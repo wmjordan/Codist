@@ -16,9 +16,6 @@ namespace Codist
 	/// </summary>
 	static class ColorHelper
 	{
-		static readonly Type __ObjectType = typeof(object);
-		static readonly Type __ThemeResourceKeyType = typeof(ThemeResourceKey);
-
 		static class NamedColorCache
 		{
 			static readonly Dictionary<string, SolidColorBrush> __Cache = GetBrushes();
@@ -84,29 +81,29 @@ namespace Codist
 			if (includeVsColors) {
 				switch (n) {
 					case nameof(EnvironmentColors):
-						return GetVsThemeBrush(typeof(EnvironmentColors), symbol.Name);
+						return GetVsThemeBrush(VsStatic.EnvironmentColor.Keys, symbol.Name);
 					case nameof(CommonDocumentColors):
-						return GetVsThemeBrush(typeof(CommonDocumentColors), symbol.Name);
+						return GetVsThemeBrush(VsStatic.CommonDocumentColor.Keys, symbol.Name);
 					case nameof(CommonControlsColors):
-						return GetVsThemeBrush(typeof(CommonControlsColors), symbol.Name);
+						return GetVsThemeBrush(VsStatic.CommonControlsColor.Keys, symbol.Name);
 					case nameof(InfoBarColors):
-						return GetVsThemeBrush(typeof(InfoBarColors), symbol.Name);
+						return GetVsThemeBrush(VsStatic.InfoBarColor.Keys, symbol.Name);
 					case nameof(StartPageColors):
-						return GetVsThemeBrush(typeof(StartPageColors), symbol.Name);
+						return GetVsThemeBrush(VsStatic.StartPageColor.Keys, symbol.Name);
 					case nameof(HeaderColors):
-						return GetVsThemeBrush(typeof(HeaderColors), symbol.Name);
+						return GetVsThemeBrush(VsStatic.HeaderColor.Keys, symbol.Name);
 					case nameof(ThemedDialogColors):
-						return GetVsThemeBrush(typeof(ThemedDialogColors), symbol.Name);
+						return GetVsThemeBrush(VsStatic.ThemedDialogColor.Keys, symbol.Name);
 					case nameof(ProgressBarColors):
-						return GetVsThemeBrush(typeof(ProgressBarColors), symbol.Name);
+						return GetVsThemeBrush(VsStatic.ProgressBarColor.Keys, symbol.Name);
 					case nameof(SearchControlColors):
-						return GetVsThemeBrush(typeof(SearchControlColors), symbol.Name);
+						return GetVsThemeBrush(VsStatic.SearchControlColor.Keys, symbol.Name);
 					case nameof(TreeViewColors):
-						return GetVsThemeBrush(typeof(TreeViewColors), symbol.Name);
+						return GetVsThemeBrush(VsStatic.TreeViewColor.Keys, symbol.Name);
 					case nameof(VsColors):
-						return GetVsResourceColor(typeof(VsColors), symbol.Name);
+						return GetVsResourceColor(symbol.Name);
 					case nameof(VsBrushes):
-						return GetVsResourceBrush(typeof(VsBrushes), symbol.Name);
+						return GetVsResourceBrush(symbol.Name);
 				}
 			}
 			return null;
@@ -115,26 +112,112 @@ namespace Codist
 			return NamedColorCache.GetBrush(color);
 		}
 
-		public static SolidColorBrush GetVsResourceBrush(Type type, string name) {
-			var p = type.GetProperty(name, __ObjectType)?.GetValue(null);
-			return p == null
-				? null
-				: System.Windows.Application.Current.Resources.Get<SolidColorBrush>(p);
+		public static SolidColorBrush GetVsResourceBrush(string name) {
+			return VsStatic.Brush.Keys.TryGetValue(name, out var key)
+				? CurrentResources.Instance.Get<SolidColorBrush>(key)
+				: null;
 		}
-		public static SolidColorBrush GetVsResourceColor(Type type, string name) {
-			var p = type.GetProperty(name, __ObjectType)?.GetValue(null);
-			return p == null
-				? null
-				: new SolidColorBrush(System.Windows.Application.Current.Resources.Get<WpfColor>(p));
+		public static SolidColorBrush GetVsResourceColor(string name) {
+			return VsStatic.Color.Keys.TryGetValue(name, out var key)
+				? new SolidColorBrush(CurrentResources.Instance.Get<WpfColor>(key))
+				: null;
 		}
 
-		public static SolidColorBrush GetVsThemeBrush(Type type, string name) {
-			var p = type.GetProperty(name, __ThemeResourceKeyType);
-			return (p?.GetValue(null) as ThemeResourceKey)?.GetWpfBrush();
+		public static SolidColorBrush GetVsThemeBrush(Guid category, string name) {
+			return VsStatic.ThemeResourceKeyProviders.TryGetValue(category, out var kp)
+				? GetVsThemeBrush(kp(), name)
+				: null;
+		}
+		public static SolidColorBrush GetVsThemeBrush(Dictionary<string, ThemeResourceKey> keys, string name) {
+			return keys.TryGetValue(name, out var key) ? key.GetWpfBrush() : null;
 		}
 
 		public static bool IsDark(this WpfColor color) {
 			return (299 * color.R + 587 * color.G + 114 * color.B) / 1000 < 128;
+		}
+
+		static class CurrentResources
+		{
+			public static readonly System.Windows.ResourceDictionary Instance = System.Windows.Application.Current.Resources;
+		}
+
+		static class VsStatic
+		{
+			public static class Color
+			{
+				public static readonly Dictionary<string, object> Keys = InitPropertyValues<object>(typeof(VsColors));
+			}
+			public static class Brush
+			{
+				public static readonly Dictionary<string, object> Keys = InitPropertyValues<object>(typeof(VsBrushes));
+			}
+
+			public static readonly Dictionary<Guid, Func<Dictionary<string, ThemeResourceKey>>> ThemeResourceKeyProviders = new Dictionary<Guid, Func<Dictionary<string, ThemeResourceKey>>> {
+				{ CommonControlsColors.Category, () => CommonControlsColor.Keys },
+				{ CommonDocumentColors.Category, () => CommonDocumentColor.Keys },
+				{ EnvironmentColors.Category, () => EnvironmentColor.Keys },
+				{ InfoBarColors.Category, () => InfoBarColor.Keys },
+				{ HeaderColors.Category, () => HeaderColor.Keys },
+				{ ThemedDialogColors.Category, () => ThemedDialogColor.Keys },
+				{ ProgressBarColors.Category, () => ProgressBarColor.Keys },
+				{ SearchControlColors.Category, () => SearchControlColor.Keys },
+				{ StartPageColors.Category, () => StartPageColor.Keys },
+				{ TreeViewColors.Category, () => TreeViewColor.Keys },
+			};
+
+			public static class CommonControlsColor
+			{
+				public static readonly Dictionary<string, ThemeResourceKey> Keys = InitPropertyValues<ThemeResourceKey>(typeof(CommonControlsColors));
+			}
+			public static class CommonDocumentColor
+			{
+				public static readonly Dictionary<string, ThemeResourceKey> Keys = InitPropertyValues<ThemeResourceKey>(typeof(CommonDocumentColors));
+			}
+			public static class EnvironmentColor
+			{
+				public static readonly Dictionary<string, ThemeResourceKey> Keys = InitPropertyValues<ThemeResourceKey>(typeof(EnvironmentColors));
+			}
+			public static class InfoBarColor
+			{
+				public static readonly Dictionary<string, ThemeResourceKey> Keys = InitPropertyValues<ThemeResourceKey>(typeof(InfoBarColors));
+			}
+			public static class HeaderColor
+			{
+				public static readonly Dictionary<string, ThemeResourceKey> Keys = InitPropertyValues<ThemeResourceKey>(typeof(HeaderColors));
+			}
+			public static class ThemedDialogColor
+			{
+				public static readonly Dictionary<string, ThemeResourceKey> Keys = InitPropertyValues<ThemeResourceKey>(typeof(ThemedDialogColors));
+			}
+			public static class ProgressBarColor
+			{
+				public static readonly Dictionary<string, ThemeResourceKey> Keys = InitPropertyValues<ThemeResourceKey>(typeof(ProgressBarColors));
+			}
+			public static class SearchControlColor
+			{
+				public static readonly Dictionary<string, ThemeResourceKey> Keys = InitPropertyValues<ThemeResourceKey>(typeof(SearchControlColors));
+			}
+			public static class StartPageColor
+			{
+				public static readonly Dictionary<string, ThemeResourceKey> Keys = InitPropertyValues<ThemeResourceKey>(typeof(StartPageColors));
+			}
+			public static class TreeViewColor
+			{
+				public static readonly Dictionary<string, ThemeResourceKey> Keys = InitPropertyValues<ThemeResourceKey>(typeof(TreeViewColors));
+			}
+
+			static Dictionary<string, TProperty> InitPropertyValues<TProperty>(Type type) {
+				var properties = type.GetProperties(System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
+				var d = new Dictionary<string, TProperty>(properties.Length);
+				var pt = typeof(TProperty);
+				foreach (var propertyInfo in properties) {
+					if (propertyInfo.PropertyType == pt
+						&& propertyInfo.GetValue(null) is TProperty p) {
+						d[propertyInfo.Name] = p;
+					}
+				}
+				return d;
+			}
 		}
 	}
 }

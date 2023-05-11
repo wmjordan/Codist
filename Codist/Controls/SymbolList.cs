@@ -186,22 +186,22 @@ namespace Codist.Controls
 					return;
 				case "Microsoft.VisualStudio.PlatformUI":
 					switch (typeName) {
-						case nameof(EnvironmentColors): SetupListForVsUIColors(typeof(EnvironmentColors)); return;
-						case nameof(CommonControlsColors): SetupListForVsUIColors(typeof(CommonControlsColors)); return;
-						case nameof(CommonDocumentColors): SetupListForVsUIColors(typeof(CommonDocumentColors)); return;
-						case nameof(HeaderColors): SetupListForVsUIColors(typeof(HeaderColors)); return;
-						case nameof(InfoBarColors): SetupListForVsUIColors(typeof(InfoBarColors)); return;
-						case nameof(ProgressBarColors): SetupListForVsUIColors(typeof(ProgressBarColors)); return;
-						case nameof(SearchControlColors): SetupListForVsUIColors(typeof(SearchControlColors)); return;
-						case nameof(StartPageColors): SetupListForVsUIColors(typeof(StartPageColors)); return;
-						case nameof(ThemedDialogColors): SetupListForVsUIColors(typeof(ThemedDialogColors)); return;
-						case nameof(TreeViewColors): SetupListForVsUIColors(typeof(TreeViewColors)); return;
+						case nameof(EnvironmentColors): SetupListForVsUIColors(EnvironmentColors.Category); return;
+						case nameof(CommonControlsColors): SetupListForVsUIColors(CommonControlsColors.Category); return;
+						case nameof(CommonDocumentColors): SetupListForVsUIColors(CommonDocumentColors.Category); return;
+						case nameof(HeaderColors): SetupListForVsUIColors(HeaderColors.Category); return;
+						case nameof(InfoBarColors): SetupListForVsUIColors(InfoBarColors.Category); return;
+						case nameof(ProgressBarColors): SetupListForVsUIColors(ProgressBarColors.Category); return;
+						case nameof(SearchControlColors): SetupListForVsUIColors(SearchControlColors.Category); return;
+						case nameof(StartPageColors): SetupListForVsUIColors(StartPageColors.Category); return;
+						case nameof(ThemedDialogColors): SetupListForVsUIColors(ThemedDialogColors.Category); return;
+						case nameof(TreeViewColors): SetupListForVsUIColors(TreeViewColors.Category); return;
 					}
 					return;
 				case "Microsoft.VisualStudio.Shell":
 					switch (typeName) {
-						case nameof(VsColors): SetupListForVsResourceColors(typeof(VsColors)); return;
-						case nameof(VsBrushes): SetupListForVsResourceBrushes(typeof(VsBrushes)); return;
+						case nameof(VsColors): SetupListForVsResourceColors(); return;
+						case nameof(VsBrushes): SetupListForVsResourceBrushes(); return;
 					}
 					return;
 				case "Microsoft.VisualStudio.Imaging":
@@ -220,17 +220,17 @@ namespace Codist.Controls
 		static bool IsStaticProperty(SymbolItem s) {
 			return (s.Symbol as IPropertySymbol)?.IsStatic == true;
 		}
-		void SetupListForVsUIColors(Type type) {
+		void SetupListForVsUIColors(Guid category) {
 			ContainerType = SymbolListType.PredefinedColors;
-			IconProvider = s => IsStaticProperty(s) ? GetColorPreviewIcon(ColorHelper.GetVsThemeBrush(type, s.Symbol.Name)) : null;
+			IconProvider = s => IsStaticProperty(s) ? GetColorPreviewIcon(ColorHelper.GetVsThemeBrush(category, s.Symbol.Name)) : null;
 		}
-		void SetupListForVsResourceColors(Type type) {
+		void SetupListForVsResourceColors() {
 			ContainerType = SymbolListType.PredefinedColors;
-			IconProvider = s => IsStaticProperty(s) ? GetColorPreviewIcon(ColorHelper.GetVsResourceColor(type, s.Symbol.Name)) : null;
+			IconProvider = s => IsStaticProperty(s) ? GetColorPreviewIcon(ColorHelper.GetVsResourceColor(s.Symbol.Name)) : null;
 		}
-		void SetupListForVsResourceBrushes(Type type) {
+		void SetupListForVsResourceBrushes() {
 			ContainerType = SymbolListType.PredefinedColors;
-			IconProvider = s => IsStaticProperty(s) ? GetColorPreviewIcon(ColorHelper.GetVsResourceBrush(type, s.Symbol.Name)) : null;
+			IconProvider = s => IsStaticProperty(s) ? GetColorPreviewIcon(ColorHelper.GetVsResourceBrush(s.Symbol.Name)) : null;
 		}
 		void SetupListForSystemColors() {
 			ContainerType = SymbolListType.PredefinedColors;
