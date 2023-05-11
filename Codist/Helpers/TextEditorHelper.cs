@@ -777,15 +777,21 @@ namespace Codist
 			CodistPackage.DTE.TryExecuteCommand(command, args);
 		}
 
-		public static ITextBuffer GetSourceBuffer(this IAsyncQuickInfoSession session) {
+		/// <summary>
+		/// Gets the trigger point and the containing <see cref="ITextBuffer"/> of <see cref="IAsyncQuickInfoSession"/>.
+		/// </summary>
+		public static ITextBuffer GetSourceBuffer(this IAsyncQuickInfoSession session, out SnapshotPoint snapshotPoint) {
 			var buffer = session.TextView.TextBuffer;
+			ITrackingPoint triggerPoint;
 			if (buffer is IProjectionBuffer projection) {
 				foreach (var sb in projection.SourceBuffers) {
-					if (session.GetTriggerPoint(sb) != null) {
+					if ((triggerPoint = session.GetTriggerPoint(sb)) != null) {
+						snapshotPoint = triggerPoint.GetPoint(sb.CurrentSnapshot);
 						return sb;
 					}
 				}
 			}
+			snapshotPoint = session.GetTriggerPoint(buffer).GetPoint(buffer.CurrentSnapshot);
 			return buffer;
 		}
 

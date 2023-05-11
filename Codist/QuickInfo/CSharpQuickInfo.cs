@@ -15,7 +15,6 @@ using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
-using Microsoft.VisualStudio.Text.Projection;
 using R = Codist.Properties.Resources;
 using Task = System.Threading.Tasks.Task;
 
@@ -32,19 +31,13 @@ namespace Codist.QuickInfo
 
 		public Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
 			// Map the trigger point down to our buffer.
-			var buffer = session.GetSourceBuffer();
-			if (buffer == null) {
-				return Task.FromResult<QuickInfoItem>(null);
-			}
-			var snapshot = buffer.CurrentSnapshot;
-			SnapshotPoint triggerPoint;
+			var buffer = session.GetSourceBuffer(out var triggerPoint);
+			ITextSnapshot snapshot;
 			Document doc;
-			if ((triggerPoint = session.GetTriggerPoint(snapshot).GetValueOrDefault()).Snapshot == null
-				|| (doc = snapshot.GetOpenDocumentInCurrentContextWithChanges()) == null
-				) {
-				return Task.FromResult<QuickInfoItem>(null);
-			}
-			return InternalGetQuickInfoItemAsync(session, snapshot, triggerPoint, doc, cancellationToken);
+			return buffer != null
+				&& (doc = (snapshot = buffer.CurrentSnapshot).GetOpenDocumentInCurrentContextWithChanges()) != null
+				? InternalGetQuickInfoItemAsync(session, snapshot, triggerPoint, doc, cancellationToken)
+				: Task.FromResult<QuickInfoItem>(null);
 		}
 
 		async Task<QuickInfoItem> InternalGetQuickInfoItemAsync(IAsyncQuickInfoSession session, ITextSnapshot currentSnapshot, SnapshotPoint triggerPoint, Document document, CancellationToken cancellationToken) {

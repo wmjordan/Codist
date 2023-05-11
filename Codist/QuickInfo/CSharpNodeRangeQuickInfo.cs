@@ -16,12 +16,12 @@ namespace Codist.QuickInfo
 				|| session.TextView is IWpfTextView view == false
 				|| (context = SemanticContext.GetOrCreateSingletonInstance(view)) == null
 				? Task.FromResult<QuickInfoItem>(null)
-				: InternalGetQuickInfoItemAsync(session, view, context, cancellationToken);
+				: InternalGetQuickInfoItemAsync(session, context, cancellationToken);
 		}
 
-		async Task<QuickInfoItem> InternalGetQuickInfoItemAsync(IAsyncQuickInfoSession session, IWpfTextView view, SemanticContext sc, CancellationToken cancellationToken) {
-			await sc.UpdateAsync(session.GetSourceBuffer(), cancellationToken).ConfigureAwait(false);
-			var node = sc.GetNode(session.GetTriggerPoint(view.TextBuffer).GetPoint(view.TextSnapshot), true, false);
+		async Task<QuickInfoItem> InternalGetQuickInfoItemAsync(IAsyncQuickInfoSession session, SemanticContext sc, CancellationToken cancellationToken) {
+			await sc.UpdateAsync(session.GetSourceBuffer(out var triggerPoint), cancellationToken).ConfigureAwait(false);
+			var node = sc.GetNode(triggerPoint, true, false);
 			if (node != null) {
 				node = node.GetNodePurpose();
 				session.Properties.AddProperty(typeof(CSharpNodeRangeQuickInfo), sc.MapSourceSpan(node.Span));
