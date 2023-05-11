@@ -201,7 +201,7 @@ namespace Codist
 		static void ShowColorPreview(ISymbol symbol, ThemedToolTip tip) {
 			var preview = QuickInfo.ColorQuickInfoUI.PreviewColorProperty(symbol as IPropertySymbol, false);
 			if (preview != null) {
-				tip.Add(preview);
+				tip.Add(preview.WrapMargin(WpfHelper.MiddleMargin));
 			}
 		}
 
