@@ -143,7 +143,7 @@ namespace Codist.Refactorings
 
 			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
 				var d = ctx.Node as MethodDeclarationSyntax;
-				return Chain.Create(InsertBefore(d, d.WithParameterList(d.ParameterList.AnnotateSelect()).WithBody(SF.Block().AnnotateReformat()).WithWhitespaceFrom(d)));
+				return Chain.Create(InsertAfter(d, d.WithParameterList(d.ParameterList.AnnotateSelect()).WithBody(SF.Block().AnnotateReformat()).WithWhitespaceFrom(d)));
 			}
 		}
 
