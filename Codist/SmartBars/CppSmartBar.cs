@@ -17,6 +17,7 @@ namespace Codist.SmartBars
 		ToolBar MyToolBar => ToolBar2;
 
 		protected override void AddCommands() {
+			base.AddCommands();
 			var isReadOnly = View.IsCaretInReadOnlyRegion();
 			AddCommand(MyToolBar, IconIds.GoToDefinition, R.CMD_GoToDefinition, ctx => {
 				TextEditorHelper.ExecuteEditorCommand("Edit.GoToDefinition", GetCurrentWord(ctx.View));

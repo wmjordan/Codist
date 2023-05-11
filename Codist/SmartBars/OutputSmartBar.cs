@@ -18,6 +18,7 @@ namespace Codist.SmartBars
 		ToolBar MyToolBar => ToolBar;
 
 		protected override void AddCommands() {
+			base.AddCommands();
 			int p;
 			string t;
 			try {
