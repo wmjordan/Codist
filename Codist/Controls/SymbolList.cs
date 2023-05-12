@@ -467,15 +467,19 @@ namespace Codist.Controls
 		}
 
 		static ThemedToolTip CreateLocationToolTip(SymbolItem item, SemanticContext sc) {
-			if (item.Location.IsInSource) {
-				var f = item.Location.SourceTree.FilePath;
+			var l = item.Location;
+			if (l.IsInSource) {
+				var f = l.SourceTree.FilePath;
 				return new ThemedToolTip(Path.GetFileName(f), String.Join(Environment.NewLine,
 					R.T_Folder + Path.GetDirectoryName(f),
-					R.T_Line + (item.Location.GetLineSpan().StartLinePosition.Line + 1).ToString(),
-					R.T_Project + sc.GetDocument(item.Location.SourceTree)?.Project.Name
+					R.T_Line + (l.GetLineSpan().StartLinePosition.Line + 1).ToString(),
+					R.T_Project + sc.GetDocument(l.SourceTree)?.Project.Name
 				));
 			}
-			return new ThemedToolTip(item.Location.MetadataModule.Name, R.T_ContainingAssembly + item.Location.MetadataModule.ContainingAssembly);
+			return new ThemedToolTip(l.MetadataModule.Name, String.Join(Environment.NewLine,
+				R.T_ContainingAssembly + l.MetadataModule.ContainingAssembly,
+				R.T_AssemblyDirectory + sc.SemanticModel.Compilation.GetReferencedAssemblyPath(l.MetadataModule.ContainingAssembly).folder
+			));
 		}
 
 		static void ShowSourceReference(TextBlock text, Location location) {
