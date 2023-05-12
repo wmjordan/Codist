@@ -805,10 +805,10 @@ namespace Codist
 			}
 
 			void Unload(object sender, RoutedEventArgs e) {
-				MouseEnter -= InitInteraction;
-				MouseEnter -= Highlight;
-				MouseLeave -= Leave;
-				Unloaded -= Unload;
+				//MouseEnter -= InitInteraction;
+				//MouseEnter -= Highlight;
+				//MouseLeave -= Leave;
+				//Unloaded -= Unload;
 
 				OnUnload();
 			}

@@ -229,14 +229,14 @@ namespace Codist
 			}
 
 			protected override void OnUnload() {
-				MouseLeftButtonDown -= GoToSymbol;
-				MouseRightButtonDown -= ShowContextMenu;
+				//MouseLeftButtonDown -= GoToSymbol;
+				//MouseRightButtonDown -= ShowContextMenu;
 				if (ContextMenu is CSharpSymbolContextMenu m) {
 					m.Closed -= DismissQuickInfo;
 					m.Dispose();
 					ContextMenu = null;
 				}
-				_Symbol = null;
+				//_Symbol = null;
 			}
 
 			protected override object CreateToolTip() {
