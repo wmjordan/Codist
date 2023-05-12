@@ -91,7 +91,7 @@ namespace Codist.Controls
 
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 		async void MenuItemSelect(object sender, MouseButtonEventArgs e) {
-			if (e.OccursOn<ListBoxItem>()) {
+			if ((e.OriginalSource as DependencyObject).GetParent<ListBoxItem>(i => i.IsSelected && i.IsFocused) != null) {
 				_ExternalAdornment.FocusOnTextView();
 				try {
 					await ((SymbolItem)((VirtualList)sender).SelectedItem)?.GoToSourceAsync();
