@@ -194,17 +194,18 @@ namespace Codist.Controls
 
 		internal static void ShowLocations(this SemanticContext context, ISymbol symbol, ImmutableArray<SyntaxReference> locations, UIElement positionElement = null) {
 			var m = new SymbolMenu(context, SymbolListType.Locations);
-			var locs = new SortedList<(string, string, int), Location>();
-			foreach (var item in locations) {
-				locs[(System.IO.Path.GetDirectoryName(item.SyntaxTree.FilePath), System.IO.Path.GetFileName(item.SyntaxTree.FilePath), item.Span.Start)] = item.ToLocation();
-			}
 			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
-				.AddSymbol(symbol, null, true, SymbolFormatter.Instance)
-				.Append(R.T_SourceLocations)
-				.Append(locs.Count);
-			// add locations in source code
-			foreach (var loc in locs) {
-				m.Add(loc.Value);
+				.AddSymbol(symbol, null, true, SymbolFormatter.Instance);
+			if (locations.Length != 0) {
+				m.Title.Append(R.T_SourceLocations).Append(locations.Length);
+				var locs = new SortedList<(string, string, int), Location>();
+				foreach (var item in locations) {
+					locs[(System.IO.Path.GetDirectoryName(item.SyntaxTree.FilePath), System.IO.Path.GetFileName(item.SyntaxTree.FilePath), item.Span.Start)] = item.ToLocation();
+				}
+				// add locations in source code
+				foreach (var loc in locs) {
+					m.Add(loc.Value);
+				}
 			}
 			// add locations in meta data
 			foreach (var loc in symbol.Locations.Where(l => l.IsInMetadata).OrderBy(x => x.MetadataModule.Name)) {
