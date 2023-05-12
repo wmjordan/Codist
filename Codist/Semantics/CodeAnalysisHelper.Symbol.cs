@@ -239,7 +239,7 @@ namespace Codist
 				}
 				return "abstract ";
 			}
-			if (symbol.IsStatic) {
+			if (symbol.IsStatic && symbol.Kind != SymbolKind.Namespace) {
 				return "static ";
 			}
 			if (symbol.IsVirtual) {
@@ -258,7 +258,7 @@ namespace Codist
 
 		public static string GetAccessibility(this ISymbol symbol) {
 			switch (symbol.DeclaredAccessibility) {
-				case Accessibility.Public: return "public ";
+				case Accessibility.Public: return symbol.Kind != SymbolKind.Namespace ? "public " : String.Empty;
 				case Accessibility.Private:
 					return symbol.GetExplicitInterfaceImplementations().Count != 0 ? String.Empty : "private ";
 				case Accessibility.ProtectedAndInternal: return "internal protected ";
