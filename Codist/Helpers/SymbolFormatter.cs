@@ -286,9 +286,9 @@ namespace Codist
 				ns = ns.ContainingNamespace;
 			} while (ns?.IsGlobalNamespace == false);
 			for (int i = n.Count - 1; i > 0; i--) {
-				loc.Append(n[i].Name.Render(Namespace)).Append(".");
+				loc.AddSymbol(n[i], false, Namespace).Append(".");
 			}
-			loc.Append(n[0].Name.Render(Namespace));
+			loc.AddSymbol(n[0], false, Namespace);
 		}
 
 		public TextBlock ShowParameters(TextBlock block, ImmutableArray<IParameterSymbol> parameters) {
@@ -684,7 +684,7 @@ namespace Codist
 					return;
 				case SymbolKind.Method: FormatMethodName(text, symbol, alias, bold); return;
 				case SymbolKind.NamedType: FormatTypeName(text, symbol, alias, bold); return;
-				case SymbolKind.Namespace: text.Add(symbol.Name.Render(Namespace)); return;
+				case SymbolKind.Namespace: text.Add(symbol.Render(alias, bold, Namespace)); return;
 				case SymbolKind.Parameter: text.Add(symbol.Render(null, bold, Parameter)); return;
 				case SymbolKind.Property: FormatPropertyName(text, (IPropertySymbol)symbol, alias, bold); return;
 				case SymbolKind.Local:
@@ -941,7 +941,7 @@ namespace Codist
 						block.Append(part.ToString(), false, false, Keyword);
 						break;
 					case SymbolDisplayPartKind.NamespaceName:
-						block.Append(part.Symbol.Name, Namespace);
+						block.AddSymbol(part.Symbol, false, Namespace);
 						break;
 					case SymbolDisplayPartKind.TypeParameterName:
 						block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, TypeParameter);

@@ -282,9 +282,18 @@ namespace Codist
 			}
 
 			void GoToSymbol(object sender, RoutedEventArgs e) {
-				_Symbol.GoToDefinition();
+				if (_Symbol.Kind == SymbolKind.Namespace) {
+					FindMembersForNamespace(_Symbol);
+				}
+				else {
+					_Symbol.GoToDefinition();
+				}
 				QuickInfo.QuickInfoOverride.DismissQuickInfo(this);
 				e.Handled = true;
+
+				async void FindMembersForNamespace(ISymbol symbol) {
+					await SemanticContext.GetHovered().FindMembersAsync(symbol);
+				}
 			}
 		}
 	}
