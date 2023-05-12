@@ -128,8 +128,20 @@ namespace Codist.Controls
 						var symbol = Symbol;
 						var proj = Container.SemanticContext.Document.Project;
 						CloseUnpinnedMenus();
-						return ServicesHelper.Instance.VisualStudioWorkspace.TryGoToDefinition(symbol, proj, default);
+						if (ServicesHelper.Instance.VisualStudioWorkspace.TryGoToDefinition(symbol, proj, default) == false) {
+							// Note: the symbol may come from other projects, which will fail the above call.
+							// In this case, we will try on related projects
+							foreach (var p in proj.GetRelatedProjects()) {
+								if (ServicesHelper.Instance.VisualStudioWorkspace.TryGoToDefinition(symbol, p, default)) {
+									return true;
 					}
+							}
+							VsShellHelper.Log($"TryGoToDefinition failed for {symbol}");
+					return false;
+						}
+						return true;
+					}
+					VsShellHelper.Log($"SemanticContext.Document is null for {Symbol}");
 					return false;
 				case 1:
 					CloseUnpinnedMenus();

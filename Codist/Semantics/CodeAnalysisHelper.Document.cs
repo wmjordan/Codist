@@ -30,7 +30,7 @@ namespace Codist
 
 		/// <summary>Gets all <see cref="Document"/>s from a given <see cref="Project"/> and referencing/referenced projects.</summary>
 		public static IEnumerable<Document> GetRelatedProjectDocuments(this Project project) {
-			foreach (var p in GetRelatedProjects(project)) {
+			foreach (var p in project.GetRelatedProjects()) {
 				foreach (var doc in p.Documents) {
 					yield return doc;
 				}
@@ -41,7 +41,7 @@ namespace Codist
 		/// Gets a collection containing <paramref name="project"/> itself, and projects referenced by <paramref name="project"/> or referencing <paramref name="project"/>.
 		/// </summary>
 		/// <param name="project">The project to be examined.</param>
-		static HashSet<Project> GetRelatedProjects(Project project) {
+		public static HashSet<Project> GetRelatedProjects(this Project project) {
 			var projects = new HashSet<Project>();
 			GetRelatedProjects(project, projects);
 			var id = project.Id;
