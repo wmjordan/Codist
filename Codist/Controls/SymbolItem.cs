@@ -113,7 +113,7 @@ namespace Codist.Controls
 		}
 
 		async Task<bool> GoToSymbolAsync() {
-			await RefreshSymbolAsync();
+			await RefreshSymbolAsync(default);
 			if (Symbol.Kind == SymbolKind.Namespace) {
 				await SyncHelper.SwitchToMainThreadAsync();
 				var item = _Content.GetParent<ListBoxItem>().NullIfMouseOver();
@@ -134,10 +134,10 @@ namespace Codist.Controls
 							foreach (var p in proj.GetRelatedProjects()) {
 								if (ServicesHelper.Instance.VisualStudioWorkspace.TryGoToDefinition(symbol, p, default)) {
 									return true;
-					}
+								}
 							}
 							VsShellHelper.Log($"TryGoToDefinition failed for {symbol}");
-					return false;
+							return false;
 						}
 						return true;
 					}
@@ -199,25 +199,20 @@ namespace Codist.Controls
 				SyntaxNode = node;
 			}
 		}
-		async Task RefreshSymbolAsync() {
-			if (Symbol.ContainingAssembly.GetSourceType() != AssemblySource.Metadata) {
-				var symbol = await Container.SemanticContext.RelocateSymbolAsync(Symbol);
-				if (symbol != null && symbol != Symbol) {
-					Symbol = symbol;
-				}
-			}
-		}
-		internal Task RefreshSymbolAsync(CancellationToken cancellationToken) {
-			if (Symbol.ContainingAssembly.GetSourceType() == AssemblySource.Metadata) {
-				return Task.CompletedTask;
-			}
-			return RefreshSymbolInternalAsync(cancellationToken);
-		}
 
-		async Task RefreshSymbolInternalAsync(CancellationToken cancellationToken) {
-			var symbol = await Container.SemanticContext.RelocateSymbolAsync(Symbol, cancellationToken);
-			if (symbol != null && symbol != Symbol) {
-				Symbol = symbol;
+		internal Task RefreshSymbolAsync(CancellationToken cancellationToken) {
+			return Symbol.ContainingAssembly.GetSourceType() == AssemblySource.Metadata
+				? Task.CompletedTask
+				: RefreshSymbolInternalAsync(this, cancellationToken);
+
+			async Task RefreshSymbolInternalAsync(SymbolItem me, CancellationToken ct) {
+				var oldSymbol = me.Symbol;
+				if (oldSymbol != null) {
+					var symbol = await me.Container?.SemanticContext?.RelocateSymbolAsync(oldSymbol, ct);
+					if (symbol != null && symbol != oldSymbol) {
+						me.Symbol = symbol;
+					}
+				}
 			}
 		}
 
