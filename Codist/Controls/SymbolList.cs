@@ -492,7 +492,7 @@ namespace Codist.Controls
 				.Append(sourceText.ToString(sourceSpan), true);
 			t = sourceText.ToString(new TextSpan(sourceSpan.End, Math.Min(sourceTree.Length - sourceSpan.End, 100)));
 			i = t.IndexOfAny(new[] { '\r', '\n' });
-			text.Append(i != -1 ? t.Substring(0, i).TrimEnd() : t.TrimEnd());
+			text.Append((i != -1 ? t.Substring(0, i) : t).TrimEnd());
 		}
 		#endregion
 
