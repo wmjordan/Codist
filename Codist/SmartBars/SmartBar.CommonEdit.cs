@@ -25,9 +25,9 @@ namespace Codist.SmartBars
 
 		WrapText _RecentWrapText;
 
-		static void ExecuteAndFind(CommandContext ctx, string command, string text) {
+		static void ExecuteAndFind(CommandContext ctx, string command, string text, bool excludeLineBreakOnLineCommand) {
 			if (ctx.RightClick) {
-				ctx.View.ExpandSelectionToLine(true);
+				ctx.View.ExpandSelectionToLine(excludeLineBreakOnLineCommand);
 			}
 			ctx.KeepToolBar(false);
 			TextEditorHelper.ExecuteEditorCommand(command);
@@ -144,7 +144,7 @@ namespace Codist.SmartBars
 						s.Select(new SnapshotSpan(s.Start.Position, s.End.Position + 1), false);
 					}
 				}
-				ExecuteAndFind(ctx, "Edit.Delete", t);
+				ExecuteAndFind(ctx, "Edit.Delete", t, false);
 			});
 		}
 
@@ -201,7 +201,7 @@ namespace Codist.SmartBars
 
 		void AddPasteCommand() {
 			if (Clipboard.ContainsText()) {
-				AddCommand(ToolBar, IconIds.Paste, R.CMD_Paste, ctx => ExecuteAndFind(ctx, "Edit.Paste", ctx.View.GetFirstSelectionText()));
+				AddCommand(ToolBar, IconIds.Paste, R.CMD_Paste, ctx => ExecuteAndFind(ctx, "Edit.Paste", ctx.View.GetFirstSelectionText(), true));
 			}
 		}
 
