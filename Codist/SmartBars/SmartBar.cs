@@ -161,7 +161,8 @@ namespace Codist.SmartBars
 				// postpone the even handler until the mouse button is released
 				await Task.Delay(100, cancellationToken);
 			}
-			if (_View.Selection.IsEmpty || Interlocked.Exchange(ref _SelectionStatus, Working) != Selecting) {
+			if (_View?.Selection.IsEmpty == true
+				|| Interlocked.Exchange(ref _SelectionStatus, Working) != Selecting) {
 				goto EXIT;
 			}
 			await InternalCreateToolBarAsync(cancellationToken);
@@ -430,12 +431,14 @@ namespace Codist.SmartBars
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void CommandButton_Click(object sender, RoutedEventArgs e) {
 				var ctx = new CommandContext(_Bar, this);
-				if (_ClickHandler != null) {
-					_ClickHandler(ctx);
+				Action<CommandContext> clickHandler = _ClickHandler;
+				Func<CommandContext, Task> asyncClickHandler;
+				if (clickHandler != null) {
+					clickHandler(ctx);
 				}
-				else if (_AsyncClickHandler != null) {
+				else if ((asyncClickHandler = _AsyncClickHandler) != null) {
 					try {
-						await _AsyncClickHandler(ctx);
+						await asyncClickHandler(ctx);
 					}
 					catch (Exception ex) {
 						MessageWindow.Error(ex);
@@ -463,24 +466,27 @@ namespace Codist.SmartBars
 					return;
 				}
 				var ctx = new CommandContext(_Bar, this, true);
+				Action<CommandContext> clickHandler;
+				Func<CommandContext, Task> asyncClickHandler;
+				SmartBar bar;
 				if (_MenuFactory != null) {
 					ClearContextMenu();
 					var m = CreateContextMenuFromMenuFactory(ctx);
 					m.Tag = RightClickTag;
 				}
-				else if (_ClickHandler != null) {
-					_ClickHandler(ctx);
+				else if ((clickHandler = _ClickHandler) != null) {
+					clickHandler(ctx);
 				}
-				else if (_AsyncClickHandler != null) {
+				else if ((asyncClickHandler = _AsyncClickHandler) != null) {
 					try {
-						await _AsyncClickHandler(ctx);
+						await asyncClickHandler(ctx);
 					}
 					catch (Exception ex) {
 						MessageWindow.Error(ex);
 					}
 				}
-				if (_Bar != null && ctx.KeepToolBarOnClick == false && ContextMenu?.IsOpen != true) {
-					_Bar.HideToolBar();
+				if ((bar = _Bar) != null && ctx.KeepToolBarOnClick == false && ContextMenu?.IsOpen != true) {
+					bar.HideToolBar();
 				}
 				e.Handled = true;
 			}
