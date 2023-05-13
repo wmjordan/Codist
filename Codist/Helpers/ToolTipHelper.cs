@@ -207,8 +207,8 @@ namespace Codist
 
 		internal static TTarget SetTipOptions<TTarget>(this TTarget target)
 			where TTarget : DependencyObject {
-			ToolTipService.SetBetweenShowDelay(target, 0);
-			ToolTipService.SetInitialShowDelay(target, 1000);
+			ToolTipService.SetBetweenShowDelay(target, 100);
+			ToolTipService.SetInitialShowDelay(target, 400);
 			ToolTipService.SetShowDuration(target, 15000);
 			return target;
 		}
