@@ -220,7 +220,7 @@ namespace Codist.Taggers
 							return null;
 						}
 						goto case SyntaxKind.ReturnStatement;
-					// highlights: return, yield return, yield break, throw and continue
+					case SyntaxKind.AwaitExpression:
 					case SyntaxKind.ReturnKeyword:
 					case SyntaxKind.GotoCaseStatement:
 					case SyntaxKind.GotoDefaultStatement:
