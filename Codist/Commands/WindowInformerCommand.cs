@@ -543,7 +543,7 @@ namespace Codist.Commands
 					if (type.Name == "__ComObject" && type.Namespace == "System") {
 						return new Run(ReflectionHelper.GetTypeNameFromComObject(value) ?? "System.__ComObject") { Foreground = f.Class };
 					}
-					var toString = type.GetMethod("ToString", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
+					var toString = type.GetMethod("ToString", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public, null, Type.EmptyTypes, null);
 					if (toString?.DeclaringType != typeof(object)) {
 						goto default;
 					}
