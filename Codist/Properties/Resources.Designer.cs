@@ -2013,11 +2013,166 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Copy symbol name in type.member or namespace.type format
+        ///Right click: Copy symbol name in namespace.type.member format.
+        /// </summary>
+        internal static string CMDT_CopyQualifiedSymbolName {
+            get {
+                return ResourceManager.GetString("CMDT_CopyQualifiedSymbolName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add, update or delete search engines listed in this menu.
+        /// </summary>
+        internal static string CMDT_CustomizeSearchEngines {
+            get {
+                return ResourceManager.GetString("CMDT_CustomizeSearchEngines", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Load a predefined theme for dark editing environment.
         /// </summary>
         internal static string CMDT_DarkTheme {
             get {
                 return ResourceManager.GetString("CMDT_DarkTheme", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search places where active constructor is called
+        ///Ctrl: Match current symbol only, excluding base or derived symbols.
+        /// </summary>
+        internal static string CMDT_FindCallers {
+            get {
+                return ResourceManager.GetString("CMDT_FindCallers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search places where constructor of current type is called
+        ///Ctrl: Match current symbol only, excluding base or derived symbols.
+        /// </summary>
+        internal static string CMDT_FindConstructorCallers {
+            get {
+                return ResourceManager.GetString("CMDT_FindConstructorCallers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search for members that take containing type of current symbol as parameter
+        ///Ctrl: Match current symbol only, excluding base or derived symbols.
+        /// </summary>
+        internal static string CMDT_FindContainingTypeInstanceAsParameter {
+            get {
+                return ResourceManager.GetString("CMDT_FindContainingTypeInstanceAsParameter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search for members that return containing type of current symbol
+        ///Ctrl: Match current symbol only, excluding base or derived symbols.
+        /// </summary>
+        internal static string CMDT_FindContainingTypeInstanceProducer {
+            get {
+                return ResourceManager.GetString("CMDT_FindContainingTypeInstanceProducer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search for members that take current type as parameter
+        ///Ctrl: Match current symbol only, excluding base or derived symbols.
+        /// </summary>
+        internal static string CMDT_FindInstanceAsParameter {
+            get {
+                return ResourceManager.GetString("CMDT_FindInstanceAsParameter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search for members that return current type
+        ///Ctrl: Match current symbol only, excluding base or derived symbols.
+        /// </summary>
+        internal static string CMDT_FindInstanceProducer {
+            get {
+                return ResourceManager.GetString("CMDT_FindInstanceProducer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search symbol having the same signature as current symbol
+        ///Ctrl: Only search in source code.
+        /// </summary>
+        internal static string CMDT_FindMethodsSameSignature {
+            get {
+                return ResourceManager.GetString("CMDT_FindMethodsSameSignature", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to List symbols referenced within current symbol.
+        /// </summary>
+        internal static string CMDT_FindReferencedSymbols {
+            get {
+                return ResourceManager.GetString("CMDT_FindReferencedSymbols", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search places where active method is called, field/property is read/write
+        ///Ctrl: Match current symbol only, excluding base or derived symbols.
+        /// </summary>
+        internal static string CMDT_FindReferrers {
+            get {
+                return ResourceManager.GetString("CMDT_FindReferrers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Find extension methods for current symbol type.
+        /// </summary>
+        internal static string CMDT_FindSymbolTypeExtensionMethods {
+            get {
+                return ResourceManager.GetString("CMDT_FindSymbolTypeExtensionMethods", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to List members of current symbol type.
+        /// </summary>
+        internal static string CMDT_FindSymbolTypeMembers {
+            get {
+                return ResourceManager.GetString("CMDT_FindSymbolTypeMembers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search symbols whose name contains current symbol name
+        ///Ctrl: Match full name.
+        /// </summary>
+        internal static string CMDT_FindSymbolwithName {
+            get {
+                return ResourceManager.GetString("CMDT_FindSymbolwithName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search for members that reference current type
+        ///Ctrl: Match current symbol only, excluding base or derived symbols.
+        /// </summary>
+        internal static string CMDT_FindTypeReferrers {
+            get {
+                return ResourceManager.GetString("CMDT_FindTypeReferrers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Go to definition of current symbol type.
+        /// </summary>
+        internal static string CMDT_GoToSymbolTypeDefinition {
+            get {
+                return ResourceManager.GetString("CMDT_GoToSymbolTypeDefinition", resourceCulture);
             }
         }
         

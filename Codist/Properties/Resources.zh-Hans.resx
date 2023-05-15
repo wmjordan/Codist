@@ -2454,4 +2454,63 @@ Right click: 显示“线程”窗口</value>
   <data name="OT_ShowOutputPaneAfterBuild" xml:space="preserve">
     <value>在生成结束时显示输出窗口</value>
   </data>
+  <data name="CMDT_CopyQualifiedSymbolName" xml:space="preserve">
+    <value>使用“类名.成员名”或“名称空间.类名”的格式复制符号名称
+右键: 使用“名称空间.类名.成员名”的格式复制符号名称</value>
+  </data>
+  <data name="CMDT_CustomizeSearchEngines" xml:space="preserve">
+    <value>添加、更新或删除本菜单列出的搜索引擎</value>
+  </data>
+  <data name="CMDT_FindCallers" xml:space="preserve">
+    <value>查找调用当前构造函数的位置
+Ctrl: 仅匹配当前构造函数，不匹配其它派生方法或继承方法</value>
+  </data>
+  <data name="CMDT_FindConstructorCallers" xml:space="preserve">
+    <value>查找调用当前类型构造函数的位置
+Ctrl: 仅匹配当前类的构造函数，不匹配其它派生类或继承类</value>
+  </data>
+  <data name="CMDT_FindContainingTypeInstanceAsParameter" xml:space="preserve">
+    <value>查找以当前符号所属类型为参数的位置
+Ctrl: 仅匹配当前类，不匹配其它派生类或继承类</value>
+  </data>
+  <data name="CMDT_FindContainingTypeInstanceProducer" xml:space="preserve">
+    <value>查找返回当前符号所属类型的位置
+Ctrl: 仅匹配当前类，不匹配其它派生类或继承类</value>
+  </data>
+  <data name="CMDT_FindInstanceAsParameter" xml:space="preserve">
+    <value>查找以当前类型为参数的位置
+Ctrl: 仅匹配当前类，不匹配其它派生类或继承类</value>
+  </data>
+  <data name="CMDT_FindInstanceProducer" xml:space="preserve">
+    <value>查找返回当前类型的位置
+Ctrl: 仅匹配当前类，不匹配其它派生类或继承类</value>
+  </data>
+  <data name="CMDT_FindMethodsSameSignature" xml:space="preserve">
+    <value>查找和当前方法具有相同签名的其它方法
+Ctrl: 仅在源代码中查找</value>
+  </data>
+  <data name="CMDT_FindReferencedSymbols" xml:space="preserve">
+    <value>列出当前符号内引用的其它符号</value>
+  </data>
+  <data name="CMDT_FindReferrers" xml:space="preserve">
+    <value>搜索调用当前方法、读写当前属性或字段的位置
+Ctrl: 仅匹配当前成员的类型，忽略继承或派生的类型</value>
+  </data>
+  <data name="CMDT_FindSymbolwithName" xml:space="preserve">
+    <value>查找名称包含当前符号名称的符号
+Ctrl: 符号名称完全匹配</value>
+  </data>
+  <data name="CMDT_FindTypeReferrers" xml:space="preserve">
+    <value>查找引用当前类型的成员
+Ctrl: 仅匹配当前类，不匹配其它派生类或继承类</value>
+  </data>
+  <data name="CMDT_FindSymbolTypeExtensionMethods" xml:space="preserve">
+    <value>查找当前符号类型的扩展方法</value>
+  </data>
+  <data name="CMDT_FindSymbolTypeMembers" xml:space="preserve">
+    <value>查找当前符号类型的成员</value>
+  </data>
+  <data name="CMDT_GoToSymbolTypeDefinition" xml:space="preserve">
+    <value>转到当前符号类型的定义</value>
+  </data>
 </root>

@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Input;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.FindSymbols;
 using R = Codist.Properties.Resources;
@@ -14,10 +13,10 @@ namespace Codist.Controls
 {
 	static class SymbolCommands
 	{
-		internal static async Task FindReferrersAsync(this SemanticContext context, ISymbol symbol, Predicate<ISymbol> definitionFilter = null, Predicate<SyntaxNode> nodeFilter = null) {
-			await SyncHelper.SwitchToMainThreadAsync(default);
-			var filter = Keyboard.Modifiers == ModifierKeys.Control ? (s => s == symbol) : definitionFilter;
+		internal static async Task FindReferrersAsync(this SemanticContext context, ISymbol symbol, bool strict, Predicate<ISymbol> definitionFilter = null, Predicate<SyntaxNode> nodeFilter = null) {
+			var filter = strict ? (s => s == symbol) : definitionFilter;
 			var referrers = await symbol.FindReferrersAsync(context.Document.Project, filter, nodeFilter);
+			await SyncHelper.SwitchToMainThreadAsync(default);
 			var m = new SymbolMenu(context, SymbolListType.SymbolReferrers);
 			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
 				.AddSymbol(symbol, null, true, SymbolFormatter.Instance)
@@ -159,37 +158,34 @@ namespace Codist.Controls
 			m.Show(positionElement);
 		}
 
-		internal static async Task FindInstanceAsParameterAsync(this SemanticContext context, ISymbol symbol) {
+		internal static async Task FindInstanceAsParameterAsync(this SemanticContext context, ISymbol symbol, bool strict) {
+			var members = await(symbol as ITypeSymbol).FindInstanceAsParameterAsync(context.Document.Project, strict, default);
 			await SyncHelper.SwitchToMainThreadAsync(default);
-			var strictMatch = Keyboard.Modifiers == ModifierKeys.Control;
-			var members = await(symbol as ITypeSymbol).FindInstanceAsParameterAsync(context.Document.Project, strictMatch, default);
 			ShowSymbolMenuForResult(symbol, context, members, R.T_AsParameter, true);
 		}
 
-		internal static async Task FindInstanceProducerAsync(this SemanticContext context, ISymbol symbol) {
-			await SyncHelper.SwitchToMainThreadAsync(default);
-			var strict = Keyboard.Modifiers == ModifierKeys.Control;
+		internal static async Task FindInstanceProducerAsync(this SemanticContext context, ISymbol symbol, bool strict) {
 			var members = await(symbol as ITypeSymbol).FindSymbolInstanceProducerAsync(context.Document.Project, strict, default);
+			await SyncHelper.SwitchToMainThreadAsync(default);
 			ShowSymbolMenuForResult(symbol, context, members, R.T_Producers, true);
 		}
 
-		internal static async Task FindExtensionMethodsAsync(this SemanticContext context, ISymbol symbol) {
-			await SyncHelper.SwitchToMainThreadAsync(default);
-			var strict = Keyboard.Modifiers == ModifierKeys.Control;
+		internal static async Task FindExtensionMethodsAsync(this SemanticContext context, ISymbol symbol, bool strict) {
 			var members = await(symbol as ITypeSymbol).FindExtensionMethodsAsync(context.Document.Project, strict, default);
+			await SyncHelper.SwitchToMainThreadAsync(default);
 			ShowSymbolMenuForResult(symbol, context, members, R.T_Extensions, true);
 		}
 
-		internal static void FindSymbolWithName(this SemanticContext context, ISymbol symbol) {
-			var fullMatch = Keyboard.Modifiers == ModifierKeys.Control;
-			var result = context.SemanticModel.Compilation.FindDeclarationMatchName(symbol.Name, fullMatch, true, default);
-			ShowSymbolMenuForResult(symbol, context, new List<ISymbol>(result), R.T_NameAlike, true);
+		internal static async Task FindSymbolWithNameAsync(this SemanticContext context, ISymbol symbol, bool fullMatch) {
+			var results = await Task.Run(() => new List<ISymbol>(context.SemanticModel.Compilation.FindDeclarationMatchName(symbol.Name, fullMatch, true, default)));
+			await SyncHelper.SwitchToMainThreadAsync(default);
+			ShowSymbolMenuForResult(symbol, context, results, R.T_NameAlike, true);
 		}
 
-		internal static void FindMethodsBySignature(this SemanticContext context, ISymbol symbol) {
-			var myCodeOnly = Keyboard.Modifiers == ModifierKeys.Control;
-			var result = context.SemanticModel.Compilation.FindMethodBySignature(symbol, myCodeOnly, default);
-			ShowSymbolMenuForResult(symbol, context, new List<ISymbol>(result), R.T_SignatureMatch, true);
+		internal static async Task FindMethodsBySignatureAsync(this SemanticContext context, ISymbol symbol, bool myCodeOnly) {
+			var methods = await Task.Run(() => new List<ISymbol>(context.SemanticModel.Compilation.FindMethodBySignature(symbol, myCodeOnly, default)));
+			await SyncHelper.SwitchToMainThreadAsync(default);
+			ShowSymbolMenuForResult(symbol, context, methods, R.T_SignatureMatch, true);
 		}
 
 		internal static void ShowLocations(this SemanticContext context, ISymbol symbol, ImmutableArray<SyntaxReference> locations, UIElement positionElement = null) {

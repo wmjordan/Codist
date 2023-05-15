@@ -2469,4 +2469,63 @@ Expression too long</value>
   <data name="OT_ShowOutputPaneAfterBuild" xml:space="preserve">
     <value>Show Output window when build finishes</value>
   </data>
+  <data name="CMDT_CopyQualifiedSymbolName" xml:space="preserve">
+    <value>Copy symbol name in type.member or namespace.type format
+Right click: Copy symbol name in namespace.type.member format</value>
+  </data>
+  <data name="CMDT_CustomizeSearchEngines" xml:space="preserve">
+    <value>Add, update or delete search engines listed in this menu</value>
+  </data>
+  <data name="CMDT_FindCallers" xml:space="preserve">
+    <value>Search places where active constructor is called
+Ctrl: Match current symbol only, excluding base or derived symbols</value>
+  </data>
+  <data name="CMDT_FindConstructorCallers" xml:space="preserve">
+    <value>Search places where constructor of current type is called
+Ctrl: Match current symbol only, excluding base or derived symbols</value>
+  </data>
+  <data name="CMDT_FindContainingTypeInstanceAsParameter" xml:space="preserve">
+    <value>Search for members that take containing type of current symbol as parameter
+Ctrl: Match current symbol only, excluding base or derived symbols</value>
+  </data>
+  <data name="CMDT_FindContainingTypeInstanceProducer" xml:space="preserve">
+    <value>Search for members that return containing type of current symbol
+Ctrl: Match current symbol only, excluding base or derived symbols</value>
+  </data>
+  <data name="CMDT_FindInstanceAsParameter" xml:space="preserve">
+    <value>Search for members that take current type as parameter
+Ctrl: Match current symbol only, excluding base or derived symbols</value>
+  </data>
+  <data name="CMDT_FindInstanceProducer" xml:space="preserve">
+    <value>Search for members that return current type
+Ctrl: Match current symbol only, excluding base or derived symbols</value>
+  </data>
+  <data name="CMDT_FindMethodsSameSignature" xml:space="preserve">
+    <value>Search symbol having the same signature as current symbol
+Ctrl: Only search in source code</value>
+  </data>
+  <data name="CMDT_FindReferencedSymbols" xml:space="preserve">
+    <value>List symbols referenced within current symbol</value>
+  </data>
+  <data name="CMDT_FindReferrers" xml:space="preserve">
+    <value>Search places where active method is called, field/property is read/write
+Ctrl: Match current symbol only, excluding base or derived symbols</value>
+  </data>
+  <data name="CMDT_FindSymbolwithName" xml:space="preserve">
+    <value>Search symbols whose name contains current symbol name
+Ctrl: Match full name</value>
+  </data>
+  <data name="CMDT_FindTypeReferrers" xml:space="preserve">
+    <value>Search for members that reference current type
+Ctrl: Match current symbol only, excluding base or derived symbols</value>
+  </data>
+  <data name="CMDT_FindSymbolTypeExtensionMethods" xml:space="preserve">
+    <value>Find extension methods for current symbol type</value>
+  </data>
+  <data name="CMDT_FindSymbolTypeMembers" xml:space="preserve">
+    <value>List members of current symbol type</value>
+  </data>
+  <data name="CMDT_GoToSymbolTypeDefinition" xml:space="preserve">
+    <value>Go to definition of current symbol type</value>
+  </data>
 </root>
