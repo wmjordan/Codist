@@ -127,22 +127,24 @@ namespace Codist.SmartBars
 
 		void AddDeleteCommand() {
 			AddCommand(ToolBar, IconIds.Delete, R.CMD_DeleteSelectedText, ctx => {
+				const string REMOVE_SPACE_BEFORE = "={<>(-+*/^!|?:~&%";
 				var s = ctx.View.Selection;
 				var t = s.GetFirstSelectionText();
 				if (s.Mode == TextSelectionMode.Stream
 					&& ctx.RightClick == false
 					&& s.IsEmpty == false) {
 					var end = s.End.Position;
-					// remove a trailing space
+					#region remove a trailing space
 					var snapshot = ctx.View.TextSnapshot;
 					if (end < snapshot.Length - 1
 						&& Char.IsLetterOrDigit(snapshot[end - 1])
 						&& snapshot[end] == ' '
 						&& (end == snapshot.Length - 2
-							|| "={<>(-+*/^!|?:~&%".IndexOf(snapshot[end.Position + 1]) == -1)) {
+							|| REMOVE_SPACE_BEFORE.IndexOf(snapshot[end.Position + 1]) == -1)) {
 						ctx.KeepToolBar(false);
 						s.Select(new SnapshotSpan(s.Start.Position, s.End.Position + 1), false);
 					}
+					#endregion
 				}
 				ExecuteAndFind(ctx, "Edit.Delete", t, false);
 			});
