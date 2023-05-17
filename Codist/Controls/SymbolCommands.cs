@@ -69,16 +69,16 @@ namespace Codist.Controls
 			m.Show();
 		}
 
-		internal static async Task FindImplementationsAsync(this SemanticContext context, ISymbol symbol) {
+		internal static async Task FindImplementationsAsync(this SemanticContext context, ISymbol symbol, CancellationToken cancellationToken = default) {
 			var s = symbol;
 			INamedTypeSymbol st;
 			// workaround for a bug in Roslyn which keeps generic types from returning any result
 			if (symbol.Kind == SymbolKind.NamedType && (st = (INamedTypeSymbol)symbol).IsGenericType) {
 				s = st.OriginalDefinition;
 			}
-			var implementations = new List<ISymbol>(await SymbolFinder.FindImplementationsAsync(s, context.Document.Project.Solution).ConfigureAwait(false));
+			var implementations = new List<ISymbol>(await SymbolFinder.FindImplementationsAsync(s, context.Document.Project.Solution, null, cancellationToken).ConfigureAwait(false));
 			implementations.Sort(CodeAnalysisHelper.CompareSymbol);
-			await SyncHelper.SwitchToMainThreadAsync(default);
+			await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
 			var m = new SymbolMenu(context);
 			var d = new SourceSymbolDeduper();
 			if (symbol.Kind == SymbolKind.NamedType) {
