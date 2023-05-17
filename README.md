@@ -169,6 +169,8 @@ _Super Quick Info_ especially enhances programming experience for C# programmers
 * **Use enhanced symbol signature style** is a new setting in version 6.6, enabled by default, which optimizes the display of symbol signatures with a reorganized layout. The layout is especially optimized for long and complex signatures, yet ordinary short symbols can also benefit from it. The following is an example for the style. A large icon on the top-left part of the quick info can be clicked and brings out a menu for symbol analysis. Next to the icon is the name of the symbol with larger text size. Clicking on the name can jump to its definition. The parameters for the method are listed next. The reorganized layout never breaks the parameter type from its name, so it is easier to find out and locate each parameter type and name. Beneath the signature is the containing type of the symbol, as well the kind of the symbol. And the member type (return value) of the symbol is under the containing type.
   ![C# optimized quick info](doc/csharp-optimized-quick-info.png)
 
+* **Highlight current syntax node in code editor** will draw polygonal markers the syntax node related to the place where Quick Info is triggered.
+
 * A **Context menu** with many symbol analysis commands will show up when you right click the signature of the symbol definition or any symbol that appears in the Super Quick Info.
   
   ![Super Quick Info Csharp Menu](doc/super-quick-info-csharp-menu.png)
@@ -448,7 +450,7 @@ _Smart Bar_ also works on _Output_, _C# Interactive_, _Immediate (Debug)_, _Find
 
 _Scrollbar Marker_ draws extra glyphs and shapes on the vertical scrollbar for the following syntax elements:
 
-* **Line numbers** (marked with gray dashed lines and numbers)
+* **Line numbers** (marked with gray dashed lines and numbers, from version 7.4 on, total line count is displayed at the bottom of the scroll bar)
 * Selection range (marked with semi-transparent color blocks over the bar)
 * Special comments tagged by comment tagger (marked with small squares)
 * C# `class`/`struct`/`interface`/`enum` **declarations** (marked with lines indicating their ranges and a square, and their names indicating their declaration locations)
@@ -514,6 +516,8 @@ It is possible to localize _Codist_ to other language. Simplified Chinese (ç®€ä½
 The interface of _Codist_ will change according to the _International_ settings of _Visual Studio_.
 
 ## Other Features
+
+From version 7.4 on, extra menu commands to open build output target folder are added to the _Build_ menu.
 
 It is possible to output a time stamp after each build.
 
