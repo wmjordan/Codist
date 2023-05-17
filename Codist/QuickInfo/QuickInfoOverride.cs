@@ -139,7 +139,7 @@ namespace Codist.QuickInfo
 				_quickInfoSession = quickInfoSession;
 
 				if (symbol.Kind == SymbolKind.Namespace) {
-					description.MouseEnter += HookEvents;
+					description.MouseEnter += HookQuickInfoDescriptionEvents;
 					return;
 				}
 				if (symbol.Kind == SymbolKind.Method && ((IMethodSymbol)symbol).MethodKind == MethodKind.LambdaMethod) {
@@ -151,7 +151,7 @@ namespace Codist.QuickInfo
 					// navigate to the containing type
 					symbol = symbol.ContainingType;
 				}
-				description.MouseEnter += HookEvents;
+				description.MouseEnter += HookQuickInfoDescriptionEvents;
 			}
 
 			static void ShowLambdaExpressionParameters(ISymbol symbol, TextBlock description) {
@@ -176,9 +176,9 @@ namespace Codist.QuickInfo
 				quickInfoSession.StateChanged += new ClickAndGo(symbol, textBuffer, description, quickInfoSession).QuickInfoSession_StateChanged;
 			}
 
-			void HookEvents(object sender, MouseEventArgs e) {
+			void HookQuickInfoDescriptionEvents(object sender, MouseEventArgs e) {
 				var s = sender as FrameworkElement;
-				s.MouseEnter -= HookEvents;
+				s.MouseEnter -= HookQuickInfoDescriptionEvents;
 				if (CodistPackage.VsVersion.Major == 15 || Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle)) {
 					HighlightSymbol(sender, e);
 					s.Cursor = Cursors.Hand;
@@ -235,8 +235,7 @@ namespace Codist.QuickInfo
 					}
 					m.AddSymbolNodeCommands();
 					m.AddTitleItem(_symbol.GetOriginalName());
-					m.Closed += HideQuickInfo;
-					m.DisposeOnClose();
+					m.CommandExecuted += HideQuickInfo;
 					s.ContextMenu = m;
 				}
 				await SyncHelper.SwitchToMainThreadAsync(default);
@@ -257,7 +256,7 @@ namespace Codist.QuickInfo
 				}
 				_quickInfoSession.StateChanged -= QuickInfoSession_StateChanged;
 				var s = _description;
-				s.MouseEnter -= HookEvents;
+				s.MouseEnter -= HookQuickInfoDescriptionEvents;
 				s.ToolTipOpening -= ShowToolTip;
 				s.MouseEnter -= HighlightSymbol;
 				s.MouseLeave -= RemoveSymbolHighlight;
@@ -265,7 +264,8 @@ namespace Codist.QuickInfo
 				s.ContextMenuOpening -= ShowContextMenu;
 				s.ContextMenuClosing -= ReleaseQuickInfo;
 				if (s.ContextMenu is CSharpSymbolContextMenu m) {
-					m.Closed -= HideQuickInfo;
+					m.CommandExecuted -= HideQuickInfo;
+					m.Dispose();
 				}
 				s.ContextMenu = null;
 				_symbol = null;

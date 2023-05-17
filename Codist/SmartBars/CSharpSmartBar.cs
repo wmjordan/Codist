@@ -202,16 +202,15 @@ namespace Codist.SmartBars
 			if (UpdateSemanticModel() == false) {
 				return;
 			}
-			var m = new ContextMenu() {
+			var m = new CSharpSymbolContextMenu(null, null, _Context) {
 				Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom,
 				PlacementTarget = ctx.Sender,
-				Resources = SharedDictionaryManager.ContextMenu
 			};
 			m.SetValue(TextBlock.ForegroundProperty, ThemeHelper.MenuTextBrush);
 			var rc = new Refactorings.RefactoringContext(_Context);
 			AddRefactoringCommands(m, Refactorings.All.Refactorings, rc);
 			ctx.Sender.ContextMenu = m;
-			m.Closed += Menu_Closed;
+			m.CommandExecuted += HideSmartBar;
 			m.IsOpen = true;
 		}
 
@@ -288,7 +287,7 @@ namespace Codist.SmartBars
 			m.AddFindAllReferencesCommand();
 			m.AddGoToAnyCommands();
 			ctx.Sender.ContextMenu = m;
-			m.Closed += Menu_Closed;
+			m.CommandExecuted += HideSmartBar;
 			m.IsOpen = true;
 		}
 
@@ -563,15 +562,15 @@ namespace Codist.SmartBars
 			return SyncHelper.RunSync(UpdateAsync);
 		}
 
-		System.Threading.Tasks.Task<bool> UpdateAsync() {
+		Task<bool> UpdateAsync() {
 			return _Context.UpdateAsync(View.Selection.Start.Position, default);
 		}
 
-		void Menu_Closed(object sender, EventArgs args) {
-			var m = sender as ContextMenu;
+		void HideSmartBar(object sender, EventArgs args) {
+			var m = sender as CSharpSymbolContextMenu;
 			m.PlacementTarget = null;
-			m.Closed -= Menu_Closed;
-			(m as CSharpSymbolContextMenu)?.Dispose();
+			m.CommandExecuted -= HideSmartBar;
+			m.Dispose();
 			HideToolBar();
 		}
 

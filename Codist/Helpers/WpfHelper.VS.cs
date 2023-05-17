@@ -155,36 +155,46 @@ namespace Codist
 			async void ShowContextMenu(object sender, MouseButtonEventArgs e) {
 				await SyncHelper.SwitchToMainThreadAsync(default);
 				if (ContextMenu != null) {
-					ContextMenu.IsOpen = true;
-					return;
+					goto SHOW_MENU;
 				}
 				var ctx = SemanticContext.GetHovered();
-				if (ctx != null) {
-					await ctx.UpdateAsync(default);
-					await SyncHelper.SwitchToMainThreadAsync(default);
-					var s = _Symbol.GetUnderlyingSymbol();
-					if (s != null) {
-						var m = new CSharpSymbolContextMenu(s, s.GetSyntaxNode(), ctx);
-						m.AddAnalysisCommands();
-						if (m.HasItems) {
-							m.Items.Add(new Separator());
-						}
-						m.AddSymbolNodeCommands();
-						m.AddTitleItem(s.GetOriginalName());
-						m.PlacementTarget = this;
-						m.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
-						QuickInfo.QuickInfoOverride.HoldQuickInfo(this, true);
-						m.Closed += DismissQuickInfo;
-						ContextMenu = m;
-						m.IsOpen = true;
-						Highlight(this, e);
-					}
-					e.Handled = true;
+				if (ctx == null) {
+					return;
 				}
+				await ctx.UpdateAsync(default);
+				await SyncHelper.SwitchToMainThreadAsync(default);
+				var s = _Symbol.GetUnderlyingSymbol();
+				if (s != null) {
+					var m = new CSharpSymbolContextMenu(s, s.GetSyntaxNode(), ctx);
+					m.AddAnalysisCommands();
+					if (m.HasItems) {
+						m.Items.Add(new Separator());
+					}
+					m.AddSymbolNodeCommands();
+					m.AddTitleItem(s.GetOriginalName());
+					m.PlacementTarget = this;
+					m.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+					m.Closed += ReleaseQuickInfo;
+					m.CommandExecuted += DismissQuickInfo;
+					ContextMenu = m;
+				}
+			SHOW_MENU:
+				HoldQuickInfo(e);
+				ContextMenu.IsOpen = true;
+				e.Handled = true;
+			}
+
+			void HoldQuickInfo(MouseButtonEventArgs e) {
+				QuickInfo.QuickInfoOverride.HoldQuickInfo(this, true);
+				Highlight(this, e);
+			}
+
+			void ReleaseQuickInfo(object sender, RoutedEventArgs e) {
+				QuickInfo.QuickInfoOverride.HoldQuickInfo(this, false);
+				ClearValue(BackgroundProperty);
 			}
 
 			void DismissQuickInfo(object sender, RoutedEventArgs e) {
-				((CSharpSymbolContextMenu)sender).Closed -= DismissQuickInfo;
 				QuickInfo.QuickInfoOverride.HoldQuickInfo(this, false);
 				QuickInfo.QuickInfoOverride.DismissQuickInfo(this);
 			}
@@ -192,8 +202,9 @@ namespace Codist
 			void Highlight(object sender, MouseEventArgs e) {
 				Background = (_Symbol.HasSource() ? SystemColors.HighlightBrush : SystemColors.GrayTextBrush).Alpha(DimmedOpacity);
 			}
+
 			void Leave(object sender, MouseEventArgs e) {
-				Background = WpfBrushes.Transparent;
+				ClearValue(BackgroundProperty);
 			}
 
 			void SymbolLink_Unloaded(object sender, RoutedEventArgs e) {
@@ -204,7 +215,8 @@ namespace Codist
 				MouseLeave -= Leave;
 				Unloaded -= SymbolLink_Unloaded;
 				if (ContextMenu is CSharpSymbolContextMenu m) {
-					m.Closed -= DismissQuickInfo;
+					m.Closed -= ReleaseQuickInfo;
+					m.CommandExecuted -= DismissQuickInfo;
 					m.Dispose();
 					ContextMenu = null;
 				}
@@ -229,14 +241,12 @@ namespace Codist
 			}
 
 			protected override void OnUnload() {
-				//MouseLeftButtonDown -= GoToSymbol;
-				//MouseRightButtonDown -= ShowContextMenu;
 				if (ContextMenu is CSharpSymbolContextMenu m) {
-					m.Closed -= DismissQuickInfo;
+					m.Closed -= ReleaseQuickInfo;
+					m.CommandExecuted -= DismissQuickInfo;
 					m.Dispose();
 					ContextMenu = null;
 				}
-				//_Symbol = null;
 			}
 
 			protected override object CreateToolTip() {
@@ -249,6 +259,7 @@ namespace Codist
 			async void ShowContextMenu(object sender, MouseButtonEventArgs e) {
 				await SyncHelper.SwitchToMainThreadAsync(default);
 				if (ContextMenu != null) {
+					HoldQuickInfo();
 					ContextMenu.IsOpen = true;
 					return;
 				}
@@ -265,18 +276,27 @@ namespace Codist
 						}
 						m.AddSymbolNodeCommands();
 						m.AddTitleItem(s.GetOriginalName());
-						QuickInfo.QuickInfoOverride.HoldQuickInfo(this, true);
-						m.Closed += DismissQuickInfo;
+						HoldQuickInfo();
+						m.Closed += ReleaseQuickInfo;
+						m.CommandExecuted += DismissQuickInfo;
 						ContextMenu = m;
 						m.IsOpen = true;
-						DoHighlight();
 					}
 					e.Handled = true;
 				}
 			}
 
+			void HoldQuickInfo() {
+				QuickInfo.QuickInfoOverride.HoldQuickInfo(this, true);
+				DoHighlight();
+			}
+
+			void ReleaseQuickInfo(object sender, RoutedEventArgs e) {
+				QuickInfo.QuickInfoOverride.HoldQuickInfo(this, false);
+				ClearValue(BackgroundProperty);
+			}
+
 			void DismissQuickInfo(object sender, RoutedEventArgs e) {
-				((CSharpSymbolContextMenu)sender).Closed -= DismissQuickInfo;
 				QuickInfo.QuickInfoOverride.HoldQuickInfo(this, false);
 				QuickInfo.QuickInfoOverride.DismissQuickInfo(this);
 			}

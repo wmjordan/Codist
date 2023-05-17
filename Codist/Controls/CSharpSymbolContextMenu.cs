@@ -4,7 +4,6 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using AppHelpers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using R = Codist.Properties.Resources;
@@ -22,6 +21,8 @@ namespace Codist.Controls
 			this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 			_Host = new UIHost(symbol, node, semanticContext);
 		}
+
+		public event EventHandler<RoutedEventArgs> CommandExecuted;
 
 		public void AddTitleItem(string name) {
 			Items.Add(new MenuItem {
@@ -141,10 +142,17 @@ namespace Codist.Controls
 		}
 
 		void AddCommand(CommandId commandId) {
-			Items.Add(_Host.CreateCommand(commandId));
+			AddCommand(_Host.CreateCommand(commandId));
 		}
 		void AddCommand(CommandId commandId, string substitution) {
-			Items.Add(_Host.CreateCommand(commandId, substitution));
+			AddCommand(_Host.CreateCommand(commandId, substitution));
+		}
+		void AddCommand(CustomMenuItem command) {
+			command.AddClickHandler(OnCommandExecuted);
+			Items.Add(command);
+		}
+		void OnCommandExecuted(object sender, RoutedEventArgs args) {
+			CommandExecuted?.Invoke(this, args);
 		}
 
 		void CreateCommandForMembers() {
@@ -265,11 +273,11 @@ namespace Codist.Controls
 		}
 
 		static CustomMenuItem CreateItem(int imageId, string title, string substitutions, RoutedEventHandler clickHandler, string tooltip) {
-			return new CustomMenuItem(imageId, title, substitutions).SetClickHandler(clickHandler).SetToolTip(tooltip);
+			return new CustomMenuItem(imageId, title, substitutions).AddClickHandler(clickHandler).SetToolTip(tooltip);
 		}
 
 		static CustomMenuItem CreateItem(int imageId, string title, RoutedEventHandler clickHandler, string tooltip = null) {
-			return new CustomMenuItem(imageId, title).SetClickHandler(clickHandler).SetToolTip(tooltip);
+			return new CustomMenuItem(imageId, title).AddClickHandler(clickHandler).SetToolTip(tooltip);
 		}
 
 		void CSharpSymbolContextMenu_Closed(object sender, RoutedEventArgs e) {
@@ -365,8 +373,8 @@ namespace Codist.Controls
 				Header = new ThemedMenuText { Text = title };
 			}
 
-			public CustomMenuItem SetClickHandler(RoutedEventHandler clickHandler) {
-				_ClickHandler = clickHandler;
+			public CustomMenuItem AddClickHandler(RoutedEventHandler clickHandler) {
+				_ClickHandler += clickHandler;
 				return this;
 			}
 
@@ -423,7 +431,7 @@ namespace Codist.Controls
 
 
 			#region Command event handlers
-			public MenuItem CreateCommand(CommandId commandId) {
+			public CustomMenuItem CreateCommand(CommandId commandId) {
 				switch (commandId) {
 					case CommandId.GoToNode:
 						return CreateItem(IconIds.GoToDefinition, R.CMD_GoToDefinition, GoToNode);
@@ -484,7 +492,7 @@ namespace Codist.Controls
 				}
 				return null;
 			}
-			public MenuItem CreateCommand(CommandId commandId, string substitution) {
+			public CustomMenuItem CreateCommand(CommandId commandId, string substitution) {
 				switch (commandId) {
 					case CommandId.ListReturnTypeMembers:
 						return CreateItem(IconIds.ListMembers, R.CMD_ListMembersOf, substitution, ListReturnTypeMembers, R.CMDT_FindSymbolTypeMembers);
@@ -723,7 +731,7 @@ namespace Codist.Controls
 				await _SemanticContext.FindInstanceAsParameterAsync(_Symbol.ContainingType, strict);
 			}
 
-			MenuItem CreateWebSearchCommand() {
+			CustomMenuItem CreateWebSearchCommand() {
 				var search = new CustomMenuItem(IconIds.SearchWebSite, R.OT_WebSearch);
 				var symbolName = _Symbol.Name;
 				search.Items.AddRange(
