@@ -117,8 +117,8 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="CMD_FindMembers" xml:space="preserve">
-    <value>查找成员...</value>
+  <data name="CMD_ListMembers" xml:space="preserve">
+    <value>列出成员...</value>
   </data>
   <data name="CMD_Close" xml:space="preserve">
     <value>关闭</value>
@@ -156,8 +156,8 @@
   <data name="CMD_FindInstanceProducer" xml:space="preserve">
     <value>查找生成实例的成员...</value>
   </data>
-  <data name="CMD_FindMembersOf" xml:space="preserve">
-    <value>查找 &lt;TYPE&gt; 的成员...</value>
+  <data name="CMD_ListMembersOf" xml:space="preserve">
+    <value>列出 &lt;TYPE&gt; 的成员...</value>
   </data>
   <data name="CMD_FindMethodsSameSignature" xml:space="preserve">
     <value>查找具有相同签名的方法...</value>
@@ -2512,5 +2512,8 @@ Ctrl: 仅匹配当前类，不匹配其它派生类或继承类</value>
   </data>
   <data name="CMDT_GoToSymbolTypeDefinition" xml:space="preserve">
     <value>转到当前符号类型的定义</value>
+  </data>
+  <data name="CMD_ListSymbolLocations" xml:space="preserve">
+    <value>列出定义符号的位置...</value>
   </data>
 </root>

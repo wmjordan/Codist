@@ -215,11 +215,11 @@ Right click: Duplicate line</value>
   <data name="CMD_FindInstanceProducer" xml:space="preserve">
     <value>Find Instance Producer...</value>
   </data>
-  <data name="CMD_FindMembers" xml:space="preserve">
-    <value>Find Members...</value>
+  <data name="CMD_ListMembers" xml:space="preserve">
+    <value>List Members...</value>
   </data>
-  <data name="CMD_FindMembersOf" xml:space="preserve">
-    <value>Find Members of &lt;TYPE&gt;...</value>
+  <data name="CMD_ListMembersOf" xml:space="preserve">
+    <value>List Members of &lt;TYPE&gt;...</value>
   </data>
   <data name="CMD_FindMethodsSameSignature" xml:space="preserve">
     <value>Find Methods with Same Signature...</value>
@@ -2527,5 +2527,8 @@ Ctrl: Match current symbol only, excluding base or derived symbols</value>
   </data>
   <data name="CMDT_GoToSymbolTypeDefinition" xml:space="preserve">
     <value>Go to definition of current symbol type</value>
+  </data>
+  <data name="CMD_ListSymbolLocations" xml:space="preserve">
+    <value>List Symbol Locations...</value>
   </data>
 </root>

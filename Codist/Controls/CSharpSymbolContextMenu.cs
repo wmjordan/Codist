@@ -85,7 +85,8 @@ namespace Codist.Controls
 					CreateCommandForNamedType(_Host.Symbol as INamedTypeSymbol);
 					break;
 				case SymbolKind.Namespace:
-					AddCommand(CommandId.FindSymbolMembers);
+					AddCommand(CommandId.ListSymbolMembers);
+					AddCommand(CommandId.ListSymbolLocations);
 					break;
 			}
 			if (_Host.Context.SemanticModel != null) {
@@ -202,7 +203,7 @@ namespace Codist.Controls
 				}
 			}
 			AddCommand(CommandId.FindTypeReferrers);
-			AddCommand(CommandId.FindSymbolMembers);
+			AddCommand(CommandId.ListSymbolMembers);
 			if (t.IsStatic) {
 				return;
 			}
@@ -237,7 +238,7 @@ namespace Codist.Controls
 			var et = rt.ResolveElementType();
 			var ga = et.ResolveSingleGenericTypeArgument();
 			string typeName = et.Name + et.GetParameterString();
-			AddCommand(CommandId.FindReturnTypeMembers, typeName);
+			AddCommand(CommandId.ListReturnTypeMembers, typeName);
 			if (rt.IsStatic == false) {
 				AddCommand(CommandId.FindReturnTypeExtensionMethods, typeName);
 			}
@@ -307,7 +308,7 @@ namespace Codist.Controls
 			CopyQualifiedSymbolName,
 			CopyConstantValue,
 			WebSearch,
-			FindReturnTypeMembers,
+			ListReturnTypeMembers,
 			FindReturnTypeExtensionMethods,
 			GoToSymbolReturnType,
 			FindSpecialGenericReturnTypeMembers,
@@ -319,7 +320,7 @@ namespace Codist.Controls
 			FindOverrides,
 			FindReferrers,
 			FindReferencedSymbols,
-			FindSymbolMembers,
+			ListSymbolMembers,
 			FindSymbolsWithName,
 			FindMethodsBySignature,
 			FindConstructorReferrers,
@@ -331,6 +332,7 @@ namespace Codist.Controls
 			FindContainingTypeInstanceProducers,
 			FindContainingTypeInstanceConsumers,
 			FindTypeReferrers,
+			ListSymbolLocations,
 		}
 
 		sealed class CustomMenuItem : MenuItem
@@ -451,8 +453,8 @@ namespace Codist.Controls
 						return CreateItem(IconIds.FindReferrers, R.CMD_FindReferrers, FindReferrers, R.CMDT_FindReferrers);
 					case CommandId.FindReferencedSymbols:
 						return CreateItem(IconIds.FindReferencingSymbols, R.CMD_FindReferencedSymbols, FindReferencedSymbols, R.CMDT_FindReferencedSymbols);
-					case CommandId.FindSymbolMembers:
-						return CreateItem(IconIds.ListMembers, R.CMD_FindMembers, FindSymbolMembers);
+					case CommandId.ListSymbolMembers:
+						return CreateItem(IconIds.ListMembers, R.CMD_ListMembers, ListSymbolMembers);
 					case CommandId.FindSymbolsWithName:
 						return CreateItem(IconIds.FindSymbolsWithName, R.CMD_FindSymbolwithName, _Symbol.Name, FindSymbolWithName, R.CMDT_FindSymbolwithName);
 					case CommandId.FindMethodsBySignature:
@@ -471,6 +473,8 @@ namespace Codist.Controls
 						return CreateItem(IconIds.Argument, R.CMD_FindInstanceAsParameter, FindContainingTypeInstanceConsumers, R.CMDT_FindContainingTypeInstanceAsParameter);
 					case CommandId.FindTypeReferrers:
 						return CreateItem(IconIds.FindTypeReferrers, R.CMD_FindTypeReferrers, FindTypeReferrers, R.CMDT_FindTypeReferrers);
+					case CommandId.ListSymbolLocations:
+						return CreateItem(IconIds.FileLocations, R.CMD_ListSymbolLocations, ListSymbolLocations);
 					case CommandId.DebugUnitTest:
 						return CreateItem(IconIds.DebugTest, R.CMD_DebugUnitTest, DebugUnitTest);
 					case CommandId.RunUnitTest:
@@ -482,14 +486,14 @@ namespace Codist.Controls
 			}
 			public MenuItem CreateCommand(CommandId commandId, string substitution) {
 				switch (commandId) {
-					case CommandId.FindReturnTypeMembers:
-						return CreateItem(IconIds.ListMembers, R.CMD_FindMembersOf, substitution, FindReturnTypeMembers, R.CMDT_FindSymbolTypeMembers);
+					case CommandId.ListReturnTypeMembers:
+						return CreateItem(IconIds.ListMembers, R.CMD_ListMembersOf, substitution, ListReturnTypeMembers, R.CMDT_FindSymbolTypeMembers);
 					case CommandId.FindReturnTypeExtensionMethods:
 						return CreateItem(IconIds.ExtensionMethod, R.CMD_FindExtensionsFor, substitution, FindReturnTypeExtensionMethods, R.CMDT_FindSymbolTypeExtensionMethods);
 					case CommandId.GoToSymbolReturnType:
 						return CreateItem(IconIds.GoToReturnType, R.CMD_GoTo, substitution, GoToSymbolReturnType, R.CMDT_GoToSymbolTypeDefinition);
 					case CommandId.FindSpecialGenericReturnTypeMembers:
-						return CreateItem(IconIds.ListMembers, R.CMD_FindMembersOf, substitution, FindSpecialGenericReturnTypeMembers, R.CMDT_FindSymbolTypeMembers);
+						return CreateItem(IconIds.ListMembers, R.CMD_ListMembersOf, substitution, FindSpecialGenericReturnTypeMembers, R.CMDT_FindSymbolTypeMembers);
 					case CommandId.GoToSpecialGenericSymbolReturnType:
 						return CreateItem(IconIds.GoToReturnType, R.CMD_GoTo, substitution, GoToSpecialGenericSymbolReturnType, R.CMDT_GoToSymbolTypeDefinition);
 				}
@@ -525,6 +529,13 @@ namespace Codist.Controls
 				else {
 					_SemanticContext.ShowLocations(_Symbol, locs, (sender as UIElement).GetParent<ListBoxItem>());
 				}
+			}
+			void ListSymbolLocations(object sender, RoutedEventArgs args) {
+				var symbol = _Symbol;
+				if (symbol is INamespaceSymbol ns) {
+					symbol = ns.GetCompilationNamespace(_SemanticContext.SemanticModel);
+				}
+				_SemanticContext.ShowLocations(symbol, symbol.GetSourceReferences(), (sender as UIElement).GetParent<ListBoxItem>());
 			}
 			void GoToSymbolReturnType(object sender, RoutedEventArgs args) {
 				_Symbol.GetReturnType().ResolveElementType().GoToSource();
@@ -582,12 +593,12 @@ namespace Codist.Controls
 				}
 			}
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
-			async void FindSymbolMembers(object sender, RoutedEventArgs e) {
+			async void ListSymbolMembers(object sender, RoutedEventArgs e) {
 				await _SemanticContext.FindMembersAsync(_Symbol);
 			}
 
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
-			async void FindReturnTypeMembers(object sender, RoutedEventArgs e) {
+			async void ListReturnTypeMembers(object sender, RoutedEventArgs e) {
 				await _SemanticContext.FindMembersAsync(_Symbol.GetReturnType().ResolveElementType());
 			}
 

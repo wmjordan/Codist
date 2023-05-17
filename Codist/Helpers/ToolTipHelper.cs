@@ -60,7 +60,7 @@ namespace Codist
 				content.AppendLineBreak()
 					.Append(R.T_Namespace + symbol.ContainingNamespace?.ToString()).AppendLine();
 				if (symbol.Kind == SymbolKind.Namespace) {
-					ShowNamespaceSource(content, symbol, context);
+					ShowNamespaceSource(content, (INamespaceSymbol)symbol, context);
 				}
 				else {
 					ShowSymbolSource(content, symbol, context);
@@ -113,26 +113,27 @@ namespace Codist
 				.Append(type.ToDisplayString(CodeAnalysisHelper.MemberNameFormat), true);
 		}
 
-		static void ShowNamespaceSource(TextBlock content, ISymbol symbol, SemanticContext context) {
-			content.Append(R.T_Assembly)
-				.Append(String.Join(", ", ((INamespaceSymbol)symbol).ConstituentNamespaces.Select(n => n.GetAssemblyModuleName()).Distinct()))
-				.AppendLine()
-				.Append(R.T_Project)
+		static void ShowNamespaceSource(TextBlock content, INamespaceSymbol symbol, SemanticContext context) {
+			content.Append(R.T_Project)
 				// hack: workaround to exclude references that returns null from GetDocument
 				.Append(String.Join(", ", symbol.GetSourceReferences().Select(r => context.GetProject(r.SyntaxTree)).Where(p => p != null).Distinct().Select(p => p.Name)))
 				.AppendLine()
 				.Append(R.T_Location)
-				.Append(symbol.Locations.Length);
+				.Append(symbol.GetCompilationNamespace(context.SemanticModel).Locations.Length)
+				.AppendLine()
+				.Append(R.T_Assembly)
+				.Append(String.Join(", ", symbol.ConstituentNamespaces.Select(n => n.GetAssemblyModuleName()).Distinct()));
 		}
 
 		static void ShowSymbolSource(TextBlock content, ISymbol symbol, SemanticContext context) {
 			Compilation compilation;
 			if (symbol.HasSource()) {
+				var refs = symbol.GetSourceReferences();
 				content.Append(R.T_SourceFile)
-					.Append(String.Join(", ", symbol.GetSourceReferences().Select(r => System.IO.Path.GetFileName(r.SyntaxTree.FilePath))))
+					.Append(String.Join(", ", refs.Select(r => System.IO.Path.GetFileName(r.SyntaxTree.FilePath))))
 					.AppendLine()
 					.Append(R.T_Project)
-					.Append(String.Join(", ", symbol.GetSourceReferences().Select(r => context.GetProject(r.SyntaxTree)).Where(p => p != null).Distinct().Select(p => p.Name)));
+					.Append(String.Join(", ", refs.Select(r => context.GetProject(r.SyntaxTree)).Where(p => p != null).Distinct().Select(p => p.Name)));
 			}
 			else if ((compilation = context.SemanticModel?.Compilation) != null) {
 				var (p, f) = compilation.GetReferencedAssemblyPath(symbol.ContainingAssembly);

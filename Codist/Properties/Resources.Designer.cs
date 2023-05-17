@@ -634,24 +634,6 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Find Members....
-        /// </summary>
-        internal static string CMD_FindMembers {
-            get {
-                return ResourceManager.GetString("CMD_FindMembers", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Find Members of &lt;TYPE&gt;....
-        /// </summary>
-        internal static string CMD_FindMembersOf {
-            get {
-                return ResourceManager.GetString("CMD_FindMembersOf", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Find Methods with Same Signature....
         /// </summary>
         internal static string CMD_FindMethodsSameSignature {
@@ -961,6 +943,33 @@ namespace Codist.Properties {
         internal static string CMD_LightTheme {
             get {
                 return ResourceManager.GetString("CMD_LightTheme", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to List Members....
+        /// </summary>
+        internal static string CMD_ListMembers {
+            get {
+                return ResourceManager.GetString("CMD_ListMembers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to List Members of &lt;TYPE&gt;....
+        /// </summary>
+        internal static string CMD_ListMembersOf {
+            get {
+                return ResourceManager.GetString("CMD_ListMembersOf", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to List Symbol Locations....
+        /// </summary>
+        internal static string CMD_ListSymbolLocations {
+            get {
+                return ResourceManager.GetString("CMD_ListSymbolLocations", resourceCulture);
             }
         }
         

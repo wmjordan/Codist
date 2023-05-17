@@ -755,6 +755,10 @@ namespace Codist
 			return ns == null || ns.IsGlobalNamespace;
 		}
 
+		public static INamespaceSymbol GetCompilationNamespace(this INamespaceSymbol namespaceSymbol, SemanticModel semanticModel) {
+			return semanticModel.Compilation.GetCompilationNamespace(namespaceSymbol);
+		}
+
 		public static string GetTypeName(this ITypeSymbol symbol) {
 			switch (symbol.Kind) {
 				case SymbolKind.NamedType:

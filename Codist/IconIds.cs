@@ -98,6 +98,7 @@ namespace Codist
 		public const int Project = KnownImageIds.CSProjectNode;
 		public const int File = KnownImageIds.CSSourceFile;
 		public const int FileEmpty = KnownImageIds.CSFile;
+		public const int FileLocations = KnownImageIds.DocumentCollection;
 		public const int GlobalNamespace = KnownImageIds.Home;
 		public const int Module = KnownImageIds.Module;
 		public const int Headings = KnownImageIds.PageHeader;
