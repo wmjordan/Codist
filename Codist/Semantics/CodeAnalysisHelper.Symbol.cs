@@ -1592,8 +1592,7 @@ namespace Codist
 				var il = m.GetILGenerator();
 				var isSource = il.DefineLabel();
 				var isRetargetSource = il.DefineLabel();
-				var notAssemblySymbol = il.DefineLabel();
-				var getUnderlyingAssemblySymbol = il.DefineLabel();
+				Label notAssemblySymbol, getUnderlyingAssemblySymbol;
 				var a = typeof(CSharpCompilation).Assembly;
 				const string NS = "Microsoft.CodeAnalysis.CSharp.Symbols.";
 				var s = a.GetType(NS + "PublicModel.AssemblySymbol"); // from VS16.5
@@ -1612,6 +1611,8 @@ namespace Codist
 					il.Emit(OpCodes.Brtrue_S, isSource);
 				}
 				if (ua != null) { // VS16.5
+					notAssemblySymbol = il.DefineLabel();
+					getUnderlyingAssemblySymbol = il.DefineLabel();
 					// (asm as AssemblySymbol)?.UnderlyingAssemblySymbol is RetargetingAssemblySymbol
 					il.Emit(OpCodes.Ldarg_0);
 					il.Emit(OpCodes.Isinst, s);

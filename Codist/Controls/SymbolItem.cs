@@ -61,6 +61,7 @@ namespace Codist.Controls
 			}
 			else {
 				var m = location.MetadataModule;
+				Symbol = m;
 				_Content = new ThemedMenuText(Path.GetFileNameWithoutExtension(m.Name)).Append(Path.GetExtension(m.Name), ThemeHelper.SystemGrayTextBrush);
 				_Hint = String.Empty;
 				_ImageId = IconIds.Module;
@@ -128,7 +129,14 @@ namespace Codist.Controls
 						var symbol = Symbol;
 						var proj = Container.SemanticContext.Document.Project;
 						CloseUnpinnedMenus();
-						if (ServicesHelper.Instance.VisualStudioWorkspace.TryGoToDefinition(symbol, proj, default) == false) {
+						if (symbol.Kind == SymbolKind.NetModule) {
+							var (folder, file) = Container.SemanticContext.SemanticModel.Compilation.GetReferencedAssemblyPath(((IModuleSymbol)symbol).ContainingAssembly);
+							if (String.IsNullOrEmpty(folder) == false) {
+								FileHelper.OpenInExplorer(folder, file);
+								return true;
+							}
+						}
+						else if (ServicesHelper.Instance.VisualStudioWorkspace.TryGoToDefinition(symbol, proj, default) == false) {
 							// Note: the symbol may come from other projects, which will fail the above call.
 							// In this case, we will try on related projects
 							foreach (var p in proj.GetRelatedProjects()) {
