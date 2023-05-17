@@ -362,6 +362,14 @@ namespace Codist
 			}
 		}
 
+		public static IEnumerable<INamedTypeSymbol> GetBaseTypes(this ITypeSymbol type) {
+			var baseType = type.BaseType;
+			while (baseType != null) {
+				yield return baseType;
+				baseType = baseType.BaseType;
+			}
+		}
+
 		public static ITypeSymbol ResolveElementType(this ITypeSymbol t) {
 			switch (t.Kind) {
 				case SymbolKind.ArrayType: return ResolveElementType(((IArrayTypeSymbol)t).ElementType);
@@ -620,6 +628,14 @@ namespace Codist
 						: null;
 			}
 			return null;
+		}
+
+		public static ITypeSymbol GetEventArgsType(this IEventSymbol symbol) {
+			ImmutableArray<IParameterSymbol> parameters;
+			return symbol.Type.GetMembers("Invoke").FirstOrDefault() is IMethodSymbol invoke
+				&& (parameters = invoke.Parameters).Length == 2
+				? parameters[1].Type
+				: null;
 		}
 
 		public static string GetParameterString(this ISymbol symbol, bool withParamName = false) {

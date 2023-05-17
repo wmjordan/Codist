@@ -169,6 +169,9 @@ namespace Codist.Controls
 			if (_Host.Symbol.Kind != SymbolKind.Event) {
 				CreateCommandsForReturnTypeCommand();
 			}
+			else {
+				CreateCommandForEventArgs();
+			}
 			if (_Host.Symbol.Kind == SymbolKind.Method) {
 				switch (((IMethodSymbol)_Host.Symbol).MethodKind) {
 					case MethodKind.Constructor:
@@ -262,6 +265,13 @@ namespace Codist.Controls
 			}
 		}
 
+		void CreateCommandForEventArgs() {
+			var t = ((IEventSymbol)_Host.Symbol).GetEventArgsType();
+			if (t?.GetBaseTypes().Any(i => i.MatchTypeName(nameof(EventArgs), nameof(System))) == true) {
+				AddCommand(CommandId.ListEventArgsMembers, t.GetOriginalName());
+			}
+		}
+
 		void CreateInstanceCommandsForType() {
 			AddCommand(CommandId.FindInstanceProducers);
 			AddCommand(CommandId.FindInstanceConsumers);
@@ -341,6 +351,7 @@ namespace Codist.Controls
 			FindContainingTypeInstanceConsumers,
 			FindTypeReferrers,
 			ListSymbolLocations,
+			ListEventArgsMembers,
 		}
 
 		sealed class CustomMenuItem : MenuItem
@@ -504,6 +515,8 @@ namespace Codist.Controls
 						return CreateItem(IconIds.ListMembers, R.CMD_ListMembersOf, substitution, FindSpecialGenericReturnTypeMembers, R.CMDT_FindSymbolTypeMembers);
 					case CommandId.GoToSpecialGenericSymbolReturnType:
 						return CreateItem(IconIds.GoToReturnType, R.CMD_GoTo, substitution, GoToSpecialGenericSymbolReturnType, R.CMDT_GoToSymbolTypeDefinition);
+					case CommandId.ListEventArgsMembers:
+						return CreateItem(IconIds.ListMembers, R.CMD_ListMembersOf, substitution, ListEventArgsMembers, "List members of arguments of event");
 				}
 				return null;
 			}
@@ -608,6 +621,14 @@ namespace Codist.Controls
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void ListReturnTypeMembers(object sender, RoutedEventArgs e) {
 				await _SemanticContext.FindMembersAsync(_Symbol.GetReturnType().ResolveElementType());
+			}
+
+			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
+			async void ListEventArgsMembers(object sender, RoutedEventArgs e) {
+				var t = ((IEventSymbol)_Symbol).GetEventArgsType();
+				if (t != null) {
+					await _SemanticContext.FindMembersAsync(t);
+				}
 			}
 
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
