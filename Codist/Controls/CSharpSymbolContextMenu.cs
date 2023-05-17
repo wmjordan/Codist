@@ -156,7 +156,7 @@ namespace Codist.Controls
 			}
 			var st = _Host.Symbol.ContainingType;
 			if (st?.TypeKind == TypeKind.Interface) {
-				AddCommand(CommandId.FindDerivedClasses);
+				AddCommand(CommandId.FindImplementations);
 			}
 			if (_Host.Symbol.Kind != SymbolKind.Event) {
 				CreateCommandsForReturnTypeCommand();
