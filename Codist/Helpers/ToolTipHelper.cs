@@ -38,7 +38,7 @@ namespace Codist
 				if (symbol.Kind == SymbolKind.Parameter) {
 					var p = symbol as IParameterSymbol;
 					if (p.HasExplicitDefaultValue) {
-						SymbolFormatter.Instance.AppendValue(tip.Title.Inlines, symbol, p.Type, p.ExplicitDefaultValue);
+						SymbolFormatter.Instance.AppendValue(tip.Title.Inlines, symbol, p.ExplicitDefaultValue);
 					}
 				}
 			}

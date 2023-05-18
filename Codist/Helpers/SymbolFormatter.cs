@@ -223,7 +223,7 @@ namespace Codist
 				case SymbolKind.Field:
 					if (symbol is IFieldSymbol f) {
 						if (f.HasConstantValue) {
-							AppendValue(signature.Inlines, symbol, f.Type, f.ConstantValue);
+							AppendValue(signature.Inlines, symbol, f.ConstantValue);
 						}
 						else if (f.IsReadOnly && f.ContainingAssembly.GetSourceType() != AssemblySource.Metadata) {
 							var val = f.DeclaringSyntaxReferences.GetHardCodedValue();
@@ -236,12 +236,12 @@ namespace Codist
 					break;
 				case SymbolKind.Parameter:
 					if (symbol is IParameterSymbol pa && pa.HasExplicitDefaultValue) {
-						AppendValue(signature.Inlines, symbol, pa.Type, pa.ExplicitDefaultValue);
+						AppendValue(signature.Inlines, symbol, pa.ExplicitDefaultValue);
 					}
 					break;
 				case SymbolKind.Local:
 					if (symbol is ILocalSymbol l && l.HasConstantValue) {
-						AppendValue(signature.Inlines, symbol, l.Type, l.ConstantValue);
+						AppendValue(signature.Inlines, symbol, l.ConstantValue);
 					}
 					break;
 				case SymbolKind.TypeParameter:
@@ -328,7 +328,7 @@ namespace Codist
 						inlines.Add(p.Render(null, i == argIndex, Parameter));
 					}
 					if (showDefault && p.HasExplicitDefaultValue) {
-						AppendValue(inlines, p, p.Type, p.ExplicitDefaultValue);
+						AppendValue(inlines, p, p.ExplicitDefaultValue);
 					}
 				}
 				if (p.IsOptional) {
@@ -418,25 +418,27 @@ namespace Codist
 			}
 		}
 
-		public void AppendValue(InlineCollection text, ISymbol symbol, ITypeSymbol type, object value) {
+		public void AppendValue(InlineCollection text, ISymbol symbol, object value) {
 			var r = symbol.DeclaringSyntaxReferences;
 			ExpressionSyntax val;
-			text.Add(" = ");
 			if (r.Length > 0 && (val = r.GetHardCodedValue()) != null) {
-				ShowExpression(text, val);
+				if (val.Kind().IsAny(SyntaxKind.DefaultLiteralExpression, SyntaxKind.NullLiteralExpression) == false) {
+					text.Add(" = ");
+					ShowExpression(text, val);
+				}
 				return;
 			}
-			if (value == null) {
-				text.Add((type.IsValueType ? "default" : "null").Render(Keyword));
-			}
-			else if (value is string s) {
-				text.Add(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(s)).ToFullString().Render(Text));
-			}
-			else if (value is bool b) {
-				text.Add((b ? "true" : "false").Render(Keyword));
-			}
-			else {
-				text.Add(value.ToString().Render(Number));
+			if (value != null) {
+				text.Add(" = ");
+				if (value is string s) {
+					text.Add(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(s)).ToFullString().Render(Text));
+				}
+				else if (value is bool b) {
+					text.Add((b ? "true" : "false").Render(Keyword));
+				}
+				else {
+					text.Add(value.ToString().Render(Number));
+				}
 			}
 		}
 
