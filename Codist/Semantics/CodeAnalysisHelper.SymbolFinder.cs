@@ -381,14 +381,14 @@ namespace Codist
 
 		/// <summary>Finds symbols referenced by given context node.</summary>
 		/// <returns>An ordered array of <see cref="KeyValuePair{TKey, TValue}"/> which contains number of occurrences of corresponding symbols.</returns>
-		public static KeyValuePair<ISymbol, int>[] FindReferencingSymbols(this SyntaxNode node, SemanticModel semanticModel, bool sourceCodeOnly) {
+		public static KeyValuePair<ISymbol, int>[] FindReferencingSymbols(this SyntaxNode node, SemanticModel semanticModel, bool sourceCodeOnly, CancellationToken cancellationToken = default) {
 			var result = new Dictionary<ISymbol, int>();
 			foreach (var item in node.DescendantNodes()) {
 				if (item.IsKind(SyntaxKind.IdentifierName) == false
 					|| item.Kind().IsDeclaration()) {
 					continue;
 				}
-				var s = semanticModel.GetSymbol(item) ?? semanticModel.GetSymbolExt(item);
+				var s = semanticModel.GetSymbol(item, cancellationToken) ?? semanticModel.GetSymbolExt(item, cancellationToken);
 				if (s == null) {
 					continue;
 				}
