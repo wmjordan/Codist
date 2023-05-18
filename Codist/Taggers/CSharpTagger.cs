@@ -338,17 +338,17 @@ namespace Codist.Taggers
 			}
 
 			static TagSpan<IClassificationTag> ClassifyPunctuation(TextSpan itemSpan, ITextSnapshot snapshot, SemanticModel semanticModel, CompilationUnitSyntax unitCompilation, CancellationToken cancellationToken) {
-				if (HighlightOptions.AllBraces && itemSpan.Length == 1) {
+				if ((HighlightOptions.AllBraces || HighlightOptions.AttributeAnnotation) && itemSpan.Length == 1) {
 					switch (snapshot[itemSpan.Start]) {
 						case '(':
 						case ')':
 							return HighlightOptions.AllParentheses ? ClassifyParentheses(itemSpan, snapshot, semanticModel, unitCompilation, cancellationToken) : null;
 						case '{':
 						case '}':
-							return ClassifyCurlyBraces(itemSpan, snapshot, unitCompilation);
+							return HighlightOptions.AllBraces ? ClassifyCurlyBraces(itemSpan, snapshot, unitCompilation) : null;
 						case '[':
 						case ']':
-							return ClassifyBrackets(itemSpan, snapshot, semanticModel, unitCompilation, cancellationToken);
+							return HighlightOptions.AttributeAnnotation ? ClassifyBrackets(itemSpan, snapshot, semanticModel, unitCompilation, cancellationToken) : null;
 					}
 				}
 				return null;
@@ -839,7 +839,7 @@ namespace Codist.Taggers
 			public static TransientMemberTagHolder MemberBraceTags { get; private set; }
 
 			// use fields to cache option flags
-			public static bool AllBraces, AllParentheses, LocalFunctionDeclaration, NonPrivateField, StyleConstructorAsType, CapturingLambda;
+			public static bool AllBraces, AllParentheses, LocalFunctionDeclaration, NonPrivateField, StyleConstructorAsType, CapturingLambda, AttributeAnnotation;
 
 			static bool Init() {
 				Config.RegisterUpdateHandler(UpdateCSharpHighlighterConfig);
@@ -899,6 +899,7 @@ namespace Codist.Taggers
 				LocalFunctionDeclaration = o.MatchFlags(SpecialHighlightOptions.LocalFunctionDeclaration);
 				NonPrivateField = o.MatchFlags(SpecialHighlightOptions.NonPrivateField);
 				StyleConstructorAsType = o.MatchFlags(SpecialHighlightOptions.UseTypeStyleOnConstructor);
+				AttributeAnnotation = FormatStore.GetStyles().TryGetValue(Constants.CSharpAttributeNotation, out var s) && s.IsSet;
 			}
 		}
 	}
