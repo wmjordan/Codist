@@ -780,28 +780,28 @@ namespace Codist.SyntaxHighlight
 					foreach (var key in resource.Keys) {
 						var val = resource[key];
 						switch (key.ToString()) {
-							case ClassificationFormatDefinition.ForegroundBrushId:
+							case EditorFormatDefinition.ForegroundBrushId:
 								sb.Append(val).Append("@f");
 								break;
-							case ClassificationFormatDefinition.ForegroundColorId:
-								if (resource.Contains(ClassificationFormatDefinition.ForegroundBrushId)) {
+							case EditorFormatDefinition.ForegroundColorId:
+								if (resource.Contains(EditorFormatDefinition.ForegroundBrushId)) {
 									break;
 								}
-								goto case ClassificationFormatDefinition.ForegroundBrushId;
+								goto case EditorFormatDefinition.ForegroundBrushId;
 							case ClassificationFormatDefinition.IsBoldId:
 								sb.Append((bool)val ? "+B" : "-B");
 								break;
 							case ClassificationFormatDefinition.IsItalicId:
 								sb.Append((bool)val ? "+I" : "-I");
 								break;
-							case ClassificationFormatDefinition.BackgroundBrushId:
+							case EditorFormatDefinition.BackgroundBrushId:
 								sb.Append(val).Append("@b");
 								break;
-							case ClassificationFormatDefinition.BackgroundColorId:
-								if (resource.Contains(ClassificationFormatDefinition.BackgroundBrushId)) {
+							case EditorFormatDefinition.BackgroundColorId:
+								if (resource.Contains(EditorFormatDefinition.BackgroundBrushId)) {
 									break;
 								}
-								goto case ClassificationFormatDefinition.BackgroundBrushId;
+								goto case EditorFormatDefinition.BackgroundBrushId;
 							case ClassificationFormatDefinition.FontRenderingSizeId:
 								sb.Append(val).Append('#');
 								break;
