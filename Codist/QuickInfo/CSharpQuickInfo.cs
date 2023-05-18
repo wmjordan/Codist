@@ -1389,18 +1389,42 @@ namespace Codist.QuickInfo
 				return;
 			}
 			var info = new ThemedTipDocument().AppendTitle(IconIds.Interface, R.T_Interface);
-			foreach (var item in declaredInterfaces) {
-				info.Append(new ThemedTipParagraph(item.IsDisposable() ? IconIds.Disposable : item.GetImageId(), ToUIText(item)));
-			}
-			foreach (var (intf, baseType) in inheritedInterfaces) {
-				info.Append(new ThemedTipParagraph(
-					intf.IsDisposable() ? IconIds.Disposable : intf.GetImageId(),
-					ToUIText(intf)
-						.Append(" : ", SymbolFormatter.SemiTransparent.PlainText)
-						.Append(ThemeHelper.GetImage(baseType.GetImageId()).WrapMargin(WpfHelper.GlyphMargin).SetOpacity(SymbolFormatter.TransparentLevel))
-						.AddSymbol(baseType, false, SymbolFormatter.SemiTransparent)));
-			}
+			//ListInterfacesSortedByNamespace(info, declaredInterfaces, inheritedInterfaces);
+			ListInterfacesInLogicalOrder(info, declaredInterfaces, inheritedInterfaces);
 			qiContent.Add(info);
+
+			void ListInterfacesSortedByNamespace(ThemedTipDocument d, ImmutableArray<INamedTypeSymbol>.Builder di, ImmutableArray<(INamedTypeSymbol intf, ITypeSymbol baseType)>.Builder ii) {
+				var allInterfaces = new List<(string, ThemedTipParagraph)>(di.Count + ii.Count);
+				foreach (var item in di) {
+					allInterfaces.Add((item.ToDisplayString(CodeAnalysisHelper.QualifiedTypeNameFormat), new ThemedTipParagraph(item.IsDisposable() ? IconIds.Disposable : item.GetImageId(), ToUIText(item))));
+				}
+				foreach (var (intf, baseType) in ii) {
+					allInterfaces.Add((intf.ToDisplayString(CodeAnalysisHelper.QualifiedTypeNameFormat), new ThemedTipParagraph(
+						intf.IsDisposable() ? IconIds.Disposable : intf.GetImageId(),
+						ToUIText(intf)
+							.Append(" : ", SymbolFormatter.SemiTransparent.PlainText)
+							.Append(ThemeHelper.GetImage(baseType.GetImageId()).WrapMargin(WpfHelper.GlyphMargin).SetOpacity(SymbolFormatter.TransparentLevel))
+							.AddSymbol(baseType, false, SymbolFormatter.SemiTransparent))));
+				}
+				allInterfaces.Sort((x, y) => x.Item1.CompareTo(y.Item1));
+				foreach (var item in allInterfaces) {
+					d.Append(item.Item2);
+				}
+			}
+
+			void ListInterfacesInLogicalOrder(ThemedTipDocument d, ImmutableArray<INamedTypeSymbol>.Builder di, ImmutableArray<(INamedTypeSymbol intf, ITypeSymbol baseType)>.Builder ii) {
+				foreach (var item in di) {
+					d.Append(new ThemedTipParagraph(item.IsDisposable() ? IconIds.Disposable : item.GetImageId(), ToUIText(item)));
+				}
+				foreach (var (intf, baseType) in ii) {
+					d.Append(new ThemedTipParagraph(
+						intf.IsDisposable() ? IconIds.Disposable : intf.GetImageId(),
+						ToUIText(intf)
+							.Append(" : ", SymbolFormatter.SemiTransparent.PlainText)
+							.Append(ThemeHelper.GetImage(baseType.GetImageId()).WrapMargin(WpfHelper.GlyphMargin).SetOpacity(SymbolFormatter.TransparentLevel))
+							.AddSymbol(baseType, false, SymbolFormatter.SemiTransparent)));
+				}
+			}
 		}
 
 		static void FindInterfacesForType(ITypeSymbol type, bool useType, ImmutableArray<INamedTypeSymbol> interfaces, ImmutableArray<(INamedTypeSymbol, ITypeSymbol)>.Builder inheritedInterfaces, HashSet<ITypeSymbol> all) {
