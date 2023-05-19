@@ -4726,6 +4726,24 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Show ordinary comment.
+        /// </summary>
+        internal static string OT_UseOrdinaryComment {
+            get {
+                return ResourceManager.GetString("OT_UseOrdinaryComment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Displays ordinary comment around declaration.
+        /// </summary>
+        internal static string OT_UseOrdinaryCommentTip {
+            get {
+                return ResourceManager.GetString("OT_UseOrdinaryCommentTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Initial value of fields and properties.
         /// </summary>
         internal static string OT_ValueOfFields {

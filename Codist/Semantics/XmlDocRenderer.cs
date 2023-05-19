@@ -11,6 +11,8 @@ using System.Xml.Linq;
 using AppHelpers;
 using Codist.Controls;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using R = Codist.Properties.Resources;
 
 namespace Codist
@@ -73,6 +75,18 @@ namespace Codist
 				}
 				if (inheritDoc == null) {
 					tip.Tag = ParagraphCount;
+				}
+			}
+			if (symbol.HasSource() && Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.OrdinaryCommentDoc)) {
+				switch (symbol.Kind) {
+					case SymbolKind.Event:
+					case SymbolKind.Field:
+					case SymbolKind.Local:
+					case SymbolKind.Method:
+					case SymbolKind.NamedType:
+					case SymbolKind.Property:
+						RenderOrdinaryComment(symbol, tip);
+						break;
 				}
 			}
 			#endregion
@@ -192,6 +206,43 @@ namespace Codist
 			}
 			#endregion
 			return tip;
+		}
+
+		static void RenderOrdinaryComment(ISymbol symbol, ThemedTipDocument tip) {
+			var refs = symbol.DeclaringSyntaxReferences;
+			if (refs.Length == 0) {
+				return;
+			}
+			var node = refs[0].SyntaxTree.GetCompilationUnitRoot().FindNode(refs[0].Span);
+			string t = null;
+			SeparatedSyntaxList<VariableDeclaratorSyntax> variables;
+			int variableIndex;
+			SyntaxToken separatorAfterNode;
+			do {
+			FIND_COMMENT:
+				if (node.HasLeadingTrivia && (t = node.GetLeadingTrivia().GetCommentContent()) != null
+					|| node.HasTrailingTrivia && (t = node.GetTrailingTrivia().GetCommentContent()) != null) {
+					break;
+				}
+				// use comment behind variable separator for multi-variable declarations:
+				// int x = 1, // comment for x
+				//   y = 2; // comment for y
+				if (node.IsKind(SyntaxKind.VariableDeclarator)
+					&& node.Parent is VariableDeclarationSyntax v) {
+					if ((variables = v.Variables).Count > 1
+						&& (variableIndex = variables.IndexOf((VariableDeclaratorSyntax)node)) < variables.SeparatorCount
+						&& (separatorAfterNode = variables.GetSeparator(variableIndex)).HasTrailingTrivia
+						&& (t = separatorAfterNode.TrailingTrivia.GetCommentContent()) != null) {
+						break;
+					}
+					node = v;
+					goto FIND_COMMENT;
+				}
+			} while (node.IsKind(SyntaxKind.VariableDeclaration)
+				&& (node = node.Parent) != null);
+			if (t != null) {
+				tip.Append(new ThemedTipParagraph(IconIds.Comment, new ThemedTipText(t)));
+			}
 		}
 
 		public void Render(XElement content, TextBlock text) {

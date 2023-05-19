@@ -149,7 +149,7 @@ namespace TestProject
 			var l = Convert<int, long>(1);
 			var i = Convert<long, int>(l);
 			// Hover to test the display of anonymous type as type arguments
-			Print(new { a = 1, b = 2, c = 3, d = new { x = 1, y = 2 } }, new { X = 1, Y = new Dictionary<int, int>() });
+			Print(new { a = 1, b = 2, c = 3, d = new { x = 1, y = l } }, new { X = 1, Y = new Dictionary<int, int>() });
 			var c = new Complex(1, 2) + new Complex(2, 3) < new Complex(3, 4) << 1;
 		}
 

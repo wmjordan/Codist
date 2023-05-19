@@ -2516,4 +2516,10 @@ Ctrl: 仅匹配当前类，不匹配其它派生类或继承类</value>
   <data name="CMD_ListSymbolLocations" xml:space="preserve">
     <value>列出定义符号的位置...</value>
   </data>
+  <data name="OT_UseOrdinaryComment" xml:space="preserve">
+    <value>显示普通注释</value>
+  </data>
+  <data name="OT_UseOrdinaryCommentTip" xml:space="preserve">
+    <value>显示代码声明前后的普通注释文本</value>
+  </data>
 </root>

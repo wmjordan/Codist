@@ -10,6 +10,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Text;
+using Microsoft.VisualStudio.Utilities;
 
 namespace Codist
 {
@@ -1442,6 +1443,67 @@ namespace Codist
 					return true;
 			}
 			return false;
+		}
+		static readonly char[] __SplitLineChars = new char[] { '\r', '\n' };
+		public static string GetCommentContent(this SyntaxTriviaList trivias) {
+			using (var rsb = ReusableStringBuilder.AcquireDefault(100)) {
+				var sb = rsb.Resource;
+				bool hasLineBreak = false;
+				foreach (var item in trivias) {
+					switch ((SyntaxKind)item.RawKind) {
+						case SyntaxKind.EndOfLineTrivia:
+							if (sb.Length != 0) {
+								hasLineBreak = true;
+							}
+							break;
+						case SyntaxKind.SingleLineCommentTrivia:
+							if (hasLineBreak) {
+								sb.AppendLine();
+							}
+							var t = item.ToString();
+							if (t.Length > 2 && t[2] == ' ') {
+								sb.Append(t, 3, t.Length - 3);
+							}
+							else {
+								sb.Append(t, 2, t.Length - 2);
+							}
+							break;
+						case SyntaxKind.MultiLineCommentTrivia:
+							if (hasLineBreak) {
+								sb.AppendLine();
+					}
+							AppendMultilineComment(sb, item.ToString());
+							break;
+				}
+				}
+				return sb.Length != 0 ? sb.ToString() : null;
+			}
+
+			void AppendMultilineComment(System.Text.StringBuilder sb, string t) {
+				int i = 2, // skip leading "/*"
+					l = t.Length - 2; // drop trailing "*/"
+				while (true) {
+					var p = t.IndexOfAny(__SplitLineChars, i);
+					if (i > 2) {
+						sb.AppendLine();
+					}
+					while (i < l) {
+						if (Char.IsWhiteSpace(t[i])) {
+							++i;
+						}
+						else {
+							break;
+						}
+					}
+					if (p == -1) {
+						sb.Append(t, i, l - i);
+						break;
+					}
+					sb.Append(t, i, p - i);
+					i = (t[p] == '\r' && p + 1 < l && t[p + 1] == '\n' ? 2 : 1)
+						+ p;
+				}
+			}
 		}
 
 		public static SyntaxNode UnqualifyExceptNamespace(this SyntaxNode node) {

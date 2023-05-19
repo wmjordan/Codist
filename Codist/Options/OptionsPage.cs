@@ -279,7 +279,7 @@ namespace Codist.Options
 		sealed class PageControl : OptionsPageContainer
 		{
 			readonly OptionBox<QuickInfoOptions> _DisableUntilShift, _CtrlSuppress, _Selection, _Color;
-			readonly OptionBox<QuickInfoOptions> _OverrideDefaultDocumentation, _DocumentationFromBaseType, _DocumentationFromInheritDoc, _TextOnlyDoc, _ReturnsDoc, _RemarksDoc, _ExceptionDoc, _SeeAlsoDoc, _ExampleDoc, _AlternativeStyle, _ContainingType, _CodeFontForXmlDocSymbol;
+			readonly OptionBox<QuickInfoOptions> _OverrideDefaultDocumentation, _DocumentationFromBaseType, _DocumentationFromInheritDoc, _TextOnlyDoc, _OrdinaryDoc, _ReturnsDoc, _RemarksDoc, _ExceptionDoc, _SeeAlsoDoc, _ExampleDoc, _AlternativeStyle, _ContainingType, _CodeFontForXmlDocSymbol;
 			readonly OptionBox<QuickInfoOptions> _NodeRange, _Attributes, _BaseType, _Declaration, _SymbolLocation, _Interfaces, _NumericValues, _String, _Parameter, _InterfaceImplementations, _TypeParameters, _NamespaceTypes, _MethodOverload, _InterfaceMembers, _EnumMembers;
 			readonly OptionBox<QuickInfoOptions>[] _Options;
 			readonly Controls.IntegerBox _MaxWidth, _MaxHeight, _ExtraHeight;
@@ -352,6 +352,8 @@ namespace Codist.Options
 						.SetLazyToolTip(() => R.OT_ShowExampleXmlDocTip),
 					_TextOnlyDoc = o.CreateOptionBox(QuickInfoOptions.TextOnlyDoc, UpdateConfig, R.OT_TextOnlyXmlDoc)
 						.SetLazyToolTip(() => R.OT_TextOnlyXmlDocTip),
+					_OrdinaryDoc = o.CreateOptionBox(QuickInfoOptions.OrdinaryCommentDoc, UpdateConfig, R.OT_UseOrdinaryComment)
+						.SetLazyToolTip(() => R.OT_UseOrdinaryCommentTip),
 					_ContainingType = o.CreateOptionBox(QuickInfoOptions.ContainingType, UpdateConfig, R.OT_ShowSeeContainingType)
 						.SetLazyToolTip(() => R.OT_ShowSeeContainingTypeTip),
 					_CodeFontForXmlDocSymbol = o.CreateOptionBox(QuickInfoOptions.UseCodeFontForXmlDocSymbol, UpdateConfig, R.OT_UseCodeEditorFontForSee)
@@ -391,10 +393,10 @@ namespace Codist.Options
 				_MaxWidth.ValueChanged += UpdateQuickInfoSize;
 				_ExtraHeight.ValueChanged += UpdateQuickInfoSize;
 				_Options = new[] { _DisableUntilShift, _CtrlSuppress, _Selection, _Color, _OverrideDefaultDocumentation, _DocumentationFromBaseType, _DocumentationFromInheritDoc, _TextOnlyDoc, _ReturnsDoc, _RemarksDoc, _ExceptionDoc, _SeeAlsoDoc, _ExampleDoc, _AlternativeStyle, _ContainingType, _CodeFontForXmlDocSymbol, _Attributes, _BaseType, _Declaration, _EnumMembers, _SymbolLocation, _Interfaces, _NumericValues, _String, _Parameter, _InterfaceImplementations, _TypeParameters, /*_NamespaceTypes, */_MethodOverload, _InterfaceMembers };
-				foreach (var item in new[] { _DocumentationFromBaseType, _DocumentationFromInheritDoc, _TextOnlyDoc, _ReturnsDoc, _RemarksDoc, _ExceptionDoc, _SeeAlsoDoc, _ExampleDoc, _ContainingType, _CodeFontForXmlDocSymbol }) {
+				foreach (var item in new[] { _DocumentationFromBaseType, _DocumentationFromInheritDoc, _TextOnlyDoc, _OrdinaryDoc, _ReturnsDoc, _RemarksDoc, _ExceptionDoc, _SeeAlsoDoc, _ExampleDoc, _ContainingType, _CodeFontForXmlDocSymbol }) {
 					item.WrapMargin(SubOptionMargin);
 				}
-				_OverrideDefaultDocumentation.BindDependentOptionControls(_DocumentationFromBaseType, _DocumentationFromInheritDoc, _TextOnlyDoc, _ReturnsDoc, _RemarksDoc, _ExceptionDoc, _SeeAlsoDoc, _ExampleDoc, _ContainingType, _CodeFontForXmlDocSymbol);
+				_OverrideDefaultDocumentation.BindDependentOptionControls(_DocumentationFromBaseType, _DocumentationFromInheritDoc, _TextOnlyDoc, _OrdinaryDoc, _ReturnsDoc, _RemarksDoc, _ExceptionDoc, _SeeAlsoDoc, _ExampleDoc, _ContainingType, _CodeFontForXmlDocSymbol);
 				_BackgroundButton.DefaultColor = () => ThemeHelper.ToolTipBackgroundBrush.Color;
 				_BackgroundButton.Color = Config.Instance.QuickInfo.BackColor;
 			}

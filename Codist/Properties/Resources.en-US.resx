@@ -2531,4 +2531,10 @@ Ctrl: Match current symbol only, excluding base or derived symbols</value>
   <data name="CMD_ListSymbolLocations" xml:space="preserve">
     <value>List Symbol Locations...</value>
   </data>
+  <data name="OT_UseOrdinaryComment" xml:space="preserve">
+    <value>Show ordinary comment</value>
+  </data>
+  <data name="OT_UseOrdinaryCommentTip" xml:space="preserve">
+    <value>Displays ordinary comment around declaration</value>
+  </data>
 </root>
