@@ -1007,31 +1007,28 @@ namespace Codist
 			var line = startLine;
 			var n = startLine.LineNumber;
 			var endLineNumber = endLine.LineNumber;
+			SnapshotSpan extent;
+			int lineStart, indentStart, p;
 			using (var b = ReusableStringBuilder.AcquireDefault(512)) {
 				var sb = b.Resource;
 				while (true) {
 					if (line.Extent.IsEmpty) {
 						spans.Add(line.Extent);
 					}
-					else if (line.Length < indentation) {
-						int i = line.Start.Position;
-						for (; i < line.Length; i++) {
-							while (i < endOfSelection && snapshot[i].IsCodeWhitespaceChar()) {
-								++i;
-							}
-						}
-						if (i >= endOfSelection) {
-							break;
-						}
-						var extent = new SnapshotSpan(snapshot, Span.FromBounds(i, line.End));
-						spans.Add(extent);
-						sb.Append(extent.GetText().TrimEnd());
-					}
 					else {
-						if (line.Start.Position + indentation >= endOfSelection) {
+						lineStart = line.Start.Position;
+						indentStart = p = lineStart + Math.Min(line.Length - 1, indentation);
+						while (p > lineStart) {
+							if (snapshot[p].IsCodeWhitespaceChar() == false) {
+								indentStart = p;
+								break;
+							}
+							--p;
+						}
+						if (indentStart >= endOfSelection) {
 							break;
 						}
-						var extent = new SnapshotSpan(snapshot, Span.FromBounds(line.Start.Position + indentation, Math.Min(line.End.Position, endOfSelection)));
+						extent = new SnapshotSpan(snapshot, Span.FromBounds(indentStart, line.End));
 						spans.Add(extent);
 						sb.Append(extent.GetText().TrimEnd());
 					}
