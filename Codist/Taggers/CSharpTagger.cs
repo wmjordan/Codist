@@ -114,6 +114,11 @@ namespace Codist.Taggers
 					var lastTriviaSpan = default(TextSpan);
 					SyntaxNode node;
 					TagSpan<IClassificationTag> tag = null;
+					var r = GetAttributeNotationSpan(snapshot, textSpan, compilationUnit);
+					if (r != null) {
+						tags.Add(r);
+					}
+
 					foreach (var item in classifiedSpans) {
 						var ct = item.ClassificationType;
 						switch (ct) {
@@ -160,6 +165,20 @@ namespace Codist.Taggers
 					}
 				}
 				return tags;
+			}
+
+			static TagSpan<IClassificationTag> GetAttributeNotationSpan(ITextSnapshot snapshot, TextSpan textSpan, CompilationUnitSyntax unitCompilation) {
+				var spanNode = unitCompilation.FindNode(textSpan, true, false);
+				if (spanNode.HasLeadingTrivia && spanNode.GetLeadingTrivia().FullSpan.Contains(textSpan)) {
+					return null;
+				}
+				switch (spanNode.Kind()) {
+					case SyntaxKind.AttributeArgument:
+					//case SyntaxKind.AttributeList:
+					case SyntaxKind.AttributeArgumentList:
+						return CreateClassificationSpan(snapshot, textSpan, __Classifications.AttributeNotation);
+				}
+				return null;
 			}
 
 			static TagSpan<IClassificationTag> ClassifyDeclarationKeyword(TextSpan itemSpan, ITextSnapshot snapshot, SyntaxNode node, CompilationUnitSyntax unitCompilation, out TagSpan<IClassificationTag> secondaryTag) {
