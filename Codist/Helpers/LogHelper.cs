@@ -17,7 +17,20 @@ namespace Codist
 		static string __Path;
 		public static string LogPath {
 			get => __Path;
-			set => __Path = File.Exists(value) ? value : null;
+			set {
+				if (File.Exists(value) == false) {
+					try {
+						File.CreateText(value);
+					}
+					catch (SystemException ex) {
+						// ignore
+						Debug.WriteLine(ex);
+						__Path = null;
+						return;
+					}
+				}
+				__Path = value;
+			}
 		}
 
 		[Conditional("LOG")]
@@ -55,13 +68,20 @@ namespace Codist
 		[Conditional("LOG")]
 		[Conditional("DEBUG")]
 		public static void ClearLog() {
-			if (File.Exists(LogPath)) {
-				try {
-					File.WriteAllText(LogPath, String.Empty);
-				}
-				catch (SystemException) {
-					// ignore
-				}
+			if (File.Exists(LogPath) == false) {
+				return;
+			}
+			while (Interlocked.CompareExchange(ref __Sync, 1, 0) != 0) {
+				SpinWait.SpinUntil(() => Volatile.Read(ref __Sync) == 0);
+			}
+			try {
+				File.WriteAllText(LogPath, String.Empty);
+			}
+			catch (SystemException) {
+				// ignore
+			}
+			finally {
+				Volatile.Write(ref __Sync, 0);
 			}
 		}
 	}
