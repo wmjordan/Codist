@@ -205,6 +205,7 @@ namespace Codist.SyntaxHighlight
 			readonly Stack<string> _Formatters = new Stack<string>();
 			FormatContext _Context;
 			Color _EditorBackground;
+			Typeface _DefaultTypeface;
 			double _DefaultFontSize;
 			int _Lock;
 
@@ -213,6 +214,7 @@ namespace Codist.SyntaxHighlight
 				_EditorFormatMap = editorFormatMap;
 				_ClassificationFormatMap = classificationFormatMap;
 				_DefaultFontSize = classificationFormatMap.DefaultTextProperties.FontRenderingEmSize;
+				_DefaultTypeface = classificationFormatMap.DefaultTextProperties.Typeface;
 				_EditorBackground = editorFormatMap.GetProperties(Constants.EditorProperties.TextViewBackground).GetBackgroundColor();
 			}
 
@@ -298,9 +300,53 @@ namespace Codist.SyntaxHighlight
 			public void SubscribeFormatMappingChanges() {
 				_EditorFormatMap.FormatMappingChanged -= EditorFormatMappingChanged;
 				_EditorFormatMap.FormatMappingChanged += EditorFormatMappingChanged;
+				_ClassificationFormatMap.ClassificationFormatMappingChanged -= ClassificationFormatMappingChanged;
+				_ClassificationFormatMap.ClassificationFormatMappingChanged += ClassificationFormatMappingChanged;
 			}
 			public void UnsubscribeFormatMappingChanges() {
 				_EditorFormatMap.FormatMappingChanged -= EditorFormatMappingChanged;
+				_ClassificationFormatMap.ClassificationFormatMappingChanged -= ClassificationFormatMappingChanged;
+			}
+
+			void ClassificationFormatMappingChanged(object sender, EventArgs e) {
+				var currentTypeface = _ClassificationFormatMap.DefaultTextProperties.Typeface;
+				if (currentTypeface != _DefaultTypeface) {
+					$"[{_Category}] default font changed".Log();
+					UpdateDefaultTypeface(currentTypeface);
+				}
+			}
+
+			// VS somehow fails to update some formats after editor font changes
+			// This method compensates the missing ones
+			void UpdateDefaultTypeface(Typeface currentTypeface) {
+				_Formatters.Push("DefaultFontChangedEvent");
+				_Lock++;
+				_Context = FormatContext.Event;
+				var startedBatch = false;
+				var defaultFontFamily = _DefaultTypeface.FontFamily;
+				if (_EditorFormatMap.IsInBatchUpdate == false) {
+					_EditorFormatMap.BeginBatchUpdate();
+					startedBatch = true;
+				}
+				try {
+					foreach (var item in _Traces) {
+						var p = _EditorFormatMap.GetProperties(item.Key);
+						if (p.GetTypeface()?.FontFamily.Equals(defaultFontFamily) == true
+							&& item.Value.Changes.GetTypeface() == null) {
+							p.SetTypeface(currentTypeface);
+							_EditorFormatMap.SetProperties(item.Key, p);
+						}
+					}
+				}
+				finally {
+					_Context = FormatContext.None;
+					if (startedBatch) {
+						_EditorFormatMap.EndBatchUpdate();
+					}
+					_Formatters.Pop();
+					_Lock--;
+				}
+				_DefaultTypeface = currentTypeface;
 			}
 
 			void EditorFormatMappingChanged(object sender, FormatItemsEventArgs e) {
@@ -575,7 +621,7 @@ namespace Codist.SyntaxHighlight
 					ChangeOpacity(current, style);
 					ChangeBackgroundOpacity(current, style);
 					ChangeFontSize(current, style, highlighter);
-					ChangeTypeface(current, style);
+					ChangeTypeface(current, style, highlighter);
 					ChangeTextDecorations(current, style);
 					return _FormatChanges;
 				}
@@ -716,11 +762,13 @@ namespace Codist.SyntaxHighlight
 					}
 				}
 
-				void ChangeTypeface(ResourceDictionary current, StyleBase style) {
+				void ChangeTypeface(ResourceDictionary current, StyleBase style, Highlighter highlighter) {
 					Typeface ct;
 					if (style != null && String.IsNullOrEmpty(style.Font) == false) {
 						ct = style.MakeTypeface();
-						if (ct != null && AreTypefaceEqual(current.GetTypeface(), ct) == false) {
+						if (ct != null
+							&& AreTypefaceEqual(current.GetTypeface(), ct) == false
+							&& AreTypefaceEqual(current.GetTypeface(), highlighter._DefaultTypeface) == false) {
 							_FormatChanges |= FormatChanges.Typeface;
 							Changes.SetTypeface(ct);
 							current.SetTypeface(ct);
