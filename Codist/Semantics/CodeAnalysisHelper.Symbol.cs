@@ -773,7 +773,7 @@ namespace Codist
 		}
 
 		public static INamespaceSymbol GetCompilationNamespace(this INamespaceSymbol namespaceSymbol, SemanticModel semanticModel) {
-			return semanticModel.Compilation.GetCompilationNamespace(namespaceSymbol);
+			return semanticModel.Compilation.GetCompilationNamespace(namespaceSymbol) ?? namespaceSymbol;
 		}
 
 		public static string GetTypeName(this ITypeSymbol symbol) {
