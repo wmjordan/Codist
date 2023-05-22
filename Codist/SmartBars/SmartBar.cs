@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -11,9 +12,8 @@ using AppHelpers;
 using Codist.Controls;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Operations;
-using VsBrushes = Microsoft.VisualStudio.Shell.VsBrushes;
 using TH = Microsoft.VisualStudio.Shell.ThreadHelper;
-using System.Diagnostics.CodeAnalysis;
+using VsBrushes = Microsoft.VisualStudio.Shell.VsBrushes;
 
 namespace Codist.SmartBars
 {
@@ -402,7 +402,6 @@ namespace Codist.SmartBars
 
 		sealed class CommandButton : Button, IDisposable
 		{
-			const string RightClickTag = "RightClick", LeftClickTag = "LeftClick";
 			SmartBar _Bar;
 			Action<CommandContext> _ClickHandler;
 			Func<CommandContext, Task> _AsyncClickHandler;
@@ -445,13 +444,12 @@ namespace Codist.SmartBars
 					}
 				}
 				else {
-					if (ContextMenu?.Tag as string == LeftClickTag) {
+					if (ContextMenu != null && ContextMenu.GetIsRightClicked() == false) {
 						ContextMenu.IsOpen = true;
 						return;
 					}
 					ClearContextMenu();
 					var m = CreateContextMenuFromMenuFactory(ctx);
-					m.Tag = LeftClickTag;
 				}
 				if (_Bar != null && ctx.KeepToolBarOnClick == false && ContextMenu?.IsOpen != true) {
 					_Bar.HideToolBar();
@@ -460,7 +458,7 @@ namespace Codist.SmartBars
 
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void CommandButton_MouseRightButtonUp(object sender, MouseButtonEventArgs e) {
-				if (ContextMenu?.Tag as string == RightClickTag) {
+				if (ContextMenu != null && ContextMenu.GetIsRightClicked()) {
 					ContextMenu.IsOpen = true;
 					e.Handled = true;
 					return;
@@ -472,7 +470,7 @@ namespace Codist.SmartBars
 				if (_MenuFactory != null) {
 					ClearContextMenu();
 					var m = CreateContextMenuFromMenuFactory(ctx);
-					m.Tag = RightClickTag;
+					m.SetIsRightClicked();
 				}
 				else if ((clickHandler = _ClickHandler) != null) {
 					clickHandler(ctx);

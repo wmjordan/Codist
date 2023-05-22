@@ -527,16 +527,17 @@ namespace Codist.SmartBars
 			return r;
 		}
 
+		static readonly ExtensionProperty<MenuItem, ClassificationTag> __ClassificationTag = ExtensionProperty<MenuItem, ClassificationTag>.Register("ClassificationTag");
 		void AddHighlightMenuItems(MenuItem menuItem) {
-			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(IconIds.MarkSymbol, R.CMD_Highlight + " 1", item => item.Tag = __HighlightClassifications.Highlight1, SetSymbolMark)));
-			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(IconIds.MarkSymbol, R.CMD_Highlight + " 2", item => item.Tag = __HighlightClassifications.Highlight2, SetSymbolMark)));
-			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(IconIds.MarkSymbol, R.CMD_Highlight + " 3", item => item.Tag = __HighlightClassifications.Highlight3, SetSymbolMark)));
-			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(IconIds.MarkSymbol, R.CMD_Highlight + " 4", item => item.Tag = __HighlightClassifications.Highlight4, SetSymbolMark)));
-			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(IconIds.MarkSymbol, R.CMD_Highlight + " 5", item => item.Tag = __HighlightClassifications.Highlight5, SetSymbolMark)));
-			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(IconIds.MarkSymbol, R.CMD_Highlight + " 6", item => item.Tag = __HighlightClassifications.Highlight6, SetSymbolMark)));
-			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(IconIds.MarkSymbol, R.CMD_Highlight + " 7", item => item.Tag = __HighlightClassifications.Highlight7, SetSymbolMark)));
-			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(IconIds.MarkSymbol, R.CMD_Highlight + " 8", item => item.Tag = __HighlightClassifications.Highlight8, SetSymbolMark)));
-			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(IconIds.MarkSymbol, R.CMD_Highlight + " 9", item => item.Tag = __HighlightClassifications.Highlight9, SetSymbolMark)));
+			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(IconIds.MarkSymbol, R.CMD_Highlight + " 1", item => __ClassificationTag.Set(item, __HighlightClassifications.Highlight1), SetSymbolMark)));
+			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(IconIds.MarkSymbol, R.CMD_Highlight + " 2", item => __ClassificationTag.Set(item, __HighlightClassifications.Highlight2), SetSymbolMark)));
+			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(IconIds.MarkSymbol, R.CMD_Highlight + " 3", item => __ClassificationTag.Set(item, __HighlightClassifications.Highlight3), SetSymbolMark)));
+			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(IconIds.MarkSymbol, R.CMD_Highlight + " 4", item => __ClassificationTag.Set(item, __HighlightClassifications.Highlight4), SetSymbolMark)));
+			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(IconIds.MarkSymbol, R.CMD_Highlight + " 5", item => __ClassificationTag.Set(item, __HighlightClassifications.Highlight5), SetSymbolMark)));
+			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(IconIds.MarkSymbol, R.CMD_Highlight + " 6", item => __ClassificationTag.Set(item, __HighlightClassifications.Highlight6), SetSymbolMark)));
+			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(IconIds.MarkSymbol, R.CMD_Highlight + " 7", item => __ClassificationTag.Set(item, __HighlightClassifications.Highlight7), SetSymbolMark)));
+			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(IconIds.MarkSymbol, R.CMD_Highlight + " 8", item => __ClassificationTag.Set(item, __HighlightClassifications.Highlight8), SetSymbolMark)));
+			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(IconIds.MarkSymbol, R.CMD_Highlight + " 9", item => __ClassificationTag.Set(item, __HighlightClassifications.Highlight9), SetSymbolMark)));
 		}
 
 		void SetSymbolMark(CommandContext context) {
@@ -547,7 +548,7 @@ namespace Codist.SmartBars
 				&& _Symbol is IMethodSymbol ctor && ctor.MethodKind == MethodKind.Constructor) {
 				_Symbol = ctor.ContainingType;
 			}
-			Taggers.SymbolMarkManager.Update(_Symbol, context.Sender.Tag as ClassificationTag);
+			Taggers.SymbolMarkManager.Update(_Symbol, __ClassificationTag.Get((MenuItem)context.Sender));
 			Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
 		}
 

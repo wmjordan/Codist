@@ -32,7 +32,7 @@ namespace Codist.QuickInfo
 
 	static class QuickInfoOverride
 	{
-		static readonly object __CodistQuickInfoItem = new object();
+		static readonly ExtensionProperty<FrameworkElement, bool> __CodistQuickInfo = ExtensionProperty<FrameworkElement, bool>.Register("IsCodistQuickInfoItem");
 
 		public static IQuickInfoOverride CreateOverride(IAsyncQuickInfoSession session) {
 			return session.GetOrCreateSingletonProperty<DefaultOverride>();
@@ -40,12 +40,12 @@ namespace Codist.QuickInfo
 
 		public static TObj Tag<TObj>(this TObj obj)
 			where TObj : FrameworkElement {
-			obj.Tag = __CodistQuickInfoItem;
+			__CodistQuickInfo.Set(obj, true);
 			return obj;
 		}
 
 		static bool IsCodistQuickInfoItem(this FrameworkElement quickInfoItem) {
-			return quickInfoItem.Tag == __CodistQuickInfoItem;
+			return __CodistQuickInfo.Get(quickInfoItem);
 		}
 
 		public static bool CheckCtrlSuppression() {

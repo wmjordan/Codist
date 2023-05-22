@@ -499,6 +499,11 @@ namespace Codist
 			setter(obj, value);
 			return obj;
 		}
+		public static TDependencyObject SetProperty<TDependencyObject>(this TDependencyObject owner, DependencyProperty property, object value)
+			where TDependencyObject : DependencyObject {
+			owner.SetValue(property, value);
+			return owner;
+		}
 
 		public static TElement HandleEvent<TElement>(this TElement control, RoutedEvent routedEvent, RoutedEventHandler handler) where TElement : UIElement {
 			control.AddHandler(routedEvent, handler);

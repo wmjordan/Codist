@@ -493,7 +493,7 @@ namespace Codist.Options
 			if (t == null) {
 				return null;
 			}
-			return new StyleSettingsButton(c, t, OnSelectTag) { Text = label.Label, Tag = label, ToolTip = label.Label };
+			return new StyleSettingsButton(c, t, OnSelectTag) { Text = label.Label, ToolTip = label.Label }.SetProperty(StyleSettingsButton.LabelProperty, label);
 
 			CommentStyle FindCommentStyle(CommentLabel cl) {
 				var styleId = cl.StyleID;
@@ -657,7 +657,7 @@ namespace Codist.Options
 				_Notice.Visibility = Visibility.Collapsed;
 			}
 			_SelectedStyleButton = b;
-			var t = _SelectedCommentTag = b.Tag as CommentLabel;
+			var t = _SelectedCommentTag = StyleSettingsButton.LabelProperty.Get(b);
 			try {
 				_Lock.Lock();
 				_TagBox.Text = t.Label;
@@ -1143,6 +1143,8 @@ namespace Codist.Options
 
 		sealed class StyleSettingsButton : Button
 		{
+			public static readonly ExtensionProperty<StyleSettingsButton, CommentLabel> LabelProperty = ExtensionProperty<StyleSettingsButton, CommentLabel>.Register("CommentLabel");
+
 			readonly CheckBox _Selector;
 			readonly TextBlock _Preview;
 			readonly IClassificationType _Classification;
@@ -1279,6 +1281,7 @@ namespace Codist.Options
 
 		sealed class FontButton : Button
 		{
+			static readonly ExtensionProperty<ThemedMenuItem, string> __InstalledFontNameProperty = ExtensionProperty<ThemedMenuItem, string>.Register("InstalledFontName");
 			readonly Action<string> _FontChangedHandler;
 			string _Font;
 
@@ -1286,8 +1289,9 @@ namespace Codist.Options
 				_FontChangedHandler = fontChanged;
 				Content = R.T_NotSet;
 			}
+
 			public string Value {
-				get => _Font as string;
+				get => _Font;
 				set {
 					if (_Font != value) {
 						_Font = value;
@@ -1296,6 +1300,7 @@ namespace Codist.Options
 					}
 				}
 			}
+
 			protected override void OnClick() {
 				base.OnClick();
 				if (ContextMenu == null) {
@@ -1305,8 +1310,8 @@ namespace Codist.Options
 						Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom,
 						PlacementTarget = this,
 						MinWidth = ActualWidth,
-						ItemsSource = new[] { new ThemedMenuItem(-1, R.T_NotSet, SetFont) { Tag = null } }
-							.Concat(WpfHelper.GetInstalledFonts().Select(f => new ThemedMenuItem(-1, f.Name, SetFont) { Tag = f.Name }))
+						ItemsSource = new[] { new ThemedMenuItem(-1, R.T_NotSet, SetFont).SetProperty(__InstalledFontNameProperty, null) }
+							.Concat(WpfHelper.GetInstalledFonts().Select(f => new ThemedMenuItem(-1, f.Name, SetFont).SetProperty(__InstalledFontNameProperty, f.Name)))
 					};
 					ContextMenu.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 				}
@@ -1315,11 +1320,11 @@ namespace Codist.Options
 
 			void SetFont(object sender, RoutedEventArgs e) {
 				var m = e.Source as ThemedMenuItem;
-				var prev = ContextMenu.Items.GetFirst<ThemedMenuItem>(i => i.Tag as string == Value);
+				var prev = ContextMenu.Items.GetFirst<ThemedMenuItem>(i => __InstalledFontNameProperty.Get(i) == Value);
 				if (prev != m) {
 					prev?.Highlight(false);
 					m.Highlight(true);
-					Value = m.Tag as string;
+					Value = __InstalledFontNameProperty.Get(m);
 				}
 			}
 		}
@@ -1358,6 +1363,7 @@ namespace Codist.Options
 
 		sealed class OpacityButton : Button
 		{
+			static readonly ExtensionProperty<ThemedMenuItem, int> __OpacityValueProperty = ExtensionProperty<ThemedMenuItem, int>.Register("OpacityValue");
 			readonly Action<byte> _OpacityChangedHandler;
 			byte _Opacity;
 
@@ -1375,13 +1381,14 @@ namespace Codist.Options
 					Content = value == 0 ? R.T_OpacityNotSet : R.T_Opacity + ((value + 1) / 16).ToString();
 				}
 			}
+
 			protected override void OnClick() {
 				base.OnClick();
 				if (ContextMenu == null) {
 					ContextMenu = new ContextMenu {
 						Resources = SharedDictionaryManager.ContextMenu,
 						Items = {
-							new ThemedMenuItem(IconIds.Opacity, R.T_Default, SelectOpacity) { Tag = 0 },
+							SetOpacityValue(new ThemedMenuItem(IconIds.Opacity, R.T_Default, SelectOpacity), 0),
 						},
 						MaxHeight = 300,
 						Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom,
@@ -1390,7 +1397,7 @@ namespace Codist.Options
 					ContextMenu.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 					var items = new ThemedMenuItem[16];
 					for (int i = 16; i > 0; i--) {
-						items[16 - i] = new ThemedMenuItem(IconIds.None, i.ToString(), SelectOpacity) { Tag = i * 16 - 1 };
+						items[16 - i] = SetOpacityValue(new ThemedMenuItem(IconIds.None, i.ToString(), SelectOpacity), i * 16 - 1);
 					}
 					ContextMenu.Items.AddRange(items);
 				}
@@ -1398,8 +1405,13 @@ namespace Codist.Options
 				ContextMenu.IsOpen = true;
 			}
 
+			static ThemedMenuItem SetOpacityValue(ThemedMenuItem item, int value) {
+				__OpacityValueProperty.Set(item, value);
+				return item;
+			}
+
 			void SelectOpacity(object sender, RoutedEventArgs e) {
-				var v = (byte)(int)(e.Source as FrameworkElement).Tag;
+				var v = (byte)__OpacityValueProperty.Get(e.Source as ThemedMenuItem);
 				if (Value != v) {
 					CheckMenuItem(Value, false);
 					CheckMenuItem(v, true);

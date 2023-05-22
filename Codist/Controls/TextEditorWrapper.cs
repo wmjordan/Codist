@@ -10,7 +10,7 @@ namespace Codist.Controls
 	// https://stackoverflow.com/questions/136435/any-way-to-make-a-wpf-textblock-selectable
 	sealed class TextEditorWrapper
 	{
-		static readonly DependencyProperty __SelectableProperty = DependencyProperty.Register("IsSelectable", typeof(bool), typeof(TextBlock));
+		static readonly ExtensionProperty<FrameworkElement, bool> __SelectableProperty = ExtensionProperty<FrameworkElement, bool>.Register("IsSelectable");
 		static readonly Type __TextEditorType = Type.GetType("System.Windows.Documents.TextEditor, PresentationFramework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35");
 		static readonly PropertyInfo __IsReadOnlyProp = __TextEditorType?.GetProperty("IsReadOnly", BindingFlags.Instance | BindingFlags.NonPublic);
 		static readonly PropertyInfo __TextViewProp = __TextEditorType?.GetProperty("TextView", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -51,7 +51,7 @@ namespace Codist.Controls
 			if (__IsInitialized == false) {
 				return null;
 			}
-			if (text.GetValue(__SelectableProperty) is bool b && b) {
+			if (__SelectableProperty.Get(text)) {
 				return null;
 			}
 			text.Focusable = true;
@@ -59,7 +59,7 @@ namespace Codist.Controls
 			var editor = new TextEditorWrapper(textContainer, text, false);
 			__IsReadOnlyProp.SetValue(editor._Editor, true);
 			__TextViewProp.SetValue(editor._Editor, __TextContainerTextViewProp.GetValue(textContainer));
-			text.SetValue(__SelectableProperty, true);
+			__SelectableProperty.Set(text, true);
 			return editor;
 		}
 
@@ -104,8 +104,7 @@ namespace Codist.Controls
 				m.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 				var newItem = new ThemedMenuItem {
 					Icon = ThemeHelper.GetImage(IconIds.Copy),
-					Header = R.CMD_CopySelection,
-					Tag = "Copy"
+					Header = R.CMD_CopySelection
 				};
 				newItem.Click += HandleMouseCopy;
 				m.Items.Add(newItem);
@@ -120,15 +119,15 @@ namespace Codist.Controls
 			var m = new ThemedMenuItem {
 				Icon = ThemeHelper.GetImage(IconIds.SearchWebSite),
 				Header = R.CMD_SearchWith.Replace("<NAME>", s.Name),
-				Tag = s.Pattern
 			};
+			m.SetSearchUrlPattern(s.Pattern, null);
 			m.Click += HandleWebSearch;
 			return m;
 		}
 
 		void HandleWebSearch(object sender, RoutedEventArgs e) {
 			var s = sender as MenuItem;
-			ExternalCommand.OpenWithWebBrowser(s.Tag as string, __TextRangeTextProp.GetValue(__TextSelectionProp.GetValue(_Editor)) as string);
+			ExternalCommand.OpenWithWebBrowser(s.GetSearchUrl(), __TextRangeTextProp.GetValue(__TextSelectionProp.GetValue(_Editor)) as string);
 		}
 
 		void HandleContextMenuOpening(object sender, ContextMenuEventArgs e) {
@@ -183,7 +182,7 @@ namespace Codist.Controls
 					_UiScope.ContextMenu = null;
 				}
 				__TextViewProp.SetValue(_Editor, null);
-				_UiScope.ClearValue(__SelectableProperty);
+				__SelectableProperty.Clear(_UiScope);
 				_UiScope = null;
 				_Editor = null;
 			}

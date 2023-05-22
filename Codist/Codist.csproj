@@ -93,6 +93,7 @@
     <Compile Include="Commands\ToggleAutoBuildVersionCommand.cs" />
     <Compile Include="Commands\SyntaxCustomizerWindowCommand.cs" />
     <Compile Include="Commands\VersionInfoBar.cs" />
+    <Compile Include="Controls\ExtensionProperties.cs" />
     <Compile Include="Controls\OverlayElementRemovedEventArgs.cs" />
     <Compile Include="Controls\CommandToolTip.cs" />
     <Compile Include="Helpers\EventArgs.cs" />

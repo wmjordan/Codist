@@ -754,13 +754,19 @@ namespace Codist.Controls
 
 			CustomMenuItem CreateWebSearchCommand() {
 				var search = new CustomMenuItem(IconIds.SearchWebSite, R.OT_WebSearch);
-				var symbolName = _Symbol.Name;
+				var symbolName = _Symbol.GetOriginalName();
 				search.Items.AddRange(
-					Config.Instance.SearchEngines.ConvertAll(s => CreateItem(
-						IconIds.SearchWebSite,
-						R.CMD_SearchWith.Replace("<NAME>", s.Name),
-						(sender, args) => ExternalCommand.OpenWithWebBrowser(s.Pattern, symbolName))
-					)
+					Config.Instance.SearchEngines.ConvertAll(s => {
+						var item = CreateItem(
+							IconIds.SearchWebSite,
+							R.CMD_SearchWith.Replace("<NAME>", s.Name),
+							(sender, args) => {
+								var m = (MenuItem)sender;
+								ExternalCommand.OpenWithWebBrowser(m.GetSearchUrl(), m.GetSearchParameter());
+							});
+						item.SetSearchUrlPattern(s.Pattern, symbolName);
+						return item;
+					})
 				);
 				search.Items.Add(CreateItem(IconIds.CustomizeWebSearch, R.CMD_Customize, (sender, args) => CodistPackage.Instance.ShowOptionPage(typeof(Options.WebSearchPage)))
 					.SetLazyToolTip(() => new CommandToolTip(IconIds.CustomizeWebSearch, R.CMD_Customize + "\n" + R.CMDT_CustomizeSearchEngines))

@@ -24,6 +24,8 @@ namespace Codist.Controls
 {
 	class SymbolList : VirtualList, ISymbolFilterable, INotifyCollectionChanged, IDisposable
 	{
+		static readonly ExtensionProperty<MenuItem, ValueTuple<SymbolItem, Action<SymbolItem>>> __CommandAction = ExtensionProperty<MenuItem, ValueTuple<SymbolItem, Action<SymbolItem>>>.Register("CommandAction");
+		static readonly ExtensionProperty<FrameworkElement, FrameworkElement> __ToolTipSource = ExtensionProperty<FrameworkElement, FrameworkElement>.Register("ToolTipSource");
 		Predicate<object> _Filter;
 		readonly ToolTip _SymbolTip;
 		readonly List<SymbolItem> _Symbols;
@@ -326,11 +328,10 @@ namespace Codist.Controls
 
 		void SetupMenuCommand(SymbolItem item, int imageId, string title, Action<SymbolItem> action) {
 			var mi = new ThemedMenuItem(imageId, title, (s, args) => {
-				var (i, a) = (ValueTuple<SymbolItem, Action<SymbolItem>>)((MenuItem)s).Tag;
+				var (i, a) = __CommandAction.Get((MenuItem)s);
 				a(i);
-			}) {
-				Tag = (item, action)
-			};
+			});
+			__CommandAction.Set(mi, (item, action));
 			ContextMenu.Items.Add(mi);
 		}
 		#endregion
@@ -338,8 +339,8 @@ namespace Codist.Controls
 		#region Tool Tip
 		protected override void OnMouseEnter(MouseEventArgs e) {
 			base.OnMouseEnter(e);
-			if (_SymbolTip.Tag == null) {
-				_SymbolTip.Tag = DateTime.Now;
+			if (__ToolTipSource.Get(_SymbolTip) == null) {
+				__ToolTipSource.Set(_SymbolTip, this);
 				SizeChanged -= SizeChanged_RelocateToolTip;
 				MouseMove -= MouseMove_ChangeToolTip;
 				MouseLeave -= MouseLeave_HideToolTip;
@@ -393,13 +394,13 @@ namespace Codist.Controls
 		internal void HideToolTip() {
 			_SymbolTip.IsOpen = false;
 			_SymbolTip.Content = null;
-			_SymbolTip.Tag = null;
+			__ToolTipSource.Clear(_SymbolTip);
 		}
 
 		[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 		async void MouseMove_ChangeToolTip(object sender, MouseEventArgs e) {
 			var li = GetMouseEventTarget(e);
-			if (li != null && _SymbolTip.Tag != li) {
+			if (li != null && __ToolTipSource.Get(_SymbolTip) != li) {
 				await ShowToolTipForItemAsync(li);
 			}
 		}
@@ -412,7 +413,7 @@ namespace Codist.Controls
 		}
 
 		async Task ShowToolTipForItemAsync(ListBoxItem li) {
-			_SymbolTip.Tag = li;
+			__ToolTipSource.Set(_SymbolTip, li);
 			_SymbolTip.Content = await CreateItemToolTipAsync(li);
 			_SymbolTip.IsOpen = true;
 		}
