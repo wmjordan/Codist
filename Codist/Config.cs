@@ -773,8 +773,8 @@ namespace Codist
 		[Obsolete]
 		CtrlSupress = 1 << 29,
 		CtrlQuickInfo = 1 << 30,
-		AlternativeStyle = 1 << 31,
-		UseCodeFontForXmlDocSymbol = 1 << 32,
+		AlternativeStyle = 1L << 31,
+		UseCodeFontForXmlDocSymbol = 1L << 32,
 		DocumentationOverride = OverrideDefaultDocumentation | DocumentationFromBaseType | DocumentationFromInheritDoc,
 		QuickInfoOverride = DocumentationOverride | AlternativeStyle,
 		Default = NodeRange | AlternativeStyle | Attributes | BaseType | Interfaces | Enum | NumericValues | InterfaceImplementations | MethodOverload | Parameter | OverrideDefaultDocumentation | DocumentationFromBaseType | DocumentationFromInheritDoc | SeeAlsoDoc | ExceptionDoc | ReturnsDoc | RemarksDoc,
