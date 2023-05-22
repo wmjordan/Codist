@@ -1,7 +1,8 @@
-﻿using CLR;
+﻿using System.Linq;
+using CLR;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Options;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Options;
 using SF = Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Codist.Refactorings
@@ -16,7 +17,22 @@ namespace Codist.Refactorings
 		}
 
 		public SemanticContext SemanticContext => _SemanticContext;
-		public SelectedSyntax<StatementSyntax> SelectedStatementInfo => (_SelectedStatementInfo ?? (_SelectedStatementInfo = _SemanticContext.Compilation.GetStatements(_SemanticContext.View.FirstSelectionSpan().ToTextSpan()))).Value;
+		public SelectedSyntax<StatementSyntax> SelectedStatementInfo {
+			get {
+				if (_SelectedStatementInfo.HasValue == false) {
+					var ss = _SemanticContext.View.FirstSelectionSpan();
+					if (_SemanticContext.IsSourceBufferInView == false) {
+						ss = _SemanticContext.MapDownToSourceSpan(ss).FirstOrDefault();
+						if (ss.Snapshot == null) {
+							return default;
+						}
+					}
+					return (_SelectedStatementInfo = _SemanticContext.Compilation.GetStatements(ss.ToTextSpan())).Value;
+				}
+				return _SelectedStatementInfo.Value;
+			}
+		}
+
 		public SyntaxToken Token => _SemanticContext.Token;
 		public SyntaxNode Node => _SemanticContext.Node;
 		public SyntaxNode NodeIncludeTrivia => _SemanticContext.NodeIncludeTrivia;

@@ -44,10 +44,12 @@ namespace Codist
 		public IOutliningManager OutliningManager {
 			get => _OutliningManager ?? (_OutliningManager = ServicesHelper.Instance.OutliningManager.GetOutliningManager(View));
 		}
+		public bool IsReady => _Model.IsEmpty == false;
 		public Workspace Workspace => _Model.Workspace;
 		public Document Document => _Model.Document;
 		public SemanticModel SemanticModel => _Model.SemanticModel;
 		public CompilationUnitSyntax Compilation => _Model.Compilation;
+		public bool IsSourceBufferInView => _Model.IsSourceBufferInView(_View);
 		public SyntaxNode Node => _HitPointSyntax?.Node;
 		public SyntaxNode NodeIncludeTrivia => _HitPointSyntax?.NodeIncludeTrivia;
 		public SyntaxTrivia NodeTrivia => _HitPointSyntax?.GetNodeTrivia() ?? default;
@@ -206,6 +208,9 @@ namespace Codist
 
 		public SnapshotSpan MapSourceSpan(TextSpan span) {
 			return _Model.MapSourceSpan(span, _View);
+		}
+		public NormalizedSnapshotSpanCollection MapDownToSourceSpan(SnapshotSpan span) {
+			return _Model.MapDownToSourceSpan(span, _View);
 		}
 
 		public Task<bool> UpdateAsync(CancellationToken cancellationToken) {
@@ -415,8 +420,16 @@ namespace Codist
 				return new SnapshotPointSyntax(this, visualSnapshotPoint, view);
 			}
 
+			public bool IsSourceBufferInView(ITextView view) {
+				return view.TextBuffer == SourceBuffer;
+			}
+
 			public SnapshotSpan MapSourceSpan(TextSpan span, ITextView view) {
 				return view.BufferGraph.MapUpToBuffer(new SnapshotSpan(SourceBuffer.CurrentSnapshot, span.ToSpan()), SpanTrackingMode.EdgeInclusive, view.TextBuffer)[0];
+			}
+
+			public NormalizedSnapshotSpanCollection MapDownToSourceSpan(SnapshotSpan span, ITextView view) {
+				return view.BufferGraph.MapDownToBuffer(span, SpanTrackingMode.EdgeInclusive, SourceBuffer);
 			}
 		}
 
