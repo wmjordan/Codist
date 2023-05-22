@@ -7,7 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
-using AppHelpers;
+using CLR;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.Win32;
 using R = Codist.Properties.Resources;

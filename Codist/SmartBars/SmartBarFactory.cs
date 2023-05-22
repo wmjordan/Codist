@@ -1,6 +1,6 @@
 ﻿using System;
 using System.ComponentModel.Composition;
-using AppHelpers;
+using CLR;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.Utilities;

@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
-using AppHelpers;
+using CLR;
 using Codist.Controls;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;

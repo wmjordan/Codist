@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using AppHelpers;
+using CLR;
 using Codist.SyntaxHighlight;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Classification;

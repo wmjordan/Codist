@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using AppHelpers;
+using CLR;
 using Codist.Controls;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text.Editor;

@@ -7,7 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
-using AppHelpers;
+using CLR;
 using Codist.Controls;
 using EnvDTE;
 using Microsoft.VisualStudio.Shell;

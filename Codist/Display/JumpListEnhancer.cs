@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Shell;
-using AppHelpers;
+using CLR;
 using R = Codist.Properties.Resources;
 
 namespace Codist.Display

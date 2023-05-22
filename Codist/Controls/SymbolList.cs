@@ -9,7 +9,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
-using AppHelpers;
+using CLR;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Imaging;

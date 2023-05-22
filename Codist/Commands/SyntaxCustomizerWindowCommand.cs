@@ -1,5 +1,5 @@
 ﻿using System;
-using AppHelpers;
+using CLR;
 using Codist.Controls;
 using Microsoft.VisualStudio.Shell;
 using R = Codist.Properties.Resources;

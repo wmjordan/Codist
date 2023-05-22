@@ -123,6 +123,7 @@
     <Compile Include="Controls\SymbolMenu.cs" />
     <Compile Include="Display\EditorWindowDisplayOptimizer.cs" />
     <Compile Include="Display\JumpListEnhancer.cs" />
+    <Compile Include="QuickInfo\CSharpEnumQuickInfo.cs" />
     <Compile Include="Semantics\AssemblySource.cs" />
     <Compile Include="Helpers\Chain.cs" />
     <Compile Include="Helpers\FileHelper.cs" />
@@ -325,9 +326,9 @@
     <Content Include="Resources\CodistPackage.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="AppHelpers.Ext, Version=2018.9.15.804, Culture=neutral, PublicKeyToken=964c79fab758d6ea, processorArchitecture=MSIL">
+    <Reference Include="CLR, Version=2023.5.12.1617, Culture=neutral, PublicKeyToken=964c79fab758d6ea, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>AppHelpers.Ext.dll</HintPath>
+      <HintPath>.\CLR.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.VisualStudio.CommandBars, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">

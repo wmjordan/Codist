@@ -8,7 +8,7 @@ using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using AppHelpers;
+using CLR;
 using Codist.Controls;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Operations;

@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Media;
-using AppHelpers;
+using CLR;
 using Codist.Controls;
 using Microsoft.VisualStudio.Text.Classification;
 using Newtonsoft.Json;

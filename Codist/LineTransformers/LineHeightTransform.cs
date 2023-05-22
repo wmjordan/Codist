@@ -4,7 +4,7 @@ using Microsoft.VisualStudio.Text.Formatting;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Differencing;
 using Microsoft.VisualStudio.Utilities;
-using AppHelpers;
+using CLR;
 
 namespace Codist.LineTransformers
 {

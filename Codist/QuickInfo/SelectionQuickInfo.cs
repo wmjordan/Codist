@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using AppHelpers;
+using CLR;
 using Codist.Controls;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
@@ -16,7 +16,7 @@ namespace Codist.QuickInfo
 		public Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
 			return Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Selection) == false
 				|| session.Mark(nameof(SelectionQuickInfo)) == false
-				? System.Threading.Tasks.Task.FromResult<QuickInfoItem>(null)
+				? Task.FromResult<QuickInfoItem>(null)
 				: InternalGetQuickInfoItemAsync(session, cancellationToken);
 		}
 

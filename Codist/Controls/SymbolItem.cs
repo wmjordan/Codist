@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using AppHelpers;
+using CLR;
 using Microsoft.CodeAnalysis;
 
 namespace Codist.Controls

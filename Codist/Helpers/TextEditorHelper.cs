@@ -7,7 +7,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
-using AppHelpers;
+using CLR;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Language.Intellisense;

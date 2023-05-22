@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.Composition;
 using System.Windows;
-using AppHelpers;
+using CLR;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Utilities;
 

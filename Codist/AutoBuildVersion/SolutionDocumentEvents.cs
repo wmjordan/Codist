@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using AppHelpers;
+using CLR;
 using Codist.Controls;
 using EnvDTE;
 using Microsoft.VisualStudio;

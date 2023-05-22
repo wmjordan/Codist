@@ -4,7 +4,7 @@ using System.Windows.Controls;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Events;
 using Microsoft.VisualStudio.PlatformUI;
-using AppHelpers;
+using CLR;
 
 namespace Codist.Display
 {

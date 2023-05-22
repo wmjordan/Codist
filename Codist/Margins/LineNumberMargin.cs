@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Media;
-using AppHelpers;
+using CLR;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;

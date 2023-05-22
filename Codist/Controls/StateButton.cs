@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls.Primitives;
-using AppHelpers;
+using CLR;
 
 namespace Codist.Controls
 {

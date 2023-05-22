@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using AppHelpers;
+using CLR;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.Utilities;

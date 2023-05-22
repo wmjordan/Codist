@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Windows.Input;
-using AppHelpers;
+using CLR;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;

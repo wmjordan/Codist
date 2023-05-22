@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.InteropServices;
+using CLR;
 using ComTypes = System.Runtime.InteropServices.ComTypes;
 
 namespace Codist
@@ -144,6 +146,31 @@ namespace Codist
 				if (ptr != IntPtr.Zero) {
 					Marshal.Release(ptr);
 				}
+			}
+		}
+
+		public static bool IsDefined<TEnum>(this TEnum value)
+			where TEnum : struct, Enum {
+			return EnumCache<TEnum>.IsDefined(value);
+		}
+
+		static class EnumCache<TEnum> where TEnum : struct, Enum
+		{
+			static readonly HashSet<TEnum> _Enums = InitEnumValues();
+
+			static HashSet<TEnum> InitEnumValues() {
+				var values = new HashSet<TEnum>();
+				var enumType = typeof(TEnum);
+				foreach (var item in enumType.GetFields()) {
+					if (item.IsLiteral && item.FieldType == enumType) {
+						values.Add(Op.Unbox<TEnum>(item.GetRawConstantValue()));
+					}
+				}
+				return values;
+			}
+
+			public static bool IsDefined(TEnum value) {
+				return _Enums.Contains(value);
 			}
 		}
 

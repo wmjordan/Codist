@@ -9,7 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using AppHelpers;
+using CLR;
 using Codist.Controls;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -1064,13 +1064,7 @@ namespace Codist
 					var en = constant.ToCSharpString();
 					int d;
 					if (en.IndexOf('|') != -1) {
-						var items = constant.Type.GetMembers().Where(i => {
-							return i is IFieldSymbol f
-								&& f.HasConstantValue
-								&& UnsafeArithmeticHelper.Equals(UnsafeArithmeticHelper.And(constant.Value, f.ConstantValue), f.ConstantValue)
-								&& UnsafeArithmeticHelper.IsZero(f.ConstantValue) == false;
-						});
-						var flags = items.ToArray();
+						var flags = (constant.Type as INamedTypeSymbol).GetFlaggedEnumFields(constant.Value).ToArray();
 						for (int i = 0; i < flags.Length; i++) {
 							if (i > 0) {
 								block.Add(" | ".Render(PlainText));

@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Windows;
 using System.Windows.Media;
-using AppHelpers;
+using CLR;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Formatting;

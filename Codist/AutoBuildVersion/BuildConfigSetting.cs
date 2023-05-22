@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
-using AppHelpers;
+using CLR;
 using EnvDTE;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;

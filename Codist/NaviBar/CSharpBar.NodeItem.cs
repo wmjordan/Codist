@@ -6,7 +6,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using AppHelpers;
+using CLR;
 using Codist.Controls;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;

@@ -7,7 +7,7 @@ using System.Management;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using AppHelpers;
+using CLR;
 using Codist.Controls;
 using Microsoft.VisualStudio.PlatformUI;
 using R = Codist.Properties.Resources;

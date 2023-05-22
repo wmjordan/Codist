@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using AppHelpers;
+using CLR;
 using Microsoft.CodeAnalysis.Classification;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;

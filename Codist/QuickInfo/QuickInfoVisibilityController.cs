@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using AppHelpers;
+using CLR;
 using Microsoft.VisualStudio.Language.Intellisense;
 
 namespace Codist.QuickInfo

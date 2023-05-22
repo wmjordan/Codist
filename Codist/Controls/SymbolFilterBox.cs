@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using Microsoft.VisualStudio.Imaging;
-using AppHelpers;
-using Microsoft.VisualStudio.PlatformUI;
-using Microsoft.CodeAnalysis;
-using R = Codist.Properties.Resources;
 using System.Windows.Controls.Primitives;
+using CLR;
+using Microsoft.CodeAnalysis;
+using Microsoft.VisualStudio.Imaging;
+using Microsoft.VisualStudio.PlatformUI;
+using R = Codist.Properties.Resources;
 
 namespace Codist.Controls
 {

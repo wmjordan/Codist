@@ -8,7 +8,7 @@ using System.Windows.Documents;
 using System.Windows.Media;
 using System.Xml;
 using System.Xml.Linq;
-using AppHelpers;
+using CLR;
 using Codist.Controls;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -19,7 +19,6 @@ namespace Codist
 {
 	sealed class XmlDocRenderer
 	{
-		internal const string XmlDocNodeName = "member";
 		const int LIST_UNDEFINED = -1, LIST_BULLET = -2, LIST_NOT_NUMERIC = -3;
 		const int BLOCK_PARA = 0, BLOCK_ITEM = 1, BLOCK_OTHER = 2, BLOCK_TITLE = 3;
 

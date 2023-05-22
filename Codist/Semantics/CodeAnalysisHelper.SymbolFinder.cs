@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.FindSymbols;
-using AppHelpers;
+using CLR;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Codist

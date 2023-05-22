@@ -6,6 +6,7 @@ using System.Reflection.Emit;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using CLR;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -1179,6 +1180,44 @@ namespace Codist
 					}
 				}
 				return null;
+			}
+		}
+		#endregion
+
+		#region Enum
+		public static IEnumerable<IFieldSymbol> GetFlaggedEnumFields(this INamedTypeSymbol enumType, object value) {
+			switch (enumType?.EnumUnderlyingType.SpecialType) {
+				case SpecialType.System_SByte: return new EnumFieldMatcher<sbyte>(value).GetMatchedFieldSymbols(enumType);
+				case SpecialType.System_Byte: return new EnumFieldMatcher<byte>(value).GetMatchedFieldSymbols(enumType);
+				case SpecialType.System_Int16: return new EnumFieldMatcher<short>(value).GetMatchedFieldSymbols(enumType);
+				case SpecialType.System_UInt16: return new EnumFieldMatcher<ushort>(value).GetMatchedFieldSymbols(enumType);
+				case SpecialType.System_Int32: return new EnumFieldMatcher<int>(value).GetMatchedFieldSymbols(enumType);
+				case SpecialType.System_UInt32: return new EnumFieldMatcher<uint>(value).GetMatchedFieldSymbols(enumType);
+				case SpecialType.System_Int64: return new EnumFieldMatcher<long>(value).GetMatchedFieldSymbols(enumType);
+				case SpecialType.System_UInt64: return new EnumFieldMatcher<ulong>(value).GetMatchedFieldSymbols(enumType);
+				default: return Enumerable.Empty<IFieldSymbol>();
+			}
+		}
+
+		sealed class EnumFieldMatcher<T>
+			where T : struct, IComparable, IConvertible
+		{
+			readonly T _Value;
+
+			public EnumFieldMatcher(object value) {
+				_Value = Op.Unbox<T>(value);
+			}
+
+			public IEnumerable<IFieldSymbol> GetMatchedFieldSymbols(INamedTypeSymbol type) {
+				foreach (var item in type.GetMembers()) {
+					if (item is IFieldSymbol f
+						&& f.HasConstantValue
+						&& f.ConstantValue is T c
+						&& Op.IsTrue(c)
+						&& Op.Ceq(Op.And(c, _Value), c)) {
+						yield return f;
+					}
+				}
 			}
 		}
 		#endregion

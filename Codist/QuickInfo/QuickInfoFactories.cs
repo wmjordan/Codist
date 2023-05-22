@@ -1,6 +1,6 @@
 ﻿using System;
 using System.ComponentModel.Composition;
-using AppHelpers;
+using CLR;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Utilities;

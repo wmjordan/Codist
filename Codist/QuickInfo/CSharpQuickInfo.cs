@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using AppHelpers;
+using CLR;
 using Codist.Controls;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -873,7 +873,7 @@ namespace Codist.QuickInfo
 				}
 				ShowConstInfo(qiContent, field, field.ConstantValue);
 			}
-			else if (field.IsReadOnly && field.IsStatic && field.ContainingType.Name == nameof(System.Reflection.Emit.OpCodes)) {
+			else if (field.IsReadOnly && field.IsStatic && field.Type.Name == "OpCode") {
 				qiContent.ShowOpCodeInfo(field);
 			}
 
@@ -1072,10 +1072,10 @@ namespace Codist.QuickInfo
 			}
 			if (typeSymbol.TypeKind == TypeKind.Enum) {
 				if (options.MatchFlags(QuickInfoOptions.Enum)) {
-					ShowEnumInfo(qiContent, typeSymbol, true);
+					qiContent.ShowEnumQuickInfo(typeSymbol, true);
 				}
 				else if (options.MatchFlags(QuickInfoOptions.BaseType)) {
-					ShowEnumInfo(qiContent, typeSymbol, false);
+					qiContent.ShowEnumQuickInfo(typeSymbol, true);
 				}
 			}
 			else if (options.MatchFlags(QuickInfoOptions.BaseType)) {
@@ -1105,7 +1105,7 @@ namespace Codist.QuickInfo
 				var s = ToolTipHelper.ShowNumericForms(value);
 				if (s != null) {
 					if (symbol != null) {
-						ShowEnumInfo(qiContent, symbol.ContainingType, false);
+						qiContent.ShowEnumQuickInfo(symbol.ContainingType, false);
 					}
 					qiContent.Add(s);
 				}
@@ -1257,97 +1257,6 @@ namespace Codist.QuickInfo
 				}
 			}
 			qiContent.Add(info);
-		}
-
-		static void ShowEnumInfo(InfoContainer qiContent, INamedTypeSymbol type, bool showMembers) {
-			var t = type.EnumUnderlyingType;
-			if (t == null) {
-				return;
-			}
-			var content = new ThemedTipText(R.T_EnumUnderlyingType, true).AddSymbol(t, true, __SymbolFormatter);
-			var s = new ThemedTipDocument()
-				.Append(new ThemedTipParagraph(IconIds.Enum, content));
-			if (showMembers == false) {
-				qiContent.Add(s);
-				return;
-			}
-			bool isFlags = type.GetAttributes().Any(a => a.AttributeClass.MatchTypeName(nameof(FlagsAttribute), "System"));
-			var c = 0;
-			object min = null, max = null, bits = null;
-			IFieldSymbol minName = null, maxName = null;
-			Grid g = null;
-			foreach (var f in type.FindMembers().OfType<IFieldSymbol>().Where(i => i.ConstantValue != null)) {
-				var v = f.ConstantValue;
-				if (min == null) {
-					min = max = bits = v;
-					minName = maxName = f;
-					g = new Grid {
-						HorizontalAlignment = HorizontalAlignment.Left,
-						ColumnDefinitions = {
-							new ColumnDefinition(),
-							new ColumnDefinition()
-						},
-						Margin = WpfHelper.MiddleBottomMargin
-					};
-					goto NEXT;
-				}
-				if (UnsafeArithmeticHelper.IsGreaterThan(v, max)) {
-					max = v;
-					maxName = f;
-				}
-				if (UnsafeArithmeticHelper.IsLessThan(v, min)) {
-					min = v;
-					minName = f;
-				}
-				bits = UnsafeArithmeticHelper.Or(v, bits);
-			NEXT:
-				if (c < 64) {
-					g.RowDefinitions.Add(new RowDefinition());
-					var ft = new ThemedTipText {
-						TextAlignment = TextAlignment.Right,
-						Foreground = ThemeHelper.SystemGrayTextBrush,
-						Margin = WpfHelper.SmallHorizontalMargin,
-						FontFamily = ThemeHelper.CodeTextFont
-					}.Append("= ", ThemeHelper.SystemGrayTextBrush);
-					SymbolFormatter.Instance.ShowFieldConstantText(ft.Inlines, f, isFlags);
-					g.Add(new TextBlock { Foreground = ThemeHelper.ToolTipTextBrush }
-							.AddSymbol(f, false, __SymbolFormatter)
-							.SetGlyph(ThemeHelper.GetImage(IconIds.EnumField))
-							.SetValue(Grid.SetRow, c))
-						.Add(ft
-							.SetValue(Grid.SetRow, c)
-							.SetValue(Grid.SetColumn, 1));
-				}
-				else if (c == 64) {
-					g.RowDefinitions.Add(new RowDefinition());
-					g.Add(new ThemedTipText(R.T_More).SetValue(Grid.SetRow, c).SetValue(Grid.SetColumnSpan, 2));
-				}
-				++c;
-			}
-			if (min == null) {
-				return;
-			}
-			content.AppendLine().Append(R.T_EnumFieldCount, true).Append(c.ToString());
-				//.AppendLine().Append(R.T_EnumMin, true)
-				//			.Append(min.ToString() + "(")
-				//			.AddSymbol(minName, false, _SymbolFormatter)
-				//			.Append(")")
-				//		.AppendLine().Append(R.T_EnumMax, true)
-				//			.Append(max.ToString() + "(")
-				//			.AddSymbol(maxName, false, _SymbolFormatter)
-				//			.Append(")");
-			if (isFlags) {
-				var d = Convert.ToString(Convert.ToInt64(bits), 2);
-				content.AppendLine().Append(R.T_BitCount, true)
-					.Append(d.Length.ToText())
-					.AppendLine()
-					.Append(R.T_EnumAllFlags, true)
-					.Append(d);
-			}
-			qiContent.Add(s);
-			if (g != null) {
-				qiContent.Add(g);
-			}
 		}
 
 		static void ShowInterfaces(InfoContainer qiContent, ITypeSymbol type) {
