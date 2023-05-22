@@ -18,7 +18,8 @@ namespace Codist
 		public static string LogPath {
 			get => __Path;
 			set {
-				if (File.Exists(value) == false) {
+				if (String.IsNullOrWhiteSpace(value) == false
+					&& File.Exists(value) == false) {
 					try {
 						File.CreateText(value);
 					}
