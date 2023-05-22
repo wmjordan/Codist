@@ -188,12 +188,6 @@
       "BackgroundEffect": "ToBottom"
     },
     {
-      "StyleID": "DelegateName",
-      "ForegroundColor": "#004040",
-      "BackgroundColor": "#8095FFFF",
-      "BackgroundEffect": "ToBottom"
-    },
-    {
       "StyleID": "EventName",
       "ForegroundColor": "#008040",
       "BackgroundColor": "#80CAFFCA",
@@ -236,7 +230,7 @@
       "Underline": true
     },
     {
-      "StyleID": "ExternMethodName"
+      "StyleID": "ExternMethodName",
       "BackgroundColor": "#FF0000",
       "BackgroundEffect": "ToBottom"
     },
@@ -317,6 +311,12 @@
     {
       "StyleID": "EnumName",
       "ForegroundColor": "#800080"
+    },
+    {
+      "StyleID": "DelegateName",
+      "ForegroundColor": "#004040",
+      "BackgroundColor": "#8095FFFF",
+      "BackgroundEffect": "ToBottom"
     },
     {
       "StyleID": "Number",
