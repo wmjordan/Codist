@@ -92,6 +92,9 @@ namespace Codist.NaviBar
 					_Menu.ClearSymbols();
 					_Menu.ItemsSource = null;
 				}
+				if (Bar._SemanticContext.IsReady == false) {
+					return;
+				}
 				PopulateTypes();
 				_Note.Clear();
 				if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.LineOfCode)) {
