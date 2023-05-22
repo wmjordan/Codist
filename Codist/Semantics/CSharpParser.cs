@@ -14,6 +14,8 @@ namespace Codist
 	/// <summary>A classifier for C# code syntax highlight.</summary>
 	sealed class CSharpParser : IDisposable
 	{
+		// cache parsed results
+		// note: don't iterate _Parsers to release TextBufferParser, since the Release method will change the collection
 		readonly Dictionary<ITextBuffer, TextBufferParser> _Parsers = new Dictionary<ITextBuffer, TextBufferParser>();
 		readonly object _SyncObj = new object();
 		IWpfTextView _View;
@@ -70,9 +72,8 @@ namespace Codist
 				_View.VisualElement.IsVisibleChanged -= VisualElement_IsVisibleChanged;
 				if (_Parsers.Count > 0) {
 					lock (_SyncObj) {
-						// don't iterate _Parsers, since the Release method will change the collection
-						foreach (var tagger in _Parsers.Values.ToList() /* hold parsers to be disposed */) {
-							tagger.Release();
+						foreach (var parser in GetTextBufferParsers()) {
+							parser.Release();
 						}
 						_Parsers.Clear();
 					}
@@ -80,6 +81,11 @@ namespace Codist
 				_LastParser = null;
 				_View = null;
 			}
+		}
+
+		// Provide a cached list for TextBufferParser instances for subsequent call for TextBufferParser.Release
+		List<TextBufferParser> GetTextBufferParsers() {
+			return _Parsers.Values.ToList() /* hold parsers to be disposed */;
 		}
 
 		void View_Closed(object sender, EventArgs e) {
@@ -235,8 +241,7 @@ namespace Codist
 				}
 
 				lock (c._SyncObj) {
-					// don't iterate _Parsers, since the Release method will change the collection
-					foreach (var tagger in c._Parsers.Values.ToList()) {
+					foreach (var tagger in c.GetTextBufferParsers()) {
 						if (tagger._State?.Workspace.CurrentSolution.Id.Id != id) {
 							tagger.Release();
 						}
