@@ -189,7 +189,7 @@ namespace Codist.SmartBars
 				if (refactoringContext.SelectedStatementInfo.Items != null) {
 					AddEditorCommand(MyToolBar, IconIds.ExtractMethod, "Refactor.ExtractMethod", R.CMD_ExtractMethod);
 				}
-				if (refactoringContext.AcceptAny(Refactorings.All.Refactorings)) {
+				if (refactoringContext.AcceptAny(Refactorings.All.Refactorings) && View.TextBuffer.ContentType.IsOfType(Constants.CodeTypes.Projection) == false) {
 					AddCommand(MyToolBar, IconIds.Refactoring, R.CMD_RefactorSelection, ShowRefactorMenu);
 				}
 				AddCommentCommands();
