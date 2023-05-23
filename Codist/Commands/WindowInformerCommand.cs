@@ -260,6 +260,8 @@ namespace Codist.Commands
 			//AppendNameValue(s, "IsDirty", pi.IsDirty);
 			AppendNameValue(s, "IsOpen", pi.IsOpen);
 			//AppendNameValue(s, "Saved", pi.Saved);
+			AppendNameValue(s, "ProjectItems.Count", pi.ProjectItems?.Count);
+			AppendNameValue(s, "ProjectItems.Kind", pi.ProjectItems?.Kind);
 			try {
 				ShowPropertyCollection(s, pi.Properties, "Properties:");
 			}
