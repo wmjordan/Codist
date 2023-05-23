@@ -61,6 +61,48 @@ namespace Codist.Controls
 			_DefaultButton.IsDefault = true;
 		}
 
+		public MessageWindow(object message)
+			: this(message, nameof(Codist), MessageBoxButton.OK, MessageBoxImage.None) { }
+
+		public MessageWindow(object message,
+			string title = null,
+			MessageBoxButton button = MessageBoxButton.OK,
+			MessageBoxImage icon = MessageBoxImage.None)
+			: this() {
+			Title = title ?? nameof(Codist);
+			Message = message;
+			Button b;
+			switch (button) {
+				case MessageBoxButton.OKCancel:
+					_ButtonPanel.Children.Add(b = CreateButton(R.CMD_Cancel, CancelButton_Click));
+					b.IsCancel = true;
+					break;
+				case MessageBoxButton.YesNoCancel:
+					_DefaultButton.Content = R.CMD_Yes;
+					_ButtonPanel.Children.Add(CreateButton(R.CMD_No, NegativeButton_Click));
+					goto case MessageBoxButton.OKCancel;
+				case MessageBoxButton.YesNo:
+					_DefaultButton.Content = R.CMD_Yes;
+					_ButtonPanel.Children.Add(b = CreateButton(R.CMD_No, NegativeButton_Click));
+					b.IsCancel = true;
+					break;
+				case MessageBoxButton.OK:
+					_DefaultButton.IsCancel = true;
+					break;
+			}
+			int img;
+			switch (icon) {
+				case MessageBoxImage.Question: img = IconIds.Question; break;
+				case MessageBoxImage.Error: img = IconIds.Error; break;
+				case MessageBoxImage.Warning: img = IconIds.Stop; break;
+				case MessageBoxImage.Information: img = IconIds.Info; break;
+				default: img = 0; break;
+			}
+			if (img != 0) {
+				_Icon.Content = ThemeHelper.GetImage(img, ThemeHelper.LargeIconSize);
+			}
+		}
+
 		public static bool? Show(object content) {
 			return new MessageWindow(content).ShowDialog();
 		}
@@ -90,45 +132,6 @@ namespace Codist.Controls
 		}
 		public static bool? AskYesNoCancel(object content) {
 			return new MessageWindow(content, null, MessageBoxButton.YesNoCancel, MessageBoxImage.Question).ShowDialog();
-		}
-
-		public MessageWindow(object message)
-			: this(message, nameof(Codist), MessageBoxButton.OK, MessageBoxImage.None) { }
-
-		public MessageWindow(object message,
-			string title = null,
-			MessageBoxButton button = MessageBoxButton.OK,
-			MessageBoxImage icon = MessageBoxImage.None)
-			: this() {
-			Title = title ?? nameof(Codist);
-			Message = message;
-			Button b;
-			switch (button) {
-				case MessageBoxButton.OKCancel:
-					_ButtonPanel.Children.Add(b = CreateButton(R.CMD_Cancel, CancelButton_Click));
-					b.IsCancel = true;
-					break;
-				case MessageBoxButton.YesNoCancel:
-					_DefaultButton.Content = R.CMD_Yes;
-					_ButtonPanel.Children.Add(CreateButton(R.CMD_No, NegativeButton_Click));
-					goto case MessageBoxButton.OKCancel;
-				case MessageBoxButton.YesNo:
-					_DefaultButton.Content = R.CMD_Yes;
-					_ButtonPanel.Children.Add(b = CreateButton(R.CMD_No, NegativeButton_Click));
-					b.IsCancel = true;
-					break;
-			}
-			int img;
-			switch (icon) {
-				case MessageBoxImage.Question: img = IconIds.Question; break;
-				case MessageBoxImage.Error: img = IconIds.Error; break;
-				case MessageBoxImage.Warning: img = IconIds.Stop; break;
-				case MessageBoxImage.Information: img = IconIds.Info; break;
-				default: img = 0; break;
-			}
-			if (img != 0) {
-				_Icon.Content = ThemeHelper.GetImage(img, ThemeHelper.LargeIconSize);
-			}
 		}
 
 		public object Message {
