@@ -525,7 +525,7 @@ namespace Codist.Margins
 			readonly Pen _DefinitionMarkerPen = new Pen(ThemeHelper.ToolWindowTextBrush, MarkerMargin);
 			IVerticalScrollBar _ScrollBar;
 			CSharpMargin _Margin;
-			ReferenceContext _Context;
+			List<ReferenceItem> _References;
 			ISymbol _ActiveSymbol;
 			CancellationTokenSource _Cancellation;
 
@@ -548,63 +548,50 @@ namespace Codist.Margins
 					SyncHelper.CancelAndDispose(ref _Cancellation, false);
 					_ScrollBar = null;
 					_Margin = null;
-					_Context = null;
+					_References = null;
 					_ActiveSymbol = null;
-					//_Symbol = null;
 				}
 			}
 
 			internal void Render(DrawingContext drawingContext) {
-				var ctx = _Context;
-				if (ctx == null) {
+				var refs = _References;
+				if (refs == null) {
 					return;
 				}
 				var snapshot = _Margin._View.TextSnapshot;
 				var snapshotLength = snapshot.Length;
-				var root = ctx.CompilationUnit;
 				var config = Config.Instance.SymbolReferenceMarkerSettings;
-				foreach (var item in ctx.ReferencePoints) {
+				foreach (var item in refs) {
 					if (_Margin._Cancellation?.IsCancellationRequested != false) {
 						break;
 					}
-					var pu = CodeAnalysisHelper.GetPotentialUsageKinds(item.Definition);
-					foreach (var loc in item.Locations) {
-						var start = loc.Location.SourceSpan.Start;
-						if (start >= snapshotLength) {
-							continue;
-						}
-						var n = root.FindNode(loc.Location.SourceSpan);
-						SolidColorBrush b;
-						Pen p = null;
-						switch (CodeAnalysisHelper.GetUsageKind(pu, n)) {
-							case SymbolUsageKind.Write:
-								b = config.WriteMarkerBrush;
-								break;
-							case SymbolUsageKind.Write | SymbolUsageKind.SetNull:
-								b = null;
-								p = config.SetNullPen;
-								break;
-							default:
-								b = config.ReferenceMarkerBrush;
-								break;
-						}
-						var y = _ScrollBar.GetYCoordinateOfBufferPosition(new SnapshotPoint(snapshot, start));
-						drawingContext.DrawRectangle(b, p, new Rect(MarkerMargin, y - (MarkerSize / 2), MarkerSize, MarkerSize));
-					}
-					if (item.Definition.ContainingAssembly.GetSourceType() == AssemblySource.Metadata) {
+					if (item.Position >= snapshotLength) {
 						continue;
 					}
-					// draws the definition marker
-					foreach (var loc in item.Definition.DeclaringSyntaxReferences) {
-						if (loc.SyntaxTree == ctx.SyntaxTree) {
-							var start = loc.Span.Start;
-							if (start >= snapshotLength) {
-								continue;
-							}
-							var y = _ScrollBar.GetYCoordinateOfBufferPosition(new SnapshotPoint(snapshot, start));
-							drawingContext.DrawRectangle(config.ReferenceMarkerBrush, _DefinitionMarkerPen, new Rect(0, y - (MarkerSize / 2), MarkerSize + MarkerMargin, MarkerSize + MarkerMargin));
-						}
+					SolidColorBrush b;
+					Pen p = null;
+					switch (item.Usage) {
+						case SymbolUsageKind.Write:
+							b = config.WriteMarkerBrush;
+							break;
+						case SymbolUsageKind.Write | SymbolUsageKind.SetNull:
+							b = null;
+							p = config.SetNullPen;
+							break;
+						case SymbolUsageKind.Usage:
+							b = config.ReferenceMarkerBrush;
+							p = _DefinitionMarkerPen;
+							break;
+						default:
+							b = config.ReferenceMarkerBrush;
+							break;
 					}
+					var y = _ScrollBar.GetYCoordinateOfBufferPosition(new SnapshotPoint(snapshot, item.Position));
+					drawingContext.DrawRectangle(b,
+						p,
+						item.Usage == SymbolUsageKind.Usage
+							? new Rect(0, y - (MarkerSize / 2), MarkerSize + MarkerMargin, MarkerSize + MarkerMargin)
+							: new Rect(MarkerMargin, y - (MarkerSize / 2), MarkerSize, MarkerSize));
 				}
 			}
 
@@ -612,9 +599,8 @@ namespace Codist.Margins
 			async void UpdateReferences(object sender, EventArgs e) {
 				var ct = SyncHelper.CancelAndRetainToken(ref _Cancellation);
 				try {
-					if (await UpdateAsync(null, ct).ConfigureAwait(false)) {
-						await SyncHelper.SwitchToMainThreadAsync(ct);
-						_Margin.InvalidateVisual();
+					if (await UpdateAsync(null, ct)) {
+						_Margin?.InvalidateVisual();
 					}
 				}
 				catch (ObjectDisposedException) {
@@ -635,41 +621,62 @@ namespace Codist.Margins
 					return false;
 				}
 				if (symbol == null) {
-					if (_Context != null) {
-						goto QUIT;
+					if (_References != null) {
+						_References = null;
+						return true;
 					}
 					else {
 						return false;
 					}
 				}
 				var doc = state.GetDocument();
-				try {
-					_Context = new ReferenceContext(
-						await SymbolFinder.FindReferencesAsync(symbol.GetAliasTarget(), doc.Project.Solution, ImmutableSortedSet.Create(doc), cancellationToken).ConfigureAwait(false),
-						state.Model.SyntaxTree,
-						state.GetCompilationUnit(cancellationToken)
-						);
-					return true;
-				}
-				catch (ArgumentException) {
-					// hack: multiple async updates could occur and invalidated ctx.Document, which might cause ArgumentException
-					// ignore this at this moment
-				}
-			QUIT:
-				_Context = null;
+				_References = await ThreadHelper.JoinableTaskFactory.RunAsync(async () => GetReferenceItems(
+					await SymbolFinder.FindReferencesAsync(symbol.GetAliasTarget(), doc.Project.Solution, ImmutableSortedSet.Create(doc), cancellationToken).ConfigureAwait(false),
+					state.Model.SyntaxTree,
+					state.GetCompilationUnit(cancellationToken),
+					cancellationToken
+					));
 				return true;
 			}
 
-			sealed class ReferenceContext
-			{
-				public readonly IEnumerable<ReferencedSymbol> ReferencePoints;
-				public readonly SyntaxTree SyntaxTree;
-				public readonly CompilationUnitSyntax CompilationUnit;
+			static List<ReferenceItem> GetReferenceItems(IEnumerable<ReferencedSymbol> referencePoints, SyntaxTree syntaxTree, CompilationUnitSyntax compilationUnit, CancellationToken cancellationToken) {
+				var r = new List<ReferenceItem>();
+				foreach (var item in referencePoints) {
+					if (cancellationToken.IsCancellationRequested) {
+						break;
+					}
 
-				public ReferenceContext(IEnumerable<ReferencedSymbol> referencePoints, SyntaxTree syntaxTree, CompilationUnitSyntax compilationUnit) {
-					ReferencePoints = referencePoints;
-					SyntaxTree = syntaxTree;
-					CompilationUnit = compilationUnit;
+					#region Add reference points
+					var pu = CodeAnalysisHelper.GetPotentialUsageKinds(item.Definition);
+					foreach (var loc in item.Locations) {
+						var span = loc.Location.SourceSpan;
+						r.Add(new ReferenceItem(span.Start, CodeAnalysisHelper.GetUsageKind(pu, compilationUnit.FindNode(span))));
+					}
+					#endregion
+
+					if (item.Definition.ContainingAssembly.GetSourceType() == AssemblySource.Metadata) {
+						continue;
+					}
+
+					#region Add declaration marker
+					foreach (var loc in item.Definition.DeclaringSyntaxReferences) {
+						if (loc.SyntaxTree == syntaxTree) {
+							r.Add(new ReferenceItem(loc.Span.Start, SymbolUsageKind.Usage));
+						}
+					}
+					#endregion
+				}
+				return r;
+			}
+
+			readonly struct ReferenceItem
+			{
+				public readonly int Position;
+				public readonly SymbolUsageKind Usage;
+
+				public ReferenceItem(int position, SymbolUsageKind usage) {
+					Position = position;
+					Usage = usage;
 				}
 			}
 		}
