@@ -609,12 +609,11 @@ namespace Codist
 		}
 
 		public static FindOptions GetFindOptionsFromKeyboardModifiers() {
-			switch (Keyboard.Modifiers) {
-				case ModifierKeys.Control: return FindOptions.MatchCase | FindOptions.Wrap;
-				case ModifierKeys.Shift: return FindOptions.WholeWord | FindOptions.Wrap;
-				case ModifierKeys.Control | ModifierKeys.Shift: return FindOptions.MatchCase | FindOptions.WholeWord | FindOptions.Wrap;
-				default: return FindOptions.Wrap;
-			}
+			return Keyboard.Modifiers.Case(
+				ModifierKeys.Control, FindOptions.MatchCase | FindOptions.Wrap,
+				ModifierKeys.Shift, FindOptions.WholeWord | FindOptions.Wrap,
+				ModifierKeys.Control | ModifierKeys.Shift, FindOptions.MatchCase | FindOptions.WholeWord | FindOptions.Wrap,
+				FindOptions.Wrap);
 		}
 
 		public static bool FindNext(this ITextView view, ITextSearchService2 searchService, string text, FindOptions options) {
