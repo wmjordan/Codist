@@ -61,23 +61,17 @@ namespace Codist.Commands
 						FileHelper.TryRun(outputPath);
 					}
 					else {
-						MessageWindow.Error($"{R.T_OutputFolderMissing}{Environment.NewLine}{outputPath}", R.CMD_OpenOutputFolder);
+						MessageWindow.Error($"{R.T_OutputFolderMissing}{Environment.NewLine}{Environment.NewLine}{outputPath}", R.CMD_OpenOutputFolder);
 					}
 				}
 			}
-			catch (System.Runtime.InteropServices.COMException ex) {
-				ShowError(ex);
-			}
-			catch (IOException ex) {
-				ShowError(ex);
-			}
-			catch (InvalidOperationException ex) {
+			catch (Exception ex) {
 				ShowError(ex);
 			}
 		}
 
 		static void ShowError(Exception ex) {
-			MessageWindow.Error($"{R.T_FailedToOpenOutputFolder}{Environment.NewLine}{ex}", R.CMD_OpenOutputFolder);
+			MessageWindow.Error($"{R.T_FailedToOpenOutputFolder}{Environment.NewLine}{Environment.NewLine}{ex}", R.CMD_OpenOutputFolder);
 		}
 
 		static Project GetSelectedProject() {
