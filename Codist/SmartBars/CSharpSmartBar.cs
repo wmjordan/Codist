@@ -234,7 +234,19 @@ namespace Codist.SmartBars
 			if (await UpdateAsync()) {
 				var selections = ctx.View.GetMultiSelectionBroker();
 				var symbol = _Symbol;
-				await SelectSymbolDefinitionAndReferencesAsync(selections, symbol);
+				Span selectionOffsetSpan = default;
+				var tokenSpan = _Context.Token.Span.ToSpan();
+				var tokenLength = tokenSpan.Length;
+				if (selections.HasMultipleSelections == false) {
+					// if only part of the symbol token is selected,
+					// select that part in other occurrences too
+					selectionOffsetSpan = selections.PrimarySelection.Extent.SnapshotSpan.Span;
+					if (tokenSpan.Contains(selectionOffsetSpan)) {
+						selectionOffsetSpan = new Span(selectionOffsetSpan.Start - tokenSpan.Start, selectionOffsetSpan.Length);
+					}
+				}
+				await SelectSymbolDefinitionAndReferencesAsync(selections, symbol, tokenLength, selectionOffsetSpan);
+				#region Select others with same name
 				switch (symbol.Kind) {
 					case SymbolKind.NamedType:
 						if (symbol is INamedTypeSymbol t && t.TypeKind == TypeKind.Class) {
@@ -242,35 +254,49 @@ namespace Codist.SmartBars
 								if (tm.Kind == SymbolKind.Method
 									&& tm.IsImplicitlyDeclared == false
 									&& IsTypeNamedMethod((IMethodSymbol)tm)) {
-									await SelectSymbolDefinitionAndReferencesAsync(selections, tm);
+									await SelectSymbolDefinitionAndReferencesAsync(selections, tm, tokenLength, selectionOffsetSpan);
 								}
 							}
 						}
 						break;
 					case SymbolKind.Method:
 						if (symbol is IMethodSymbol m && IsTypeNamedMethod(m)) {
-							await SelectSymbolDefinitionAndReferencesAsync(selections, symbol = symbol.ContainingType);
+							await SelectSymbolDefinitionAndReferencesAsync(selections, symbol = symbol.ContainingType, tokenLength, selectionOffsetSpan);
 							goto case SymbolKind.NamedType;
 						}
 						break;
 				}
+				#endregion
 			}
 
 			bool IsTypeNamedMethod(IMethodSymbol m) {
 				var k = m.MethodKind;
 				return k == MethodKind.Constructor || k == MethodKind.StaticConstructor || k == MethodKind.Destructor;
 			}
-		}
 
-		async Task SelectSymbolDefinitionAndReferencesAsync(IMultiSelectionBroker selections, ISymbol symbol) {
-			var snapshot = selections.CurrentSnapshot;
-			foreach (var refs in await Microsoft.CodeAnalysis.FindSymbols.SymbolFinder.FindReferencesAsync(symbol, _Context.Document.Project.Solution, System.Collections.Immutable.ImmutableHashSet.Create(_Context.Document), default)) {
-				selections.AddSelections(refs.Locations.Select(l => l.Location.SourceSpan));
-			}
-			foreach (var sr in symbol.Locations) {
-				if (sr.IsInSource && sr.SourceTree == _Context.Compilation.SyntaxTree) {
-					selections.AddSelection(sr.SourceSpan);
+			async Task SelectSymbolDefinitionAndReferencesAsync(IMultiSelectionBroker selections, ISymbol symbol, int tokenLength, Span selectionOffsetSpan) {
+				foreach (var refs in await Microsoft.CodeAnalysis.FindSymbols.SymbolFinder.FindReferencesAsync(symbol, _Context.Document.Project.Solution, System.Collections.Immutable.ImmutableHashSet.Create(_Context.Document), default)) {
+					selections.AddSelections(FilterLocations(refs.Locations, tokenLength, selectionOffsetSpan));
 				}
+				selections.AddSelections(FilterDeclarationLocations(symbol.Locations, _Context.Compilation.SyntaxTree, tokenLength, selectionOffsetSpan));
+			}
+
+			IEnumerable<Span> FilterLocations(IEnumerable<Microsoft.CodeAnalysis.FindSymbols.ReferenceLocation> locations, int len, Span off) {
+				foreach (var location in locations) {
+					yield return Offset(location.Location.SourceSpan, len, off);
+				}
+			}
+
+			IEnumerable<Span> FilterDeclarationLocations(System.Collections.Immutable.ImmutableArray<Location> locations, SyntaxTree sTree, int len, Span off) {
+				foreach (var location in locations) {
+					if (location.IsInSource && location.SourceTree == sTree) {
+						yield return Offset(location.SourceSpan, len, off);
+					}
+				}
+			}
+
+			Span Offset(Microsoft.CodeAnalysis.Text.TextSpan sourceSpan, int len, Span offsetSpan) {
+				return sourceSpan.Length == len && offsetSpan.Length != 0 ? new Span(sourceSpan.Start + offsetSpan.Start, offsetSpan.Length) : sourceSpan.ToSpan();
 			}
 		}
 

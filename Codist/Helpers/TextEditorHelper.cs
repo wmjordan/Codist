@@ -71,6 +71,11 @@ namespace Codist
 				? new SnapshotSpan(snapshot, span.Start, span.Length)
 				: default;
 		}
+		public static SnapshotSpan CreateSnapshotSpan(this Span span, ITextSnapshot snapshot) {
+			return span.End < snapshot.Length
+				? new SnapshotSpan(snapshot, span.Start, span.Length)
+				: default;
+		}
 		public static Span ToSpan(this TextSpan span) {
 			return new Span(span.Start, span.Length);
 		}
@@ -351,10 +356,10 @@ namespace Codist
 		}
 
 		#region Selection
-		public static void AddSelection(this IMultiSelectionBroker selectionBroker, TextSpan span) {
+		public static void AddSelection(this IMultiSelectionBroker selectionBroker, Span span) {
 			selectionBroker.AddSelection(new Selection(span.CreateSnapshotSpan(selectionBroker.CurrentSnapshot)));
 		}
-		public static void AddSelections(this IMultiSelectionBroker selectionBroker, IEnumerable<TextSpan> spans) {
+		public static void AddSelections(this IMultiSelectionBroker selectionBroker, IEnumerable<Span> spans) {
 			var snapshot = selectionBroker.CurrentSnapshot;
 			selectionBroker.AddSelectionRange(spans.Select(s => new Selection(s.CreateSnapshotSpan(snapshot))));
 		}
