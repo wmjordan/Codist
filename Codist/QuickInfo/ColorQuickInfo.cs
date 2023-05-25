@@ -6,9 +6,9 @@ using Microsoft.VisualStudio.Language.Intellisense;
 
 namespace Codist.QuickInfo
 {
-	sealed class ColorQuickInfo : IAsyncQuickInfoSource
+	sealed class ColorQuickInfo : SingletonQuickInfoSource
 	{
-		public Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
+		protected override Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
 			return Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Color) == false
 				? Task.FromResult<QuickInfoItem>(null)
 				: InternalGetQuickInfoItemAsync(session, cancellationToken);
@@ -35,7 +35,5 @@ namespace Codist.QuickInfo
 				? new QuickInfoItem(extent.ToTrackingSpan(), ColorQuickInfoUI.PreviewColor(brush).Tag())
 				: null;
 		}
-
-		void IDisposable.Dispose() {}
 	}
 }

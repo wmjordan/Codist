@@ -1,5 +1,7 @@
 ﻿using System;
 using System.ComponentModel.Composition;
+using System.Threading;
+using System.Threading.Tasks;
 using CLR;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
@@ -106,5 +108,30 @@ namespace Codist.QuickInfo
 				? textBuffer.GetOrCreateSingletonProperty<QuickInfoBackgroundController>()
 				: null;
 		}
+	}
+
+	/// <summary>
+	/// A base class which prevents the same Quick Info Source from being created more than once for the same <see cref="IAsyncQuickInfoSession"/>.
+	/// </summary>
+	/// <remarks>In VS, there is a bug which can cause <see cref="IAsyncQuickInfoSource.GetQuickInfoItemAsync(IAsyncQuickInfoSession, CancellationToken)"/> being called twice in the C# Interactive window.</remarks>
+	abstract class SingletonQuickInfoSource : IAsyncQuickInfoSource
+	{
+		Task<QuickInfoItem> IAsyncQuickInfoSource.GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
+			return session.Properties.ContainsProperty(GetType())
+				? Task.FromResult<QuickInfoItem>(null)
+				: InternalGetQuickInfoItemAsync(session, cancellationToken);
+		}
+
+		protected abstract Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken);
+
+		async Task<QuickInfoItem> InternalGetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
+			var item = await GetQuickInfoItemAsync(session, cancellationToken).ConfigureAwait(false);
+			if (item != null) {
+				session.Properties.AddProperty(GetType(), this);
+			}
+			return item;
+		}
+
+		public virtual void Dispose() { }
 	}
 }

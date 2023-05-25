@@ -8,9 +8,9 @@ using Microsoft.VisualStudio.Text.Editor;
 
 namespace Codist.QuickInfo
 {
-	sealed class CSharpNodeRangeQuickInfo : IAsyncQuickInfoSource
+	sealed class CSharpNodeRangeQuickInfo : SingletonQuickInfoSource
 	{
-		public Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
+		protected override Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
 			SemanticContext context;
 			return Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Color) == false
 				|| session.TextView is IWpfTextView view == false
@@ -44,7 +44,5 @@ namespace Codist.QuickInfo
 				}
 			}
 		}
-
-		void IDisposable.Dispose() {}
 	}
 }

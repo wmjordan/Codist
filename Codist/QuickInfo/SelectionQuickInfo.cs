@@ -9,11 +9,11 @@ using R = Codist.Properties.Resources;
 
 namespace Codist.QuickInfo
 {
-	internal sealed class SelectionQuickInfo : IAsyncQuickInfoSource
+	sealed class SelectionQuickInfo : SingletonQuickInfoSource
 	{
 		const string Name = "SelectionInfo";
 
-		public Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
+		protected override Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
 			return Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Selection) == false
 				|| session.Mark(nameof(SelectionQuickInfo)) == false
 				? Task.FromResult<QuickInfoItem>(null)
@@ -34,8 +34,6 @@ namespace Codist.QuickInfo
 				return null;
 			}
 		}
-
-		void IDisposable.Dispose() {}
 
 		/// <summary>Displays numbers about selected characters and lines in quick info.</summary>
 		static QuickInfoItem ShowSelectionInfo(IAsyncQuickInfoSession session, SnapshotPoint point) {

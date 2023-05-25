@@ -5,15 +5,13 @@ using Microsoft.VisualStudio.Language.Intellisense;
 
 namespace Codist.QuickInfo
 {
-	sealed class QuickInfoOverrideController : IAsyncQuickInfoSource
+	sealed class QuickInfoOverrideController : SingletonQuickInfoSource
 	{
-		public async Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
+		protected override async Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
 			await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
 			return QuickInfoOverride.CheckCtrlSuppression()
 				? null
 				: new QuickInfoItem(null, QuickInfoOverride.CreateOverride(session).CreateControl(session));
 		}
-
-		void IDisposable.Dispose() {}
 	}
 }

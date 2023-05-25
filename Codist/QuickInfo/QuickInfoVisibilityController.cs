@@ -7,9 +7,9 @@ using Microsoft.VisualStudio.Language.Intellisense;
 
 namespace Codist.QuickInfo
 {
-	sealed class QuickInfoVisibilityController : IAsyncQuickInfoSource
+	sealed class QuickInfoVisibilityController : SingletonQuickInfoSource
 	{
-		public async Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
+		protected override async Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
 			await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
 			// hide Quick Info when:
 			//   CtrlQuickInfo option is on and shift is not pressed,
@@ -24,7 +24,5 @@ namespace Codist.QuickInfo
 			}
 			return null;
 		}
-
-		void IDisposable.Dispose() { }
 	}
 }

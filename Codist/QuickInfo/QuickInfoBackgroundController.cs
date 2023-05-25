@@ -8,7 +8,7 @@ using Microsoft.VisualStudio.Language.Intellisense;
 
 namespace Codist.QuickInfo
 {
-	sealed class QuickInfoBackgroundController : IAsyncQuickInfoSource
+	sealed class QuickInfoBackgroundController : SingletonQuickInfoSource
 	{
 		SolidColorBrush _Background;
 
@@ -35,14 +35,14 @@ namespace Codist.QuickInfo
 			}
 		}
 
-		public async Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
+		protected override async Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
 			await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
 			return QuickInfoOverride.CheckCtrlSuppression() == false && _Background != null
 				? new QuickInfoItem(null, new BackgroundController(_Background).Tag())
 				: null;
 		}
 
-		void IDisposable.Dispose() {
+		public override void Dispose() {
 			Config.UnregisterUpdateHandler(ConfigUpdated);
 		}
 

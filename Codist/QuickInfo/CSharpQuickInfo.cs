@@ -20,7 +20,7 @@ using Task = System.Threading.Tasks.Task;
 
 namespace Codist.QuickInfo
 {
-	sealed class CSharpQuickInfo : IAsyncQuickInfoSource
+	sealed class CSharpQuickInfo : SingletonQuickInfoSource
 	{
 		internal const string Name = nameof(CSharpQuickInfo);
 
@@ -29,7 +29,7 @@ namespace Codist.QuickInfo
 		SpecialProjectInfo _SpecialProject;
 		bool _IsCandidate;
 
-		public Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
+		protected override Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
 			// Map the trigger point down to our buffer.
 			var buffer = session.GetSourceBuffer(out var triggerPoint);
 			ITextSnapshot snapshot;
@@ -1591,8 +1591,6 @@ namespace Codist.QuickInfo
 		static TextBlock ToUIText(ISymbol symbol) {
 			return new ThemedTipText().AddSymbolDisplayParts(symbol.ToDisplayParts(CodeAnalysisHelper.QuickInfoSymbolDisplayFormat), __SymbolFormatter, -1);
 		}
-
-		void IDisposable.Dispose() { }
 
 		sealed class SpecialProjectInfo
 		{
