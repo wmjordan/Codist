@@ -67,7 +67,7 @@ namespace Codist
 
 		#region Spans
 		public static SnapshotSpan CreateSnapshotSpan(this TextSpan span, ITextSnapshot snapshot) {
-			return span.End < snapshot.Length
+			return span.End <= snapshot.Length
 				? new SnapshotSpan(snapshot, span.Start, span.Length)
 				: default;
 		}
