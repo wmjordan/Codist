@@ -282,7 +282,7 @@ namespace Codist
 				switch (args.Kind) {
 					case WorkspaceChangeKind.DocumentChanged:
 					case WorkspaceChangeKind.DocumentRemoved:
-						if (args.DocumentId == _State?.DocumentId) {
+						if (args.DocumentId == _State?.Document.Id) {
 							// skip notifications from current document
 							return;
 						}
@@ -403,7 +403,7 @@ namespace Codist
 				}
 				if (Interlocked.CompareExchange(ref _State, (int)ParserState.Completed, (int)ParserState.Working) == (int)ParserState.Working) {
 					Debug.WriteLine($"{snapshot.TextBuffer.GetDocument().GetDocId()} end parsing {snapshot.Version} on thread {Thread.CurrentThread.ManagedThreadId}");
-					_Callback(new SemanticState(workspace, model, snapshot, document.Id));
+					_Callback(new SemanticState(workspace, model, snapshot, document));
 					Interlocked.CompareExchange(ref _State, (int)ParserState.Idle, (int)ParserState.Completed);
 				}
 				else {

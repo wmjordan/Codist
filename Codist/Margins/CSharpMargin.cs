@@ -629,9 +629,8 @@ namespace Codist.Margins
 						return false;
 					}
 				}
-				var doc = state.GetDocument();
 				_References = await ThreadHelper.JoinableTaskFactory.RunAsync(async () => GetReferenceItems(
-					await SymbolFinder.FindReferencesAsync(symbol.GetAliasTarget(), doc.Project.Solution, ImmutableSortedSet.Create(doc), cancellationToken).ConfigureAwait(false),
+					await SymbolFinder.FindReferencesAsync(symbol.GetAliasTarget(), state.Document.Project.Solution, ImmutableSortedSet.Create(state.Document), cancellationToken).ConfigureAwait(false),
 					state.Model.SyntaxTree,
 					state.GetCompilationUnit(cancellationToken),
 					cancellationToken
