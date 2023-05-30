@@ -282,7 +282,7 @@ namespace Codist.Options
 			readonly OptionBox<QuickInfoOptions> _OverrideDefaultDocumentation, _DocumentationFromBaseType, _DocumentationFromInheritDoc, _TextOnlyDoc, _OrdinaryDoc, _ReturnsDoc, _RemarksDoc, _ExceptionDoc, _SeeAlsoDoc, _ExampleDoc, _AlternativeStyle, _ContainingType, _CodeFontForXmlDocSymbol;
 			readonly OptionBox<QuickInfoOptions> _NodeRange, _Attributes, _BaseType, _Declaration, _SymbolLocation, _Interfaces, _NumericValues, _String, _Parameter, _InterfaceImplementations, _TypeParameters, _NamespaceTypes, _MethodOverload, _InterfaceMembers, _EnumMembers;
 			readonly OptionBox<QuickInfoOptions>[] _Options;
-			readonly Controls.IntegerBox _MaxWidth, _MaxHeight, _ExtraHeight;
+			readonly Controls.IntegerBox _MaxWidth, _MaxHeight, _ExtraHeight, _DisplayDelay;
 			readonly ColorButton _BackgroundButton;
 
 			public PageControl(OptionsPage page) : base(page) {
@@ -316,6 +316,12 @@ namespace Codist.Options
 						.Add(new TextBlock { MinWidth = 240, Margin = WpfHelper.SmallHorizontalMargin, Text = R.OT_ExtraXmlDocSize })
 						.Add(_ExtraHeight = new Controls.IntegerBox((int)Config.Instance.QuickInfoXmlDocExtraHeight) { Minimum = 0, Maximum = 1000, Step = 50 })
 						.SetLazyToolTip(() => R.OT_ExtraXmlDocSizeTip),
+
+					new TitleBox(R.OT_DelayDisplay),
+					new DescriptionBox(R.OT_DelayDisplayNote),
+					new StackPanel().MakeHorizontal()
+						.Add(new TextBlock { MinWidth = 240, Margin = WpfHelper.SmallHorizontalMargin, Text = R.OT_DelayTime })
+						.Add(_DisplayDelay = new Controls.IntegerBox(Config.Instance.QuickInfo.DelayDisplay) { Minimum = 0, Maximum = 100000, Step = 100 }),
 
 					new TitleBox(R.T_Color),
 					new WrapPanel {
@@ -389,9 +395,10 @@ namespace Codist.Options
 						.SetLazyToolTip(() => R.OT_StringInfoTip)
 					);
 
-				_MaxHeight.ValueChanged += UpdateQuickInfoSize;
-				_MaxWidth.ValueChanged += UpdateQuickInfoSize;
-				_ExtraHeight.ValueChanged += UpdateQuickInfoSize;
+				_MaxHeight.ValueChanged += UpdateQuickInfoValue;
+				_MaxWidth.ValueChanged += UpdateQuickInfoValue;
+				_ExtraHeight.ValueChanged += UpdateQuickInfoValue;
+				_DisplayDelay.ValueChanged += UpdateQuickInfoValue;
 				_Options = new[] { _DisableUntilShift, _CtrlSuppress, _Selection, _Color, _OverrideDefaultDocumentation, _DocumentationFromBaseType, _DocumentationFromInheritDoc, _TextOnlyDoc, _ReturnsDoc, _RemarksDoc, _ExceptionDoc, _SeeAlsoDoc, _ExampleDoc, _AlternativeStyle, _ContainingType, _CodeFontForXmlDocSymbol, _Attributes, _BaseType, _Declaration, _EnumMembers, _SymbolLocation, _Interfaces, _NumericValues, _String, _Parameter, _InterfaceImplementations, _TypeParameters, /*_NamespaceTypes, */_MethodOverload, _InterfaceMembers };
 				foreach (var item in new[] { _DocumentationFromBaseType, _DocumentationFromInheritDoc, _TextOnlyDoc, _OrdinaryDoc, _ReturnsDoc, _RemarksDoc, _ExceptionDoc, _SeeAlsoDoc, _ExampleDoc, _ContainingType, _CodeFontForXmlDocSymbol }) {
 					item.WrapMargin(SubOptionMargin);
@@ -407,6 +414,7 @@ namespace Codist.Options
 				_MaxHeight.Value = (int)config.QuickInfoMaxHeight;
 				_MaxWidth.Value = (int)config.QuickInfoMaxWidth;
 				_ExtraHeight.Value = (int)config.QuickInfoXmlDocExtraHeight;
+				_DisplayDelay.Value = config.QuickInfo.DelayDisplay;
 				_BackgroundButton.Color = config.QuickInfo.BackColor;
 			}
 
@@ -418,7 +426,7 @@ namespace Codist.Options
 				Config.Instance.FireConfigChangedEvent(Features.SuperQuickInfo);
 			}
 
-			void UpdateQuickInfoSize(object sender, DependencyPropertyChangedEventArgs args) {
+			void UpdateQuickInfoValue(object sender, DependencyPropertyChangedEventArgs args) {
 				if (sender == _MaxHeight) {
 					Config.Instance.QuickInfoMaxHeight = _MaxHeight.Value;
 				}
@@ -427,6 +435,9 @@ namespace Codist.Options
 				}
 				else if (sender == _ExtraHeight) {
 					Config.Instance.QuickInfoXmlDocExtraHeight = _ExtraHeight.Value;
+				}
+				else if (sender == _DisplayDelay) {
+					Config.Instance.QuickInfo.DelayDisplay = _DisplayDelay.Value;
 				}
 				Config.Instance.FireConfigChangedEvent(Features.SuperQuickInfo);
 			}

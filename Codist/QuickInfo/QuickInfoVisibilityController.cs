@@ -10,6 +10,10 @@ namespace Codist.QuickInfo
 	sealed class QuickInfoVisibilityController : SingletonQuickInfoSource
 	{
 		protected override async Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
+			var delay = Config.Instance.QuickInfo.DelayDisplay;
+			if (delay > 50) {
+				await Task.Delay(delay);
+			}
 			await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
 			// hide Quick Info when:
 			//   CtrlQuickInfo option is on and shift is not pressed,

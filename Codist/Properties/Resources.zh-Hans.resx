@@ -2522,4 +2522,13 @@ Ctrl: 仅匹配当前类，不匹配其它派生类或继承类</value>
   <data name="OT_UseOrdinaryCommentTip" xml:space="preserve">
     <value>显示代码声明前后的普通注释文本</value>
   </data>
+  <data name="OT_DelayDisplay" xml:space="preserve">
+    <value>延迟显示</value>
+  </data>
+  <data name="OT_DelayDisplayNote" xml:space="preserve">
+    <value>延迟显示快速信息</value>
+  </data>
+  <data name="OT_DelayTime" xml:space="preserve">
+    <value>延迟毫秒数:</value>
+  </data>
 </root>

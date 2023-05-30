@@ -1320,7 +1320,7 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
     <value>Displays information of type parameters</value>
   </data>
   <data name="OT_UnlimitedSize" xml:space="preserve">
-    <value>Set the above value to 0 to for unlimited size</value>
+    <value>Set the above value to 0 for unlimited size</value>
   </data>
   <data name="OT_URLPattern" xml:space="preserve">
     <value>URL Pattern</value>
@@ -2536,5 +2536,14 @@ Ctrl: Match current symbol only, excluding base or derived symbols</value>
   </data>
   <data name="OT_UseOrdinaryCommentTip" xml:space="preserve">
     <value>Displays ordinary comment around declaration</value>
+  </data>
+  <data name="OT_DelayDisplay" xml:space="preserve">
+    <value>Delay Display</value>
+  </data>
+  <data name="OT_DelayDisplayNote" xml:space="preserve">
+    <value>Postpone the display of Quick Info</value>
+  </data>
+  <data name="OT_DelayTime" xml:space="preserve">
+    <value>Delay time (milliseconds):</value>
   </data>
 </root>

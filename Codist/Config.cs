@@ -590,12 +590,16 @@ namespace Codist
 	public sealed class QuickInfoConfig
 	{
 		Color _BackColor;
+		int _DelayDisplay;
 
 		[DefaultValue(Constants.EmptyColor)]
 		public string BackgroundColor {
 			get => _BackColor.A == 0 ? Constants.EmptyColor : _BackColor.ToHexString();
 			set => UIHelper.ParseColor(value, out _BackColor, out _);
 		}
+
+		[DefaultValue(0)]
+		public int DelayDisplay { get => _DelayDisplay; set => _DelayDisplay = Math.Max(0, value); }
 
 		internal Color BackColor { get => _BackColor; set => _BackColor = value; }
 	}
