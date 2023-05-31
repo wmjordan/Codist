@@ -400,7 +400,7 @@ namespace Codist.QuickInfo
 				if (p == null) {
 					goto EXIT;
 				}
-
+				p.SetProperty(TextBlock.FontFamilyProperty, ThemeHelper.ToolTipFont);
 				try {
 					if (Config.Instance.DisplayOptimizations.MatchFlags(DisplayOptimizations.CodeWindow)) {
 						WpfHelper.SetUITextRenderOptions(p, true);
