@@ -369,6 +369,7 @@ namespace Codist.Commands
 					AppendNameValue(ss, "IsRunable", c.IsRunable);
 					AppendNameValue(ss, "Object", c.Object);
 					AppendNameValue(ss, "Owner", c.Owner);
+					ShowOutputGroups(ss, c.OutputGroups, "OutputGroups:");
 					try {
 						ShowPropertyCollection(ss, c.Properties, "Properties:");
 					}
@@ -382,6 +383,21 @@ namespace Codist.Commands
 			}
 			catch (COMException ex) {
 				AppendNameValue(s, "Properties", ex.Message);
+			}
+		}
+
+		[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
+		static void ShowOutputGroups(Section ss, OutputGroups outputGroups, string title) {
+			var s = NewIndentSection(ss, title);
+			for (int i = 0; i < outputGroups.Count;) {
+				var g = outputGroups.Item(++i);
+				ss = NewIndentSection(s, "OutputGroup " + i.ToString());
+				AppendNameValue(ss, "CanonicalName", g.CanonicalName);
+				AppendNameValue(ss, "Description", g.Description);
+				AppendNameValue(ss, "DisplayName", g.DisplayName);
+				AppendNameValue(ss, "FileCount", g.FileCount);
+				//AppendNameValue(ss, "FileNames", g.FileNames);
+				//AppendNameValue(ss, "FileURLs", g.FileURLs);
 			}
 		}
 
