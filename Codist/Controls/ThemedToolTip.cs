@@ -31,7 +31,8 @@ namespace Codist.Controls
 			if (Config.Instance.QuickInfoMaxWidth > 0) {
 				MaxWidth = Config.Instance.QuickInfoMaxWidth;
 			}
-			this.SetProperty(TextBlock.FontFamilyProperty, ThemeHelper.ToolTipFont);
+			this.SetProperty(TextBlock.FontFamilyProperty, ThemeHelper.ToolTipFont)
+				.SetProperty(TextBlock.FontSizeProperty, ThemeHelper.ToolTipFontSize);
 		}
 
 		public TextBlock Title { get; }

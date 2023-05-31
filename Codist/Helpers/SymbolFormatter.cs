@@ -203,7 +203,7 @@ namespace Codist
 				Foreground = PlainText
 			}.AddSymbol(symbol, true, this);
 			TextEditorWrapper.CreateFor(signature);
-			signature.Inlines.FirstInline.FontSize *= 1.2;
+			signature.Inlines.FirstInline.FontSize = ThemeHelper.ToolTipFontSize * 1.2;
 
 			switch (symbol.Kind) {
 				case SymbolKind.Property:
