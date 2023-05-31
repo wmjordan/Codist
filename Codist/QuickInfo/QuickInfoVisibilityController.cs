@@ -12,7 +12,7 @@ namespace Codist.QuickInfo
 		protected override async Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
 			var delay = Config.Instance.QuickInfo.DelayDisplay;
 			if (delay > 50) {
-				await Task.Delay(delay);
+				await Task.Delay(delay, cancellationToken);
 			}
 			await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
 			// hide Quick Info when:
