@@ -58,14 +58,16 @@ namespace Codist.QuickInfo
 
 		// reposition the Quick Info to prevent it from hindering text selection with mouse cursor
 		static void RepositionQuickInfoIfOverCursor(IAsyncQuickInfoSession s, FrameworkElement quickInfo, Popup popup) {
-			var visibleLineTop = s.TextView.TextViewLines.FirstVisibleLine.Top;
-			var mousePosition = System.Windows.Input.Mouse.GetPosition(popup.PlacementTarget);
-			var cursorLine = s.TextView.TextViewLines.GetTextViewLineContainingYCoordinate(mousePosition.Y + visibleLineTop);
-			var offsetLine = cursorLine.Top - visibleLineTop;
-			// if the Quick Info popup is over the line with mouse cursor
-			if (offsetLine + quickInfo.ActualHeight > s.TextView.ViewportHeight) {
-				// move the Quick Info popup window on top of the line
-				popup.PlacementRectangle = new Rect(new Point(popup.PlacementRectangle.Left, popup.PlacementRectangle.Top - quickInfo.ActualHeight - cursorLine.TextHeight), popup.RenderSize);
+			if (s.TextView is Microsoft.VisualStudio.Text.Editor.IWpfTextView view) {
+				var visibleLineTop = view.TextViewLines.FirstVisibleLine.Top;
+				var mousePosition = System.Windows.Input.Mouse.GetPosition(popup.PlacementTarget);
+				var cursorLine = view.TextViewLines.GetTextViewLineContainingYCoordinate(mousePosition.Y + visibleLineTop);
+				var offsetLine = cursorLine.Top - visibleLineTop;
+				// if the Quick Info popup is over the line with mouse cursor
+				if (offsetLine + quickInfo.ActualHeight > view.ViewportHeight) {
+					// move the Quick Info popup window on top of the line
+					popup.PlacementRectangle = new Rect(new Point(popup.PlacementRectangle.Left, popup.PlacementRectangle.Top - quickInfo.ActualHeight * 100 / view.ZoomLevel - cursorLine.TextHeight), popup.RenderSize);
+				}
 			}
 		}
 	}
