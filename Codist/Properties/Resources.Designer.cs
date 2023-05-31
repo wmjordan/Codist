@@ -508,6 +508,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Export....
+        /// </summary>
+        internal static string CMD_Export {
+            get {
+                return ResourceManager.GetString("CMD_Export", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Extract interface....
         /// </summary>
         internal static string CMD_ExtractInterface {
@@ -862,6 +871,15 @@ namespace Codist.Properties {
         internal static string CMD_IfElseToConditional {
             get {
                 return ResourceManager.GetString("CMD_IfElseToConditional", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Import....
+        /// </summary>
+        internal static string CMD_Import {
+            get {
+                return ResourceManager.GetString("CMD_Import", resourceCulture);
             }
         }
         

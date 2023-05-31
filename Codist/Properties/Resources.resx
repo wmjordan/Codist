@@ -2546,4 +2546,10 @@ Ctrl: Match current symbol only, excluding base or derived symbols</value>
   <data name="OT_DelayTime" xml:space="preserve">
     <value>Delay time (milliseconds):</value>
   </data>
+  <data name="CMD_Export" xml:space="preserve">
+    <value>Export...</value>
+  </data>
+  <data name="CMD_Import" xml:space="preserve">
+    <value>Import...</value>
+  </data>
 </root>

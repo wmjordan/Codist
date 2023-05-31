@@ -59,7 +59,7 @@ namespace Codist.Options
 		readonly StyleCheckBox _TagCaseSensitiveBox;
 		readonly StyleCheckBox _TagHasPunctuationBox;
 		readonly RadioBox _TagApplyOnTagBox, _TagApplyOnContentBox, _TagApplyOnWholeBox;
-		readonly Button _LoadThemeButton, _SaveThemeButton, _ResetThemeButton;
+		readonly Button _ImportThemeButton, _ExportThemeButton, _ResetThemeButton;
 		readonly UiLock _Lock = new UiLock();
 		IWpfTextView _WpfTextView;
 		IClassificationFormatMap _FormatMap;
@@ -114,11 +114,11 @@ namespace Codist.Options
 									FontWeight = FontWeights.Bold,
 									Margin = WpfHelper.TopItemMargin
 								},
-								new ThemedButton(IconIds.Load, R.CMD_Load, R.CMDT_LoadTheme, LoadTheme) { HorizontalContentAlignment = HorizontalAlignment.Left }
-									.Set(ref _LoadThemeButton)
+								new ThemedButton(IconIds.Load, R.CMD_Import, R.CMDT_LoadTheme, ImportTheme) { HorizontalContentAlignment = HorizontalAlignment.Left }
+									.Set(ref _ImportThemeButton)
 									.ReferenceStyle(VsResourceKeys.ButtonStyleKey),
-								new ThemedButton(IconIds.SaveAs, R.CMD_Save, R.CMDT_SaveTheme, SaveTheme) { HorizontalContentAlignment = HorizontalAlignment.Left }
-									.Set(ref _SaveThemeButton)
+								new ThemedButton(IconIds.SaveAs, R.CMD_Export, R.CMDT_SaveTheme, ExportTheme) { HorizontalContentAlignment = HorizontalAlignment.Left }
+									.Set(ref _ExportThemeButton)
 									.ReferenceStyle(VsResourceKeys.ButtonStyleKey),
 								new ThemedButton(IconIds.ResetTheme, R.CMD_Reset, R.CMDT_ResetTheme, ResetTheme) { HorizontalContentAlignment = HorizontalAlignment.Left }
 									.Set(ref _ResetThemeButton)
@@ -1067,7 +1067,7 @@ namespace Codist.Options
 		#endregion
 
 		#region Theme management
-		void LoadTheme() {
+		void ImportTheme() {
 			var d = new OpenFileDialog {
 				Title = R.T_LoadSyntaxHighlightFile,
 				FileName = "Codist.styles",
@@ -1083,7 +1083,7 @@ namespace Codist.Options
 				}
 			}
 		}
-		void SaveTheme() {
+		void ExportTheme() {
 			var d = new SaveFileDialog {
 				Title = R.T_SaveSyntaxHighlightFile,
 				FileName = "Codist.styles",

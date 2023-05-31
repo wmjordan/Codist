@@ -2531,4 +2531,10 @@ Ctrl: 仅匹配当前类，不匹配其它派生类或继承类</value>
   <data name="OT_DelayTime" xml:space="preserve">
     <value>延迟毫秒数:</value>
   </data>
+  <data name="CMD_Export" xml:space="preserve">
+    <value>导出...</value>
+  </data>
+  <data name="CMD_Import" xml:space="preserve">
+    <value>导入...</value>
+  </data>
 </root>
