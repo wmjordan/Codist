@@ -213,7 +213,7 @@ namespace Codist.SmartBars
 			var pos = Mouse.GetPosition(v.VisualElement);
 			var rs = _ToolBarTray.RenderSize;
 			var z = v.ZoomLevel / 100;
-			var x = (pos.X - 35) * z;
+			var x = Math.Max(0, (pos.X - 35) * z);
 			var y = (pos.Y - 10) * z - rs.Height;
 			Canvas.SetLeft(_ToolBarTray, Math.Min(x, v.ViewportWidth * z - rs.Width));
 			Canvas.SetTop(_ToolBarTray, y > 0 ? y : (pos.Y + 10) * z);
