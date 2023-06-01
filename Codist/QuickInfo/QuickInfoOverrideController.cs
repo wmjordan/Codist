@@ -36,8 +36,6 @@ namespace Codist.QuickInfo
 					var quickInfo = ui.GetParent<FrameworkElement>(n => n.GetType().Name == "PopupRoot");
 					if (quickInfo?.Parent is Popup popup) {
 						RepositionQuickInfoIfOverCursor(s, quickInfo, popup);
-						quickInfo.SizeChanged += QuickInfo_SizeChanged;
-						quickInfo.Unloaded += QuickInfo_Unloaded;
 					}
 					break;
 			}
@@ -57,7 +55,7 @@ namespace Codist.QuickInfo
 		}
 
 		// reposition the Quick Info to prevent it from hindering text selection with mouse cursor
-		static void RepositionQuickInfoIfOverCursor(IAsyncQuickInfoSession s, FrameworkElement quickInfo, Popup popup) {
+		void RepositionQuickInfoIfOverCursor(IAsyncQuickInfoSession s, FrameworkElement quickInfo, Popup popup) {
 			if (s.TextView is Microsoft.VisualStudio.Text.Editor.IWpfTextView view) {
 				var visibleLineTop = view.TextViewLines.FirstVisibleLine.Top;
 				var mousePosition = System.Windows.Input.Mouse.GetPosition(popup.PlacementTarget);
@@ -65,8 +63,14 @@ namespace Codist.QuickInfo
 				var offsetLine = cursorLine.Top - visibleLineTop;
 				// if the Quick Info popup is over the line with mouse cursor
 				if (offsetLine + quickInfo.ActualHeight > view.ViewportHeight) {
+					var textBounds = view.TextViewLines.GetTextMarkerGeometry(s.ApplicableToSpan.GetSpan(view.TextSnapshot)).Bounds;
+					var left = popup.PlacementRectangle.Left; // PlacementRectangle.Left == textBounds.X != mousePosition.X
+					var p = new Point(mousePosition.X + ThemeHelper.ToolTipFontSize < textBounds.Right ? left + ThemeHelper.ToolTipFontSize : left,
+						popup.PlacementRectangle.Top - quickInfo.ActualHeight * 100 / view.ZoomLevel - cursorLine.TextHeight);
 					// move the Quick Info popup window on top of the line
-					popup.PlacementRectangle = new Rect(new Point(popup.PlacementRectangle.Left, popup.PlacementRectangle.Top - quickInfo.ActualHeight * 100 / view.ZoomLevel - cursorLine.TextHeight), popup.RenderSize);
+					popup.PlacementRectangle = new Rect(p, textBounds.Size);
+					quickInfo.SizeChanged += QuickInfo_SizeChanged;
+					quickInfo.Unloaded += QuickInfo_Unloaded;
 				}
 			}
 		}
