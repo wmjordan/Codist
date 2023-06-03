@@ -155,7 +155,7 @@ namespace Codist.Refactorings
 			public override bool Accept(RefactoringContext ctx) {
 				var node = ctx.Node;
 				return node is VariableDeclaratorSyntax v
-					&& v.Initializer?.Value.Kind().IsAny(SyntaxKind.NullLiteralExpression, SyntaxKind.DefaultLiteralExpression) == false
+					&& v.Initializer?.Value.IsAnyKind(SyntaxKind.NullLiteralExpression, SyntaxKind.DefaultLiteralExpression) == false
 					&& v.Parent is VariableDeclarationSyntax d
 					&& d.Variables.Count == 1
 					&& d.Parent.IsKind(SyntaxKind.LocalDeclarationStatement)
@@ -443,8 +443,8 @@ namespace Codist.Refactorings
 					default: return false;
 				}
 				SyntaxNode p = node.Parent;
-				if (nodeKind.IsAny(SyntaxKind.AddExpression, SyntaxKind.SubtractExpression)) {
-					while (p.Kind().IsAny(SyntaxKind.AddExpression, SyntaxKind.SubtractExpression)) {
+				if (nodeKind.CeqAny(SyntaxKind.AddExpression, SyntaxKind.SubtractExpression)) {
+					while (p.IsAnyKind(SyntaxKind.AddExpression, SyntaxKind.SubtractExpression)) {
 						node = p;
 						p = p.Parent;
 					}
@@ -467,7 +467,7 @@ namespace Codist.Refactorings
 				if (nodeKind == SyntaxKind.LogicalAndExpression) {
 					ReformatLogicalExpressions(ref node, ref newExp, newLine, indent, nodeKind);
 				}
-				else if (nodeKind.IsAny(SyntaxKind.AddExpression, SyntaxKind.SubtractExpression)) {
+				else if (nodeKind.CeqAny(SyntaxKind.AddExpression, SyntaxKind.SubtractExpression)) {
 					ReformatAddExpressions(ref node, ref newExp, newLine, indent);
 				}
 				else if (nodeKind == SyntaxKind.LogicalOrExpression) {
@@ -492,7 +492,7 @@ namespace Codist.Refactorings
 
 			static void ReformatAddExpressions(ref SyntaxNode node, ref BinaryExpressionSyntax newExp, SyntaxTrivia newLine, SyntaxTriviaList indent) {
 				var exp = (BinaryExpressionSyntax)node;
-				while (exp.Left.Kind().IsAny(SyntaxKind.AddExpression, SyntaxKind.SubtractExpression)) {
+				while (exp.Left.IsAnyKind(SyntaxKind.AddExpression, SyntaxKind.SubtractExpression)) {
 					exp = (BinaryExpressionSyntax)exp.Left;
 				}
 				do {
@@ -501,7 +501,7 @@ namespace Codist.Refactorings
 						exp.OperatorToken.WithLeadingTrivia(indent).WithTrailingTrivia(SF.Space),
 						exp.Right);
 					exp = exp.Parent as BinaryExpressionSyntax;
-				} while (exp?.Kind().IsAny(SyntaxKind.AddExpression, SyntaxKind.SubtractExpression) == true);
+				} while (exp?.IsAnyKind(SyntaxKind.AddExpression, SyntaxKind.SubtractExpression) == true);
 			}
 
 			static void ReformatLogicalExpressions(ref SyntaxNode node, ref BinaryExpressionSyntax newExp, SyntaxTrivia newLine, SyntaxTriviaList indent, SyntaxKind nodeKind) {
@@ -658,7 +658,7 @@ namespace Codist.Refactorings
 			public override string Title => R.CMD_MultiLineMemberAccess;
 
 			public override bool Accept(RefactoringContext ctx) {
-				return ctx.NodeIncludeTrivia.Kind().IsAny(SyntaxKind.SimpleMemberAccessExpression, SyntaxKind.ConditionalAccessExpression);
+				return ctx.NodeIncludeTrivia.IsAnyKind(SyntaxKind.SimpleMemberAccessExpression, SyntaxKind.ConditionalAccessExpression);
 			}
 
 			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
@@ -683,11 +683,11 @@ namespace Codist.Refactorings
 						}
 					}
 
-					if (node.Parent.Kind().IsAny(SyntaxKind.SimpleMemberAccessExpression, SyntaxKind.ConditionalAccessExpression)) {
+					if (node.Parent.IsAnyKind(SyntaxKind.SimpleMemberAccessExpression, SyntaxKind.ConditionalAccessExpression)) {
 						node = node.Parent;
 					}
 					else if (node.Parent is InvocationExpressionSyntax i
-						&& i.Parent.Kind().IsAny(SyntaxKind.SimpleMemberAccessExpression, SyntaxKind.ConditionalAccessExpression)) {
+						&& i.Parent.IsAnyKind(SyntaxKind.SimpleMemberAccessExpression, SyntaxKind.ConditionalAccessExpression)) {
 						newExp = i.Update(newExp, i.ArgumentList);
 						node = i.Parent;
 					}

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using CLR;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.VisualStudio.Text;
@@ -58,10 +59,10 @@ namespace Codist.Refactorings
 
 			public override bool Accept(RefactoringContext ctx) {
 				var token = ctx.Token;
-				if (token.Kind().IsAny(SyntaxKind.NullKeyword, SyntaxKind.DefaultKeyword)
+				if (token.IsAnyKind(SyntaxKind.NullKeyword, SyntaxKind.DefaultKeyword)
 					&& ctx.Node.FirstAncestorOrSelf<SyntaxNode>(n => n.IsKind(SyntaxKind.ParameterList)) == null
 					&& ctx.SemanticContext.SemanticModel.GetTypeInfo(ctx.Node).ConvertedType is ITypeSymbol type) {
-					if (type.TypeKind == TypeKind.Class || type.TypeKind == TypeKind.Struct) {
+					if (type.TypeKind.CeqAny(TypeKind.Class, TypeKind.Struct)) {
 						switch (type.SpecialType) {
 							case SpecialType.System_Boolean:
 								_Title = R.CMD_UseDefault.Replace("default", "false");
@@ -114,7 +115,7 @@ namespace Codist.Refactorings
 				if (!(ctx.SemanticModel.GetTypeInfo(ctx.Node).ConvertedType is ITypeSymbol type)) {
 					return String.Empty;
 				}
-				if (type.TypeKind == TypeKind.Class || type.TypeKind == TypeKind.Struct) {
+				if (type.TypeKind.CeqAny(TypeKind.Class, TypeKind.Struct)) {
 					switch (type.SpecialType) {
 						case SpecialType.System_Boolean:
 							return "false";

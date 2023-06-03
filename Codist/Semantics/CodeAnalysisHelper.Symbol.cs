@@ -45,7 +45,7 @@ namespace Codist
 			else if (node is AccessorDeclarationSyntax) {
 				s = semanticModel.GetDeclaredSymbol(node, cancellationToken);
 			}
-			else if (k.IsAny(SyntaxKind.TypeParameter, SyntaxKind.Parameter, RecordDeclaration, RecordStructDeclaration)) {
+			else if (k.CeqAny(SyntaxKind.TypeParameter, SyntaxKind.Parameter, RecordDeclaration, RecordStructDeclaration)) {
 				s = semanticModel.GetDeclaredSymbol(node, cancellationToken);
 			}
 			if (s != null) {

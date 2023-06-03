@@ -422,7 +422,7 @@ namespace Codist
 			var r = symbol.DeclaringSyntaxReferences;
 			ExpressionSyntax val;
 			if (r.Length > 0 && (val = r.GetHardCodedValue()) != null) {
-				if (val.Kind().IsAny(SyntaxKind.DefaultLiteralExpression, SyntaxKind.NullLiteralExpression) == false) {
+				if (val.IsAnyKind(SyntaxKind.DefaultLiteralExpression, SyntaxKind.NullLiteralExpression) == false) {
 					text.Add(" = ");
 					ShowExpression(text, val);
 				}

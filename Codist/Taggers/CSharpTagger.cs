@@ -457,7 +457,7 @@ namespace Codist.Taggers
 					case SyntaxKind.AttributeList:
 						return CreateClassificationSpan(snapshot, node.Span, __Classifications.AttributeNotation);
 					case SyntaxKind.ArrayRankSpecifier:
-						return node.Parent.Parent.Kind().IsAny(SyntaxKind.ArrayCreationExpression, SyntaxKind.StackAllocArrayCreationExpression, SyntaxKind.ImplicitStackAllocArrayCreationExpression)
+						return node.Parent.Parent.IsAnyKind(SyntaxKind.ArrayCreationExpression, SyntaxKind.StackAllocArrayCreationExpression, SyntaxKind.ImplicitStackAllocArrayCreationExpression)
 							? CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.MemberBraceTags.Constructor)
 							: null;
 					case SyntaxKind.ImplicitStackAllocArrayCreationExpression:

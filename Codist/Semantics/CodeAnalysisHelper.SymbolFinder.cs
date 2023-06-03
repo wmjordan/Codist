@@ -549,15 +549,14 @@ namespace Codist
 						? SymbolUsageKind.Write | SymbolUsageKind.SetNull
 						: SymbolUsageKind.Write;
 				}
-				else if (n.IsKind(SyntaxKind.PostIncrementExpression)
-					|| n.IsKind(SyntaxKind.PreIncrementExpression)
-					|| n is ArgumentSyntax r && (r.RefKindKeyword.IsKind(SyntaxKind.RefKeyword) || r.RefKindKeyword.IsKind(SyntaxKind.OutKeyword))) {
+				else if (n.IsAnyKind(SyntaxKind.PostIncrementExpression, SyntaxKind.PreIncrementExpression)
+					|| n is ArgumentSyntax r && (r.RefKindKeyword.IsAnyKind(SyntaxKind.RefKeyword, SyntaxKind.OutKeyword))) {
 					return SymbolUsageKind.Write;
 				}
 			}
 			else if (possibleUsage.MatchFlags(SymbolUsageKind.TypeCast)) {
 				node = node.GetNodePurpose();
-				if (node.IsKind(SyntaxKind.AsExpression) || node.IsKind(SyntaxKind.IsExpression) || node.IsKind(SyntaxKind.IsPatternExpression) || node.IsKind(SyntaxKind.CastExpression)) {
+				if (node.IsAnyKind(SyntaxKind.AsExpression, SyntaxKind.IsExpression, SyntaxKind.IsPatternExpression, SyntaxKind.CastExpression)) {
 					return SymbolUsageKind.TypeCast;
 				}
 				if (possibleUsage.MatchFlags(SymbolUsageKind.Catch)
@@ -565,7 +564,7 @@ namespace Codist
 					return SymbolUsageKind.Catch;
 				}
 				if (possibleUsage.MatchFlags(SymbolUsageKind.TypeParameter)
-					&& (node.IsKind(SyntaxKind.TypeArgumentList) || node.IsKind(SyntaxKind.TypeOfExpression))) {
+					&& (node.IsAnyKind(SyntaxKind.TypeArgumentList, SyntaxKind.TypeOfExpression))) {
 					return SymbolUsageKind.TypeParameter;
 				}
 			}
@@ -579,7 +578,7 @@ namespace Codist
 						return SymbolUsageKind.Detach;
 					}
 				}
-				else if (node.IsKind(SyntaxKind.ConditionalAccessExpression) || node.IsKind(SyntaxKind.SimpleMemberAccessExpression)) {
+				else if (node.IsAnyKind(SyntaxKind.ConditionalAccessExpression, SyntaxKind.SimpleMemberAccessExpression)) {
 					return SymbolUsageKind.Trigger;
 				}
 			}

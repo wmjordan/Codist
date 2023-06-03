@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using CLR;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -70,17 +71,23 @@ namespace Codist
 		internal const MethodKind FunctionPointerMethod = (MethodKind)18;
 
 		#region Node info
-		public static bool IsAny(this SyntaxKind kind, SyntaxKind kind1, SyntaxKind kind2) {
-			return kind == kind1 || kind == kind2;
+		public static bool IsAnyKind(this SyntaxNode node, SyntaxKind kind1, SyntaxKind kind2) {
+			return Op.Cast<int, SyntaxKind>(node.RawKind).CeqAny(kind1, kind2);
 		}
-		public static bool IsAny(this SyntaxKind kind, SyntaxKind kind1, SyntaxKind kind2, SyntaxKind kind3) {
-			return kind == kind1 || kind == kind2 || kind == kind3;
+		public static bool IsAnyKind(this SyntaxNode node, SyntaxKind kind1, SyntaxKind kind2, SyntaxKind kind3) {
+			return Op.Cast<int, SyntaxKind>(node.RawKind).CeqAny(kind1, kind2, kind3);
 		}
-		public static bool IsAny(this SyntaxKind kind, SyntaxKind kind1, SyntaxKind kind2, SyntaxKind kind3, SyntaxKind kind4) {
-			return kind == kind1 || kind == kind2 || kind == kind3 || kind == kind4;
+		public static bool IsAnyKind(this SyntaxNode node, SyntaxKind kind1, SyntaxKind kind2, SyntaxKind kind3, SyntaxKind kind4) {
+			return Op.Cast<int, SyntaxKind>(node.RawKind).CeqAny(kind1, kind2, kind3, kind4);
 		}
-		public static bool IsAny(this SyntaxKind kind, SyntaxKind kind1, SyntaxKind kind2, SyntaxKind kind3, SyntaxKind kind4, SyntaxKind kind5) {
-			return kind == kind1 || kind == kind2 || kind == kind3 || kind == kind4 || kind == kind5;
+		public static bool IsAnyKind(this SyntaxToken token, SyntaxKind kind1, SyntaxKind kind2) {
+			return Op.Cast<int, SyntaxKind>(token.RawKind).CeqAny(kind1, kind2);
+		}
+		public static bool IsAnyKind(this SyntaxToken token, SyntaxKind kind1, SyntaxKind kind2, SyntaxKind kind3) {
+			return Op.Cast<int, SyntaxKind>(token.RawKind).CeqAny(kind1, kind2, kind3);
+		}
+		public static bool IsAnyKind(this SyntaxToken token, SyntaxKind kind1, SyntaxKind kind2, SyntaxKind kind3, SyntaxKind kind4) {
+			return Op.Cast<int, SyntaxKind>(token.RawKind).CeqAny(kind1, kind2, kind3, kind4);
 		}
 		public static bool IsPredefinedSystemType(this SyntaxKind kind) {
 			return kind >= SyntaxKind.BoolKeyword && kind <= SyntaxKind.ObjectKeyword;
@@ -408,6 +415,19 @@ namespace Codist
 				break;
 			}
 			return i == 0 ? list : new SyntaxTriviaList(list.Skip(i));
+		}
+
+		public static SyntaxNodeOrToken GetFollowingNodeOrToken(this SyntaxNode node) {
+			var foundCurrentNode = false;
+			foreach (var item in node.Parent.ChildNodesAndTokens()) {
+				if (foundCurrentNode) {
+					return item;
+				}
+				if (item == node) {
+					foundCurrentNode = true;
+				}
+			}
+			return default;
 		}
 		#endregion
 
@@ -1471,10 +1491,10 @@ namespace Codist
 						case SyntaxKind.MultiLineCommentTrivia:
 							if (hasLineBreak) {
 								sb.AppendLine();
-					}
+							}
 							AppendMultilineComment(sb, item.ToString());
 							break;
-				}
+					}
 				}
 				return sb.Length != 0 ? sb.ToString() : null;
 			}
@@ -1533,7 +1553,7 @@ namespace Codist
 				originName = null;
 			}
 			var n = node;
-			while (n.Kind().IsAny(SyntaxKind.QualifiedName, SyntaxKind.SimpleMemberAccessExpression, SyntaxKind.PointerMemberAccessExpression, SyntaxKind.MemberBindingExpression)) {
+			while (n.IsAnyKind(SyntaxKind.QualifiedName, SyntaxKind.SimpleMemberAccessExpression, SyntaxKind.PointerMemberAccessExpression, SyntaxKind.MemberBindingExpression)) {
 				if (n is MemberAccessExpressionSyntax ma && ma.Name != originName) {
 					return node;
 				}

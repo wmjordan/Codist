@@ -533,13 +533,13 @@ namespace Codist.Controls
 				_Symbol.GetSyntaxNode().SelectNode(true);
 			}
 			void RunUnitTest(object sender, RoutedEventArgs args) {
-				if (_SemanticContext.Node.FirstAncestorOrSelf<SyntaxNode>(n => n.Kind().IsAny(SyntaxKind.ClassDeclaration, SyntaxKind.MethodDeclaration)) != _Node) {
+				if (_SemanticContext.Node.FirstAncestorOrSelf<SyntaxNode>(n => n.IsAnyKind(SyntaxKind.ClassDeclaration, SyntaxKind.MethodDeclaration)) != _Node) {
 					_SemanticContext.View.MoveCaret(_Node.SpanStart);
 				}
 				TextEditorHelper.ExecuteEditorCommand("TestExplorer.RunAllTestsInContext");
 			}
 			void DebugUnitTest(object sender, RoutedEventArgs args) {
-				if (_SemanticContext.Node.FirstAncestorOrSelf<SyntaxNode>(n => n.Kind().IsAny(SyntaxKind.ClassDeclaration, SyntaxKind.MethodDeclaration)) != _Node) {
+				if (_SemanticContext.Node.FirstAncestorOrSelf<SyntaxNode>(n => n.IsAnyKind(SyntaxKind.ClassDeclaration, SyntaxKind.MethodDeclaration)) != _Node) {
 					_SemanticContext.View.MoveCaret(_Node.SpanStart);
 				}
 				TextEditorHelper.ExecuteEditorCommand("TestExplorer.DebugAllTestsInContext");
