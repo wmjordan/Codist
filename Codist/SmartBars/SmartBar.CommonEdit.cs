@@ -282,6 +282,8 @@ namespace Codist.SmartBars
 			if (_RecentWrapText == null) {
 				if (Config.Instance.WrapTexts.Count == 0) {
 					WrapWith(ctx, "(", ")", true);
+					_RecentWrapText = new WrapText("($)");
+					return;
 				}
 				_RecentWrapText = Config.Instance.WrapTexts[0];
 			}
