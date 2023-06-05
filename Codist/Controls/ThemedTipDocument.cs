@@ -32,7 +32,12 @@ namespace Codist.Controls
 		}
 		public ThemedTipDocument AppendLine() {
 			_Container.RowDefinitions.Add(new RowDefinition());
-			_Container.Children.Add(new Border { Height = 1, BorderThickness = WpfHelper.TinyMargin, BorderBrush = ThemeHelper.DocumentTextBrush, Margin = WpfHelper.SmallVerticalMargin }.SetValue(Grid.SetRow, _RowCount).SetValue(Grid.SetColumnSpan, 2));
+			_Container.Children.Add(new Border {
+				Height = 1,
+				BorderThickness = WpfHelper.TinyMargin,
+				BorderBrush = ThemeHelper.DocumentTextBrush,
+				Margin = WpfHelper.SmallVerticalMargin
+			}.SetValue(Grid.SetRow, _RowCount).SetValue(Grid.SetColumnSpan, 2));
 			_RowCount++;
 			return this;
 		}

@@ -464,24 +464,25 @@ namespace Codist.Refactorings
 				var (indent, newLine) = ctx.GetIndentAndNewLine(node.SpanStart);
 				BinaryExpressionSyntax newExp = null;
 				SyntaxToken token;
-				if (nodeKind == SyntaxKind.LogicalAndExpression) {
-					ReformatLogicalExpressions(ref node, ref newExp, newLine, indent, nodeKind);
-				}
-				else if (nodeKind.CeqAny(SyntaxKind.AddExpression, SyntaxKind.SubtractExpression)) {
-					ReformatAddExpressions(ref node, ref newExp, newLine, indent);
-				}
-				else if (nodeKind == SyntaxKind.LogicalOrExpression) {
-					ReformatLogicalExpressions(ref node, ref newExp, newLine, indent, nodeKind);
-				}
-				else if (nodeKind == SyntaxKind.CoalesceExpression) {
-					token = CreateTokenWithTrivia(indent, SyntaxKind.QuestionQuestionToken);
-					ReformatCoalesceExpression(ref node, ref newExp, newLine, token, nodeKind);
-				}
-				else if (nodeKind == SyntaxKind.ConditionalExpression) {
-					return Chain.Create(ReformatConditionalExpression((ConditionalExpressionSyntax)node, indent, newLine));
-				}
-				else {
-					return Enumerable.Empty<RefactoringAction>();
+				switch (nodeKind) {
+					case SyntaxKind.LogicalAndExpression:
+						ReformatLogicalExpressions(ref node, ref newExp, newLine, indent, nodeKind);
+						break;
+					case SyntaxKind.AddExpression:
+					case SyntaxKind.SubtractExpression:
+						ReformatAddExpressions(ref node, ref newExp, newLine, indent);
+						break;
+					case SyntaxKind.LogicalOrExpression:
+						ReformatLogicalExpressions(ref node, ref newExp, newLine, indent, nodeKind);
+						break;
+					case SyntaxKind.CoalesceExpression:
+						token = CreateTokenWithTrivia(indent, SyntaxKind.QuestionQuestionToken);
+						ReformatCoalesceExpression(ref node, ref newExp, newLine, token, nodeKind);
+						break;
+					case SyntaxKind.ConditionalExpression:
+						return Chain.Create(ReformatConditionalExpression((ConditionalExpressionSyntax)node, indent, newLine));
+					default:
+						return Enumerable.Empty<RefactoringAction>();
 				}
 				return Chain.Create(Replace(node, newExp.AnnotateSelect()));
 			}
@@ -669,18 +670,13 @@ namespace Codist.Refactorings
 					if (node is MemberAccessExpressionSyntax ma) {
 						newExp = ma.Update((newExp ?? ma.Expression).WithTrailingTrivia(newLine), ma.OperatorToken.WithLeadingTrivia(indent), ma.Name);
 					}
+					else if (node is ConditionalAccessExpressionSyntax ca) {
+						newExp = ca.WhenNotNull.FullSpan.Contains(ctx.Token.FullSpan.Start)
+							? ca.Update(ca.Expression, ca.OperatorToken, newExp ?? ca.WhenNotNull)
+							: ca.Update((newExp ?? ca.Expression).WithTrailingTrivia(newLine), ca.OperatorToken.WithLeadingTrivia(indent), WrapAccess(ca.WhenNotNull, indent, newLine));
+					}
 					else {
-						if (node is ConditionalAccessExpressionSyntax ca) {
-							if (ca.WhenNotNull.FullSpan.Contains(ctx.Token.FullSpan.Start)) {
-								newExp = ca.Update(ca.Expression, ca.OperatorToken, newExp ?? ca.WhenNotNull);
-							}
-							else {
-								newExp = ca.Update((newExp ?? ca.Expression).WithTrailingTrivia(newLine), ca.OperatorToken.WithLeadingTrivia(indent), WrapAccess(ca.WhenNotNull, indent, newLine));
-							}
-						}
-						else {
-							break;
-						}
+						break;
 					}
 
 					if (node.Parent.IsAnyKind(SyntaxKind.SimpleMemberAccessExpression, SyntaxKind.ConditionalAccessExpression)) {
@@ -704,15 +700,13 @@ namespace Codist.Refactorings
 						ma.OperatorToken.WithLeadingTrivia(indent),
 						ma.Name);
 				}
-				else if (expression is InvocationExpressionSyntax i) {
+				if (expression is InvocationExpressionSyntax i) {
 					return i.Update(WrapAccess(i.Expression, indent, newLine), i.ArgumentList);
 				}
-				else if (expression is ConditionalAccessExpressionSyntax ca) {
+				if (expression is ConditionalAccessExpressionSyntax ca) {
 					return ca.Update(ca.Expression.WithTrailingTrivia(newLine), ca.OperatorToken.WithLeadingTrivia(indent), WrapAccess(ca.WhenNotNull, indent, newLine));
 				}
-				else {
-					return expression;
-				}
+				return expression;
 			}
 		}
 
@@ -751,10 +745,9 @@ namespace Codist.Refactorings
 			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
 				if (_Mode == CONCAT) {
 					var ie = ctx.NodeIncludeTrivia.FirstAncestorOrSelf<InvocationExpressionSyntax>();
-					if (ie == null) {
-						return Enumerable.Empty<RefactoringAction>();
-					}
-					return Chain.Create(Replace(ie,
+					return ie == null
+						? Enumerable.Empty<RefactoringAction>()
+						: Chain.Create(Replace(ie,
 						SF.InterpolatedStringExpression(
 							SF.Token(SyntaxKind.InterpolatedStringStartToken),
 							new SyntaxList<InterpolatedStringContentSyntax>(ArgumentsToInterpolatedStringContents(ie.ArgumentList.Arguments))

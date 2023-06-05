@@ -304,7 +304,7 @@ namespace Codist.Refactorings
 						node = d.Parent;
 						return Chain.Create(Replace(node, new SyntaxNode[] {
 							SF.LocalDeclarationStatement(
-								SF.VariableDeclaration(tn, SF.SeparatedList<VariableDeclaratorSyntax>(new[] {
+								SF.VariableDeclaration(tn, SF.SeparatedList(new[] {
 									SF.VariableDeclarator(v.Identifier.WithoutTrivia())
 								}))
 								).WithTriviaFrom(node),

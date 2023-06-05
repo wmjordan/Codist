@@ -376,8 +376,8 @@ namespace Codist.QuickInfo
 			readonly DefaultOverride _Override;
 			bool _Overridden;
 
-			public UIOverride(DefaultOverride overrider) {
-				_Override = overrider;
+			public UIOverride(DefaultOverride uiOverride) {
+				_Override = uiOverride;
 			}
 
 			public bool KeepQuickInfoOpen { get; set; }

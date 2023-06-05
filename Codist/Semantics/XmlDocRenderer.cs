@@ -129,7 +129,8 @@ namespace Codist
 			}
 			#endregion
 			#region Value
-			if (symbol.Kind == SymbolKind.Property || (symbol.Kind == SymbolKind.Method && symbol.ContainingSymbol.Kind == SymbolKind.Property)) {
+			if (symbol.Kind == SymbolKind.Property
+				|| (symbol.Kind == SymbolKind.Method && symbol.ContainingSymbol.Kind == SymbolKind.Property)) {
 				var value = doc.Value ?? doc.ExplicitInheritDoc?.Value ?? doc.InheritedXmlDocs.FirstOrDefault(i => i.Value != null)?.Value;
 				if (value != null && IsEmptyElement(value) == false) {
 					tip.Append(new ThemedTipParagraph(IconIds.Value, new ThemedTipText()

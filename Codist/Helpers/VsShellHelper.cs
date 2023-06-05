@@ -42,7 +42,7 @@ namespace Codist
 
 		public static T GetExtObjectAs<T>(this IVsHierarchy item) where T : class {
 			ThreadHelper.ThrowIfNotOnUIThread();
-			return item.GetProperty(Microsoft.VisualStudio.VSConstants.VSITEMID_ROOT, (int)VsHierarchyPropID.ExtObject, out var name) != 0
+			return item.GetProperty(VSConstants.VSITEMID_ROOT, (int)VsHierarchyPropID.ExtObject, out var name) != 0
 				? null
 				: name as T;
 		}

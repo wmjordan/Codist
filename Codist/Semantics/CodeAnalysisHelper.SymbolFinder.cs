@@ -550,7 +550,7 @@ namespace Codist
 						: SymbolUsageKind.Write;
 				}
 				else if (n.IsAnyKind(SyntaxKind.PostIncrementExpression, SyntaxKind.PreIncrementExpression)
-					|| n is ArgumentSyntax r && (r.RefKindKeyword.IsAnyKind(SyntaxKind.RefKeyword, SyntaxKind.OutKeyword))) {
+					|| n is ArgumentSyntax r && r.RefKindKeyword.IsAnyKind(SyntaxKind.RefKeyword, SyntaxKind.OutKeyword)) {
 					return SymbolUsageKind.Write;
 				}
 			}
@@ -564,7 +564,7 @@ namespace Codist
 					return SymbolUsageKind.Catch;
 				}
 				if (possibleUsage.MatchFlags(SymbolUsageKind.TypeParameter)
-					&& (node.IsAnyKind(SyntaxKind.TypeArgumentList, SyntaxKind.TypeOfExpression))) {
+					&& node.IsAnyKind(SyntaxKind.TypeArgumentList, SyntaxKind.TypeOfExpression)) {
 					return SymbolUsageKind.TypeParameter;
 				}
 			}
