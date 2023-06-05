@@ -323,14 +323,6 @@ namespace Codist
 			return t;
 		}
 
-		public static bool IsAnyKind(this ISymbol symbol, SymbolKind kind, SymbolKind kind2) {
-			return symbol.Kind == kind || symbol.Kind == kind2;
-		}
-		public static bool IsAnyKind(this ISymbol symbol, SymbolKind kind, SymbolKind kind2, SymbolKind kind3) {
-			SymbolKind k;
-			return (k = symbol.Kind) == kind || k == kind2 || k == kind3;
-		}
-
 		public static ISymbol GetUnderlyingSymbol(this ISymbol symbol) {
 			switch (symbol.Kind) {
 				case SymbolKind.ArrayType:

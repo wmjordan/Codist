@@ -116,7 +116,7 @@ namespace Codist
 			#endregion
 			#region Returns
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ReturnsDoc)
-					&& (symbol.IsAnyKind(SymbolKind.Method, SymbolKind.Property)
+					&& (symbol.Kind.CeqAny(SymbolKind.Method, SymbolKind.Property)
 					|| symbol.Kind == SymbolKind.NamedType && ((INamedTypeSymbol)symbol).TypeKind == TypeKind.Delegate)) {
 				var returns = doc.Returns ?? doc.ExplicitInheritDoc?.Returns ?? doc.InheritedXmlDocs.FirstOrDefault(i => i.Returns != null)?.Returns;
 				if (returns != null && IsEmptyElement(returns) == false) {
