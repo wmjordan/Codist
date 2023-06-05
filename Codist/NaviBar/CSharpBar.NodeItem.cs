@@ -250,7 +250,7 @@ namespace Codist.NaviBar
 			void AddMemberDeclarations(SyntaxNode node, IEnumerable<SyntaxNode> scope, bool isExternal, bool includeDirectives) {
 				const byte UNDEFINED = 0xFF, TRUE = 1, FALSE = 0;
 				var directives = includeDirectives && Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.Region)
-					? node.GetDirectives(d => d.IsKind(SyntaxKind.RegionDirectiveTrivia) || d.IsKind(SyntaxKind.EndRegionDirectiveTrivia))
+					? node.GetDirectives(d => d.IsAnyKind(SyntaxKind.RegionDirectiveTrivia, SyntaxKind.EndRegionDirectiveTrivia))
 					: null;
 				byte regionJustStart = UNDEFINED; // undefined, prevent #endregion show up on top of menu items
 				bool selected = false;
@@ -291,7 +291,7 @@ namespace Codist.NaviBar
 							directives = null;
 						}
 					}
-					if (childKind == SyntaxKind.FieldDeclaration || childKind == SyntaxKind.EventFieldDeclaration) {
+					if (childKind.CeqAny(SyntaxKind.FieldDeclaration, SyntaxKind.EventFieldDeclaration)) {
 						AddVariables(((BaseFieldDeclarationSyntax)child).Declaration.Variables, isExternal, pos);
 					}
 					else {

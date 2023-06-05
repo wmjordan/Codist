@@ -1472,13 +1472,9 @@ namespace Codist
 			return tp?.Parameters.FirstOrDefault(p => p.Identifier.Text == name);
 		}
 		public static bool IsLineComment(this SyntaxTrivia trivia) {
-			switch (trivia.Kind()) {
-				case SyntaxKind.MultiLineCommentTrivia:
-				case SyntaxKind.SingleLineCommentTrivia:
-					return true;
-			}
-			return false;
+			return trivia.Kind().CeqAny(SyntaxKind.MultiLineCommentTrivia, SyntaxKind.SingleLineCommentTrivia);
 		}
+
 		static readonly char[] __SplitLineChars = new char[] { '\r', '\n' };
 		public static string GetCommentContent(this SyntaxTriviaList trivias) {
 			using (var rsb = ReusableStringBuilder.AcquireDefault(100)) {
@@ -1546,13 +1542,7 @@ namespace Codist
 				var n = node;
 				while ((n = n.Parent).IsKind(SyntaxKind.QualifiedName)) {
 				}
-				switch (n.Kind()) {
-					case SyntaxKind.UsingDirective:
-					case SyntaxKind.NamespaceDeclaration:
-						return node;
-					default:
-						return n;
-				}
+				return n.IsAnyKind(SyntaxKind.UsingDirective, SyntaxKind.NamespaceDeclaration) ? node : n;
 			}
 			return node;
 		}
@@ -1560,7 +1550,7 @@ namespace Codist
 		/// <summary>Navigates upward through ancestral axis and find out the first node reflecting the usage.</summary>
 		public static SyntaxNode GetNodePurpose(this SyntaxNode node) {
 			NameSyntax originName;
-			if (node.IsKind(SyntaxKind.IdentifierName) || node.IsKind(SyntaxKind.GenericName)) {
+			if (node.IsAnyKind(SyntaxKind.IdentifierName, SyntaxKind.GenericName)) {
 				originName = node as NameSyntax;
 				node = node.Parent;
 			}

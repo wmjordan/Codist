@@ -314,26 +314,26 @@ namespace Codist.NaviBar
 				_Span = span;
 				Content = new ThemedMenuText(span.ContentText);
 				var ct = span.Tag.ClassificationType;
-				if (ct == __H1 || ct == __DummyTag1) {
+				if (ct.CeqAny(__H1, __DummyTag1)) {
 					Content.FontWeight = FontWeights.Bold;
 					_ImageId = IconIds.Heading1;
 				}
-				else if (ct == __H2 || ct == __DummyTag2) {
+				else if (ct.CeqAny(__H2, __DummyTag2)) {
 					_ImageId = IconIds.Heading2;
 				}
-				else if (ct == __H3 || ct == __DummyTag3) {
+				else if (ct.CeqAny(__H3, __DummyTag3)) {
 					_ImageId = IconIds.Heading3;
 					Content.Padding = __H3Padding;
 				}
-				else if (ct == __H4 || ct == __DummyTag4) {
+				else if (ct.CeqAny(__H4, __DummyTag4)) {
 					_ImageId = IconIds.Heading4;
 					Content.Padding = __H4Padding;
 				}
-				else if (ct == __H5 || ct == __DummyTag5) {
+				else if (ct.CeqAny(__H5, __DummyTag5)) {
 					_ImageId = IconIds.Heading5;
 					Content.Padding = __H5Padding;
 				}
-				else if (ct == __H6 || ct == __DummyTag6) {
+				else if (ct.CeqAny(__H6, __DummyTag6)) {
 					_ImageId = IconIds.None;
 					Content.Padding = __H6Padding;
 				}

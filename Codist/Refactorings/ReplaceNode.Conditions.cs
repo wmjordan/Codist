@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using CLR;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -104,9 +105,10 @@ namespace Codist.Refactorings
 					&& (node = GetParentConditional(ifs)) != null
 					&& node.SyntaxTree.GetText().Lines.GetLineFromPosition(node.SpanStart)
 						.SpanIncludingLineBreak.Contains(ifs.FullSpan.Start) == false) {
-					_NodeKind = node.IsKind(SyntaxKind.IfStatement) ? "if"
-						: node.IsKind(SyntaxKind.ElseClause) ? "else"
-						: "while";
+					_NodeKind = node.Kind()
+						.Case(SyntaxKind.IfStatement, "if",
+							SyntaxKind.ElseClause, "else",
+							"while");
 					return true;
 				}
 				return false;
@@ -222,8 +224,7 @@ namespace Codist.Refactorings
 					&& (es = ifs.Else.Statement) != null
 					&& (es = GetSingleStatement(es)) != null
 					&& es.IsKind(k = ss.Kind())
-					&& (k == SyntaxKind.ReturnStatement
-						|| k == SyntaxKind.YieldReturnStatement
+					&& (k.CeqAny(SyntaxKind.ReturnStatement, SyntaxKind.YieldReturnStatement)
 						|| k == SyntaxKind.ExpressionStatement && ss.IsAssignedToSameTarget(es))
 					? (ifs, ss, es)
 					: default;

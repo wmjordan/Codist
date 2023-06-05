@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using CLR;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -81,10 +82,7 @@ namespace Codist.Refactorings
 			}
 
 			static bool IsWhitespaceTrivia(SyntaxTrivia trivia) {
-				var k = trivia.RawKind;
-				return k == 0
-					|| k == (int)SyntaxKind.WhitespaceTrivia
-					|| k == (int)SyntaxKind.EndOfLineTrivia;
+				return trivia.RawKind.CeqAny(0, (int)SyntaxKind.WhitespaceTrivia, (int)SyntaxKind.EndOfLineTrivia);
 			}
 		}
 
@@ -146,7 +144,7 @@ namespace Codist.Refactorings
 							}
 							goto default;
 						case EOL:
-							if (k == SyntaxKind.EndOfLineTrivia || k == SyntaxKind.WhitespaceTrivia) {
+							if (k.CeqAny(SyntaxKind.EndOfLineTrivia, SyntaxKind.WhitespaceTrivia)) {
 								continue;
 							}
 							goto default;

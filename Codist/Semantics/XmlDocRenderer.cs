@@ -91,7 +91,7 @@ namespace Codist
 			#endregion
 			#region Type parameter
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.TypeParameters)
-				&& (symbol.Kind == SymbolKind.Method || symbol.Kind == SymbolKind.NamedType)) {
+				&& symbol.Kind.CeqAny(SymbolKind.Method, SymbolKind.NamedType)) {
 				var typeParams = symbol.GetTypeParameters();
 				if (typeParams.IsDefaultOrEmpty == false) {
 					var para = new ThemedTipParagraph(IconIds.TypeParameters);
@@ -143,8 +143,7 @@ namespace Codist
 			#endregion
 			#region Remarks
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.RemarksDoc)
-					&& symbol.Kind != SymbolKind.Parameter
-					&& symbol.Kind != SymbolKind.TypeParameter) {
+					&& symbol.Kind.CeqAny(SymbolKind.Parameter, SymbolKind.TypeParameter) == false) {
 				var remarks = doc.Remarks ?? doc.ExplicitInheritDoc?.Remarks ?? doc.InheritedXmlDocs.FirstOrDefault(i => i.Remarks != null)?.Remarks;
 				if (remarks != null && IsEmptyElement(remarks) == false) {
 					tip.Append(new ThemedTipParagraph(IconIds.RemarksXmlDoc, new ThemedTipText()

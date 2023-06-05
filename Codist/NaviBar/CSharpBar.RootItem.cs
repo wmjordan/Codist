@@ -218,11 +218,11 @@ namespace Codist.NaviBar
 			}
 			void ChangeSearchScope(object sender, KeyEventArgs e) {
 				if (Keyboard.Modifiers == ModifierKeys.None) {
-					if (e.Key == Key.OemPlus || e.Key == Key.Add) {
+					if (e.Key.CeqAny(Key.OemPlus, Key.Add)) {
 						_ScopeBox.Filter = ScopeType.ActiveProject;
 						e.Handled = true;
 					}
-					else if (e.Key == Key.OemMinus || e.Key == Key.Subtract) {
+					else if (e.Key.CeqAny(Key.OemMinus, Key.Subtract)) {
 						_ScopeBox.Filter = ScopeType.ActiveDocument;
 						e.Handled = true;
 					}

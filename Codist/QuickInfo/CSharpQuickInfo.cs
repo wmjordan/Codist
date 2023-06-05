@@ -318,7 +318,7 @@ namespace Codist.QuickInfo
 						&& token.Span.Length >= 8) {
 							container.Add(new ThemedTipText(token.ValueText) { FontSize = ThemeHelper.ToolTipFontSize * 2 });
 						}
-						else if (node.IsKind(SyntaxKind.Block) || node.IsKind(SyntaxKind.SwitchStatement)) {
+						else if (node.IsAnyKind(SyntaxKind.Block, SyntaxKind.SwitchStatement)) {
 							ShowBlockInfo(container, currentSnapshot, node, semanticModel);
 						}
 						isConvertedType = true;
@@ -328,7 +328,7 @@ namespace Codist.QuickInfo
 						isConvertedType = true;
 						break;
 					default:
-						if (node.IsKind(SyntaxKind.Block) || node.IsKind(SyntaxKind.SwitchStatement)) {
+						if (node.IsAnyKind(SyntaxKind.Block, SyntaxKind.SwitchStatement)) {
 							ShowBlockInfo(container, currentSnapshot, node, semanticModel);
 						}
 						break;

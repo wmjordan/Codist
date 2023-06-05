@@ -92,12 +92,8 @@ namespace Codist.SmartBars
 						case SyntaxKind.GetKeyword:
 						case CodeAnalysisHelper.InitKeyword:
 							if (nodeKind.IsDeclaration()
-								|| nodeKind == SyntaxKind.PredefinedType
+								|| nodeKind.CeqAny(SyntaxKind.PredefinedType, SyntaxKind.Parameter, SyntaxKind.VariableDeclarator, SyntaxKind.ForEachStatement, SyntaxKind.SingleVariableDesignation)
 								|| node is TypeSyntax
-								|| nodeKind == SyntaxKind.Parameter
-								|| nodeKind == SyntaxKind.VariableDeclarator
-								|| nodeKind == SyntaxKind.ForEachStatement
-								|| nodeKind == SyntaxKind.SingleVariableDesignation
 								|| node is AccessorDeclarationSyntax) {
 								// selection is within a symbol
 								_Symbol = await _Context.GetSymbolAsync(cancellationToken);
@@ -145,8 +141,7 @@ namespace Codist.SmartBars
 							}
 							if (View.Selection.StreamSelectionSpan.Length < 4
 								&& (tokenKind >= SyntaxKind.TildeToken && tokenKind <= SyntaxKind.PercentEqualsToken
-									|| tokenKind == SyntaxKind.IsKeyword
-									|| tokenKind == SyntaxKind.AsKeyword)
+									|| tokenKind.CeqAny(SyntaxKind.IsKeyword, SyntaxKind.AsKeyword))
 								&& SelectionIs<SyntaxNode>()) {
 								AddCommand(MyToolBar, IconIds.SelectBlock, R.CMD_SelectBlock, SelectNodeAsKind<SyntaxNode>);
 							}
@@ -160,10 +155,10 @@ namespace Codist.SmartBars
 					AddDirectiveCommands();
 				}
 				if (isReadOnly == false) {
-					if (tokenKind == SyntaxKind.TrueKeyword || tokenKind == SyntaxKind.FalseKeyword) {
+					if (tokenKind.CeqAny(SyntaxKind.TrueKeyword, SyntaxKind.FalseKeyword)) {
 						AddCommand(MyToolBar, IconIds.ToggleValue, R.CMD_ToggleValue, ctx => Replace(ctx, v => v == "true" ? "false" : "true", true));
 					}
-					else if (tokenKind == SyntaxKind.ExplicitKeyword || tokenKind == SyntaxKind.ImplicitKeyword) {
+					else if (tokenKind.CeqAny(SyntaxKind.ExplicitKeyword, SyntaxKind.ImplicitKeyword)) {
 						AddCommand(MyToolBar, IconIds.ToggleValue, R.CMD_ToggleOperator, ctx => Replace(ctx, v => v == "implicit" ? "explicit" : "implicit", true));
 					}
 					if (nodeKind == SyntaxKind.VariableDeclarator) {
@@ -223,7 +218,7 @@ namespace Codist.SmartBars
 		}
 
 		void AddSymbolCommands(SyntaxKind nodeKind) {
-			if (nodeKind == SyntaxKind.IdentifierName || nodeKind == SyntaxKind.GenericName) {
+			if (nodeKind.CeqAny(SyntaxKind.IdentifierName, SyntaxKind.GenericName)) {
 				AddEditorCommand(MyToolBar, IconIds.GoToDefinition, "Edit.GoToDefinition", R.CMD_GoToDefinitionPeek, "Edit.PeekDefinition");
 			}
 			AddCommand(MyToolBar, IconIds.SymbolAnalysis, R.CMD_AnalyzeSymbol, ShowSymbolContextMenu);
@@ -270,8 +265,7 @@ namespace Codist.SmartBars
 			}
 
 			bool IsTypeNamedMethod(IMethodSymbol m) {
-				var k = m.MethodKind;
-				return k == MethodKind.Constructor || k == MethodKind.StaticConstructor || k == MethodKind.Destructor;
+				return m.MethodKind.CeqAny(MethodKind.Constructor, MethodKind.StaticConstructor, MethodKind.Destructor);
 			}
 
 			async Task SelectSymbolDefinitionAndReferencesAsync(IMultiSelectionBroker selections, ISymbol symbol, int tokenLength, Span selectionOffsetSpan) {

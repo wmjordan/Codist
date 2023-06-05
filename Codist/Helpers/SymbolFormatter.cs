@@ -247,7 +247,7 @@ namespace Codist
 				case SymbolKind.TypeParameter:
 					if (symbol is ITypeParameterSymbol tp) {
 						if (tp.Variance != VarianceKind.None) {
-							signature.Inlines.InsertBefore(signature.Inlines.FirstInline, (tp.Variance == VarianceKind.Out ? "out " : "in ").Render(Keyword));
+							signature.Inlines.InsertBefore(signature.Inlines.FirstInline, tp.Variance.Case(VarianceKind.Out, "out ", "in ").Render(Keyword));
 						}
 						if (tp.HasConstraint()) {
 							signature.Append(": ");
@@ -997,10 +997,7 @@ namespace Codist
 			var a = item.AttributeClass.Name;
 			block.Add("[".Render(PlainText));
 			if (attributeType != 0) {
-				block.Add((attributeType == 1 ? "return"
-					: attributeType == 2 ? "field"
-					: attributeType == 3 ? "assembly"
-					: "?").Render(Keyword));
+				block.Add(attributeType.Switch(String.Empty, "return", "field", "assembly", "?").Render(Keyword));
 				block.Add(": ".Render(PlainText));
 			}
 			block.Add(WpfHelper.Render(item.AttributeConstructor ?? (ISymbol)item.AttributeClass, a.EndsWith("Attribute", StringComparison.Ordinal) ? a.Substring(0, a.Length - 9) : a, Class));
@@ -1024,7 +1021,7 @@ namespace Codist
 				if (++i > 1) {
 					block.Add(", ".Render(PlainText));
 				}
-				var attrMember = item.AttributeClass.GetMembers(arg.Key).FirstOrDefault(m => m.Kind == SymbolKind.Field || m.Kind == SymbolKind.Property);
+				var attrMember = item.AttributeClass.GetMembers(arg.Key).FirstOrDefault(m => m.Kind.CeqAny(SymbolKind.Field, SymbolKind.Property));
 				if (attrMember != null) {
 					block.Add(arg.Key.Render(attrMember.Kind == SymbolKind.Property ? Property : Field));
 				}

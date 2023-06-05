@@ -1280,9 +1280,7 @@ namespace Codist
 
 		public static bool IsAccessible(this ISymbol symbol, bool checkContainingType) {
 			return symbol != null
-				&& (symbol.DeclaredAccessibility == Accessibility.Public
-					|| symbol.DeclaredAccessibility == Accessibility.Protected
-					|| symbol.DeclaredAccessibility == Accessibility.ProtectedOrInternal
+				&& (symbol.DeclaredAccessibility.CeqAny(Accessibility.Public, Accessibility.Protected, Accessibility.ProtectedOrInternal)
 					|| symbol.ContainingAssembly.GetSourceType() != AssemblySource.Metadata)
 				&& (checkContainingType == false || symbol.ContainingType?.IsAccessible(true) != false);
 		}
