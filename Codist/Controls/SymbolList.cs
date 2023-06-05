@@ -657,26 +657,27 @@ namespace Codist.Controls
 			}
 
 			async void Handler(SymbolItem i, MouseEventArgs args) {
-				if (await SemanticContext.UpdateAsync(default).ConfigureAwait(false)) {
-					await i.RefreshSyntaxNodeAsync().ConfigureAwait(false);
-					await SyncHelper.SwitchToMainThreadAsync();
-					var s = args.Source as FrameworkElement;
-					MouseMove -= BeginDragHandler;
-					DragOver += DragOverHandler;
-					Drop += DropHandler;
-					DragEnter += DragOverHandler;
-					DragLeave += DragLeaveHandler;
-					QueryContinueDrag += QueryContinueDragHandler;
-					var r = DragDrop.DoDragDrop(s, i, DragDropEffects.Copy | DragDropEffects.Move);
-					if (Footer is TextBlock t) {
-						t.Text = null;
-					}
-					DragOver -= DragOverHandler;
-					Drop -= DropHandler;
-					DragEnter -= DragOverHandler;
-					DragLeave -= DragLeaveHandler;
-					QueryContinueDrag -= QueryContinueDragHandler;
+				if (await SemanticContext.UpdateAsync(default).ConfigureAwait(false) == false) {
+					return;
 				}
+				await i.RefreshSyntaxNodeAsync().ConfigureAwait(false);
+				await SyncHelper.SwitchToMainThreadAsync();
+				var s = args.Source as FrameworkElement;
+				MouseMove -= BeginDragHandler;
+				DragOver += DragOverHandler;
+				Drop += DropHandler;
+				DragEnter += DragOverHandler;
+				DragLeave += DragLeaveHandler;
+				QueryContinueDrag += QueryContinueDragHandler;
+				var r = DragDrop.DoDragDrop(s, i, DragDropEffects.Copy | DragDropEffects.Move);
+				if (Footer is TextBlock t) {
+					t.Text = null;
+				}
+				DragOver -= DragOverHandler;
+				Drop -= DropHandler;
+				DragEnter -= DragOverHandler;
+				DragLeave -= DragLeaveHandler;
+				QueryContinueDrag -= QueryContinueDragHandler;
 			}
 		}
 
@@ -710,6 +711,7 @@ namespace Codist.Controls
 			e.Handled = true;
 		}
 
+		[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 		async void DropHandler(object sender, DragEventArgs e) {
 			var li = GetDragEventTarget(e);
 			SymbolItem source, target;

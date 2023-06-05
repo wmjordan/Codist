@@ -118,10 +118,9 @@ namespace Codist.QuickInfo
 
 			(string name, string ext) DeconstructFileName(string fileName) {
 				int i = fileName.LastIndexOf('.');
-				if (i >= 0) {
-					return (fileName.Substring(0, i), fileName.Substring(i));
-				}
-				return (fileName, String.Empty);
+				return i >= 0
+					? (fileName.Substring(0, i), fileName.Substring(i))
+					: (fileName, String.Empty);
 			}
 		}
 

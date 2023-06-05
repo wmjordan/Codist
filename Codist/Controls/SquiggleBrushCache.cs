@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Windows;
 using System.Windows.Media;
 using System.Windows.Shapes;
 
@@ -36,7 +37,7 @@ namespace Codist.Controls
 			var drawingBrush = new DrawingBrush {
 				Stretch = Stretch.None,
 				TileMode = TileMode.Tile,
-				Viewport = new System.Windows.Rect(0.0, -0.6, 6.0, 4.3),
+				Viewport = new Rect(0.0, -0.6, 6.0, 4.3),
 				ViewportUnits = BrushMappingMode.Absolute,
 				Drawing = geometryDrawing
 			};
@@ -47,8 +48,8 @@ namespace Codist.Controls
 				Width = 200,
 				Height = 3,
 				Fill = drawingBrush,
-				VerticalAlignment = System.Windows.VerticalAlignment.Bottom,
-				HorizontalAlignment = System.Windows.HorizontalAlignment.Left
+				VerticalAlignment = VerticalAlignment.Bottom,
+				HorizontalAlignment = HorizontalAlignment.Left
 			}) { Stretch = Stretch.UniformToFill };
 		}
 	}
