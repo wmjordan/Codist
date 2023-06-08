@@ -1102,7 +1102,7 @@ namespace Codist.QuickInfo
 			else if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.NumericValues)) {
 				var s = ToolTipHelper.ShowNumericForms(value);
 				if (s != null) {
-					if (symbol != null) {
+					if (symbol?.ContainingType?.TypeKind == TypeKind.Enum) {
 						qiContent.ShowEnumQuickInfo(symbol.ContainingType, false);
 					}
 					qiContent.Add(s);
