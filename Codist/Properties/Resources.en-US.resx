@@ -1039,11 +1039,11 @@ ALL existing items will be REPLACE by default items.</value>
   <data name="OT_InterfacesTip" xml:space="preserve">
     <value>Displays interfaces implemented by the symbol</value>
   </data>
-  <data name="OT_LimitItemSize" xml:space="preserve">
-    <value>Limit Item Size</value>
+  <data name="OT_LimitSize" xml:space="preserve">
+    <value>Limit Content Size</value>
   </data>
-  <data name="OT_LimitItemSizeNote" xml:space="preserve">
-    <value>Limit the maximum size of each items in Quick Info, preventing any item from taking up the whole screen</value>
+  <data name="OT_LimitContentSizeNote" xml:space="preserve">
+    <value>Limit the maximum size of Quick Info popup content, preventing it from taking up the whole screen</value>
   </data>
   <data name="OT_LineNumber" xml:space="preserve">
     <value>Line number</value>

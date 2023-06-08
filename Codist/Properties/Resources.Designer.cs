@@ -3543,20 +3543,20 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Limit Item Size.
+        ///   Looks up a localized string similar to Limit the maximum size of Quick Info popup content, preventing it from taking up the whole screen.
         /// </summary>
-        internal static string OT_LimitItemSize {
+        internal static string OT_LimitContentSizeNote {
             get {
-                return ResourceManager.GetString("OT_LimitItemSize", resourceCulture);
+                return ResourceManager.GetString("OT_LimitContentSizeNote", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Limit the maximum size of each items in Quick Info, preventing any item from taking up the whole screen.
+        ///   Looks up a localized string similar to Limit Content Size.
         /// </summary>
-        internal static string OT_LimitItemSizeNote {
+        internal static string OT_LimitSize {
             get {
-                return ResourceManager.GetString("OT_LimitItemSizeNote", resourceCulture);
+                return ResourceManager.GetString("OT_LimitSize", resourceCulture);
             }
         }
         

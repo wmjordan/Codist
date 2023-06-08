@@ -297,17 +297,17 @@ namespace Codist.Options
 					_Color = o.CreateOptionBox(QuickInfoOptions.Color, UpdateConfig, R.OT_ColorInfo)
 						.SetLazyToolTip(() => R.OT_ColorInfoTip),
 
-					new TitleBox(R.OT_LimitItemSize),
-					new DescriptionBox(R.OT_LimitItemSizeNote),
+					new TitleBox(R.OT_LimitSize),
+					new DescriptionBox(R.OT_LimitContentSizeNote),
 					new WrapPanel {
 						Children = {
 							new StackPanel().MakeHorizontal()
 								.Add(new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin }.Append(R.OT_MaxWidth))
-								.Add(_MaxWidth = new Controls.IntegerBox((int)Config.Instance.QuickInfo.MaxWidth) { Minimum = 0, Maximum = 5000, Step = 100 })
+								.Add(_MaxWidth = new Controls.IntegerBox(Config.Instance.QuickInfo.MaxWidth) { Minimum = 0, Maximum = 5000, Step = 100 })
 								.SetLazyToolTip(() => R.OT_MaxWidthTip),
 							new StackPanel().MakeHorizontal()
 								.Add(new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin }.Append(R.OT_MaxHeight))
-								.Add(_MaxHeight = new Controls.IntegerBox((int)Config.Instance.QuickInfo.MaxHeight) { Minimum = 0, Maximum = 5000, Step = 50 })
+								.Add(_MaxHeight = new Controls.IntegerBox(Config.Instance.QuickInfo.MaxHeight) { Minimum = 0, Maximum = 5000, Step = 50 })
 								.SetLazyToolTip(() => R.OT_MaxHeightTip),
 						}
 					}.ForEachChild((FrameworkElement b) => b.MinWidth = MinColumnWidth),
@@ -406,8 +406,8 @@ namespace Codist.Options
 			protected override void LoadConfig(Config config) {
 				var o = config.QuickInfoOptions;
 				Array.ForEach(_Options, i => i.UpdateWithOption(o));
-				_MaxHeight.Value = (int)config.QuickInfo.MaxHeight;
-				_MaxWidth.Value = (int)config.QuickInfo.MaxWidth;
+				_MaxHeight.Value = config.QuickInfo.MaxHeight;
+				_MaxWidth.Value = config.QuickInfo.MaxWidth;
 				_DisplayDelay.Value = config.QuickInfo.DelayDisplay;
 				_BackgroundButton.Color = config.QuickInfo.BackColor;
 			}

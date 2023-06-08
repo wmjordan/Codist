@@ -959,11 +959,11 @@ Shift：粘贴并选中下一项（整个单词）</value>
   <data name="OT_InterfacesTip" xml:space="preserve">
     <value>显示成员实现的接口</value>
   </data>
-  <data name="OT_LimitItemSize" xml:space="preserve">
-    <value>限制内容条目尺寸</value>
+  <data name="OT_LimitSize" xml:space="preserve">
+    <value>限制内容尺寸</value>
   </data>
-  <data name="OT_LimitItemSizeNote" xml:space="preserve">
-    <value>限制代码提示中内容条目的最大尺寸，避免提示内容占满屏幕</value>
+  <data name="OT_LimitContentSizeNote" xml:space="preserve">
+    <value>限制代码提示内容的最大尺寸，避免提示窗口占满屏幕</value>
   </data>
   <data name="OT_LineNumber" xml:space="preserve">
     <value>行号</value>
