@@ -193,8 +193,8 @@ namespace Codist
 			if (summary != null) {
 				var docContent = tip.AddTextBlock();
 				new XmlDocRenderer(compilation, SymbolFormatter.Instance).Render(summary, docContent);
-				if (Config.Instance.QuickInfoMaxWidth >= 100) {
-					tip.MaxWidth = Config.Instance.QuickInfoMaxWidth;
+				if (Config.Instance.QuickInfo.MaxWidth >= 100) {
+					tip.MaxWidth = Config.Instance.QuickInfo.MaxWidth;
 				}
 			}
 		}

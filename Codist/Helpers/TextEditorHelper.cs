@@ -799,6 +799,14 @@ namespace Codist
 			return buffer;
 		}
 
+		public static string GetTriggerText(this IAsyncQuickInfoSession session) {
+			return session.ApplicableToSpan.GetText(session.TextView.TextSnapshot);
+		}
+
+		public static SnapshotSpan GetTriggerSpan(this IAsyncQuickInfoSession session) {
+			return session.ApplicableToSpan.GetSpan(session.TextView.TextSnapshot);
+		}
+
 		/// <summary>
 		/// <para>When we click from the Symbol Link or the context menu command on the Quick Info,
 		/// <see cref="OpenFile"/> command will be executed and caret will be moved to the new place.</para>

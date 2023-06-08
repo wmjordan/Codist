@@ -12,12 +12,14 @@ using WpfBrush = System.Windows.Media.Brush;
 using WpfBrushes = System.Windows.Media.Brushes;
 using WpfColor = System.Windows.Media.Color;
 using WpfText = System.Windows.Media.FormattedText;
+using Screen = System.Windows.Forms.Screen;
 
 namespace Codist
 {
 	static partial class WpfHelper
 	{
 		static readonly string __DummyToolTip = String.Empty;
+
 		internal const int IconRightMargin = 5;
 		internal const int SmallMarginSize = 3;
 		internal const double DimmedOpacity = 0.3;
@@ -301,11 +303,11 @@ namespace Codist
 			if (element == null) {
 				return null;
 			}
-			if (Config.Instance.QuickInfoMaxHeight > 0) {
-				element.MaxHeight = Config.Instance.QuickInfoMaxHeight;
+			if (Config.Instance.QuickInfo.MaxHeight > 0) {
+				element.MaxHeight = Config.Instance.QuickInfo.MaxHeight;
 			}
-			if (Config.Instance.QuickInfoMaxWidth > 0) {
-				element.MaxWidth = Config.Instance.QuickInfoMaxWidth;
+			if (Config.Instance.QuickInfo.MaxWidth > 0) {
+				element.MaxWidth = Config.Instance.QuickInfo.MaxWidth;
 				if (element is TextBlock t && t.TextWrapping == TextWrapping.NoWrap) {
 					t.TextWrapping = TextWrapping.Wrap;
 				}
@@ -760,6 +762,25 @@ namespace Codist
 			return (typeface.Weight == FontWeights.Normal || typeface.Weight == FontWeights.Bold)
 				 && (typeface.Style == FontStyles.Normal || typeface.Style == FontStyles.Italic || typeface.Style == FontStyles.Oblique)
 				 && (typeface.Stretch == FontStretches.Normal);
+		}
+		#endregion
+
+		#region Screen size
+		static Size __ScreenSize = GetMainWindowScreenSize();
+		public static Size GetActiveScreenSize() {
+			return __ScreenSize;
+		}
+		static Size GetMainWindowScreenSize() {
+			var screen = Screen.FromHandle(new System.Windows.Interop.WindowInteropHelper(Application.Current.MainWindow).Handle);
+			var size = screen.Bounds.Size;
+			if (__ScreenSize.Width == 0) {
+				Application.Current.MainWindow.LocationChanged += MainWindow_LocationChanged;
+			}
+			return new Size(size.Width, size.Height);
+		}
+
+		static void MainWindow_LocationChanged(object sender, EventArgs e) {
+			__ScreenSize = GetMainWindowScreenSize();
 		}
 		#endregion
 

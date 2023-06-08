@@ -79,8 +79,10 @@ namespace Codist
 		[DefaultValue(0d)]
 		public double BottomSpace { get; set; }
 		[DefaultValue(0d)]
+		[Obsolete("Use QuickInfoOptions.MaxWidth")]
 		public double QuickInfoMaxWidth { get; set; }
 		[DefaultValue(0d)]
+		[Obsolete("Use QuickInfoOptions.MaxHeight")]
 		public double QuickInfoMaxHeight { get; set; }
 		[DefaultValue(0d)]
 		public double QuickInfoXmlDocExtraHeight { get; set; }
@@ -601,6 +603,12 @@ namespace Codist
 		[DefaultValue(0)]
 		public int DelayDisplay { get => _DelayDisplay; set => _DelayDisplay = Math.Max(0, value); }
 
+		[DefaultValue(0)]
+		public int MaxWidth { get; set; }
+
+		[DefaultValue(0)]
+		public int MaxHeight { get; set; }
+
 		internal Color BackColor { get => _BackColor; set => _BackColor = value; }
 	}
 	sealed class SearchEngine
@@ -613,13 +621,14 @@ namespace Codist
 		public string Name { get; set; }
 		public string Pattern { get; set; }
 	}
+
 	sealed class WrapText
 	{
 		string _Prefix, _Suffix, _Pattern, _Substitution;
 		char _Indicator;
 		public const char DefaultIndicator = '$';
 		public WrapText(string pattern, string name = null, char indicator = DefaultIndicator) {
-			Indicator = indicator;
+			_Indicator = indicator;
 			Pattern = pattern;
 			Name = name;
 		}

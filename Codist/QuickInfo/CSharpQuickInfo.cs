@@ -63,10 +63,11 @@ namespace Codist.QuickInfo
 			var skipTriggerPointCheck = false;
 			var isConvertedType = false;
 			symbol = null;
-			var overrider = Config.Instance.QuickInfoOptions.HasAnyFlag(QuickInfoOptions.QuickInfoOverride)
+			// the Quick Info override
+			var o = Config.Instance.QuickInfoOptions.HasAnyFlag(QuickInfoOptions.QuickInfoOverride)
 				? QuickInfoOverride.CreateOverride(session)
 				: null;
-			var container = new InfoContainer(overrider);
+			var container = new InfoContainer();
 			ClassifyToken:
 			switch (token.Kind()) {
 				case SyntaxKind.WhitespaceTrivia:
@@ -90,14 +91,14 @@ namespace Codist.QuickInfo
 						isConvertedType = true;
 						goto PROCESS;
 					}
-					if (overrider != null) {
-						overrider.OverrideBuiltInXmlDoc = false;
+					if (o != null) {
+						o.OverrideBuiltInXmlDoc = false;
 					}
 					ShowBlockInfo(container, currentSnapshot, node, semanticModel);
 					goto RETURN;
 				case SyntaxKind.CloseBraceToken:
-					if (overrider != null) {
-						overrider.OverrideBuiltInXmlDoc = false;
+					if (o != null) {
+						o.OverrideBuiltInXmlDoc = false;
 					}
 					if ((node = unitCompilation.FindNode(token.Span)).IsKind(SyntaxKind.Interpolation)) {
 						goto case SyntaxKind.CommaToken;
@@ -344,7 +345,7 @@ namespace Codist.QuickInfo
 				}
 				ctor = node.Parent as ObjectCreationExpressionSyntax;
 				OverrideDocumentation(node,
-					overrider,
+					o,
 					ctor?.Type == node
 						? semanticModel.GetSymbolInfo(ctor, cancellationToken).Symbol ?? symbol
 						: symbol,
@@ -368,15 +369,13 @@ namespace Codist.QuickInfo
 					symbol = symbol.ContainingType;
 				}
 			}
-			overrider?.ApplyClickAndGo(symbol);
+			o?.ApplyClickAndGo(symbol);
 			if (container.ItemCount == 0) {
 				if (symbol != null) {
 					// place holder
-					container.Add(new ContentPresenter());
+					container.Add(new ContentPresenter() { Name = "SymbolPlaceHolder" });
 				}
-				else {
-					return null;
-				}
+				return null;
 			}
 			return CreateQuickInfoItem(session, token, container.ToUI().Tag());
 		}
@@ -623,9 +622,6 @@ namespace Codist.QuickInfo
 					ShowNamespaceInfo(qiContent, symbol as INamespaceSymbol);
 					break;
 			}
-			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.SymbolLocation)) {
-				ShowSymbolLocationInfo(qiContent, semanticModel.Compilation, symbol);
-			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
 				&& (node.Parent.IsKind(SyntaxKind.Argument) == false || Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter) == false) /*the signature has already been displayed there*/) {
 				var st = symbol.GetReturnType();
@@ -639,6 +635,9 @@ namespace Codist.QuickInfo
 						)));
 				}
 			}
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.SymbolLocation)) {
+				ShowSymbolLocationInfo(qiContent, semanticModel.Compilation, symbol);
+			}
 		}
 
 		static void ShowSymbolLocationInfo(InfoContainer qiContent, Compilation compilation, ISymbol symbol) {
@@ -647,7 +646,8 @@ namespace Codist.QuickInfo
 				return;
 			}
 			var asmText = new ThemedTipText(R.T_Assembly, true);
-			var item = new ThemedTipDocument().AppendParagraph(IconIds.Module, asmText);
+			var item = new ThemedTipDocument { Name = "SymbolLocation" }
+				.AppendParagraph(IconIds.Module, asmText);
 			if (p.Length > 0) {
 				asmText.AppendFileLink(f, p);
 			}

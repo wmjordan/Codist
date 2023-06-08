@@ -28,8 +28,8 @@ namespace Codist.Controls
 			if (content != null) {
 				Content.Text = content;
 			}
-			if (Config.Instance.QuickInfoMaxWidth > 0) {
-				MaxWidth = Config.Instance.QuickInfoMaxWidth;
+			if (Config.Instance.QuickInfo.MaxWidth > 0) {
+				MaxWidth = Config.Instance.QuickInfo.MaxWidth;
 			}
 			this.SetProperty(TextBlock.FontFamilyProperty, ThemeHelper.ToolTipFont)
 				.SetProperty(TextBlock.FontSizeProperty, ThemeHelper.ToolTipFontSize);

@@ -23,7 +23,7 @@ namespace Codist
 				Text = text,
 				TextAlignment = alignLeft ? TextAlignment.Left : TextAlignment.Right,
 				MinWidth = 180,
-				MaxWidth = Config.Instance.QuickInfoMaxWidth > 180 ? Config.Instance.QuickInfoMaxWidth - 100 : 180,
+				MaxWidth = Config.Instance.QuickInfo.MaxWidth > 180 ? Config.Instance.QuickInfo.MaxWidth - 100 : 180,
 				TextWrapping = TextWrapping.Wrap,
 				VerticalScrollBarVisibility = ScrollBarVisibility.Auto
 			});

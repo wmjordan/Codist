@@ -282,7 +282,7 @@ namespace Codist.Options
 			readonly OptionBox<QuickInfoOptions> _OverrideDefaultDocumentation, _DocumentationFromBaseType, _DocumentationFromInheritDoc, _TextOnlyDoc, _OrdinaryDoc, _ReturnsDoc, _RemarksDoc, _ExceptionDoc, _SeeAlsoDoc, _ExampleDoc, _AlternativeStyle, _ContainingType, _CodeFontForXmlDocSymbol;
 			readonly OptionBox<QuickInfoOptions> _NodeRange, _Attributes, _BaseType, _Declaration, _SymbolLocation, _Interfaces, _NumericValues, _String, _Parameter, _InterfaceImplementations, _TypeParameters, _NamespaceTypes, _MethodOverload, _InterfaceMembers, _EnumMembers;
 			readonly OptionBox<QuickInfoOptions>[] _Options;
-			readonly Controls.IntegerBox _MaxWidth, _MaxHeight, _ExtraHeight, _DisplayDelay;
+			readonly Controls.IntegerBox _MaxWidth, _MaxHeight, _DisplayDelay;
 			readonly ColorButton _BackgroundButton;
 
 			public PageControl(OptionsPage page) : base(page) {
@@ -303,19 +303,15 @@ namespace Codist.Options
 						Children = {
 							new StackPanel().MakeHorizontal()
 								.Add(new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin }.Append(R.OT_MaxWidth))
-								.Add(_MaxWidth = new Controls.IntegerBox((int)Config.Instance.QuickInfoMaxWidth) { Minimum = 0, Maximum = 5000, Step = 100 })
+								.Add(_MaxWidth = new Controls.IntegerBox((int)Config.Instance.QuickInfo.MaxWidth) { Minimum = 0, Maximum = 5000, Step = 100 })
 								.SetLazyToolTip(() => R.OT_MaxWidthTip),
 							new StackPanel().MakeHorizontal()
 								.Add(new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin }.Append(R.OT_MaxHeight))
-								.Add(_MaxHeight = new Controls.IntegerBox((int)Config.Instance.QuickInfoMaxHeight) { Minimum = 0, Maximum = 5000, Step = 50 })
+								.Add(_MaxHeight = new Controls.IntegerBox((int)Config.Instance.QuickInfo.MaxHeight) { Minimum = 0, Maximum = 5000, Step = 50 })
 								.SetLazyToolTip(() => R.OT_MaxHeightTip),
 						}
 					}.ForEachChild((FrameworkElement b) => b.MinWidth = MinColumnWidth),
 					new DescriptionBox(R.OT_UnlimitedSize),
-					new StackPanel().MakeHorizontal()
-						.Add(new TextBlock { MinWidth = 240, Margin = WpfHelper.SmallHorizontalMargin, Text = R.OT_ExtraXmlDocSize })
-						.Add(_ExtraHeight = new Controls.IntegerBox((int)Config.Instance.QuickInfoXmlDocExtraHeight) { Minimum = 0, Maximum = 1000, Step = 50 })
-						.SetLazyToolTip(() => R.OT_ExtraXmlDocSizeTip),
 
 					new TitleBox(R.OT_DelayDisplay),
 					new DescriptionBox(R.OT_DelayDisplayNote),
@@ -397,7 +393,6 @@ namespace Codist.Options
 
 				_MaxHeight.ValueChanged += UpdateQuickInfoValue;
 				_MaxWidth.ValueChanged += UpdateQuickInfoValue;
-				_ExtraHeight.ValueChanged += UpdateQuickInfoValue;
 				_DisplayDelay.ValueChanged += UpdateQuickInfoValue;
 				_Options = new[] { _DisableUntilShift, _CtrlSuppress, _Selection, _Color, _OverrideDefaultDocumentation, _DocumentationFromBaseType, _DocumentationFromInheritDoc, _TextOnlyDoc, _ReturnsDoc, _RemarksDoc, _ExceptionDoc, _SeeAlsoDoc, _ExampleDoc, _AlternativeStyle, _ContainingType, _CodeFontForXmlDocSymbol, _Attributes, _BaseType, _Declaration, _EnumMembers, _SymbolLocation, _Interfaces, _NumericValues, _String, _Parameter, _InterfaceImplementations, _TypeParameters, /*_NamespaceTypes, */_MethodOverload, _InterfaceMembers };
 				foreach (var item in new[] { _DocumentationFromBaseType, _DocumentationFromInheritDoc, _TextOnlyDoc, _OrdinaryDoc, _ReturnsDoc, _RemarksDoc, _ExceptionDoc, _SeeAlsoDoc, _ExampleDoc, _ContainingType, _CodeFontForXmlDocSymbol }) {
@@ -411,9 +406,8 @@ namespace Codist.Options
 			protected override void LoadConfig(Config config) {
 				var o = config.QuickInfoOptions;
 				Array.ForEach(_Options, i => i.UpdateWithOption(o));
-				_MaxHeight.Value = (int)config.QuickInfoMaxHeight;
-				_MaxWidth.Value = (int)config.QuickInfoMaxWidth;
-				_ExtraHeight.Value = (int)config.QuickInfoXmlDocExtraHeight;
+				_MaxHeight.Value = (int)config.QuickInfo.MaxHeight;
+				_MaxWidth.Value = (int)config.QuickInfo.MaxWidth;
 				_DisplayDelay.Value = config.QuickInfo.DelayDisplay;
 				_BackgroundButton.Color = config.QuickInfo.BackColor;
 			}
@@ -428,13 +422,10 @@ namespace Codist.Options
 
 			void UpdateQuickInfoValue(object sender, DependencyPropertyChangedEventArgs args) {
 				if (sender == _MaxHeight) {
-					Config.Instance.QuickInfoMaxHeight = _MaxHeight.Value;
+					Config.Instance.QuickInfo.MaxHeight = _MaxHeight.Value;
 				}
 				else if (sender == _MaxWidth) {
-					Config.Instance.QuickInfoMaxWidth = _MaxWidth.Value;
-				}
-				else if (sender == _ExtraHeight) {
-					Config.Instance.QuickInfoXmlDocExtraHeight = _ExtraHeight.Value;
+					Config.Instance.QuickInfo.MaxWidth = _MaxWidth.Value;
 				}
 				else if (sender == _DisplayDelay) {
 					Config.Instance.QuickInfo.DelayDisplay = _DisplayDelay.Value;

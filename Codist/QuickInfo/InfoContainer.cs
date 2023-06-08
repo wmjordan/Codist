@@ -8,11 +8,6 @@ namespace Codist.QuickInfo
 	sealed class InfoContainer
 	{
 		readonly ImmutableArray<object>.Builder _List = ImmutableArray.CreateBuilder<object>();
-		public readonly IQuickInfoOverride Override;
-
-		public InfoContainer(IQuickInfoOverride quickInfoOverride) {
-			Override = quickInfoOverride;
-		}
 
 		public int ItemCount => _List.Count;
 
