@@ -387,14 +387,10 @@ namespace Codist.QuickInfo
 
 		static Task<ThemedTipDocument> ShowAvailabilityAsync(Document doc, SyntaxToken token, CancellationToken cancellationToken) {
 			var solution = doc.Project.Solution;
-			if (solution.ProjectIds.Count == 0) {
-				return System.Threading.Tasks.Task.FromResult<ThemedTipDocument>(null);
-			}
-			var linkedDocuments = doc.GetLinkedDocumentIds();
-			if (linkedDocuments.Length == 0) {
-				return System.Threading.Tasks.Task.FromResult<ThemedTipDocument>(null);
-			}
-			return ShowAvailabilityAsync(token, solution, linkedDocuments, cancellationToken);
+			ImmutableArray<DocumentId> linkedDocuments;
+			return solution.ProjectIds.Count == 0 || (linkedDocuments = doc.GetLinkedDocumentIds()).Length == 0
+				? Task.FromResult<ThemedTipDocument>(null)
+				: ShowAvailabilityAsync(token, solution, linkedDocuments, cancellationToken);
 		}
 
 		static async Task<ThemedTipDocument> ShowAvailabilityAsync(SyntaxToken token, Solution solution, ImmutableArray<DocumentId> linkedDocuments, CancellationToken cancellationToken) {
@@ -615,7 +611,7 @@ namespace Codist.QuickInfo
 					ShowPropertyInfo(qiContent, symbol as IPropertySymbol);
 					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Color)
 						&& session.Mark(nameof(ColorQuickInfoUI))) {
-						qiContent.Add(ColorQuickInfoUI.PreviewColorProperty(symbol as IPropertySymbol, _SpecialProject.MaybeVsProject));
+						qiContent.Add(ColorQuickInfoUI.PreviewColorProperty(symbol as IPropertySymbol, _SpecialProject.MayBeVsProject));
 					}
 					break;
 				case SymbolKind.Namespace:
@@ -866,7 +862,7 @@ namespace Codist.QuickInfo
 				ShowDeclarationModifier(qiContent, field);
 			}
 			if (field.HasConstantValue) {
-				if (_SpecialProject.MaybeVsProject && field.ConstantValue is int fc) {
+				if (field.ConstantValue is int fc && _SpecialProject.MayBeVsProject) {
 					ShowKnownImageId(qiContent, field, fc);
 				}
 				ShowConstInfo(qiContent, field, field.ConstantValue);
@@ -1592,12 +1588,15 @@ namespace Codist.QuickInfo
 
 		sealed class SpecialProjectInfo
 		{
-			public readonly bool IsCodist;
-			public readonly bool MaybeVsProject;
+			readonly SemanticModel _Model;
+			int _MayBeVsProject;
+
+			public bool MayBeVsProject => _MayBeVsProject != 0
+				? _MayBeVsProject == 1
+				: (_MayBeVsProject = _Model.GetNamespaceSymbol("Microsoft", "VisualStudio", "PlatformUI") != null || _Model.GetTypeSymbol(nameof(VsColors), "Microsoft", "VisualStudio", "Shell") != null ? 1 : -1) == 1;
 
 			public SpecialProjectInfo(SemanticModel model) {
-				IsCodist = model.GetTypeSymbol(nameof(CodistPackage), nameof(Codist)) != null;
-				MaybeVsProject = model.GetNamespaceSymbol("Microsoft", "VisualStudio", "PlatformUI") != null || model.GetTypeSymbol(nameof(VsColors), "Microsoft", "VisualStudio", "Shell") != null;
+				_Model = model;
 			}
 		}
 	}
