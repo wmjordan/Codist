@@ -60,7 +60,7 @@ namespace Codist.QuickInfo
 			return new StackPanel {
 				Name = PreviewPanelName,
 				Children = {
-					new ThemedTipText().Append(new System.Windows.Shapes.Rectangle { Width = 16, Height = 16, Fill = brush }).Append(R.T_Color, true),
+					new ThemedTipText().Append(new System.Windows.Shapes.Rectangle { Width = 16, Height = 16, Fill = brush, Margin = WpfHelper.GlyphMargin }).Append(R.T_Color, true),
 					new Grid {
 						HorizontalAlignment = HorizontalAlignment.Left,
 						RowDefinitions = {
