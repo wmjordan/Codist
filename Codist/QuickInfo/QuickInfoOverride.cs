@@ -410,7 +410,7 @@ namespace Codist.QuickInfo
 					if (Config.Instance.DisplayOptimizations.MatchFlags(DisplayOptimizations.CodeWindow)) {
 						WpfHelper.SetUITextRenderOptions(p, true);
 					}
-					StackPanel altSign = Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation) || _Override.ClickAndGoSymbol != null
+					Grid altSign = Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation) || _Override.ClickAndGoSymbol != null
 						? OverrideXmlDocGetSignature(p)
 						: null;
 					_Override.ErrorTags?.Clear();
@@ -488,10 +488,10 @@ namespace Codist.QuickInfo
 				bool WorkaroundForTypeScriptQuickInfo(DependencyObject c) => c is Button == false;
 			}
 
-			StackPanel OverrideXmlDocGetSignature(StackPanel infoPanel) {
+			Grid OverrideXmlDocGetSignature(StackPanel infoPanel) {
 				var titlePanel = infoPanel.GetFirstVisualChild<WrapPanel>();
 				if (titlePanel == null) {
-					StackPanel altSign = null;
+					Grid altSign = null;
 					if (_Override.ClickAndGoSymbol != null
 						&& Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle)) {
 						// no built-in documentation, but Codist has it
@@ -540,7 +540,7 @@ namespace Codist.QuickInfo
 				return null;
 			}
 
-			StackPanel ShowAlternativeSignature() {
+			Grid ShowAlternativeSignature() {
 				var s = _Override.ClickAndGoSymbol;
 				var icon = ThemeHelper.GetImage(s.GetImageId(), ThemeHelper.LargeIconSize)
 					.AsSymbolLink(Keyboard.Modifiers == ModifierKeys.Control ? s.OriginalDefinition : s);
@@ -549,9 +549,12 @@ namespace Codist.QuickInfo
 				signature.MaxWidth = (Config.Instance.QuickInfo.MaxWidth >= 100
 					? Config.Instance.QuickInfo.MaxWidth
 					: WpfHelper.GetActiveScreenSize().Width / 2) - (ThemeHelper.LargeIconSize + 30);
-				return new StackPanel {
-					Orientation = Orientation.Horizontal,
-					Children = { icon, signature }
+				return new Grid {
+					ColumnDefinitions = {
+						new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+						new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) }
+					},
+					Children = { icon, signature.SetValue(Grid.SetColumn, 1) }
 				}.Tag();
 			}
 

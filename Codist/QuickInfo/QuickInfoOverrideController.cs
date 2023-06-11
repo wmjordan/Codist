@@ -60,11 +60,18 @@ namespace Codist.QuickInfo
 
 			// reposition the Quick Info to prevent it from hindering text selection with mouse cursor
 			public void Reposition(bool attachEventsOnDemand) {
-				if (_Session.TextView is IWpfTextView view == false || _Session.ApplicableToSpan == null) {
+				if (_Session.TextView is IWpfTextView view == false
+					|| _Session.ApplicableToSpan == null
+					|| view.VisualElement.IsVisible == false) {
 					return;
 				}
 				var viewLines = view.TextViewLines;
 				var visibleLineTop = viewLines.FirstVisibleLine.Top;
+				#region positioning fix for VS 2017
+				if (_Popup.PlacementTarget == null) {
+					_Popup.PlacementTarget = view.VisualElement;
+				}
+				#endregion
 				var mousePosition = System.Windows.Input.Mouse.GetPosition(_Popup.PlacementTarget);
 				var cursorLine = viewLines.GetTextViewLineContainingBufferPosition(_Session.GetTriggerPoint(view.TextSnapshot).Value);
 				var offsetLine = cursorLine.TextTop - view.ViewportTop;
@@ -74,44 +81,38 @@ namespace Codist.QuickInfo
 				var left = mousePosition.X - 40;
 				var zoom = view.ZoomLevel / 100;
 				var quickInfoHeight = _QuickInfo.ActualHeight / zoom;
-				double top;
-				if (offsetLine + cursorLine.TextHeight + quickInfoHeight > view.ViewportHeight) {
+				var top = view.VisualElement.PointFromScreen(new Point(0, 0)).Y;
+				var bottom = view.VisualElement.PointFromScreen(new Point(0, WpfHelper.GetActiveScreenSize().Height)).Y;
+				if (offsetLine + cursorLine.TextHeight + quickInfoHeight > bottom) {
 					// Quick Info popup is over the line with mouse cursor
-					top = offsetLine - quickInfoHeight - cursorLine.TextHeight;
-					if (view.VisualElement.PointToScreen(new Point(left, top)).Y < 0) {
-						var bottom = view.VisualElement.PointFromScreen(new Point(0, WpfHelper.GetActiveScreenSize().Height)).Y;
-						if (textBound.Bottom + quickInfoHeight >= bottom) {
-							top = view.VisualElement.PointFromScreen(new Point(0, 0)).Y;
-							// find the max vertical room to place the popup,
-							// resize if popup can go off screen
-							if (offsetLine - top < bottom - textBound.Bottom) {
-								_QuickInfo.MaxHeight = (bottom - textBound.Bottom) * zoom;
-								top = offsetLine;
-							}
-							else {
-								_QuickInfo.MaxHeight = (offsetLine - top) * zoom;
-								top = offsetLine - quickInfoHeight - cursorLine.TextHeight;
-								return;
-							}
-						}
-						else {
-							top = offsetLine;
+					if (view.VisualElement.PointToScreen(new Point(left, offsetLine - quickInfoHeight - cursorLine.TextHeight)).Y >= 0) {
+						goto SHOW_ON_TOP;
+
+					}
+					if (textBound.Bottom + quickInfoHeight >= bottom) {
+						// find the max vertical room to place the popup,
+						// resize if popup can go off screen
+						if (offsetLine - top >= bottom - textBound.Bottom) {
+							goto SHOW_ON_TOP;
 						}
 					}
 				}
-				else {
-					top = offsetLine;
-				}
-				_Popup.PlacementRectangle = new Rect(new Point(left, top), textBound.Size);
+				_QuickInfo.MaxHeight = (bottom - textBound.Bottom) * zoom;
+				_Popup.PlacementRectangle = new Rect(new Point(left, offsetLine), textBound.Size);
 				if (attachEventsOnDemand) {
 					_QuickInfo.SizeChanged += QuickInfo_SizeChanged;
 					_QuickInfo.Unloaded += QuickInfo_Unloaded;
 				}
+				return;
+				SHOW_ON_TOP:
+				_QuickInfo.MaxHeight = (offsetLine - top) * zoom;
+				_Popup.Placement = PlacementMode.Top;
+				_Popup.PlacementRectangle = new Rect(new Point(left, offsetLine), textBound.Size);
 			}
 
 			void QuickInfo_SizeChanged(object sender, SizeChangedEventArgs e) {
 				if (e.NewSize.Height != 0 && e.NewSize.Height != e.PreviousSize.Height) {
-					//Reposition(false);
+					Reposition(false);
 				}
 			}
 
