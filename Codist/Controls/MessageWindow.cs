@@ -18,6 +18,7 @@ namespace Codist.Controls
 			MinHeight = 100;
 			MinWidth = 200;
 
+			var ss = WpfHelper.GetActiveScreenSize();
 			ShowInTaskbar = false;
 			ResizeMode = ResizeMode.NoResize;
 			WindowStartupLocation = WindowStartupLocation.CenterOwner;
@@ -26,10 +27,10 @@ namespace Codist.Controls
 				Margin = WpfHelper.MiddleMargin,
 				Children = {
 					new Grid {
-						MaxHeight = Math.Min(Math.Max(Owner.ActualHeight / 2, 400), Owner.ActualHeight),
+						MaxHeight = Math.Min(Math.Max(ss.Height / 2, 400), ss.Height),
 						ColumnDefinitions = {
 							new ColumnDefinition(),
-							new ColumnDefinition { MaxWidth = Math.Min(Math.Max(Owner.ActualWidth / 2, 800), Owner.ActualWidth) },
+							new ColumnDefinition { MaxWidth = Math.Min(Math.Max(ss.Width / 2, 800), ss.Width) },
 						},
 						Children = {
 							new ContentPresenter { VerticalAlignment = VerticalAlignment.Top, Margin = WpfHelper.MiddleMargin }.Set(ref _Icon),
