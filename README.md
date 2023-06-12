@@ -148,13 +148,17 @@ To customize the *Super Quick Info*, adjust the settings in the options page.
   
   ![Super Quick Info - Color](doc/super-quick-info-debugger-watch.png)
 
-* **Quick Info item size**
+* **Quick Info size**
   
-  It is possible to limit the size of each Quick Info item, so the window won't cover your whole screen.
+  From version 7.5 on, it is possible to limit the size of the Quick Info popup, so the window won't cover your whole screen.
   
-  By default, _Codist_ does not apply size limitations. You must manually set the _Max width_ and _Max height_ here. Extra height can be assigned to C# XML Documentations, so you can read more of them at a glance. If the contents exceed the width, they are wrapped, and scrollbars will appear when necessary, as the screenshot below demonstrates.
+  By default, _Codist_ does not apply size limitations. You must manually set the _Max width_ and _Max height_ here. If the contents exceed the width, they are wrapped, and scrollbars will appear when necessary, as the screenshot below demonstrates.
   
   ![Super Quick Info - Size](doc/super-quick-info-size.png)
+
+* **Display Delay**
+
+  From version 7.5 on, Codist can delay the display of Quick Info, so it won't get into your way when you move your mouse in the document window.
 
 * **Background**
   
@@ -166,7 +170,7 @@ _Super Quick Info_ especially enhances programming experience for C# programmers
 
 <img src="doc/super-quick-info-csharp-options.png" title="" alt="Super Quick Info - Options" width="617">
 
-* **Use enhanced symbol signature style** is a new setting in version 6.6, enabled by default, which optimizes the display of symbol signatures with a reorganized layout. The layout is especially optimized for long and complex signatures, yet ordinary short symbols can also benefit from it. The following is an example for the style. A large icon on the top-left part of the quick info can be clicked and brings out a menu for symbol analysis. Next to the icon is the name of the symbol with larger text size. Clicking on the name can jump to its definition. The parameters for the method are listed next. The reorganized layout never breaks the parameter type from its name, so it is easier to find out and locate each parameter type and name. Beneath the signature is the containing type of the symbol, as well the kind of the symbol. And the member type (return value) of the symbol is under the containing type.
+* **Use enhanced symbol signature style** is a new setting in version 6.6, enabled by default, which optimizes the display of symbol signatures with a reorganized layout. The layout is especially optimized for long and complex signatures, yet ordinary short symbols can also benefit from it. The following is an example for the style. A large icon on the top-left part of the quick info can be clicked and brings out a menu for symbol analysis. Next to the icon is the name of the symbol standing out with larger text. Clicking on the name can jump to its definition. The parameters for the method are listed next. The reorganized layout never breaks the parameter type from its name, so it is easier to find out and locate each parameter type and name. Beneath the signature is the containing type of the symbol, as well the kind of the symbol. And the member type (return value) of the symbol is under the containing type.
   ![C# optimized quick info](doc/csharp-optimized-quick-info.png)
 
 * **Highlight current syntax node in code editor** will draw polygonal markers the syntax node related to the place where Quick Info is triggered.
