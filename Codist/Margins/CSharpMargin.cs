@@ -600,6 +600,7 @@ namespace Codist.Margins
 				var ct = SyncHelper.CancelAndRetainToken(ref _Cancellation);
 				try {
 					if (await Task.Run(() => UpdateAsync(null, ct))) {
+						await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(default);
 						_Margin?.InvalidateVisual();
 					}
 				}
