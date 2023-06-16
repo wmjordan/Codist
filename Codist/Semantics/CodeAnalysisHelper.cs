@@ -1476,20 +1476,18 @@ namespace Codist
 		}
 
 		static readonly char[] __SplitLineChars = new char[] { '\r', '\n' };
-		public static string GetCommentContent(this SyntaxTriviaList trivias) {
+		public static string GetCommentContent(this SyntaxTriviaList trivias, bool leading) {
 			using (var rsb = ReusableStringBuilder.AcquireDefault(100)) {
 				var sb = rsb.Resource;
-				bool hasLineBreak = false;
+				int hasLineBreak = 0;
 				foreach (var item in trivias) {
 					switch ((SyntaxKind)item.RawKind) {
-						case SyntaxKind.EndOfLineTrivia:
-							if (sb.Length != 0) {
-								hasLineBreak = true;
-							}
-							break;
 						case SyntaxKind.SingleLineCommentTrivia:
-							if (hasLineBreak) {
-								sb.AppendLine();
+							if (hasLineBreak != 0) {
+								if (hasLineBreak == 1) {
+									sb.AppendLine();
+								}
+								hasLineBreak = 0;
 							}
 							var t = item.ToString();
 							if (t.Length > 2 && t[2] == ' ') {
@@ -1500,13 +1498,33 @@ namespace Codist
 							}
 							break;
 						case SyntaxKind.MultiLineCommentTrivia:
-							if (hasLineBreak) {
-								sb.AppendLine();
+							if (hasLineBreak != 0) {
+								if (hasLineBreak == 1) {
+									sb.AppendLine();
+								}
+								hasLineBreak = 0;
 							}
 							AppendMultilineComment(sb, item.ToString());
 							break;
+						case SyntaxKind.WhitespaceTrivia:
+							continue;
+						case SyntaxKind.EndOfLineTrivia:
+							if (sb.Length != 0 && ++hasLineBreak > 1) {
+								goto default;
+							}
+							break;
+						default:
+							if (leading) {
+								sb.Clear();
+								hasLineBreak = 0;
+							}
+							else {
+								goto EXIT;
+							}
+							break;
 					}
 				}
+				EXIT:
 				return sb.Length != 0 ? sb.ToString() : null;
 			}
 

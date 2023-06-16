@@ -219,8 +219,8 @@ namespace Codist
 			SyntaxToken separatorAfterNode;
 			do {
 			FIND_COMMENT:
-				if (node.HasLeadingTrivia && (t = node.GetLeadingTrivia().GetCommentContent()) != null
-					|| node.HasTrailingTrivia && (t = node.GetTrailingTrivia().GetCommentContent()) != null) {
+				if (node.HasLeadingTrivia && (t = node.GetLeadingTrivia().GetCommentContent(true)) != null
+					|| node.HasTrailingTrivia && (t = node.GetTrailingTrivia().GetCommentContent(false)) != null) {
 					break;
 				}
 				// use comment behind variable separator for multi-variable declarations:
@@ -231,7 +231,7 @@ namespace Codist
 					if ((variables = v.Variables).Count > 1
 						&& (variableIndex = variables.IndexOf((VariableDeclaratorSyntax)node)) < variables.SeparatorCount
 						&& (separatorAfterNode = variables.GetSeparator(variableIndex)).HasTrailingTrivia
-						&& (t = separatorAfterNode.TrailingTrivia.GetCommentContent()) != null) {
+						&& (t = separatorAfterNode.TrailingTrivia.GetCommentContent(false)) != null) {
 						break;
 					}
 					node = v;
