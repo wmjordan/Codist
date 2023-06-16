@@ -124,7 +124,7 @@ namespace Codist.NaviBar
 
 		protected override void OnMouseLeave(MouseEventArgs e) {
 			base.OnMouseLeave(e);
-			ViewOverlay.ClearRangeAdornments();
+			ViewOverlay?.ClearRangeAdornments();
 			_MouseHoverItem = null;
 		}
 
