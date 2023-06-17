@@ -525,16 +525,18 @@ namespace Codist.Options
 					classifications = GetClassificationsForSelection();
 					break;
 			}
+			TextEditorHelper.ActiveTextViewChanged -= HandleViewChangedEvent;
+			_WpfTextView.Selection.SelectionChanged -= HandleViewSelectionChangedEvent;
+			string activeClassification;
 			if (source == SyntaxStyleSource.Selection) {
 				TextEditorHelper.ActiveTextViewChanged += HandleViewChangedEvent;
-				_WpfTextView.Selection.SelectionChanged -= HandleViewSelectionChangedEvent;
 				_WpfTextView.Selection.SelectionChanged += HandleViewSelectionChangedEvent;
+				activeClassification = GetHeuristicActiveClassification(classifications);
 			}
 			else {
-				TextEditorHelper.ActiveTextViewChanged -= HandleViewChangedEvent;
+				activeClassification = ActiveStyle?.ClassificationType;
 			}
 			var cts = new HashSet<IClassificationType>();
-			var style = ActiveStyle;
 			_SelectedStyleButton = null;
 			foreach (var c in classifications) {
 				if (c is TextEditorHelper.ClassificationCategory) {
@@ -555,10 +557,10 @@ namespace Codist.Options
 					continue;
 				}
 				var button = new StyleSettingsButton(c, t, OnSelectStyle) { ToolTip = c.Classification };
-				if (style != null && c.Classification == style.ClassificationType) {
+				if (activeClassification != null && c.Classification == activeClassification) {
 					OnSelectStyle(button, null);
 					_SettingsGroup.Visibility = _StyleNameHolder.Visibility = Visibility.Visible;
-					style = null;
+					activeClassification = null;
 				}
 				l.Add(button);
 			}
@@ -581,6 +583,40 @@ namespace Codist.Options
 				FilterSettingsList(null, EventArgs.Empty);
 				_RightPaneTitle.Visibility = Visibility.Visible;
 			}
+		}
+
+		static string GetHeuristicActiveClassification(IEnumerable<IClassificationType> classifications) {
+			IClassificationType t = null;
+			int level = 0;
+			foreach (var item in classifications) {
+				switch (item.Classification) {
+					case Constants.CodeIdentifier:
+					case Constants.CodeFormalLanguage:
+					case Constants.CodePunctuation:
+					case Constants.CodeOperator:
+						if (t == null) {
+							t = item;
+							level = 1;
+						}
+						break;
+					case Constants.CSharpUserSymbol:
+					case Constants.CSharpMetadataSymbol:
+					case Constants.CSharpStaticMemberName:
+					case Constants.CSharpSealedMemberName:
+					case Constants.CSharpVirtualMemberName:
+					case Constants.CSharpOverrideMemberName:
+					case Constants.CSharpDeclarationName:
+					case Constants.CSharpMemberDeclarationName:
+						continue;
+					default:
+						if (t == null || level < 2 || item.IsOfType(t.Classification)) {
+							t = item;
+							level = 2;
+						}
+						continue;
+				}
+			}
+			return (t ?? classifications.FirstOrDefault())?.Classification;
 		}
 
 		static List<IClassificationType> ToClassificationTypes<TStyle>(List<TStyle> styles)
@@ -614,6 +650,7 @@ namespace Codist.Options
 			var classifications = ServicesHelper.Instance.ViewTagAggregatorFactory
 				.CreateTagAggregator<Microsoft.VisualStudio.Text.Tagging.IClassificationTag>(_WpfTextView)
 				.GetTags(span)
+				.Where(s => s.Span.ToSnapshotSpan().Intersection(span).GetValueOrDefault().Length > 0)
 				.Select(t => t.Tag.ClassificationType)
 				.ToList(); // cache the results for iterations below
 			return classifications
