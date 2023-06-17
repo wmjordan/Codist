@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows;
+using CLR;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Events;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -119,7 +120,6 @@ namespace Codist
 		}
 
 		void InitializeOrUpgradeConfig() {
-
 			// save the file to prevent following notification showing up again until future upgrade
 			Config.Instance.SaveConfig(Config.ConfigPath);
 
@@ -128,7 +128,8 @@ namespace Codist
 			}
 			catch (MissingMemberException) {
 				// HACK: For VS 2022, InfoBar is broken. Prompt to open page at this moment.
-				if (Controls.MessageWindow.AskYesNo(Properties.Resources.T_NewVersionPrompt) == true) {
+				string welcome = Config.Instance.InitStatus.Case(InitStatus.FirstLoad, Properties.Resources.T_FirstRunPrompt, Properties.Resources.T_NewVersionPrompt);
+				if (Controls.MessageWindow.AskYesNo(welcome) == true) {
 					OpenWebPage(Config.Instance.InitStatus);
 				}
 			}

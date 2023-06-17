@@ -2537,4 +2537,8 @@ Ctrl: 仅匹配当前类，不匹配其它派生类或继承类</value>
   <data name="CMD_Import" xml:space="preserve">
     <value>导入...</value>
   </data>
+  <data name="T_FirstRunPrompt" xml:space="preserve">
+    <value>Codist 已经在你的 Visual Studio 中安装好了。
+是否要了解一下关于这个插件的信息呢？</value>
+  </data>
 </root>

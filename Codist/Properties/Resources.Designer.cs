@@ -5990,6 +5990,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Codist is just installed on your Visual Studio. Do you want to learn more about it?.
+        /// </summary>
+        internal static string T_FirstRunPrompt {
+            get {
+                return ResourceManager.GetString("T_FirstRunPrompt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Folder: .
         /// </summary>
         internal static string T_Folder {

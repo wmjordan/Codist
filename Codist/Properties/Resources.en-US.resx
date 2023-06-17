@@ -2552,4 +2552,7 @@ Ctrl: Match current symbol only, excluding base or derived symbols</value>
   <data name="CMD_Import" xml:space="preserve">
     <value>Import...</value>
   </data>
+  <data name="T_FirstRunPrompt" xml:space="preserve">
+    <value>Codist is just installed on your Visual Studio. Do you want to learn more about it?</value>
+  </data>
 </root>
