@@ -578,7 +578,7 @@ namespace Codist.Taggers
 			}
 
 			static Chain<ClassificationTag> GetClassificationType(SyntaxNode node, SemanticModel semanticModel, CancellationToken cancellationToken) {
-				var symbol = semanticModel.GetSymbolInfo(node, cancellationToken).Symbol;
+				var symbol = semanticModel.GetSymbolOrFirstCandidate(node, cancellationToken);
 				var tags = new Chain<ClassificationTag>();
 				if (symbol is null) {
 					symbol = semanticModel.GetDeclaredSymbol(node, cancellationToken);
@@ -588,7 +588,7 @@ namespace Codist.Taggers
 							tags.Add(__Classifications.AliasNamespace);
 						}
 						else if (node is AttributeArgumentSyntax attributeArgument) {
-							symbol = semanticModel.GetSymbolInfo(attributeArgument.Expression, cancellationToken).Symbol;
+							symbol = semanticModel.GetSymbolOrFirstCandidate(attributeArgument.Expression, cancellationToken);
 							if (symbol?.Kind == SymbolKind.Field && (symbol as IFieldSymbol)?.IsConst == true) {
 								tags.Add(__Classifications.ConstField);
 							}

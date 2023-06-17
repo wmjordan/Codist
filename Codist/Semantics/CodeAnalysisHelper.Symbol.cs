@@ -68,9 +68,10 @@ namespace Codist
 		}
 
 		public static ISymbol GetSymbolOrFirstCandidate(this SemanticModel semanticModel, SyntaxNode node, CancellationToken cancellationToken = default) {
+			ImmutableArray<ISymbol> candidates;
 			var info = semanticModel.GetSymbolInfo(node, cancellationToken);
 			return info.Symbol
-				?? (info.CandidateSymbols.Length > 0 ? info.CandidateSymbols[0] : null);
+				?? ((candidates = info.CandidateSymbols).Length != 0 ? candidates[0] : null);
 		}
 
 		public static INamedTypeSymbol GetSystemTypeSymbol(this SemanticModel semanticModel, SyntaxKind kind) {
