@@ -1095,7 +1095,7 @@ namespace Codist.Options
 			}
 		}
 		void ResetTheme() {
-			if (MessageWindow.Show(R.T_ConfirmResetSyntaxHighlight) == true) {
+			if (MessageWindow.AskYesNo(R.T_ConfirmResetSyntaxHighlight) == true) {
 				Config.ResetStyles();
 			}
 		}
