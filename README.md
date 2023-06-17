@@ -591,6 +591,6 @@ If you like _Codist_, consider [buying me a cup of Chinese tea](https://paypal.m
 
 You can donate any amount of money as you like. The recommended amount of donation is `$19.99`.
 
-5 donations have been received so far :)
+6 donations have been received so far :)
 
 Well, you have already reached here. Why not give Codist a ★★★★★ rating on the [Visual Studio Extension Marketplace](https://marketplace.visualstudio.com/items?itemName=wmj.Codist)?
