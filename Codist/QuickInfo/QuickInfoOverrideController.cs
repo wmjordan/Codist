@@ -76,6 +76,9 @@ namespace Codist.QuickInfo
 				var cursorLine = viewLines.GetTextViewLineContainingBufferPosition(_Session.GetTriggerPoint(view.TextSnapshot).Value);
 				var offsetLine = cursorLine.TextTop - view.ViewportTop;
 				var textSpan = cursorLine.Extent.Intersection(_Session.GetTriggerSpan()).Value;
+				if (textSpan.IsEmpty) {
+					return;
+				}
 				var textBound = viewLines.GetTextMarkerGeometry(textSpan).Bounds;
 				textBound.Offset(-view.ViewportLeft, -view.ViewportTop);
 				var left = mousePosition.X - 40;
