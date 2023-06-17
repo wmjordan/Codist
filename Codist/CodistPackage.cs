@@ -119,15 +119,6 @@ namespace Codist
 		}
 
 		void InitializeOrUpgradeConfig() {
-			if (Config.Instance.InitStatus == InitStatus.FirstLoad) {
-				// automatically load theme when first load
-				if (ThemeHelper.DocumentPageColor.ToWpfColor().IsDark()) {
-					Config.LoadConfig(Config.DarkTheme, StyleFilters.All);
-				}
-				else {
-					Config.LoadConfig(Config.LightTheme, StyleFilters.All);
-				}
-			}
 
 			// save the file to prevent following notification showing up again until future upgrade
 			Config.Instance.SaveConfig(Config.ConfigPath);
