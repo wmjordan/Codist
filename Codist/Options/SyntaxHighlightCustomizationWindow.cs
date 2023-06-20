@@ -607,6 +607,8 @@ namespace Codist.Options
 					case Constants.CSharpOverrideMemberName:
 					case Constants.CSharpDeclarationName:
 					case Constants.CSharpMemberDeclarationName:
+					case Constants.CSharpPrivateMemberName:
+					case Constants.CSharpAbstractMemberName:
 						continue;
 					default:
 						if (t == null || level < 2 || item.IsOfType(t.Classification)) {
