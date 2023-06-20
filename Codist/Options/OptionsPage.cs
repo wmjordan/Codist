@@ -231,12 +231,15 @@ namespace Codist.Options
 						return;
 					}
 					try {
-						Config.LoadConfig(d.FileName);
+						string file = d.FileName;
+						Config.LoadConfig(file);
 						if (Version.TryParse(Config.Instance.Version, out var newVersion)
 							&& newVersion > Version.Parse(Config.CurrentVersion)) {
 							MessageBox.Show(R.T_NewVersionConfig, nameof(Codist), MessageBoxButton.OK, MessageBoxImage.Information);
 						}
-						System.IO.File.Copy(d.FileName, Config.ConfigPath, true);
+						if (file != Config.ConfigPath) {
+							System.IO.File.Copy(file, Config.ConfigPath, true);
+						}
 					}
 					catch (Exception ex) {
 						MessageBox.Show(R.T_ErrorLoadingConfig + ex.Message, nameof(Codist));
