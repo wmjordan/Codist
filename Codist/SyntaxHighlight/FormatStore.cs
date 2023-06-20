@@ -93,7 +93,8 @@ namespace Codist.SyntaxHighlight
 			foreach (var item in __Highlighters) {
 				item.Reset();
 			}
-			ResetStyleCache();
+			__SyntaxStyleCache.Clear();
+			IdentifySymbolSource = false;
 		}
 
 		public static void Reset(string classificationType) {
