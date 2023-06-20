@@ -643,10 +643,8 @@ namespace Codist.Controls
 				var c = 0;
 				var containerType = _Symbol.ContainingType ?? _Symbol;
 				var loc = _Node.SyntaxTree.FilePath;
-				foreach (var s in _Node.FindReferencingSymbols(_SemanticContext.SemanticModel, true)
-						.OrderBy(i => i.Key.ContainingType == containerType ? null : (i.Key.ContainingType ?? i.Key).Name)
-						.ThenBy(i => i.Key.Name)
-						.Select(i => i.Key)) {
+				foreach (var sr in _Node.FindReferencingSymbols(_SemanticContext.SemanticModel, true)) {
+					var s = sr.Key;
 					var sl = s.DeclaringSyntaxReferences[0];
 					SymbolItem i;
 					if (sl.SyntaxTree.FilePath != loc) {
@@ -658,6 +656,9 @@ namespace Codist.Controls
 					i = m.Add(s, false);
 					if (s.ContainingType.Equals(containerType) == false) {
 						i.Hint = (s.ContainingType ?? s).ToDisplayString(CodeAnalysisHelper.MemberNameFormat);
+					}
+					if (sr.Value > 1) {
+						i.Hint += " @" + sr.Value.ToText();
 					}
 					++c;
 				}

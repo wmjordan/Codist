@@ -380,7 +380,7 @@ namespace Codist
 		}
 
 		/// <summary>Finds symbols referenced by given context node.</summary>
-		/// <returns>An ordered array of <see cref="KeyValuePair{TKey, TValue}"/> which contains number of occurrences of corresponding symbols.</returns>
+		/// <returns>An array of <see cref="KeyValuePair{TKey, TValue}"/> which contains referenced symbols and number of occurrences.</returns>
 		public static KeyValuePair<ISymbol, int>[] FindReferencingSymbols(this SyntaxNode node, SemanticModel semanticModel, bool sourceCodeOnly, CancellationToken cancellationToken = default) {
 			var result = new Dictionary<ISymbol, int>();
 			foreach (var item in node.DescendantNodes()) {
@@ -421,12 +421,20 @@ namespace Codist
 				result[s] = result.TryGetValue(s, out int i) ? ++i : 1;
 			}
 			var a = result.ToArray();
-			Array.Sort(a, (x, y) => {
-				var i = y.Value.CompareTo(x.Value);
-				return i != 0 ? i
-					: (i = String.CompareOrdinal(x.Key.ContainingType?.Name, y.Key.ContainingType?.Name)) != 0 ? i
-					: String.CompareOrdinal(x.Key.Name, y.Key.Name);
-			});
+			if (sourceCodeOnly) {
+				Array.Sort(a, (x, y) => {
+					int i = String.CompareOrdinal(x.Key.DeclaringSyntaxReferences[0].SyntaxTree.FilePath, y.Key.DeclaringSyntaxReferences[0].SyntaxTree.FilePath);
+					return i != 0 ? i
+						: (i = String.CompareOrdinal(x.Key.ContainingType?.Name, y.Key.ContainingType?.Name)) != 0 ? i
+						: String.CompareOrdinal(x.Key.Name, y.Key.Name);
+				});
+			}
+			else {
+				Array.Sort(a, (x, y) => {
+					int i = String.CompareOrdinal(x.Key.ContainingType?.Name, y.Key.ContainingType?.Name);
+					return i != 0 ? i : String.CompareOrdinal(x.Key.Name, y.Key.Name);
+				});
+			}
 			return a;
 		}
 
