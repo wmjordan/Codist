@@ -652,7 +652,7 @@ namespace Codist.Options
 			var classifications = ServicesHelper.Instance.ViewTagAggregatorFactory
 				.CreateTagAggregator<Microsoft.VisualStudio.Text.Tagging.IClassificationTag>(_WpfTextView)
 				.GetTags(span)
-				.Where(s => s.Span.ToSnapshotSpan().Intersection(span).GetValueOrDefault().Length > 0)
+				.Where(s => s.Span.GetSpans(span.Snapshot.TextBuffer)[0].Intersection(span).GetValueOrDefault().Length > 0)
 				.Select(t => t.Tag.ClassificationType)
 				.ToList(); // cache the results for iterations below
 			return classifications
