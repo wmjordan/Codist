@@ -233,9 +233,10 @@ namespace Codist.SyntaxHighlight
 				}
 			}
 
-			// note: VS appears to have difficulty in merging semantic braces and some other styles
-			//   by explicitly calling GetTextProperties then SetTextProperties,
-			//   the underlying merging process will be called
+			// note: VS appears to have difficulty in merging semantic braces and some other styles.
+			//   By explicitly iterating the CurrentPriorityOrder collection,
+			//   calling GetTextProperties then SetTextProperties one by one,
+			//   the underlying merging process will be called and the priority order is enforced.
 			public void Refresh() {
 				_Lock++;
 				_Formatters.Push(nameof(Refresh));
