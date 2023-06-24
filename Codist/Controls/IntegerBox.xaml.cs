@@ -2,7 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
-using System.Windows.Data;
+using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 
 namespace Codist.Controls
@@ -17,58 +17,6 @@ namespace Codist.Controls
 		public readonly static DependencyProperty MinimumProperty = DependencyProperty.Register("Minimum", typeof(int), typeof(IntegerBox), new UIPropertyMetadata(int.MinValue));
 		public readonly static DependencyProperty ValueProperty = DependencyProperty.Register("Value", typeof(int), typeof(IntegerBox), new UIPropertyMetadata(0, (o, e) => ((IntegerBox)o).RaiseValueChangedEvent(e)));
 		public readonly static DependencyProperty StepProperty = DependencyProperty.Register("Step", typeof(int), typeof(IntegerBox), new UIPropertyMetadata(1));
-
-		public readonly static Style VsRepeatButtonStyle = new Style {
-			TargetType = typeof(RepeatButton),
-			Setters = {
-				new Setter {
-					Property = ForegroundProperty,
-					Value = new Binding {
-						Source = new DynamicResourceExtension {
-							ResourceKey = VsBrushes.ButtonTextKey
-						}
-					}
-				},
-				new Setter {
-					Property = BackgroundProperty,
-					Value = new Binding {
-						Source = new DynamicResourceExtension {
-							ResourceKey = VsBrushes.ButtonFaceKey
-						}
-					}
-				}
-			},
-			Triggers = {
-				new Trigger {
-					Property = ButtonBase.IsPressedProperty,
-					Value = true,
-					Setters = {
-						new Setter {
-							Property = BackgroundProperty,
-							Value = new Binding {
-								Source = new DynamicResourceExtension {
-									ResourceKey = VsBrushes.ButtonHighlightKey
-								}
-							}
-						}
-					}
-				},
-				new Trigger {
-					Property = IsMouseOverProperty,
-					Value = true,
-					Setters = {
-						new Setter {
-							Property = BackgroundProperty,
-							Value = new Binding {
-								Source = new DynamicResourceExtension {
-									ResourceKey = VsBrushes.ButtonHighlightKey
-								}
-							}
-						}
-					}
-				}
-			}
-		};
 
 		public IntegerBox() {
 			InitializeComponent();
@@ -99,8 +47,38 @@ namespace Codist.Controls
 
 		public IntegerBox UseVsTheme() {
 			tbmain.ReferenceStyle(VsResourceKeys.TextBoxStyleKey);
-			PART_DownButton.OverridesDefaultStyle = true;
-			PART_DownButton.Style = VsRepeatButtonStyle;
+			PART_UpButton.OverridesDefaultStyle = PART_DownButton.OverridesDefaultStyle = true;
+			PART_UpButton.Style = PART_DownButton.Style = new Style {
+				TargetType = typeof(RepeatButton),
+				Setters = {
+					new Setter {
+						Property = ForegroundProperty,
+						Value = new DynamicResourceExtension { ResourceKey = EnvironmentColors.ScrollBarArrowGlyphBrushKey
+						}
+					},
+					new Setter {
+						Property = BackgroundProperty,
+						Value = new DynamicResourceExtension { ResourceKey = EnvironmentColors.ScrollBarArrowBackgroundBrushKey
+						}
+					}
+				},
+				Triggers = {
+					new Trigger {
+						Property = IsMouseOverProperty,
+						Value = true,
+						Setters = {
+							new Setter {
+								Property = ForegroundProperty,
+								Value = EnvironmentColors.ScrollBarArrowGlyphMouseOverColorKey.GetWpfBrush()
+							},
+							new Setter {
+								Property = BackgroundProperty,
+								Value = EnvironmentColors.ScrollBarArrowMouseOverBackgroundBrushKey.GetWpfBrush()
+							}
+						}
+					}
+				}
+			};
 			return this;
 		}
 

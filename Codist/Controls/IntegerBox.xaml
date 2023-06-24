@@ -5,7 +5,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:c="clr-namespace:Codist.Controls"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="24" d:DesignWidth="100"
+			 d:DataContext="{d:DesignInstance Type=c:IntegerBox}">
 	<Border BorderThickness="1" BorderBrush="{x:Static SystemColors.ControlDarkBrush}">
 		<Grid Background="Transparent">
 			<Grid.RowDefinitions>
@@ -17,16 +18,12 @@
 				<ColumnDefinition Width="Auto"/>
 			</Grid.ColumnDefinitions>
 			<TextBox Name="tbmain" BorderThickness="0" Grid.Column="0" Grid.RowSpan="2" Width="60"
-					 Foreground="{TemplateBinding c:IntegerBox.Foreground}"
-					 Background="{TemplateBinding c:IntegerBox.Background}"
 					 Text="{Binding Value, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnValidationError=True, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type c:IntegerBox}}}" />
-			<RepeatButton Name="PART_UpButton" BorderThickness="0" Grid.Column="1" Grid.Row="0" Width="13"
-						  Background="Transparent" Foreground="{TemplateBinding c:IntegerBox.Foreground}">
-				<Path Fill="Black" Data="M 0 3 L 6 3 L 3 0 Z"/>
+			<RepeatButton Name="PART_UpButton" BorderThickness="0" Grid.Column="1" Grid.Row="0" Width="13">
+				<Path Name="PART_UpGlyph" Fill="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type RepeatButton}}}" Data="M 0 3 L 6 3 L 3 0 Z"/>
 			</RepeatButton>
-			<RepeatButton Name="PART_DownButton" BorderThickness="0" Grid.Column="1" Grid.Row="1" Width="13"
-						  Background="Transparent" Foreground="{TemplateBinding c:IntegerBox.Foreground}">
-				<Path Fill="Black" Data="M 0 0 L 3 3 L 6 0 Z"/>
+			<RepeatButton Name="PART_DownButton" BorderThickness="0" Grid.Column="1" Grid.Row="1" Width="13">
+				<Path Name="PART_DownGlyph" Fill="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type RepeatButton}}}" Data="M 0 0 L 3 3 L 6 0 Z"/>
 			</RepeatButton>
 		</Grid>
 	</Border>
