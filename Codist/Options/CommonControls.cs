@@ -265,6 +265,10 @@ namespace Codist.Options
 			Color = e.Data;
 		}
 
+		static int Round(double value) {
+			return (int)Math.Round(value, MidpointRounding.AwayFromZero);
+		}
+
 		static Color GetClipboardColor() {
 			string c;
 			try {
@@ -542,9 +546,9 @@ namespace Codist.Options
 			}
 
 			void SetHslValues(HslColor gc) {
-				_HBox.Value = Convert.ToInt32(gc.Hue);
-				_SBox.Value = Convert.ToInt32(gc.Saturation * ColorComponent.Saturation.MaxValue);
-				_LBox.Value = Convert.ToInt32(gc.Luminosity * ColorComponent.Brightness.MaxValue);
+				_HBox.Value = Round(gc.Hue);
+				_SBox.Value = Round(gc.Saturation * ColorComponent.Saturation.MaxValue);
+				_LBox.Value = Round(gc.Luminosity * ColorComponent.Brightness.MaxValue);
 			}
 
 			void UpdateColor(Color c, ColorSource source) {
@@ -561,11 +565,11 @@ namespace Codist.Options
 					var hsl = HslColor.FromColor(c);
 					switch (source) {
 						case ColorSource.SelectorSpectrum:
-							_HBox.Value = Convert.ToInt32(hsl.Hue);
-							_SBox.Value = Convert.ToInt32(hsl.Saturation * ColorComponent.Saturation.MaxValue);
+							_HBox.Value = Round(hsl.Hue);
+							_SBox.Value = Round(hsl.Saturation * ColorComponent.Saturation.MaxValue);
 							break;
 						case ColorSource.SelectorSlider:
-							_LBox.Value = Convert.ToInt32(hsl.Luminosity * ColorComponent.Brightness.MaxValue);
+							_LBox.Value = Round(hsl.Luminosity * ColorComponent.Brightness.MaxValue);
 							break;
 						default:
 							SetHslValues(HslColor.FromColor(c));
@@ -692,7 +696,7 @@ namespace Codist.Options
 					tip.Title.Text = R.T_Color;
 					var c = Color;
 					var hsl = HslColor.FromColor(c);
-					tip.Content.Append($"HSL: {Convert.ToInt32(hsl.Hue).ToText()}, {Convert.ToInt32(hsl.Saturation * ColorComponent.Saturation.MaxValue).ToText()}, {Convert.ToInt32(hsl.Luminosity * ColorComponent.Brightness.MaxValue).ToText()}").AppendLineBreak()
+					tip.Content.Append($"HSL: {Round(hsl.Hue).ToText()}, {Round(hsl.Saturation * ColorComponent.Saturation.MaxValue).ToText()}, {Round(hsl.Luminosity * ColorComponent.Brightness.MaxValue).ToText()}").AppendLineBreak()
 						.Append($"RGB: {c.R}, {c.G}, {c.B}");
 					ToolTip = tip;
 				}
