@@ -102,6 +102,9 @@ namespace Codist.Controls
 			if (img != 0) {
 				_Icon.Content = ThemeHelper.GetImage(img, ThemeHelper.LargeIconSize);
 			}
+			else {
+				_Icon.Visibility = Visibility.Collapsed;
+			}
 		}
 
 		public static bool? Show(object content) {
