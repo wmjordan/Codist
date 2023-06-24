@@ -25,7 +25,13 @@ namespace Codist.Controls
 
 		void TextPartChanged(object sender, RoutedEventArgs e) {
 			if (Int32.TryParse(tbmain.Text, out int v)) {
-				Value = v;
+				var n = Math.Min(Maximum, Math.Max(Minimum, v));
+				if (v != Value) {
+					Value = v;
+				}
+				if (n != v) {
+					tbmain.Text = n.ToText();
+				}
 			}
 		}
 
