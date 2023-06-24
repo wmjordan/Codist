@@ -1357,6 +1357,11 @@ namespace Codist.Options
 				ContextMenu.IsOpen = true;
 			}
 
+			protected override void OnContextMenuOpening(ContextMenuEventArgs e) {
+				e.Handled = true;
+				OnClick();
+			}
+
 			void SetFont(object sender, RoutedEventArgs e) {
 				var m = e.Source as ThemedMenuItem;
 				var prev = ContextMenu.Items.GetFirst<ThemedMenuItem>(i => __InstalledFontNameProperty.Get(i) == Value);
@@ -1442,6 +1447,11 @@ namespace Codist.Options
 				}
 				CheckMenuItem(Value, true);
 				ContextMenu.IsOpen = true;
+			}
+
+			protected override void OnContextMenuOpening(ContextMenuEventArgs e) {
+				e.Handled = true;
+				OnClick();
 			}
 
 			static ThemedMenuItem SetOpacityValue(ThemedMenuItem item, int value) {

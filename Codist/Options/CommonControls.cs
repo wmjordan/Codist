@@ -175,6 +175,11 @@ namespace Codist.Options
 			ContextMenu.IsOpen = true;
 		}
 
+		protected override void OnContextMenuOpening(ContextMenuEventArgs e) {
+			e.Handled = true;
+			OnClick();
+		}
+
 		void CopyColor(object sender, RoutedEventArgs e) {
 			try {
 				Clipboard.SetDataObject(Color.ToHexString());
