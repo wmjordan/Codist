@@ -110,6 +110,39 @@ namespace Codist.Options
 		}
 	}
 
+	sealed class LabeledControl : StackPanel
+	{
+		public LabeledControl(string text, double labelWidth, FrameworkElement control) {
+			Orientation = Orientation.Horizontal;
+			this.Add(new TextBlock {
+				Text = text,
+				Width = labelWidth,
+				VerticalAlignment = VerticalAlignment.Center,
+				Margin = WpfHelper.SmallMargin
+			},
+				control.WrapMargin(WpfHelper.SmallMargin));
+		}
+	}
+
+	sealed class RadioBox : RadioButton
+	{
+		readonly Action<RadioBox> _CheckHandler;
+
+		public RadioBox(string text, string group, Action<RadioBox> checkHandler) {
+			Content = text;
+			GroupName = group;
+			Margin = WpfHelper.SmallMargin;
+			MinWidth = 60;
+			this.ReferenceStyle(VsResourceKeys.ThemedDialogRadioButtonStyleKey);
+			Checked += CheckHandler;
+			_CheckHandler = checkHandler;
+		}
+
+		void CheckHandler(object sender, EventArgs args) {
+			_CheckHandler(this);
+		}
+	}
+
 	sealed class ColorButton : Button
 	{
 		readonly Border _Border;
