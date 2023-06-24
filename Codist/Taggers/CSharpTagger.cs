@@ -773,15 +773,19 @@ namespace Codist.Taggers
 				}
 				else if (symbol.IsSealed) {
 					ITypeSymbol type;
-					if (symbol.Kind == SymbolKind.NamedType
-						&& (type = (ITypeSymbol)symbol).TypeKind == TypeKind.Struct) {
-						if (type.IsReadOnly()) {
-							tags.Add(__Classifications.ReadOnlyStruct);
+					if (symbol.Kind == SymbolKind.NamedType) {
+						if ((type = (ITypeSymbol)symbol).TypeKind == TypeKind.Struct) {
+							if (type.IsReadOnly()) {
+								tags.Add(__Classifications.ReadOnlyStruct);
+							}
+							if (type.IsRefLike()) {
+								tags.Add(__Classifications.RefStruct);
+							}
+							goto EXIT;
 						}
-						if (type.IsRefLike()) {
-							tags.Add(__Classifications.RefStruct);
+						else if (type.TypeKind == TypeKind.Enum) {
+							goto EXIT;
 						}
-						goto EXIT;
 					}
 					tags.Add(__Classifications.SealedMember);
 				}
