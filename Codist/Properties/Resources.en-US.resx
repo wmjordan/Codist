@@ -2600,4 +2600,13 @@ Ctrl: Match current symbol only, excluding base or derived symbols</value>
   <data name="T_StandardColors" xml:space="preserve">
     <value>Standard colors:</value>
   </data>
+  <data name="T_Customized" xml:space="preserve">
+    <value>Customized</value>
+  </data>
+  <data name="OT_FilterStyleNamesTip" xml:space="preserve">
+    <value>Filter syntax style names</value>
+  </data>
+  <data name="OT_ShowCustomizedStylesTip" xml:space="preserve">
+    <value>Show only customized styles</value>
+  </data>
 </root>

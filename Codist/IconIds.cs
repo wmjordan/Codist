@@ -91,6 +91,7 @@ namespace Codist
 		#endregion
 		#region user interface icons
 		public const int Filter = KnownImageIds.Filter;
+		public const int FilterCustomized = KnownImageIds.EditFilter;
 		public const int ClearFilter = KnownImageIds.DeleteFilter;
 		public const int Search = KnownImageIds.Search;
 		public const int RunTest = KnownImageIds.RunTest;

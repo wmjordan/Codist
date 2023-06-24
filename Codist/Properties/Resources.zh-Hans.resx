@@ -2586,4 +2586,13 @@ Ctrl: 仅匹配当前类，不匹配其它派生类或继承类</value>
   <data name="T_StandardColors" xml:space="preserve">
     <value>标准颜色:</value>
   </data>
+  <data name="T_Customized" xml:space="preserve">
+    <value>已自定义</value>
+  </data>
+  <data name="OT_FilterStyleNamesTip" xml:space="preserve">
+    <value>按名称筛选语法样式</value>
+  </data>
+  <data name="OT_ShowCustomizedStylesTip" xml:space="preserve">
+    <value>仅显示修改过的语法样式</value>
+  </data>
 </root>

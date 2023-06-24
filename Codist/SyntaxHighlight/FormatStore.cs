@@ -52,6 +52,11 @@ namespace Codist.SyntaxHighlight
 			}
 		}
 
+		public static bool IsOverridden(this IClassificationType classificationType) {
+			lock (__SyncRoot) {
+				return classificationType != null && __SyntaxStyleCache.TryGetValue(classificationType.Classification, out var s) && s.IsSet;
+			}
+		}
 		public static StyleBase GetOrCreateStyle(IClassificationType classificationType) {
 			var c = classificationType.Classification;
 			lock (__SyncRoot) {

@@ -3246,6 +3246,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Filter syntax style names.
+        /// </summary>
+        internal static string OT_FilterStyleNamesTip {
+            get {
+                return ResourceManager.GetString("OT_FilterStyleNamesTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Filter all properties with fields.
         /// </summary>
         internal static string OT_FitlerFieldsAndProperties {
@@ -4326,6 +4335,15 @@ namespace Codist.Properties {
         internal static string OT_ShortcutKeysNote {
             get {
                 return ResourceManager.GetString("OT_ShortcutKeysNote", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Show only customized styles.
+        /// </summary>
+        internal static string OT_ShowCustomizedStylesTip {
+            get {
+                return ResourceManager.GetString("OT_ShowCustomizedStylesTip", resourceCulture);
             }
         }
         
@@ -5597,6 +5615,15 @@ namespace Codist.Properties {
         internal static string T_CustomColors {
             get {
                 return ResourceManager.GetString("T_CustomColors", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Customized.
+        /// </summary>
+        internal static string T_Customized {
+            get {
+                return ResourceManager.GetString("T_Customized", resourceCulture);
             }
         }
         

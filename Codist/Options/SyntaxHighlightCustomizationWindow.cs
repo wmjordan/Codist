@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using Codist.Controls;
 using Codist.SyntaxHighlight;
@@ -26,6 +27,8 @@ namespace Codist.Options
 
 		readonly StackPanel _SettingsList;
 		readonly ThemedTextBox _SettingsFilterBox;
+		readonly ThemedToggleButton _OverriddenStyleFilterButton;
+		readonly ThemedButton _ClearFilterButton;
 		readonly Border _OptionPageHolder;
 		readonly TextBlock _Notice;
 		readonly ListBox _SyntaxSourceBox;
@@ -157,22 +160,35 @@ namespace Codist.Options
 								new Grid {
 									ColumnDefinitions = {
 										new ColumnDefinition { Width = new GridLength(10, GridUnitType.Star) },
-										new ColumnDefinition { Width = new GridLength(120, GridUnitType.Pixel) },
+										new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
 										new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
 										new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
 									},
 									Children = {
 										new TextBlock { Text = R.T_SyntaxStyles, FontWeight = FontWeights.Bold }.SetValue(Grid.SetColumn, 0),
 										new Border {
-											Padding = WpfHelper.SmallMargin,
+											HorizontalAlignment = HorizontalAlignment.Right,
 											Child = new StackPanel {
 												Orientation = Orientation.Horizontal,
 												Children = {
 													ThemeHelper.GetImage(IconIds.Filter).WrapMargin(WpfHelper.GlyphMargin),
 													new ThemedTextBox {
 														Width = 120,
-														Margin = WpfHelper.GlyphMargin
-													}.Set(ref _SettingsFilterBox)
+														Margin = WpfHelper.SmallMargin,
+														ToolTip = R.OT_FilterStyleNamesTip
+													}.Set(ref _SettingsFilterBox),
+													new Border {
+														BorderThickness = WpfHelper.TinyMargin,
+														Margin = WpfHelper.SmallVerticalMargin,
+														CornerRadius = new CornerRadius(3),
+														Child = new StackPanel {
+															Orientation = Orientation.Horizontal,
+															Children = {
+																new ThemedToggleButton(IconIds.FilterCustomized, R.OT_ShowCustomizedStylesTip) { Padding = WpfHelper.NoMargin, Background = null }.ClearMargin().ClearBorder().Set(ref _OverriddenStyleFilterButton),
+																new ThemedButton(ThemeHelper.GetImage(IconIds.ClearFilter), R.CMD_ClearFilter) { Padding = WpfHelper.NoMargin, Background = null }.ClearMargin().ClearBorder().SetValue(ToolTipService.SetPlacement, PlacementMode.Left).Set(ref _ClearFilterButton)
+															}
+														}
+													}.ReferenceProperty(Border.BorderBrushProperty, CommonControlsColors.TextBoxBorderBrushKey)
 												}
 											}
 										}.SetValue(Grid.SetColumn, 1),
@@ -353,6 +369,9 @@ namespace Codist.Options
 			_RemoveTagButton.Click += RemoveTag;
 			_TagBox.TextChanged += ApplyTag;
 			_SettingsFilterBox.TextChanged += FilterSettingsList;
+			_OverriddenStyleFilterButton.Checked += FilterSettingsList;
+			_OverriddenStyleFilterButton.Unchecked += FilterSettingsList;
+			_ClearFilterButton.Click += ClearFilters;
 			Config.Instance.BeginUpdate();
 		}
 
@@ -662,10 +681,16 @@ namespace Codist.Options
 		}
 
 		void FilterSettingsList(object sender, EventArgs args) {
+			if (_Lock.IsLocked) {
+				return;
+			}
 			var t = _SettingsFilterBox.Text;
+			var filterByText = String.IsNullOrWhiteSpace(t) == false;
+			var overriddenOnly = _OverriddenStyleFilterButton.IsChecked == true;
 			foreach (var item in _SettingsList.Children) {
 				if (item is StyleSettingsButton b) {
-					b.ToggleVisibility(b.Text.IndexOf(t, StringComparison.OrdinalIgnoreCase) != -1);
+					b.ToggleVisibility((filterByText == false || b.Text.IndexOf(t, StringComparison.OrdinalIgnoreCase) != -1)
+						&& (overriddenOnly == false || b.StyleSettings.IsSet));
 				}
 			}
 			if (_SelectedStyleButton?.Visibility == Visibility.Collapsed) {
@@ -677,6 +702,14 @@ namespace Codist.Options
 				_SelectedCommentTag = null;
 				_TagSettingsGroup.Visibility = Visibility.Collapsed;
 			}
+		}
+
+		void ClearFilters(object sender, EventArgs args) {
+			_Lock.Lock();
+			_SettingsFilterBox.Text = String.Empty;
+			_OverriddenStyleFilterButton.IsChecked = false;
+			_Lock.Unlock();
+			FilterSettingsList(sender, args);
 		}
 
 		void OnSelectTag(object sender, RoutedEventArgs e) {
@@ -1319,7 +1352,7 @@ namespace Codist.Options
 					ContextMenu = new ContextMenu {
 						Resources = SharedDictionaryManager.ContextMenu,
 						MaxHeight = 300,
-						Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom,
+						Placement = PlacementMode.Bottom,
 						PlacementTarget = this,
 						MinWidth = ActualWidth,
 						ItemsSource = new[] { new ThemedMenuItem(-1, R.T_NotSet, SetFont).SetProperty(__InstalledFontNameProperty, null) }
@@ -1408,7 +1441,7 @@ namespace Codist.Options
 							SetOpacityValue(new ThemedMenuItem(IconIds.Opacity, R.T_Default, SelectOpacity), 0),
 						},
 						MaxHeight = 300,
-						Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom,
+						Placement = PlacementMode.Bottom,
 						PlacementTarget = this,
 					};
 					ContextMenu.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
@@ -1464,19 +1497,6 @@ namespace Codist.Options
 			CommentTagger,
 			CommentLabels,
 			PriorityOrder
-		}
-
-		sealed class TagStyle
-		{
-			public readonly CommentStyleTypes Style;
-			public readonly string Description;
-			public TagStyle(CommentStyleTypes style, string description) {
-				Style = style;
-				Description = description;
-			}
-			public override string ToString() {
-				return Description;
-			}
 		}
 
 		sealed class ClassificationCategoryItem
