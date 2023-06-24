@@ -2555,4 +2555,49 @@ Ctrl: Match current symbol only, excluding base or derived symbols</value>
   <data name="T_FirstRunPrompt" xml:space="preserve">
     <value>Codist is just installed on your Visual Studio. Do you want to learn more about it?</value>
   </data>
+  <data name="CMDT_CopyColor" xml:space="preserve">
+    <value>Copy active color</value>
+  </data>
+  <data name="CMDT_PasteColor" xml:space="preserve">
+    <value>Paste into active color</value>
+  </data>
+  <data name="CMDT_RevertColor" xml:space="preserve">
+    <value>Revert to initial color</value>
+  </data>
+  <data name="CMD_Revert" xml:space="preserve">
+    <value>Revert</value>
+  </data>
+  <data name="CMD_UseActiveColor" xml:space="preserve">
+    <value>Use Active Color</value>
+  </data>
+  <data name="T_Blue" xml:space="preserve">
+    <value>Blue:</value>
+  </data>
+  <data name="T_ColorVariances" xml:space="preserve">
+    <value>Color variances:</value>
+  </data>
+  <data name="T_CustomColors" xml:space="preserve">
+    <value>Custom colors:</value>
+  </data>
+  <data name="T_Green" xml:space="preserve">
+    <value>Green:</value>
+  </data>
+  <data name="T_Hue" xml:space="preserve">
+    <value>Hue:</value>
+  </data>
+  <data name="T_Lightness" xml:space="preserve">
+    <value>Lightness:</value>
+  </data>
+  <data name="T_PickColor" xml:space="preserve">
+    <value>Pick color</value>
+  </data>
+  <data name="T_Red" xml:space="preserve">
+    <value>Red:</value>
+  </data>
+  <data name="T_Saturation" xml:space="preserve">
+    <value>Saturation:</value>
+  </data>
+  <data name="T_StandardColors" xml:space="preserve">
+    <value>Standard colors:</value>
+  </data>
 </root>

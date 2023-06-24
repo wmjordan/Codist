@@ -94,6 +94,7 @@ namespace Codist
 		public int SmartBarButtonSize { get; set; } = DefaultIconSize;
 		public List<CommentLabel> Labels { get; } = new List<CommentLabel>();
 		public QuickInfoConfig QuickInfo { get; } = new QuickInfoConfig();
+		public List<Color> CustomColors { get; } = new List<Color>();
 
 		#region Deprecated style containers
 		public List<CommentStyle> CommentStyles { get; } = new List<CommentStyle>();

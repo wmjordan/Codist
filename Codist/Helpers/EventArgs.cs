@@ -2,7 +2,7 @@
 
 namespace Codist
 {
-	sealed class EventArgs<TData> : EventArgs
+	public sealed class EventArgs<TData> : EventArgs
 	{
 		public EventArgs(TData data) {
 			Data = data;

@@ -2541,4 +2541,49 @@ Ctrl: 仅匹配当前类，不匹配其它派生类或继承类</value>
     <value>Codist 已经在你的 Visual Studio 中安装好了。
 是否要了解一下关于这个插件的信息呢？</value>
   </data>
+  <data name="CMDT_CopyColor" xml:space="preserve">
+    <value>复制当前颜色</value>
+  </data>
+  <data name="CMDT_PasteColor" xml:space="preserve">
+    <value>粘贴颜色</value>
+  </data>
+  <data name="CMDT_RevertColor" xml:space="preserve">
+    <value>还原到初始的颜色</value>
+  </data>
+  <data name="CMD_Revert" xml:space="preserve">
+    <value>还原</value>
+  </data>
+  <data name="CMD_UseActiveColor" xml:space="preserve">
+    <value>使用当前颜色</value>
+  </data>
+  <data name="T_Blue" xml:space="preserve">
+    <value>蓝:</value>
+  </data>
+  <data name="T_ColorVariances" xml:space="preserve">
+    <value>近邻颜色:</value>
+  </data>
+  <data name="T_CustomColors" xml:space="preserve">
+    <value>自定义颜色:</value>
+  </data>
+  <data name="T_Green" xml:space="preserve">
+    <value>绿:</value>
+  </data>
+  <data name="T_Hue" xml:space="preserve">
+    <value>色相:</value>
+  </data>
+  <data name="T_Lightness" xml:space="preserve">
+    <value>明度:</value>
+  </data>
+  <data name="T_PickColor" xml:space="preserve">
+    <value>选择颜色</value>
+  </data>
+  <data name="T_Red" xml:space="preserve">
+    <value>红:</value>
+  </data>
+  <data name="T_Saturation" xml:space="preserve">
+    <value>彩度:</value>
+  </data>
+  <data name="T_StandardColors" xml:space="preserve">
+    <value>标准颜色:</value>
+  </data>
 </root>

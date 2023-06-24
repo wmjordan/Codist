@@ -136,6 +136,55 @@ namespace Codist
 			return (299 * color.R + 587 * color.G + 114 * color.B) / 1000 < 128;
 		}
 
+		public static WpfColor FromHsl(double hue, double saturation, double luminosity) {
+			double v;
+			double r, g, b;
+			r = g = b = luminosity;   // default to gray
+			v = (luminosity <= 0.5) ? (luminosity * (1.0 + saturation)) : (luminosity + saturation - luminosity * saturation);
+
+			if (v > 0) {
+				double m, sv, vsf;
+				int sextant;
+				m = luminosity + luminosity - v;
+				sv = (v - m) / v;
+				hue /= 60;
+				sextant = (int)hue;
+				vsf = v * sv * (hue - sextant);
+				switch (sextant) {
+					case 0:
+						r = v;
+						g = m + vsf;
+						b = m;
+						break;
+					case 1:
+						r = v - vsf;
+						g = v;
+						b = m;
+						break;
+					case 2:
+						r = m;
+						g = v;
+						b = m + vsf;
+						break;
+					case 3:
+						r = m;
+						g = v - vsf;
+						b = v;
+						break;
+					case 4:
+						r = m + vsf;
+						g = m;
+						b = v;
+						break;
+					case 5:
+						r = v;
+						g = m;
+						b = v - vsf;
+						break;
+				}
+			}
+			return WpfColor.FromRgb((byte)Math.Round(r * 255.0, MidpointRounding.AwayFromZero), (byte)Math.Round(g * 255.0, MidpointRounding.AwayFromZero), (byte)Math.Round(b * 255.0, MidpointRounding.AwayFromZero));
+		}
 		static class CurrentResources
 		{
 			public static readonly System.Windows.ResourceDictionary Instance = System.Windows.Application.Current.Resources;

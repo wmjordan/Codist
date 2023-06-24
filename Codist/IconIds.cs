@@ -194,6 +194,7 @@ namespace Codist
 		public const int Cut = KnownImageIds.Cut;
 		public const int Paste = KnownImageIds.Paste;
 		public const int Delete = KnownImageIds.Cancel;
+		public const int Undo = KnownImageIds.Undo;
 		public const int Duplicate = KnownImageIds.CopyItem;
 		public const int Find = KnownImageIds.QuickFind;
 		public const int FindNext = KnownImageIds.FindNext;

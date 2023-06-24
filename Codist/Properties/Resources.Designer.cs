@@ -1459,6 +1459,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Revert.
+        /// </summary>
+        internal static string CMD_Revert {
+            get {
+                return ResourceManager.GetString("CMD_Revert", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Revert Selected Range.
         /// </summary>
         internal static string CMD_RevertSelectedRange {
@@ -1922,6 +1931,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Use Active Color.
+        /// </summary>
+        internal static string CMD_UseActiveColor {
+            get {
+                return ResourceManager.GetString("CMD_UseActiveColor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Use &lt;default&gt;.
         /// </summary>
         internal static string CMD_UseDefault {
@@ -2036,6 +2054,15 @@ namespace Codist.Properties {
         internal static string CMDT_ConfigureSyntaxHighlight {
             get {
                 return ResourceManager.GetString("CMDT_ConfigureSyntaxHighlight", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copy active color.
+        /// </summary>
+        internal static string CMDT_CopyColor {
+            get {
+                return ResourceManager.GetString("CMDT_CopyColor", resourceCulture);
             }
         }
         
@@ -2258,6 +2285,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Paste into active color.
+        /// </summary>
+        internal static string CMDT_PasteColor {
+            get {
+                return ResourceManager.GetString("CMDT_PasteColor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Reset current auto build version settings to default.
         /// </summary>
         internal static string CMDT_ResetAutoBuildVersion {
@@ -2272,6 +2308,15 @@ namespace Codist.Properties {
         internal static string CMDT_ResetTheme {
             get {
                 return ResourceManager.GetString("CMDT_ResetTheme", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Revert to initial color.
+        /// </summary>
+        internal static string CMDT_RevertColor {
+            get {
+                return ResourceManager.GetString("CMDT_RevertColor", resourceCulture);
             }
         }
         
@@ -5258,6 +5303,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Blue:.
+        /// </summary>
+        internal static string T_Blue {
+            get {
+                return ResourceManager.GetString("T_Blue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Bottom gradient.
         /// </summary>
         internal static string T_BottomGradient {
@@ -5429,6 +5483,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Color variances:.
+        /// </summary>
+        internal static string T_ColorVariances {
+            get {
+                return ResourceManager.GetString("T_ColorVariances", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Comment tag settings:.
         /// </summary>
         internal static string T_CommentTagSettings {
@@ -5525,6 +5588,15 @@ namespace Codist.Properties {
         internal static string T_CpuUsage {
             get {
                 return ResourceManager.GetString("T_CpuUsage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Custom colors:.
+        /// </summary>
+        internal static string T_CustomColors {
+            get {
+                return ResourceManager.GetString("T_CustomColors", resourceCulture);
             }
         }
         
@@ -6026,6 +6098,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Green:.
+        /// </summary>
+        internal static string T_Green {
+            get {
+                return ResourceManager.GetString("T_Green", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Hash code.
         /// </summary>
         internal static string T_HashCode {
@@ -6049,6 +6130,15 @@ namespace Codist.Properties {
         internal static string T_HighlightSettingFileFilter {
             get {
                 return ResourceManager.GetString("T_HighlightSettingFileFilter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hue:.
+        /// </summary>
+        internal static string T_Hue {
+            get {
+                return ResourceManager.GetString("T_Hue", resourceCulture);
             }
         }
         
@@ -6175,6 +6265,15 @@ namespace Codist.Properties {
         internal static string T_LeftGradient {
             get {
                 return ResourceManager.GetString("T_LeftGradient", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Lightness:.
+        /// </summary>
+        internal static string T_Lightness {
+            get {
+                return ResourceManager.GetString("T_Lightness", resourceCulture);
             }
         }
         
@@ -6595,6 +6694,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Pick color.
+        /// </summary>
+        internal static string T_PickColor {
+            get {
+                return ResourceManager.GetString("T_PickColor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to PNG images (*.png)|*.png.
         /// </summary>
         internal static string T_PngFileFilter {
@@ -6699,6 +6807,15 @@ namespace Codist.Properties {
         internal static string T_ReadVariable {
             get {
                 return ResourceManager.GetString("T_ReadVariable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Red:.
+        /// </summary>
+        internal static string T_Red {
+            get {
+                return ResourceManager.GetString("T_Red", resourceCulture);
             }
         }
         
@@ -6817,6 +6934,15 @@ namespace Codist.Properties {
         internal static string T_SafeModeTip {
             get {
                 return ResourceManager.GetString("T_SafeModeTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Saturation:.
+        /// </summary>
+        internal static string T_Saturation {
+            get {
+                return ResourceManager.GetString("T_Saturation", resourceCulture);
             }
         }
         
@@ -7027,6 +7153,15 @@ namespace Codist.Properties {
         internal static string T_Squiggle {
             get {
                 return ResourceManager.GetString("T_Squiggle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Standard colors:.
+        /// </summary>
+        internal static string T_StandardColors {
+            get {
+                return ResourceManager.GetString("T_StandardColors", resourceCulture);
             }
         }
         

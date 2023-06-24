@@ -1,0 +1,29 @@
+﻿<UserControl x:Class="Codist.Controls.ColorSelector"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+            
+             mc:Ignorable="d" Height="270" Width="314"  >
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="SliderResources.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid>
+        <Border BorderBrush="Gray" BorderThickness="2" Margin="0,0,0,0" SnapsToDevicePixels="True"  Height="260" Width="260" HorizontalAlignment="Left" >
+            <Grid ClipToBounds="True">
+                <Image HorizontalAlignment="Left" Name="ColorPlane" Stretch="Uniform" VerticalAlignment="Top" SnapsToDevicePixels="True"  Height="256" Width="256" MouseMove="ColorPlane_MouseMove" />
+                <Ellipse Width="11" Height="11" Stroke="White" Name="selectionEllipse" />
+                <Ellipse Width="13" Height="13" Stroke="Black" Name="selectionOuterEllipse" />
+            </Grid>
+        </Border>
+
+        <Border  BorderBrush="Gray" BorderThickness="2"   Grid.Column="1" Grid.Row="1" Margin="272,0,0,0"  SnapsToDevicePixels="True" Width="28" Height="260" HorizontalAlignment="Left" VerticalAlignment="Center" >
+            <Image Height="256" HorizontalAlignment="Left"  Name="NormalColorImage" Stretch="Fill" VerticalAlignment="Top" Width="24"  SnapsToDevicePixels="True" MouseDown="NormalColorImage_MouseDown" MouseMove="NormalColorImage_MouseMove" />
+        </Border>
+        <Slider Height="268" HorizontalAlignment="Left" Margin="292,0,0,0" Maximum="255" Name="NormalSlider" Orientation="Vertical" Style="{DynamicResource SliderStyle}" VerticalAlignment="center" Width="28" ValueChanged="NormalSlider_ValueChanged" />
+    </Grid>
+</UserControl>
