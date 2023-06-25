@@ -245,7 +245,7 @@ namespace Codist.Options
 			picker.OriginalColor = picker.Color;
 			picker.ColorChanged += Picker_ColorChanged;
 			var window = this.GetParent<Window>();
-			window.Hide();
+			window?.Hide();
 			try {
 				if (new MessageWindow(picker, R.T_PickColor, MessageBoxButton.OKCancel).ShowDialog() != true) {
 					Color = c;
@@ -257,7 +257,7 @@ namespace Codist.Options
 			}
 			finally {
 				picker.ColorChanged -= Picker_ColorChanged;
-				window.Show();
+				window?.Show();
 			}
 		}
 
