@@ -365,7 +365,7 @@ namespace Codist.Options
 				_HBox.Minimum = _SBox.Minimum = _LBox.Minimum
 					= _RBox.Minimum = _GBox.Minimum = _BBox.Minimum
 					= 0;
-				_HBox.Maximum = 360;
+				_HBox.Maximum = 359;
 				_SBox.Maximum = ColorComponent.Saturation.MaxValue;
 				_LBox.Maximum = ColorComponent.Brightness.MaxValue;
 				_RBox.Maximum = 255;
@@ -430,15 +430,9 @@ namespace Codist.Options
 					var hd = 120 / v;
 					var hmid = v / 2;
 					var hn = h - hd * hmid;
-					if (hn < 0) {
-						hn += 360;
-					}
 					for (int j = 0; j < v; j++) {
 						if (j == hmid) {
 							hn += hd;
-						}
-						if (hn > 360) {
-							hn -= 360;
 						}
 						colors[i] = ColorHelper.FromHsl(hn, s, l);
 						colors[i + v] = ColorHelper.FromHsl(h, n, l);

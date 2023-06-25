@@ -141,6 +141,12 @@ namespace Codist
 			double r, g, b;
 			r = g = b = luminosity;   // default to gray
 			v = (luminosity <= 0.5) ? (luminosity * (1.0 + saturation)) : (luminosity + saturation - luminosity * saturation);
+			if (hue >= 360) {
+				hue %= 360;
+			}
+			else if (hue < 0) {
+				hue = hue % 360 + 360;
+			}
 
 			if (v > 0) {
 				double m, sv, vsf;
