@@ -466,7 +466,7 @@ namespace Codist.Options
 			var l = _SettingsList.Children;
 			l.Clear();
 			_AddTagButton.Visibility = Visibility.Visible;
-			_Notice.Visibility = _SettingsGroup.Visibility = Visibility.Collapsed;
+			_Notice.Visibility = _SettingsGroup.Visibility = _OverriddenStyleFilterButton.Visibility = Visibility.Collapsed;
 			_SelectedStyleButton = null;
 			var tag = _SelectedCommentTag;
 			foreach (var label in Config.Instance.Labels) {
@@ -525,6 +525,7 @@ namespace Codist.Options
 			var l = _SettingsList.Children;
 			l.Clear();
 			_Notice.Toggle(_SettingsList.Visibility != Visibility.Visible);
+			_OverriddenStyleFilterButton.Visibility = Visibility.Visible;
 			_AddTagButton.Visibility = _RemoveTagButton.Visibility = _TagSettingsGroup.Visibility = Visibility.Collapsed;
 			IEnumerable<IClassificationType> classifications;
 			switch (source) {
