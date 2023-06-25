@@ -162,8 +162,6 @@ namespace Codist.Options
 									ColumnDefinitions = {
 										new ColumnDefinition { Width = new GridLength(10, GridUnitType.Star) },
 										new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
-										new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
-										new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
 									},
 									Children = {
 										new TextBlock { Text = R.T_SyntaxStyles, FontWeight = FontWeights.Bold }.SetValue(Grid.SetColumn, 0),
@@ -178,25 +176,15 @@ namespace Codist.Options
 														Margin = WpfHelper.SmallMargin,
 														ToolTip = R.OT_FilterStyleNamesTip
 													}.Set(ref _SettingsFilterBox),
-													new Border {
-														BorderThickness = WpfHelper.TinyMargin,
-														Margin = WpfHelper.SmallVerticalMargin,
-														CornerRadius = new CornerRadius(3),
-														Child = new StackPanel {
-															Orientation = Orientation.Horizontal,
-															Children = {
-																new ThemedToggleButton(IconIds.FilterCustomized, R.OT_ShowCustomizedStylesTip) { Padding = WpfHelper.NoMargin, Background = null }.ClearMargin().ClearBorder().Set(ref _OverriddenStyleFilterButton),
-																new ThemedButton(ThemeHelper.GetImage(IconIds.ClearFilter), R.CMD_ClearFilter) { Padding = WpfHelper.NoMargin, Background = null }.ClearMargin().ClearBorder().SetValue(ToolTipService.SetPlacement, PlacementMode.Left).Set(ref _ClearFilterButton)
-															}
-														}
-													}.ReferenceProperty(Border.BorderBrushProperty, CommonControlsColors.TextBoxBorderBrushKey)
+													new ThemedControlGroup { Margin = WpfHelper.SmallVerticalMargin }
+														.AddRange(
+															new ThemedToggleButton(IconIds.FilterCustomized, R.OT_ShowCustomizedStylesTip).Set(ref _OverriddenStyleFilterButton),
+															new ThemedImageButton(IconIds.Add, R.CMD_Add).SetValue(ToolTipService.SetPlacement, PlacementMode.Left).Set(ref _AddTagButton),
+															new ThemedImageButton(IconIds.Remove, R.CMD_Remove).SetValue(ToolTipService.SetPlacement, PlacementMode.Left).Set(ref _RemoveTagButton),
+															new ThemedButton(ThemeHelper.GetImage(IconIds.ClearFilter), R.CMD_ClearFilter).SetValue(ToolTipService.SetPlacement, PlacementMode.Left).Set(ref _ClearFilterButton)),
 												}
 											}
-										}.SetValue(Grid.SetColumn, 1),
-										new Button { Content = R.CMD_Add }.ReferenceStyle(VsResourceKeys.ButtonStyleKey)
-											.Set(ref _AddTagButton).SetValue(Grid.SetColumn, 2),
-										new Button { Content = R.CMD_Remove }.ReferenceStyle(VsResourceKeys.ButtonStyleKey)
-											.Set(ref _RemoveTagButton).SetValue(Grid.SetColumn, 3)
+										}.SetValue(Grid.SetColumn, 1)
 									}
 								}.Set(ref _RightPaneTitle),
 								new Border {

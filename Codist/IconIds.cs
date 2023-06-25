@@ -93,6 +93,8 @@ namespace Codist
 		public const int Filter = KnownImageIds.Filter;
 		public const int FilterCustomized = KnownImageIds.EditFilter;
 		public const int ClearFilter = KnownImageIds.DeleteFilter;
+		public const int Add = KnownImageIds.Add;
+		public const int Remove = KnownImageIds.Cancel;
 		public const int Search = KnownImageIds.Search;
 		public const int RunTest = KnownImageIds.RunTest;
 		public const int DebugTest = KnownImageIds.DebugSelection;
