@@ -77,6 +77,7 @@ namespace Codist.Options
 			MinHeight = 300;
 			MinWidth = 480;
 			SnapsToDevicePixels = true;
+			Resources = SharedDictionaryManager.ThemedControls;
 			Content = new Border {
 				Padding = WpfHelper.MiddleMargin,
 				Child = new Grid {
@@ -1418,7 +1419,7 @@ namespace Codist.Options
 			byte _Opacity;
 
 			public OpacityButton(Action<byte> opacityChangedHandler) {
-				Content = "Opacity";
+				Content = R.T_Opacity;
 				Width = MIDDLE_LABEL_WIDTH;
 				Margin = WpfHelper.SmallMargin;
 				this.ReferenceStyle(VsResourceKeys.ButtonStyleKey);

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
-using Microsoft.VisualStudio.PlatformUI;
 using R = Codist.Properties.Resources;
 
 namespace Codist.Controls
@@ -18,16 +17,7 @@ namespace Codist.Controls
 			_DocumentFilter = CreateButton(IconIds.File, R.T_SearchCurrentDocument);
 			_ProjectFilter = CreateButton(IconIds.Project, R.T_SearchCurrentProject);
 			Margin = WpfHelper.SmallHorizontalMargin;
-			Content = new Border {
-				BorderThickness = WpfHelper.TinyMargin,
-				CornerRadius = new CornerRadius(3),
-				Child = new StackPanel {
-					Children = {
-						_DocumentFilter, _ProjectFilter,
-					},
-					Orientation = Orientation.Horizontal
-				}
-			}.ReferenceProperty(BorderBrushProperty, CommonControlsColors.TextBoxBorderBrushKey);
+			Content = new ThemedControlGroup().AddRange(_DocumentFilter, _ProjectFilter);
 			_DocumentFilter.IsChecked = true;
 		}
 

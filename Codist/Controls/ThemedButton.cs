@@ -4,6 +4,7 @@ using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using Microsoft.VisualStudio.PlatformUI;
+using Microsoft.VisualStudio.Shell;
 
 namespace Codist.Controls
 {
@@ -15,8 +16,8 @@ namespace Codist.Controls
 		public ThemedButton(object content, object toolTip) {
 			Content = content;
 			ToolTip = toolTip;
-			this.ReferenceProperty(ForegroundProperty, CommonControlsColors.ButtonTextBrushKey)
-				.ReferenceProperty(BackgroundProperty, CommonControlsColors.ButtonBrushKey)
+			MinWidth = 0;
+			this.ReferenceStyle(VsResourceKeys.ButtonStyleKey)
 				.ReferenceCrispImageBackground(EnvironmentColors.MainWindowActiveCaptionColorKey);
 		}
 
@@ -68,6 +69,8 @@ namespace Codist.Controls
 		public static readonly DependencyProperty IsHighlightedProperty = DependencyProperty.Register("IsHighlighted", typeof(bool), typeof(ThemedImageButton));
 		bool _IsChecked, _IsHighlighted;
 
+		public ThemedImageButton(int imageId) : this(imageId, (TextBlock)null) { }
+		public ThemedImageButton(int imageId, string content) : this(imageId, new TextBlock { Text = content }) { }
 		public ThemedImageButton(int imageId, TextBlock content) {
 			Content = content != null ?
 				(object)new StackPanel {
@@ -140,6 +143,29 @@ namespace Codist.Controls
 				p.Children.DisposeCollection();
 			}
 			Content = null;
+		}
+	}
+
+	public sealed class ThemedControlGroup : Border
+	{
+		readonly StackPanel _ControlPanel;
+
+		public ThemedControlGroup() {
+			BorderThickness = WpfHelper.TinyMargin;
+			CornerRadius = new CornerRadius(3);
+			Child = _ControlPanel = new StackPanel { Orientation = Orientation.Horizontal };
+			this.ReferenceProperty(BorderBrushProperty, CommonControlsColors.TextBoxBorderBrushKey);
+		}
+
+		public ThemedControlGroup AddRange(params Control[] controls) {
+			foreach (var item in controls) {
+				item.Padding = WpfHelper.NoMargin;
+				item.Margin = WpfHelper.NoMargin;
+				item.BorderThickness = WpfHelper.NoMargin;
+				item.MinHeight = 10;
+				_ControlPanel.Add(item);
+			}
+			return this;
 		}
 	}
 }

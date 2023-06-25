@@ -23,6 +23,7 @@ namespace Codist.Controls
 			ResizeMode = ResizeMode.NoResize;
 			WindowStartupLocation = WindowStartupLocation.CenterOwner;
 			Owner = Application.Current.MainWindow;
+			Resources = SharedDictionaryManager.ThemedControls;
 			Content = new StackPanel {
 				Margin = WpfHelper.MiddleMargin,
 				Children = {

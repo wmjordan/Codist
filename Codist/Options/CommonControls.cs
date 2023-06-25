@@ -317,14 +317,14 @@ namespace Codist.Options
 											Padding = WpfHelper.SmallHorizontalMargin,
 											ToolTip = R.CMDT_RevertColor
 										}.ReferenceStyle(VsResourceKeys.ButtonStyleKey).Set(ref _RevertButton),
-										new ThemedImageButton(IconIds.Copy, null) {
+										new ThemedImageButton(IconIds.Copy) {
 											Margin = WpfHelper.SmallMargin,
 											Padding = WpfHelper.TinyMargin,
 											MinWidth = 30,
 											MaxWidth = 30,
 											ToolTip = R.CMDT_CopyColor
 										}.ReferenceStyle(VsResourceKeys.ButtonStyleKey).Set(ref _CopyButton),
-										new ThemedImageButton(IconIds.Paste, null) {
+										new ThemedImageButton(IconIds.Paste) {
 											Margin = WpfHelper.SmallMargin,
 											Padding = WpfHelper.TinyMargin,
 											MinWidth = 30,
