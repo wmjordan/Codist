@@ -124,6 +124,12 @@ namespace Codist.Controls
 			this.ReferenceCrispImageBackground(EnvironmentColors.MainWindowActiveCaptionColorKey);
 		}
 
+		public ThemedToggleButton(int imageId, string toolTip, RoutedEventHandler changedHandler)
+			: this(imageId, toolTip) {
+			Checked += changedHandler;
+			Unchecked += changedHandler;
+		}
+
 		public TextBlock Text {
 			get => _Text;
 			set {

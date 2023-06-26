@@ -29,17 +29,14 @@ namespace Codist.Controls
 						new Separator()
 					}
 			};
-			HeaderButtons = new StackPanel {
-				Orientation = Orientation.Horizontal,
-				Children = {
-					new ThemedButton(ThemeHelper.GetImage(IconIds.TogglePinning), R.CMD_Pin, TogglePinButton),
+			HeaderButtons = new ThemedControlGroup()
+				.AddRange(
+					new ThemedToggleButton(IconIds.TogglePinning, R.CMD_Pin, TogglePinButton),
 					new ThemedButton(IconIds.Close, R.CMD_Close, () => {
 						var a = _ExternalAdornment;
 						a.RemoveAndDispose(this);
 						a.FocusOnTextView();
-					})
-				}
-			};
+					}));
 			MouseLeftButtonUp += MenuItemSelect;
 			_ExternalAdornment.MakeDraggable(this);
 		}
@@ -59,7 +56,7 @@ namespace Codist.Controls
 		}
 
 		void TogglePinButton(object sender, RoutedEventArgs e) {
-			((ThemedButton)e.Source).Content = ThemeHelper.GetImage((IsPinned = !IsPinned) ? IconIds.Pin : IconIds.Unpin);
+			((ThemedToggleButton)e.Source).Content = ThemeHelper.GetImage((IsPinned = !IsPinned) ? IconIds.Pin : IconIds.Unpin);
 		}
 
 		public void Show(UIElement relativeElement = null) {
