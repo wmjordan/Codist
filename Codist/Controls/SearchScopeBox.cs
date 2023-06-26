@@ -38,7 +38,7 @@ namespace Codist.Controls
 		public UIElementCollection Contents => ((StackPanel)((Border)Content).Child).Children;
 
 		ThemedToggleButton CreateButton(int imageId, string toolTip) {
-			var b = new ThemedToggleButton(imageId, toolTip).ClearMargin().ClearBorder();
+			var b = new ThemedToggleButton(imageId, toolTip).ClearSpacing();
 			b.Checked += UpdateFilterValue;
 			b.Unchecked += KeepChecked;
 			return b;

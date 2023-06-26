@@ -314,9 +314,9 @@ namespace Codist
 			}
 			return element;
 		}
-		public static TElement ClearBorder<TElement>(this TElement element)
+		public static TElement ClearSpacing<TElement>(this TElement element)
 			where TElement : Control {
-			element.BorderThickness = NoMargin;
+			element.Margin = element.Padding = element.BorderThickness = NoMargin;
 			return element;
 		}
 		public static TElement ClearMargin<TElement>(this TElement element)

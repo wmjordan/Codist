@@ -49,9 +49,9 @@ namespace Codist.Controls
 			}
 			_FilterContainer
 				.Add(_FilterGroups)
-				.Add(new ThemedButton(IconIds.ClearFilter, R.CMD_ClearFilter, ClearFilters) { Padding = WpfHelper.NoMargin, MinHeight = 10 }
+				.Add(new ThemedButton(IconIds.ClearFilter, R.CMD_ClearFilter, ClearFilters) { MinHeight = 10 }
 					.SetValue(ToolTipService.SetPlacement, PlacementMode.Left)
-					.ClearBorder());
+					.ClearSpacing());
 			_Filter = filter;
 			foreach (var item in _FilterGroups) {
 				item.FilterChanged += FilterBox_Changed;
@@ -333,7 +333,7 @@ namespace Codist.Controls
 			}
 
 			protected ThemedToggleButton CreateButton(int imageId, string toolTip) {
-				var b = new ThemedToggleButton(imageId, toolTip).ClearMargin().ClearBorder();
+				var b = new ThemedToggleButton(imageId, toolTip).ClearSpacing();
 				b.Checked += UpdateFilterValueHandler;
 				b.Unchecked += UpdateFilterValueHandler;
 				return b;

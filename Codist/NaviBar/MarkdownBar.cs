@@ -196,10 +196,6 @@ namespace Codist.NaviBar
 			}
 		}
 
-		//void AddItem(int imageId, RoutedEventHandler clickHandler) {
-		//	Items.Add(new ThemedButton(ThemeHelper.GetImage(imageId), null, clickHandler) { Padding = WpfHelper.SmallMargin });
-		//}
-
 		sealed class MarkdownList : VirtualList
 		{
 			readonly MarkdownBar _Bar;
@@ -218,17 +214,8 @@ namespace Codist.NaviBar
 							Children = {
 								ThemeHelper.GetImage(IconIds.Search).WrapMargin(WpfHelper.GlyphMargin),
 								(_FinderBox = new ThemedTextBox { MinWidth = 150 }),
-								new Border {
-									BorderThickness = WpfHelper.TinyMargin,
-									CornerRadius = new CornerRadius(3),
-									Margin = WpfHelper.SmallHorizontalMargin,
-									Child = new StackPanel {
-										Children = {
-											new ThemedButton(IconIds.ClearFilter, R.CMD_ClearFilter, ClearFilter).SetValue(ToolTipService.SetPlacement, PlacementMode.Left)
-										},
-										Orientation = Orientation.Horizontal
-									}
-								}.ReferenceProperty(BorderBrushProperty, CommonControlsColors.TextBoxBorderBrushKey)
+								new ThemedControlGroup { Margin = WpfHelper.SmallHorizontalMargin }
+									.AddRange(new ThemedButton(IconIds.ClearFilter, R.CMD_ClearFilter, ClearFilter).SetValue(ToolTipService.SetPlacement, PlacementMode.Left))
 							}
 						},
 					}

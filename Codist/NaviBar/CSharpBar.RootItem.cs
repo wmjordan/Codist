@@ -44,7 +44,7 @@ namespace Codist.NaviBar
 									(_FinderBox = new MemberFinderBox() { MinWidth = 150, ToolTip = new ThemedToolTip(R.CMD_SearchDeclaration, R.T_SearchMemberTip) }),
 									(_ScopeBox = new SearchScopeBox {
 										Contents = {
-											new ThemedButton(IconIds.ClearFilter, R.CMD_ClearFilter, ClearFilter).SetValue(ToolTipService.SetPlacement, PlacementMode.Left).ClearBorder()
+											new ThemedButton(IconIds.ClearFilter, R.CMD_ClearFilter, ClearFilter) { MinHeight = 10 }.SetValue(ToolTipService.SetPlacement, PlacementMode.Left).ClearSpacing()
 										}
 									}),
 								}
