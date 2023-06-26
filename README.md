@@ -566,6 +566,7 @@ I have learned a lot from the following extension projects (sorted by the time w
 * [Roslynator](https://github.com/JosefPihrt/Roslynator): hundreds of code refactorings and analyzers
 * [ShowTheShortcut](https://github.com/madskristensen/ShowTheShortcut): discovering identifiers of executed commands
 * [Copy Nice](https://marketplace.visualstudio.com/items?itemName=MadsKristensen.CopyNice): copying text without indentation
+* [WPF Color Picker Construction Kit](https://www.codeproject.com/Articles/131708/WPF-Color-Picker-Construction-Kit): color picker with spectrum
 
 And thank you, every donators, beta testers, feedback providers to this project.
 
