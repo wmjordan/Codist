@@ -648,7 +648,13 @@ namespace Codist
 				case "b":
 				case "i":
 				case "u":
-				case "c": return true;
+				case "c":
+				case "strong":
+				case "em":
+				case "strike":
+				case "tt":
+				case "term":
+					return true;
 			}
 			return false;
 		}
