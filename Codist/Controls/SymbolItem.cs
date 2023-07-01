@@ -198,8 +198,8 @@ namespace Codist.Controls
 		internal void SetSymbolToSyntaxNode() {
 			Symbol = SyncHelper.RunSync(() => Container.SemanticContext.GetSymbolAsync(SyntaxNode));
 		}
-		internal async Task SetSymbolToSyntaxNodeAsync() {
-			Symbol = await Container.SemanticContext.GetSymbolAsync(SyntaxNode);
+		internal async Task SetSymbolToSyntaxNodeAsync(CancellationToken cancellationToken) {
+			Symbol = await Container.SemanticContext.GetSymbolAsync(SyntaxNode, cancellationToken);
 		}
 		internal async Task RefreshSyntaxNodeAsync() {
 			var node = await Container.SemanticContext.RelocateDeclarationNodeAsync(SyntaxNode);

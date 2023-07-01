@@ -155,9 +155,9 @@ namespace Codist.Controls
 		void Canvas_PreviewMouseRightButtonUp(object sender, MouseButtonEventArgs args) {
 			// hack: suppress the undesired built-in context menu of tabs in VS 16.5
 			if (args.Source is SymbolList symbolList) {
-				symbolList.ShowContextMenu(args);
+				return;
 			}
-			else if ((args.Source as FrameworkElement).GetParent<Button>() == null) {
+			if ((args.Source as FrameworkElement).GetParent<Button>() == null) {
 				args.Handled = true;
 			}
 		}
@@ -205,9 +205,6 @@ namespace Codist.Controls
 			var s = e.Source as UIElement;
 			s.MouseLeftButtonDown -= MenuHeader_MouseDown;
 			s.MouseMove += MenuHeader_DragMove;
-			if (s is SymbolList l) {
-				l.HideToolTip();
-			}
 		}
 
 		void MenuHeader_DragMove(object sender, MouseEventArgs e) {

@@ -4,9 +4,11 @@ using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
 using CLR;
@@ -17,7 +19,6 @@ using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using GDI = System.Drawing;
 using R = Codist.Properties.Resources;
-using Task = System.Threading.Tasks.Task;
 using WPF = System.Windows.Media;
 
 namespace Codist.Controls
@@ -25,21 +26,35 @@ namespace Codist.Controls
 	class SymbolList : VirtualList, ISymbolFilterable, INotifyCollectionChanged, IDisposable
 	{
 		static readonly ExtensionProperty<MenuItem, ValueTuple<SymbolItem, Action<SymbolItem>>> __CommandAction = ExtensionProperty<MenuItem, ValueTuple<SymbolItem, Action<SymbolItem>>>.Register("CommandAction");
-		static readonly ExtensionProperty<FrameworkElement, FrameworkElement> __ToolTipSource = ExtensionProperty<FrameworkElement, FrameworkElement>.Register("ToolTipSource");
+		static readonly ExtensionProperty<ListBoxItem, WeakReference<SymbolItem>> __ListBoxItemContent = ExtensionProperty<ListBoxItem, WeakReference<SymbolItem>>.Register("ListBoxItemContent");
+		static readonly ContextMenu __ListItemDummyContextMenu = new ContextMenu();
 		Predicate<object> _Filter;
-		readonly ToolTip _SymbolTip;
 		readonly List<SymbolItem> _Symbols;
-		//ListBoxItem _HighlightItem;
+		CancellationTokenSource _ToolTipCancellationTokenSource, _ContextMenuCancellationTokenSource;
 
 		public SymbolList(SemanticContext semanticContext) {
 			_Symbols = new List<SymbolItem>();
 			FilteredItems = new ListCollectionView(_Symbols);
 			SemanticContext = semanticContext;
-			_SymbolTip = new ToolTip {
-				Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom,
-				PlacementTarget = this
-			};
 			Resources = SharedDictionaryManager.SymbolList;
+			// We have to use code to set ItemContainerStyle for event handlers are not supported in XAML DataTemplate
+			ItemContainerStyle = new Style {
+				TargetType = typeof(ListBoxItem),
+				Setters = {
+					new Setter { Property = OverridesDefaultStyleProperty, Value = true },
+					new Setter { Property = SnapsToDevicePixelsProperty, Value = true },
+					new Setter { Property = CursorProperty, Value = Cursors.Arrow },
+					new Setter { Property = HeightProperty, Value = 22d },
+					new Setter { Property = TemplateProperty, Value = Resources["ListBoxItemTemplate"] as ControlTemplate },
+					new Setter { Property = ToolTipProperty, Value = String.Empty },
+					new Setter { Property = ContextMenuProperty, Value = __ListItemDummyContextMenu },
+					new Setter { Property = ToolTipService.InitialShowDelayProperty, Value = Config.Instance.QuickInfo.DelayDisplay },
+					new Setter { Property = ToolTipService.PlacementTargetProperty, Value = this },
+					new Setter { Property = ToolTipService.PlacementProperty, Value = PlacementMode.Bottom },
+					new EventSetter { Event = ToolTipOpeningEvent, Handler = new ToolTipEventHandler(OnListItemToolTipOpening) },
+					new EventSetter { Event = ContextMenuOpeningEvent, Handler = new ContextMenuEventHandler(OnListItemContextMenuOpening) },
+				},
+			};
 			PreviewKeyDown += SymbolList_PreviewKeyDown;
 		}
 
@@ -275,23 +290,41 @@ namespace Codist.Controls
 		#endregion
 
 		#region Context menu
-		protected override void OnContextMenuOpening(ContextMenuEventArgs e) {
-			base.OnContextMenuOpening(e);
-			ShowContextMenu(e);
-		}
+		[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
+		async void OnListItemContextMenuOpening(object sender, ContextMenuEventArgs e) {
+			var sc = SemanticContext;
+			if (sc == null) {
+				return;
+			}
 
-		internal void ShowContextMenu(RoutedEventArgs e) {
 			var item = SelectedSymbolItem;
-			if (item == null
-				|| (item.Symbol == null && item.SyntaxNode == null)
-				|| (e.OriginalSource as DependencyObject).GetParentOrSelf<ListBoxItem>() == null) {
+			try {
+				var ct = SyncHelper.CancelAndRetainToken(ref _ContextMenuCancellationTokenSource);
+				await sc.UpdateAsync(ct);
+				if (item != null) {
+					if (item.Symbol != null) {
+						await item.RefreshSymbolAsync(ct);
+					}
+					else {
+						await item.SetSymbolToSyntaxNodeAsync(ct);
+					}
+				}
+			}
+			catch (OperationCanceledException) {
+				// ignore
+			}
+			catch (Exception ex) {
+				MessageWindow.Error(ex);
 				e.Handled = true;
 				return;
 			}
-			if (ContextMenu is CSharpSymbolContextMenu m) {
-				m.Dispose();
+
+			if (item.Symbol == null && item.SyntaxNode == null) {
+				e.Handled = true;
+				return;
 			}
-			ContextMenu = m = new CSharpSymbolContextMenu(item.Symbol, item.SyntaxNode, SemanticContext) {
+			CSharpSymbolContextMenu m;
+			((ListBoxItem)sender).ContextMenu = m = new CSharpSymbolContextMenu(item.Symbol, item.SyntaxNode, SemanticContext) {
 				Resources = SharedDictionaryManager.ContextMenu,
 				Foreground = ThemeHelper.ToolWindowTextBrush,
 				IsEnabled = true,
@@ -299,9 +332,10 @@ namespace Codist.Controls
 			SetupContextMenu(m, item);
 			m.AddTitleItem(item.SyntaxNode?.GetDeclarationSignature() ?? item.Symbol.GetOriginalName());
 			m.IsOpen = true;
+			e.Handled = true;
 		}
 
-		void SetupContextMenu(CSharpSymbolContextMenu menu, SymbolItem item) {
+		static void SetupContextMenu(CSharpSymbolContextMenu menu, SymbolItem item) {
 			if (item.Symbol != null) {
 				menu.AddAnalysisCommands();
 				menu.Items.Add(new Separator());
@@ -313,125 +347,67 @@ namespace Codist.Controls
 				}
 			}
 			if (item.SyntaxNode != null) {
-				SetupMenuCommand(item, IconIds.SelectCode, R.CMD_SelectCode, s => {
+				menu.Items.Add(SetupMenuCommand(item, IconIds.SelectCode, R.CMD_SelectCode, s => {
 					if (s.IsExternal) {
 						s.SyntaxNode.SelectNode(true);
 					}
 					else {
 						s.Container.SemanticContext.View.SelectNode(s.SyntaxNode, true);
 					}
-				});
+				}));
 				//SetupMenuCommand(item, KnownImageIds.Copy, "Copy Code", s => Clipboard.SetText(s.SyntaxNode.ToFullString()));
 				item.SetSymbolToSyntaxNode();
 			}
 		}
 
-		void SetupMenuCommand(SymbolItem item, int imageId, string title, Action<SymbolItem> action) {
+		static ThemedMenuItem SetupMenuCommand(SymbolItem item, int imageId, string title, Action<SymbolItem> action) {
 			var mi = new ThemedMenuItem(imageId, title, (s, args) => {
 				var (i, a) = __CommandAction.Get((MenuItem)s);
 				a(i);
 			});
 			__CommandAction.Set(mi, (item, action));
-			ContextMenu.Items.Add(mi);
+			return mi;
 		}
 		#endregion
 
 		#region Tool Tip
-		protected override void OnMouseEnter(MouseEventArgs e) {
-			base.OnMouseEnter(e);
-			if (__ToolTipSource.Get(_SymbolTip) == null) {
-				__ToolTipSource.Set(_SymbolTip, this);
-				SizeChanged -= SizeChanged_RelocateToolTip;
-				MouseMove -= MouseMove_ChangeToolTip;
-				MouseLeave -= MouseLeave_HideToolTip;
-				SizeChanged += SizeChanged_RelocateToolTip;
-				MouseMove += MouseMove_ChangeToolTip;
-				MouseLeave += MouseLeave_HideToolTip;
-				//if (ContainerType == SymbolListType.NodeList) {
-				//	UnhookHighlightMouseEvent();
-				//	MouseMove += MouseMove_HighlightCode;
-				//	MouseLeave += MouseLeave_ClearCodeHighlight;
-				//}
-			}
-		}
-
-		//void MouseLeave_ClearCodeHighlight(object sender, MouseEventArgs e) {
-		//	UnhookHighlightMouseEvent();
-		//	_HighlightItem = null;
-		//}
-
-		//void MouseMove_HighlightCode(object sender, MouseEventArgs e) {
-		//	if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.RangeHighlight) == false) {
-		//		return;
-		//	}
-		//	var li = GetMouseEventTarget(e);
-		//	if (li != null
-		//		&& _HighlightItem != li
-		//		&& li.Content is SymbolItem si
-		//		&& si.IsExternal == false) {
-		//		_HighlightItem = li;
-		//		TextViewOverlay.Get(SemanticContext.View)
-		//			?.SetRangeAdornment(si.SyntaxNode.Span.CreateSnapshotSpan(SemanticContext.View.TextSnapshot));
-		//	}
-		//}
-
-		//void UnhookHighlightMouseEvent() {
-		//	MouseMove -= MouseMove_HighlightCode;
-		//	MouseLeave -= MouseLeave_ClearCodeHighlight;
-		//}
-
-		void MouseLeave_HideToolTip(object sender, MouseEventArgs e) {
-			UnhookMouseEventAndHideToolTip();
-		}
-
-		void UnhookMouseEventAndHideToolTip() {
-			SizeChanged -= SizeChanged_RelocateToolTip;
-			MouseMove -= MouseMove_ChangeToolTip;
-			MouseLeave -= MouseLeave_HideToolTip;
-			HideToolTip();
-		}
-
-		internal void HideToolTip() {
-			_SymbolTip.IsOpen = false;
-			_SymbolTip.Content = null;
-			__ToolTipSource.Clear(_SymbolTip);
-		}
-
 		[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
-		async void MouseMove_ChangeToolTip(object sender, MouseEventArgs e) {
-			var li = GetMouseEventTarget(e);
-			if (li != null && __ToolTipSource.Get(_SymbolTip) != li) {
-				await ShowToolTipForItemAsync(li);
+		async void OnListItemToolTipOpening(object sender, ToolTipEventArgs args) {
+			var item = args.Source as ListBoxItem;
+			try {
+				if (item.Content is SymbolItem si
+					&& (item.ToolTip is string s && s.Length == 0
+						|| __ListBoxItemContent.Get(item).TryGetTarget(out var t) == false
+						|| t != si)) {
+					item.ToolTip = await CreateItemToolTipAsync(si);
+					// note: ListBoxItem, the container of SymbolItem,
+					//   may be reused and filled with other SymbolItem, while we scroll the SymbolList.
+					//   Thus we use the extensive property to make sure the SymbolItem and ToolTip are a couple.
+					__ListBoxItemContent.Set(item, new WeakReference<SymbolItem>(si));
+				}
+			}
+			catch (OperationCanceledException) {
+				// ignore
+			}
+			catch (Exception) {
+				// ignore
 			}
 		}
 
-		void SizeChanged_RelocateToolTip(object sender, SizeChangedEventArgs e) {
-			if (_SymbolTip.IsOpen) {
-				_SymbolTip.IsOpen = false;
-				_SymbolTip.IsOpen = true;
-			}
-		}
-
-		async Task ShowToolTipForItemAsync(ListBoxItem li) {
-			__ToolTipSource.Set(_SymbolTip, li);
-			_SymbolTip.Content = await CreateItemToolTipAsync(li);
-			_SymbolTip.IsOpen = true;
-		}
-
-		async Task<object> CreateItemToolTipAsync(ListBoxItem li) {
-			SymbolItem item;
+		async Task<object> CreateItemToolTipAsync(SymbolItem item) {
 			var sc = SemanticContext;
-			if ((item = li.Content as SymbolItem) == null
-				|| sc == null
-				|| await sc.UpdateAsync(default) == false) {
+			CancellationToken ct;
+			if (sc == null
+				|| await sc.UpdateAsync(ct = SyncHelper.CancelAndRetainToken(ref _ToolTipCancellationTokenSource)) == false) {
 				return null;
 			}
 
+			// the sequences of these conditions are important
 			if (item.SyntaxNode != null) {
-				return await CreateSyntaxNodeToolTipAsync(item, sc);
+				return await CreateSyntaxNodeToolTipAsync(item, sc, ct);
 			}
 			if (item.Symbol != null) {
-				return await CreateSymbolToolTipAsync(item, sc);
+				return await CreateSymbolToolTipAsync(item, sc, ct);
 			}
 			if (item.Location != null) {
 				return CreateLocationToolTip(item, sc);
@@ -439,12 +415,12 @@ namespace Codist.Controls
 			return null;
 		}
 
-		async Task<object> CreateSyntaxNodeToolTipAsync(SymbolItem item, SemanticContext sc) {
+		async Task<object> CreateSyntaxNodeToolTipAsync(SymbolItem item, SemanticContext sc, CancellationToken ct) {
 			if (item.Symbol != null) {
-				await item.RefreshSymbolAsync(default);
+				await item.RefreshSymbolAsync(ct);
 			}
 			else {
-				await item.SetSymbolToSyntaxNodeAsync();
+				await item.SetSymbolToSyntaxNodeAsync(ct);
 			}
 			if (item.Symbol != null) {
 				var tip = ToolTipHelper.CreateToolTip(item.Symbol, ContainerType == SymbolListType.NodeList, sc);
@@ -452,13 +428,16 @@ namespace Codist.Controls
 					tip.AddTextBlock()
 						.Append(R.T_LineOfCode + (item.SyntaxNode.GetLineSpan().Length + 1).ToString());
 				}
+#if DEBUG
+				tip.AddTextBlock().Append(item.SyntaxNode.GetQualifiedSignature());
+#endif
 				return tip;
 			}
 			return ((Microsoft.CodeAnalysis.CSharp.SyntaxKind)item.SyntaxNode.RawKind).GetSyntaxBrief();
 		}
 
-		async Task<object> CreateSymbolToolTipAsync(SymbolItem item, SemanticContext sc) {
-			await item.RefreshSymbolAsync(default);
+		async Task<object> CreateSymbolToolTipAsync(SymbolItem item, SemanticContext sc, CancellationToken ct) {
+			await item.RefreshSymbolAsync(ct);
 			var tip = ToolTipHelper.CreateToolTip(item.Symbol, false, sc);
 			if (ContainerType == SymbolListType.SymbolReferrers && item.Location.IsInSource) {
 				// append location info to tip
@@ -746,9 +725,6 @@ namespace Codist.Controls
 		public override void Dispose() {
 			base.Dispose();
 			if (SemanticContext != null) {
-				UnhookMouseEventAndHideToolTip();
-				//UnhookHighlightMouseEvent();
-				_SymbolTip.PlacementTarget = null;
 				ClearSymbols();
 				if (ContextMenu is IDisposable d) {
 					d.Dispose();
@@ -758,6 +734,8 @@ namespace Codist.Controls
 				SemanticContext = null;
 				IconProvider = null;
 				ExtIconProvider = null;
+				SyncHelper.CancelAndDispose(ref _ContextMenuCancellationTokenSource, false);
+				SyncHelper.CancelAndDispose(ref _ToolTipCancellationTokenSource, false);
 			}
 		}
 	}

@@ -25,6 +25,12 @@
 			</Setter.Value>
 		</Setter>
 	</Style>
+	<ControlTemplate x:Key="ListBoxItemTemplate" TargetType="ListBoxItem">
+		<ContentPresenter
+			ContentTemplateSelector="{StaticResource symbolTemplateSelector}"
+			ContentStringFormat="{TemplateBinding ContentControl.ContentStringFormat}" 
+			HorizontalAlignment="Stretch" VerticalAlignment="{TemplateBinding Control.VerticalContentAlignment}" SnapsToDevicePixels="False" Height="22" />
+	</ControlTemplate>
 	<DataTemplate x:Key="LabelTemplate" DataType="{x:Type c:SymbolItem}">
 		<Border Name="Border" BorderThickness="0,0,0,1" Padding="5,1,1,1" HorizontalAlignment="Stretch" Background="{DynamicResource VsBrush.CommandBarMenuBackgroundGradient}" BorderBrush="{DynamicResource VsBrush.CommandBarMenuSeparator}">
 			<ContentPresenter MaxWidth="500" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" Content="{Binding Path=Content}" RecognizesAccessKey="False" />

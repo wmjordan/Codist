@@ -193,7 +193,7 @@ namespace Codist
 					}
 					p += item.NewText.Length - item.Span.Length;
 				}
-				var newNode = sm.SyntaxTree.GetCompilationUnitRoot(cancellationToken).FindNode(new TextSpan(p, 0));
+				var newNode = sm.SyntaxTree.GetCompilationUnitRoot(cancellationToken).FindNode(new TextSpan(p, 0)).AncestorsAndSelf().FirstOrDefault(n => n is MemberDeclarationSyntax || n is BaseTypeDeclarationSyntax || n is VariableDeclaratorSyntax);
 				if (newNode.RawKind != node.RawKind) {
 					return null;
 				}
