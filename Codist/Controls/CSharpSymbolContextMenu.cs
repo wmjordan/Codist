@@ -178,6 +178,7 @@ namespace Codist.Controls
 				switch (((IMethodSymbol)_Host.Symbol).MethodKind) {
 					case MethodKind.Constructor:
 						if (st.SpecialType == SpecialType.None) {
+							AddCommand(CommandId.FindTypeReferrers);
 							CreateInstanceCommandsForContainingType();
 						}
 						break;
