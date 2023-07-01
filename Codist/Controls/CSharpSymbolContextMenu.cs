@@ -463,11 +463,11 @@ namespace Codist.Controls
 					case CommandId.FindExtensionMethods:
 						return CreateItem(IconIds.ExtensionMethod, R.CMD_FindExtensions, FindExtensionMethods);
 					case CommandId.FindSubInterfaces:
-						return CreateItem(IconIds.FindDerivedTypes, R.CMD_FindInheritedInterfaces, FindSubInterfaces);
+						return CreateItem(IconIds.FindDerivedTypes, R.CMD_FindInheritedInterfaces, FindSubInterfaces, R.CMDT_FindInheritedInterfaces);
 					case CommandId.FindImplementations:
 						return CreateItem(IconIds.FindImplementations, R.CMD_FindImplementations, FindImplementations);
 					case CommandId.FindDerivedClasses:
-						return CreateItem(IconIds.FindDerivedTypes, R.CMD_FindDerivedClasses, FindDerivedClasses);
+						return CreateItem(IconIds.FindDerivedTypes, R.CMD_FindDerivedClasses, FindDerivedClasses, R.CMDT_FindDerivedClasses);
 					case CommandId.FindOverrides:
 						return CreateItem(IconIds.FindOverloads, R.CMD_FindOverrides, FindOverrides);
 					case CommandId.FindReferrers:
@@ -669,15 +669,18 @@ namespace Codist.Controls
 					.Append(c.ToString());
 				m.Show();
 			}
+
+			static bool IsCtrlDown() {
+				return Keyboard.Modifiers == ModifierKeys.Control;
+			}
+
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindReferrers(object sender, RoutedEventArgs e) {
-				var strict = Keyboard.Modifiers == ModifierKeys.Control;
-				await _SemanticContext.FindReferrersAsync(_Symbol, strict);
+				await _SemanticContext.FindReferrersAsync(_Symbol, IsCtrlDown());
 			}
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindTypeReferrers(object sender, RoutedEventArgs e) {
-				var strict = Keyboard.Modifiers == ModifierKeys.Control;
-				await _SemanticContext.FindReferrersAsync(_Symbol, strict, s => s.Kind == SymbolKind.NamedType, IsTypeReference);
+				await _SemanticContext.FindReferrersAsync(_Symbol.Kind == SymbolKind.Method ? _Symbol.ContainingType : _Symbol, IsCtrlDown(), s => s.Kind == SymbolKind.NamedType, IsTypeReference);
 			}
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindOverrides(object sender, RoutedEventArgs e) {
@@ -685,7 +688,7 @@ namespace Codist.Controls
 			}
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindDerivedClasses(object sender, RoutedEventArgs e) {
-				await _SemanticContext.FindDerivedClassesAsync(_Symbol);
+				await _SemanticContext.FindDerivedClassesAsync(_Symbol, IsCtrlDown());
 			}
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindImplementations(object sender, RoutedEventArgs e) {
@@ -694,65 +697,55 @@ namespace Codist.Controls
 
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindSubInterfaces(object sender, RoutedEventArgs e) {
-				await _SemanticContext.FindSubInterfacesAsync(_Symbol);
+				await _SemanticContext.FindSubInterfacesAsync(_Symbol, IsCtrlDown());
 			}
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindMethodsBySignature(object sender, RoutedEventArgs e) {
-				var myCodeOnly = Keyboard.Modifiers == ModifierKeys.Control;
-				await _SemanticContext.FindMethodsBySignatureAsync(_Symbol, myCodeOnly);
+				await _SemanticContext.FindMethodsBySignatureAsync(_Symbol, IsCtrlDown());
 			}
 
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindExtensionMethods(object sender, RoutedEventArgs e) {
-				var strict = Keyboard.Modifiers == ModifierKeys.Control;
-				await _SemanticContext.FindExtensionMethodsAsync(_Symbol, strict);
+				await _SemanticContext.FindExtensionMethodsAsync(_Symbol, IsCtrlDown());
 			}
 
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindReturnTypeExtensionMethods(object sender, RoutedEventArgs e) {
-				var strict = Keyboard.Modifiers == ModifierKeys.Control;
-				await _SemanticContext.FindExtensionMethodsAsync(_Symbol.GetReturnType(), strict);
+				await _SemanticContext.FindExtensionMethodsAsync(_Symbol.GetReturnType(), IsCtrlDown());
 			}
 
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindSymbolWithName(object sender, RoutedEventArgs e) {
-				var fullMatch = Keyboard.Modifiers == ModifierKeys.Control;
-				await _SemanticContext.FindSymbolWithNameAsync(_Symbol, fullMatch);
+				await _SemanticContext.FindSymbolWithNameAsync(_Symbol, IsCtrlDown());
 			}
 
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindConstructorReferrers(object sender, RoutedEventArgs e) {
-				var strict = Keyboard.Modifiers == ModifierKeys.Control;
-				await _SemanticContext.FindReferrersAsync(_SemanticContext.SemanticModel.GetSymbolOrFirstCandidate(_Node.GetObjectCreationNode()), strict);
+				await _SemanticContext.FindReferrersAsync(_SemanticContext.SemanticModel.GetSymbolOrFirstCandidate(_Node.GetObjectCreationNode()), IsCtrlDown());
 			}
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindObjectInitializers(object sender, RoutedEventArgs e) {
-				var strict = Keyboard.Modifiers == ModifierKeys.Control;
-				await _SemanticContext.FindReferrersAsync(_Symbol, strict, s => s.Kind == SymbolKind.Method);
+				await _SemanticContext.FindReferrersAsync(_Symbol, IsCtrlDown(), s => s.Kind == SymbolKind.Method);
 			}
 
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindInstanceProducers(object sender, RoutedEventArgs e) {
-				var strict = Keyboard.Modifiers == ModifierKeys.Control;
-				await _SemanticContext.FindInstanceProducerAsync(_Symbol, strict);
+				await _SemanticContext.FindInstanceProducerAsync(_Symbol, IsCtrlDown());
 			}
 
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindContainingTypeInstanceProducers(object sender, RoutedEventArgs e) {
-				var strict = Keyboard.Modifiers == ModifierKeys.Control;
-				await _SemanticContext.FindInstanceProducerAsync(_Symbol.ContainingType, strict);
+				await _SemanticContext.FindInstanceProducerAsync(_Symbol.ContainingType, IsCtrlDown());
 			}
 
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindInstanceConsumers(object sender, RoutedEventArgs e) {
-				var strict = Keyboard.Modifiers == ModifierKeys.Control;
-				await _SemanticContext.FindInstanceAsParameterAsync(_Symbol, strict);
+				await _SemanticContext.FindInstanceAsParameterAsync(_Symbol, IsCtrlDown());
 			}
 
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindContainingTypeInstanceConsumers(object sender, RoutedEventArgs e) {
-				var strict = Keyboard.Modifiers == ModifierKeys.Control;
-				await _SemanticContext.FindInstanceAsParameterAsync(_Symbol.ContainingType, strict);
+				await _SemanticContext.FindInstanceAsParameterAsync(_Symbol.ContainingType, IsCtrlDown());
 			}
 
 			CustomMenuItem CreateWebSearchCommand() {

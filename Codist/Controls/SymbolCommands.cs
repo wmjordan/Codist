@@ -41,16 +41,28 @@ namespace Codist.Controls
 			m.Show();
 		}
 
-		internal static async Task FindDerivedClassesAsync(this SemanticContext context, ISymbol symbol) {
-			var classes = (await SymbolFinder.FindDerivedClassesAsync(symbol as INamedTypeSymbol, context.Document.Project.Solution).ConfigureAwait(false)).ToList();
+		internal static async Task FindDerivedClassesAsync(this SemanticContext context, ISymbol symbol, bool directDerive) {
+			var type = symbol as INamedTypeSymbol;
+			var classes = await SymbolFinder.FindDerivedClassesAsync(type, context.Document.Project.Solution).ConfigureAwait(false);
+			if (directDerive) {
+				if (type.IsGenericType) {
+					classes = classes.Where(t => {
+						var bt = t.BaseType;
+						return bt.Equals(type) || bt.IsGenericType && bt.OriginalDefinition.Equals(type);
+					});
+				}
+				else {
+					classes = classes.Where(t => t.BaseType.Equals(type));
+				}
+			}
 			await SyncHelper.SwitchToMainThreadAsync(default);
-			ShowSymbolMenuForResult(symbol, context, classes, R.T_DerivedClasses, false);
+			ShowSymbolMenuForResult(symbol, context, classes.ToList(), directDerive ? R.T_DirectlyDerivedClasses : R.T_DerivedClasses, false);
 		}
 
-		internal static async Task FindSubInterfacesAsync(this SemanticContext context, ISymbol symbol) {
-			var interfaces = await (symbol as INamedTypeSymbol).FindDerivedInterfacesAsync(context.Document.Project, default).ConfigureAwait(false);
+		internal static async Task FindSubInterfacesAsync(this SemanticContext context, ISymbol symbol, bool directDerive) {
+			var interfaces = await (symbol as INamedTypeSymbol).FindDerivedInterfacesAsync(context.Document.Project, directDerive, default).ConfigureAwait(false);
 			await SyncHelper.SwitchToMainThreadAsync(default);
-			ShowSymbolMenuForResult(symbol, context, interfaces, R.T_DerivedInterfaces, false);
+			ShowSymbolMenuForResult(symbol, context, interfaces, directDerive ? R.T_DirectlyDerivedInterfaces : R.T_DerivedInterfaces, false);
 		}
 
 		internal static async Task FindOverridesAsync(this SemanticContext context, ISymbol symbol) {

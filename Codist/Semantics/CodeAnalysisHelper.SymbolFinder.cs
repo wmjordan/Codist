@@ -130,14 +130,14 @@ namespace Codist
 		}
 
 		/// <summary>Returns interfaces derived from the given interface <paramref name="type"/> in specific <paramref name="project"/>.</summary>
-		public static async Task<List<INamedTypeSymbol>> FindDerivedInterfacesAsync(this INamedTypeSymbol type, Project project, CancellationToken cancellationToken = default) {
+		public static async Task<List<INamedTypeSymbol>> FindDerivedInterfacesAsync(this INamedTypeSymbol type, Project project, bool directDerive, CancellationToken cancellationToken = default) {
 			var compilation = await project.GetCompilationAsync(cancellationToken).ConfigureAwait(false);
 			var r = new List<INamedTypeSymbol>(7);
 			var d = new SourceSymbolDeduper();
 			foreach (var item in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
 				if (item.TypeKind == TypeKind.Interface
 					&& item != type
-					&& item.AllInterfaces.Contains(type)
+					&& (directDerive ? item.Interfaces : item.AllInterfaces).Contains(type)
 					&& d.TryAdd(item)) {
 					r.Add(item);
 				}

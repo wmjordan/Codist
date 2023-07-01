@@ -2609,4 +2609,18 @@ Ctrl: Match current symbol only, excluding base or derived symbols</value>
   <data name="OT_ShowCustomizedStylesTip" xml:space="preserve">
     <value>Show only customized styles</value>
   </data>
+  <data name="CMDT_FindDerivedClasses" xml:space="preserve">
+    <value>Search classes that derive from current class
+Ctrl: Directly derived classes only</value>
+  </data>
+  <data name="CMDT_FindInheritedInterfaces" xml:space="preserve">
+    <value>Search interfaces that inherit from current interface
+Ctrl: Directly inherited interfaces only</value>
+  </data>
+  <data name="T_DirectlyDerivedClasses" xml:space="preserve">
+    <value> directly derived classes</value>
+  </data>
+  <data name="T_DirectlyDerivedInterfaces" xml:space="preserve">
+    <value> directly derived interfaces</value>
+  </data>
 </root>

@@ -2135,6 +2135,26 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Search classes that derive from current class
+        ///Ctrl: Directly derived classes only.
+        /// </summary>
+        internal static string CMDT_FindDerivedClasses {
+            get {
+                return ResourceManager.GetString("CMDT_FindDerivedClasses", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search interfaces that inherit from current interface
+        ///Ctrl: Directly inherited interfaces only.
+        /// </summary>
+        internal static string CMDT_FindInheritedInterfaces {
+            get {
+                return ResourceManager.GetString("CMDT_FindInheritedInterfaces", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Search for members that take current type as parameter
         ///Ctrl: Match current symbol only, excluding base or derived symbols.
         /// </summary>
@@ -5750,6 +5770,24 @@ namespace Codist.Properties {
         internal static string T_DerivedInterfaces {
             get {
                 return ResourceManager.GetString("T_DerivedInterfaces", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to  directly derived classes.
+        /// </summary>
+        internal static string T_DirectlyDerivedClasses {
+            get {
+                return ResourceManager.GetString("T_DirectlyDerivedClasses", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to  directly derived interfaces.
+        /// </summary>
+        internal static string T_DirectlyDerivedInterfaces {
+            get {
+                return ResourceManager.GetString("T_DirectlyDerivedInterfaces", resourceCulture);
             }
         }
         

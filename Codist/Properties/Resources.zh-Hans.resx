@@ -2595,4 +2595,18 @@ Ctrl: 仅匹配当前类，不匹配其它派生类或继承类</value>
   <data name="OT_ShowCustomizedStylesTip" xml:space="preserve">
     <value>仅显示修改过的语法样式</value>
   </data>
+  <data name="CMDT_FindDerivedClasses" xml:space="preserve">
+    <value>查找继承当前类的子类
+Ctrl: 仅直接继承的子类</value>
+  </data>
+  <data name="CMDT_FindInheritedInterfaces" xml:space="preserve">
+    <value>查找继承当前接口的接口
+Ctrl: 仅直接继承的接口</value>
+  </data>
+  <data name="T_DirectlyDerivedClasses" xml:space="preserve">
+    <value> 直接派生类</value>
+  </data>
+  <data name="T_DirectlyDerivedInterfaces" xml:space="preserve">
+    <value> 直接派生接口</value>
+  </data>
 </root>
