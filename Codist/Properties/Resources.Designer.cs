@@ -6669,29 +6669,29 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Normal.
+        ///   Looks up a localized string similar to Non-scaling Mode.
         /// </summary>
-        internal static string T_Normal {
+        internal static string T_NonScaleMode {
             get {
-                return ResourceManager.GetString("T_Normal", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to No Scaling Mode.
-        /// </summary>
-        internal static string T_NoScaleMode {
-            get {
-                return ResourceManager.GetString("T_NoScaleMode", resourceCulture);
+                return ResourceManager.GetString("T_NonScaleMode", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Starts Visual Studio without DPI scaling to work with WinForms designers..
         /// </summary>
-        internal static string T_NoScaleModeTip {
+        internal static string T_NonScaleModeTip {
             get {
-                return ResourceManager.GetString("T_NoScaleModeTip", resourceCulture);
+                return ResourceManager.GetString("T_NonScaleModeTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Normal.
+        /// </summary>
+        internal static string T_Normal {
+            get {
+                return ResourceManager.GetString("T_Normal", resourceCulture);
             }
         }
         

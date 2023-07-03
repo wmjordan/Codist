@@ -1909,10 +1909,10 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   <data name="T_RewriteCopyrightYear" xml:space="preserve">
     <value>重写 AssemblyCopyright 中的年份</value>
   </data>
-  <data name="T_NoScaleMode" xml:space="preserve">
+  <data name="T_NonScaleMode" xml:space="preserve">
     <value>禁用 DPI 感知模式</value>
   </data>
-  <data name="T_NoScaleModeTip" xml:space="preserve">
+  <data name="T_NonScaleModeTip" xml:space="preserve">
     <value>启动禁用 DPI 感知功能以设置 WinForms 界面布局的 Visual Studio 实例...</value>
   </data>
   <data name="T_PresentationMode" xml:space="preserve">

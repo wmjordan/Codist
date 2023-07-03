@@ -1915,10 +1915,10 @@ ALL existing items will be REPLACE by default items.</value>
   <data name="T_RewriteCopyrightYear" xml:space="preserve">
     <value>Rewrite year in AssemblyCopyright</value>
   </data>
-  <data name="T_NoScaleMode" xml:space="preserve">
-    <value>No Scaling Mode</value>
+  <data name="T_NonScaleMode" xml:space="preserve">
+    <value>Non-scaling Mode</value>
   </data>
-  <data name="T_NoScaleModeTip" xml:space="preserve">
+  <data name="T_NonScaleModeTip" xml:space="preserve">
     <value>Starts Visual Studio without DPI scaling to work with WinForms designers.</value>
   </data>
   <data name="T_PresentationMode" xml:space="preserve">

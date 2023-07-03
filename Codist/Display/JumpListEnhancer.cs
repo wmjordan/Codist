@@ -29,7 +29,7 @@ namespace Codist.Display
 			if (args.Config.Features.MatchFlags(Features.JumpList)) {
 				var devenv = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
 				if (args.Config.JumpListOptions.MatchFlags(JumpListOptions.NoScaling)) {
-					AddJumpListItem(list, devenv, R.T_NoScaleMode, R.T_NoScaleModeTip, "/noScale");
+					AddJumpListItem(list, devenv, R.T_NonScaleMode, R.T_NonScaleModeTip, "/noScale");
 				}
 				if (args.Config.JumpListOptions.MatchFlags(JumpListOptions.SafeMode)) {
 					AddJumpListItem(list, devenv, R.T_SafeMode, R.T_SafeModeTip, "/SafeMode");
