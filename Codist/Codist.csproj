@@ -88,6 +88,7 @@
     <Compile Include="AutoBuildVersion\VersionRewriteMode.cs" />
     <Compile Include="AutoBuildVersion\VersionSetting.cs" />
     <Compile Include="Commands\AutoBuildVersionWindow.cs" />
+    <Compile Include="Commands\AutoSurroundSelectionCommand.cs" />
     <Compile Include="Commands\OpenOutputFolderCommand.cs" />
     <Compile Include="Commands\CommandRegistry.cs" />
     <Compile Include="Commands\WindowInformerCommand.cs" />
@@ -302,6 +303,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\wechatQrcode.png" />
+    <Content Include="CLR.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="zh-Hans\Extension.vsixlangpack">
       <IncludeInVSIX>true</IncludeInVSIX>
       <SubType>Designer</SubType>
