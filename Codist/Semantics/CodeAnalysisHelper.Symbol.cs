@@ -1371,6 +1371,37 @@ namespace Codist
 			return false;
 		}
 
+		/// <summary>
+		/// <para>Matches two types with a simple rule. The following aspects must be equal.</para>
+		/// <list type="number">
+		/// <item>TypeKind</item>
+		/// <item>DeclaredAccessibility</item>
+		/// <item>Name</item>
+		/// <item>Arity</item>
+		/// <item>ContainingType</item>
+		/// <item>ContainingNamespace</item>
+		/// </list>
+		/// </summary>
+		public static bool MatchWith(this INamedTypeSymbol a, INamedTypeSymbol b) {
+			// todo unwrap alias
+			return ReferenceEquals(a, b) ||
+				a != null && b != null
+				&& a.TypeKind == b.TypeKind
+				&& a.Name == b.Name
+				&& a.Arity == b.Arity
+				&& a.ContainingType.MatchWith(b.ContainingType)
+				&& HasSameName(a.ContainingNamespace, b.ContainingNamespace);
+		}
+
+		public static int GetHashCodeForMatch(this INamedTypeSymbol symbol) {
+			return unchecked(((int)symbol.TypeKind * 500069)
+				^ ((int)symbol.DeclaredAccessibility * 7329097)
+				^ symbol.Name.GetHashCode()
+				^ (symbol.Arity * 2081236337)
+				^ (symbol.ContainingType?.GetHashCodeForMatch() ?? 192901013)
+				^ (symbol.ContainingNamespace.Name.GetHashCode() * 500069));
+		}
+
 		public static int CompareSymbol<TSymbol>(TSymbol a, TSymbol b) where TSymbol : ISymbol {
 			var s = b.ContainingAssembly.GetSourceType().CompareTo(a.ContainingAssembly.GetSourceType());
 			if (s != 0) {
@@ -1595,6 +1626,9 @@ namespace Codist
 		public static Func<ISymbol, bool> GetSpecificSymbolComparer(ISymbol symbol) {
 			return new SpecificSymbolEqualityComparer(symbol).Equals;
 		}
+		public static IEqualityComparer<INamedTypeSymbol> GetNamedTypeComparer() {
+			return NamedTypeComparer.Instance;
+		}
 		#endregion
 
 		/// <summary>
@@ -1713,6 +1747,17 @@ namespace Codist
 
 			public int GetHashCode(ISymbol obj) {
 				return obj.Name.GetHashCode();
+			}
+		}
+		sealed class NamedTypeComparer : IEqualityComparer<INamedTypeSymbol>
+		{
+			internal static readonly NamedTypeComparer Instance = new NamedTypeComparer();
+
+			public bool Equals(INamedTypeSymbol x, INamedTypeSymbol y) {
+				return x.MatchWith(y);
+			}
+			public int GetHashCode(INamedTypeSymbol obj) {
+				return obj.GetHashCodeForMatch();
 			}
 		}
 

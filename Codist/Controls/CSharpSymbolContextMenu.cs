@@ -4,6 +4,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using CLR;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using R = Codist.Properties.Resources;
@@ -689,7 +690,8 @@ namespace Codist.Controls
 			}
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindDerivedClasses(object sender, RoutedEventArgs e) {
-				await _SemanticContext.FindDerivedClassesAsync(_Symbol, IsCtrlDown());
+				var m = Keyboard.Modifiers;
+				await _SemanticContext.FindDerivedClassesAsync(_Symbol, m.MatchFlags(ModifierKeys.Control), m.MatchFlags(ModifierKeys.Shift));
 			}
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindImplementations(object sender, RoutedEventArgs e) {
