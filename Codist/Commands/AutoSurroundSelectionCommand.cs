@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using CLR;
 using Microsoft.VisualStudio.Commanding;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Editor.Commanding.Commands;
 using Microsoft.VisualStudio.Utilities;
+using R = Codist.Properties.Resources;
 
 namespace Codist.Commands
 {
@@ -40,7 +42,11 @@ namespace Codist.Commands
 		public abstract string DisplayName { get; }
 
 		public bool ExecuteCommand(TypeCharCommandArgs args, CommandExecutionContext executionContext) {
-			var view = args.TextView;
+			ITextView view;
+			if (Config.Instance.Features.MatchFlags(Features.AutoSurround) == false) {
+				return false;
+			}
+			view = args.TextView;
 			if (view.Selection.IsEmpty || TextPairs.TryGetValue(args.TypedChar, out var endText) == false) {
 				return false;
 			}
@@ -49,8 +55,8 @@ namespace Codist.Commands
 			var oldSpans = view.Selection.SelectedSpans;
 			var startText = args.TypedChar.ToString();
 			var history = ServicesHelper.Instance.TextUndoHistoryService.GetHistory(view.TextBuffer);
-			using (var transaction = history.CreateTransaction($"{startText}AutoSurround{endText}"))
-			using (ITextEdit edit = view.TextBuffer.CreateEdit()) {
+			using (var transaction = history.CreateTransaction(startText + R.T_AutoSurround + endText))
+			using (var edit = view.TextBuffer.CreateEdit()) {
 				foreach (var span in oldSpans) {
 					edit.Insert(span.Start, startText);
 					edit.Insert(span.End, endText);
@@ -68,7 +74,7 @@ namespace Codist.Commands
 
 		static IEnumerable<Selection> UpdateSelections(IEnumerable<SnapshotSpan> oldSpans, ITextSnapshot newText) {
 			foreach (var item in oldSpans) {
-				SnapshotSpan extent = item.TranslateTo(newText, SpanTrackingMode.EdgeInclusive);
+				var extent = item.TranslateTo(newText, SpanTrackingMode.EdgeInclusive);
 				yield return new Selection(extent.Length > 1
 					? new SnapshotSpan(newText, extent.Start + 1, extent.Length - 1)
 					: extent);

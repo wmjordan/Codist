@@ -122,7 +122,7 @@ namespace Codist.Options
 
 		sealed class PageControl : OptionsPageContainer
 		{
-			readonly OptionBox<Features> _SyntaxHighlight, _SuperQuickInfo, _SmartBar, _NavigationBar, _ScrollbarMarker, _JumpListEnhancer;
+			readonly OptionBox<Features> _SyntaxHighlight, _SuperQuickInfo, _SmartBar, _NavigationBar, _ScrollbarMarker, _JumpListEnhancer, _AutoSurround;
 			readonly OptionBox<Features>[] _Options;
 			readonly Button _LoadButton, _SaveButton, _OpenConfigFolderButton;
 			readonly Note _NoticeBox;
@@ -146,7 +146,9 @@ namespace Codist.Options
 							(_ScrollbarMarker = o.CreateOptionBox(Features.ScrollbarMarkers, UpdateConfig, R.T_ScrollbarMarkers)
 								.SetLazyToolTip(() => R.OT_ScrollbarMarkerTip)),
 							(_JumpListEnhancer = o.CreateOptionBox(Features.JumpList, UpdateConfig, R.T_JumpList)
-								.SetLazyToolTip(() => R.OT_JumpListTip))
+								.SetLazyToolTip(() => R.OT_JumpListTip)),
+							(_AutoSurround = o.CreateOptionBox(Features.AutoSurround, UpdateConfig, R.T_AutoSurround)
+								.SetLazyToolTip(() => R.OT_AutoSurround))
 						}
 					},
 					_NoticeBox = new Note(R.OT_FeatureChangesTip) { BorderThickness = WpfHelper.TinyMargin, Visibility = Visibility.Collapsed },
@@ -173,11 +175,11 @@ namespace Codist.Options
 					new TextBlock { Margin = linkMargin }.AppendLink(R.CMD_WechatDonateLink, ShowWechatQrCode, R.CMDT_OpenWechatQrCode),
 					new DescriptionBox(R.OT_DonateLinkTip)
 					);
-				_Options = new[] { _SyntaxHighlight, _SuperQuickInfo, _SmartBar, _NavigationBar, _ScrollbarMarker, _JumpListEnhancer };
+				_Options = new[] { _SyntaxHighlight, _SuperQuickInfo, _SmartBar, _NavigationBar, _ScrollbarMarker, _JumpListEnhancer, _AutoSurround };
 				foreach (var item in _Options) {
 					item.MinWidth = 120;
 					item.Margin = WpfHelper.MiddleMargin;
-					if (item != _JumpListEnhancer) {
+					if (item.CeqAny(_JumpListEnhancer, _AutoSurround) == false) {
 						item.PreviewMouseDown += HighlightNoticeBox;
 					}
 				}

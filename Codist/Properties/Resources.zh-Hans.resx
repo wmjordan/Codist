@@ -2612,4 +2612,10 @@ Ctrl: 仅直接继承的接口</value>
   <data name="CMD_CopyListContent" xml:space="preserve">
     <value>复制列表内容</value>
   </data>
+  <data name="T_AutoSurround" xml:space="preserve">
+    <value>自动包围符号</value>
+  </data>
+  <data name="OT_AutoSurround" xml:space="preserve">
+    <value>自动插入配对的引号或括号以包围选中内容</value>
+  </data>
 </root>

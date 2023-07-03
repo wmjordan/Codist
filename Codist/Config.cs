@@ -42,7 +42,7 @@ namespace Codist
 		public bool ShouldSerializeLogPath() => String.IsNullOrEmpty(LogPath) == false;
 
 		[DefaultValue(Features.All)]
-		public Features Features { get; set; } = Features.All;
+		public Features Features { get; set; } = Features.Default;
 
 		[DefaultValue(DisplayOptimizations.None)]
 		public DisplayOptimizations DisplayOptimizations { get; set; } = DisplayOptimizations.None;
@@ -724,7 +724,9 @@ namespace Codist
 		WebSearch = 1 << 5,
 		WrapText = 1 << 6,
 		JumpList = 1 << 7,
-		All = SyntaxHighlight | ScrollbarMarkers | SuperQuickInfo | SmartBar | NaviBar | WebSearch | WrapText | JumpList
+		AutoSurround = 1 << 8,
+		Default = SyntaxHighlight | ScrollbarMarkers | SuperQuickInfo | SmartBar | NaviBar | WebSearch | WrapText | JumpList,
+		All = Default | AutoSurround
 	}
 
 	[Flags]

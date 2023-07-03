@@ -2626,4 +2626,10 @@ Ctrl: Directly inherited interfaces only</value>
   <data name="CMD_CopyListContent" xml:space="preserve">
     <value>Copy List Content</value>
   </data>
+  <data name="T_AutoSurround" xml:space="preserve">
+    <value>Auto Pair Punctuation</value>
+  </data>
+  <data name="OT_AutoSurround" xml:space="preserve">
+    <value>Automatically pair quotations, parentheses and braces arround selections</value>
+  </data>
 </root>

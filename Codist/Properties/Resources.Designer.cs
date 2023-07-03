@@ -2679,6 +2679,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Automatically pair quotations, parentheses and braces arround selections.
+        /// </summary>
+        internal static string OT_AutoSurround {
+            get {
+                return ResourceManager.GetString("OT_AutoSurround", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Base type.
         /// </summary>
         internal static string OT_BaseType {
@@ -5283,6 +5292,15 @@ namespace Codist.Properties {
         internal static string T_AutoBuildVersionNote {
             get {
                 return ResourceManager.GetString("T_AutoBuildVersionNote", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Auto Pair Punctuation.
+        /// </summary>
+        internal static string T_AutoSurround {
+            get {
+                return ResourceManager.GetString("T_AutoSurround", resourceCulture);
             }
         }
         
