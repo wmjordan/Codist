@@ -20,6 +20,7 @@ namespace Codist
 			public const string Code = "Code";
 			public const string CSharp = "CSharp";
 			public const string HtmlxProjection = "HTMLXProjection";
+			public const string PlainText = "plaintext";
 			public const string Text = "Text";
 			/// <summary>
 			/// From VS 17.5 on, 'vs-markdown' is used instead of 'Markdown'

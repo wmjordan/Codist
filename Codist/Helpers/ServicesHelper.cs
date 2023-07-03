@@ -58,7 +58,10 @@ namespace Codist
 		public Microsoft.VisualStudio.LanguageServices.VisualStudioWorkspace VisualStudioWorkspace { get; private set; }
 
 		[Import]
-		public IRtfBuilderService RtfService { get; set; }
+		public IRtfBuilderService RtfService { get; private set; }
+
+		[Import]
+		public ITextUndoHistoryRegistry TextUndoHistoryService { get; private set; }
 
 		public static TInterface Get<TInterface, VSInterface>() where TInterface : class {
 			ThreadHelper.ThrowIfNotOnUIThread();
