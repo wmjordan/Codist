@@ -173,33 +173,38 @@ namespace Codist
 			}
 		}
 
-		public async Task<ISymbol> GetSymbolAsync(SyntaxNode node, CancellationToken cancellationToken = default) {
+		public Task<ISymbol> GetSymbolAsync(SyntaxNode node, CancellationToken cancellationToken = default) {
 			var sm = SemanticModel;
-			if (node.SyntaxTree != sm.SyntaxTree) {
-				var doc = GetDocument(node.SyntaxTree);
+			return node.SyntaxTree == sm.SyntaxTree
+				? Task.FromResult(sm.GetSymbol(node, cancellationToken))
+				: RefreshSymbol(node, sm, cancellationToken);
+
+			async Task<ISymbol> RefreshSymbol(SyntaxNode n, SemanticModel m, CancellationToken ct) {
+				var doc = GetDocument(n.SyntaxTree);
 				// doc no longer exists
 				if (doc == null) {
 					return null;
 				}
-				sm = await doc.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
-				if (node.SpanStart >= sm.SyntaxTree.Length) {
+				m = await doc.GetSemanticModelAsync(ct).ConfigureAwait(false);
+				if (n.SpanStart >= m.SyntaxTree.Length) {
 					return null;
 				}
 				// find the new node in the new model
-				var p = node.SpanStart;
-				foreach (var item in sm.SyntaxTree.GetChanges(node.SyntaxTree)) {
+				var p = n.SpanStart;
+				foreach (var item in m.SyntaxTree.GetChanges(n.SyntaxTree)) {
 					if (item.Span.Start > p) {
 						break;
 					}
 					p += item.NewText.Length - item.Span.Length;
 				}
-				var newNode = sm.SyntaxTree.GetCompilationUnitRoot(cancellationToken).FindNode(new TextSpan(p, 0)).AncestorsAndSelf().FirstOrDefault(n => n is MemberDeclarationSyntax || n is BaseTypeDeclarationSyntax || n is VariableDeclaratorSyntax);
-				if (newNode.RawKind != node.RawKind) {
+				var newNode = m.SyntaxTree.GetCompilationUnitRoot(ct).FindNode(new TextSpan(p, 0)).AncestorsAndSelf().FirstOrDefault(i => i is MemberDeclarationSyntax || i is BaseTypeDeclarationSyntax || i is VariableDeclaratorSyntax);
+				if (newNode.RawKind != n.RawKind) {
 					return null;
 				}
-				node = newNode;
+				n = newNode;
+				return m.GetSymbol(n, ct);
+
 			}
-			return sm.GetSymbol(node, cancellationToken);
 		}
 
 		public async Task<ISymbol> GetSymbolAsync(CancellationToken cancellationToken) {
