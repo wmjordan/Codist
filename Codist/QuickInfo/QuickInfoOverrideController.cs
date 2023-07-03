@@ -60,22 +60,33 @@ namespace Codist.QuickInfo
 
 			// reposition the Quick Info to prevent it from hindering text selection with mouse cursor
 			public void Reposition(bool attachEventsOnDemand) {
-				if (_Session.TextView is IWpfTextView view == false
-					|| _Session.ApplicableToSpan == null
-					|| view.VisualElement.IsVisible == false) {
+				var session = _Session;
+				Popup popup;
+				if (session == null
+					|| session.TextView is Microsoft.VisualStudio.Text.Editor.IWpfTextView view == false
+					|| session.ApplicableToSpan == null
+					|| view.VisualElement.IsVisible == false
+					|| (popup = _Popup) == null) {
 					return;
 				}
 				var viewLines = view.TextViewLines;
 				var visibleLineTop = viewLines.FirstVisibleLine.Top;
 				#region positioning fix for VS 2017
-				if (_Popup.PlacementTarget == null) {
-					_Popup.PlacementTarget = view.VisualElement;
+				if (popup.PlacementTarget == null) {
+					popup.PlacementTarget = view.VisualElement;
 				}
 				#endregion
-				var mousePosition = System.Windows.Input.Mouse.GetPosition(_Popup.PlacementTarget);
-				var cursorLine = viewLines.GetTextViewLineContainingBufferPosition(_Session.GetTriggerPoint(view.TextSnapshot).Value);
+				var qi = _QuickInfo;
+				if (qi == null) {
+					return;
+				}
+				var mousePosition = System.Windows.Input.Mouse.GetPosition(popup.PlacementTarget);
+				var cursorLine = viewLines.GetTextViewLineContainingBufferPosition(session.GetTriggerPoint(view.TextSnapshot).Value);
+				if (cursorLine == null) {
+					return;
+				}
 				var offsetLine = cursorLine.TextTop - view.ViewportTop;
-				var textSpan = cursorLine.Extent.Intersection(_Session.GetTriggerSpan()).Value;
+				var textSpan = cursorLine.Extent.Intersection(session.GetTriggerSpan()).Value;
 				if (textSpan.IsEmpty) {
 					return;
 				}
@@ -83,7 +94,7 @@ namespace Codist.QuickInfo
 				textBound.Offset(-view.ViewportLeft, -view.ViewportTop);
 				var left = mousePosition.X - 40;
 				var zoom = view.ZoomLevel / 100;
-				var quickInfoHeight = _QuickInfo.ActualHeight / zoom;
+				var quickInfoHeight = qi.ActualHeight / zoom;
 				var top = view.VisualElement.PointFromScreen(new Point(0, 0)).Y;
 				var bottom = view.VisualElement.PointFromScreen(new Point(0, WpfHelper.GetActiveScreenSize().Height)).Y;
 				if (offsetLine + cursorLine.TextHeight + quickInfoHeight > bottom) {
@@ -100,17 +111,17 @@ namespace Codist.QuickInfo
 						}
 					}
 				}
-				_QuickInfo.MaxHeight = (bottom - textBound.Bottom) * zoom;
-				_Popup.PlacementRectangle = new Rect(new Point(left, offsetLine), textBound.Size);
+				qi.MaxHeight = (bottom - textBound.Bottom) * zoom;
+				popup.PlacementRectangle = new Rect(new Point(left, offsetLine), textBound.Size);
 				if (attachEventsOnDemand) {
-					_QuickInfo.SizeChanged += QuickInfo_SizeChanged;
-					_QuickInfo.Unloaded += QuickInfo_Unloaded;
+					qi.SizeChanged += QuickInfo_SizeChanged;
+					qi.Unloaded += QuickInfo_Unloaded;
 				}
 				return;
 				SHOW_ON_TOP:
-				_QuickInfo.MaxHeight = (offsetLine - top) * zoom;
-				_Popup.Placement = PlacementMode.Top;
-				_Popup.PlacementRectangle = new Rect(new Point(left, offsetLine), textBound.Size);
+				qi.MaxHeight = (offsetLine - top) * zoom;
+				popup.Placement = PlacementMode.Top;
+				popup.PlacementRectangle = new Rect(new Point(left, offsetLine), textBound.Size);
 			}
 
 			void QuickInfo_SizeChanged(object sender, SizeChangedEventArgs e) {
