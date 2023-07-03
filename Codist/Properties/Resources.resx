@@ -2623,4 +2623,7 @@ Ctrl: Directly inherited interfaces only</value>
   <data name="T_DirectlyDerivedInterfaces" xml:space="preserve">
     <value> directly derived interfaces</value>
   </data>
+  <data name="CMD_CopyListContent" xml:space="preserve">
+    <value>Copy List Content</value>
+  </data>
 </root>

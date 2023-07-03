@@ -242,6 +242,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Copy List Content.
+        /// </summary>
+        internal static string CMD_CopyListContent {
+            get {
+                return ResourceManager.GetString("CMD_CopyListContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Copy Qualified Symbol Name.
         /// </summary>
         internal static string CMD_CopyQualifiedSymbolName {
