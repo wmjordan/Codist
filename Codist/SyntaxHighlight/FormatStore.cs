@@ -117,11 +117,20 @@ namespace Codist.SyntaxHighlight
 		}
 
 		static Dictionary<string, StyleBase> InitSyntaxStyleCache() {
+#if LOG || DEBUG
+			Microsoft.VisualStudio.PlatformUI.VSColorTheme.ThemeChanged += VSColorTheme_ThemeChanged;
+#endif
 			var cache = new Dictionary<string, StyleBase>(100, StringComparer.OrdinalIgnoreCase);
 			LoadSyntaxStyleCache(cache);
 			Config.RegisterLoadHandler((config) => ResetStyleCache());
 			return cache;
 		}
+
+#if LOG || DEBUG
+		static void VSColorTheme_ThemeChanged(Microsoft.VisualStudio.PlatformUI.ThemeChangedEventArgs e) {
+			("Theme changed: " + e.Message.ToText()).Log();
+		}
+#endif
 
 		static void LoadSyntaxStyleCache(Dictionary<string, StyleBase> cache) {
 			InitStyleClassificationCache<CodeStyleTypes, CodeStyle>(cache, Config.Instance.GeneralStyles);
