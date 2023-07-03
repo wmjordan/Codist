@@ -2,7 +2,9 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Microsoft.VisualStudio.Utilities;
 using R = Codist.Properties.Resources;
+using System.Windows.Controls.Primitives;
 
 namespace Codist.Controls
 {
@@ -29,14 +31,17 @@ namespace Codist.Controls
 						new Separator()
 					}
 			};
-			HeaderButtons = new ThemedControlGroup()
+			HeaderButtons = new ThemedControlGroup { Opacity = 0.8 }
 				.AddRange(
+					new ThemedButton(IconIds.Copy, R.CMD_CopyListContent, CopyListContent).SetProperty(ToolTipService.PlacementProperty, PlacementMode.Left),
 					new ThemedToggleButton(IconIds.TogglePinning, R.CMD_Pin, TogglePinButton),
 					new ThemedButton(IconIds.Close, R.CMD_Close, () => {
 						var a = _ExternalAdornment;
 						a.RemoveAndDispose(this);
 						a.FocusOnTextView();
-					}));
+					}).SetProperty(ToolTipService.PlacementProperty, PlacementMode.Left))
+				.HandleEvent(MouseEnterEvent, MouseEnterHeader)
+				.HandleEvent(MouseLeaveEvent, MouseLeaveHeader);
 			MouseLeftButtonUp += MenuItemSelect;
 			_ExternalAdornment.MakeDraggable(this);
 		}
@@ -103,6 +108,33 @@ namespace Codist.Controls
 				_ExternalAdornment.RemoveAndDispose(this);
 				e.Handled = true;
 			}
+		}
+
+		void CopyListContent() {
+			using (var sbr = ReusableStringBuilder.AcquireDefault(100)) {
+				var sb = sbr.Resource;
+				foreach (var symbolItem in Symbols) {
+					if (symbolItem.IndentLevel != 0) {
+						sb.Append(' ', symbolItem.IndentLevel);
+					}
+					sb.AppendLine(symbolItem.Content.GetText());
+				}
+				try {
+					Clipboard.SetDataObject(sb.ToString());
+				}
+				catch (System.Runtime.InteropServices.ExternalException) {
+					// ignore
+				}
+			}
+			_FilterBox.FocusFilterBox();
+		}
+
+		void MouseEnterHeader(object sender, RoutedEventArgs e) {
+			((UIElement)e.Source).Opacity = 1;
+		}
+
+		void MouseLeaveHeader(object sender, RoutedEventArgs e) {
+			((UIElement)e.Source).Opacity = 0.8;
 		}
 	}
 }
