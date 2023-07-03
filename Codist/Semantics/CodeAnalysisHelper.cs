@@ -429,6 +429,33 @@ namespace Codist
 			}
 			return default;
 		}
+
+		public static string GetQualifiedSignature(this SyntaxNode node) {
+			var s = new LinkedList<string>(); // signature parts
+			DeclarationCategory c;
+			while ((c = node.Kind().GetDeclarationCategory()) != DeclarationCategory.None) {
+				if (c == DeclarationCategory.Namespace) {
+					s.AddFirst((node.GetFileScopedNamespaceDeclarationName() ?? ((NamespaceDeclarationSyntax)node).Name).GetFullName());
+				}
+				else if (c == DeclarationCategory.Local) {
+					if (node.Parent.IsKind(SyntaxKind.VariableDeclaration)) {
+						s.AddFirst(node.GetDeclarationSignature());
+						node = node.Parent.Parent;
+						if (node.IsAnyKind(SyntaxKind.FieldDeclaration, SyntaxKind.EventFieldDeclaration) == false) {
+							break;
+						}
+					}
+					else {
+						break;
+					}
+				}
+				else {
+					s.AddFirst(node.GetDeclarationSignature());
+				}
+				node = node.Parent;
+			}
+			return String.Join(".", s);
+		}
 		#endregion
 
 		#region Node icon
@@ -1308,6 +1335,37 @@ namespace Codist
 				case SyntaxKind.AliasQualifiedName: return ((AliasQualifiedNameSyntax)name).Name.Identifier.Text;
 			}
 			return name.ToString();
+		}
+		public static string GetFullName(this NameSyntax name) {
+			if (name is null) {
+				return null;
+			}
+			LinkedList<string> nb = null;
+			string t;
+			do {
+				switch (name.Kind()) {
+					case SyntaxKind.IdentifierName:
+					case SyntaxKind.GenericName:
+						t = ((SimpleNameSyntax)name).Identifier.Text;
+						if (nb == null) {
+							return t;
+						}
+						nb.AddFirst(t);
+						name = null;
+						break;
+					case SyntaxKind.QualifiedName:
+						var qn = (QualifiedNameSyntax)name;
+						 (nb ?? (nb = new LinkedList<string>())).AddFirst(qn.Right.Identifier.Text);
+						name = qn.Left;
+						break;
+					case SyntaxKind.AliasQualifiedName:
+						var aqn = (AliasQualifiedNameSyntax)name;
+						return $"{aqn.Alias.Identifier.Text}.{aqn.Name.Identifier.Text}";
+				}
+			} while (name != null);
+			return nb != null
+				? String.Join(".", nb)
+				: null;
 		}
 		public static TSyntax WithWhitespaceFrom<TSyntax>(this TSyntax node, SyntaxNode from)
 			where TSyntax : SyntaxNode {
