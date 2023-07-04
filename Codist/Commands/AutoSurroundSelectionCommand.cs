@@ -42,11 +42,11 @@ namespace Codist.Commands
 		public abstract string DisplayName { get; }
 
 		public bool ExecuteCommand(TypeCharCommandArgs args, CommandExecutionContext executionContext) {
-			ITextView view;
-			if (Config.Instance.Features.MatchFlags(Features.AutoSurround) == false) {
-				return false;
-			}
-			view = args.TextView;
+			return Config.Instance.Features.MatchFlags(Features.AutoSurround) && ProcessChar(args);
+		}
+
+		bool ProcessChar(TypeCharCommandArgs args) {
+			ITextView view = args.TextView;
 			if (view.Selection.IsEmpty || TextPairs.TryGetValue(args.TypedChar, out var endText) == false) {
 				return false;
 			}
