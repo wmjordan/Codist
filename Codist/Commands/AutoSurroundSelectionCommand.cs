@@ -21,21 +21,27 @@ namespace Codist.Commands
 			{ '[', "]" },
 			{ '<', ">" },
 		};
-		static readonly Dictionary<char, string> __TextPairs = new Dictionary<char, string>(__CommonPairs) {
-			{ '\u201C', "\u201D" }, // full-width quotation mark ""
-			{ '\u2018', "\u2019" }, // full-width single quotation mark ''
-			{ '\uFF08', "\uFF09" }, // full-width parentheses ()
-			{ '\uFF5B', "\uFF5D" }, // full-width square bracket []
-			{ '\uFF1C', "\uFF1E" }, // full-width less than / greater than sign <>
-			{ '\uFF62', "\uFF63" }, // corner bracket ""
-			{ '\u3010', "\u3011" }, // black lenticular bracket []
-			{ '\u3014', "\u3015" }, // tortoise shell bracket []
-			{ '\u3016', "\u3017" }, // white lenticular bracket []
-			{ '\u300A', "\u300B" }, // double angle bracket <<>>
-			{ '\u3008', "\u3009" }, // single angle bracket <>
-			{ '\u300C', "\u300D" }, // corner bracket
-			{ '\u300E', "\u300F" }, // white corner bracket
-		};
+		static readonly Dictionary<char, string> __TextPairs = IsChineseEnvironment() == false ? __CommonPairs
+			: new Dictionary<char, string>(__CommonPairs) {
+				{ '\u201C', "\u201D" }, // full-width quotation mark ""
+				{ '\u2018', "\u2019" }, // full-width single quotation mark ''
+				{ '\uFF08', "\uFF09" }, // full-width parentheses ()
+				{ '\uFF5B', "\uFF5D" }, // full-width square bracket []
+				{ '\uFF1C', "\uFF1E" }, // full-width less than / greater than sign <>
+				{ '\uFF62', "\uFF63" }, // corner bracket ""
+				{ '\u3010', "\u3011" }, // black lenticular bracket []
+				{ '\u3014', "\u3015" }, // tortoise shell bracket []
+				{ '\u3016', "\u3017" }, // white lenticular bracket []
+				{ '\u300A', "\u300B" }, // double angle bracket <<>>
+				{ '\u3008', "\u3009" }, // single angle bracket <>
+				{ '\u300C', "\u300D" }, // corner bracket
+				{ '\u300E', "\u300F" }, // white corner bracket
+			};
+
+		static bool IsChineseEnvironment() {
+			return System.Globalization.CultureInfo.CurrentCulture.LCID.CeqAny(2052, 3076, 5124, 1028, 4100)
+				|| R.Culture.LCID.CeqAny(2052, 3076, 5124, 1028, 4100);
+		}
 
 		protected abstract Dictionary<char, string> TextPairs { get; }
 
