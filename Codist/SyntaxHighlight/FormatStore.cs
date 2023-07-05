@@ -256,7 +256,9 @@ namespace Codist.SyntaxHighlight
 				_Formatters.Push(nameof(Refresh));
 				_EditorFormatMap.BeginBatchUpdate();
 				try {
-					foreach (var item in _ClassificationFormatMap.CurrentPriorityOrder) {
+					var formats = _ClassificationFormatMap.CurrentPriorityOrder;
+					$"Refresh priority {formats.Count}".Log();
+					foreach (var item in formats) {
 						if (item != null && _Traces.ContainsKey(item.Classification)) {
 							_ClassificationFormatMap.SetTextProperties(item, _ClassificationFormatMap.GetTextProperties(item));
 						}
@@ -274,7 +276,9 @@ namespace Codist.SyntaxHighlight
 				_Formatters.Push(nameof(Apply));
 				_EditorFormatMap.BeginBatchUpdate();
 				try {
-					foreach (var item in _ClassificationFormatMap.CurrentPriorityOrder) {
+					var formats = _ClassificationFormatMap.CurrentPriorityOrder;
+					$"Apply priority {formats.Count}".Log();
+					foreach (var item in formats) {
 						Highlight(item);
 					}
 				}
@@ -327,7 +331,7 @@ namespace Codist.SyntaxHighlight
 			void ClassificationFormatMappingChanged(object sender, EventArgs e) {
 				var currentTypeface = _ClassificationFormatMap.DefaultTextProperties.Typeface;
 				if (currentTypeface != _DefaultTypeface) {
-					$"[{_Category}] default font changed".Log();
+					$"[{_Category}] default font changed {_DefaultTypeface?.FontFamily.Source}->{currentTypeface.FontFamily.Source}".Log();
 					UpdateDefaultTypeface(currentTypeface);
 				}
 			}
@@ -381,14 +385,14 @@ namespace Codist.SyntaxHighlight
 				var currentBg = _EditorFormatMap.GetProperties(Constants.EditorProperties.TextViewBackground).GetBackgroundColor();
 				var bgChanged = _EditorBackground != currentBg;
 				if (bgChanged) {
+					$"[{_Category}] background changed {_EditorBackground.ToHexString()}->{currentBg.ToHexString()}".Log();
 					_EditorBackground = currentBg;
-					$"[{_Category}] background changed".Log();
 				}
 				var currentFontSize = _ClassificationFormatMap.DefaultTextProperties.FontRenderingEmSize;
 				var fsChanged = _DefaultFontSize != currentFontSize;
 				if (fsChanged) {
+					$"[{_Category}] font size changed {_DefaultFontSize}->{currentFontSize}".Log();
 					_DefaultFontSize = currentFontSize;
-					$"[{_Category}] font size changed".Log();
 				}
 				bool needRefresh = false;
 				try {
