@@ -700,6 +700,7 @@ namespace Codist.Options
 			_OverriddenStyleFilterButton.IsChecked = false;
 			_Lock.Unlock();
 			FilterSettingsList(sender, args);
+			_SettingsFilterBox.Focus();
 		}
 
 		void OnSelectTag(object sender, RoutedEventArgs e) {
@@ -1526,7 +1527,6 @@ namespace Codist.Options
 		{
 			readonly OptionBox<SpecialHighlightOptions> _MarkSpecialPunctuationBox, _HighlightDeclarationBracesBox, _HighlightParameterBracesBox, _HighlightCastParenthesesBox, _HighlightBranchBracesBox, _HighlightLoopBracesBox, _HighlightResourceBracesBox,
 				_HighlightLocalFunctionDeclarationBox, _HighlightNonPrivateFieldDeclarationBox, _HighlightConstructorAsTypeBox, _HighlightCapturingLambdaBox;
-			//readonly OptionBox<SpecialHighlightOptions>[] _Options;
 
 			public CSharpAdditionalHighlightConfigPage() {
 				var o = Config.Instance.SpecialHighlightOptions;
