@@ -691,7 +691,7 @@ namespace Codist.Controls
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindDerivedClasses(object sender, RoutedEventArgs e) {
 				var m = Keyboard.Modifiers;
-				await _SemanticContext.FindDerivedClassesAsync(_Symbol, m.MatchFlags(ModifierKeys.Control), m.MatchFlags(ModifierKeys.Shift));
+				await _SemanticContext.FindDerivedClassesAsync(_Symbol, m.MatchFlags(ModifierKeys.Control), m.MatchFlags(ModifierKeys.Shift) == false);
 			}
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindImplementations(object sender, RoutedEventArgs e) {
