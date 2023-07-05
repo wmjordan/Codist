@@ -53,8 +53,10 @@ namespace Codist.Margins
 			if (setVisible == false && visible) {
 				Visibility = Visibility.Collapsed;
 			}
-			else if (setVisible && visible == false) {
-				Visibility = Visibility.Visible;
+			else if (setVisible) {
+				if (visible == false) {
+					Visibility = Visibility.Visible;
+				}
 				Setup();
 			}
 			InvalidateVisual();
