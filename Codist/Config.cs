@@ -195,6 +195,10 @@ namespace Codist
 				config.QuickInfoOptions |= QuickInfoOptions.NodeRange;
 				__Updated?.Invoke(new ConfigUpdatedEventArgs(config, Features.SuperQuickInfo));
 			}
+			if (oldVersion < new Version(7, 6) && config.Features == Features.All) {
+				config.Features = Features.Default;
+				__Updated?.Invoke(new ConfigUpdatedEventArgs(config, Features.None));
+			}
 		}
 
 		public static void LoadConfig(string configPath, StyleFilters styleFilter = StyleFilters.None) {
