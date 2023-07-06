@@ -24,6 +24,7 @@ Check out this list to see what _Codist_ can do for you.
 * [Auto Changing Version Numbers](#auto-changing-version-numbers)
 * [Display Enhancements](#display-enhancements)
 * [Jump List Shortcuts](#jump-list-shortcuts)
+* [Auto Pair Punctuations](#auto-pair-punctuations)
 * [Codist in Your Language](#codist-in-your-language)
 * [Others](#other-features)
 * [Comprehensive Configurations](#feature-control)
@@ -42,10 +43,10 @@ The following screenshots of the `TestPage.cs` file in the source code project d
 
   ![Syntax highlight](doc/highlight1.png) 
 
-* The font size of type and member declarations can be enlarged, font families are also changeable, so it is much easier to spot them.
+* The font size and font family for each syntax style can be changed, so it is much easier to spot them. This feature is helpful for color-blind people.
 * Syntax highlight can be applied to braces and parentheses.
 * Various syntax identifiers have different styles, temporary elements such as method parameters and local variables are italic, `static` symbols are underlined.
-* Comment content can be tagged (e.g. _note_) and highlighted with individual style.
+* Comment content can be tagged (e.g. _todo_, _note_) and highlighted with individual style.
 * Unnecessary code can be marked strike-through.
 * Keywords are categorized and highlighted with various styles (e.g. `abstract` and `sealed`, `return` and `throw`, etc.).
 * Overriding members (such as `ToString`) can be painted with gradient background color, so at a glance we know that the marked implementations have overridden their base classes.
@@ -507,11 +508,29 @@ By checking the check boxes started with "Hide...", it is possible to hide some 
 
 Jump List is a menu section that appears when you right click the Visual Studio button on the task bar. It lists your recently opened solutions, projects or documents.
 
-From version 6.3 on, Codist can add three shortcuts to that list when you check the _Jump List Shortcuts_ option. Those shortcuts start Visual Studio in a special mode.
+If you are using Open-Shell or other similar Start Menu applications, Codist can add three shortcuts to the Quick Start list of Visual Studio when you check the _Jump List Shortcuts_ option. Those shortcuts start Visual Studio in a special mode.
 
-1. *No scaling mode*: disables DPI-awareness of Visual Studio and let you design WinForm applications with 100% scaling.
+1. *Non-scaling mode*: disables DPI-awareness of Visual Studio and let you design WinForm applications with 100% scaling.
 2. *Safe mode*: disables most extensions in Visual Studio. If an extension keeps crashing the development environment, you can use the Safe mode to enter Visual Studio to disable or uninstall it.
 3. *Presentation mode*: opens a particular instance of Visual Studio which has its own settings and layouts.
+
+## Auto Pair Punctuations
+
+From version 7.6 on, Codist can automatically "pair" punctuations around selections.
+
+To make this work, follow the steps below:
+1. Check the _Auto Pair Punctuation_ option in the option page, which is off by default.
+2. Select some text in the code editor.
+3. Type an "opening" punctuation, for instance, `(`, `<`, `{`, `[`, `"` or `'`.
+4. When this option is turned off, the typed character will replace the selection; when this option is turned on, typed character will be inserted in front of the selection, and their counterpart--that is, `)`, `>`, `}`, `]`, `"` or `'`--will be appended behind the selection. For example, if you select `abc` in the code, and type `"`, you will get `"abc"`; if you select `x + y` in the code, and type `(`, you will get `(x + y)`.
+5. Once the first character is typed,
+   a. If you actually want the typed character to replace the selection, press the _Delete_ or _Backspace_ key, the selection and the automatically inserted counterpart will be erased;
+   b. If more characters are to be inserted after the first character, just keep typing, the not-yet-removed content as well as the punctuation counterpart will be replaced.
+   c. If the automatically inserted paired punctuation is what you need, that is what you get now.
+6. When we edit Markdown documents, the <tt>\`</tt>, `*`, `_` and `~` are also auto-paired.
+7. For Chinese users, Chinese full width punctuations are also auto-paired.
+
+You can always turn off this feature by unchecking the _Auto Pair Punctuation_ option in the option page.
 
 ## Codist in Your Language
 
