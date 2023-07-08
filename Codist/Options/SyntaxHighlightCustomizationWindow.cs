@@ -1208,7 +1208,7 @@ namespace Codist.Options
 		{
 			public static readonly ExtensionProperty<StyleSettingsButton, CommentLabel> LabelProperty = ExtensionProperty<StyleSettingsButton, CommentLabel>.Register("CommentLabel");
 
-			readonly CheckBox _Selector;
+			readonly RadioButton _Selector;
 			readonly TextBlock _Preview;
 			readonly IClassificationType _Classification;
 			readonly StyleBase _Style;
@@ -1220,11 +1220,11 @@ namespace Codist.Options
 				Content = new StackPanel {
 					Orientation = Orientation.Horizontal,
 					Children = {
-						(_Selector = new CheckBox {
+						(_Selector = new RadioButton {
 							VerticalAlignment = VerticalAlignment.Center,
 							Margin = WpfHelper.GlyphMargin,
 							IsEnabled = false
-						}).ReferenceStyle(VsResourceKeys.CheckBoxStyleKey),
+						}).ReferenceStyle(VsResourceKeys.ThemedDialogRadioButtonStyleKey),
 						(_Preview = new TextBlock {
 							Text = ct.Classification,
 							Margin = WpfHelper.SmallMargin,
