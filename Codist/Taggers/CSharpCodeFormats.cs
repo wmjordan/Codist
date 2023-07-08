@@ -505,7 +505,7 @@ namespace Codist.Taggers
 	[Order(After = Constants.CodeMethodName)]
 	[Order(After = Constants.CodePropertyName)]
 	[Order(After = Constants.CodeEventName)]
-	[Order(After = Constants.CSharpUserSymbol)]
+	[Order(Before = Constants.CSharpUserSymbol)]
 	sealed class PrivateMemberFormat : ClassificationFormatDefinition
 	{
 		public PrivateMemberFormat() {
