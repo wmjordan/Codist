@@ -20,6 +20,8 @@ namespace Codist.SyntaxHighlight
 		#region sequence-critical static fields
 		static readonly Func<string, IClassificationType> __GetClassificationType = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType;
 
+		// caches IEditorFormatMap.Key and corresponding StyleBase
+		// when accessed, the key should be provided by IClassificationFormatMap.GetEditorFormatMapKey
 		static Dictionary<string, StyleBase> __SyntaxStyleCache = InitSyntaxStyleCache();
 
 		static readonly Dictionary<IClassificationType, List<IClassificationType>> __ClassificationTypeStore = InitClassificationTypes(__SyntaxStyleCache.Keys);
@@ -27,6 +29,9 @@ namespace Codist.SyntaxHighlight
 		static readonly HashSet<Highlighter> __Highlighters = new HashSet<Highlighter>();
 		#endregion
 
+		/// <summary>
+		/// Gets whether symbol source (user code or metadata code) is assigned with specific syntax style.
+		/// </summary>
 		internal static bool IdentifySymbolSource { get; private set; }
 
 		public static void Highlight(IWpfTextView view) {
@@ -46,19 +51,16 @@ namespace Codist.SyntaxHighlight
 			}
 		}
 
+		/// <summary>
+		/// Enforces syntax style precedencies.
+		/// </summary>
 		public static void Refresh() {
 			foreach (var item in __Highlighters) {
 				item.Refresh();
 			}
 		}
-
-		public static bool IsOverridden(this IClassificationType classificationType) {
-			lock (__SyncRoot) {
-				return classificationType != null && __SyntaxStyleCache.TryGetValue(classificationType.Classification, out var s) && s.IsSet;
-			}
-		}
-		public static StyleBase GetOrCreateStyle(IClassificationType classificationType) {
-			var c = classificationType.Classification;
+		public static StyleBase GetOrCreateStyle(IClassificationType classificationType, IClassificationFormatMap formatMap) {
+			var c = formatMap.GetEditorFormatMapKey(classificationType);
 			lock (__SyncRoot) {
 				if (__SyntaxStyleCache.TryGetValue(c, out var r)) {
 					return r;
@@ -216,7 +218,7 @@ namespace Codist.SyntaxHighlight
 			readonly string _Category;
 			readonly IEditorFormatMap _EditorFormatMap;
 			readonly IClassificationFormatMap _ClassificationFormatMap;
-			readonly Dictionary<string, ChangeTrace> _Traces = new Dictionary<string, ChangeTrace>();
+			readonly Dictionary<string, ChangeTrace> _Traces = new Dictionary<string, ChangeTrace>(StringComparer.OrdinalIgnoreCase);
 			readonly Stack<string> _Formatters = new Stack<string>();
 			FormatContext _Context;
 			Color _EditorBackground;
@@ -259,7 +261,7 @@ namespace Codist.SyntaxHighlight
 					var formats = _ClassificationFormatMap.CurrentPriorityOrder;
 					$"Refresh priority {formats.Count}".Log();
 					foreach (var item in formats) {
-						if (item != null && _Traces.ContainsKey(item.Classification)) {
+						if (item != null && _Traces.ContainsKey(_ClassificationFormatMap.GetEditorFormatMapKey(item))) {
 							_ClassificationFormatMap.SetTextProperties(item, _ClassificationFormatMap.GetTextProperties(item));
 						}
 					}
@@ -277,7 +279,7 @@ namespace Codist.SyntaxHighlight
 				_EditorFormatMap.BeginBatchUpdate();
 				try {
 					var formats = _ClassificationFormatMap.CurrentPriorityOrder;
-					$"Apply priority {formats.Count}".Log();
+					$"[{_Category}] apply priority {formats.Count}".Log();
 					foreach (var item in formats) {
 						Highlight(item);
 					}
@@ -451,11 +453,11 @@ namespace Codist.SyntaxHighlight
 				if (classification is null) {
 					return FormatChanges.None;
 				}
-				var c = classification.Classification;
+				var c = _ClassificationFormatMap.GetEditorFormatMapKey(classification);
 				__SyntaxStyleCache.TryGetValue(c, out var style);
 				_Formatters.Push($"Highlight<{c}>");
 				_Lock++;
-				var current = _EditorFormatMap.GetProperties(_ClassificationFormatMap.GetEditorFormatMapKey(classification));
+				var current = _EditorFormatMap.GetProperties(c);
 				var changes = FormatChanges.None;
 				if (_Traces.TryGetValue(c, out var trace) == false) {
 					if (style == null) {
@@ -483,7 +485,7 @@ namespace Codist.SyntaxHighlight
 					$"[{_Category}] change format trace <{c}> ({trace})".Log();
 					trace.Change(current, style, this);
 				}
-				_EditorFormatMap.SetProperties(_ClassificationFormatMap.GetEditorFormatMapKey(classification), current);
+				_EditorFormatMap.SetProperties(c, current);
 			EXIT:
 				_Formatters.Pop();
 				_Lock--;
@@ -523,14 +525,13 @@ namespace Codist.SyntaxHighlight
 			}
 
 			void ResetTextProperties(IEditorFormatMap map, IClassificationType item) {
-				var c = item.Classification;
-				if (__SyntaxStyleCache.ContainsKey(c) == false) {
+				var formatKey = _ClassificationFormatMap.GetEditorFormatMapKey(item);
+				if (__SyntaxStyleCache.ContainsKey(formatKey) == false) {
 					return;
 				}
 
-				var formatKey = _ClassificationFormatMap.GetEditorFormatMapKey(item);
 				var current = map.GetProperties(formatKey);
-				var reset = Reset(c, current);
+				var reset = Reset(formatKey, current);
 				if (reset != current) {
 					map.SetProperties(formatKey, reset);
 				}

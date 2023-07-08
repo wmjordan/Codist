@@ -501,7 +501,7 @@ namespace Codist.Options
 			if (t == null) {
 				return null;
 			}
-			return new StyleSettingsButton(c, t, OnSelectTag) { Text = label.Label, ToolTip = label.Label }.SetProperty(StyleSettingsButton.LabelProperty, label);
+			return new StyleSettingsButton(c, _FormatMap, t, OnSelectTag) { Text = label.Label, ToolTip = label.Label }.SetProperty(StyleSettingsButton.LabelProperty, label);
 
 			CommentStyle FindCommentStyle(CommentLabel cl) {
 				var styleId = cl.StyleID;
@@ -565,7 +565,7 @@ namespace Codist.Options
 				if (t == null) {
 					continue;
 				}
-				var button = new StyleSettingsButton(c, t, OnSelectStyle) { ToolTip = c.Classification };
+				var button = new StyleSettingsButton(c, _FormatMap, t, OnSelectStyle) { ToolTip = c.Classification };
 				if (activeClassification != null && c.Classification == activeClassification) {
 					OnSelectStyle(button, null);
 					_SettingsGroup.Visibility = _StyleNameHolder.Visibility = Visibility.Visible;
@@ -1213,9 +1213,9 @@ namespace Codist.Options
 			readonly IClassificationType _Classification;
 			readonly StyleBase _Style;
 
-			public StyleSettingsButton(IClassificationType ct, TextFormattingRunProperties t, RoutedEventHandler clickHandler) {
+			public StyleSettingsButton(IClassificationType ct, IClassificationFormatMap cfm, TextFormattingRunProperties t, RoutedEventHandler clickHandler) {
 				_Classification = ct;
-				_Style = FormatStore.GetOrCreateStyle(ct);
+				_Style = FormatStore.GetOrCreateStyle(ct, cfm);
 				HorizontalContentAlignment = HorizontalAlignment.Stretch;
 				Content = new StackPanel {
 					Orientation = Orientation.Horizontal,
