@@ -128,7 +128,7 @@ namespace Codist
 			catch (MissingMemberException) {
 				// HACK: For VS 2022, InfoBar is broken. Prompt to open page at this moment.
 				string welcome = Config.Instance.InitStatus.Case(InitStatus.FirstLoad, Properties.Resources.T_FirstRunPrompt, Properties.Resources.T_NewVersionPrompt);
-				if (Controls.MessageWindow.AskYesNo(welcome) == true) {
+				if (new Controls.MessageWindow(welcome, null, MessageBoxButton.YesNo, MessageBoxImage.Information) { Topmost = true }.ShowDialog() == true) {
 					OpenWebPage(Config.Instance.InitStatus);
 				}
 			}
