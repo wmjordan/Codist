@@ -205,7 +205,6 @@ namespace Codist.Options
 					Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom,
 					PlacementTarget = this
 				};
-				ContextMenu.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 			}
 			ContextMenu.IsOpen = true;
 		}
@@ -704,7 +703,6 @@ namespace Codist.Options
 							},
 							PlacementTarget = this
 						};
-						ContextMenu.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 						if (_PaletteGrid.Editable) {
 							ContextMenu.Items.Add(new ThemedMenuItem(IconIds.Paste, R.CMD_PasteColor, PasteColor));
 							ContextMenu.Items.Add(new ThemedMenuItem(IconIds.PickColor, R.CMD_UseActiveColor, PasteActiveColor));

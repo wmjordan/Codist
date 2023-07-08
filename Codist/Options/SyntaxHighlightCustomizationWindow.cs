@@ -1349,7 +1349,6 @@ namespace Codist.Options
 						ItemsSource = new[] { new ThemedMenuItem(-1, R.T_NotSet, SetFont).SetProperty(__InstalledFontNameProperty, null) }
 							.Concat(WpfHelper.GetInstalledFonts().Select(f => new ThemedMenuItem(-1, f.Name, SetFont).SetProperty(__InstalledFontNameProperty, f.Name)))
 					};
-					ContextMenu.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 				}
 				ContextMenu.IsOpen = true;
 			}
@@ -1435,7 +1434,6 @@ namespace Codist.Options
 						Placement = PlacementMode.Bottom,
 						PlacementTarget = this,
 					};
-					ContextMenu.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 					var items = new ThemedMenuItem[16];
 					for (int i = 16; i > 0; i--) {
 						items[16 - i] = SetOpacityValue(new ThemedMenuItem(IconIds.None, i.ToString(), SelectOpacity), i * 16 - 1);

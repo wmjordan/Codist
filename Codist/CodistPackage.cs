@@ -37,7 +37,6 @@ namespace Codist
 		internal const string PackageGuidString = "c7b93d20-621f-4b21-9d28-d51157ef0b94";
 
 		static OleMenuCommandService __Menu;
-		static IVsOutputWindowPane __OutputPane;
 
 		//int _extenderCookie;
 
