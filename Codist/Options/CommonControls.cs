@@ -350,7 +350,7 @@ namespace Codist.Options
 													Height = 48,
 													BorderBrush = Brushes.Gray,
 													BorderThickness = WpfHelper.SmallMargin
-												}.Set(ref _ActiveColorBox)
+												}.UseDummyToolTip().Set(ref _ActiveColorBox)
 											}
 										},
 										CreateTripletGrid(R.T_Hue, ref _HBox, R.T_Saturation, ref _SBox, R.T_Lightness, ref _LBox),
@@ -384,6 +384,7 @@ namespace Codist.Options
 				_RevertButton.Click += RevertButton_Clicked;
 				_CopyButton.Click += CopyColor;
 				_PasteButton.Click += PasteColor;
+				_ActiveColorBox.ToolTipOpening += ActiveColorBox_ToolTipOpening;
 			}
 
 			public event EventHandler<EventArgs<Color>> ColorChanged;
@@ -588,6 +589,10 @@ namespace Codist.Options
 
 			void PasteColor(object sender, RoutedEventArgs e) {
 				Color = GetClipboardColor();
+			}
+
+			void ActiveColorBox_ToolTipOpening(object sender, ToolTipEventArgs e) {
+				_ActiveColorBox.ToolTip = QuickInfo.ColorQuickInfoUI.PreviewColor((SolidColorBrush)_ActiveColorBox.Background);
 			}
 
 			enum ColorSource
