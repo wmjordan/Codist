@@ -90,7 +90,8 @@ namespace Codist
 			}
 
 			ShowNumericForms(symbol, tip);
-			if (symbol.Kind == SymbolKind.Property && Config.Instance.SymbolToolTipOptions.MatchFlags(SymbolToolTipOptions.Colors)) {
+			if (symbol.Kind == SymbolKind.Property
+				&& Config.Instance.SymbolToolTipOptions.MatchFlags(SymbolToolTipOptions.Colors)) {
 				ShowColorPreview(symbol, tip);
 			}
 			return tip;
