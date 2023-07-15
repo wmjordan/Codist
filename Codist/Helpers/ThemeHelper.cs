@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Controls;
+using Codist.SyntaxHighlight;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Imaging.Interop;
@@ -24,19 +25,24 @@ namespace Codist
 		internal const int XLargeIconSize = 48;
 
 		static readonly IClassificationFormatMap __ToolTipFormatMap = ServicesHelper.Instance.ClassificationFormatMap.GetClassificationFormatMap("tooltip");
-		static readonly IClassificationFormatMap __TextFormatMap = ServicesHelper.Instance.ClassificationFormatMap.GetClassificationFormatMap(Constants.CodeText);
+
+		static Guid __CurrentThemeId;
+
 		static ThemeHelper() {
 			RefreshThemeCache();
+			var themeInfo = GetCurrentThemeInfo();
+			__CurrentThemeId = themeInfo.Key;
 			__ToolTipFormatMap.ClassificationFormatMappingChanged += UpdateToolTipFormatMap;
-			__TextFormatMap.ClassificationFormatMappingChanged += UpdateTextFormatMap;
-			VSColorTheme.ThemeChanged += _ => {
-				System.Diagnostics.Debug.WriteLine("Theme changed.");
-				RefreshThemeCache();
-			};
+			VSColorTheme.ThemeChanged += OnThemeChanged;
 		}
 
-		public static System.Windows.Media.Brush EditorBackground => ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap("text").GetProperties(Constants.EditorProperties.TextViewBackground).GetBrush(EditorFormatDefinition.BackgroundBrushId);
-		public static WpfFontFamily CodeTextFont { get; private set; }
+		/// <summary>
+		/// Event for theme changes.
+		/// Parameter key is the GUID for the theme, and value is the theme name.
+		/// </summary>
+		internal static event EventHandler<EventArgs<KeyValuePair<Guid, string>>> ThemeChanged;
+
+		public static WpfFontFamily CodeTextFont => FormatStore.EditorDefaultTextProperties.Typeface.FontFamily;
 		public static GdiColor DocumentPageColor { get; private set; }
 		public static WpfBrush DocumentPageBrush { get; private set; }
 		public static GdiColor DocumentTextColor { get; private set; }
@@ -64,6 +70,44 @@ namespace Codist
 		public static WpfBrush SystemGrayTextBrush { get; private set; }
 		public static WpfFontFamily ToolTipFont { get; private set; }
 		public static double ToolTipFontSize { get; private set; }
+
+		#region Theme events
+		static KeyValuePair<Guid, string> GetCurrentThemeInfo() {
+			ThreadHelper.ThrowIfNotOnUIThread();
+			var i = ServicesHelper.Get<Interop.IVsColorThemeService, Interop.SVsColorThemeService>();
+			if (i != null) {
+				var t = i.CurrentTheme;
+				$"Current theme: {t.Name} ({t.ThemeId})".Log();
+				return new KeyValuePair<Guid, string>(t.ThemeId, t.Name);
+			}
+			"Failed to cast IVsColorThemeService.".Log();
+			return CompatibleGetThemeInfo();
+		}
+
+		// in VS 2022, SVsColorThemeService somehow can't be cast to IVsColorThemeService,
+		// we have to use dynamic in this case
+		static KeyValuePair<Guid, string> CompatibleGetThemeInfo() {
+			ThreadHelper.ThrowIfNotOnUIThread();
+			dynamic s = ServiceProvider.GlobalProvider.GetService(new Guid("0D915B59-2ED7-472A-9DE8-9161737EA1C5"));
+			if (s == null) {
+				return new KeyValuePair<Guid, string>(Guid.Empty, String.Empty);
+			}
+			var t = s.CurrentTheme;
+			$"Current theme: {t.Name} ({t.ThemeId})".Log();
+			return new KeyValuePair<Guid, string>(t.ThemeId, t.Name);
+		}
+
+		static void OnThemeChanged(ThemeChangedEventArgs e) {
+			("Theme changed: " + e.Message.ToText()).Log();
+			var themeInfo = GetCurrentThemeInfo();
+			var themeId = themeInfo.Key;
+			if (themeId != __CurrentThemeId && themeId != Guid.Empty) {
+				__CurrentThemeId = themeId;
+				RefreshThemeCache();
+				ThemeChanged?.Invoke(themeInfo, new EventArgs<KeyValuePair<Guid, string>>(themeInfo));
+			}
+		}
+		#endregion
 
 		#region Colors and brushes
 		public static System.Windows.Media.Brush GetAnyBrush(this IEditorFormatMap formatMap, params string[] formatNames) {
@@ -145,7 +189,7 @@ namespace Codist
 		#endregion
 
 		#region Cache
-		internal static void RefreshThemeCache() {
+		static void RefreshThemeCache() {
 			DocumentPageColor = CommonDocumentColors.PageColorKey.GetGdiColor();
 			DocumentPageBrush = new WpfBrush(DocumentPageColor.ToWpfColor());
 			DocumentTextColor = CommonDocumentColors.PageTextColorKey.GetGdiColor();
@@ -171,7 +215,6 @@ namespace Codist
 			SystemThreeDFaceColor = EnvironmentColors.SystemThreeDFaceColorKey.GetWpfColor();
 			SystemGrayTextBrush = EnvironmentColors.SystemGrayTextBrushKey.GetWpfBrush();
 			UpdateToolTipFormatMap(null, EventArgs.Empty);
-			UpdateTextFormatMap(null, EventArgs.Empty);
 		}
 
 		static void UpdateToolTipFormatMap(object sender, EventArgs e) {
@@ -179,11 +222,6 @@ namespace Codist
 			ToolTipTextBrush = formatMap.ForegroundBrush as WpfBrush;
 			ToolTipFont = formatMap.Typeface.FontFamily;
 			ToolTipFontSize = formatMap.FontRenderingEmSize;
-		}
-
-		static void UpdateTextFormatMap(object sender, EventArgs e) {
-			var formatMap = __TextFormatMap.DefaultTextProperties;
-			CodeTextFont = formatMap.Typeface.FontFamily;
 		}
 		#endregion
 

@@ -65,7 +65,8 @@ namespace Codist.Options
 		readonly Button _ImportThemeButton, _ExportThemeButton, _ResetThemeButton;
 		readonly UiLock _Lock = new UiLock();
 		IWpfTextView _WpfTextView;
-		IClassificationFormatMap _FormatMap;
+		string _CurrentViewCategory;
+		IFormatCache _FormatCache;
 		TextFormattingRunProperties _DefaultFormat;
 		StyleSettingsButton _SelectedStyleButton;
 		CommentLabel _SelectedCommentTag;
@@ -361,6 +362,9 @@ namespace Codist.Options
 			_OverriddenStyleFilterButton.Checked += FilterSettingsList;
 			_OverriddenStyleFilterButton.Unchecked += FilterSettingsList;
 			_ClearFilterButton.Click += ClearFilters;
+			TextEditorHelper.ActiveTextViewChanged += HandleViewChangedEvent;
+			FormatStore.EditorBackgroundChanged += FormatStore_EditorBackgroundChanged;
+			FormatStore.ClassificationFormatMapChanged += RefreshList;
 			Config.Instance.BeginUpdate();
 		}
 
@@ -384,6 +388,18 @@ namespace Codist.Options
 
 		#region Syntax settings loader
 
+		void FormatStore_EditorBackgroundChanged(object sender, EventArgs<Color> e) {
+			if (sender != _FormatCache) {
+				return;
+			}
+			var bg = new SolidColorBrush(e.Data);
+			foreach (var item in _SettingsList.Children) {
+				if (item is StyleSettingsButton btn) {
+					btn.Background = bg;
+				}
+			}
+		}
+
 		void HandleViewChangedEvent(object sender, TextViewCreatedEventArgs args) {
 			if (args.TextView == _WpfTextView) {
 				return;
@@ -396,6 +412,12 @@ namespace Codist.Options
 				_WpfTextView.Selection.SelectionChanged += HandleViewSelectionChangedEvent;
 				_WpfTextView.Closed += UnhookSelectionChangedEvent;
 				SetFormatMap(_WpfTextView);
+				if (_SyntaxSourceBox.SelectedIndex == 0) {
+					LoadSyntaxStyles(SyntaxStyleSource.Selection);
+				}
+				else {
+					_SettingsList.ForEachChild<StackPanel, StyleSettingsButton>(RefreshStyleButton);
+				}
 			}
 		}
 
@@ -413,18 +435,13 @@ namespace Codist.Options
 		}
 
 		void SetFormatMap(ITextView view) {
-			if (_FormatMap != null) {
-				_FormatMap.ClassificationFormatMappingChanged -= RefreshList;
-			}
-			_FormatMap = view != null
-				? ServicesHelper.Instance.ClassificationFormatMap.GetClassificationFormatMap(view)
-				: ServicesHelper.Instance.ClassificationFormatMap.GetClassificationFormatMap(Constants.CodeText);
-			_FormatMap.ClassificationFormatMappingChanged += RefreshList;
+			_CurrentViewCategory = view.GetViewCategory();
+			_FormatCache = FormatStore.GetFormatCache(_CurrentViewCategory);
 			UpdateDefaultFormat();
 		}
 
 		void UpdateDefaultFormat() {
-			var p = _FormatMap.DefaultTextProperties;
+			var p = _FormatCache.DefaultTextProperties;
 			if (p != _DefaultFormat) {
 				_DefaultFormat = p;
 				_SettingsList.SetValue(TextBlock.SetFontFamily, p.Typeface.FontFamily)
@@ -497,11 +514,11 @@ namespace Codist.Options
 			if (c == null) {
 				return null;
 			}
-			var t = _FormatMap.GetTextProperties(c);
+			var t = _FormatCache.GetCachedProperty(c);
 			if (t == null) {
 				return null;
 			}
-			return new StyleSettingsButton(c, _FormatMap, t, OnSelectTag) { Text = label.Label, ToolTip = label.Label }.SetProperty(StyleSettingsButton.LabelProperty, label);
+			return new StyleSettingsButton(c, _FormatCache, t, OnSelectTag) { Text = label.Label, ToolTip = label.Label }.SetProperty(StyleSettingsButton.LabelProperty, label);
 
 			CommentStyle FindCommentStyle(CommentLabel cl) {
 				var styleId = cl.StyleID;
@@ -524,7 +541,7 @@ namespace Codist.Options
 				case SyntaxStyleSource.Markdown: classifications = ToClassificationTypes(Config.Instance.MarkdownStyles); break;
 				case SyntaxStyleSource.Xml: classifications = ToClassificationTypes(Config.Instance.XmlCodeStyles); break;
 				case SyntaxStyleSource.CommentTagger: classifications = ToClassificationTypes(Config.Instance.CommentStyles); break;
-				case SyntaxStyleSource.PriorityOrder: classifications = _FormatMap.CurrentPriorityOrder.Where(i => i != __BraceMatchingClassificationType && i?.Classification.Contains("Breakpoint") == false); break;
+				case SyntaxStyleSource.PriorityOrder: classifications = _FormatCache.ClassificationFormatMap.CurrentPriorityOrder.Where(i => i != __BraceMatchingClassificationType && i?.Classification.Contains("Breakpoint") == false); break;
 				case SyntaxStyleSource.Selection:
 				default:
 					if (_WpfTextView == null) {
@@ -534,11 +551,9 @@ namespace Codist.Options
 					classifications = GetClassificationsForSelection();
 					break;
 			}
-			TextEditorHelper.ActiveTextViewChanged -= HandleViewChangedEvent;
 			_WpfTextView.Selection.SelectionChanged -= HandleViewSelectionChangedEvent;
 			string activeClassification;
 			if (source == SyntaxStyleSource.Selection) {
-				TextEditorHelper.ActiveTextViewChanged += HandleViewChangedEvent;
 				_WpfTextView.Selection.SelectionChanged += HandleViewSelectionChangedEvent;
 				activeClassification = GetHeuristicActiveClassification(classifications);
 			}
@@ -561,11 +576,11 @@ namespace Codist.Options
 				if (c == null || cts.Add(c) == false) {
 					continue;
 				}
-				var t = _FormatMap.GetTextProperties(c);
+				var t = _FormatCache.GetCachedProperty(c);
 				if (t == null) {
 					continue;
 				}
-				var button = new StyleSettingsButton(c, _FormatMap, t, OnSelectStyle) { ToolTip = c.Classification };
+				var button = new StyleSettingsButton(c, _FormatCache, t, OnSelectStyle) { ToolTip = c.Classification };
 				if (activeClassification != null && c.Classification == activeClassification) {
 					OnSelectStyle(button, null);
 					_SettingsGroup.Visibility = _StyleNameHolder.Visibility = Visibility.Visible;
@@ -779,10 +794,10 @@ namespace Codist.Options
 				_ForegroundButton.Color = s.ForeColor;
 				_BackgroundButton.Color = s.BackColor;
 				_LineColorButton.Color = s.LineColor;
-				_ForegroundButton.DefaultColor = () => ((_FormatMap.GetTextProperties(b.Classification)?.ForegroundBrush as SolidColorBrush)?.Color).GetValueOrDefault();
-				_BackgroundButton.DefaultColor = () => ((_FormatMap.GetTextProperties(b.Classification)?.BackgroundBrush as SolidColorBrush)?.Color).GetValueOrDefault();
+				_ForegroundButton.DefaultColor = () => ((_FormatCache.GetCachedProperty(b.Classification)?.ForegroundBrush as SolidColorBrush)?.Color).GetValueOrDefault();
+				_BackgroundButton.DefaultColor = () => ((_FormatCache.GetCachedProperty(b.Classification)?.BackgroundBrush as SolidColorBrush)?.Color).GetValueOrDefault();
 				_LineColorButton.DefaultColor = () => {
-					var c = _FormatMap.GetTextProperties(b.Classification);
+					var c = _FormatCache.GetCachedProperty(b.Classification);
 					return c != null
 						? ((c.TextDecorations.FirstOrDefault(i => i.Location == TextDecorationLocation.Underline)?.Pen?.Brush as SolidColorBrush ?? (c.ForegroundBrush as SolidColorBrush))?.Color).GetValueOrDefault()
 						: default;
@@ -847,9 +862,15 @@ namespace Codist.Options
 			_VariantBox.IsEnabled = _VariantBox.Items.Count > 0;
 		}
 
-		void RefreshList(object sender, EventArgs e) {
-			_SettingsList.ForEachChild((StyleSettingsButton c) => c.Refresh(_FormatMap));
-			UpdateDefaultFormat();
+		void RefreshList(object sender, EventArgs<IEnumerable<IClassificationType>> e) {
+			if (sender == _FormatCache) {
+				_SettingsList.ForEachChild<StackPanel, StyleSettingsButton>(RefreshStyleButton);
+				UpdateDefaultFormat();
+			}
+		}
+
+		void RefreshStyleButton(StyleSettingsButton button) {
+			button.Refresh(_FormatCache);
 		}
 		#endregion
 
@@ -1131,6 +1152,10 @@ namespace Codist.Options
 
 		#region Theme management
 		void ImportTheme() {
+			if (System.Windows.Input.Keyboard.Modifiers == System.Windows.Input.ModifierKeys.Control) {
+				FormatStore.Refresh();
+				return;
+			}
 			var d = new OpenFileDialog {
 				Title = R.T_LoadSyntaxHighlightFile,
 				FileName = "Codist.styles",
@@ -1176,6 +1201,7 @@ namespace Codist.Options
 				var b = _SelectedStyleButton;
 				_SelectedStyleButton = null;
 				OnSelectStyle(b, new RoutedEventArgs());
+				RefreshStyleButton(b);
 				return true;
 			});
 		}
@@ -1185,9 +1211,10 @@ namespace Codist.Options
 			Owner.Activate();
 			UnhookSelectionChangedEvent(_WpfTextView, EventArgs.Empty);
 			TextEditorHelper.ActiveTextViewChanged -= HandleViewChangedEvent;
-			_FormatMap.ClassificationFormatMappingChanged -= RefreshList;
+			FormatStore.EditorBackgroundChanged -= FormatStore_EditorBackgroundChanged;
+			FormatStore.ClassificationFormatMapChanged -= RefreshList;
 			_WpfTextView = null;
-			_FormatMap = null;
+			_FormatCache = null;
 			if (IsClosing == false) {
 				Config.Instance.EndUpdate(false);
 			}
@@ -1208,23 +1235,24 @@ namespace Codist.Options
 		{
 			public static readonly ExtensionProperty<StyleSettingsButton, CommentLabel> LabelProperty = ExtensionProperty<StyleSettingsButton, CommentLabel>.Register("CommentLabel");
 
+			readonly Border _StyleSetIndicator;
 			readonly RadioButton _Selector;
 			readonly TextBlock _Preview;
 			readonly IClassificationType _Classification;
-			readonly StyleBase _Style;
+			StyleBase _Style;
 
-			public StyleSettingsButton(IClassificationType ct, IClassificationFormatMap cfm, TextFormattingRunProperties t, RoutedEventHandler clickHandler) {
+			public StyleSettingsButton(IClassificationType ct, IFormatCache cache, TextFormattingRunProperties t, RoutedEventHandler clickHandler) {
 				_Classification = ct;
-				_Style = FormatStore.GetOrCreateStyle(ct, cfm);
 				HorizontalContentAlignment = HorizontalAlignment.Stretch;
 				Content = new StackPanel {
 					Orientation = Orientation.Horizontal,
 					Children = {
 						(_Selector = new RadioButton {
-							VerticalAlignment = VerticalAlignment.Center,
-							Margin = WpfHelper.GlyphMargin,
-							IsEnabled = false
-						}).ReferenceStyle(VsResourceKeys.ThemedDialogRadioButtonStyleKey),
+								VerticalAlignment = VerticalAlignment.Center,
+								Margin = WpfHelper.GlyphMargin,
+								IsEnabled = false
+							}).ReferenceStyle(VsResourceKeys.ThemedDialogRadioButtonStyleKey),
+						(_StyleSetIndicator = new Border { Width = 16, Height = 16, VerticalAlignment = VerticalAlignment.Center }),
 						(_Preview = new TextBlock {
 							Text = ct.Classification,
 							Margin = WpfHelper.SmallMargin,
@@ -1233,7 +1261,8 @@ namespace Codist.Options
 						})
 					},
 				};
-				Background = ThemeHelper.EditorBackground;
+				Background = new SolidColorBrush(cache.ViewBackground);
+				SetStyle(FormatStore.GetOrCreateStyle(ct, cache.ClassificationFormatMap));
 				PreviewLabelStyle(_Preview, t);
 				this.ReferenceStyle(VsResourceKeys.ButtonStyleKey);
 				Click += clickHandler;
@@ -1253,12 +1282,18 @@ namespace Codist.Options
 			public void PerformClick() {
 				OnClick();
 			}
-			public void Refresh(IClassificationFormatMap formatMap) {
+			public void Refresh(IFormatCache formatCache) {
 				_Preview.ClearValues(TextBlock.ForegroundProperty, TextBlock.BackgroundProperty,
 					TextBlock.FontFamilyProperty, TextBlock.FontSizeProperty,
 					TextBlock.FontStyleProperty, TextBlock.FontWeightProperty,
 					TextBlock.TextDecorationsProperty);
-				PreviewLabelStyle(_Preview, formatMap.GetTextProperties(_Classification));
+				PreviewLabelStyle(_Preview, formatCache.GetCachedProperty(_Classification) ?? formatCache.DefaultTextProperties);
+				SetStyle(FormatStore.GetOrCreateStyle(_Classification, formatCache.ClassificationFormatMap));
+			}
+
+			void SetStyle(StyleBase style) {
+				_Style = style;
+				_StyleSetIndicator.Child = ThemeHelper.GetImage(style.IsSet ? IconIds.CustomizeStyle : IconIds.None);
 			}
 
 			static TextBlock PreviewLabelStyle(TextBlock preview, TextFormattingRunProperties format) {

@@ -186,6 +186,9 @@ namespace Codist
 			}
 		}
 		#region Format ResourceDictionary
+		public static WpfColor GetBackgroundColor(this IEditorFormatMap formatMap) {
+			return formatMap.GetProperties(Constants.EditorProperties.TextViewBackground).GetBackgroundColor();
+		}
 		public static double? GetFontSize(this ResourceDictionary resource) {
 			return resource.GetNullable<double>(ClassificationFormatDefinition.FontRenderingSizeId);
 		}
@@ -1076,6 +1079,10 @@ namespace Codist
 		#region TextView and editor
 		public static event EventHandler<TextViewCreatedEventArgs> ActiveTextViewChanged;
 
+		public static string GetViewCategory(this ITextView view) {
+			return view.Options.GetOptionValue(DefaultWpfViewOptions.AppearanceCategory);
+		}
+
 		/// <summary>Gets the floating point zoom factor <c>(<see cref="IWpfTextView.ZoomLevel"/> / 100)</c> from specific view</summary>
 		public static double ZoomFactor(this IWpfTextView view) {
 			return view.ZoomLevel / 100;
@@ -1237,6 +1244,9 @@ namespace Codist
 						}
 						ForgetViewPosition();
 						ActiveTextViewChanged?.Invoke(_View, new TextViewCreatedEventArgs(_View));
+					}
+					if (_IsDocument && __MouseOverDocumentView == null) {
+						__MouseOverDocumentView = _View;
 					}
 				}
 

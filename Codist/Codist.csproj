@@ -131,6 +131,7 @@
     <Compile Include="Controls\SymbolMenu.cs" />
     <Compile Include="Display\EditorWindowDisplayOptimizer.cs" />
     <Compile Include="Display\JumpListEnhancer.cs" />
+    <Compile Include="Helpers\VsColorThemeService.cs" />
     <Compile Include="QuickInfo\CSharpEnumQuickInfo.cs" />
     <Compile Include="Semantics\AssemblySource.cs" />
     <Compile Include="Helpers\Chain.cs" />
@@ -186,6 +187,7 @@
     <Compile Include="SyntaxHighlight\CommentStyle.cs" />
     <Compile Include="SyntaxHighlight\CppStyle.cs" />
     <Compile Include="SyntaxHighlight\CSharpStyle.cs" />
+    <Compile Include="SyntaxHighlight\IFormatCache.cs" />
     <Compile Include="SyntaxHighlight\MarkdownStyle.cs" />
     <Compile Include="SyntaxHighlight\SymbolMarkerStyle.cs" />
     <Compile Include="SyntaxHighlight\XmlCodeStyle.cs" />

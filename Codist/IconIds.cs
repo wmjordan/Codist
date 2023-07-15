@@ -246,6 +246,7 @@ namespace Codist
 		public const int Close = KnownImageIds.Close;
 		public const int SyntaxTheme = KnownImageIds.ColorPalette;
 		public const int Opacity = KnownImageIds.FillOpacity;
+		public const int CustomizeStyle = KnownImageIds.StyleBlock;
 		public const int PickColor = KnownImageIds.ColorDialog;
 		public const int Reset = KnownImageIds.EmptyBucket;
 		public const int ResetTheme = KnownImageIds.CleanData;

@@ -11,6 +11,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using CLR;
 using Codist.Controls;
+using Codist.SyntaxHighlight;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -24,7 +25,6 @@ namespace Codist
 		internal const double TransparentLevel = 0.6;
 
 		static readonly IEditorFormatMap __CodeFormatMap = ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(Constants.CodeText);
-		static readonly IClassificationFormatMap __CodeClassificationFormatMap = ServicesHelper.Instance.ClassificationFormatMap.GetClassificationFormatMap(Constants.CodeText);
 		static readonly Dictionary<string, Action<string, SymbolFormatter>> __BrushSetter = CreatePropertySetter();
 		internal static readonly SymbolFormatter Instance = new SymbolFormatter(b => { b?.Freeze(); return b; });
 		internal static readonly SymbolFormatter SemiTransparent = new SymbolFormatter(b => {
@@ -37,11 +37,10 @@ namespace Codist
 		readonly Func<Brush, Brush> _BrushConfigurator;
 		SymbolFormatter(Func<Brush, Brush> brushConfigurator) {
 			_BrushConfigurator = brushConfigurator;
-			var cfm = __CodeClassificationFormatMap;
 			foreach (var setter in __BrushSetter) {
 				setter.Value(setter.Key, this);
 			}
-			__CodeFormatMap.FormatMappingChanged += FormatMap_FormatMappingChanged;
+			FormatStore.FormatItemsChanged += FormatMap_FormatMappingChanged;
 		}
 
 		/// <summary>
@@ -1256,7 +1255,7 @@ namespace Codist
 				var ctn = item.GetCustomAttribute<ClassificationTypeAttribute>().ClassificationTypeNames;
 				var setFormatBrush = ReflectionHelper.CreateSetPropertyMethod<SymbolFormatter, Brush>(item.Name);
 				r.Add(ctn, (ct, f) => {
-					var brush = (ct == Constants.CodePlainText ? __CodeClassificationFormatMap.DefaultTextProperties :  __CodeClassificationFormatMap.GetRunProperties(ct)).ForegroundBrush;
+					var brush = (ct == Constants.CodePlainText ? FormatStore.EditorDefaultTextProperties :  FormatStore.GetCachedEditorProperty(ct) ?? FormatStore.EditorDefaultTextProperties).ForegroundBrush;
 					if (f._BrushConfigurator != null) {
 						brush = f._BrushConfigurator(brush);
 					}
@@ -1266,8 +1265,11 @@ namespace Codist
 			return r;
 		}
 
-		void FormatMap_FormatMappingChanged(object sender, FormatItemsEventArgs e) {
-			foreach (var item in e.ChangedItems) {
+		void FormatMap_FormatMappingChanged(object sender, EventArgs<IReadOnlyList<string>> e) {
+			if (sender != FormatStore.EditorFormatCache) {
+				return;
+			}
+			foreach (var item in e.Data) {
 				if (__BrushSetter.TryGetValue(item, out var updateBrush)) {
 					updateBrush(item, this);
 				}

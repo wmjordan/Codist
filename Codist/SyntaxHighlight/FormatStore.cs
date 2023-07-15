@@ -20,13 +20,15 @@ namespace Codist.SyntaxHighlight
 		#region sequence-critical static fields
 		static readonly Func<string, IClassificationType> __GetClassificationType = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType;
 
+		static readonly HashSet<Highlighter> __Highlighters = new HashSet<Highlighter>();
+
 		// caches IEditorFormatMap.Key and corresponding StyleBase
 		// when accessed, the key should be provided by IClassificationFormatMap.GetEditorFormatMapKey
 		static Dictionary<string, StyleBase> __SyntaxStyleCache = InitSyntaxStyleCache();
 
 		static readonly Dictionary<IClassificationType, List<IClassificationType>> __ClassificationTypeStore = InitClassificationTypes(__SyntaxStyleCache.Keys);
 
-		static readonly HashSet<Highlighter> __Highlighters = new HashSet<Highlighter>();
+		static readonly Highlighter __EditorHighlighter = Highlight(Constants.CodeText);
 		#endregion
 
 		/// <summary>
@@ -34,8 +36,43 @@ namespace Codist.SyntaxHighlight
 		/// </summary>
 		internal static bool IdentifySymbolSource { get; private set; }
 
+		internal static TextFormattingRunProperties EditorDefaultTextProperties => __EditorHighlighter.DefaultTextProperties;
+
+		internal static IFormatCache EditorFormatCache => __EditorHighlighter;
+
+		/// <summary>
+		/// Event for editor background color changes.
+		/// Sender is <see cref="IFormatCache"/>.
+		/// Parameter the new background color.
+		/// </summary>
+		internal static event EventHandler<EventArgs<Color>> EditorBackgroundChanged;
+
+		/// <summary>
+		/// Event for classification format map changes.
+		/// Sender is <see cref="IClassificationFormatMap"/>.
+		/// Parameter is a collection of changed classification types.
+		/// </summary>
+		internal static event EventHandler<EventArgs<IEnumerable<IClassificationType>>> ClassificationFormatMapChanged;
+
+		/// <summary>
+		/// Event for view default text properties changes.
+		/// Sender is <see cref="IFormatCache"/>.
+		/// Parameter is the default text format run properties.
+		/// </summary>
+		internal static event EventHandler<EventArgs<TextFormattingRunProperties>> DefaultTextPropertiesChanged;
+
+		/// <summary>
+		/// Event for format item changes.
+		/// Sender is <see cref="IEditorFormatMap"/>.
+		/// Parameter is changed format map keys.
+		/// </summary>
+		internal static event EventHandler<EventArgs<IReadOnlyList<string>>> FormatItemsChanged;
+
 		public static void Highlight(IWpfTextView view) {
-			var category = view.Options.GetOptionValue(DefaultWpfViewOptions.AppearanceCategory);
+			Highlight(view.GetViewCategory());
+		}
+
+		static Highlighter Highlight(string category) {
 			var efm = ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(category);
 			var cfm = ServicesHelper.Instance.ClassificationFormatMap.GetClassificationFormatMap(category);
 			var highlighter = new Highlighter(category, efm, cfm);
@@ -46,9 +83,22 @@ namespace Codist.SyntaxHighlight
 				$"[{category}] highlighter created".Log();
 				highlighter.SubscribeConfigUpdateHandler();
 				highlighter.SubscribeFormatMappingChanges();
+				highlighter.DetectThemeColorCompatibilityWithBackground();
 				highlighter.Apply();
 				highlighter.Refresh();
+				return highlighter;
 			}
+			return null;
+		}
+
+		public static IFormatCache GetFormatCache(string category) {
+			Highlight(category);
+			foreach (var item in __Highlighters) {
+				if (item.Category == category) {
+					return item;
+				}
+			}
+			return null;
 		}
 
 		/// <summary>
@@ -96,6 +146,19 @@ namespace Codist.SyntaxHighlight
 			}
 		}
 
+		/// <summary>
+		/// Gets cached <see cref="TextFormattingRunProperties"/> from code editor.
+		/// </summary>
+		public static TextFormattingRunProperties GetCachedEditorProperty(IClassificationType classificationType) {
+			return __EditorHighlighter.GetCachedProperty(classificationType);
+		}
+		public static TextFormattingRunProperties GetCachedEditorProperty(string classificationType) {
+			var ct = __GetClassificationType(classificationType);
+			return ct != null
+				? GetCachedEditorProperty(ct)
+				: null;
+		}
+
 		public static void Reset() {
 			foreach (var item in __Highlighters) {
 				item.Reset();
@@ -119,20 +182,16 @@ namespace Codist.SyntaxHighlight
 		}
 
 		static Dictionary<string, StyleBase> InitSyntaxStyleCache() {
-#if LOG || DEBUG
-			Microsoft.VisualStudio.PlatformUI.VSColorTheme.ThemeChanged += VSColorTheme_ThemeChanged;
-#endif
 			var cache = new Dictionary<string, StyleBase>(100, StringComparer.OrdinalIgnoreCase);
 			LoadSyntaxStyleCache(cache);
 			Config.RegisterLoadHandler((config) => ResetStyleCache());
+			ThemeHelper.ThemeChanged += (s, args) => {
+				foreach (var item in __Highlighters) {
+					item.Reset();
+				}
+			};
 			return cache;
 		}
-
-#if LOG || DEBUG
-		static void VSColorTheme_ThemeChanged(Microsoft.VisualStudio.PlatformUI.ThemeChangedEventArgs e) {
-			("Theme changed: " + e.Message.ToText()).Log();
-		}
-#endif
 
 		static void LoadSyntaxStyleCache(Dictionary<string, StyleBase> cache) {
 			InitStyleClassificationCache<CodeStyleTypes, CodeStyle>(cache, Config.Instance.GeneralStyles);
@@ -213,15 +272,19 @@ namespace Codist.SyntaxHighlight
 			}
 		}
 
-		sealed class Highlighter : IEquatable<Highlighter>
+		sealed class Highlighter : IEquatable<Highlighter>, IFormatCache
 		{
 			readonly string _Category;
 			readonly IEditorFormatMap _EditorFormatMap;
 			readonly IClassificationFormatMap _ClassificationFormatMap;
 			readonly Dictionary<string, ChangeTrace> _Traces = new Dictionary<string, ChangeTrace>(StringComparer.OrdinalIgnoreCase);
+			readonly Dictionary<IClassificationType, TextFormattingRunProperties> _PropertiesCache = new Dictionary<IClassificationType, TextFormattingRunProperties>();
+			readonly Dictionary<string, IClassificationType> _FormatClassificationTypes = new Dictionary<string, IClassificationType>();
 			readonly Stack<string> _Formatters = new Stack<string>();
+			readonly List<string> _ChangedFormatItems = new List<string>(7);
+			readonly PendingChange _PendingChange = new PendingChange();
 			FormatContext _Context;
-			Color _EditorBackground;
+			Color _ViewBackground;
 			Typeface _DefaultTypeface;
 			double _DefaultFontSize;
 			int _Lock;
@@ -232,10 +295,15 @@ namespace Codist.SyntaxHighlight
 				_ClassificationFormatMap = classificationFormatMap;
 				_DefaultFontSize = classificationFormatMap.DefaultTextProperties.FontRenderingEmSize;
 				_DefaultTypeface = classificationFormatMap.DefaultTextProperties.Typeface;
-				_EditorBackground = editorFormatMap.GetProperties(Constants.EditorProperties.TextViewBackground).GetBackgroundColor();
+				_ViewBackground = editorFormatMap.GetBackgroundColor();
 			}
 
+			public string Category => _Category;
+
+			public IClassificationFormatMap ClassificationFormatMap => _ClassificationFormatMap;
 			public TextFormattingRunProperties DefaultTextProperties => _ClassificationFormatMap.DefaultTextProperties;
+			public Color ViewBackground => _ViewBackground;
+			public Typeface ViewTypeface => _DefaultTypeface;
 
 			public int FormattableItemCount {
 				get {
@@ -249,45 +317,78 @@ namespace Codist.SyntaxHighlight
 				}
 			}
 
+			public TextFormattingRunProperties GetCachedProperty(IClassificationType classificationType) {
+				return _PropertiesCache.TryGetValue(classificationType, out var property)
+					? property
+					: _PropertiesCache[classificationType] = _ClassificationFormatMap.GetTextProperties(classificationType);
+			}
+
+			void LockEvent(string name) {
+				++_Lock;
+				_Formatters.Push(name);
+			}
+
+			void UnlockEvent() {
+				_Formatters.Pop();
+				if (--_Lock == 0 && _PendingChange.PendingEvents != EventKind.None) {
+					_PendingChange.FireEvents(this);
+					_ChangedFormatItems.Clear();
+				}
+			}
+
 			// note: VS appears to have difficulty in merging semantic braces and some other styles.
 			//   By explicitly iterating the CurrentPriorityOrder collection,
 			//   calling GetTextProperties then SetTextProperties one by one,
 			//   the underlying merging process will be called and the priority order is enforced.
 			public void Refresh() {
-				_Lock++;
-				_Formatters.Push(nameof(Refresh));
-				_EditorFormatMap.BeginBatchUpdate();
+				if (_ClassificationFormatMap.IsInBatchUpdate) {
+					_PendingChange.PendEvent(EventKind.Refresh);
+					return;
+				}
+				LockEvent(nameof(Refresh));
+				_ClassificationFormatMap.BeginBatchUpdate();
 				try {
 					var formats = _ClassificationFormatMap.CurrentPriorityOrder;
 					$"Refresh priority {formats.Count}".Log();
+					_PropertiesCache.Clear();
 					foreach (var item in formats) {
-						if (item != null && _Traces.ContainsKey(_ClassificationFormatMap.GetEditorFormatMapKey(item))) {
-							_ClassificationFormatMap.SetTextProperties(item, _ClassificationFormatMap.GetTextProperties(item));
+						if (item != null && _Traces.ContainsKey(GetEditorFormatMapKey(item))) {
+							var p = _ClassificationFormatMap.GetTextProperties(item);
+							_ClassificationFormatMap.SetTextProperties(item, p);
+							_PropertiesCache[item] = p;
 						}
 					}
 				}
 				finally {
-					_EditorFormatMap.EndBatchUpdate();
-					_Formatters.Pop();
-					_Lock--;
+					_ClassificationFormatMap.EndBatchUpdate();
+					UnlockEvent();
 				}
 			}
 
 			public void Apply() {
-				_Lock++;
-				_Formatters.Push(nameof(Apply));
-				_EditorFormatMap.BeginBatchUpdate();
-				try {
-					var formats = _ClassificationFormatMap.CurrentPriorityOrder;
-					$"[{_Category}] apply priority {formats.Count}".Log();
-					foreach (var item in formats) {
-						Highlight(item);
+				var formats = _ClassificationFormatMap.CurrentPriorityOrder;
+				$"[{_Category}] apply priority {formats.Count}".Log();
+				var newStyles = new List<KeyValuePair<string, ResourceDictionary>>(7);
+				foreach (var item in formats) {
+					if (Highlight(item, out var newStyle) != FormatChanges.None) {
+						newStyles.Add(newStyle);
 					}
 				}
-				finally {
-					_EditorFormatMap.EndBatchUpdate();
-					_Formatters.Pop();
-					_Lock--;
+
+				if (newStyles.Count != 0) {
+					_PropertiesCache.Clear();
+					LockEvent(nameof(Apply));
+					_EditorFormatMap.BeginBatchUpdate();
+					$"[{_Category}] update formats {newStyles.Count}".Log();
+					try {
+						foreach (var item in newStyles) {
+							_EditorFormatMap.SetProperties(item.Key, item.Value);
+						}
+					}
+					finally {
+						_EditorFormatMap.EndBatchUpdate();
+						UnlockEvent();
+					}
 				}
 			}
 
@@ -310,7 +411,17 @@ namespace Codist.SyntaxHighlight
 				if (eventArgs.UpdatedFeature.MatchFlags(Features.SyntaxHighlight)) {
 					_Context = FormatContext.Config;
 					if (eventArgs.Parameter is string t) {
-						Highlight(t);
+						if (Highlight(__GetClassificationType(t), out var newStyle) != FormatChanges.None) {
+							// remove the cache and let subsequent call to GetCachedProperty updates it
+							_PropertiesCache.Remove(__GetClassificationType(t));
+							_ClassificationFormatMap.BeginBatchUpdate();
+							try {
+								_EditorFormatMap.SetProperties(newStyle.Key, newStyle.Value);
+							}
+							finally {
+								_ClassificationFormatMap.EndBatchUpdate();
+							}
+						}
 					}
 					else {
 						Apply();
@@ -331,24 +442,44 @@ namespace Codist.SyntaxHighlight
 			}
 
 			void ClassificationFormatMappingChanged(object sender, EventArgs e) {
-				var currentTypeface = _ClassificationFormatMap.DefaultTextProperties.Typeface;
-				if (currentTypeface != _DefaultTypeface) {
-					$"[{_Category}] default font changed {_DefaultTypeface?.FontFamily.Source}->{currentTypeface.FontFamily.Source}".Log();
-					UpdateDefaultTypeface(currentTypeface);
+				_PendingChange.PendEvent(EventKind.ClassificationFormat);
+				if (_Lock != 0) {
+					return;
+				}
+				LockEvent("ClassificationFormatMappingChangedEvent");
+				try {
+					var currentTypeface = _ClassificationFormatMap.DefaultTextProperties.Typeface;
+					if (AreTypefaceEqual(currentTypeface, _DefaultTypeface) == false) {
+						$"[{_Category}] default font changed {_DefaultTypeface?.FontFamily.Source}->{currentTypeface.FontFamily.Source}".Log();
+						if (_Lock == 1) {
+							UpdateDefaultTypeface(currentTypeface);
+							DefaultTextPropertiesChanged?.Invoke(this, new EventArgs<TextFormattingRunProperties>(_ClassificationFormatMap.DefaultTextProperties));
+						}
+						else {
+							_PendingChange.PendEvent(EventKind.DefaultText);
+						}
+					}
+				}
+				finally {
+					UnlockEvent();
 				}
 			}
 
 			// VS somehow fails to update some formats after editor font changes
 			// This method compensates the missing ones
 			void UpdateDefaultTypeface(Typeface currentTypeface) {
-				_Formatters.Push("DefaultFontChangedEvent");
-				_Lock++;
+				LockEvent("DefaultFontChangedEvent");
 				_Context = FormatContext.Event;
-				var startedBatch = false;
+				var startedEditorBatch = false;
+				var startedClassifierBatch = false;
 				var defaultFontFamily = _DefaultTypeface.FontFamily;
+				if (_ClassificationFormatMap.IsInBatchUpdate == false) {
+					_ClassificationFormatMap.BeginBatchUpdate();
+					startedClassifierBatch = true;
+				}
 				if (_EditorFormatMap.IsInBatchUpdate == false) {
 					_EditorFormatMap.BeginBatchUpdate();
-					startedBatch = true;
+					startedEditorBatch = true;
 				}
 				try {
 					foreach (var item in _Traces) {
@@ -362,61 +493,78 @@ namespace Codist.SyntaxHighlight
 				}
 				finally {
 					_Context = FormatContext.None;
-					if (startedBatch) {
+					if (startedEditorBatch) {
 						_EditorFormatMap.EndBatchUpdate();
 					}
-					_Formatters.Pop();
-					_Lock--;
+					if (startedClassifierBatch) {
+						_ClassificationFormatMap.EndBatchUpdate();
+					}
+					UnlockEvent();
 				}
 				_DefaultTypeface = currentTypeface;
 			}
 
 			void EditorFormatMappingChanged(object sender, FormatItemsEventArgs e) {
-				if (_Lock > 0) {
+				_ChangedFormatItems.AddRange(e.ChangedItems);
+				_PendingChange.PendEvent(EventKind.EditorFormat);
+				if (_Lock != 0) {
 					$"[{_Category}] format changed {String.Join(", ", e.ChangedItems)}, blocked by {String.Join(".", _Formatters)}".Log();
 					return;
 				}
-				_Formatters.Push("FormatChangedEvent");
-				_Lock++;
+
 				_Context = FormatContext.Event;
-				var startedBatch = false;
-				if (_EditorFormatMap.IsInBatchUpdate == false) {
-					_EditorFormatMap.BeginBatchUpdate();
-					startedBatch = true;
-				}
-				var currentBg = _EditorFormatMap.GetProperties(Constants.EditorProperties.TextViewBackground).GetBackgroundColor();
-				var bgChanged = _EditorBackground != currentBg;
+				LockEvent("FormatChangedEvent");
+				var newStyles = new List<KeyValuePair<string, ResourceDictionary>>(7);
+				bool startedBatch = false, needRefresh = false, bgInverted = false;
+				var currentBg = _EditorFormatMap.GetBackgroundColor();
+				var bgChanged = _ViewBackground != currentBg;
 				if (bgChanged) {
-					$"[{_Category}] background changed {_EditorBackground.ToHexString()}->{currentBg.ToHexString()}".Log();
-					_EditorBackground = currentBg;
+					$"[{_Category}] background changed {_ViewBackground.ToHexString()}->{currentBg.ToHexString()}".Log();
+					if (_Category == Constants.CodeText) {
+						bgInverted = InvertColorOnBackgroundInverted(currentBg);
+					}
+					_ViewBackground = currentBg;
+					_PendingChange.PendEvent(EventKind.Background);
 				}
 				var currentFontSize = _ClassificationFormatMap.DefaultTextProperties.FontRenderingEmSize;
 				var fsChanged = _DefaultFontSize != currentFontSize;
 				if (fsChanged) {
 					$"[{_Category}] font size changed {_DefaultFontSize}->{currentFontSize}".Log();
 					_DefaultFontSize = currentFontSize;
+					_PendingChange.PendEvent(EventKind.DefaultText);
 				}
-				bool needRefresh = false;
-				try {
-					var dedup = new HashSet<IClassificationType>();
-					// ChangedItems collection is dynamic
-					// cache the changes to prevent it from changing during the enumerating procedure
-					foreach (var item in e.ChangedItems.ToList()) {
-						HighlightRecursive(__GetClassificationType(item), dedup);
-					}
+				var dedup = new HashSet<IClassificationType>();
+				// ChangedItems collection is dynamic
+				// cache the changes to prevent it from changing during the enumerating procedure
+				var changedItems = e.ChangedItems.ToList();
+				$"[{_Category}] editor format changed: {changedItems.Count}".Log();
+				foreach (var item in changedItems) {
+					HighlightRecursive(__GetClassificationType(item), dedup, newStyles);
+				}
 
-					if (bgChanged || fsChanged) {
-						foreach (var item in __SyntaxStyleCache) {
-							if (bgChanged && item.Value.BackColor.A > 0
-								|| fsChanged && item.Value.FontSize != 0) {
-								HighlightRecursive(__GetClassificationType(item.Key), dedup);
-								needRefresh = true;
-							}
+				if (bgChanged || fsChanged) {
+					foreach (var item in __SyntaxStyleCache) {
+						if (bgChanged && item.Value.BackColor.A > 0
+							|| fsChanged && item.Value.FontSize != 0) {
+							HighlightRecursive(__GetClassificationType(item.Key), dedup, newStyles);
+							needRefresh = true;
 						}
 					}
+				}
 
-					if (needRefresh == false) {
-						needRefresh = dedup.Contains(__GetClassificationType(Constants.CodeClassName));
+				$"[{_Category}] overridden {newStyles.Count} styles".Log();
+				try {
+					if (newStyles.Count != 0) {
+						if (_EditorFormatMap.IsInBatchUpdate == false) {
+							_EditorFormatMap.BeginBatchUpdate();
+							startedBatch = true;
+						}
+						foreach (var item in newStyles) {
+							_EditorFormatMap.SetProperties(item.Key, item.Value);
+						}
+						if (needRefresh == false) {
+							needRefresh = dedup.Contains(__GetClassificationType(Constants.CodeClassName));
+						}
 					}
 				}
 				finally {
@@ -424,44 +572,92 @@ namespace Codist.SyntaxHighlight
 					if (startedBatch) {
 						_EditorFormatMap.EndBatchUpdate();
 					}
-					_Formatters.Pop();
+					$"[{_Category}] after format mapping changes".Log();
+					if (bgInverted) {
+						Apply();
+					}
 					if (needRefresh) {
 						Refresh();
 					}
-					_Lock--;
+					UnlockEvent();
 				}
 			}
 
-			void HighlightRecursive(IClassificationType ct, HashSet<IClassificationType> dedup) {
-				if (dedup.Add(ct)
-					&& Highlight(ct).MatchFlags(FormatChanges.FontSize | FormatChanges.BackgroundBrush)
-					&& __ClassificationTypeStore.TryGetValue(ct, out var subTypes)) {
-					foreach (var subType in subTypes) {
-						HighlightRecursive(subType, dedup);
+			internal void DetectThemeColorCompatibilityWithBackground() {
+				var isBackgroundDark = _ViewBackground.IsDark();
+				// color counter
+				int brightness = 0;
+				foreach (var item in GetStyles()) {
+					var style = item.Value;
+					CountColorBrightness(style.ForeColor, ref brightness);
+					CountColorBrightness(style.BackColor, ref brightness);
+				}
+				if (brightness > 3 && isBackgroundDark == false || brightness < -3 && isBackgroundDark) {
+					InvertColorBrightness();
+				}
+
+				void CountColorBrightness(Color c, ref int b) {
+					if (c.A != 0) {
+						b += c.IsDark() ? -1 : 1;
 					}
 				}
 			}
 
-			FormatChanges Highlight(string classification) {
-				if (classification is null) {
-					return FormatChanges.None;
+			bool InvertColorOnBackgroundInverted(Color currentBg) {
+				if (_ViewBackground.IsDark() ^ currentBg.IsDark()) {
+					InvertColorBrightness();
+					return true;
 				}
-				return Highlight(__GetClassificationType(classification));
+				return false;
 			}
 
-			FormatChanges Highlight(IClassificationType classification) {
+			void InvertColorBrightness() {
+				$"[{_Category}] invert color brightness".Log();
+				foreach (var item in GetStyles()) {
+					var style = item.Value;
+					if (style.ForeColor.A != 0) {
+						style.ForeColor = style.ForeColor.InvertBrightness();
+					}
+					if (style.BackColor.A != 0) {
+						style.BackColor = style.BackColor.InvertBrightness();
+					}
+					if (style.HasLineColor) {
+						style.LineColor = style.LineColor.InvertBrightness();
+					}
+				}
+			}
+
+			void HighlightRecursive(IClassificationType ct, HashSet<IClassificationType> dedup, List<KeyValuePair<string, ResourceDictionary>> updates) {
+				if (dedup.Add(ct) == false) {
+					return;
+				}
+				var c = Highlight(ct, out var newStyle);
+				if (c == FormatChanges.None) {
+					return;
+				}
+				updates.Add(newStyle);
+				if (c.MatchFlags(FormatChanges.FontSize | FormatChanges.BackgroundBrush)
+					&& __ClassificationTypeStore.TryGetValue(ct, out var subTypes)) {
+					foreach (var subType in subTypes) {
+						HighlightRecursive(subType, dedup, updates);
+					}
+				}
+			}
+
+			FormatChanges Highlight(IClassificationType classification, out KeyValuePair<string, ResourceDictionary> newStyle) {
 				if (classification is null) {
+					newStyle = default;
 					return FormatChanges.None;
 				}
-				var c = _ClassificationFormatMap.GetEditorFormatMapKey(classification);
+				var c = GetEditorFormatMapKey(classification);
 				__SyntaxStyleCache.TryGetValue(c, out var style);
-				_Formatters.Push($"Highlight<{c}>");
-				_Lock++;
+				LockEvent($"Highlight<{c}>");
 				var current = _EditorFormatMap.GetProperties(c);
 				var changes = FormatChanges.None;
 				if (_Traces.TryGetValue(c, out var trace) == false) {
 					if (style == null) {
 						$"[{_Category}] skipped format {c}".Log();
+						newStyle = default;
 						goto EXIT;
 					}
 					trace = new ChangeTrace(current);
@@ -474,27 +670,27 @@ namespace Codist.SyntaxHighlight
 				else if (_Context == FormatContext.Event) {
 					// format mapping may change outside of Codist,
 					// thus we should update the trace
-					changes = trace.FormatChanges;
-					// merge external changes to trace
-					trace.Change(current, style, this);
-					if (changes != trace.FormatChanges) {
+					changes = trace.Change(current, style, this);
+					if (changes != FormatChanges.None) {
 						$"[{_Category}] update format trace <{c}> ({trace})".Log();
+					}
+					else {
+						newStyle = default;
+						goto EXIT;
 					}
 				}
 				else {
 					$"[{_Category}] change format trace <{c}> ({trace})".Log();
-					trace.Change(current, style, this);
+					changes = trace.Change(current, style, this);
 				}
-				_EditorFormatMap.SetProperties(c, current);
+				newStyle = new KeyValuePair<string, ResourceDictionary>(c, current);
 			EXIT:
-				_Formatters.Pop();
-				_Lock--;
+				UnlockEvent();
 				return changes;
 			}
 
 			public void Reset() {
-				_Lock++;
-				_Formatters.Push("Reset");
+				LockEvent("Reset");
 				var map = _EditorFormatMap;
 				map.BeginBatchUpdate();
 				try {
@@ -506,8 +702,7 @@ namespace Codist.SyntaxHighlight
 				}
 				finally {
 					map.EndBatchUpdate();
-					_Formatters.Pop();
-					_Lock--;
+					UnlockEvent();
 				}
 			}
 
@@ -519,13 +714,18 @@ namespace Codist.SyntaxHighlight
 			}
 
 			public void Reset(IClassificationType classificationType) {
-				_Lock++;
+				LockEvent($"Reset.{classificationType.Classification}");
 				ResetTextProperties(_EditorFormatMap, classificationType);
-				_Lock--;
+				UnlockEvent();
+			}
+
+			public void Clear() {
+				_PropertiesCache.Clear();
+				_Traces.Clear();
 			}
 
 			void ResetTextProperties(IEditorFormatMap map, IClassificationType item) {
-				var formatKey = _ClassificationFormatMap.GetEditorFormatMapKey(item);
+				var formatKey = GetEditorFormatMapKey(item);
 				if (__SyntaxStyleCache.ContainsKey(formatKey) == false) {
 					return;
 				}
@@ -533,6 +733,8 @@ namespace Codist.SyntaxHighlight
 				var current = map.GetProperties(formatKey);
 				var reset = Reset(formatKey, current);
 				if (reset != current) {
+					// remove the cache and let subsequent call to GetCachedProperty updates it
+					_PropertiesCache.Remove(item);
 					map.SetProperties(formatKey, reset);
 				}
 			}
@@ -563,6 +765,22 @@ namespace Codist.SyntaxHighlight
 				return _Category;
 			}
 
+			string GetEditorFormatMapKey(IClassificationType classificationType) {
+				var key = _ClassificationFormatMap.GetEditorFormatMapKey(classificationType);
+				if (_FormatClassificationTypes.ContainsKey(key) == false) {
+					_FormatClassificationTypes.Add(key, classificationType);
+				}
+				return key;
+			}
+
+			IEnumerable<IClassificationType> GetChangedClassificationTypes() {
+				foreach (var item in _ChangedFormatItems) {
+					if (_FormatClassificationTypes.TryGetValue(item, out var t)) {
+						yield return t;
+					}
+				}
+			}
+
 			static bool AreBrushesEqual(Brush x, Brush y) {
 				if (x == y) {
 					return true;
@@ -590,6 +808,45 @@ namespace Codist.SyntaxHighlight
 					&& x.Stretch.Equals(y.Stretch)
 					&& x.Weight.Equals(y.Weight)
 					&& x.Style.Equals(y.Style);
+			}
+
+			sealed class PendingChange
+			{
+				public EventKind PendingEvents;
+				public EventKind FiringEvent;
+
+				public void FireEvents(Highlighter highlighter) {
+					if (PendingEvents == EventKind.None) {
+						return;
+					}
+					if (PendingEvents.MatchFlags(EventKind.Background)) {
+						FiringEvent = EventKind.Background;
+						EditorBackgroundChanged?.Invoke(highlighter, new EventArgs<Color>(highlighter.ViewBackground));
+					}
+					if (PendingEvents.MatchFlags(EventKind.DefaultText)) {
+						FiringEvent = EventKind.DefaultText;
+						DefaultTextPropertiesChanged?.Invoke(highlighter, new EventArgs<TextFormattingRunProperties>(highlighter.DefaultTextProperties));
+					}
+					if (PendingEvents.MatchFlags(EventKind.EditorFormat)) {
+						FiringEvent = EventKind.EditorFormat;
+						FormatItemsChanged?.Invoke(highlighter, new EventArgs<IReadOnlyList<string>>(highlighter._ChangedFormatItems));
+					}
+					if (PendingEvents.MatchFlags(EventKind.ClassificationFormat)) {
+						FiringEvent = EventKind.ClassificationFormat;
+						ClassificationFormatMapChanged?.Invoke(highlighter, new EventArgs<IEnumerable<IClassificationType>>(highlighter.GetChangedClassificationTypes()));
+					}
+					if (PendingEvents.MatchFlags(EventKind.Refresh)) {
+						FiringEvent = EventKind.Refresh;
+						highlighter.Refresh();
+					}
+					PendingEvents = FiringEvent = EventKind.None;
+				}
+
+				public void PendEvent(EventKind eventKind) {
+					if (FiringEvent == EventKind.None) {
+						PendingEvents |= eventKind;
+					}
+				}
 			}
 
 			/// <summary>
@@ -635,135 +892,154 @@ namespace Codist.SyntaxHighlight
 				/// <param name="highlighter">The highlighter providing global settings (background, default font size, etc.)</param>
 				/// <returns>What's changed</returns>
 				public FormatChanges Change(ResourceDictionary current, StyleBase style, Highlighter highlighter) {
-					ChangeBold(current, style);
-					ChangeItalic(current, style);
-					ChangeBrush(current, style);
-					ChangeBackgroundBrush(current, style, highlighter);
-					ChangeOpacity(current, style);
-					ChangeBackgroundOpacity(current, style);
-					ChangeFontSize(current, style, highlighter);
-					ChangeTypeface(current, style, highlighter);
-					ChangeTextDecorations(current, style);
-					return _FormatChanges;
+					var c = FormatChanges.None;
+					ChangeBold(current, style, ref c);
+					ChangeItalic(current, style, ref c);
+					ChangeBrush(current, style, ref c);
+					ChangeBackgroundBrush(current, style, highlighter, ref c);
+					ChangeOpacity(current, style, ref c);
+					ChangeBackgroundOpacity(current, style, ref c);
+					ChangeFontSize(current, style, highlighter, ref c);
+					ChangeTypeface(current, style, highlighter, ref c);
+					ChangeTextDecorations(current, style, ref c);
+					return c;
 				}
 
 				#region ResourceDictionary alteration methods
-				void ChangeBold(ResourceDictionary current, StyleBase style) {
+				void ChangeBold(ResourceDictionary current, StyleBase style, ref FormatChanges c) {
 					bool? s;
 					if (style?.Bold != null) {
 						if ((s = style.Bold) != current.GetBold()) {
 							_FormatChanges |= FormatChanges.Bold;
 							Changes.SetBold(s);
 							current.SetBold(s);
+							c |= FormatChanges.Bold;
 						}
 					}
 					else if (_FormatChanges.MatchFlags(FormatChanges.Bold)) {
 						_FormatChanges ^= FormatChanges.Bold;
 						Changes.SetBold(null);
 						current.SetBold(Origin.GetBold());
+						c |= FormatChanges.Bold;
 					}
 					else if ((s = current.GetBold()) != Origin.GetBold()) {
 						Origin.SetBold(s);
+						c |= FormatChanges.Bold;
 					}
 				}
 
-				void ChangeItalic(ResourceDictionary current, StyleBase style) {
+				void ChangeItalic(ResourceDictionary current, StyleBase style, ref FormatChanges c) {
 					bool? s;
 					if (style?.Italic != null) {
 						if ((s = style.Italic) != current.GetItalic()) {
 							_FormatChanges |= FormatChanges.Italic;
 							Changes.SetItalic(s);
 							current.SetItalic(s);
+							c |= FormatChanges.Italic;
 						}
 					}
 					else if (_FormatChanges.MatchFlags(FormatChanges.Italic)) {
 						_FormatChanges ^= FormatChanges.Italic;
 						Changes.SetItalic(null);
 						current.SetItalic(Origin.GetItalic());
+						c |= FormatChanges.Italic;
 					}
 					else if ((s = current.GetItalic()) != Origin.GetItalic()) {
 						Origin.SetItalic(s);
+						c |= FormatChanges.Italic;
 					}
 				}
 
-				void ChangeBrush(ResourceDictionary current, StyleBase style) {
+				void ChangeBrush(ResourceDictionary current, StyleBase style, ref FormatChanges c) {
 					Brush b;
 					if (style != null && style.ForeColor.A != 0) {
 						if (AreBrushesEqual(b = style.MakeBrush(), current.GetBrush()) == false) {
 							_FormatChanges |= FormatChanges.ForegroundBrush;
 							Changes.SetBrush(b);
 							current.SetBrush(b);
+							c |= FormatChanges.ForegroundBrush;
 						}
 					}
 					else if (_FormatChanges.MatchFlags(FormatChanges.ForegroundBrush)) {
 						_FormatChanges ^= FormatChanges.ForegroundBrush;
 						Changes.SetBrush(null);
 						current.SetBrush(Origin.GetBrush());
+						c |= FormatChanges.ForegroundBrush;
 					}
 					else if (AreBrushesEqual(b = current.GetBrush(), Origin.GetBrush()) == false) {
 						Origin.SetBrush(b);
+						c |= FormatChanges.ForegroundBrush;
 					}
 				}
 
-				void ChangeBackgroundBrush(ResourceDictionary current, StyleBase style, Highlighter highlighter) {
+				void ChangeBackgroundBrush(ResourceDictionary current, StyleBase style, Highlighter highlighter, ref FormatChanges c) {
 					Brush b;
 					if (style != null && style.BackColor.A != 0) {
-						b = style.MakeBackgroundBrush(highlighter._EditorFormatMap.GetColor(Constants.EditorProperties.TextViewBackground, EditorFormatDefinition.BackgroundColorId));
+						b = style.MakeBackgroundBrush(highlighter._ViewBackground);
 						if (AreBrushesEqual(b, current.GetBackgroundBrush()) == false) {
 							_FormatChanges |= FormatChanges.BackgroundBrush;
 							Changes.SetBackgroundBrush(b);
 							current.SetBackgroundBrush(b);
+							c |= FormatChanges.BackgroundBrush;
 						}
 					}
 					else if (_FormatChanges.MatchFlags(FormatChanges.BackgroundBrush)) {
 						_FormatChanges ^= FormatChanges.BackgroundBrush;
 						Changes.SetBackgroundBrush(null);
 						current.SetBackgroundBrush(Origin.GetBackgroundBrush());
+						c |= FormatChanges.BackgroundBrush;
 					}
 					else if (AreBrushesEqual(b = current.GetBackgroundBrush(), Origin.GetBackgroundBrush()) == false) {
 						Origin.SetBackgroundBrush(b);
+						c |= FormatChanges.BackgroundBrush;
 					}
 				}
 
-				void ChangeOpacity(ResourceDictionary current, StyleBase style) {
+				void ChangeOpacity(ResourceDictionary current, StyleBase style, ref FormatChanges c) {
 					double o;
 					if (style != null && style.ForegroundOpacity != 0) {
 						if ((o = style.ForegroundOpacity / 255d) != current.GetOpacity()) {
 							_FormatChanges |= FormatChanges.ForegroundOpacity;
 							Changes.SetOpacity(o);
 							current.SetOpacity(o);
+							c |= FormatChanges.ForegroundOpacity;
 						}
 					}
 					else if (_FormatChanges.MatchFlags(FormatChanges.ForegroundOpacity)) {
 						_FormatChanges ^= FormatChanges.ForegroundOpacity;
 						Changes.SetOpacity(0);
 						current.SetOpacity(Origin.GetOpacity());
+						c |= FormatChanges.ForegroundOpacity;
 					}
 					else if ((o = current.GetOpacity()) != Origin.GetOpacity()) {
 						Origin.SetOpacity(o);
+						c |= FormatChanges.ForegroundOpacity;
 					}
 				}
 
-				void ChangeBackgroundOpacity(ResourceDictionary current, StyleBase style) {
+				void ChangeBackgroundOpacity(ResourceDictionary current, StyleBase style, ref FormatChanges c) {
 					double o;
 					if (style != null && style.BackgroundOpacity != 0) {
 						if ((o = style.BackgroundOpacity / 255d) != current.GetBackgroundOpacity()) {
 							_FormatChanges |= FormatChanges.BackgroundOpacity;
 							Changes.SetBackgroundOpacity(o);
 							current.SetBackgroundOpacity(o);
+							c |= FormatChanges.BackgroundOpacity;
 						}
 					}
 					else if (_FormatChanges.MatchFlags(FormatChanges.BackgroundOpacity)) {
 						_FormatChanges ^= FormatChanges.BackgroundOpacity;
 						Changes.SetBackgroundOpacity(0);
 						current.SetBackgroundOpacity(Origin.GetBackgroundOpacity());
+						c |= FormatChanges.BackgroundOpacity;
 					}
 					else if ((o = current.GetBackgroundOpacity()) != Origin.GetBackgroundOpacity()) {
 						Origin.SetBackgroundOpacity(o);
+						c |= FormatChanges.BackgroundOpacity;
 					}
 				}
 
-				void ChangeFontSize(ResourceDictionary current, StyleBase style, Highlighter highlighter) {
+				void ChangeFontSize(ResourceDictionary current, StyleBase style, Highlighter highlighter, ref FormatChanges c) {
 					double? s;
 					if (style != null && style.FontSize != 0) {
 						s = highlighter._DefaultFontSize + style.FontSize;
@@ -771,19 +1047,22 @@ namespace Codist.SyntaxHighlight
 							_FormatChanges |= FormatChanges.FontSize;
 							Changes.SetFontSize(s);
 							current.SetFontSize(s);
+							c |= FormatChanges.FontSize;
 						}
 					}
 					else if (_FormatChanges.MatchFlags(FormatChanges.FontSize)) {
 						_FormatChanges ^= FormatChanges.FontSize;
 						Changes.SetFontSize(null);
 						current.SetFontSize(Origin.GetFontSize());
+						c |= FormatChanges.FontSize;
 					}
 					else if ((s = current.GetFontSize()) != Origin.GetFontSize()) {
 						Origin.SetFontSize(s);
+						c |= FormatChanges.FontSize;
 					}
 				}
 
-				void ChangeTypeface(ResourceDictionary current, StyleBase style, Highlighter highlighter) {
+				void ChangeTypeface(ResourceDictionary current, StyleBase style, Highlighter highlighter, ref FormatChanges c) {
 					Typeface ct;
 					if (style != null && String.IsNullOrEmpty(style.Font) == false) {
 						ct = style.MakeTypeface();
@@ -793,19 +1072,22 @@ namespace Codist.SyntaxHighlight
 							_FormatChanges |= FormatChanges.Typeface;
 							Changes.SetTypeface(ct);
 							current.SetTypeface(ct);
+							c |= FormatChanges.Typeface;
 						}
 					}
 					else if (_FormatChanges.MatchFlags(FormatChanges.Typeface)) {
 						_FormatChanges ^= FormatChanges.Typeface;
 						Changes.SetTypeface(null);
 						current.SetTypeface(Origin.GetTypeface());
+						c |= FormatChanges.Typeface;
 					}
 					else if ((ct = current.GetTypeface()) != Origin.GetTypeface()) {
 						Origin.SetTypeface(ct);
+						c |= FormatChanges.Typeface;
 					}
 				}
 
-				void ChangeTextDecorations(ResourceDictionary current, StyleBase style) {
+				void ChangeTextDecorations(ResourceDictionary current, StyleBase style, ref FormatChanges c) {
 					TextDecorationCollection td;
 					if (style?.HasLine == true) {
 						var t = style.MakeTextDecorations();
@@ -814,15 +1096,18 @@ namespace Codist.SyntaxHighlight
 							_FormatChanges |= FormatChanges.TextDecorations;
 							Changes.SetTextDecorations(t);
 							current.SetTextDecorations(t);
+							c |= FormatChanges.TextDecorations;
 						}
 					}
 					else if (_FormatChanges.MatchFlags(FormatChanges.TextDecorations)) {
 						_FormatChanges ^= FormatChanges.TextDecorations;
 						Changes.SetTextDecorations(null);
 						current.SetTextDecorations(Origin.GetTextDecorations());
+						c |= FormatChanges.TextDecorations;
 					}
 					else if ((td = current.GetTextDecorations()) != Origin.GetTextDecorations()) {
 						Origin.SetTextDecorations(td);
+						c |= FormatChanges.TextDecorations;
 					}
 				}
 				#endregion
@@ -850,7 +1135,7 @@ namespace Codist.SyntaxHighlight
 						var val = resource[key];
 						switch (key.ToString()) {
 							case EditorFormatDefinition.ForegroundBrushId:
-								sb.Append(val).Append("@f");
+								sb.Append(BrushToString(val)).Append("@f");
 								break;
 							case EditorFormatDefinition.ForegroundColorId:
 								if (resource.Contains(EditorFormatDefinition.ForegroundBrushId)) {
@@ -864,7 +1149,7 @@ namespace Codist.SyntaxHighlight
 								sb.Append((bool)val ? "+I" : "-I");
 								break;
 							case EditorFormatDefinition.BackgroundBrushId:
-								sb.Append(val).Append("@b");
+								sb.Append(BrushToString(val)).Append("@b");
 								break;
 							case EditorFormatDefinition.BackgroundColorId:
 								if (resource.Contains(EditorFormatDefinition.BackgroundBrushId)) {
@@ -875,7 +1160,7 @@ namespace Codist.SyntaxHighlight
 								sb.Append(val).Append('#');
 								break;
 							case ClassificationFormatDefinition.TypefaceId:
-								sb.Append(((Typeface)val).FontFamily.ToString());
+								sb.Append('\'').Append(((Typeface)val).FontFamily.ToString()).Append('\'');
 								break;
 							case ClassificationFormatDefinition.ForegroundOpacityId:
 								sb.Append('%').Append(((double)val).ToString("0.0#")).Append('f');
@@ -892,6 +1177,19 @@ namespace Codist.SyntaxHighlight
 						}
 					}
 					sb.Append(']');
+
+					string BrushToString(object brush) {
+						if (brush is Color c) {
+							return c.ToHexString();
+						}
+						if (brush is SolidColorBrush sc) {
+							return sc.Color.ToHexString();
+						}
+						if (brush is GradientBrush g) {
+							return String.Join("|", g.GradientStops.Select(s => s.Color.ToHexString()));
+						}
+						return String.Empty;
+					}
 				}
 			}
 
@@ -917,6 +1215,17 @@ namespace Codist.SyntaxHighlight
 				BackgroundBrush = 1 << 6,
 				BackgroundOpacity = 1 << 7,
 				TextDecorations = 1 << 8,
+			}
+
+			[Flags]
+			enum EventKind
+			{
+				None,
+				EditorFormat = 1,
+				ClassificationFormat = 1 << 1,
+				Background = 1 << 2,
+				DefaultText = 1 << 3,
+				Refresh = 1 << 4
 			}
 		}
 	}

@@ -136,6 +136,11 @@ namespace Codist
 			return (299 * color.R + 587 * color.G + 114 * color.B) / 1000 < 128;
 		}
 
+		public static WpfColor InvertBrightness(this WpfColor color) {
+			var g = color.ToGdiColor();
+			return FromHsl(g.GetHue(), g.GetSaturation(), 1 - g.GetBrightness());
+		}
+
 		public static WpfColor FromHsl(double hue, double saturation, double luminosity) {
 			double v;
 			double r, g, b;

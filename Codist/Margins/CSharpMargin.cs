@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using CLR;
+using Codist.SyntaxHighlight;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -455,15 +456,18 @@ namespace Codist.Margins
 
 			static class PenStore
 			{
-				static readonly IClassificationFormatMap __FormatMap = WireUpClassificationFormatMap();
 				internal static Pen Class, Interface, Struct, Enum, Event, Delegate, Constructor, Method, Property, Field, Region;
 				internal static Brush RegionForeground, RegionBackground;
 
-				static IClassificationFormatMap WireUpClassificationFormatMap() {
-					var m = ServicesHelper.Instance.ClassificationFormatMap.GetClassificationFormatMap(Constants.CodeText);
-					CreatePens(m);
-					m.ClassificationFormatMappingChanged += (sender, e) => CreatePens((IClassificationFormatMap)sender);
-					return m;
+				static PenStore() {
+					CreatePens(FormatStore.EditorFormatCache.ClassificationFormatMap);
+					FormatStore.ClassificationFormatMapChanged += FormatStore_ClassificationFormatMapChanged;
+				}
+
+				static void FormatStore_ClassificationFormatMapChanged(object sender, EventArgs<IEnumerable<IClassificationType>> e) {
+					if (sender is IFormatCache c && c.Category == Constants.CodeText) {
+						CreatePens(c.ClassificationFormatMap);
+					}
 				}
 
 				internal static Pen GetPenForCodeMemberType(CodeMemberType memberType) {
