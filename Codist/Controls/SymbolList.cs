@@ -23,7 +23,7 @@ using WPF = System.Windows.Media;
 
 namespace Codist.Controls
 {
-	class SymbolList : VirtualList, ISymbolFilterable, INotifyCollectionChanged, IDisposable
+	class SymbolList : VirtualList, ISymbolFilterable, INotifyCollectionChanged
 	{
 		static readonly ExtensionProperty<MenuItem, ValueTuple<SymbolItem, Action<SymbolItem>>> __CommandAction = ExtensionProperty<MenuItem, ValueTuple<SymbolItem, Action<SymbolItem>>>.Register("CommandAction");
 		static readonly ExtensionProperty<ListBoxItem, WeakReference<SymbolItem>> __ListBoxItemContent = ExtensionProperty<ListBoxItem, WeakReference<SymbolItem>>.Register("ListBoxItemContent");
@@ -46,13 +46,18 @@ namespace Codist.Controls
 					new Setter { Property = CursorProperty, Value = Cursors.Arrow },
 					new Setter { Property = HeightProperty, Value = 22d },
 					new Setter { Property = TemplateProperty, Value = Resources["ListBoxItemTemplate"] as ControlTemplate },
-					new Setter { Property = ToolTipProperty, Value = String.Empty },
+					#region context menu for list items
 					new Setter { Property = ContextMenuProperty, Value = __ListItemDummyContextMenu },
+					new EventSetter { Event = ContextMenuOpeningEvent, Handler = new ContextMenuEventHandler(OnListItemContextMenuOpening) },
+					#endregion
+					#region tool tip for list items
+					new Setter { Property = ToolTipProperty, Value = String.Empty },
 					new Setter { Property = ToolTipService.InitialShowDelayProperty, Value = Config.Instance.QuickInfo.DelayDisplay },
+					new Setter { Property = ToolTipService.ShowDurationProperty, Value = 15000 },
 					new Setter { Property = ToolTipService.PlacementTargetProperty, Value = this },
 					new Setter { Property = ToolTipService.PlacementProperty, Value = PlacementMode.Bottom },
 					new EventSetter { Event = ToolTipOpeningEvent, Handler = new ToolTipEventHandler(OnListItemToolTipOpening) },
-					new EventSetter { Event = ContextMenuOpeningEvent, Handler = new ContextMenuEventHandler(OnListItemContextMenuOpening) },
+					#endregion
 				},
 			};
 			PreviewKeyDown += SymbolList_PreviewKeyDown;
