@@ -57,31 +57,7 @@ namespace Codist.Commands
 				Owner = System.Windows.Application.Current.MainWindow
 			};
 			// stop VS from stealing key strokes (enter, backspace, arrow keys, tab stops, etc.) from the window
-			Controls.KeystrokeThief.Bind(_Window);
-			_Window.Closed += UnbindConfig;
-			Config.RegisterLoadHandler(RefreshSyntaxCustomizerWindow);
-		}
-
-		static void UnbindConfig(object sender, EventArgs e) {
-			_Window.Closed -= UnbindConfig;
-			Config.UnregisterLoadHandler(RefreshSyntaxCustomizerWindow);
-		}
-
-		static void RefreshSyntaxCustomizerWindow(Config config) {
-			if (_Window != null && _Window.IsClosing == false && _Window.IsVisible) {
-				var b = _Window.RestoreBounds;
-				var s = _Window.WindowState;
-				_Window.Close();
-				if (_Window.IsClosing == false) {
-					CreateWindow(TextEditorHelper.GetActiveWpfInteractiveView());
-					_Window.Top = b.Top;
-					_Window.Left = b.Left;
-					_Window.Width = b.Width;
-					_Window.Height = b.Height;
-					_Window.WindowState = s;
-				}
-				_Window.Show();
-			}
+			KeystrokeThief.Bind(_Window);
 		}
 	}
 }
