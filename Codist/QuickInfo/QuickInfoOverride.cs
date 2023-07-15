@@ -542,7 +542,7 @@ namespace Codist.QuickInfo
 
 			Grid ShowAlternativeSignature() {
 				var s = _Override.ClickAndGoSymbol;
-				var icon = ThemeHelper.GetImage(s.GetImageId(), ThemeHelper.LargeIconSize)
+				var icon = ThemeHelper.GetImage(s.GetImageId(), ThemeHelper.QuickInfoLargeIconSize)
 					.AsSymbolLink(Keyboard.Modifiers == ModifierKeys.Control ? s.OriginalDefinition : s);
 				icon.VerticalAlignment = VerticalAlignment.Top;
 				var signature = SymbolFormatter.Instance.ShowSignature(s);

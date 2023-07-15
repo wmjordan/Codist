@@ -51,7 +51,6 @@ namespace Codist
 		public static GdiColor ToolWindowBackgroundColor { get; private set; }
 		public static WpfColor TitleBackgroundColor { get; private set; }
 		public static WpfBrush TitleTextBrush { get; private set; }
-		public static WpfBrush ToolTipTextBrush { get; private set; }
 		public static WpfBrush ToolTipBackgroundBrush { get; private set; }
 		public static WpfBrush ToolWindowTextBrush { get; private set; }
 		public static WpfBrush ToolWindowBackgroundBrush { get; private set; }
@@ -68,8 +67,10 @@ namespace Codist
 		public static WpfColor SystemButtonFaceColor { get; private set; }
 		public static WpfColor SystemThreeDFaceColor { get; private set; }
 		public static WpfBrush SystemGrayTextBrush { get; private set; }
+		public static WpfBrush ToolTipTextBrush { get; private set; }
 		public static WpfFontFamily ToolTipFont { get; private set; }
 		public static double ToolTipFontSize { get; private set; }
+		public static double QuickInfoLargeIconSize { get; private set; }
 
 		#region Theme events
 		static KeyValuePair<Guid, string> GetCurrentThemeInfo() {
@@ -161,7 +162,7 @@ namespace Codist
 		/// Gets a themed <see cref="Image"/> from a value defined in <see cref="KnownImageIds"/>
 		/// </summary>
 		/// <param name="imageId">The image id.</param>
-		public static CrispImage GetImage(int imageId, int size = 0) {
+		public static CrispImage GetImage(int imageId, double size = 0) {
 			var moniker = new ImageMoniker {
 				Guid = KnownImageIds.ImageCatalogGuid,
 				Id = imageId
@@ -222,6 +223,7 @@ namespace Codist
 			ToolTipTextBrush = formatMap.ForegroundBrush as WpfBrush;
 			ToolTipFont = formatMap.Typeface.FontFamily;
 			ToolTipFontSize = formatMap.FontRenderingEmSize;
+			QuickInfoLargeIconSize = LargeIconSize * ToolTipFontSize / 12;
 		}
 		#endregion
 
