@@ -102,6 +102,7 @@ namespace Codist.Commands
 		[Export(typeof(ICommandHandler))]
 		[Name(nameof(AutoSurroundSelectionCommandBase) + "." + nameof(Markdown))]
 		[ContentType(Constants.CodeTypes.Markdown)]
+		[ContentType("code++.Markdown")]
 		[ContentType(Constants.CodeTypes.VsMarkdown)]
 		[TextViewRole(PredefinedTextViewRoles.Document)]
 		[TextViewRole(PredefinedTextViewRoles.Editable)]
