@@ -1252,7 +1252,7 @@ namespace Codist.Options
 								Margin = WpfHelper.GlyphMargin,
 								IsEnabled = false
 							}).ReferenceStyle(VsResourceKeys.ThemedDialogRadioButtonStyleKey),
-						(_StyleSetIndicator = new Border { Width = 16, Height = 16, VerticalAlignment = VerticalAlignment.Center }),
+						(_StyleSetIndicator = new Border { Width = 16, Height = 16, VerticalAlignment = VerticalAlignment.Center }.ReferenceCrispImageBackground(CommonDocumentColors.PageColorKey)),
 						(_Preview = new TextBlock {
 							Text = ct.Classification,
 							Margin = WpfHelper.SmallMargin,
