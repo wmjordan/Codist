@@ -28,6 +28,8 @@ namespace Codist.SyntaxHighlight
 
 		static readonly Dictionary<IClassificationType, List<IClassificationType>> __ClassificationTypeStore = InitClassificationTypes(__SyntaxStyleCache.Keys);
 
+		static readonly Dictionary<IClassificationType, bool> __UnsupportedClassificationType = InitFormattableClassificationType();
+
 		static readonly Highlighter __EditorHighlighter = Highlight(Constants.CodeText);
 		#endregion
 
@@ -99,6 +101,13 @@ namespace Codist.SyntaxHighlight
 				}
 			}
 			return null;
+		}
+
+		public static bool IsFormattableClassificationType(this IClassificationType type) {
+			return type != null
+				&& (__UnsupportedClassificationType.TryGetValue(type, out var f)
+					? f
+					: (__UnsupportedClassificationType[type] = IsFormattable(type)));
 		}
 
 		/// <summary>
@@ -173,18 +182,10 @@ namespace Codist.SyntaxHighlight
 			}
 		}
 
-		static void ResetStyleCache() {
-			lock (__SyncRoot) {
-				var cache = new Dictionary<string, StyleBase>(__SyntaxStyleCache.Count, StringComparer.OrdinalIgnoreCase);
-				LoadSyntaxStyleCache(cache);
-				__SyntaxStyleCache = cache;
-			}
-		}
-
 		static Dictionary<string, StyleBase> InitSyntaxStyleCache() {
 			var cache = new Dictionary<string, StyleBase>(100, StringComparer.OrdinalIgnoreCase);
-			LoadSyntaxStyleCache(cache);
-			Config.RegisterLoadHandler((config) => ResetStyleCache());
+			LoadSyntaxStyleCache(cache, Config.Instance);
+			Config.RegisterLoadHandler(ResetStyleCache);
 			ThemeHelper.ThemeChanged += (s, args) => {
 				foreach (var item in __Highlighters) {
 					item.Reset();
@@ -193,15 +194,53 @@ namespace Codist.SyntaxHighlight
 			return cache;
 		}
 
-		static void LoadSyntaxStyleCache(Dictionary<string, StyleBase> cache) {
-			InitStyleClassificationCache<CodeStyleTypes, CodeStyle>(cache, Config.Instance.GeneralStyles);
-			InitStyleClassificationCache<CommentStyleTypes, CommentStyle>(cache, Config.Instance.CommentStyles);
-			InitStyleClassificationCache<CppStyleTypes, CppStyle>(cache, Config.Instance.CppStyles);
-			InitStyleClassificationCache<CSharpStyleTypes, CSharpStyle>(cache, Config.Instance.CodeStyles);
-			InitStyleClassificationCache<MarkdownStyleTypes, MarkdownStyle>(cache, Config.Instance.MarkdownStyles);
-			InitStyleClassificationCache<XmlStyleTypes, XmlCodeStyle>(cache, Config.Instance.XmlCodeStyles);
-			InitStyleClassificationCache<SymbolMarkerStyleTypes, SymbolMarkerStyle>(cache, Config.Instance.SymbolMarkerStyles);
-			var styles = Config.Instance.Styles;
+		static Dictionary<IClassificationType, bool> InitFormattableClassificationType() {
+			var u = new Dictionary<IClassificationType, bool>();
+			foreach (var item in ServicesHelper.Instance.ClassificationFormatMap.GetClassificationFormatMap(Constants.CodeText).CurrentPriorityOrder) {
+				if (item != null) {
+					u.Add(item, IsFormattable(item));
+				}
+			}
+			return u;
+		}
+
+		static bool IsFormattable(IClassificationType item) {
+			string c;
+			return (item != null)
+				&& (c = item.Classification) != null
+				&& c.StartsWith("Breakpoint", StringComparison.Ordinal) == false
+				&& c.StartsWith("Logpoint", StringComparison.Ordinal) == false
+				&& c.StartsWith("Tracepoint", StringComparison.Ordinal) == false
+				&& c.StartsWith("Snappoint", StringComparison.Ordinal) == false
+				&& c.StartsWith("Executing Thread IP", StringComparison.Ordinal) == false
+				&& c.StartsWith("Current Statement", StringComparison.Ordinal) == false
+				&& c.StartsWith("Call Return", StringComparison.Ordinal) == false
+				&& c.EndsWith("{LegacyMarker}", StringComparison.Ordinal) == false
+				&& c != "quickinfo-bold"
+				&& c != "sighelp-documentation"
+				&& c != "Formal Language Priority"
+				&& c != "Natural Language Priority"
+				&& c != "mismatched brace"
+				&& c.StartsWith("brace matching", StringComparison.Ordinal) == false;
+		}
+
+		static void ResetStyleCache(Config config) {
+			lock (__SyncRoot) {
+				var cache = new Dictionary<string, StyleBase>(__SyntaxStyleCache.Count, StringComparer.OrdinalIgnoreCase);
+				LoadSyntaxStyleCache(cache, config);
+				__SyntaxStyleCache = cache;
+			}
+		}
+
+		static void LoadSyntaxStyleCache(Dictionary<string, StyleBase> cache, Config config) {
+			InitStyleClassificationCache<CodeStyleTypes, CodeStyle>(cache, config.GeneralStyles);
+			InitStyleClassificationCache<CommentStyleTypes, CommentStyle>(cache, config.CommentStyles);
+			InitStyleClassificationCache<CppStyleTypes, CppStyle>(cache, config.CppStyles);
+			InitStyleClassificationCache<CSharpStyleTypes, CSharpStyle>(cache, config.CodeStyles);
+			InitStyleClassificationCache<MarkdownStyleTypes, MarkdownStyle>(cache, config.MarkdownStyles);
+			InitStyleClassificationCache<XmlStyleTypes, XmlCodeStyle>(cache, config.XmlCodeStyles);
+			InitStyleClassificationCache<SymbolMarkerStyleTypes, SymbolMarkerStyle>(cache, config.SymbolMarkerStyles);
+			var styles = config.Styles;
 			if (styles != null) {
 				foreach (var item in styles) {
 					if (item == null || String.IsNullOrEmpty(item.ClassificationType)) {
@@ -212,7 +251,7 @@ namespace Codist.SyntaxHighlight
 						cache[item.ClassificationType] = item;
 					}
 				}
-				Config.Instance.Styles = null;
+				config.Styles = null;
 			}
 			UpdateIdentifySymbolSource(cache);
 		}
@@ -277,6 +316,8 @@ namespace Codist.SyntaxHighlight
 			readonly string _Category;
 			readonly IEditorFormatMap _EditorFormatMap;
 			readonly IClassificationFormatMap _ClassificationFormatMap;
+			// traces changed IEditorFormatMap items;
+			// key should obtain from IClassificationFormatMap.GetEditorFormatMapKey
 			readonly Dictionary<string, ChangeTrace> _Traces = new Dictionary<string, ChangeTrace>(StringComparer.OrdinalIgnoreCase);
 			readonly Dictionary<IClassificationType, TextFormattingRunProperties> _PropertiesCache = new Dictionary<IClassificationType, TextFormattingRunProperties>();
 			readonly Dictionary<string, IClassificationType> _FormatClassificationTypes = new Dictionary<string, IClassificationType>();
@@ -301,6 +342,7 @@ namespace Codist.SyntaxHighlight
 			public string Category => _Category;
 
 			public IClassificationFormatMap ClassificationFormatMap => _ClassificationFormatMap;
+			public IEditorFormatMap EditorFormatMap => _EditorFormatMap;
 			public TextFormattingRunProperties DefaultTextProperties => _ClassificationFormatMap.DefaultTextProperties;
 			public Color ViewBackground => _ViewBackground;
 			public Typeface ViewTypeface => _DefaultTypeface;
@@ -309,7 +351,7 @@ namespace Codist.SyntaxHighlight
 				get {
 					int c = 0;
 					foreach (var item in _ClassificationFormatMap.CurrentPriorityOrder) {
-						if (item != null) {
+						if (item.IsFormattableClassificationType()) {
 							++c;
 						}
 					}
@@ -352,7 +394,7 @@ namespace Codist.SyntaxHighlight
 					$"Refresh priority {formats.Count}".Log();
 					_PropertiesCache.Clear();
 					foreach (var item in formats) {
-						if (item != null && _Traces.ContainsKey(GetEditorFormatMapKey(item))) {
+						if (item.IsFormattableClassificationType() && _Traces.ContainsKey(GetEditorFormatMapKey(item))) {
 							var p = _ClassificationFormatMap.GetTextProperties(item);
 							_ClassificationFormatMap.SetTextProperties(item, p);
 							_PropertiesCache[item] = p;
@@ -370,7 +412,8 @@ namespace Codist.SyntaxHighlight
 				$"[{_Category}] apply priority {formats.Count}".Log();
 				var newStyles = new List<KeyValuePair<string, ResourceDictionary>>(7);
 				foreach (var item in formats) {
-					if (Highlight(item, out var newStyle) != FormatChanges.None) {
+					if (item.IsFormattableClassificationType()
+						&& Highlight(item, out var newStyle) != FormatChanges.None) {
 						newStyles.Add(newStyle);
 					}
 				}
@@ -424,6 +467,7 @@ namespace Codist.SyntaxHighlight
 						}
 					}
 					else {
+						$"[{_Category}] update theme after config change".Log();
 						Apply();
 					}
 					_Context = FormatContext.None;
@@ -628,7 +672,8 @@ namespace Codist.SyntaxHighlight
 			}
 
 			void HighlightRecursive(IClassificationType ct, HashSet<IClassificationType> dedup, List<KeyValuePair<string, ResourceDictionary>> updates) {
-				if (dedup.Add(ct) == false) {
+				if (ct.IsFormattableClassificationType() == false
+					|| dedup.Add(ct) == false) {
 					return;
 				}
 				var c = Highlight(ct, out var newStyle);
@@ -739,8 +784,8 @@ namespace Codist.SyntaxHighlight
 				}
 			}
 
-			ResourceDictionary Reset(string classification, ResourceDictionary format) {
-				if (_Traces.TryGetValue(classification, out var trace)) {
+			ResourceDictionary Reset(string editorFormatMapKey, ResourceDictionary format) {
+				if (_Traces.TryGetValue(editorFormatMapKey, out var trace)) {
 					if (trace.FormatChanges == FormatChanges.None) {
 						return format;
 					}

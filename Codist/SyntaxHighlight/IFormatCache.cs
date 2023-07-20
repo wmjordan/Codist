@@ -10,6 +10,7 @@ namespace Codist.SyntaxHighlight
 	{
 		string Category { get; }
 		IClassificationFormatMap ClassificationFormatMap { get; }
+		IEditorFormatMap EditorFormatMap { get; }
 		TextFormattingRunProperties DefaultTextProperties { get; }
 		Color ViewBackground { get; }
 

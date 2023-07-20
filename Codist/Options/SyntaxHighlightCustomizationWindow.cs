@@ -541,7 +541,7 @@ namespace Codist.Options
 				case SyntaxStyleSource.Markdown: classifications = ToClassificationTypes(Config.Instance.MarkdownStyles); break;
 				case SyntaxStyleSource.Xml: classifications = ToClassificationTypes(Config.Instance.XmlCodeStyles); break;
 				case SyntaxStyleSource.CommentTagger: classifications = ToClassificationTypes(Config.Instance.CommentStyles); break;
-				case SyntaxStyleSource.PriorityOrder: classifications = _FormatCache.ClassificationFormatMap.CurrentPriorityOrder.Where(i => i != __BraceMatchingClassificationType && i?.Classification.Contains("Breakpoint") == false); break;
+				case SyntaxStyleSource.PriorityOrder: classifications = _FormatCache.ClassificationFormatMap.CurrentPriorityOrder.Where(FormatStore.IsFormattableClassificationType); break;
 				case SyntaxStyleSource.Selection:
 				default:
 					if (_WpfTextView == null) {
@@ -681,7 +681,7 @@ namespace Codist.Options
 				.ToList(); // cache the results for iterations below
 			return classifications
 				.Union(classifications.SelectMany(i => i.GetBaseTypes()), TextEditorHelper.GetClassificationTypeComparer())
-				.Where(t => t.IsOfType("(TRANSIENT)") == false) // remove transient classification types
+				.Where(t => t.IsFormattableClassificationType() && t.IsOfType("(TRANSIENT)") == false) // remove transient classification types
 				.ToList();
 		}
 
