@@ -12,11 +12,11 @@ namespace Codist.QuickInfo
 	{
 		protected override Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
 			SemanticContext context;
-			return Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Color) == false
-				|| session.TextView is IWpfTextView view == false
-				|| (context = SemanticContext.GetOrCreateSingletonInstance(view)) == null
-				? Task.FromResult<QuickInfoItem>(null)
-				: InternalGetQuickInfoItemAsync(session, context, cancellationToken);
+			return Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Color)
+				&& session.TextView is IWpfTextView view
+				&& (context = SemanticContext.GetOrCreateSingletonInstance(view)) != null
+				? InternalGetQuickInfoItemAsync(session, context, cancellationToken)
+				: Task.FromResult<QuickInfoItem>(null);
 		}
 
 		async Task<QuickInfoItem> InternalGetQuickInfoItemAsync(IAsyncQuickInfoSession session, SemanticContext sc, CancellationToken cancellationToken) {

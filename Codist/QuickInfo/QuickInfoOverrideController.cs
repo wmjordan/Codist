@@ -62,10 +62,10 @@ namespace Codist.QuickInfo
 			public void Reposition(bool attachEventsOnDemand) {
 				var session = _Session;
 				Popup popup;
+				IWpfTextView view;
 				if (session == null
-					|| session.TextView is Microsoft.VisualStudio.Text.Editor.IWpfTextView view == false
 					|| session.ApplicableToSpan == null
-					|| view.VisualElement.IsVisible == false
+					|| (view = session.TextView as IWpfTextView)?.VisualElement.IsVisible != true
 					|| (popup = _Popup) == null) {
 					return;
 				}
