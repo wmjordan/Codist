@@ -732,6 +732,24 @@ namespace Codist
 				s.ToolTipOpening -= ShowLazyToolTip;
 			}
 		}
+		public static TObject SetLazyToolTip<TObject>(this TObject item, Func<TObject, object> toolTipProvider)
+			where TObject : FrameworkElement {
+			item.ToolTip = __DummyToolTip;
+			item.ToolTipOpening += ShowLazyToolTip;
+			return item;
+
+			void ShowLazyToolTip(object sender, ToolTipEventArgs args) {
+				var s = args.Source as TObject;
+				var v = toolTipProvider(s);
+				if (v is string t) {
+					v = new TextBlock {
+						Text = t
+					}.LimitSize();
+				}
+				s.ToolTip = v;
+				s.ToolTipOpening -= ShowLazyToolTip;
+			}
+		}
 
 		public static ResourceDictionary Copy(this ResourceDictionary resources) {
 			if (resources == null) {
@@ -812,7 +830,7 @@ namespace Codist
 			protected virtual object CreateToolTip() => null;
 
 			protected void DoHighlight() {
-				Background = HighlightBrush.Alpha(WpfHelper.DimmedOpacity);
+				Background = HighlightBrush.Alpha(DimmedOpacity);
 			}
 
 			protected override void OnToolTipOpening(ToolTipEventArgs e) {

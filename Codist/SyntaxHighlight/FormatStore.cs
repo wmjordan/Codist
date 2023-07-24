@@ -365,6 +365,18 @@ namespace Codist.SyntaxHighlight
 					: _PropertiesCache[classificationType] = _ClassificationFormatMap.GetTextProperties(classificationType);
 			}
 
+			public bool TryGetChanges(string formatMapKey, out ResourceDictionary original, out ResourceDictionary changes, out string note) {
+				if (_Traces.TryGetValue(formatMapKey, out var trace)) {
+					original = trace.Origin.Copy();
+					changes = trace.Changes.Copy();
+					note = trace.FormatChanges.ToString();
+					return true;
+				}
+				changes = original = null;
+				note = null;
+				return false;
+			}
+
 			void LockEvent(string name) {
 				++_Lock;
 				_Formatters.Push(name);
