@@ -365,6 +365,7 @@ namespace Codist.Options
 			TextEditorHelper.ActiveTextViewChanged += HandleViewChangedEvent;
 			FormatStore.EditorBackgroundChanged += FormatStore_EditorBackgroundChanged;
 			FormatStore.ClassificationFormatMapChanged += RefreshList;
+			IsVisibleChanged += WindowIsVisibleChanged;
 			Config.Instance.BeginUpdate();
 		}
 
@@ -1206,6 +1207,12 @@ namespace Codist.Options
 			});
 		}
 		#endregion
+
+		void WindowIsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) {
+			if (IsVisible == false) {
+				Owner.Activate();
+			}
+		}
 
 		protected override void OnClosed(EventArgs e) {
 			Owner.Activate();
