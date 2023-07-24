@@ -236,26 +236,18 @@ namespace Codist
 		public static ResourceDictionary SetColor(this ResourceDictionary resource, WpfColor color) {
 			if (color.A != 0) {
 				resource[EditorFormatDefinition.ForegroundColorId] = color;
-				var b = new SolidColorBrush(color);
-				b.Freeze();
-				resource[EditorFormatDefinition.ForegroundBrushId] = b;
 			}
 			else {
 				resource.Remove(EditorFormatDefinition.ForegroundColorId);
-				resource.Remove(EditorFormatDefinition.ForegroundBrushId);
 			}
 			return resource;
 		}
 		public static ResourceDictionary SetBackgroundColor(this ResourceDictionary resource, WpfColor color) {
 			if (color.A != 0) {
 				resource[EditorFormatDefinition.BackgroundColorId] = color;
-				var b = new SolidColorBrush(color);
-				b.Freeze();
-				resource[EditorFormatDefinition.BackgroundBrushId] = b;
 			}
 			else {
 				resource.Remove(EditorFormatDefinition.BackgroundColorId);
-				resource.Remove(EditorFormatDefinition.BackgroundBrushId);
 			}
 			return resource;
 		}
@@ -263,6 +255,12 @@ namespace Codist
 			if (brush != null) {
 				brush.Freeze();
 				resource[EditorFormatDefinition.ForegroundBrushId] = brush;
+				if (brush is SolidColorBrush c) {
+					resource[EditorFormatDefinition.ForegroundColorId] = c.Color;
+				}
+				else {
+					resource.Remove(EditorFormatDefinition.ForegroundColorId);
+				}
 			}
 			else {
 				resource.Remove(EditorFormatDefinition.ForegroundColorId);
@@ -274,9 +272,14 @@ namespace Codist
 			if (brush != null) {
 				brush.Freeze();
 				resource[EditorFormatDefinition.BackgroundBrushId] = brush;
+				if (brush is SolidColorBrush c) {
+					resource[EditorFormatDefinition.BackgroundColorId] = c.Color;
+				}
+				else {
+					resource.Remove(EditorFormatDefinition.BackgroundColorId);
+				}
 			}
 			else {
-				resource.Remove(EditorFormatDefinition.BackgroundColorId);
 				resource.Remove(EditorFormatDefinition.BackgroundBrushId);
 			}
 			return resource;

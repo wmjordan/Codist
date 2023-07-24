@@ -395,27 +395,49 @@ namespace Codist.SyntaxHighlight
 			//   calling GetTextProperties then SetTextProperties one by one,
 			//   the underlying merging process will be called and the priority order is enforced.
 			public void Refresh() {
-				if (_ClassificationFormatMap.IsInBatchUpdate) {
+				if (_EditorFormatMap.IsInBatchUpdate) {
 					_PendingChange.PendEvent(EventKind.Refresh);
 					return;
 				}
 				LockEvent(nameof(Refresh));
-				_ClassificationFormatMap.BeginBatchUpdate();
+				_EditorFormatMap.BeginBatchUpdate();
 				try {
 					var formats = _ClassificationFormatMap.CurrentPriorityOrder;
 					$"Refresh priority {formats.Count}".Log();
+					var semanticBrace = Config.Instance.SpecialHighlightOptions.HasAnyFlag(SpecialHighlightOptions.AllParentheses);
+					var boldBrace = Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.SpecialPunctuation);
 					_PropertiesCache.Clear();
 					foreach (var item in formats) {
 						if (item.IsFormattableClassificationType() && _Traces.ContainsKey(GetEditorFormatMapKey(item))) {
 							var p = _ClassificationFormatMap.GetTextProperties(item);
-							_ClassificationFormatMap.SetTextProperties(item, p);
+							$"[{_Category}] refresh classification {item.Classification}".Log();
+							// hack: workaround for punctuation format properties that voids settings of semanticBrace or boldBrace
+							if ((semanticBrace && p.ForegroundBrushEmpty == false
+								|| boldBrace && p.BoldEmpty == false)
+								&& item.Classification == Constants.CodePunctuation) {
+								WorkaroundPunctuationStyle(_EditorFormatMap, semanticBrace, boldBrace);
+							}
+							else {
+								_ClassificationFormatMap.SetTextProperties(item, p);
+							}
 							_PropertiesCache[item] = p;
 						}
 					}
 				}
 				finally {
-					_ClassificationFormatMap.EndBatchUpdate();
+					_EditorFormatMap.EndBatchUpdate();
 					UnlockEvent();
+				}
+
+				void WorkaroundPunctuationStyle(IEditorFormatMap map, bool s, bool b) {
+					var m = map.GetProperties(Constants.CodePunctuation);
+					if (s) {
+						m.SetBrush(null);
+					}
+					if (b) {
+						m.SetBold(null);
+					}
+					map.SetProperties(Constants.CodePunctuation, m);
 				}
 			}
 
@@ -498,7 +520,9 @@ namespace Codist.SyntaxHighlight
 			}
 
 			void ClassificationFormatMappingChanged(object sender, EventArgs e) {
-				_PendingChange.PendEvent(EventKind.ClassificationFormat);
+				if (_PendingChange.FiringEvent == EventKind.None) {
+					_PendingChange.PendEvent(EventKind.ClassificationFormat);
+				}
 				if (_Lock != 0) {
 					return;
 				}
@@ -561,8 +585,10 @@ namespace Codist.SyntaxHighlight
 			}
 
 			void EditorFormatMappingChanged(object sender, FormatItemsEventArgs e) {
-				_ChangedFormatItems.AddRange(e.ChangedItems);
-				_PendingChange.PendEvent(EventKind.EditorFormat);
+				if (_PendingChange.FiringEvent == EventKind.None) {
+					_ChangedFormatItems.AddRange(e.ChangedItems);
+					_PendingChange.PendEvent(EventKind.EditorFormat);
+				}
 				if (_Lock != 0) {
 					$"[{_Category}] format changed {String.Join(", ", e.ChangedItems)}, blocked by {String.Join(".", _Formatters)}".Log();
 					return;
