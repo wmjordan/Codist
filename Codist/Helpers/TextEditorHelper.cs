@@ -825,6 +825,9 @@ namespace Codist
 			if (session.TextView is IWpfTextView v) {
 				__ActiveDocumentView = v;
 				__ActiveViewPosition = session.GetTriggerPoint(v.TextSnapshot)?.Position ?? -1;
+				if (session.Options == QuickInfoSessionOptions.TrackMouse) {
+					__MouseOverDocumentView = v;
+				}
 				session.StateChanged += QuickInfoSession_StateChanged;
 			}
 		}
