@@ -66,7 +66,7 @@ namespace Codist
 			public const string VisibleWhitespace = "Visible Whitespace";
 		}
 
-		public const string CodeKeyword = "Keyword";// it is weird that there are two keyword with different cases in the resource dictionary: a Keyword and a PredefinedClassificationTypeNames.Keyword;
+		public const string CodeKeyword = PredefinedClassificationTypeNames.Keyword;
 		public const string CodeComment = PredefinedClassificationTypeNames.Comment;
 		public const string CodeText = "text";
 
@@ -92,13 +92,13 @@ namespace Codist
 		public const string CodeUnnecessary = "unnecessary code";
 		public const string CodeIdentifier = PredefinedClassificationTypeNames.Identifier;
 		public const string CodeLiteral = PredefinedClassificationTypeNames.Literal;
-		public const string CodeNumber = "Number"; // it is weird that there are two keyword with different cases in the resource dictionary: a Number and PredefinedClassificationTypeNames.Number;
+		public const string CodeNumber = PredefinedClassificationTypeNames.Number;
 		public const string CodeOperator = PredefinedClassificationTypeNames.Operator;
 		public const string CodePlainText = "Plain Text";
 		public const string CodePunctuation = "punctuation";
 		public const string CodeBraceMatching = "brace matching";
 		public const string CodeInlineRenameField = "inline rename field";
-		public const string CodeString = "String";// it is weird that there are two keyword with different cases in the resource dictionary: a String and a PredefinedClassificationTypeNames.String;
+		public const string CodeString = PredefinedClassificationTypeNames.String;
 		public const string CodeStringVerbatim = "string - verbatim";
 		public const string CodeSymbolDefinition = PredefinedClassificationTypeNames.SymbolDefinition;
 		public const string CodeSymbolReference = PredefinedClassificationTypeNames.SymbolReference;

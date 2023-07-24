@@ -318,7 +318,7 @@ namespace Codist.SyntaxHighlight
 			readonly IClassificationFormatMap _ClassificationFormatMap;
 			// traces changed IEditorFormatMap items;
 			// key should obtain from IClassificationFormatMap.GetEditorFormatMapKey
-			readonly Dictionary<string, ChangeTrace> _Traces = new Dictionary<string, ChangeTrace>(StringComparer.OrdinalIgnoreCase);
+			readonly Dictionary<string, ChangeTrace> _Traces = new Dictionary<string, ChangeTrace>();
 			readonly Dictionary<IClassificationType, TextFormattingRunProperties> _PropertiesCache = new Dictionary<IClassificationType, TextFormattingRunProperties>();
 			readonly Dictionary<string, IClassificationType> _FormatClassificationTypes = new Dictionary<string, IClassificationType>();
 			readonly Stack<string> _Formatters = new Stack<string>();
