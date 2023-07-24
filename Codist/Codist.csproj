@@ -132,6 +132,7 @@
     <Compile Include="Display\EditorWindowDisplayOptimizer.cs" />
     <Compile Include="Display\JumpListEnhancer.cs" />
     <Compile Include="Helpers\VsColorThemeService.cs" />
+    <Compile Include="QuickInfo\CSharpCompletionTooltip.cs" />
     <Compile Include="QuickInfo\CSharpEnumQuickInfo.cs" />
     <Compile Include="Semantics\AssemblySource.cs" />
     <Compile Include="Helpers\Chain.cs" />
