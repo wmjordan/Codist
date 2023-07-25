@@ -417,12 +417,12 @@ namespace Codist.SyntaxHighlight
 			//   calling GetTextProperties then SetTextProperties one by one,
 			//   the underlying merging process will be called and the priority order is enforced.
 			public void Refresh() {
-				if (_EditorFormatMap.IsInBatchUpdate) {
+				if (_ClassificationFormatMap.IsInBatchUpdate) {
 					_PendingChange.PendEvent(EventKind.Refresh);
 					return;
 				}
 				LockEvent(nameof(Refresh));
-				_EditorFormatMap.BeginBatchUpdate();
+				_ClassificationFormatMap.BeginBatchUpdate();
 				try {
 					var formats = _ClassificationFormatMap.CurrentPriorityOrder;
 					$"Refresh priority {formats.Count}".Log();
@@ -447,7 +447,7 @@ namespace Codist.SyntaxHighlight
 					}
 				}
 				finally {
-					_EditorFormatMap.EndBatchUpdate();
+					_ClassificationFormatMap.EndBatchUpdate();
 					UnlockEvent();
 				}
 
