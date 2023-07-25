@@ -67,16 +67,35 @@ namespace Codist.Taggers
 		ITextView _LastView;
 		ITextBuffer _LastTextBuffer;
 		CSharpTagger _LastTagger;
+		bool _Enabled;
 
 		// for debug info
 		int _taggerCount;
+
+		public CSharpTaggerProvider() {
+			_Enabled = Config.Instance.Features.MatchFlags(Features.SyntaxHighlight);
+			Config.RegisterUpdateHandler(FeatureToggle);
+		}
+
+		void FeatureToggle(ConfigUpdatedEventArgs args) {
+			bool enabled;
+			if (args.UpdatedFeature == Features.SyntaxHighlight
+				&& (enabled = Config.Instance.Features.MatchFlags(Features.SyntaxHighlight)) != _Enabled) {
+				_Enabled = enabled;
+				foreach (var item in _Taggers) {
+					foreach (var tagger in item.Value) {
+						tagger.Value.Disabled = !enabled;
+					}
+				}
+			}
+		}
 
 		public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag {
 			return (typeof(T) == typeof(IClassificationTag)) ? GetTagger(textView, buffer) as ITagger<T> : null;
 		}
 
 		ITagger<IClassificationTag> GetTagger(ITextView textView, ITextBuffer buffer) {
-			if (Config.Instance.Features.MatchFlags(Features.SyntaxHighlight) == false
+			if (_Enabled == false
 				|| buffer.MayBeEditor() == false // it seems that the analyzer preview windows do not call the View_Close event handler, thus we exclude them here
 				|| textView.TextBuffer.ContentType.IsOfType("RoslynPreviewContentType")
 				|| textView.Roles.ContainsAny(__TaggableRoles) == false && textView.TextBuffer.ContentType.TypeName != Constants.CodeTypes.InteractiveContent

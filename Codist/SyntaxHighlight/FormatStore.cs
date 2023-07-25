@@ -22,6 +22,8 @@ namespace Codist.SyntaxHighlight
 
 		static readonly HashSet<Highlighter> __Highlighters = new HashSet<Highlighter>();
 
+		static bool __HighlightEnabled;
+
 		// caches IEditorFormatMap.Key and corresponding StyleBase
 		// when accessed, the key should be provided by IClassificationFormatMap.GetEditorFormatMapKey
 		static Dictionary<string, StyleBase> __SyntaxStyleCache = InitSyntaxStyleCache();
@@ -184,14 +186,34 @@ namespace Codist.SyntaxHighlight
 
 		static Dictionary<string, StyleBase> InitSyntaxStyleCache() {
 			var cache = new Dictionary<string, StyleBase>(100, StringComparer.OrdinalIgnoreCase);
+			__HighlightEnabled = Config.Instance.Features.MatchFlags(Features.SyntaxHighlight);
 			LoadSyntaxStyleCache(cache, Config.Instance);
 			Config.RegisterLoadHandler(ResetStyleCache);
+			Config.RegisterUpdateHandler(FeatureToggle);
 			ThemeHelper.ThemeChanged += (s, args) => {
 				foreach (var item in __Highlighters) {
 					item.Reset();
 				}
 			};
 			return cache;
+		}
+
+		static void FeatureToggle(ConfigUpdatedEventArgs args) {
+			bool enabled;
+			if (args.UpdatedFeature == Features.SyntaxHighlight
+				&& (enabled = Config.Instance.Features.MatchFlags(Features.SyntaxHighlight)) != __HighlightEnabled) {
+				if (__HighlightEnabled = enabled) {
+					foreach (var item in __Highlighters) {
+						item.Apply();
+						item.Refresh();
+					}
+				}
+				else {
+					foreach (var item in __Highlighters) {
+						item.Reset();
+					}
+				}
+			}
 		}
 
 		static Dictionary<IClassificationType, bool> InitFormattableClassificationType() {

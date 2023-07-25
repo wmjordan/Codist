@@ -47,11 +47,12 @@ namespace Codist.Taggers
 			}
 		}
 
+		public bool Disabled { get; set; }
 		public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 
 		public IEnumerable<ITagSpan<IClassificationTag>> GetTags(NormalizedSnapshotSpanCollection spans) {
 			var p = _Parser;
-			if (p == null) {
+			if (p == null || Disabled) {
 				return Enumerable.Empty<ITagSpan<IClassificationTag>>();
 			}
 			if (p.TryGetSemanticState(spans[0].Snapshot, out var r)) {
