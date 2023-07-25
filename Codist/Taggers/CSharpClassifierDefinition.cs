@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.Composition;
+using Microsoft.VisualStudio.Language.StandardClassification;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Utilities;
 
@@ -131,6 +132,11 @@ namespace Codist.Taggers
 		[BaseDefinition(Constants.CodeNamespaceName)]
 		[Name(Constants.CSharpNamespaceName)]
 		static ClassificationTypeDefinition Namespace;
+
+		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition(Constants.CodeIdentifier)]
+		[Name(Constants.CSharpNestedTypeName)]
+		static ClassificationTypeDefinition NestedType;
 
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CSharpDeclarationName)]

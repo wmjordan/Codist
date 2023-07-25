@@ -734,6 +734,9 @@ namespace Codist.Taggers
 						break;
 
 					case SymbolKind.NamedType:
+						if (symbol.ContainingType != null && symbol.Kind == SymbolKind.NamedType) {
+							tags.Add(__Classifications.NestedType);
+						}
 						break;
 
 					default:

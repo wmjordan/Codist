@@ -514,6 +514,25 @@ namespace Codist.Taggers
 	}
 
 	[Export(typeof(EditorFormatDefinition))]
+	[ClassificationType(ClassificationTypeNames = Constants.CSharpNestedTypeName)]
+	[Name(Constants.CSharpNestedTypeName)]
+	[UserVisible(false)]
+	[Order(After = Constants.CodeIdentifier)]
+	[Order(After = Constants.CodeClassName)]
+	[Order(After = Constants.CodeStructName)]
+	[Order(After = Constants.CodeInterfaceName)]
+	[Order(After = Constants.CodeEnumName)]
+	[Order(After = Constants.CodeRecordClassName)]
+	[Order(After = Constants.CodeRecordStructName)]
+	[Order(Before = Constants.CSharpUserSymbol)]
+	sealed class NestedTypeFormat : ClassificationFormatDefinition
+	{
+		public NestedTypeFormat() {
+			DisplayName = Constants.NameOfMe + ": nested type";
+		}
+	}
+
+	[Export(typeof(EditorFormatDefinition))]
 	[ClassificationType(ClassificationTypeNames = Constants.CSharpLabel)]
 	[Name(Constants.CSharpLabel)]
 	[UserVisible(false)]

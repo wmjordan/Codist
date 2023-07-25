@@ -34,6 +34,7 @@ namespace Codist.Taggers
 			Method = registry.GetClassificationTag(Constants.CSharpMethodName);
 			Namespace = registry.GetClassificationTag(Constants.CSharpNamespaceName);
 			NestedDeclaration = registry.GetClassificationTag(Constants.CSharpMemberDeclarationName);
+			NestedType = registry.GetClassificationTag(Constants.CSharpNestedTypeName);
 			OverrideMember = registry.GetClassificationTag(Constants.CSharpOverrideMemberName);
 			Parameter = registry.GetClassificationTag(Constants.CSharpParameterName);
 			Property = registry.GetClassificationTag(Constants.CSharpPropertyName);
@@ -104,6 +105,8 @@ namespace Codist.Taggers
 		public ClassificationTag Namespace { get; }
 
 		public ClassificationTag NestedDeclaration { get; }
+
+		public ClassificationTag NestedType { get; }
 
 		public ClassificationTag OverrideMember { get; }
 
