@@ -143,13 +143,17 @@ namespace Codist.Controls
 			get => _Content.Content;
 			set {
 				if (value is string s) {
-					_Content.Content = new ThemedTipText(s) {
-						Padding = WpfHelper.MiddleMargin,
-					}.ReferenceProperty(ForegroundProperty, CommonControlsColors.TextBoxTextBrushKey);
+				}
+				else if (value is System.Windows.Media.Visual v) {
+					_Content.Content = v;
+					return;
 				}
 				else {
-					_Content.Content = value;
+					s = value.ToString();
 				}
+				_Content.Content = new ThemedTipText(s) {
+					Padding = WpfHelper.MiddleMargin,
+				}.ReferenceProperty(ForegroundProperty, CommonControlsColors.TextBoxTextBrushKey);
 			}
 		}
 
