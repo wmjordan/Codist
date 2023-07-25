@@ -281,6 +281,7 @@ namespace Codist
 			}
 			else {
 				resource.Remove(EditorFormatDefinition.BackgroundBrushId);
+				resource.Remove(EditorFormatDefinition.BackgroundColorId);
 			}
 			return resource;
 		}
