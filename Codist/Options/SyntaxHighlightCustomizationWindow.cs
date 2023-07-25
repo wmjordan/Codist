@@ -697,6 +697,14 @@ namespace Codist.Options
 							t = item;
 							level = 2;
 						}
+						if (t != null && level < 3) {
+							var p = FormatStore.GetCachedEditorProperty(item);
+							if (p.ForegroundBrushEmpty == false
+								&& p.ForegroundBrushSame(FormatStore.EditorDefaultTextProperties.ForegroundBrush) == false) {
+								t = item;
+								level = 3;
+							}
+						}
 						continue;
 				}
 			}
