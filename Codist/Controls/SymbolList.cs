@@ -310,7 +310,7 @@ namespace Codist.Controls
 					if (item.Symbol != null) {
 						await item.RefreshSymbolAsync(ct);
 					}
-					else {
+					else if (item.SyntaxNode != null) {
 						await item.SetSymbolToSyntaxNodeAsync(ct);
 					}
 				}
