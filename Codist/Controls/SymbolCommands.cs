@@ -43,6 +43,9 @@ namespace Codist.Controls
 
 		internal static async Task FindDerivedClassesAsync(this SemanticContext context, ISymbol symbol, bool directDerive, bool orderByHierarchy) {
 			var type = (symbol as INamedTypeSymbol).OriginalDefinition;
+#if LOG || DEBUG
+			var typeName = type.GetTypeName();
+#endif
 			var classes = await SymbolFinder.FindDerivedClassesAsync(type, context.Document.Project.Solution).ConfigureAwait(false);
 			await SyncHelper.SwitchToMainThreadAsync(default);
 			if (directDerive) {
@@ -64,7 +67,18 @@ namespace Codist.Controls
 					children.Add(t);
 				}
 				else {
-
+#if LOG || DEBUG
+					var btName = bt.GetTypeName();
+					if (btName == typeName) {
+						$"Found same name type, but not directly derived for {typeName}".Log();
+						if (type.HasSource()) {
+							$"  File: {type.GetSourceReferences()[0].SyntaxTree.FilePath}".Log();
+						}
+						if (type.ContainingAssembly.Equals(bt.ContainingAssembly) == false) {
+							$"  Assembly: {bt.ContainingAssembly?.ToDisplayString()}".Log();
+						}
+					}
+#endif
 					hierarchies.Add(bt, new List<INamedTypeSymbol> { t });
 				}
 			}
