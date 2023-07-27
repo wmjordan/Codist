@@ -4,6 +4,31 @@ using Microsoft.VisualStudio.Text.Tagging;
 
 namespace Codist.Taggers
 {
+	sealed class GeneralClassifications
+	{
+		public static readonly GeneralClassifications Instance = new GeneralClassifications(ServicesHelper.Instance.ClassificationTypeRegistry);
+
+		GeneralClassifications(IClassificationTypeRegistryService registry) {
+			BranchingKeyword = registry.GetClassificationTag(Constants.CSharpBranchingKeyword);
+			ControlFlowKeyword = registry.GetClassificationTag(Constants.CSharpControlFlowKeyword);
+			Identifier = registry.GetClassificationTag(Constants.CodeIdentifier);
+			LoopKeyword = registry.GetClassificationTag(Constants.CSharpLoopKeyword);
+			TypeCastKeyword = registry.GetClassificationTag(Constants.CSharpTypeCastKeyword);
+			Punctuation = registry.GetClassificationTag(Constants.CodePunctuation);
+			Keyword = registry.GetClassificationTag(Constants.CodeKeyword);
+			Bold = registry.GetClassificationTag(Constants.CodeBold);
+		}
+
+		public ClassificationTag BranchingKeyword { get; }
+		public ClassificationTag ControlFlowKeyword { get; }
+		public ClassificationTag Identifier { get; }
+		public ClassificationTag LoopKeyword { get; }
+		public ClassificationTag TypeCastKeyword { get; }
+		public ClassificationTag Keyword { get; }
+		public ClassificationTag Punctuation { get; }
+		public ClassificationTag Bold { get; }
+	}
+
 	sealed class CSharpClassifications
 	{
 		public static readonly CSharpClassifications Instance = new CSharpClassifications(ServicesHelper.Instance.ClassificationTypeRegistry);
@@ -142,31 +167,6 @@ namespace Codist.Taggers
 		public ClassificationTag VolatileField { get; }
 
 		public ClassificationTag XmlDoc { get; }
-	}
-
-	sealed class GeneralClassifications
-	{
-		public static readonly GeneralClassifications Instance = new GeneralClassifications(ServicesHelper.Instance.ClassificationTypeRegistry);
-
-		GeneralClassifications(IClassificationTypeRegistryService registry) {
-			BranchingKeyword = registry.GetClassificationTag(Constants.CSharpBranchingKeyword);
-			ControlFlowKeyword = registry.GetClassificationTag(Constants.CSharpControlFlowKeyword);
-			Identifier = registry.GetClassificationTag(Constants.CodeIdentifier);
-			LoopKeyword = registry.GetClassificationTag(Constants.CSharpLoopKeyword);
-			TypeCastKeyword = registry.GetClassificationTag(Constants.CSharpTypeCastKeyword);
-			Punctuation = registry.GetClassificationTag(Constants.CodePunctuation);
-			Keyword = registry.GetClassificationTag(Constants.CodeKeyword);
-			Bold = registry.GetClassificationTag(Constants.CodeBold);
-		}
-
-		public ClassificationTag BranchingKeyword { get; }
-		public ClassificationTag ControlFlowKeyword { get; }
-		public ClassificationTag Identifier { get; }
-		public ClassificationTag LoopKeyword { get; }
-		public ClassificationTag TypeCastKeyword { get; }
-		public ClassificationTag Keyword { get; }
-		public ClassificationTag Punctuation { get; }
-		public ClassificationTag Bold { get; }
 	}
 
 	sealed class HighlightClassifications
