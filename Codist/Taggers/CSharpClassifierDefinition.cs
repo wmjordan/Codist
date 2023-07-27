@@ -216,6 +216,11 @@ namespace Codist.Taggers
 		static ClassificationTypeDefinition VirtualMember;
 
 		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition(Constants.CodeOperator)]
+		[Name(Constants.CSharpVariableCapturedExpression)]
+		static ClassificationTypeDefinition VariableCapturedExpression;
+
+		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CSharpFieldName)]
 		[Name(Constants.CSharpVolatileFieldName)]
 		static ClassificationTypeDefinition VolatileField;

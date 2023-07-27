@@ -476,7 +476,7 @@ namespace Codist.Taggers
 						if (ss != null) {
 							var df = semanticModel.AnalyzeDataFlow(ss);
 							if (df.ReadInside.Any(i => (i as ILocalSymbol)?.IsConst != true && df.VariablesDeclared.Contains(i) == false)) {
-								return CreateClassificationSpan(snapshot, itemSpan, TransientKeywordTagHolder.Bold.Resource);
+								return CreateClassificationSpan(snapshot, itemSpan, CSharpClassifications.Instance.VariableCapturedExpression);
 							}
 						}
 					}

@@ -165,6 +165,7 @@ namespace Codist
 		public const string CSharpSealedMemberName = "C#: Sealed class or member";
 		public const string CSharpPrivateMemberName = "C#: Private member";
 		public const string CSharpNestedTypeName = "C#: Nested type member";
+		public const string CSharpVariableCapturedExpression = "C#: Variable captured expression";
 		public const string CSharpAttributeName = "C#: Attribute name";
 		public const string CSharpAttributeNotation = "C#: Attribute notation";
 		public const string CSharpLabel = "C#: Label";
@@ -640,6 +641,10 @@ namespace Codist
 		[Description("Declaration of local function, inheriting from method name")]
 		LocalFunctionDeclaration,
 		[Category(Constants.SyntaxCategory.Declaration)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpVariableCapturedExpression)]
+		[Description("Declaration of expression which captures external variable")]
+		VariableCapturedExpression,
+		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpDeclarationBrace)]
 		[BaseDefinition(Constants.CodePunctuation)]
 		[Description("Braces {} for declaration, inheriting from Punctuation")]
@@ -697,6 +702,10 @@ namespace Codist
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpSealedMemberName)]
 		[Description("Name of sealed class or sealed member")]
 		SealedClassName,
+		[Category(Constants.SyntaxCategory.TypeDefinition)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpNestedTypeName)]
+		[Description("Name of nested type")]
+		NestedType,
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpReadOnlyStructName)]
 		[BaseDefinition(Constants.CodeStructName)]

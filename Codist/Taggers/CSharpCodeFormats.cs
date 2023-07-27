@@ -533,6 +533,21 @@ namespace Codist.Taggers
 	}
 
 	[Export(typeof(EditorFormatDefinition))]
+	[ClassificationType(ClassificationTypeNames = Constants.CSharpVariableCapturedExpression)]
+	[Name(Constants.CSharpVariableCapturedExpression)]
+	[UserVisible(false)]
+	[Order(After = Constants.CodeOperator)]
+	[Order(After = Constants.CSharpLocalFunctionDeclarationName)]
+	[Order(Before = Constants.CSharpUserSymbol)]
+	sealed class VariableCapturedExpressionFormat : ClassificationFormatDefinition
+	{
+		public VariableCapturedExpressionFormat() {
+			DisplayName = Constants.NameOfMe + ": variable captured";
+			IsBold = true;
+		}
+	}
+
+	[Export(typeof(EditorFormatDefinition))]
 	[ClassificationType(ClassificationTypeNames = Constants.CSharpLabel)]
 	[Name(Constants.CSharpLabel)]
 	[UserVisible(false)]

@@ -47,6 +47,7 @@ namespace Codist.Taggers
 			StaticMember = registry.GetClassificationTag(Constants.CSharpStaticMemberName);
 			StructName = registry.GetClassificationTag(Constants.CodeStructName);
 			TypeParameter = registry.GetClassificationTag(Constants.CSharpTypeParameterName);
+			VariableCapturedExpression = registry.GetClassificationTag(Constants.CSharpVariableCapturedExpression);
 			VirtualMember = registry.GetClassificationTag(Constants.CSharpVirtualMemberName);
 			VolatileField = registry.GetClassificationTag(Constants.CSharpVolatileFieldName);
 			XmlDoc = registry.GetClassificationTag(Constants.CSharpXmlDoc);
@@ -133,6 +134,8 @@ namespace Codist.Taggers
 		public ClassificationTag TypeParameter { get; }
 
 		public ClassificationTag UserSymbol { get; }
+
+		public ClassificationTag VariableCapturedExpression { get; }
 
 		public ClassificationTag VirtualMember { get; }
 
