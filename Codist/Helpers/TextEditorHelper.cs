@@ -234,118 +234,47 @@ namespace Codist
 			return resource.GetColor(EditorFormatDefinition.BackgroundColorId);
 		}
 		public static ResourceDictionary SetColor(this ResourceDictionary resource, WpfColor color) {
-			if (color.A != 0) {
-				resource[EditorFormatDefinition.ForegroundColorId] = color;
-			}
-			else {
-				resource.Remove(EditorFormatDefinition.ForegroundColorId);
-			}
+			resource.SetColor(EditorFormatDefinition.ForegroundColorId, color);
 			return resource;
 		}
 		public static ResourceDictionary SetBackgroundColor(this ResourceDictionary resource, WpfColor color) {
-			if (color.A != 0) {
-				resource[EditorFormatDefinition.BackgroundColorId] = color;
-			}
-			else {
-				resource.Remove(EditorFormatDefinition.BackgroundColorId);
-			}
+			resource.SetColor(EditorFormatDefinition.BackgroundColorId, color);
 			return resource;
 		}
 		public static ResourceDictionary SetBrush(this ResourceDictionary resource, WpfBrush brush) {
-			if (brush != null) {
-				brush.Freeze();
-				resource[EditorFormatDefinition.ForegroundBrushId] = brush;
-				if (brush is SolidColorBrush c) {
-					resource[EditorFormatDefinition.ForegroundColorId] = c.Color;
-				}
-				else {
-					resource.Remove(EditorFormatDefinition.ForegroundColorId);
-				}
-			}
-			else {
-				resource.Remove(EditorFormatDefinition.ForegroundColorId);
-				resource.Remove(EditorFormatDefinition.ForegroundBrushId);
-			}
+			resource.SetBrush(EditorFormatDefinition.ForegroundBrushId, EditorFormatDefinition.ForegroundColorId, brush);
 			return resource;
 		}
 		public static ResourceDictionary SetBackgroundBrush(this ResourceDictionary resource, WpfBrush brush) {
-			if (brush != null) {
-				brush.Freeze();
-				resource[EditorFormatDefinition.BackgroundBrushId] = brush;
-				if (brush is SolidColorBrush c) {
-					resource[EditorFormatDefinition.BackgroundColorId] = c.Color;
-				}
-				else {
-					resource.Remove(EditorFormatDefinition.BackgroundColorId);
-				}
-			}
-			else {
-				resource.Remove(EditorFormatDefinition.BackgroundBrushId);
-				resource.Remove(EditorFormatDefinition.BackgroundColorId);
-			}
+			resource.SetBrush(EditorFormatDefinition.BackgroundBrushId, EditorFormatDefinition.BackgroundColorId, brush);
 			return resource;
 		}
 		public static ResourceDictionary SetBold(this ResourceDictionary resource, bool? bold) {
-			if (bold != null) {
-				resource[ClassificationFormatDefinition.IsBoldId] = bold.Value;
-			}
-			else {
-				resource.Remove(ClassificationFormatDefinition.IsBoldId);
-			}
+			resource.SetValue(ClassificationFormatDefinition.IsBoldId, bold);
 			return resource;
 		}
 		public static ResourceDictionary SetItalic(this ResourceDictionary resource, bool? italic) {
-			if (italic != null) {
-				resource[ClassificationFormatDefinition.IsItalicId] = italic.Value;
-			}
-			else {
-				resource.Remove(ClassificationFormatDefinition.IsItalicId);
-			}
+			resource.SetValue(ClassificationFormatDefinition.IsItalicId, italic);
 			return resource;
 		}
 		public static ResourceDictionary SetOpacity(this ResourceDictionary resource, double opacity) {
-			if (opacity != 0) {
-				resource[ClassificationFormatDefinition.ForegroundOpacityId] = opacity;
-			}
-			else {
-				resource.Remove(ClassificationFormatDefinition.ForegroundOpacityId);
-			}
+			resource.SetValue(ClassificationFormatDefinition.ForegroundOpacityId, opacity);
 			return resource;
 		}
-		public static ResourceDictionary SetBackgroundOpacity(this ResourceDictionary resource, double? opacity) {
-			if (opacity != null) {
-				resource[ClassificationFormatDefinition.BackgroundOpacityId] = opacity.Value;
-			}
-			else {
-				resource.Remove(ClassificationFormatDefinition.BackgroundOpacityId);
-			}
+		public static ResourceDictionary SetBackgroundOpacity(this ResourceDictionary resource, double opacity) {
+			resource.SetValue(ClassificationFormatDefinition.BackgroundOpacityId, opacity);
 			return resource;
 		}
 		public static ResourceDictionary SetFontSize(this ResourceDictionary resource, double? fontSize) {
-			if (fontSize != null) {
-				resource[ClassificationFormatDefinition.FontRenderingSizeId] = fontSize.Value;
-			}
-			else {
-				resource.Remove(ClassificationFormatDefinition.FontRenderingSizeId);
-			}
+			resource.SetValue(ClassificationFormatDefinition.FontRenderingSizeId, fontSize);
 			return resource;
 		}
 		public static ResourceDictionary SetTypeface(this ResourceDictionary resource, Typeface typeface) {
-			if (typeface != null) {
-				resource[ClassificationFormatDefinition.TypefaceId] = typeface;
-			}
-			else {
-				resource.Remove(ClassificationFormatDefinition.TypefaceId);
-			}
+			resource.SetValue(ClassificationFormatDefinition.TypefaceId, typeface);
 			return resource;
 		}
 		public static ResourceDictionary SetTextDecorations(this ResourceDictionary resource, TextDecorationCollection decorations) {
-			if (decorations != null) {
-				resource[ClassificationFormatDefinition.TextDecorationsId] = decorations;
-			}
-			else {
-				resource.Remove(ClassificationFormatDefinition.TextDecorationsId);
-			}
+			resource.SetValue(ClassificationFormatDefinition.TextDecorationsId, decorations);
 			return resource;
 		}
 		public static void Remove(this IEditorFormatMap map, string formatName, string key) {

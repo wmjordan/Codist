@@ -7,12 +7,13 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using CLR;
+using Screen = System.Windows.Forms.Screen;
 using VisualTreeHelper = System.Windows.Media.VisualTreeHelper;
 using WpfBrush = System.Windows.Media.Brush;
 using WpfBrushes = System.Windows.Media.Brushes;
 using WpfColor = System.Windows.Media.Color;
 using WpfText = System.Windows.Media.FormattedText;
-using Screen = System.Windows.Forms.Screen;
 
 namespace Codist
 {
@@ -649,6 +650,47 @@ namespace Codist
 			return (items?.Contains(key) == true && items[key] is TItem item)
 				? (TItem?)item
 				: null;
+		}
+		public static void SetBrush(this ResourceDictionary resource, object brushKey, object colorKey, WpfBrush brush) {
+			if (brush != null) {
+				brush.Freeze();
+				resource[brushKey] = brush;
+				if (brush is SolidColorBrush c) {
+					resource[colorKey] = c.Color;
+				}
+				else {
+					resource.Remove(colorKey);
+				}
+			}
+			else {
+				resource.Remove(colorKey);
+				resource.Remove(brushKey);
+			}
+		}
+		public static void SetColor(this ResourceDictionary resource, object key, WpfColor color) {
+			if (color.A != 0) {
+				resource[key] = color;
+			}
+			else {
+				resource.Remove(key);
+			}
+		}
+		public static void SetValue<TStruct>(this ResourceDictionary resource, object key, TStruct? value)
+			where TStruct : struct {
+			if (value != null) {
+				resource[key] = value.Value;
+			}
+			else {
+				resource.Remove(key);
+			}
+		}
+		public static void SetValue<TValue>(this ResourceDictionary resource, object key, TValue value) {
+			if (Op.IsTrue(value)) {
+				resource[key] = value;
+			}
+			else {
+				resource.Remove(key);
+			}
 		}
 
 		public static TElement NullIfMouseOver<TElement>(this TElement uiElement)
