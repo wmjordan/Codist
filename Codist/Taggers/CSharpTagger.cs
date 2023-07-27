@@ -155,7 +155,6 @@ namespace Codist.Taggers
 							continue;
 						}
 						if (ct == Constants.CodeIdentifier
-							//|| ct == Constants.CodeStaticSymbol
 							|| ct.EndsWith("name", StringComparison.Ordinal)) {
 							textSpan = item.TextSpan;
 							node = compilationUnit.FindNode(textSpan, true, true);
@@ -175,7 +174,6 @@ namespace Codist.Taggers
 				}
 				switch (spanNode.Kind()) {
 					case SyntaxKind.AttributeArgument:
-					//case SyntaxKind.AttributeList:
 					case SyntaxKind.AttributeArgumentList:
 						return CreateClassificationSpan(snapshot, textSpan, __Classifications.AttributeNotation);
 				}
