@@ -4,11 +4,11 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using CLR;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.FindSymbols;
-using CLR;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.FindSymbols;
 
 namespace Codist
 {
@@ -547,6 +547,27 @@ namespace Codist
 				NEXT:;
 				}
 			}
+		}
+
+		/// <summary>Navigates upward through ancestral axis and find out the first node reflecting the usage.</summary>
+		public static SyntaxNode GetNodePurpose(this SyntaxNode node) {
+			NameSyntax originName;
+			if (node.IsAnyKind(SyntaxKind.IdentifierName, SyntaxKind.GenericName)) {
+				originName = node as NameSyntax;
+				node = node.Parent;
+			}
+			else {
+				originName = null;
+			}
+			var n = node;
+			while (n.IsAnyKind(SyntaxKind.QualifiedName, SyntaxKind.SimpleMemberAccessExpression, SyntaxKind.PointerMemberAccessExpression, SyntaxKind.MemberBindingExpression)) {
+				if (n is MemberAccessExpressionSyntax ma && ma.Name != originName) {
+					return node;
+				}
+				node = n;
+				n = n.Parent;
+			}
+			return n;
 		}
 
 		public static SymbolUsageKind GetUsageKind(SymbolUsageKind possibleUsage, SyntaxNode node) {

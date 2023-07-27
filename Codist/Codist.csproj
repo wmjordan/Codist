@@ -139,6 +139,7 @@
     <Compile Include="Helpers\FileHelper.cs" />
     <Compile Include="Helpers\InstalledFont.cs" />
     <Compile Include="Helpers\LogHelper.cs" />
+    <Compile Include="Semantics\CodeAnalysisHelper.Node.cs" />
     <Compile Include="Semantics\ITextBufferParser.cs" />
     <Compile Include="Semantics\SelectedSyntax.cs" />
     <Compile Include="Semantics\SemanticState.cs" />
