@@ -48,9 +48,12 @@ namespace Codist.Display
 				: g.GetFirstVisualChild<FrameworkElement>(i => i.Name == boxName)
 					?.GetParent<ContentPresenter>(i => i.Name == "DataTemplatePresenter");
 			if (t != null) {
-				t.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
+				t.ToggleVisibility(show);
 			}
-			else {
+			else if (element != DisplayOptimizations.HideSearchBox
+				|| g.GetFirstVisualChild<UserControl>(i => i.GetType().Name == "PackageAllInOneSearchButtonPresenter")
+					?.GetParent<ContentPresenter>(i => i.Name == "DataTemplatePresenter")
+					?.ToggleVisibility(show) == null) {
 				__LayoutElementNotFound = true;
 			}
 		}
