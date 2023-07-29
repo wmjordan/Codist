@@ -87,6 +87,7 @@
     <Compile Include="AutoBuildVersion\BuildSetting.cs" />
     <Compile Include="AutoBuildVersion\VersionRewriteMode.cs" />
     <Compile Include="AutoBuildVersion\VersionSetting.cs" />
+    <Compile Include="CodeStyleTypes.cs" />
     <Compile Include="Commands\AutoBuildVersionWindow.cs" />
     <Compile Include="Commands\AutoSurroundSelectionCommand.cs" />
     <Compile Include="Commands\OpenOutputFolderCommand.cs" />
