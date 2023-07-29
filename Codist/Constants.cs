@@ -309,75 +309,99 @@ namespace Codist
 
 	enum CommentStyleTypes
 	{
+		[Inheritance]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeComment)]
 		Default,
 		[Category(Constants.SyntaxCategory.Task)]
+		[BaseDefinition(Constants.CodeComment)]
 		[ClassificationType(ClassificationTypeNames = Constants.EmphasisComment)]
 		Emphasis,
 		[Category(Constants.SyntaxCategory.Task)]
+		[BaseDefinition(Constants.CodeComment)]
 		[ClassificationType(ClassificationTypeNames = Constants.QuestionComment)]
 		Question,
 		[Category(Constants.SyntaxCategory.Task)]
+		[BaseDefinition(Constants.CodeComment)]
 		[ClassificationType(ClassificationTypeNames = Constants.ExclamationComment)]
 		Exclamation,
 		[Category(Constants.SyntaxCategory.Task)]
+		[BaseDefinition(Constants.CodeComment)]
 		[ClassificationType(ClassificationTypeNames = Constants.DeletionComment)]
 		Deletion,
 		[Category(Constants.SyntaxCategory.Task)]
+		[BaseDefinition(Constants.CodeComment)]
 		[ClassificationType(ClassificationTypeNames = Constants.TodoComment)]
 		ToDo,
 		[Category(Constants.SyntaxCategory.Task)]
+		[BaseDefinition(Constants.CodeComment)]
 		[ClassificationType(ClassificationTypeNames = Constants.NoteComment)]
 		Note,
 		[Category(Constants.SyntaxCategory.Task)]
+		[BaseDefinition(Constants.CodeComment)]
 		[ClassificationType(ClassificationTypeNames = Constants.HackComment)]
 		Hack,
 		[Category(Constants.SyntaxCategory.Task)]
+		[BaseDefinition(Constants.CodeComment)]
 		[ClassificationType(ClassificationTypeNames = Constants.UndoneComment)]
 		Undone,
 		[Category(Constants.SyntaxCategory.Heading)]
+		[BaseDefinition(Constants.CodeComment)]
 		[ClassificationType(ClassificationTypeNames = Constants.Heading1Comment)]
 		Heading1,
 		[Category(Constants.SyntaxCategory.Heading)]
+		[BaseDefinition(Constants.CodeComment)]
 		[ClassificationType(ClassificationTypeNames = Constants.Heading2Comment)]
 		Heading2,
 		[Category(Constants.SyntaxCategory.Heading)]
+		[BaseDefinition(Constants.CodeComment)]
 		[ClassificationType(ClassificationTypeNames = Constants.Heading3Comment)]
 		Heading3,
 		[Category(Constants.SyntaxCategory.Heading)]
+		[BaseDefinition(Constants.CodeComment)]
 		[ClassificationType(ClassificationTypeNames = Constants.Heading4Comment)]
 		Heading4,
 		[Category(Constants.SyntaxCategory.Heading)]
+		[BaseDefinition(Constants.CodeComment)]
 		[ClassificationType(ClassificationTypeNames = Constants.Heading5Comment)]
 		Heading5,
 		[Category(Constants.SyntaxCategory.Heading)]
+		[BaseDefinition(Constants.CodeComment)]
 		[ClassificationType(ClassificationTypeNames = Constants.Heading6Comment)]
 		Heading6,
 		[Category(Constants.SyntaxCategory.GeneralTask)]
+		[BaseDefinition(Constants.CodeComment)]
 		[ClassificationType(ClassificationTypeNames = Constants.Task1Comment)]
 		Task1,
 		[Category(Constants.SyntaxCategory.GeneralTask)]
+		[BaseDefinition(Constants.CodeComment)]
 		[ClassificationType(ClassificationTypeNames = Constants.Task2Comment)]
 		Task2,
 		[Category(Constants.SyntaxCategory.GeneralTask)]
+		[BaseDefinition(Constants.CodeComment)]
 		[ClassificationType(ClassificationTypeNames = Constants.Task3Comment)]
 		Task3,
 		[Category(Constants.SyntaxCategory.GeneralTask)]
+		[BaseDefinition(Constants.CodeComment)]
 		[ClassificationType(ClassificationTypeNames = Constants.Task4Comment)]
 		Task4,
 		[Category(Constants.SyntaxCategory.GeneralTask)]
+		[BaseDefinition(Constants.CodeComment)]
 		[ClassificationType(ClassificationTypeNames = Constants.Task5Comment)]
 		Task5,
 		[Category(Constants.SyntaxCategory.GeneralTask)]
+		[BaseDefinition(Constants.CodeComment)]
 		[ClassificationType(ClassificationTypeNames = Constants.Task6Comment)]
 		Task6,
 		[Category(Constants.SyntaxCategory.GeneralTask)]
+		[BaseDefinition(Constants.CodeComment)]
 		[ClassificationType(ClassificationTypeNames = Constants.Task7Comment)]
 		Task7,
 		[Category(Constants.SyntaxCategory.GeneralTask)]
+		[BaseDefinition(Constants.CodeComment)]
 		[ClassificationType(ClassificationTypeNames = Constants.Task8Comment)]
 		Task8,
 		[Category(Constants.SyntaxCategory.GeneralTask)]
+		[BaseDefinition(Constants.CodeComment)]
 		[ClassificationType(ClassificationTypeNames = Constants.Task9Comment)]
 		Task9,
 	}
@@ -601,6 +625,7 @@ namespace Codist
 		[Category(Constants.SyntaxCategory.Keyword)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpControlFlowKeyword)]
 		[BaseDefinition(Constants.CodeKeyword)]
+		[BaseDefinition(Constants.CodeKeywordControl)]
 		[Description("Keyword: break, continue, yield, return, throw, inheriting from Keyword")]
 		BreakAndReturnKeyword,
 		[Category(Constants.SyntaxCategory.Keyword)]
@@ -616,6 +641,7 @@ namespace Codist
 		[Category(Constants.SyntaxCategory.Keyword)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpLoopKeyword)]
 		[BaseDefinition(Constants.CodeKeyword)]
+		[BaseDefinition(Constants.CodeKeywordControl)]
 		[Description("Keyword: for, foreach in, do, while, inheriting from Keyword")]
 		LoopKeyword,
 		[Category(Constants.SyntaxCategory.Keyword)]
@@ -634,14 +660,20 @@ namespace Codist
 		Declaration,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpMemberDeclarationName)]
+		[BaseDefinition(Constants.CSharpDeclarationName)]
 		[Description("Declaration of type member: property, method, event, delegate, nested type, etc. (excluding fields), inheriting from Declaration")]
 		MemberDeclaration,
+		[Category(Constants.SyntaxCategory.Declaration)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpAliasNamespaceName)]
+		[Description("Declaration of alias namespace")]
+		AliasNamespace,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpLocalFunctionDeclarationName)]
 		[Description("Declaration of local function, inheriting from method name")]
 		LocalFunctionDeclaration,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpVariableCapturedExpression)]
+		[BaseDefinition(Constants.CodeOperator)]
 		[Description("Declaration of expression which captures external variable")]
 		VariableCapturedExpression,
 		[Category(Constants.SyntaxCategory.Declaration)]
@@ -651,35 +683,44 @@ namespace Codist
 		DeclarationBrace,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpStaticMemberName)]
+		[BaseDefinition(Constants.CodeFormalLanguage)]
 		[BaseDefinition(Constants.CodeStaticSymbol)]
 		[Description("Name of static member, inheriting from static symbol")]
 		StaticMemberName,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpOverrideMemberName)]
+		[BaseDefinition(Constants.CodeFormalLanguage)]
 		[Description("Name of overriding member, inheriting from Identifier")]
 		OverrideMemberName,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpAbstractMemberName)]
+		[BaseDefinition(Constants.CodeFormalLanguage)]
 		[Description("Name of abstract member, inheriting from Identifier")]
 		AbstractMemberName,
 		[Category(Constants.SyntaxCategory.Declaration)]
+		[BaseDefinition(Constants.CodeFormalLanguage)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpVirtualMemberName)]
 		[Description("Name of virtual member, inheriting from Identifier")]
 		VirtualMemberName,
 		[Category(Constants.SyntaxCategory.Declaration)]
+		[BaseDefinition(Constants.CodeIdentifier)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpPrivateMemberName)]
 		[Description("Name of private member, inheriting from Identifier")]
 		PrivateMemberName,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpLocalDeclarationName)]
+		[BaseDefinition(Constants.CSharpLocalVariableName)]
 		[Description("Declaration of local variable")]
 		LocalDeclaration,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpLocalVariableName)]
+		[BaseDefinition(Constants.CodeIdentifier)]
+		[BaseDefinition(Constants.CodeLocalName)]
 		[Description("Name of local variable, inheriting from Identifier")]
 		LocalVariableName,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpLabel)]
+		[BaseDefinition(Constants.CodeIdentifier)]
 		[BaseDefinition(Constants.CodeLabelName)]
 		[Description("Name of label, inheriting from Identifier")]
 		Label,
@@ -704,6 +745,7 @@ namespace Codist
 		SealedClassName,
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpNestedTypeName)]
+		[BaseDefinition(Constants.CodeIdentifier)]
 		[Description("Name of nested type")]
 		NestedType,
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
@@ -712,12 +754,19 @@ namespace Codist
 		[Description("Name of readonly struct")]
 		ReadOnlyStructName,
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpRefStructName)]
+		[BaseDefinition(Constants.CodeStructName)]
+		[Description("Name of ref struct")]
+		RefStructName,
+		[Category(Constants.SyntaxCategory.TypeDefinition)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpEventName)]
+		[BaseDefinition(Constants.CodeIdentifier)]
 		[BaseDefinition(Constants.CodeEventName)]
 		[Description("Name of event, inheriting from Identifier")]
 		EventName,
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpTypeParameterName)]
+		[BaseDefinition(Constants.CodeIdentifier)]
 		[BaseDefinition(Constants.CodeTypeParameterName)]
 		[Description("Name of type parameter, inheriting from Identifier")]
 		TypeParameterName,
@@ -731,6 +780,7 @@ namespace Codist
 		ConstructorMethodName,
 		[Category(Constants.SyntaxCategory.Member)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpFieldName)]
+		[BaseDefinition(Constants.CodeIdentifier)]
 		[BaseDefinition(Constants.CodeFieldName)]
 		[Description("Name of field, inheriting from Identifier")]
 		FieldName,
@@ -759,6 +809,7 @@ namespace Codist
 		EnumFieldName,
 		[Category(Constants.SyntaxCategory.Member)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpPropertyName)]
+		[BaseDefinition(Constants.CodeIdentifier)]
 		[BaseDefinition(Constants.CodePropertyName)]
 		[Description("Name of property, inheriting from Identifier")]
 		PropertyName,
@@ -781,6 +832,7 @@ namespace Codist
 		ExternMethodName,
 		[Category(Constants.SyntaxCategory.Member)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpParameterName)]
+		[BaseDefinition(Constants.CodeIdentifier)]
 		[BaseDefinition(Constants.CodeParameterName)]
 		[Description("Name of parameter, inheriting from Identifier")]
 		ParameterName,
@@ -926,23 +978,36 @@ namespace Codist
 		Heading6,
 		[Category(Constants.SyntaxCategory.Style)]
 		[ClassificationType(ClassificationTypeNames = Constants.MarkdownVsBold)]
+		[Inheritance]
 		Bold,
 		[Category(Constants.SyntaxCategory.Style)]
 		[ClassificationType(ClassificationTypeNames = Constants.MarkdownVsItalic)]
+		[Inheritance]
 		Italic,
 		[Category(Constants.SyntaxCategory.Style)]
 		[ClassificationType(ClassificationTypeNames = Constants.MarkdownVsStrikethrough)]
+		[Inheritance]
 		Strikethrough,
 		[Category(Constants.SyntaxCategory.Style)]
 		[ClassificationType(ClassificationTypeNames = Constants.MarkdownVsSuperscript)]
+		[Inheritance]
 		Superscript,
 		[Category(Constants.SyntaxCategory.Style)]
 		[ClassificationType(ClassificationTypeNames = Constants.MarkdownVsSubscript)]
+		[Inheritance]
 		Subscript,
 		[Category(Constants.SyntaxCategory.Style)]
 		[ClassificationType(ClassificationTypeNames = Constants.MarkdownVsUrl)]
+		[Inheritance]
 		Url,
 	}
+
+	enum PrivateStyleTypes
+	{
+		[ClassificationType(ClassificationTypeNames = Constants.CodeBold)]
+		Bold
+	}
+
 	enum MarkerStyleTypes
 	{
 		None,

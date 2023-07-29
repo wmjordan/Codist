@@ -116,7 +116,10 @@ namespace Codist
 
 		#region Classification
 		public static ClassificationTag GetClassificationTag(this IClassificationTypeRegistryService registry, string classificationType) {
-			return new ClassificationTag(registry.GetClassificationType(classificationType));
+			var t = registry.GetClassificationType(classificationType);
+			return t == null
+				? throw new KeyNotFoundException($"Missing ClassificationType ({classificationType})")
+				: new ClassificationTag(t);
 		}
 
 		public static IClassificationType CreateClassificationCategory(string classificationType) {
