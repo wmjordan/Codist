@@ -496,7 +496,7 @@ namespace Codist.Options
 
 		sealed class PageControl : OptionsPageContainer
 		{
-			readonly OptionBox<SmartBarOptions> _ShiftToggleDisplay, _ManualDisplaySmartBar, _DoubleIndentRefactoring;
+			readonly OptionBox<SmartBarOptions> _ShiftToggleDisplay, _ManualDisplaySmartBar, _UnderscoreBold, _UnderscoreItalic, _DoubleIndentRefactoring;
 			readonly OptionBox<SmartBarOptions>[] _Options;
 
 			public PageControl(OptionsPage page) : base(page) {
@@ -511,10 +511,16 @@ namespace Codist.Options
 
 					new TitleBox(R.OT_CSharpSmartBar),
 					_DoubleIndentRefactoring = o.CreateOptionBox(SmartBarOptions.DoubleIndentRefactoring, UpdateConfig, R.OT_DoubleIndentation)
-						.SetLazyToolTip(() => R.OT_DoubleIndentationTip)
+						.SetLazyToolTip(() => R.OT_DoubleIndentationTip),
+
+					new TitleBox(R.OT_MarkdownSmartBar),
+					_UnderscoreBold = o.CreateOptionBox(SmartBarOptions.UnderscoreBold, UpdateConfig, R.OT_BoldPreferUnderscore)
+						.SetLazyToolTip(() => R.OT_PreferUnderscoreTip),
+					_UnderscoreItalic = o.CreateOptionBox(SmartBarOptions.UnderscoreItalic, UpdateConfig, R.OT_ItalicPreferUnderscore)
+						.SetLazyToolTip(() => R.OT_PreferUnderscoreTip)
 					);
 
-				_Options = new[] { _ShiftToggleDisplay, _ManualDisplaySmartBar };
+				_Options = new[] { _ShiftToggleDisplay, _ManualDisplaySmartBar, _DoubleIndentRefactoring, _UnderscoreBold, _UnderscoreItalic };
 			}
 
 			protected override void LoadConfig(Config config) {

@@ -2742,6 +2742,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Bold style prefer __underscore__.
+        /// </summary>
+        internal static string OT_BoldPreferUnderscore {
+            get {
+                return ResourceManager.GetString("OT_BoldPreferUnderscore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to This option adds extra margin below each line in code editor.
         /// </summary>
         internal static string OT_BottomMarginTip {
@@ -3599,6 +3608,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Italic style prefer _underscore_.
+        /// </summary>
+        internal static string OT_ItalicPreferUnderscore {
+            get {
+                return ResourceManager.GetString("OT_ItalicPreferUnderscore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Provides additional shortcuts, such as safe mode, no DPI scaling, etc. to jump list of Visual Studio.
         /// </summary>
         internal static string OT_JumpListTip {
@@ -3767,6 +3785,15 @@ namespace Codist.Properties {
         internal static string OT_ManualSmartBarTip {
             get {
                 return ResourceManager.GetString("OT_ManualSmartBarTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Markdown SmartBar.
+        /// </summary>
+        internal static string OT_MarkdownSmartBar {
+            get {
+                return ResourceManager.GetString("OT_MarkdownSmartBar", resourceCulture);
             }
         }
         
@@ -4121,6 +4148,15 @@ namespace Codist.Properties {
         internal static string OT_ParameterOfMethodTip {
             get {
                 return ResourceManager.GetString("OT_ParameterOfMethodTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Insert _underscore_ pairs instead of *asterisk* pairs.
+        /// </summary>
+        internal static string OT_PreferUnderscoreTip {
+            get {
+                return ResourceManager.GetString("OT_PreferUnderscoreTip", resourceCulture);
             }
         }
         

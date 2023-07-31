@@ -24,9 +24,6 @@ namespace Codist
 			PaleDarkTheme = ThemePrefix + "PaleDark",
 			SimpleTheme = ThemePrefix + "Simple";
 
-		#if DEBUG
-		static DateTime __LastSaved, __LastLoaded;
-		#endif
 		static int __LoadingConfig;
 		static Action<Config> __Loaded;
 		static Action<ConfigUpdatedEventArgs> __Updated;
@@ -112,6 +109,7 @@ namespace Codist
 		public bool ShouldSerializeGeneralStyles() => false;
 		public bool ShouldSerializeSymbolMarkerStyles() => false;
 		#endregion
+
 		public List<SyntaxStyle> Styles { get; set; } // for serialization only
 		public List<MarkerStyle> MarkerSettings { get; } = new List<MarkerStyle>();
 		public List<SearchEngine> SearchEngines { get; } = new List<SearchEngine>();
@@ -258,9 +256,6 @@ namespace Codist
 				ResetCodeStyle(Instance.SymbolMarkerStyles, config.SymbolMarkerStyles);
 				ResetCodeStyle(Instance.MarkerSettings, config.MarkerSettings);
 				Instance.Styles = config.Styles;
-				#if DEBUG
-				__LastLoaded = DateTime.Now;
-				#endif
 				return Instance;
 			}
 			else if (styleFilter != StyleFilters.None) {
@@ -272,16 +267,10 @@ namespace Codist
 				MergeCodeStyle(Instance.SymbolMarkerStyles, config.SymbolMarkerStyles, styleFilter);
 				ResetCodeStyle(Instance.MarkerSettings, config.MarkerSettings);
 				Instance.Styles = config.Styles;
-				#if DEBUG
-				__LastLoaded = DateTime.Now;
-				#endif
 				return Instance;
 			}
 			Display.LayoutOverride.Reload(config.DisplayOptimizations);
 			Display.ResourceMonitor.Reload(config.DisplayOptimizations);
-			#if DEBUG
-			__LastLoaded = DateTime.Now;
-			#endif
 			"Config loaded".Log();
 			return config;
 		}
@@ -331,6 +320,7 @@ namespace Codist
 					Directory.CreateDirectory(d);
 				}
 				object o;
+				bool isDarkStyle = ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(Constants.CodeText).GetBackgroundColor().IsDark();
 				if (stylesOnly) {
 					o = new {
 						Version = CurrentVersion,
@@ -351,9 +341,6 @@ namespace Codist
 						Converters = { new Newtonsoft.Json.Converters.StringEnumConverter() }
 					}));
 				if (path == ConfigPath) {
-					#if DEBUG
-					__LastSaved = __LastLoaded = DateTime.Now;
-					#endif
 					"Config saved".Log();
 				}
 			}
@@ -454,9 +441,6 @@ namespace Codist
 		}
 
 		static Config GetDefaultConfig() {
-			#if DEBUG
-			__LastLoaded = DateTime.Now;
-			#endif
 			var c = new Config();
 			InitDefaultLabels(c.Labels);
 			ResetSearchEngines(c.SearchEngines);
@@ -548,19 +532,15 @@ namespace Codist
 
 		sealed class StyleConfig
 		{
-			readonly Config _Config;
+			public bool? IsDark { get; set; }
+			public List<SyntaxStyle> Styles { get; } = new List<SyntaxStyle>();
 
-			public StyleConfig(Config config) {
-				_Config = config;
+			public StyleConfig() {}
+
+			public StyleConfig(bool isDark, IEnumerable<SyntaxStyle> styles) {
+				IsDark = isDark;
+				Styles.AddRange(styles);
 			}
-
-			public List<CommentStyle> CommentStyles => GetDefinedStyles(_Config.CommentStyles);
-			public List<XmlCodeStyle> XmlCodeStyles => GetDefinedStyles(_Config.XmlCodeStyles);
-			public List<CSharpStyle> CodeStyles => GetDefinedStyles(_Config.CodeStyles);
-			public List<CppStyle> CppStyles => GetDefinedStyles(_Config.CppStyles);
-			public List<MarkdownStyle> MarkdownStyles => GetDefinedStyles(_Config.MarkdownStyles);
-			public List<CodeStyle> GeneralStyles => GetDefinedStyles(_Config.GeneralStyles);
-			public List<SymbolMarkerStyle> SymbolMarkerStyles => GetDefinedStyles(_Config.SymbolMarkerStyles);
 		}
 
 		sealed class ConfigManager
@@ -808,6 +788,8 @@ namespace Codist
 		ShiftToggleDisplay = 1 << 2,
 		ManualDisplaySmartBar = 1 << 3,
 		DoubleIndentRefactoring = 1 << 4,
+		UnderscoreBold = 1 << 5,
+		UnderscoreItalic = 1 << 6,
 		Default = ExpansionIncludeTrivia | ShiftToggleDisplay
 	}
 

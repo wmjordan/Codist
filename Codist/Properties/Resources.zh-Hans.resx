@@ -2618,4 +2618,16 @@ Ctrl: 仅直接继承的接口</value>
   <data name="OT_AutoSurround" xml:space="preserve">
     <value>自动插入配对的引号或括号以包围选中内容</value>
   </data>
+  <data name="OT_BoldPreferUnderscore" xml:space="preserve">
+    <value>粗体以 __下划线__ 标记</value>
+  </data>
+  <data name="OT_ItalicPreferUnderscore" xml:space="preserve">
+    <value>斜体以 _下划线_ 标记</value>
+  </data>
+  <data name="OT_MarkdownSmartBar" xml:space="preserve">
+    <value>Markdown 智能工具条</value>
+  </data>
+  <data name="OT_PreferUnderscoreTip" xml:space="preserve">
+    <value>插入成对的 _下划线_，而不是 *星号*</value>
+  </data>
 </root>

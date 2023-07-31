@@ -2632,4 +2632,16 @@ Ctrl: Directly inherited interfaces only</value>
   <data name="OT_AutoSurround" xml:space="preserve">
     <value>Automatically pair quotations, parentheses and braces arround selections</value>
   </data>
+  <data name="OT_BoldPreferUnderscore" xml:space="preserve">
+    <value>Bold style prefer __underscore__</value>
+  </data>
+  <data name="OT_ItalicPreferUnderscore" xml:space="preserve">
+    <value>Italic style prefer _underscore_</value>
+  </data>
+  <data name="OT_MarkdownSmartBar" xml:space="preserve">
+    <value>Markdown SmartBar</value>
+  </data>
+  <data name="OT_PreferUnderscoreTip" xml:space="preserve">
+    <value>Insert _underscore_ pairs instead of *asterisk* pairs</value>
+  </data>
 </root>
