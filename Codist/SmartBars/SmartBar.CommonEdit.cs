@@ -71,9 +71,10 @@ namespace Codist.SmartBars
 			string s = ctx.View.GetFirstSelectionText();
 			ctx.KeepToolBar(false);
 			var m = ctx.View.WrapWith(prefix, suffix);
-			if (s != null && Keyboard.Modifiers.HasAnyFlag(ModifierKeys.Control | ModifierKeys.Shift)
-				&& FindNext(ctx, s) == false) {
-				ctx.HideToolBar();
+			if (s != null && Keyboard.Modifiers.HasAnyFlag(ModifierKeys.Control | ModifierKeys.Shift)) {
+				if (FindNext(ctx, s) == false) {
+					ctx.HideToolBar();
+				}
 			}
 			else if (selectModified) {
 				ctx.View.SelectSpans(m);
