@@ -39,6 +39,7 @@ namespace Codist
 		static readonly HashSet<IWpfTextView> __WpfTextViews = new HashSet<IWpfTextView>();
 		static IWpfTextView __MouseOverDocumentView, __ActiveDocumentView, __ActiveInteractiveView;
 		static int __ActiveViewPosition;
+		static bool __ActiveViewFocused;
 
 		#region Position
 		public static SnapshotPoint GetCaretPosition(this ITextView textView) {
@@ -1092,6 +1093,9 @@ namespace Codist
 		public static IWpfTextView GetMouseOverDocumentView() {
 			return __MouseOverDocumentView;
 		}
+		public static bool ActiveViewFocused() {
+			return __ActiveViewFocused;
+		}
 		public static IWpfTextView GetActiveWpfDocumentView() {
 			return __ActiveDocumentView;
 			//ThreadHelper.ThrowIfNotOnUIThread();
@@ -1167,11 +1171,24 @@ namespace Codist
 					view.Closed += TextView_CloseView;
 					view.VisualElement.Loaded += TextView_SetActiveView;
 					view.VisualElement.MouseEnter += TextViewMouseEnter_SetActiveView;
+					view.VisualElement.GotFocus += TextView_GotFocus;
+					view.VisualElement.LostFocus += TextView_LostFocus;
 					view.GotAggregateFocus += TextView_SetActiveView;
 					if (view.Roles.Contains(PredefinedTextViewRoles.Document)) {
 						_IsDocument = true;
 						__ActiveDocumentView = view;
 						__WpfTextViews.Add(view);
+					}
+				}
+
+				void TextView_GotFocus(object sender, EventArgs e) {
+					if (sender == _View) {
+						__ActiveViewFocused = true;
+					}
+				}
+				void TextView_LostFocus(object sender, EventArgs e) {
+					if (sender == _View) {
+						__ActiveViewFocused = false;
 					}
 				}
 
@@ -1214,6 +1231,8 @@ namespace Codist
 					v.Closed -= TextView_CloseView;
 					v.VisualElement.Loaded -= TextView_SetActiveView;
 					v.VisualElement.MouseEnter -= TextViewMouseEnter_SetActiveView;
+					v.VisualElement.GotFocus -= TextView_GotFocus;
+					v.VisualElement.LostFocus -= TextView_LostFocus;
 					v.GotAggregateFocus -= TextView_SetActiveView;
 				}
 			}

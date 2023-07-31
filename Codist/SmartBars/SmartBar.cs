@@ -251,6 +251,9 @@ namespace Codist.SmartBars
 		}
 
 		void ViewKeyUp(object sender, KeyEventArgs e) {
+			if (TextEditorHelper.ActiveViewFocused()) {
+				return;
+			}
 			if (e.Key != Key.LeftShift && e.Key != Key.RightShift) {
 				_LastShiftHit = DateTime.MinValue;
 				return;
@@ -316,7 +319,8 @@ namespace Codist.SmartBars
 
 		void ViewSelectionChanged(object sender, EventArgs e) {
 			// suppress event handler if KeepToolBar
-			if (DateTime.Now < _LastExecute.AddSeconds(1) && _ToolBarTray.Visibility == Visibility.Visible) {
+			if (TextEditorHelper.ActiveViewFocused() == false
+				|| DateTime.Now < _LastExecute.AddSeconds(1) && _ToolBarTray.Visibility == Visibility.Visible) {
 				return;
 			}
 			if (_View.Selection.IsEmpty) {
