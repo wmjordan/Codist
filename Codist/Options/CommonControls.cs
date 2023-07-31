@@ -414,9 +414,9 @@ namespace Codist.Options
 			Color[] GenerateVariantPalette() {
 				var hsl = HslColor.FromColor(_ColorSelector.Color);
 				int i = 0;
-				var v = __HueValues.Length;
+				var cols = __HueValues.Length;
 				double h = hsl.Hue, s = hsl.Saturation, l = hsl.Luminosity;
-				var colors = new Color[v * 3];
+				var colors = new Color[cols * 3];
 				if (s == 0 || l.CeqAny(0, 1)) {
 					// generate gray scales
 					double cl = colors.Length;
@@ -425,20 +425,19 @@ namespace Codist.Options
 					}
 				}
 				else {
-					var d = 1d / (v + 1);
-					var n = d;
-					var hd = 120 / v;
-					var hmid = v / 2;
-					var hn = h - hd * hmid;
-					for (int j = 0; j < v; j++) {
+					double hd = 120 / cols, hmid = cols / 2, hn = h - hd * hmid; // hue variance
+					double ds = 1d / cols, sn = ds; // saturation variance
+					double dl = 1d / (cols + 1), ln = dl; // lightness variance
+					for (int j = 0; j < cols; j++) {
 						if (j == hmid) {
 							hn += hd;
 						}
-						colors[i] = ColorHelper.FromHsl(hn, s, l);
-						colors[i + v] = ColorHelper.FromHsl(h, n, l);
-						colors[i + v + v] = ColorHelper.FromHsl(h, s, 1 - n);
+						colors[i] = ColorHelper.FromHsl(hn, s, l); // hue row
+						colors[i + cols] = ColorHelper.FromHsl(h, sn, l); // saturation row
+						colors[i + cols + cols] = ColorHelper.FromHsl(h, s, 1 - ln); // lightness row
 						++i;
-						n += d;
+						sn += ds;
+						ln += dl;
 						hn += hd;
 					}
 				}
