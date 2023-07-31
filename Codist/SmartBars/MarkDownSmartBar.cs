@@ -16,14 +16,14 @@ namespace Codist.SmartBars
 
 		protected override void AddCommands() {
 			base.AddCommands();
-			AddCommand(MyToolBar, IconIds.TagBold, R.CMD_MarkBold, MakeBold);
-			AddCommand(MyToolBar, IconIds.TagItalic, R.CMD_MarkItalic, MakeItalic);
-			AddCommand(MyToolBar, IconIds.TagCode, R.CMD_MarkCode, MakeCode);
-			AddCommand(MyToolBar, IconIds.TagHyperLink, R.CMD_MarkLink, MakeUrl);
+			AddCommand(MyToolBar, IconIds.TagBold, R.CMD_MarkBold, MarkBold);
+			AddCommand(MyToolBar, IconIds.TagItalic, R.CMD_MarkItalic, MarkItalic);
+			AddCommand(MyToolBar, IconIds.TagCode, R.CMD_MarkCode, MarkCode);
+			AddCommand(MyToolBar, IconIds.TagHyperLink, R.CMD_MarkLink, MarkUrl);
 			AddCommand(MyToolBar, IconIds.TagStrikeThrough, R.CMD_MarkStrikeThrough, ctx => WrapWith(ctx, "~~", "~~", true));
 		}
 
-		void MakeBold(CommandContext ctx) {
+		void MarkBold(CommandContext ctx) {
 			if (Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.UnderscoreBold)) {
 				WrapWith(ctx, "__", "__", true);
 			}
@@ -32,7 +32,7 @@ namespace Codist.SmartBars
 			}
 		}
 
-		void MakeItalic(CommandContext ctx) {
+		void MarkItalic(CommandContext ctx) {
 			if (Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.UnderscoreItalic)) {
 				WrapWith(ctx, "_", "_", true);
 			}
@@ -41,7 +41,7 @@ namespace Codist.SmartBars
 			}
 		}
 
-		void MakeCode(CommandContext ctx) {
+		void MarkCode(CommandContext ctx) {
 			if (ctx.RightClick) {
 				WrapWith(ctx, "``", "``", true);
 			}
@@ -50,7 +50,7 @@ namespace Codist.SmartBars
 			}
 		}
 
-		void MakeUrl(CommandContext ctx) {
+		void MarkUrl(CommandContext ctx) {
 			var t = ctx.View.GetFirstSelectionText();
 			if (MaybeUrl(t)) {
 				foreach (var s in WrapWith(ctx, "[title](", ")", false)) {
