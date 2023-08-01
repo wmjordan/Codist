@@ -203,11 +203,13 @@ namespace Codist.QuickInfo
 				((TextBlock)sender).Background = Brushes.Transparent;
 			}
 
-			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
-			async void GoToSource(object sender, MouseButtonEventArgs e) {
-				var s = _symbol;
-				await _quickInfoSession.DismissAsync();
-				s.GoToDefinition();
+			void GoToSource(object sender, MouseButtonEventArgs e) {
+				try {
+					_symbol.GoToDefinition();
+				}
+				catch (Exception ex) {
+					MessageWindow.Error(ex);
+				}
 			}
 
 			void ShowToolTip(object sender, ToolTipEventArgs e) {
