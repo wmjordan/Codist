@@ -418,12 +418,12 @@ namespace Codist.QuickInfo
 					_Override.ErrorTags?.Clear();
 					MakeTextualContentSelectableWithIcon(p);
 					if (_Override.Session.Options == QuickInfoSessionOptions.TrackMouse) {
-						if (p.GetParent<FrameworkElement>(e => e.GetType().Name == "WpfToolTipControl") is ContentControl toolTip
-							&& toolTip.Content is FrameworkElement c) {
+						if (p.GetParent<FrameworkElement>(e => e.GetType().Name == "WpfToolTipControl") is ContentControl tip
+							&& tip.Content is FrameworkElement c) {
 							ThemedTipDocument locDoc = Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.SymbolLocation) && _Override.ClickAndGoSymbol != null
 								? p.GetFirstVisualChild<ThemedTipDocument>(d => d.Name == "SymbolLocation")
 								: null;
-							toolTip.Content = null;
+							tip.Content = null;
 							var s = new QuickInfoControl();
 							if (altSign != null) {
 								s.AddTopPart(altSign);
@@ -436,8 +436,8 @@ namespace Codist.QuickInfo
 							if (_Override.LimitItemSize) {
 								s.LimitSize();
 							}
-							toolTip.Content = s;
-							__QuickInfoContainer.Set(toolTip.GetParent((FrameworkElement e) => e.GetType().Name == "PopupRoot"), s);
+							tip.Content = s;
+							__QuickInfoContainer.Set(tip.GetParent((FrameworkElement e) => e.GetType().Name == "PopupRoot"), s);
 						}
 					}
 					else if (altSign != null) {

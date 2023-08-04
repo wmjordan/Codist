@@ -9,7 +9,6 @@ using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using R = Codist.Properties.Resources;
 using Task = System.Threading.Tasks.Task;
-using TH = Microsoft.VisualStudio.Shell.ThreadHelper;
 
 namespace Codist.NaviBar
 {
