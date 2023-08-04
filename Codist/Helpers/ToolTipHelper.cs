@@ -89,7 +89,7 @@ namespace Codist
 				}
 			}
 
-			ShowNumericForms(symbol, tip);
+			ShowNumericRepresentations(symbol, tip);
 			if (symbol.Kind == SymbolKind.Property
 				&& Config.Instance.SymbolToolTipOptions.MatchFlags(SymbolToolTipOptions.Colors)) {
 				ShowColorPreview(symbol, tip);
@@ -172,10 +172,10 @@ namespace Codist
 			}
 		}
 
-		static void ShowNumericForms(ISymbol symbol, ThemedToolTip tip) {
+		static void ShowNumericRepresentations(ISymbol symbol, ThemedToolTip tip) {
 			if (Config.Instance.SymbolToolTipOptions.MatchFlags(SymbolToolTipOptions.NumericValues)
 				&& symbol is IFieldSymbol f && f.IsConst) {
-				var p = ShowNumericForms(f);
+				var p = ShowNumericRepresentations(f);
 				if (p != null) {
 					tip.AddBorder().Child = p;
 				}
@@ -227,19 +227,19 @@ namespace Codist
 			return target;
 		}
 
-		internal static Grid ShowNumericForms(SyntaxNode node) {
-			return ShowNumericForms(node.GetFirstToken().Value, node.Parent.IsKind(SyntaxKind.UnaryMinusExpression) ? NumericForm.Negative : NumericForm.None);
+		internal static Grid ShowNumericRepresentations(SyntaxNode node) {
+			return ShowNumericRepresentations(node.GetFirstToken().Value, node.Parent.IsKind(SyntaxKind.UnaryMinusExpression) ? NumericForm.Negative : NumericForm.None);
 		}
 
-		internal static Grid ShowNumericForms(object value) {
-			return ShowNumericForms(value, NumericForm.None);
+		internal static Grid ShowNumericRepresentations(object value) {
+			return ShowNumericRepresentations(value, NumericForm.None);
 		}
 
-		internal static Grid ShowNumericForms(IFieldSymbol symbol) {
-			return ShowNumericForms(symbol.ConstantValue, NumericForm.None);
+		internal static Grid ShowNumericRepresentations(IFieldSymbol symbol) {
+			return ShowNumericRepresentations(symbol.ConstantValue, NumericForm.None);
 		}
 
-		static Grid ShowNumericForms(object value, NumericForm form) {
+		static Grid ShowNumericRepresentations(object value, NumericForm form) {
 			if (value == null) {
 				return null;
 			}
@@ -251,9 +251,9 @@ namespace Codist
 				case TypeCode.Double: return ShowDouble((double)value, form);
 				case TypeCode.Int16: return ShowInt16((short)value, form);
 				case TypeCode.Char: return ShowChar((char)value);
-				case TypeCode.UInt32: return ShowNumericForms((int)(uint)value, NumericForm.Unsigned);
-				case TypeCode.UInt16: return ShowNumericForms((short)(ushort)value, NumericForm.Unsigned);
-				case TypeCode.UInt64: return ShowNumericForms((long)(ulong)value, NumericForm.Unsigned);
+				case TypeCode.UInt32: return ShowNumericRepresentations((int)(uint)value, NumericForm.Unsigned);
+				case TypeCode.UInt16: return ShowNumericRepresentations((short)(ushort)value, NumericForm.Unsigned);
+				case TypeCode.UInt64: return ShowNumericRepresentations((long)(ulong)value, NumericForm.Unsigned);
 				case TypeCode.SByte: return ShowNumberAndBytes(((sbyte)value).ToString(), new byte[] { (byte)(sbyte)value });
 			}
 			return null;

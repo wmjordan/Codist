@@ -716,7 +716,7 @@ namespace Codist.QuickInfo
 			var nodeKind = node.Kind();
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.NumericValues)
 				&& nodeKind.CeqAny(SyntaxKind.NumericLiteralExpression, SyntaxKind.CharacterLiteralExpression)) {
-				infoBox = ToolTipHelper.ShowNumericForms(node);
+				infoBox = ToolTipHelper.ShowNumericRepresentations(node);
 			}
 			else if (nodeKind == SyntaxKind.SwitchStatement) {
 				var s = ((SwitchStatementSyntax)node).Sections.Count;
@@ -1096,7 +1096,7 @@ namespace Codist.QuickInfo
 				}
 			}
 			else if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.NumericValues)) {
-				var s = ToolTipHelper.ShowNumericForms(value);
+				var s = ToolTipHelper.ShowNumericRepresentations(value);
 				if (s != null) {
 					if (symbol?.ContainingType?.TypeKind == TypeKind.Enum) {
 						qiContent.ShowEnumQuickInfo(symbol.ContainingType, false);
