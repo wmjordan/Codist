@@ -482,11 +482,11 @@ namespace Codist.Taggers
 	[Name(Constants.CSharpSealedMemberName)]
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
-	[Order(After = Constants.CodeClassName)]
-	[Order(After = Constants.CodeRecordClassName)]
-	[Order(After = Constants.CodeMethodName)]
-	[Order(After = Constants.CodePropertyName)]
-	[Order(After = Constants.CodeEventName)]
+	[Order(Before = Constants.CodeClassName)]
+	[Order(Before = Constants.CodeRecordClassName)]
+	[Order(Before = Constants.CodeMethodName)]
+	[Order(Before = Constants.CodePropertyName)]
+	[Order(Before = Constants.CodeEventName)]
 	[Order(Before = Constants.CSharpUserSymbol)]
 	sealed class SealedMemberFormat : ClassificationFormatDefinition
 	{
@@ -500,11 +500,11 @@ namespace Codist.Taggers
 	[Name(Constants.CSharpPrivateMemberName)]
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
-	[Order(After = Constants.CodeClassName)]
-	[Order(After = Constants.CodeRecordClassName)]
-	[Order(After = Constants.CodeMethodName)]
-	[Order(After = Constants.CodePropertyName)]
-	[Order(After = Constants.CodeEventName)]
+	[Order(Before = Constants.CodeClassName)]
+	[Order(Before = Constants.CodeRecordClassName)]
+	[Order(Before = Constants.CodeMethodName)]
+	[Order(Before = Constants.CodePropertyName)]
+	[Order(Before = Constants.CodeEventName)]
 	[Order(Before = Constants.CSharpUserSymbol)]
 	sealed class PrivateMemberFormat : ClassificationFormatDefinition
 	{
