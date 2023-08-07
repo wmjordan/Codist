@@ -251,7 +251,7 @@ namespace Codist.SmartBars
 		}
 
 		void ViewKeyUp(object sender, KeyEventArgs e) {
-			if (TextEditorHelper.ActiveViewFocused()) {
+			if (TextEditorHelper.ActiveViewFocused() == false) {
 				return;
 			}
 			if (e.Key != Key.LeftShift && e.Key != Key.RightShift) {
