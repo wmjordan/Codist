@@ -535,6 +535,7 @@ namespace Codist.SyntaxHighlight
 					}
 					else {
 						$"[{_Category}] update theme after config change".Log();
+						DetectThemeColorCompatibilityWithBackground();
 						Apply();
 					}
 					_Context = FormatContext.None;
