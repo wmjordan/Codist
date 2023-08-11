@@ -274,7 +274,7 @@ namespace Codist.Controls
 		}
 
 		void BringToFront(object sender, MouseButtonEventArgs e) {
-			Canvas.SetZIndex(e.Source as UIElement, ++_LayerZIndex);
+			Panel.SetZIndex(e.Source as UIElement, ++_LayerZIndex);
 		}
 
 		void ReleaseQuickInfo(object sender, MouseEventArgs e) {
