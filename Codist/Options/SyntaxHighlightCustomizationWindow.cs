@@ -1336,7 +1336,12 @@ namespace Codist.Options
 				};
 				Background = new SolidColorBrush(cache.ViewBackground);
 				SetStyle(FormatStore.GetOrCreateStyle(ct, cache.ClassificationFormatMap));
-				PreviewLabelStyle(_Preview, t);
+				try {
+					PreviewLabelStyle(_Preview, t);
+				}
+				catch (Exception ex) {
+					MessageWindow.Error(ex, "Set Preview style error for " + _Preview.Text);
+				}
 				this.ReferenceStyle(VsResourceKeys.ButtonStyleKey);
 				Click += clickHandler;
 			}
@@ -1393,7 +1398,7 @@ namespace Codist.Options
 					}
 				}
 				if (format.FontRenderingEmSizeEmpty == false) {
-					preview.FontSize = format.FontRenderingEmSize;
+					preview.FontSize = Math.Max(1, format.FontRenderingEmSize);
 				}
 				if (format.TextDecorationsEmpty == false) {
 					preview.TextDecorations = format.TextDecorations;
