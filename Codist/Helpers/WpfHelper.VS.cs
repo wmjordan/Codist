@@ -308,7 +308,12 @@ namespace Codist
 					FindMembersForNamespace(_Symbol);
 				}
 				else {
-					_Symbol.GoToDefinition();
+					try {
+						_Symbol.GoToDefinition();
+					}
+					catch (Exception ex) {
+						MessageWindow.Error(ex);
+					}
 				}
 				QuickInfo.QuickInfoOverride.DismissQuickInfo(this);
 				e.Handled = true;
