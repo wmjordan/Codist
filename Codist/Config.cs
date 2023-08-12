@@ -454,7 +454,9 @@ namespace Codist
 			c.SymbolMarkerStyles.AddRange(GetDefaultCodeStyles<SymbolMarkerStyle, SymbolMarkerStyleTypes>());
 			c.MarkerSettings.AddRange(GetDefaultMarkerStyles());
 			c.SymbolReferenceMarkerSettings.Reset();
-			FormatStore.Reset();
+			if (Instance != null) {
+				FormatStore.Reset();
+			}
 			return c;
 		}
 
