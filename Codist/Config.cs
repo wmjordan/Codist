@@ -712,7 +712,7 @@ namespace Codist
 		WrapText = 1 << 6,
 		JumpList = 1 << 7,
 		AutoSurround = 1 << 8,
-		Default = SyntaxHighlight | ScrollbarMarkers | SuperQuickInfo | SmartBar | NaviBar | WebSearch | WrapText | JumpList,
+		Default = SyntaxHighlight | ScrollbarMarkers | SuperQuickInfo | SmartBar | NaviBar | WebSearch | WrapText,
 		All = Default | AutoSurround
 	}
 
