@@ -763,10 +763,12 @@ namespace Codist.QuickInfo
 				foreach (var tag in tagger.GetTags(span)) {
 					var content = tag.Tag.ToolTipContent;
 					if (content is ContainerElement ce) {
-						foreach (var cte in ce.Elements.Cast<ClassifiedTextElement>()) {
-							var firstRun = cte.Runs.First();
-							if (firstRun != null) {
-								_TagHolder[firstRun.Text] = tag.Tag.ErrorType;
+						foreach (var item in ce.Elements) {
+							if (item is ClassifiedTextElement cte) {
+								var firstRun = cte.Runs.First();
+								if (firstRun != null) {
+									_TagHolder[firstRun.Text] = tag.Tag.ErrorType;
+								}
 							}
 						}
 					}
