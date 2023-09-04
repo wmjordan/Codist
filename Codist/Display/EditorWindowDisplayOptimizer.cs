@@ -21,10 +21,12 @@ namespace Codist.Display
 		}
 
 		void TextViewLoaded(object sender, EventArgs args) {
-			var e = (FrameworkElement)sender;
-			e.Loaded -= TextViewLoaded;
-			if (Config.Instance.DisplayOptimizations.MatchFlags(DisplayOptimizations.CodeWindow)) {
-				WpfHelper.SetUITextRenderOptions(e, true);
+			Config c;
+			if (sender is FrameworkElement e && (c = Config.Instance) != null) {
+				e.Loaded -= TextViewLoaded;
+				if (c.DisplayOptimizations.MatchFlags(DisplayOptimizations.CodeWindow)) {
+					WpfHelper.SetUITextRenderOptions(e, true);
+				}
 			}
 		}
 	}
