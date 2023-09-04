@@ -694,7 +694,7 @@ namespace Codist.QuickInfo
 			}
 		}
 
-		class QuickInfoControl : DockPanel
+		sealed class QuickInfoControl : DockPanel
 		{
 			public QuickInfoControl() {
 				Margin = WpfHelper.MiddleVerticalMargin;
