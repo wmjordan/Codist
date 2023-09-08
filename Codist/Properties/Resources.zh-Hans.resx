@@ -2630,4 +2630,16 @@ Ctrl: 仅直接继承的接口</value>
   <data name="OT_PreferUnderscoreTip" xml:space="preserve">
     <value>插入成对的 _下划线_，而不是 *星号*</value>
   </data>
+  <data name="CMD_DeleteAStatement" xml:space="preserve">
+    <value>删除 &lt;A&gt; 语句</value>
+  </data>
+  <data name="CMD_DeleteField" xml:space="preserve">
+    <value>删除字段</value>
+  </data>
+  <data name="CMD_DeleteStatement" xml:space="preserve">
+    <value>删除语句</value>
+  </data>
+  <data name="CMD_DeleteSwitchSection" xml:space="preserve">
+    <value>删除 Switch 条件</value>
+  </data>
 </root>

@@ -16,6 +16,7 @@ namespace Codist.Refactorings
 		public static readonly ReplaceNode WrapInElse = new WrapInElseRefactoring();
 		public static readonly ReplaceNode WrapInUsing = new WrapInUsingRefactoring();
 		public static readonly ReplaceNode MergeToConditional = new MergeToConditionalRefactoring();
+		public static readonly ReplaceNode DeleteStatement = new DeleteStatementRefactoring();
 
 		abstract class ReplaceStatements : ReplaceNode
 		{
@@ -205,6 +206,37 @@ namespace Codist.Refactorings
 						SF.UsingStatement(null, exp.Expression, newBlock).AnnotateReformatAndSelect()));
 				}
 				return Enumerable.Empty<RefactoringAction>();
+			}
+		}
+
+		sealed class DeleteStatementRefactoring : ReplaceStatements
+		{
+			string _Title;
+			public override int IconId => IconIds.Delete;
+			public override string Title => _Title;
+
+			public override bool Accept(RefactoringContext ctx) {
+				if (ctx.SelectedStatementInfo.Items != null) {
+					_Title = R.CMD_DeleteStatement;
+					return true;
+				}
+				if (ctx.Node is StatementSyntax s) {
+					_Title = R.CMD_DeleteAStatement.Replace("<A>", s.Kind().ToString().Replace("Statement", string.Empty));
+					return true;
+				}
+				if (ctx.Node.Parent is SwitchSectionSyntax) {
+					_Title = R.CMD_DeleteSwitchSection;
+					return true;
+				}
+				return false;
+			}
+
+			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
+				return Chain.Create(ctx.SelectedStatementInfo.Items != null
+					? Remove(ctx.SelectedStatementInfo.Items)
+					: ctx.Node is StatementSyntax
+					? Remove(ctx.Node)
+					: Remove(ctx.Node.Parent));
 			}
 		}
 	}

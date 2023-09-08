@@ -369,6 +369,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Delete &lt;A&gt; Statement.
+        /// </summary>
+        internal static string CMD_DeleteAStatement {
+            get {
+                return ResourceManager.GetString("CMD_DeleteAStatement", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Delete &lt;if&gt; Condition.
         /// </summary>
         internal static string CMD_DeleteCondition {
@@ -401,6 +410,15 @@ namespace Codist.Properties {
         internal static string CMD_DeleteEvent {
             get {
                 return ResourceManager.GetString("CMD_DeleteEvent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete Field.
+        /// </summary>
+        internal static string CMD_DeleteField {
+            get {
+                return ResourceManager.GetString("CMD_DeleteField", resourceCulture);
             }
         }
         
@@ -440,6 +458,24 @@ namespace Codist.Properties {
         internal static string CMD_DeleteSelectedText {
             get {
                 return ResourceManager.GetString("CMD_DeleteSelectedText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete Statement.
+        /// </summary>
+        internal static string CMD_DeleteStatement {
+            get {
+                return ResourceManager.GetString("CMD_DeleteStatement", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete Switch Section.
+        /// </summary>
+        internal static string CMD_DeleteSwitchSection {
+            get {
+                return ResourceManager.GetString("CMD_DeleteSwitchSection", resourceCulture);
             }
         }
         

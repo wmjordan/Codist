@@ -36,6 +36,7 @@ namespace Codist.Refactorings
 			ReplaceToken.UseExplicitType,
 			ReplaceNode.DeleteCondition,
 			ReplaceNode.RemoveContainingStatement,
+			ReplaceNode.DeleteStatement,
 			ReplaceText.CommentToRegion,
 			ReplaceText.WrapInRegion,
 			ReplaceText.WrapInIf,

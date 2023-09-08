@@ -2644,4 +2644,16 @@ Ctrl: Directly inherited interfaces only</value>
   <data name="OT_PreferUnderscoreTip" xml:space="preserve">
     <value>Insert _underscore_ pairs instead of *asterisk* pairs</value>
   </data>
+  <data name="CMD_DeleteAStatement" xml:space="preserve">
+    <value>Delete &lt;A&gt; Statement</value>
+  </data>
+  <data name="CMD_DeleteField" xml:space="preserve">
+    <value>Delete Field</value>
+  </data>
+  <data name="CMD_DeleteStatement" xml:space="preserve">
+    <value>Delete Statement</value>
+  </data>
+  <data name="CMD_DeleteSwitchSection" xml:space="preserve">
+    <value>Delete Switch Section</value>
+  </data>
 </root>
