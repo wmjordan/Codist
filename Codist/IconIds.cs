@@ -147,6 +147,7 @@ namespace Codist
 		public const int DeleteType = KnownImageIds.ClassMissing;
 		public const int DeleteProperty = KnownImageIds.PropertyMissing;
 		public const int DeleteEvent = KnownImageIds.EventMissing;
+		public const int DeleteField = KnownImageIds.FieldMissing;
 		public const int DeleteCondition = KnownImageIds.DeleteClause;
 		public const int MergeCondition = KnownImageIds.GroupByClause;
 		public const int NestCondition = KnownImageIds.AddChildNode;

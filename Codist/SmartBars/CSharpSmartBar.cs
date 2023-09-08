@@ -427,8 +427,14 @@ namespace Codist.SmartBars
 					AddCommand(MyToolBar, IconIds.DeleteType, R.CMD_DeleteEnum, DeleteCurrentNode);
 					break;
 				case SyntaxKind.VariableDeclarator:
-					if (node.Parent?.Parent.IsKind(SyntaxKind.FieldDeclaration) == true) {
-						AddEditorCommand(MyToolBar, IconIds.EncapsulateField, "Refactor.EncapsulateField", R.CMD_EncapsulateField);
+					if ((node = node.Parent?.Parent).IsAnyKind(SyntaxKind.FieldDeclaration, SyntaxKind.EventFieldDeclaration)) {
+						if (node.IsKind(SyntaxKind.FieldDeclaration) && ((FieldDeclarationSyntax)node).Declaration.Variables.Count == 1) {
+							AddEditorCommand(MyToolBar, IconIds.EncapsulateField, "Refactor.EncapsulateField", R.CMD_EncapsulateField);
+							AddCommand(MyToolBar, IconIds.DeleteField, R.CMD_DeleteField, DeleteParentDeclaration);
+						}
+						else if (node.IsKind(SyntaxKind.EventFieldDeclaration) && ((EventFieldDeclarationSyntax)node).Declaration.Variables.Count == 1) {
+							AddCommand(MyToolBar, IconIds.DeleteEvent, R.CMD_DeleteEvent, DeleteParentDeclaration);
+						}
 					}
 					break;
 			}
@@ -438,6 +444,14 @@ namespace Codist.SmartBars
 			var node = _Context.Node;
 			ctx.View.SelectNode(node, true);
 			ctx.View.Edit(node, (view, n, edit) => edit.Delete(n.FullSpan.ToSpan()));
+		}
+
+		void DeleteParentDeclaration(CommandContext ctx) {
+			var node = _Context.Node.Parent?.Parent;
+			if (node != null) {
+				ctx.View.SelectNode(node, true);
+				ctx.View.Edit(node, (view, n, edit) => edit.Delete(n.FullSpan.ToSpan()));
+			}
 		}
 
 		void AddXmlDocCommands() {
