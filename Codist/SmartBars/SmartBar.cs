@@ -319,7 +319,7 @@ namespace Codist.SmartBars
 
 		void ViewSelectionChanged(object sender, EventArgs e) {
 			// suppress event handler if KeepToolBar
-			if (TextEditorHelper.ActiveViewFocused() == false
+			if (TextEditorHelper.ActiveViewFocused() == false && _View.VisualElement.IsKeyboardFocused == false
 				|| DateTime.Now < _LastExecute.AddSeconds(1) && _ToolBarTray.Visibility == Visibility.Visible) {
 				return;
 			}

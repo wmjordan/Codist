@@ -1093,6 +1093,7 @@ namespace Codist
 		public static IWpfTextView GetMouseOverDocumentView() {
 			return __MouseOverDocumentView;
 		}
+		// note: Due to a bug in VS, mouse focus could sometimes not in sync, but we can check the keyboard focus if the window is keyboard focusable
 		public static bool ActiveViewFocused() {
 			return __ActiveViewFocused;
 		}
@@ -1182,12 +1183,12 @@ namespace Codist
 				}
 
 				void TextView_GotFocus(object sender, EventArgs e) {
-					if (sender == _View) {
+					if (__ActiveInteractiveView == _View) {
 						__ActiveViewFocused = true;
 					}
 				}
 				void TextView_LostFocus(object sender, EventArgs e) {
-					if (sender == _View) {
+					if (__ActiveInteractiveView == _View) {
 						__ActiveViewFocused = false;
 					}
 				}
@@ -1204,6 +1205,7 @@ namespace Codist
 					if (_IsDocument && __MouseOverDocumentView == null) {
 						__MouseOverDocumentView = _View;
 					}
+					__ActiveViewFocused = true;
 				}
 
 				void TextViewMouseEnter_SetActiveView(object sender, MouseEventArgs e) {
