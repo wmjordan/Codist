@@ -22,9 +22,10 @@ namespace Codist.Display
 
 		void TextViewLoaded(object sender, EventArgs args) {
 			Config c;
-			if (sender is FrameworkElement e && (c = Config.Instance) != null) {
+			if (sender is FrameworkElement e) {
 				e.Loaded -= TextViewLoaded;
-				if (c.DisplayOptimizations.MatchFlags(DisplayOptimizations.CodeWindow)) {
+				if ((c = Config.Instance) != null
+					&& c.DisplayOptimizations.MatchFlags(DisplayOptimizations.CodeWindow)) {
 					WpfHelper.SetUITextRenderOptions(e, true);
 				}
 			}
