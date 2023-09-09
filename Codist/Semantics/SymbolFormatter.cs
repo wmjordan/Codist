@@ -1004,7 +1004,8 @@ namespace Codist
 				block.Add(": ".Render(PlainText));
 			}
 			block.Add(WpfHelper.Render(item.AttributeConstructor ?? (ISymbol)item.AttributeClass, a.EndsWith("Attribute", StringComparison.Ordinal) ? a.Substring(0, a.Length - 9) : a, Class));
-			if (item.ConstructorArguments.Length == 0 && item.NamedArguments.Length == 0) {
+			var cas = item.ConstructorArguments;
+			if (cas.Length == 0 && item.NamedArguments.Length == 0) {
 				var node = item.ApplicationSyntaxReference?.GetSyntax() as AttributeSyntax;
 				if (node?.ArgumentList?.Arguments.Count > 0) {
 					block.Add(node.ArgumentList.ToString().Render(ThemeHelper.SystemGrayTextBrush));
@@ -1014,11 +1015,15 @@ namespace Codist
 			}
 			block.Add("(".Render(PlainText));
 			int i = 0;
-			foreach (var arg in item.ConstructorArguments) {
-				if (++i > 1) {
-					block.Add(", ".Render(PlainText));
+			if (cas.Length != 0) {
+				var pp = item.AttributeConstructor.Parameters[cas.Length - 1].IsParams;
+				var cl = pp ? cas.Length : -1;
+				foreach (var arg in cas) {
+					if (i != 0) {
+						block.Add(", ".Render(PlainText));
+					}
+					Format(block, arg, ++i == cl);
 				}
-				Format(block, arg);
 			}
 			foreach (var arg in item.NamedArguments) {
 				if (++i > 1) {
@@ -1032,7 +1037,7 @@ namespace Codist
 					block.Add(arg.Key.Render(false, true, null));
 				}
 				block.Add("=".Render(PlainText));
-				Format(block, arg.Value);
+				Format(block, arg.Value, false);
 			}
 			block.Add(")]".Render(PlainText));
 		}
@@ -1068,7 +1073,7 @@ namespace Codist
 			text.Add(">".Render(PlainText));
 		}
 
-		void Format(InlineCollection block, TypedConstant constant) {
+		void Format(InlineCollection block, TypedConstant constant, bool isParams) {
 			if (constant.IsNull) {
 				block.Add("null".Render(Keyword));
 				return;
@@ -1115,8 +1120,10 @@ namespace Codist
 					block.Add(")".Render(PlainText));
 					break;
 				case TypedConstantKind.Array:
-					block.Add("new".Render(Keyword));
-					block.Add("[] { ".Render(PlainText));
+					if (isParams == false) {
+						block.Add("new".Render(Keyword));
+						block.Add("[] { ".Render(PlainText));
+					}
 					bool c = false;
 					foreach (var item in constant.Values) {
 						if (c) {
@@ -1125,9 +1132,12 @@ namespace Codist
 						else {
 							c = true;
 						}
-						Format(block, item);
+						Format(block, item, false);
 					}
-					block.Add(" }".Render(PlainText));
+
+					if (isParams == false) {
+						block.Add(" }".Render(PlainText));
+					}
 					break;
 				default:
 					block.Add(constant.ToCSharpString());
