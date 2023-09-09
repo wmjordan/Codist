@@ -134,7 +134,12 @@
     <Compile Include="Display\JumpListEnhancer.cs" />
     <Compile Include="Helpers\VsColorThemeService.cs" />
     <Compile Include="QuickInfo\CSharpCompletionTooltip.cs" />
-    <Compile Include="QuickInfo\CSharpEnumQuickInfo.cs" />
+    <Compile Include="QuickInfo\CSharpQuickInfo.AnonymousType.cs" />
+    <Compile Include="QuickInfo\CSharpQuickInfo.Enum.cs" />
+    <Compile Include="QuickInfo\CSharpQuickInfo.Interface.cs" />
+    <Compile Include="QuickInfo\CSharpQuickInfo.Block.cs" />
+    <Compile Include="QuickInfo\CSharpQuickInfo.Overloads.cs" />
+    <Compile Include="QuickInfo\CSharpQuickInfo.Parameter.cs" />
     <Compile Include="Semantics\AssemblySource.cs" />
     <Compile Include="Helpers\Chain.cs" />
     <Compile Include="Helpers\FileHelper.cs" />
@@ -170,7 +175,7 @@
     </Compile>
     <Compile Include="QuickInfo\CSharpNodeRangeQuickInfo.cs" />
     <Compile Include="QuickInfo\ColorQuickInfoUI.cs" />
-    <Compile Include="QuickInfo\CSharpOpCodeQuickInfo.cs" />
+    <Compile Include="QuickInfo\CSharpQuickInfo.OpCode.cs" />
     <Compile Include="QuickInfo\InfoContainer.cs" />
     <Compile Include="QuickInfo\QuickInfoBackgroundController.cs" />
     <Compile Include="Semantics\CodeFormatHelper.cs" />

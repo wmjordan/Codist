@@ -9,13 +9,19 @@ using R = Codist.Properties.Resources;
 
 namespace Codist.QuickInfo
 {
-	static class CSharpEnumQuickInfo
+	partial class CSharpQuickInfo
 	{
-		public static void ShowEnumQuickInfo(this InfoContainer qiContent, INamedTypeSymbol type, bool showMembers) {
+		static void ShowEnumQuickInfo(InfoContainer qiContent, INamedTypeSymbol type, bool showUnderlyingType, bool showMembers) {
+			var s = new ThemedTipDocument();
 			var underlyingType = type.EnumUnderlyingType;
-			var content = new ThemedTipText(R.T_EnumUnderlyingType, true).AddSymbol(underlyingType, true, SymbolFormatter.Instance);
-			var s = new ThemedTipDocument()
-				.Append(new ThemedTipParagraph(IconIds.Enum, content));
+			TextBlock content;
+			if (showUnderlyingType) {
+				content = new ThemedTipText(R.T_EnumUnderlyingType, true).AddSymbol(underlyingType, true, SymbolFormatter.Instance);
+				s.Append(new ThemedTipParagraph(IconIds.Enum, content));
+			}
+			else {
+				content = null;
+			}
 			if (showMembers == false) {
 				qiContent.Add(s);
 				return;
@@ -74,16 +80,19 @@ namespace Codist.QuickInfo
 			if (agg.Count == 0) {
 				return;
 			}
-			content.AppendLine().Append(R.T_EnumFieldCount, true).Append(agg.Count.ToString())
-				.AppendLine().Append(R.T_EnumMin, true).AddSymbol(minField, false, SymbolFormatter.Instance)
-				.Append(", ").Append(R.T_EnumMax, true).AddSymbol(maxField, false, SymbolFormatter.Instance);
-			if (isFlags) {
-				var d = Convert.ToString((long)agg.Bits, 2);
-				content.AppendLine().Append(R.T_BitCount, true)
-					.Append(d.Length.ToText())
-					.AppendLine()
-					.Append(R.T_EnumAllFlags, true)
-					.Append(d);
+
+			if (showUnderlyingType) {
+				content.AppendLine().Append(R.T_EnumFieldCount, true).Append(agg.Count.ToString())
+							.AppendLine().Append(R.T_EnumMin, true).AddSymbol(minField, false, SymbolFormatter.Instance)
+							.Append(", ").Append(R.T_EnumMax, true).AddSymbol(maxField, false, SymbolFormatter.Instance);
+				if (isFlags) {
+					var d = Convert.ToString((long)agg.Bits, 2);
+					content.AppendLine().Append(R.T_BitCount, true)
+						.Append(d.Length.ToText())
+						.AppendLine()
+						.Append(R.T_EnumAllFlags, true)
+						.Append(d);
+				}
 			}
 			qiContent.Add(s);
 			if (g != null) {

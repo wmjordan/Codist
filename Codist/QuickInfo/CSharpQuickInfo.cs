@@ -20,7 +20,7 @@ using Task = System.Threading.Tasks.Task;
 
 namespace Codist.QuickInfo
 {
-	sealed class CSharpQuickInfo : SingletonQuickInfoSource
+	sealed partial class CSharpQuickInfo : SingletonQuickInfoSource
 	{
 		internal const string Name = nameof(CSharpQuickInfo);
 
@@ -535,27 +535,6 @@ namespace Codist.QuickInfo
 			return tip;
 		}
 
-		static void ShowCapturedVariables(SyntaxNode node, ISymbol symbol, SemanticModel semanticModel, ThemedTipDocument tip, CancellationToken cancellationToken) {
-			if (node is LambdaExpressionSyntax
-				|| (symbol as IMethodSymbol)?.MethodKind == MethodKind.LocalFunction) {
-				var ss = node is LambdaExpressionSyntax
-					? node.AncestorsAndSelf().FirstOrDefault(i => i is StatementSyntax || i is ExpressionSyntax && i.IsKind(SyntaxKind.IdentifierName) == false)
-					: symbol.GetSyntaxNode(cancellationToken);
-				if (ss != null) {
-					var df = semanticModel.AnalyzeDataFlow(ss);
-					var captured = df.ReadInside.RemoveAll(i => df.VariablesDeclared.Contains(i) || (i as ILocalSymbol)?.IsConst == true);
-					if (captured.Length > 0) {
-						var p = new ThemedTipParagraph(IconIds.ReadVariables, new ThemedTipText().Append(R.T_CapturedVariables, true));
-						int i = 0;
-						foreach (var item in captured) {
-							p.Content.Append(++i == 1 ? ": " : ", ").AddSymbol(item, false, __SymbolFormatter);
-						}
-						tip.Append(p);
-					}
-				}
-			}
-		}
-
 		static void ShowCandidateInfo(InfoContainer qiContent, ImmutableArray<ISymbol> candidates) {
 			var info = new ThemedTipDocument().AppendTitle(IconIds.SymbolCandidate, R.T_Maybe);
 			foreach (var item in candidates) {
@@ -671,46 +650,6 @@ namespace Codist.QuickInfo
 			qiContent.Add(item);
 		}
 
-		static void ShowBlockInfo(InfoContainer qiContent, ITextSnapshot textSnapshot, SyntaxNode node, SemanticModel semanticModel) {
-			var lines = textSnapshot.GetLineSpan(node.Span).Length + 1;
-			if (lines > 1) {
-				qiContent.Add(
-					(lines > 100 ? new ThemedTipText(lines + R.T_Lines, true) : new ThemedTipText(lines + R.T_Lines))
-						.SetGlyph(ThemeHelper.GetImage(IconIds.LineOfCode))
-					);
-			}
-			if ((node is StatementSyntax || node is ExpressionSyntax || node is ConstructorInitializerSyntax) == false) {
-				return;
-			}
-			var df = semanticModel.AnalyzeDataFlow(node);
-			if (df.Succeeded) {
-				ListVariables(R.T_DeclaredVariable, df.VariablesDeclared, IconIds.DeclaredVariables, qiContent);
-				ListVariables(R.T_ReadVariable, df.DataFlowsIn, IconIds.ReadVariables, qiContent);
-				ListVariables(R.T_WrittenVariable, df.DataFlowsOut, IconIds.WrittenVariables, qiContent);
-				ListVariables(R.T_TakenAddress, df.UnsafeAddressTaken, IconIds.RefVariables, qiContent);
-			}
-
-			void ListVariables(string title, ImmutableArray<ISymbol> variables, int icon, InfoContainer container) {
-				if (variables.IsEmpty) {
-					return;
-				}
-				var p = new ThemedTipText(title, true).Append(variables.Length).AppendLine();
-				bool s = false;
-				foreach (var item in variables) {
-					if (s) {
-						p.Append(", ");
-					}
-					if (item.IsImplicitlyDeclared) {
-						p.AddSymbol(item.GetReturnType(), item.Name, __SymbolFormatter);
-					}
-					else {
-						p.AddSymbol(item, false, __SymbolFormatter);
-					}
-					s = true;
-				}
-				container.Add(new ThemedTipDocument().Append(new ThemedTipParagraph(icon, p)));
-			}
-		}
 		static void ShowMiscInfo(InfoContainer qiContent, SyntaxNode node) {
 			Grid infoBox = null;
 			var nodeKind = node.Kind();
@@ -868,7 +807,7 @@ namespace Codist.QuickInfo
 				ShowConstInfo(qiContent, field, field.ConstantValue);
 			}
 			else if (field.IsReadOnly && field.IsStatic && field.Type.Name == "OpCode") {
-				qiContent.ShowOpCodeInfo(field);
+				ShowOpCodeInfo(qiContent, field);
 			}
 
 			void ShowKnownImageId(InfoContainer qc, IFieldSymbol f, int fieldValue) {
@@ -906,95 +845,8 @@ namespace Codist.QuickInfo
 				&& options.MatchFlags(QuickInfoOptions.AlternativeStyle) == false) {
 				ShowExtensionMethod(qiContent, method);
 			}
-			if (options.MatchFlags(QuickInfoOptions.MethodOverload)) {
+			if (options.MatchFlags(QuickInfoOptions.MethodOverload) && _IsCandidate == false) {
 				ShowOverloadsInfo(qiContent, node, method, semanticModel, cancellationToken);
-			}
-		}
-
-		void ShowOverloadsInfo(InfoContainer qiContent, SyntaxNode node, IMethodSymbol method, SemanticModel semanticModel, CancellationToken cancellationToken) {
-			if (_IsCandidate) {
-				return;
-			}
-			var overloads = node.Kind().CeqAny(SyntaxKind.MethodDeclaration, SyntaxKind.ConstructorDeclaration)
-				? method.ContainingType.GetMembers(method.Name)
-				: semanticModel.GetMemberGroup(node, cancellationToken);
-			if (overloads.Length < 2) {
-				return;
-			}
-			var re = method.MethodKind == MethodKind.ReducedExtension;
-			method = method.OriginalDefinition;
-			if (re) {
-				method = method.ReducedFrom;
-			}
-			var mst = method.IsStatic;
-			var mmod = method.GetSpecialMethodModifier();
-			var rt = method.ReturnType;
-			var mps = method.Parameters;
-			var ct = method.ContainingType;
-			var overloadInfo = new ThemedTipDocument().AppendTitle(IconIds.MethodOverloads, R.T_MethodOverload);
-			foreach (var overload in overloads) {
-				var om = overload.OriginalDefinition as IMethodSymbol;
-				if (om == null) {
-					continue;
-				}
-				var ore = re && om.MethodKind == MethodKind.ReducedExtension;
-				if (ore) {
-					if (method.Equals(om.ReducedFrom)) {
-						continue;
-					}
-				}
-				else if (om.ReducedFrom != null) {
-					om = om.ReducedFrom;
-				}
-				if (om.Equals(method)) {
-					continue;
-				}
-				var t = new ThemedTipText();
-				var st = om.IsStatic;
-				if (st) {
-					t.Append("static ".Render((st == mst ? SymbolFormatter.SemiTransparent : SymbolFormatter.Instance).Keyword));
-				}
-				var mod = om.GetSpecialMethodModifier();
-				if (mod != null) {
-					t.Append(mod.Render((mod == mmod ? SymbolFormatter.SemiTransparent : SymbolFormatter.Instance).Keyword));
-				}
-				if (om.MethodKind != MethodKind.Constructor) {
-					t.AddSymbol(om.ReturnType, false, CodeAnalysisHelper.AreEqual(om.ReturnType, rt, false) ? SymbolFormatter.SemiTransparent : __SymbolFormatter).Append(" ");
-				}
-				if (ore) {
-					t.AddSymbol(om.ReceiverType, "this", (om.ContainingType != ct ? __SymbolFormatter : SymbolFormatter.SemiTransparent).Keyword).Append(".", SymbolFormatter.SemiTransparent.PlainText);
-				}
-				else if (om.ContainingType != ct) {
-					t.AddSymbol(om.ContainingType, false, __SymbolFormatter).Append(".", SymbolFormatter.SemiTransparent.PlainText);
-				}
-				t.AddSymbol(om, true, SymbolFormatter.SemiTransparent);
-				t.Append("(", SymbolFormatter.SemiTransparent.PlainText);
-				foreach (var op in om.Parameters) {
-					var mp = mps.FirstOrDefault(p => p.Name == op.Name);
-					if (op.Ordinal == 0) {
-						if (ore == false && om.IsExtensionMethod) {
-							t.Append("this ", __SymbolFormatter.Keyword);
-						}
-					}
-					else {
-						t.Append(", ", SymbolFormatter.SemiTransparent.PlainText);
-					}
-					if (mp != null) {
-						if (mp.RefKind != op.RefKind
-							|| CodeAnalysisHelper.AreEqual(mp.Type, op.Type, false) == false
-							|| mp.IsParams != op.IsParams
-							|| mp.IsOptional != op.IsOptional
-							|| mp.HasExplicitDefaultValue != op.HasExplicitDefaultValue) {
-							mp = null;
-						}
-					}
-					t.AddSymbolDisplayParts(op.ToDisplayParts(CodeAnalysisHelper.InTypeOverloadDisplayFormat), mp == null ? __SymbolFormatter : SymbolFormatter.SemiTransparent, -1);
-				}
-				t.Append(")", SymbolFormatter.SemiTransparent.PlainText);
-				overloadInfo.Append(new ThemedTipParagraph(overload.GetImageId(), t));
-			}
-			if (overloadInfo.ParagraphCount > 1) {
-				qiContent.Add(overloadInfo);
 			}
 		}
 
@@ -1051,7 +903,8 @@ namespace Codist.QuickInfo
 				&& options.MatchFlags(QuickInfoOptions.MethodOverload)) {
 				node = node.GetObjectCreationNode();
 				if (node != null
-					&& semanticModel.GetSymbolOrFirstCandidate(node, cancellationToken) is IMethodSymbol method) {
+					&& semanticModel.GetSymbolOrFirstCandidate(node, cancellationToken) is IMethodSymbol method
+					&& _IsCandidate == false) {
 					ShowOverloadsInfo(qiContent, node, method, semanticModel, cancellationToken);
 				}
 			}
@@ -1064,13 +917,8 @@ namespace Codist.QuickInfo
 				) {
 				ShowDeclarationModifier(qiContent, typeSymbol);
 			}
-			if (typeSymbol.TypeKind == TypeKind.Enum) {
-				if (options.MatchFlags(QuickInfoOptions.Enum)) {
-					qiContent.ShowEnumQuickInfo(typeSymbol, true);
-				}
-				else if (options.MatchFlags(QuickInfoOptions.BaseType)) {
-					qiContent.ShowEnumQuickInfo(typeSymbol, true);
-				}
+			if (typeSymbol.TypeKind == TypeKind.Enum && options.HasAnyFlag(QuickInfoOptions.BaseType | QuickInfoOptions.Enum)) {
+				ShowEnumQuickInfo(qiContent, typeSymbol, options.MatchFlags(QuickInfoOptions.BaseType), options.MatchFlags(QuickInfoOptions.Enum));
 			}
 			else if (options.MatchFlags(QuickInfoOptions.BaseType)) {
 				ShowBaseType(qiContent, typeSymbol);
@@ -1099,101 +947,10 @@ namespace Codist.QuickInfo
 				var s = ToolTipHelper.ShowNumericRepresentations(value);
 				if (s != null) {
 					if (symbol?.ContainingType?.TypeKind == TypeKind.Enum) {
-						qiContent.ShowEnumQuickInfo(symbol.ContainingType, false);
+						ShowEnumQuickInfo(qiContent, symbol.ContainingType, Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseType), false);
 					}
 					qiContent.Add(s);
 				}
-			}
-		}
-
-		static void ShowInterfaceImplementation<TSymbol>(InfoContainer qiContent, TSymbol symbol, IEnumerable<TSymbol> explicitImplementations)
-			where TSymbol : class, ISymbol {
-			if (symbol.DeclaredAccessibility != Accessibility.Public && explicitImplementations.Any() == false) {
-				return;
-			}
-			var interfaces = symbol.ContainingType.AllInterfaces;
-			if (interfaces.Length == 0) {
-				return;
-			}
-			var implementedIntfs = ImmutableArray.CreateBuilder<ITypeSymbol>(3);
-			ThemedTipDocument info = null;
-			var returnType = symbol.GetReturnType();
-			var parameters = symbol.GetParameters();
-			var typeParams = symbol.GetTypeParameters();
-			foreach (var intf in interfaces) {
-				foreach (var member in intf.GetMembers(symbol.Name)) {
-					if (member.Kind == symbol.Kind
-						&& member.DeclaredAccessibility == Accessibility.Public
-						&& member.MatchSignature(symbol.Kind, returnType, parameters, typeParams)) {
-						implementedIntfs.Add(intf);
-					}
-				}
-			}
-			if (implementedIntfs.Count > 0) {
-				info = new ThemedTipDocument().AppendTitle(IconIds.InterfaceImplementation, R.T_Implements);
-				foreach (var item in implementedIntfs) {
-					info.Append(new ThemedTipParagraph(item.GetImageId(), ToUIText(item)));
-				}
-			}
-			if (explicitImplementations != null) {
-				implementedIntfs.Clear();
-				implementedIntfs.AddRange(explicitImplementations.Select(i => i.ContainingType));
-				if (implementedIntfs.Count > 0) {
-					(info ?? (info = new ThemedTipDocument()))
-						.AppendTitle(IconIds.InterfaceImplementation, R.T_ExplicitImplements);
-					foreach (var item in implementedIntfs) {
-						info.Append(new ThemedTipParagraph(item.GetImageId(), ToUIText(item)));
-					}
-				}
-			}
-			if (info != null) {
-				qiContent.Add(info);
-			}
-		}
-		static void ShowInterfaceMembers(InfoContainer qiContent, INamedTypeSymbol type, INamedTypeSymbol declaredClass) {
-			var doc = new ThemedTipDocument();
-			doc.AppendTitle(IconIds.ListMembers, declaredClass != null ? R.T_MemberImplementation : R.T_Member);
-			ShowInterfaceMembers(type, declaredClass, doc, false);
-			foreach (var item in type.AllInterfaces) {
-				ShowInterfaceMembers(item, declaredClass, doc, true);
-			}
-			if (doc.ParagraphCount > 1) {
-				qiContent.Add(doc);
-			}
-		}
-
-		static void ShowInterfaceMembers(INamedTypeSymbol type, INamedTypeSymbol declaredClass, ThemedTipDocument doc, bool isInherit) {
-			var members = ImmutableArray.CreateBuilder<ISymbol>();
-			members.AddRange(type.FindMembers());
-			members.Sort(CodeAnalysisHelper.CompareByAccessibilityKindName);
-			var isInterface = type.TypeKind == TypeKind.Interface;
-			foreach (var member in members) {
-				var t = new ThemedTipText();
-				if (isInherit) {
-					t.AddSymbol(type, false, SymbolFormatter.SemiTransparent).Append(".");
-				}
-				if (declaredClass != null && member.IsAbstract) {
-					var implementation = declaredClass.FindImplementationForInterfaceMember(member);
-					if (implementation != null) {
-						doc.Append(new ThemedTipParagraph(implementation.GetImageId(), t.AddSymbol(implementation, member.GetOriginalName(), false, __SymbolFormatter)));
-						continue;
-					}
-					t.AddSymbol(member, false, __SymbolFormatter)
-						.Append(ThemeHelper.GetImage(IconIds.MissingImplementation).WrapMargin(WpfHelper.SmallHorizontalMargin).SetOpacity(WpfHelper.DimmedOpacity));
-				}
-				else {
-					t.AddSymbol(member, false, __SymbolFormatter);
-				}
-				if (member.Kind == SymbolKind.Method) {
-					t.AddParameters(((IMethodSymbol)member).Parameters, __SymbolFormatter);
-					if (isInterface && member.IsStatic == false && member.IsAbstract == false) {
-						t.Append(" ").AddImage(IconIds.DefaultInterfaceImplementation);
-					}
-				}
-				if (member.IsStatic) {
-					t.Append(" ").AddImage(IconIds.StaticMember);
-				}
-				doc.Append(new ThemedTipParagraph(member.GetImageId(), t));
 			}
 		}
 
@@ -1253,333 +1010,8 @@ namespace Codist.QuickInfo
 			qiContent.Add(info);
 		}
 
-		static void ShowInterfaces(InfoContainer qiContent, ITypeSymbol type) {
-			type = type.OriginalDefinition;
-			var interfaces = type.Interfaces;
-			var declaredInterfaces = ImmutableArray.CreateBuilder<INamedTypeSymbol>(interfaces.Length);
-			var inheritedInterfaces = ImmutableArray.CreateBuilder<(INamedTypeSymbol intf, ITypeSymbol baseType)>(5);
-			foreach (var item in interfaces) {
-				if (item.DeclaredAccessibility == Accessibility.Public || item.Locations.Any(l => l.IsInSource)) {
-					declaredInterfaces.Add(item);
-				}
-			}
-			HashSet<ITypeSymbol> all;
-			switch (type.TypeKind) {
-				case TypeKind.Class:
-					all = new HashSet<ITypeSymbol>(interfaces);
-					while ((type = type.BaseType) != null) {
-						FindInterfacesForType(type, true, type.Interfaces, inheritedInterfaces, all);
-					}
-					foreach (var item in interfaces) {
-						FindInterfacesForType(item, true, item.Interfaces, inheritedInterfaces, all);
-					}
-					break;
-				case TypeKind.Interface:
-					all = new HashSet<ITypeSymbol>(interfaces);
-					foreach (var item in interfaces) {
-						FindInterfacesForType(item, false, item.Interfaces, inheritedInterfaces, all);
-					}
-					FindInterfacesForType(type, false, type.Interfaces, inheritedInterfaces, all);
-					break;
-				case TypeKind.Struct:
-					all = new HashSet<ITypeSymbol>(interfaces);
-					foreach (var item in interfaces) {
-						FindInterfacesForType(item, true, item.Interfaces, inheritedInterfaces, all);
-					}
-					break;
-			}
-			if (declaredInterfaces.Count == 0 && inheritedInterfaces.Count == 0) {
-				return;
-			}
-			var info = new ThemedTipDocument().AppendTitle(IconIds.Interface, R.T_Interface);
-			//ListInterfacesSortedByNamespace(info, declaredInterfaces, inheritedInterfaces);
-			ListInterfacesInLogicalOrder(info, declaredInterfaces, inheritedInterfaces);
-			qiContent.Add(info);
-
-			void ListInterfacesSortedByNamespace(ThemedTipDocument d, ImmutableArray<INamedTypeSymbol>.Builder di, ImmutableArray<(INamedTypeSymbol intf, ITypeSymbol baseType)>.Builder ii) {
-				var allInterfaces = new List<(string, ThemedTipParagraph)>(di.Count + ii.Count);
-				foreach (var item in di) {
-					allInterfaces.Add((item.ToDisplayString(CodeAnalysisHelper.QualifiedTypeNameFormat), new ThemedTipParagraph(item.IsDisposable() ? IconIds.Disposable : item.GetImageId(), ToUIText(item))));
-				}
-				foreach (var (intf, baseType) in ii) {
-					allInterfaces.Add((intf.ToDisplayString(CodeAnalysisHelper.QualifiedTypeNameFormat), new ThemedTipParagraph(
-						intf.IsDisposable() ? IconIds.Disposable : intf.GetImageId(),
-						ToUIText(intf)
-							.Append(" : ", SymbolFormatter.SemiTransparent.PlainText)
-							.Append(ThemeHelper.GetImage(baseType.GetImageId()).WrapMargin(WpfHelper.GlyphMargin).SetOpacity(SymbolFormatter.TransparentLevel))
-							.AddSymbol(baseType, false, SymbolFormatter.SemiTransparent))));
-				}
-				allInterfaces.Sort((x, y) => x.Item1.CompareTo(y.Item1));
-				foreach (var item in allInterfaces) {
-					d.Append(item.Item2);
-				}
-			}
-
-			void ListInterfacesInLogicalOrder(ThemedTipDocument d, ImmutableArray<INamedTypeSymbol>.Builder di, ImmutableArray<(INamedTypeSymbol intf, ITypeSymbol baseType)>.Builder ii) {
-				foreach (var item in di) {
-					d.Append(new ThemedTipParagraph(item.IsDisposable() ? IconIds.Disposable : item.GetImageId(), ToUIText(item)));
-				}
-				foreach (var (intf, baseType) in ii) {
-					d.Append(new ThemedTipParagraph(
-						intf.IsDisposable() ? IconIds.Disposable : intf.GetImageId(),
-						ToUIText(intf)
-							.Append(" : ", SymbolFormatter.SemiTransparent.PlainText)
-							.Append(ThemeHelper.GetImage(baseType.GetImageId()).WrapMargin(WpfHelper.GlyphMargin).SetOpacity(SymbolFormatter.TransparentLevel))
-							.AddSymbol(baseType, false, SymbolFormatter.SemiTransparent)));
-				}
-			}
-		}
-
-		static void FindInterfacesForType(ITypeSymbol type, bool useType, ImmutableArray<INamedTypeSymbol> interfaces, ImmutableArray<(INamedTypeSymbol, ITypeSymbol)>.Builder inheritedInterfaces, HashSet<ITypeSymbol> all) {
-			foreach (var item in interfaces) {
-				if (all.Add(item) && IsAccessibleInterface(item)) {
-					inheritedInterfaces.Add((item, type));
-					FindInterfacesForType(useType ? type : item, useType, item.Interfaces, inheritedInterfaces, all);
-				}
-			}
-		}
-
-		static bool IsAccessibleInterface(INamedTypeSymbol type) {
-			return type.DeclaredAccessibility == Accessibility.Public || type.Locations.Any(l => l.IsInSource);
-		}
-
 		static void ShowDeclarationModifier(InfoContainer qiContent, ISymbol symbol) {
 			qiContent.Add(new ThemedTipDocument().Append(new ThemedTipParagraph(IconIds.DeclarationModifier, __SymbolFormatter.ShowSymbolDeclaration(symbol, new ThemedTipText(), true, false))));
-		}
-
-		static void ShowParameterInfo(InfoContainer qiContent, SyntaxNode node, SemanticModel semanticModel, CancellationToken cancellationToken) {
-			var argument = node;
-			if (node.IsKind(SyntaxKind.NullLiteralExpression)) {
-				argument = node.Parent;
-			}
-			int depth = 0;
-			do {
-				var n = argument as ArgumentSyntax ?? (SyntaxNode)(argument as AttributeArgumentSyntax);
-				if (n != null) {
-					ShowArgumentInfo(qiContent, n, semanticModel, cancellationToken);
-					return;
-				}
-			} while ((argument = argument.Parent) != null && ++depth < 4);
-		}
-
-		static void ShowArgumentInfo(InfoContainer qiContent, SyntaxNode argument, SemanticModel semanticModel, CancellationToken cancellationToken) {
-			var argList = argument.Parent;
-			SeparatedSyntaxList<ArgumentSyntax> arguments;
-			int argIndex, argCount;
-			string argName;
-			switch (argList.Kind()) {
-				case SyntaxKind.ArgumentList:
-					arguments = ((ArgumentListSyntax)argList).Arguments;
-					argIndex = arguments.IndexOf(argument as ArgumentSyntax);
-					argCount = arguments.Count;
-					argName = ((ArgumentSyntax)argument).NameColon?.Name.ToString();
-					break;
-				//case SyntaxKind.BracketedArgumentList: arguments = (argList as BracketedArgumentListSyntax).Arguments; break;
-				case SyntaxKind.AttributeArgumentList:
-					var aa = ((AttributeArgumentListSyntax)argument.Parent).Arguments;
-					argIndex = aa.IndexOf((AttributeArgumentSyntax)argument);
-					argCount = aa.Count;
-					argName = ((AttributeArgumentSyntax)argument).NameColon?.Name.ToString();
-					break;
-				default:
-					return;
-			}
-			if (argIndex == -1) {
-				return;
-			}
-			var symbol = semanticModel.GetSymbolInfo(argList.Parent, cancellationToken);
-			if (symbol.Symbol != null) {
-				IMethodSymbol m;
-				switch (symbol.Symbol.Kind) {
-					case SymbolKind.Method: m = symbol.Symbol as IMethodSymbol; break;
-					case CodeAnalysisHelper.FunctionPointerType: m = (symbol.Symbol as ITypeSymbol).GetFunctionPointerTypeSignature(); break;
-					default: m = null; break;
-				}
-				if (m == null) { // in a very rare case m can be null
-					return;
-				}
-				var om = m.OriginalDefinition;
-				IParameterSymbol p = null;
-				if (argName != null) {
-					var mp = om.Parameters;
-					for (int i = 0; i < mp.Length; i++) {
-						if (mp[i].Name == argName) {
-							argIndex = i;
-							p = mp[i];
-							break;
-						}
-					}
-				}
-				else if (argIndex != -1) {
-					var mp = om.Parameters;
-					if (argIndex < mp.Length) {
-						argName = (p = mp[argIndex]).Name;
-					}
-					else if (mp.Length > 0 && mp[mp.Length - 1].IsParams) {
-						argIndex = mp.Length - 1;
-						argName = (p = mp[argIndex]).Name;
-					}
-				}
-				var doc = argName != null ? new XmlDoc(om.MethodKind == MethodKind.DelegateInvoke ? om.ContainingSymbol : om, semanticModel.Compilation) : null;
-				var paramDoc = doc?.GetParameter(argName);
-				var content = new ThemedTipText(R.T_Argument, true)
-					.Append(R.T_ArgumentOf)
-					.AddSymbol(om.ReturnType, om.MethodKind == MethodKind.Constructor ? "new" : null, __SymbolFormatter)
-					.Append(" ")
-					.AddSymbol(om.MethodKind != MethodKind.DelegateInvoke ? om : (ISymbol)om.ContainingType, true, __SymbolFormatter)
-					.AddParameters(om.Parameters, __SymbolFormatter, argIndex);
-				var info = new ThemedTipDocument().Append(new ThemedTipParagraph(IconIds.Argument, content));
-				if (paramDoc != null) {
-					content.Append("\n" + argName, true, false, __SymbolFormatter.Parameter)
-						.Append(": ")
-						.AddXmlDoc(paramDoc, new XmlDocRenderer(semanticModel.Compilation, __SymbolFormatter));
-				}
-				if (m.IsGenericMethod) {
-					for (int i = 0; i < m.TypeArguments.Length; i++) {
-						content.Append("\n");
-						__SymbolFormatter.ShowTypeArgumentInfo(m.TypeParameters[i], m.TypeArguments[i], content);
-						var typeParamDoc = doc.GetTypeParameter(m.TypeParameters[i].Name);
-						if (typeParamDoc != null) {
-							content.Append(": ")
-								.AddXmlDoc(typeParamDoc, new XmlDocRenderer(semanticModel.Compilation, __SymbolFormatter));
-						}
-					}
-				}
-				if (p?.Type.TypeKind == TypeKind.Delegate) {
-					var invoke = ((INamedTypeSymbol)p.Type).DelegateInvokeMethod;
-					info.Append(new ThemedTipParagraph(IconIds.Delegate,
-						new ThemedTipText(R.T_DelegateSignature, true).Append(": ")
-							.AddSymbol(invoke.ReturnType, false, __SymbolFormatter)
-							.Append(" ").Append(p.Name, true, false, __SymbolFormatter.Parameter)
-							.AddParameters(invoke.Parameters, __SymbolFormatter)
-						));
-				}
-				foreach (var item in content.Inlines) {
-					if (item.Foreground == null) {
-						item.Foreground = ThemeHelper.ToolTipTextBrush;
-					}
-				}
-				if (p != null && Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Attributes)) {
-					var attrs = p.GetAttributes();
-					if (attrs.Length > 0) {
-						var para = new ThemedTipParagraph(
-							IconIds.Attribute,
-							new ThemedTipText().Append(R.T_AttributeOf).Append(p.Name, true, false, __SymbolFormatter.Parameter).Append(":")
-						);
-						foreach (var attr in attrs) {
-							__SymbolFormatter.Format(para.Content.AppendLine().Inlines, attr, 0);
-						}
-						info.Append(para);
-					}
-				}
-				qiContent.Add(info);
-			}
-			else if (symbol.CandidateSymbols.Length > 0) {
-				var info = new ThemedTipDocument();
-				info.Append(new ThemedTipParagraph(IconIds.ParameterCandidate, new ThemedTipText(R.T_MaybeArgument, true).Append(R.T_MaybeArgumentOf)));
-				foreach (var candidate in symbol.CandidateSymbols) {
-					info.Append(
-						new ThemedTipParagraph(
-							candidate.GetImageId(),
-							new ThemedTipText().AddSymbolDisplayParts(
-								candidate.ToDisplayParts(CodeAnalysisHelper.QuickInfoSymbolDisplayFormat),
-								__SymbolFormatter,
-								argName == null ? argIndex : Int32.MinValue)
-						)
-					);
-				}
-				qiContent.Add(info);
-			}
-			else if (argList.Parent.IsKind(SyntaxKind.InvocationExpression)) {
-				var methodName = ((InvocationExpressionSyntax)argList.Parent).Expression.ToString();
-				if (methodName == "nameof" && argCount == 1) {
-					return;
-				}
-				qiContent.Add(new ThemedTipText(R.T_ArgumentNOf.Replace("<N>", (++argIndex).ToString())).Append(methodName, true));
-			}
-			else {
-				qiContent.Add(R.T_ArgumentN.Replace("<N>", (++argIndex).ToString()));
-			}
-		}
-
-		static void ShowAnonymousTypeInfo(InfoContainer container, ISymbol symbol) {
-			ITypeSymbol t;
-			ImmutableArray<ITypeSymbol>.Builder types = null;
-			switch (symbol.Kind) {
-				case SymbolKind.NamedType:
-					if ((t = symbol as ITypeSymbol).IsAnonymousType
-						&& Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle) == false) {
-						Add(ref types, t);
-					}
-					break;
-				case SymbolKind.Method:
-					var m = symbol as IMethodSymbol;
-					if (m.IsGenericMethod) {
-						foreach (var item in m.TypeArguments) {
-							if (item.IsAnonymousType) {
-								Add(ref types, item);
-							}
-						}
-					}
-					else if (m.MethodKind == MethodKind.Constructor) {
-						symbol = m.ContainingSymbol;
-						goto case SymbolKind.NamedType;
-					}
-					break;
-				case SymbolKind.Property:
-					if ((t = symbol.ContainingType).IsAnonymousType) {
-						Add(ref types, t);
-					}
-					break;
-				default: return;
-			}
-			if (types != null) {
-				ShowAnonymousTypes(container, types, symbol);
-			}
-
-			void ShowAnonymousTypes(InfoContainer c, ImmutableArray<ITypeSymbol>.Builder anonymousTypes, ISymbol currentSymbol) {
-				const string AnonymousNumbers = "abcdefghijklmnopqrstuvwxyz";
-				var d = new ThemedTipDocument().AppendTitle(IconIds.AnonymousType, R.T_AnonymousType);
-				for (var i = 0; i < anonymousTypes.Count; i++) {
-					var type = anonymousTypes[i];
-					var content = new ThemedTipText()
-						.AddSymbol(type, "'" + AnonymousNumbers[i], __SymbolFormatter)
-						.Append(" is { ");
-					foreach (var m in type.GetMembers()) {
-						if (m.Kind != SymbolKind.Property) {
-							continue;
-						}
-						var pt = m.GetReturnType();
-						string alias = null;
-						if (pt?.IsAnonymousType == true) {
-							Add(ref anonymousTypes, pt);
-							alias = "'" + AnonymousNumbers[anonymousTypes.IndexOf(pt)];
-						}
-						content.AddSymbol(pt, alias, __SymbolFormatter)
-							.Append(" ")
-							.AddSymbol(m, m == currentSymbol, __SymbolFormatter)
-							.Append(", ");
-					}
-					var run = content.Inlines.LastInline as System.Windows.Documents.Run;
-					if (run.Text == ", ") {
-						run.Text = " }";
-					}
-					else {
-						run.Text += "}";
-					}
-					d.Append(new ThemedTipParagraph(content));
-				}
-				c.Insert(0, d);
-			}
-
-			void Add(ref ImmutableArray<ITypeSymbol>.Builder list, ITypeSymbol type) {
-				if ((list ?? (list = ImmutableArray.CreateBuilder<ITypeSymbol>())).Contains(type) == false) {
-					list.Add(type);
-				}
-				if (type.ContainingType?.IsAnonymousType == true) {
-					Add(ref list, type);
-				}
-			}
 		}
 
 		static TextBlock ToUIText(ISymbol symbol) {
