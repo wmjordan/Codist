@@ -8,6 +8,7 @@
     <UseCodebase>true</UseCodebase>
     <TargetFrameworkProfile />
     <UICulture>en-US</UICulture>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -20,7 +21,6 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>2.5.0.0</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -132,6 +132,7 @@
     <Compile Include="Controls\SymbolMenu.cs" />
     <Compile Include="Display\EditorWindowDisplayOptimizer.cs" />
     <Compile Include="Display\JumpListEnhancer.cs" />
+    <Compile Include="Helpers\GenericEqualityComparer.cs" />
     <Compile Include="Helpers\VsColorThemeService.cs" />
     <Compile Include="QuickInfo\CSharpCompletionTooltip.cs" />
     <Compile Include="QuickInfo\CSharpQuickInfo.AnonymousType.cs" />
@@ -145,6 +146,7 @@
     <Compile Include="Helpers\FileHelper.cs" />
     <Compile Include="Helpers\InstalledFont.cs" />
     <Compile Include="Helpers\LogHelper.cs" />
+    <Compile Include="Semantics\CodeAnalysisHelper.Icon.cs" />
     <Compile Include="Semantics\CodeAnalysisHelper.Node.cs" />
     <Compile Include="Semantics\ITextBufferParser.cs" />
     <Compile Include="Semantics\SelectedSyntax.cs" />

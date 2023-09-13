@@ -137,7 +137,7 @@ namespace Codist
 			foreach (var item in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
 				if (item.TypeKind == TypeKind.Interface
 					&& item != type
-					&& (directDerive ? item.Interfaces : item.AllInterfaces).Contains(type, NamedTypeComparer.Instance)
+					&& (directDerive ? item.Interfaces : item.AllInterfaces).Contains(type, Comparers.NamedTypeComparer)
 					&& d.TryAdd(item)) {
 					r.Add(item);
 				}
@@ -700,6 +700,11 @@ namespace Codist
 				}
 				return true;
 			};
+		}
+
+		static partial class Comparers
+		{
+			internal static readonly GenericEqualityComparer<SymbolCallerInfo> SymbolCallerInfoComparer = new GenericEqualityComparer<SymbolCallerInfo>((x, y) => x.CallingSymbol == y.CallingSymbol, o => o.CallingSymbol.GetHashCode());
 		}
 	}
 }
