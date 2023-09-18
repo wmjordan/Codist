@@ -15,6 +15,7 @@ namespace Codist.Taggers
 	{
 		static ClassificationTag[] __CommentClassifications;
 		static readonly Dictionary<IClassificationType, bool> __CommentClasses = new Dictionary<IClassificationType, bool>();
+		readonly bool _FullParseAtFirstLoad;
 		ITagAggregator<IClassificationTag> _Aggregator;
 		TaggerResult _Tags;
 		ITextView _TextView;
@@ -45,6 +46,7 @@ namespace Codist.Taggers
 				}
 			}
 
+			_FullParseAtFirstLoad = textView.Roles.Contains(PredefinedTextViewRoles.PreviewTextView) == false;
 			_Buffer = buffer;
 			_TextView = textView;
 			buffer.Changed += TextBuffer_Changed;
@@ -72,15 +74,15 @@ namespace Codist.Taggers
 
 		public IEnumerable<ITagSpan<IClassificationTag>> GetTags(NormalizedSnapshotSpanCollection spans) {
 			if (spans.Count == 0
-			|| Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.SpecialComment) == false
-			|| _Tags is null) {
+				|| Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.SpecialComment) == false
+				|| _Tags is null) {
 				yield break;
 			}
 
 			var snapshot = spans[0].Snapshot;
 			IEnumerable<IMappingTagSpan<IClassificationTag>> tagSpans;
 			try {
-				if (_Tags.LastParsed == 0) {
+				if (_Tags.LastParsed == 0 && _FullParseAtFirstLoad) {
 					// perform a full parse at the first time
 					Debug.WriteLine("Full parse");
 					tagSpans = _Aggregator.GetTags(new SnapshotSpan(snapshot, 0, snapshot.Length));

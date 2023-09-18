@@ -20,6 +20,7 @@ namespace Codist.Taggers
 		}; // used when syntax highlight is disabled
 
 		readonly ClassificationTag[] _Tags;
+		readonly bool _FullParseAtFirstLoad;
 		ITextView _TextView;
 		ITextBuffer _TextBuffer;
 
@@ -27,29 +28,31 @@ namespace Codist.Taggers
 			_Tags = syntaxHighlightEnabled ? HeaderClassificationTypes : DummyHeaderTags;
 			_TextView = textView;
 			_TextBuffer = buffer;
+			_FullParseAtFirstLoad = textView.Roles.Contains(PredefinedTextViewRoles.PreviewTextView) == false;
 			buffer.ContentTypeChanged += Buffer_ContentTypeChanged;
 			textView.Closed += TextView_Closed;
 		}
 
-		protected override bool DoFullParseAtFirstLoad => true;
+		protected override bool DoFullParseAtFirstLoad => _FullParseAtFirstLoad;
 
 		protected override void Parse(SnapshotSpan span, ICollection<TaggedContentSpan> results) {
-			var t = span.GetText();
-			if (t.Length < 1 || t[0] != '#') {
-				Result.ClearRange(span.Start, span.Length);
+			int l = span.Length, start = span.Start;
+			if (l < 1 || span.Start.GetChar() != '#') {
+				Result.ClearRange(start, l);
 				return;
 			}
 			int c = 1, w = 0;
-			for (int i = 1; i < t.Length; i++) {
-				switch (t[i]) {
+			var s = span.Snapshot;
+			for (int i = 1, p = start; i < l; i++, p++) {
+				switch (s[p]) {
 					case '#': if (w == 0) { ++c; } continue;
 					case ' ':
-					case '\t': ++w; continue;
+					case '\t': continue;
 				}
 				break;
 			}
 			w += c;
-			results.Add(new TaggedContentSpan(_Tags[c], span, w, t.Length - w));
+			results.Add(new TaggedContentSpan(_Tags[c], span, w, l - w));
 		}
 
 		static ClassificationTag[] InitHeaderClassificationTypes() {
