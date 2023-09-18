@@ -221,8 +221,11 @@ namespace Codist.Refactorings
 					return true;
 				}
 				if (ctx.Node is StatementSyntax s) {
-					_Title = R.CMD_DeleteAStatement.Replace("<A>", s.Kind().ToString().Replace("Statement", string.Empty));
-					return true;
+					SyntaxNode p;
+					if ((p = ctx.Node.Parent) is StatementSyntax || p?.Kind().IsDeclaration() == true) {
+						_Title = R.CMD_DeleteAStatement.Replace("<A>", s.Kind().ToString().Replace("Statement", string.Empty));
+						return true;
+					}
 				}
 				if (ctx.Node.Parent is SwitchSectionSyntax) {
 					_Title = R.CMD_DeleteSwitchSection;
