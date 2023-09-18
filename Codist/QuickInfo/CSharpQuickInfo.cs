@@ -814,7 +814,7 @@ namespace Codist.QuickInfo
 				var t = f.ContainingType;
 				if (t.MatchTypeName(nameof(Microsoft.VisualStudio.Imaging.KnownImageIds), "Imaging", "VisualStudio", "Microsoft")
 					|| t.MatchTypeName(nameof(IconIds), nameof(Codist))) {
-					qc.Add(new ThemedTipDocument().Append(new ThemedTipParagraph(fieldValue, new ThemedTipText(field.Name))));
+					qc.Add(new ThemedTipDocument().Append(new ThemedTipParagraph(fieldValue, new ThemedTipText(f.Name))));
 				}
 			}
 		}
