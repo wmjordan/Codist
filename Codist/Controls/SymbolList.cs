@@ -172,7 +172,7 @@ namespace Codist.Controls
 					break;
 			}
 			typeNamespace = type.ContainingNamespace;
-			if (typeNamespace?.IsGlobalNamespace != false) {
+			if (typeNamespace.IsExplicitNamespace() == false) {
 				return;
 			}
 			string typeName = type.Name;

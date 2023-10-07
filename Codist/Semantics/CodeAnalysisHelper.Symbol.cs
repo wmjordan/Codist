@@ -185,6 +185,12 @@ namespace Codist
 					?? symbol.ContainingAssembly?.Name;
 		}
 
+		public static bool IsExplicitNamespace(this INamespaceSymbol ns) {
+			return ns?.IsGlobalNamespace == false;
+		}
+		#endregion
+
+		#region Symbol information
 		public static string GetOriginalName(this ISymbol symbol) {
 			switch (symbol.Kind) {
 				case SymbolKind.Method:
@@ -227,9 +233,7 @@ namespace Codist
 				? ps.Name.Replace("[]", String.Empty)
 				: ps.Name;
 		}
-		#endregion
 
-		#region Symbol information
 		public static string GetAbstractionModifier(this ISymbol symbol) {
 			if (symbol.IsAbstract) {
 				if (symbol.Kind == SymbolKind.NamedType && ((INamedTypeSymbol)symbol).TypeKind == TypeKind.Interface) {
@@ -462,7 +466,7 @@ namespace Codist
 				&& nt.IsGenericType
 				&& type.Name == nameof(Nullable)
 				&& type.ContainingNamespace?.Name == "System"
-				&& type.ContainingNamespace.ContainingNamespace?.IsGlobalNamespace == true
+				&& type.ContainingNamespace.ContainingNamespace.IsExplicitNamespace()
 				&& nt.TypeArguments.Length == 1) {
 				return nt.TypeArguments[0];
 			}
@@ -602,12 +606,12 @@ namespace Codist
 		public static bool MatchNamespaces(this ITypeSymbol typeSymbol, params string[] namespaces) {
 			var ns = typeSymbol.ContainingNamespace;
 			foreach (var item in namespaces) {
-				if (ns == null || ns.IsGlobalNamespace || ns.Name != item) {
+				if (ns.IsExplicitNamespace() == false || ns.Name != item) {
 					return false;
 				}
 				ns = ns.ContainingNamespace;
 			}
-			return ns == null || ns.IsGlobalNamespace;
+			return ns.IsExplicitNamespace() == false;
 		}
 
 		public static INamespaceSymbol GetCompilationNamespace(this INamespaceSymbol namespaceSymbol, SemanticModel semanticModel) {
@@ -885,7 +889,7 @@ namespace Codist
 		public static bool IsDisposable(this ISymbol symbol) {
 			return symbol.Name == nameof(IDisposable)
 				&& (symbol = symbol.ContainingNamespace)?.Name == nameof(System)
-				&& symbol.ContainingNamespace?.IsGlobalNamespace != false;
+				&& symbol.ContainingNamespace.IsExplicitNamespace() == false;
 		}
 
 		public static bool IsObsolete(this ISymbol symbol) {
