@@ -10,6 +10,7 @@ namespace Codist.Controls
 	{
 		static readonly ConditionalWeakTable<Brush, VisualBrush> __BrushCache = new ConditionalWeakTable<Brush, VisualBrush>();
 		static readonly Geometry __SquiggleGeometry = Geometry.Parse("M0,0 L1.5,-1.5 4.5,1.5 6,0");
+		static readonly Rect __ViewportRect = new Rect(0.0, -0.6, 6.0, 4.3);
 
 		public static VisualBrush GetOrCreate(Brush colorBrush) {
 			return __BrushCache.GetValue(colorBrush, CreateBrush);
@@ -37,7 +38,7 @@ namespace Codist.Controls
 			var drawingBrush = new DrawingBrush {
 				Stretch = Stretch.None,
 				TileMode = TileMode.Tile,
-				Viewport = new Rect(0.0, -0.6, 6.0, 4.3),
+				Viewport = __ViewportRect,
 				ViewportUnits = BrushMappingMode.Absolute,
 				Drawing = geometryDrawing
 			};
