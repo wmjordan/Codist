@@ -162,7 +162,32 @@ namespace Codist.SmartBars
 		}
 
 		void AddEditAllMatchingCommand() {
-			AddCommand(ToolBar, IconIds.EditMatches, R.CMD_EditMatches, ctx => TextEditorHelper.ExecuteEditorCommand("Edit.InsertCaretsatAllMatching"));
+			AddCommand(ToolBar, IconIds.EditMatches, R.CMD_EditMatches, ctx => {
+				var spans = ctx.View.Selection.SelectedSpans;
+				if (spans.Count < 1) {
+					return;
+				}
+				var s = spans[0];
+				if (s.Length == 0) {
+					return;
+				}
+				var b = ctx.View.GetMultiSelectionBroker();
+				var option = FindOptions.Wrap | FindOptions.OrdinalComparison;
+				var m = Keyboard.Modifiers;
+				if (m.MatchFlags(ModifierKeys.Control)) {
+					option |= FindOptions.MatchCase;
+				}
+				if (m.MatchFlags(ModifierKeys.Shift)) {
+					option |= FindOptions.WholeWord;
+				}
+				var t = s.GetText();
+				if (t.Contains('\n')) {
+					option |= FindOptions.Multiline;
+				}
+				// reverse the Selection direction to prevent adjacent selections being merged together
+				b.AddSelectionRange(ctx.Bar._TextSearchService.FindAll(ctx.View.TextSnapshot.ToSnapshotSpan(), t, option).Select(i => new Selection(i.End, i.Start)));
+				b.TrySetAsPrimarySelection(new Selection(s.End, s.Start));
+			});
 		}
 
 		void AddDiffCommands() {

@@ -1704,7 +1704,9 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
     <value> derived interfaces</value>
   </data>
   <data name="CMD_EditMatches" xml:space="preserve">
-    <value>Edit All Matching</value>
+    <value>Edit All Matching
+Ctrl: Match case
+Shift: Match whole word</value>
   </data>
   <data name="CMD_EncapsulateField" xml:space="preserve">
     <value>Encapsulate field...</value>

@@ -1695,7 +1695,9 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
     <value> 派生接口</value>
   </data>
   <data name="CMD_EditMatches" xml:space="preserve">
-    <value>编辑所有匹配的文本</value>
+    <value>编辑所有匹配的文本
+Ctrl：匹配大小写
+Shift：匹配整个单词</value>
   </data>
   <data name="CMD_EncapsulateField" xml:space="preserve">
     <value>封装字段...</value>
