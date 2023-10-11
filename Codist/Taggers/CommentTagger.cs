@@ -85,7 +85,7 @@ namespace Codist.Taggers
 				if (_Tags.LastParsed == 0 && _FullParseAtFirstLoad) {
 					// perform a full parse at the first time
 					Debug.WriteLine("Full parse");
-					tagSpans = _Aggregator.GetTags(new SnapshotSpan(snapshot, 0, snapshot.Length));
+					tagSpans = _Aggregator.GetTags(snapshot.ToSnapshotSpan());
 					_Tags.LastParsed = snapshot.Length;
 				}
 				else {

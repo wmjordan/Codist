@@ -162,7 +162,7 @@ namespace Codist.Margins
 			public async Task UpdateAsync(SemanticState state, CancellationToken ct) {
 				var rootDoc = await state.Model.SyntaxTree.GetRootAsync(ct).ConfigureAwait(false);
 				var snapshot = state.Snapshot;
-				var root = new CodeBlock(null, CodeMemberType.Root, null, new SnapshotSpan(snapshot, 0, snapshot.Length), 0);
+				var root = new CodeBlock(null, CodeMemberType.Root, null, snapshot.ToSnapshotSpan(), 0);
 				ParseSyntaxNode(snapshot, rootDoc, root, 0, ct);
 				_CodeBlock = root;
 				_Regions = Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.RegionDirective)

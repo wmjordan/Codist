@@ -77,6 +77,9 @@ namespace Codist
 				? new SnapshotSpan(snapshot, span.Start, span.Length)
 				: default;
 		}
+		public static SnapshotSpan ToSnapshotSpan(this ITextSnapshot snapshot) {
+			return new SnapshotSpan(snapshot, 0, snapshot.Length);
+		}
 		public static Span ToSpan(this TextSpan span) {
 			return new Span(span.Start, span.Length);
 		}
