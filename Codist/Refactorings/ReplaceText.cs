@@ -57,7 +57,7 @@ namespace Codist.Refactorings
 				var w = ls.CountLinePrecedingWhitespace();
 				if (p1 >= 0 && p1 <= w) {
 					se = s.End.Position.Position;
-					le = sn.GetLineFromPosition(se - 1);
+					le = sn.GetLineFromPosition(se > 0 ? se - 1 : se);
 					if (le.EndIncludingLineBreak.Position == se || le.End.Position == se) {
 						return IsWhitespaceTrivia(ctx.SemanticContext.Compilation.FindTrivia(ss)) && IsWhitespaceTrivia(ctx.SemanticContext.Compilation.FindTrivia(se));
 					}
