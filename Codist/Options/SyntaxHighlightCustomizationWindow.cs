@@ -637,14 +637,19 @@ namespace Codist.Options
 						t.Append("null");
 						continue;
 					}
-					if (v is bool b) {
-						t.Append(b ? "true" : "false");
+					if (v is bool bo) {
+						t.Append(bo ? "true" : "false");
 					}
 					else if (v is SolidColorBrush sc) {
-						t.Append(sc.Color.ToHexString());
+						t.Append(CreatePreviewBox(new SolidColorBrush(sc.Color)))
+							.Append(sc.Color.ToHexString());
 					}
 					else if (v is Color c) {
-						t.Append(c.ToHexString());
+						t.Append(CreatePreviewBox(new SolidColorBrush(c)))
+							.Append(c.ToHexString());
+					}
+					else if (v is Brush b) {
+						t.Append(CreatePreviewBox(b)).Append(v.ToString());
 					}
 					else if (v is double d) {
 						t.Append(d.ToString());
@@ -664,6 +669,17 @@ namespace Codist.Options
 						t.Append(v.ToString());
 					}
 				}
+			}
+
+			Border CreatePreviewBox(Brush brush) {
+				return new Border {
+					BorderThickness = WpfHelper.TinyMargin,
+					BorderBrush = ThemeHelper.ToolTipTextBrush,
+					Width = ThemeHelper.DefaultIconSize,
+					Height = ThemeHelper.DefaultIconSize,
+					Background = brush,
+					Margin = WpfHelper.GlyphMargin
+				};
 			}
 		}
 
