@@ -963,8 +963,10 @@ namespace Codist.Options
 		}
 
 		void RefreshStyleButton(StyleSettingsButton button) {
-			// todo: update tooltip
 			button.Refresh(_FormatCache);
+			if (button.HasDummyToolTip() == false) {
+				button.SetLazyToolTip(ShowStyleSettingsButtonToolTip);
+			}
 		}
 		#endregion
 
