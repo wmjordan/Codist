@@ -129,6 +129,7 @@ namespace Codist
 		UnnecessaryCode,
 	}
 
+	[Category(Constants.CodeTypes.CPlusPlus)]
 	enum CppStyleTypes
 	{
 		None,
@@ -230,6 +231,7 @@ namespace Codist
 		InlineHint,
 	}
 
+	[Category(Constants.CodeTypes.CSharp)]
 	enum CSharpStyleTypes
 	{
 		None,

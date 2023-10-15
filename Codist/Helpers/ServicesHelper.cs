@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Linq;
 using System.Reflection;
@@ -42,6 +43,9 @@ namespace Codist
 		public IClassifierAggregatorService ClassifierAggregator { get; private set; }
 
 		[Import]
+		public IContentTypeRegistryService ContentTypeRegistry { get; private set; }
+
+		[Import]
 		public Microsoft.VisualStudio.Utilities.IFileExtensionRegistryService FileExtensionRegistry { get; private set; }
 
 		[Import]
@@ -75,7 +79,7 @@ namespace Codist
 
 		void PostInitialization() {
 			#region Create classification types for syntax highlight
-			var e = new ClassificationTypeExporter(ClassificationTypeRegistry);
+			var e = new ClassificationTypeExporter(ClassificationTypeRegistry, ContentTypeRegistry);
 			e.FindClassificationTypes<SymbolMarkerStyleTypes>();
 			e.FindClassificationTypes<CommentStyleTypes>();
 			e.FindClassificationTypes<CSharpStyleTypes>();
@@ -90,21 +94,30 @@ namespace Codist
 
 		sealed class ClassificationTypeExporter
 		{
-			readonly IClassificationTypeRegistryService _Registry;
+			readonly IClassificationTypeRegistryService _Classifications;
+			readonly IContentTypeRegistryService _ContentTypes;
 			readonly List<ExportEntry> _Entries = new List<ExportEntry>();
 
-			public ClassificationTypeExporter(IClassificationTypeRegistryService registry) {
-				_Registry = registry;
+			public ClassificationTypeExporter(IClassificationTypeRegistryService classifications, IContentTypeRegistryService contentTypes) {
+				_Classifications = classifications;
+				_ContentTypes = contentTypes;
 			}
 
 			public void FindClassificationTypes<TStyle>() where TStyle : Enum {
 				var t = typeof(TStyle);
-				var r = _Registry;
+				var r = _Classifications;
+
+				// skip classification types which do not have a corresponding content type
+				var c = t.GetCustomAttribute<CategoryAttribute>();
+				if (c != null && _ContentTypes.GetContentType(c.Category) == null) {
+					return;
+				}
+
 				foreach (var field in t.GetFields()) {
 					var name = field.GetCustomAttribute<ClassificationTypeAttribute>()?.ClassificationTypeNames;
 					if (String.IsNullOrEmpty(name)
 						|| r.GetClassificationType(name) != null
-						|| field.GetCustomAttribute<System.ComponentModel.InheritanceAttribute>() != null) {
+						|| field.GetCustomAttribute<InheritanceAttribute>() != null) {
 						continue;
 					}
 					var baseNames = new List<string>(field.GetCustomAttributes<BaseDefinitionAttribute>().Select(d => d.BaseDefinition).Where(i => String.IsNullOrEmpty(i) == false));
@@ -115,7 +128,7 @@ namespace Codist
 			public void ExportClassificationTypes() {
 				var e = 0;
 				int lastExported;
-				var r = _Registry;
+				var r = _Classifications;
 				do {
 					lastExported = e;
 					foreach (var item in _Entries) {
@@ -129,11 +142,10 @@ namespace Codist
 						}
 						else {
 							var cts = item.BaseNames.ConvertAll(r.GetClassificationType);
-							if (cts.TrueForAll(i => i != null)) {
-								r.CreateClassificationType(item.Name, cts);
-								e++;
-								item.Exported = true;
-							}
+							cts.RemoveAll(i => i == null);
+							r.CreateClassificationType(item.Name, cts);
+							e++;
+							item.Exported = true;
 						}
 					}
 				}
