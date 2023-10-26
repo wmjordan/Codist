@@ -112,31 +112,33 @@ namespace Codist
 
 			#region Containing symbol
 			var cs = s.ContainingSymbol;
+			ThemedTipText b; // text block for symbol
+			INamedTypeSymbol ct; // containing type
 			if (cs != null) {
 				var showNs = Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.SymbolLocation) == false && cs.Kind == SymbolKind.Namespace;
 				var showContainer = showNs == false && s.Kind != SymbolKind.Namespace && cs.Kind != SymbolKind.Namespace;
-				var csb = new ThemedTipText { FontSize = ThemeHelper.ToolTipFontSize, FontFamily = ThemeHelper.ToolTipFont };
+				b = new ThemedTipText { FontSize = ThemeHelper.ToolTipFontSize, FontFamily = ThemeHelper.ToolTipFont };
 				if (showContainer) {
-					csb.Append(ThemeHelper.GetImage(cs.GetImageId()).WrapMargin(WpfHelper.GlyphMargin));
+					b.Append(ThemeHelper.GetImage(cs.GetImageId()).WrapMargin(WpfHelper.GlyphMargin));
 				}
-				if (cs is INamedTypeSymbol ct && (ct = ct.ContainingType) != null) {
-					ShowContainingTypes(ct, csb);
+				if ((ct = cs.GetUnderlyingSymbol().ContainingType) != null) {
+					ShowContainingTypes(ct, b);
 				}
 
 				if (showContainer) {
-					csb.AddSymbol(cs, false, this).Append(" ");
+					b.AddSymbol(cs, false, this).Append(" ");
 				}
 
-				p.Add(ShowSymbolDeclaration(s, csb, true, false));
+				p.Add(ShowSymbolDeclaration(s, b, true, false));
 				if (showNs && ((INamespaceSymbol)cs).IsGlobalNamespace == false) {
-					var nsb = new ThemedTipText { FontSize = ThemeHelper.ToolTipFontSize, FontFamily = ThemeHelper.ToolTipFont }.Append(ThemeHelper.GetImage(IconIds.Namespace)
+					b = new ThemedTipText { FontSize = ThemeHelper.ToolTipFontSize, FontFamily = ThemeHelper.ToolTipFont }.Append(ThemeHelper.GetImage(IconIds.Namespace)
 						.WrapMargin(WpfHelper.GlyphMargin));
-					ShowContainingNamespace(symbol, nsb);
-					p.Add(nsb);
+					ShowContainingNamespace(symbol, b);
+					p.Add(b);
 				}
 				else if (s.Kind == SymbolKind.Method
 					&& (m = (IMethodSymbol)s).MethodKind == MethodKind.ReducedExtension) {
-					csb.AddImage(IconIds.ExtensionMethod)
+					b.AddImage(IconIds.ExtensionMethod)
 						.Append(" ")
 						.AddSymbol(m.ReducedFrom.Parameters[0].Type, false, this);
 				}
@@ -153,11 +155,15 @@ namespace Codist
 				}
 			}
 			else if (s.Kind != SymbolKind.Method || ((IMethodSymbol)s).IsTypeSpecialMethod() == false) {
-				p.Add(new ThemedTipText { FontSize = ThemeHelper.ToolTipFontSize, FontFamily = ThemeHelper.ToolTipFont }
+				b = new ThemedTipText { FontSize = ThemeHelper.ToolTipFontSize, FontFamily = ThemeHelper.ToolTipFont }
 					.Append(ThemeHelper.GetImage(IconIds.Return).WrapMargin(WpfHelper.GlyphMargin))
-					.Append(GetRefType(s), Keyword)
-					.AddSymbol(rt, false, this)
-					.Append(rt.IsAwaitable() ? $" ({R.T_Awaitable})" : String.Empty));
+					.Append(GetRefType(s), Keyword);
+				if ((ct = rt.GetUnderlyingSymbol().ContainingType) != null) {
+					ShowContainingTypes(ct, b);
+				}
+				b.AddSymbol(rt, false, this)
+					.Append(rt.IsAwaitable() ? $" ({R.T_Awaitable})" : String.Empty);
+				p.Add(b);
 			}
 			#endregion
 
