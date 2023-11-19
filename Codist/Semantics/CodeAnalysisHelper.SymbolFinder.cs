@@ -676,18 +676,12 @@ namespace Codist
 					if (matchCase) {
 						return name => name == keywords;
 					}
-					else {
-						return name => String.Equals(name, keywords, StringComparison.OrdinalIgnoreCase);
-					}
+					return name => String.Equals(name, keywords, StringComparison.OrdinalIgnoreCase);
 				}
-				else {
-					if (matchCase) {
-						return name => name.IndexOf(keywords, StringComparison.Ordinal) != -1;
-					}
-					else {
-						return name => name.IndexOf(keywords, StringComparison.OrdinalIgnoreCase) != -1;
-					}
+				if (matchCase) {
+					return name => name.IndexOf(keywords, StringComparison.Ordinal) != -1;
 				}
+				return name => name.IndexOf(keywords, StringComparison.OrdinalIgnoreCase) != -1;
 			}
 			return name => {
 				int i = 0;
