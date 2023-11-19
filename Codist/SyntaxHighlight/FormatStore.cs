@@ -240,8 +240,8 @@ namespace Codist.SyntaxHighlight
 				&& c.EndsWith("{LegacyMarker}", StringComparison.Ordinal) == false
 				&& c != "quickinfo-bold"
 				&& c != "sighelp-documentation"
-				&& c != "Formal Language Priority"
-				&& c != "Natural Language Priority"
+				&& c != "formal language"
+				&& c != "natural language"
 				&& c != "mismatched brace"
 				&& c.StartsWith("brace matching", StringComparison.Ordinal) == false;
 		}
