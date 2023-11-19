@@ -10,6 +10,7 @@ using Codist.Margins;
 using Codist.SyntaxHighlight;
 using Codist.Taggers;
 using Newtonsoft.Json;
+using System.Windows;
 
 namespace Codist
 {
@@ -269,10 +270,27 @@ namespace Codist
 				Instance.Styles = config.Styles;
 				return Instance;
 			}
-			Display.LayoutOverride.Reload(config.DisplayOptimizations);
-			Display.ResourceMonitor.Reload(config.DisplayOptimizations);
+
+			if (Application.Current.MainWindow.Visibility == Visibility.Visible) {
+				UpdateDisplay(config);
+			}
+			else {
+				Application.Current.MainWindow.IsVisibleChanged += MainWindow_IsVisibleChanged;
+			}
 			"Config loaded".Log();
 			return config;
+		}
+
+		static void UpdateDisplay(Config config) {
+			Display.LayoutOverride.Reload(config.DisplayOptimizations);
+			Display.ResourceMonitor.Reload(config.DisplayOptimizations);
+		}
+
+		static void MainWindow_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) {
+			if ((bool)e.NewValue) {
+				Application.Current.MainWindow.IsVisibleChanged -= MainWindow_IsVisibleChanged;
+				UpdateDisplay(Instance);
+			}
 		}
 
 		public static void ResetStyles() {
