@@ -161,6 +161,15 @@ namespace Codist.SmartBars
 			});
 		}
 
+		protected void AddCommentCommand(System.Windows.Controls.ToolBar toolBar) {
+			AddCommand(toolBar, IconIds.Comment, R.CMD_CommentSelection, ctx => {
+				if (ctx.RightClick) {
+					ctx.View.ExpandSelectionToLine();
+				}
+				TextEditorHelper.ExecuteEditorCommand("Edit.CommentSelection");
+			});
+		}
+
 		void AddEditAllMatchingCommand() {
 			AddCommand(ToolBar, IconIds.EditMatches, R.CMD_EditMatches, ctx => {
 				var spans = ctx.View.Selection.SelectedSpans;

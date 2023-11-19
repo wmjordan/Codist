@@ -37,6 +37,8 @@ namespace Codist.SmartBars
 			view.Closed += View_Closed;
 		}
 
+		protected override BarType Type => BarType.CSharp;
+
 		ToolBar MyToolBar => ToolBar2;
 
 		protected override async Task AddCommandsAsync(CancellationToken cancellationToken) {
@@ -357,12 +359,7 @@ namespace Codist.SmartBars
 		}
 
 		void AddCommentCommands() {
-			AddCommand(MyToolBar, IconIds.Comment, R.CMD_CommentSelection, ctx => {
-				if (ctx.RightClick) {
-					ctx.View.ExpandSelectionToLine();
-				}
-				TextEditorHelper.ExecuteEditorCommand("Edit.CommentSelection");
-			});
+			AddCommentCommand(MyToolBar);
 			if (View.TryGetFirstSelectionSpan(out var ss) && ss.Length < 0x2000) {
 				foreach (var t in _Context.Compilation.DescendantTrivia(ss.ToTextSpan())) {
 					if (t.IsKind(SyntaxKind.SingleLineCommentTrivia)) {
@@ -462,12 +459,7 @@ namespace Codist.SmartBars
 			AddCommand(MyToolBar, IconIds.TagItalic, R.CMD_TagXmlDocI, ctx => WrapWith(ctx, "<i>", "</i>", true));
 			AddCommand(MyToolBar, IconIds.TagUnderline, R.CMD_TagXmlDocU, ctx => WrapWith(ctx, "<u>", "</u>", true));
 			AddCommand(MyToolBar, IconIds.TagHyperLink, R.CMD_TagXmlDocA, MakeUrl);
-			AddCommand(MyToolBar, IconIds.Comment, R.CMD_CommentSelection, ctx => {
-				if (ctx.RightClick) {
-					ctx.View.ExpandSelectionToLine();
-				}
-				TextEditorHelper.ExecuteEditorCommand("Edit.CommentSelection");
-			});
+			AddCommentCommand(MyToolBar);
 		}
 
 		void WrapXmlDocSee(CommandContext ctx) {

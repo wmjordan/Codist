@@ -85,6 +85,7 @@ namespace Codist.SmartBars
 		protected IWpfTextView View => _View;
 		protected ITextSearchService2 TextSearchService => _TextSearchService;
 		protected CancellationToken CancellationToken => _Cancellation?.Token ?? new CancellationToken(true);
+		protected virtual BarType Type => BarType.General;
 
 		protected void AddCommand(ToolBar toolBar, int imageId, string tooltip, Action<CommandContext> handler) {
 			toolBar.Items.Add(new CommandButton(this, imageId, tooltip, handler));
@@ -103,6 +104,9 @@ namespace Codist.SmartBars
 				AddPasteCommand();
 				AddDuplicateCommand();
 				AddDeleteCommand();
+				if (Type.CeqAny(BarType.CSharp, BarType.Cpp) == false) {
+					AddCommentCommand(ToolBar);
+				}
 				AddSpecialFormatCommand();
 				AddWrapTextCommand();
 				AddEditAllMatchingCommand();
@@ -609,6 +613,15 @@ namespace Codist.SmartBars
 					bar.HideToolBar();
 				}
 			}
+		}
+
+		internal enum BarType
+		{
+			General,
+			CSharp,
+			Cpp,
+			Markdown,
+			Output
 		}
 	}
 }

@@ -14,6 +14,8 @@ namespace Codist.SmartBars
 			textView.Closed += TextView_Closed;
 		}
 
+		protected override BarType Type => BarType.Cpp;
+
 		ToolBar MyToolBar => ToolBar2;
 
 		protected override void AddCommands() {
@@ -30,12 +32,7 @@ namespace Codist.SmartBars
 			});
 			if (isReadOnly == false) {
 				//AddEditorCommand(MyToolBar, KnownImageIds.IntellisenseLightBulb, "EditorContextMenus.CodeWindow.QuickActionsForPosition", "Quick actions for position");
-				AddCommand(MyToolBar, IconIds.Comment, R.CMD_CommentSelection, ctx => {
-					if (ctx.RightClick) {
-						ctx.View.ExpandSelectionToLine();
-					}
-					TextEditorHelper.ExecuteEditorCommand("Edit.CommentSelection");
-				});
+				AddCommentCommand(MyToolBar);
 				AddEditorCommand(MyToolBar, IconIds.Uncomment, "Edit.UncommentSelection", R.CMD_UncommentSelection);
 			}
 		}

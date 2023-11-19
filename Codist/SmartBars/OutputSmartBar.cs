@@ -15,6 +15,8 @@ namespace Codist.SmartBars
 		public OutputSmartBar(IWpfTextView textView, Microsoft.VisualStudio.Text.Operations.ITextSearchService2 textSearchService) : base(textView, textSearchService) {
 		}
 
+		protected override BarType Type => BarType.Output;
+
 		ToolBar MyToolBar => ToolBar;
 
 		protected override void AddCommands() {

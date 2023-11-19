@@ -12,6 +12,8 @@ namespace Codist.SmartBars
 		public MarkdownSmartBar(IWpfTextView textView, Microsoft.VisualStudio.Text.Operations.ITextSearchService2 textSearchService) : base(textView, textSearchService) {
 		}
 
+		protected override BarType Type => BarType.Markdown;
+
 		ToolBar MyToolBar => ToolBar2;
 
 		protected override void AddCommands() {
