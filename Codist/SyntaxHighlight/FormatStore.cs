@@ -438,7 +438,7 @@ namespace Codist.SyntaxHighlight
 					var boldBrace = Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.SpecialPunctuation);
 					_PropertiesCache.Clear();
 					foreach (var item in formats) {
-						if (item.IsFormattableClassificationType() && _Traces.ContainsKey(GetEditorFormatMapKey(item))) {
+						if (item.IsFormattableClassificationType()) {
 							var p = _ClassificationFormatMap.GetTextProperties(item);
 							$"[{_Category}] refresh classification {item.Classification} ({p.Print()})".Log();
 							// hack: workaround for punctuation format properties that voids settings of semanticBrace or boldBrace
@@ -1185,7 +1185,7 @@ namespace Codist.SyntaxHighlight
 						ct = style.MakeTypeface();
 						if (ct != null
 							&& AreTypefaceEqual(current.GetTypeface(), ct) == false
-							&& AreTypefaceEqual(current.GetTypeface(), highlighter._DefaultTypeface) == false) {
+							&& AreTypefaceEqual(ct, highlighter._DefaultTypeface) == false) {
 							_FormatChanges |= FormatChanges.Typeface;
 							Changes.SetTypeface(ct);
 							current.SetTypeface(ct);
