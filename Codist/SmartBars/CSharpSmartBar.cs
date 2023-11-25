@@ -495,7 +495,7 @@ namespace Codist.SmartBars
 					edit.Replace(item, (SyntaxFacts.GetKeywordKind(t) != SyntaxKind.None ? "<see langword=\"" : "<see cref=\"") + t + "\"/>");
 					NEXT:;
 				}
-				if (t != null && Keyboard.Modifiers.MatchFlags(ModifierKeys.Control | ModifierKeys.Shift)
+				if (t != null && ctx.ModifierKeys.MatchFlags(ModifierKeys.Control | ModifierKeys.Shift)
 					&& FindNext(arg.ctx, t) == false) {
 					arg.ctx.HideToolBar();
 				}

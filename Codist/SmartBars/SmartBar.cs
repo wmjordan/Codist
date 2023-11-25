@@ -381,6 +381,9 @@ namespace Codist.SmartBars
 
 		protected sealed class CommandContext
 		{
+			const ModifierKeys UnknownModifier = (ModifierKeys)(-1);
+			ModifierKeys _ModifierKeys = UnknownModifier;
+
 			public CommandContext(SmartBar bar, Control control) {
 				Bar = bar;
 				Sender = control;
@@ -395,6 +398,7 @@ namespace Codist.SmartBars
 			public IWpfTextView View => Bar.View;
 			public ITextSearchService2 TextSearchService => Bar.TextSearchService;
 			public CancellationToken CancellationToken => Bar._Cancellation.GetToken();
+			public ModifierKeys ModifierKeys => _ModifierKeys == UnknownModifier ? (_ModifierKeys = Keyboard.Modifiers) : _ModifierKeys;
 
 			public void HideToolBar() {
 				Bar.HideToolBar();

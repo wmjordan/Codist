@@ -31,7 +31,7 @@ namespace Codist.SmartBars
 			}
 			ctx.KeepToolBar(false);
 			TextEditorHelper.ExecuteEditorCommand(command);
-			if (Keyboard.Modifiers.HasAnyFlag(ModifierKeys.Control | ModifierKeys.Shift)
+			if (ctx.ModifierKeys.HasAnyFlag(ModifierKeys.Control | ModifierKeys.Shift)
 				&& FindNext(ctx, text) == false) {
 				ctx.HideToolBar();
 			}
@@ -55,7 +55,7 @@ namespace Codist.SmartBars
 				return null;
 			});
 			if (edited != null) {
-				if (t != null && Keyboard.Modifiers.HasAnyFlag(ModifierKeys.Control | ModifierKeys.Shift) && FindNext(ctx, t) == false) {
+				if (t != null && ctx.ModifierKeys.HasAnyFlag(ModifierKeys.Control | ModifierKeys.Shift) && FindNext(ctx, t) == false) {
 					ctx.HideToolBar();
 				}
 				else if (selectModified) {
@@ -71,7 +71,7 @@ namespace Codist.SmartBars
 			string s = ctx.View.GetFirstSelectionText();
 			ctx.KeepToolBar(false);
 			var m = ctx.View.WrapWith(prefix, suffix);
-			if (s != null && Keyboard.Modifiers.HasAnyFlag(ModifierKeys.Control | ModifierKeys.Shift)) {
+			if (s != null && ctx.ModifierKeys.HasAnyFlag(ModifierKeys.Control | ModifierKeys.Shift)) {
 				if (FindNext(ctx, s) == false) {
 					ctx.HideToolBar();
 				}
@@ -85,7 +85,7 @@ namespace Codist.SmartBars
 			string s = ctx.View.GetFirstSelectionText();
 			ctx.KeepToolBar(false);
 			var m = ctx.View.WrapWith(wrapText);
-			if (s != null && Keyboard.Modifiers.HasAnyFlag(ModifierKeys.Control | ModifierKeys.Shift)
+			if (s != null && ctx.ModifierKeys.HasAnyFlag(ModifierKeys.Control | ModifierKeys.Shift)
 				&& FindNext(ctx, s) == false) {
 				ctx.HideToolBar();
 			}
@@ -101,7 +101,7 @@ namespace Codist.SmartBars
 					ctx.View.ExpandSelectionToLine();
 				}
 
-				if (Keyboard.Modifiers.MatchFlags(ModifierKeys.Control)) {
+				if (ctx.ModifierKeys.MatchFlags(ModifierKeys.Control)) {
 					ctx.View.CopySelectionWithoutIndentation();
 				}
 				else {
@@ -116,7 +116,7 @@ namespace Codist.SmartBars
 					ctx.View.ExpandSelectionToLine();
 				}
 
-				if (Keyboard.Modifiers.MatchFlags(ModifierKeys.Control)) {
+				if (ctx.ModifierKeys.MatchFlags(ModifierKeys.Control)) {
 					ctx.View.CopySelectionWithoutIndentation();
 					TextEditorHelper.ExecuteEditorCommand("Edit.Delete");
 				}
@@ -184,7 +184,7 @@ namespace Codist.SmartBars
 				}
 				var b = ctx.View.GetMultiSelectionBroker();
 				var option = FindOptions.Wrap | FindOptions.OrdinalComparison;
-				var m = Keyboard.Modifiers;
+				var m = ctx.ModifierKeys;
 				if (m.MatchFlags(ModifierKeys.Control)) {
 					option |= FindOptions.MatchCase;
 				}
@@ -219,14 +219,14 @@ namespace Codist.SmartBars
 				return;
 			}
 			ctx.KeepToolBar(false);
-			if (Keyboard.Modifiers == ModifierKeys.Alt) {
+			if (ctx.ModifierKeys == ModifierKeys.Alt) {
 				TextEditorHelper.ExecuteEditorCommand("Edit.InsertNextMatchingCaret");
 				return;
 			}
 			var r = ctx.TextSearchService.Find(ctx.View.Selection.StreamSelectionSpan.End.Position, t,
 				FindOptions.Wrap
-					.SetFlags(FindOptions.MatchCase, Keyboard.Modifiers.MatchFlags(ModifierKeys.Control))
-					.SetFlags(FindOptions.WholeWord, Keyboard.Modifiers.MatchFlags(ModifierKeys.Shift))
+					.SetFlags(FindOptions.MatchCase, ctx.ModifierKeys.MatchFlags(ModifierKeys.Control))
+					.SetFlags(FindOptions.WholeWord, ctx.ModifierKeys.MatchFlags(ModifierKeys.Shift))
 					.SetFlags(FindOptions.Multiline, t.IndexOf('\n') >= 0)
 				);
 			if (r.HasValue) {
@@ -415,7 +415,7 @@ namespace Codist.SmartBars
 			if (CodistPackage.DebuggerStatus != DebuggerStatus.Design) {
 				AddCommand(ToolBar2, IconIds.RunToCursor, R.CMD_RunToCursor, ctx => {
 					TextEditorHelper.ExecuteEditorCommand(
-						Keyboard.Modifiers.MatchFlags(ModifierKeys.Control) ? "Debug.RunFlaggedThreadsToCursor"
+						ctx.ModifierKeys.MatchFlags(ModifierKeys.Control) ? "Debug.RunFlaggedThreadsToCursor"
 							: ctx.RightClick ? "Debug.Threads"
 							: "Debug.RunToCursor");
 				});
