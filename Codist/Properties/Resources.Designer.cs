@@ -3151,7 +3151,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Recommended donation value is $19.99. But you can modify the amount to any value if you like.
+        ///   Looks up a localized string similar to Recommended donation value is $19.99.
         /// </summary>
         internal static string OT_DonateLinkTip {
             get {
@@ -5009,7 +5009,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to This page defines text items wrapping selection which can be accessed by right clicking the &quot;Wrap select with text&quot; button on Smart Bar.
+        ///   Looks up a localized string similar to This page defines text items wrapping selection which can be accessed by right clicking the &quot;Wrap selection with text&quot; button on Smart Bar.
         /// </summary>
         internal static string OT_WrapTextNote {
             get {

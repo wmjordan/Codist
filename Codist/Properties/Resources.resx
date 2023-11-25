@@ -541,7 +541,7 @@ Use space to separate keywords.</value>
     <value>Donate via PayPal</value>
   </data>
   <data name="OT_DonateLinkTip" xml:space="preserve">
-    <value>Recommended donation value is $19.99. But you can modify the amount to any value if you like</value>
+    <value>Recommended donation value is $19.99</value>
   </data>
   <data name="OT_FeatureChangesTip" xml:space="preserve">
     <value>Changes will take place on NEWLY OPENED document windows. Currently opened document windows WILL NOT BE AFFECTED</value>
@@ -1840,7 +1840,7 @@ ALL existing items will be REPLACE by default items.</value>
     <value>Wrap Text</value>
   </data>
   <data name="OT_WrapTextNote" xml:space="preserve">
-    <value>This page defines text items wrapping selection which can be accessed by right clicking the "Wrap select with text" button on Smart Bar</value>
+    <value>This page defines text items wrapping selection which can be accessed by right clicking the "Wrap selection with text" button on Smart Bar</value>
   </data>
   <data name="OT_WrapTextPattern" xml:space="preserve">
     <value>Wrap text pattern</value>

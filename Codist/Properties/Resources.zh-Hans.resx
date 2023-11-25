@@ -915,7 +915,7 @@ Shift：粘贴并选中下一项（整个单词）</value>
     <value>提供高级语法突出显示和注释标记器</value>
   </data>
   <data name="OT_DonateLinkTip" xml:space="preserve">
-    <value>建议的捐赠金额为 49 人民币，但是，您可以根据您的经济状况，爱捐多少就捐多少</value>
+    <value>建议的捐赠金额为人民币 49 元，但是，您可以根据您的经济状况，爱捐多少就捐多少</value>
   </data>
   <data name="OT_FeatureChangesTip" xml:space="preserve">
     <value>更改将应用到新打开的文档窗口上，当前打开的文档窗口将不受影响</value>
