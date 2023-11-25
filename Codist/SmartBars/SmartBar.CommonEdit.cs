@@ -162,12 +162,14 @@ namespace Codist.SmartBars
 		}
 
 		protected void AddCommentCommand(System.Windows.Controls.ToolBar toolBar) {
-			AddCommand(toolBar, IconIds.Comment, R.CMD_CommentSelection, ctx => {
-				if (ctx.RightClick) {
-					ctx.View.ExpandSelectionToLine();
-				}
-				TextEditorHelper.ExecuteEditorCommand("Edit.CommentSelection");
-			});
+			if (CodistPackage.DTE.Commands.Item("Edit.CommentSelection").IsAvailable) {
+				AddCommand(toolBar, IconIds.Comment, R.CMD_CommentSelection, ctx => {
+					if (ctx.RightClick) {
+						ctx.View.ExpandSelectionToLine();
+					}
+					TextEditorHelper.ExecuteEditorCommand("Edit.CommentSelection");
+				});
+			}
 		}
 
 		void AddEditAllMatchingCommand() {
