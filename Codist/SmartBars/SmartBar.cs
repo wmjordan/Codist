@@ -456,21 +456,19 @@ namespace Codist.SmartBars
 					}
 				}
 				else {
-					if (ContextMenu != null && ContextMenu.GetIsRightClicked() == false) {
+					if (ContextMenu?.GetIsRightClicked() == false) {
 						ContextMenu.IsOpen = true;
 						return;
 					}
 					ClearContextMenu();
 					var m = CreateContextMenuFromMenuFactory(ctx);
 				}
-				if (_Bar != null && ctx.KeepToolBarOnClick == false && ContextMenu?.IsOpen != true) {
-					_Bar.HideToolBar();
-				}
+				TryHideToolBar(ctx);
 			}
 
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void CommandButton_MouseRightButtonUp(object sender, MouseButtonEventArgs e) {
-				if (ContextMenu != null && ContextMenu.GetIsRightClicked()) {
+				if (ContextMenu?.GetIsRightClicked() == true) {
 					ContextMenu.IsOpen = true;
 					e.Handled = true;
 					return;
@@ -478,7 +476,6 @@ namespace Codist.SmartBars
 				var ctx = new CommandContext(_Bar, this, true);
 				Action<CommandContext> clickHandler;
 				Func<CommandContext, Task> asyncClickHandler;
-				SmartBar bar;
 				if (_MenuFactory != null) {
 					ClearContextMenu();
 					var m = CreateContextMenuFromMenuFactory(ctx);
@@ -495,10 +492,15 @@ namespace Codist.SmartBars
 						MessageWindow.Error(ex);
 					}
 				}
+				TryHideToolBar(ctx);
+				e.Handled = true;
+			}
+
+			void TryHideToolBar(CommandContext ctx) {
+				SmartBar bar;
 				if ((bar = _Bar) != null && ctx.KeepToolBarOnClick == false && ContextMenu?.IsOpen != true) {
 					bar.HideToolBar();
 				}
-				e.Handled = true;
 			}
 
 			protected override AutomationPeer OnCreateAutomationPeer() {

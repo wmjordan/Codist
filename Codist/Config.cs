@@ -4,13 +4,13 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Windows;
 using System.Windows.Media;
 using CLR;
 using Codist.Margins;
 using Codist.SyntaxHighlight;
 using Codist.Taggers;
 using Newtonsoft.Json;
-using System.Windows;
 
 namespace Codist
 {
