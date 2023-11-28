@@ -193,6 +193,7 @@
     <Compile Include="Refactorings\ReplaceToken.cs" />
     <Compile Include="Refactorings\ReplaceNode.Statements.cs" />
     <Compile Include="SharedDictionaryManager.cs" />
+    <Compile Include="SmartBars\TextSmartBar.cs" />
     <Compile Include="SyntaxHighlight\CodeStyle.cs" />
     <Compile Include="SyntaxHighlight\CommentStyle.cs" />
     <Compile Include="SyntaxHighlight\CppStyle.cs" />

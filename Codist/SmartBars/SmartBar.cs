@@ -14,6 +14,7 @@ using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Operations;
 using TH = Microsoft.VisualStudio.Shell.ThreadHelper;
 using VsBrushes = Microsoft.VisualStudio.Shell.VsBrushes;
+using R = Codist.Properties.Resources;
 
 namespace Codist.SmartBars
 {
@@ -96,6 +97,7 @@ namespace Codist.SmartBars
 
 		protected virtual void AddCommands() {
 			var readOnly = _View.IsCaretInReadOnlyRegion();
+			var multiline = _View.IsMultilineSelected();
 			if (readOnly == false) {
 				AddCutCommand();
 			}
@@ -107,6 +109,9 @@ namespace Codist.SmartBars
 				if (Type.CeqAny(BarType.CSharp, BarType.Cpp) == false) {
 					AddCommentCommand(ToolBar);
 				}
+				if (multiline && Type.CeqAny(BarType.Markdown, BarType.PlainText)) {
+					AddCommand(ToolBar, IconIds.JoinLines, R.CMD_JoinLines, ctx => ctx.View.JoinSelectedLines());
+				}
 				AddSpecialFormatCommand();
 				AddWrapTextCommand();
 				AddEditAllMatchingCommand();
@@ -114,7 +119,7 @@ namespace Codist.SmartBars
 			if (_IsDiffWindow) {
 				AddDiffCommands();
 			}
-			if (_View.IsMultilineSelected() == false) {
+			if (multiline == false) {
 				AddFindAndReplaceCommands();
 				AddViewInBrowserCommand();
 				if (Config.Instance.DeveloperOptions.MatchFlags(DeveloperOptions.ShowSyntaxClassificationInfo)) {
@@ -627,6 +632,7 @@ namespace Codist.SmartBars
 			CSharp,
 			Cpp,
 			Markdown,
+			PlainText,
 			Output
 		}
 	}

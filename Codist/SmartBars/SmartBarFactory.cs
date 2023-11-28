@@ -48,6 +48,9 @@ namespace Codist.SmartBars
 			else if (textView.TextBuffer.LikeContentType(Constants.CodeTypes.Markdown)) {
 				new MarkdownSmartBar(textView, _TextSearchService);
 			}
+			else if (contentType.TypeName == Constants.CodeTypes.PlainText) {
+				new TextSmartBar(textView, _TextSearchService);
+			}
 			else if (contentType.IsOfType(Constants.CodeTypes.Output)
 				|| contentType.IsOfType(Constants.CodeTypes.FindResults)
 				|| contentType.IsOfType(Constants.CodeTypes.InteractiveContent)
