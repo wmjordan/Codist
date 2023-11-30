@@ -142,13 +142,20 @@ namespace Codist.SmartBars
 								goto case SyntaxKind.IdentifierToken;
 							}
 							if (View.Selection.StreamSelectionSpan.Length < 4
-								&& (tokenKind >= SyntaxKind.TildeToken && tokenKind <= SyntaxKind.PercentEqualsToken
+								&& (tokenKind.IsBetween(SyntaxKind.TildeToken, SyntaxKind.PercentEqualsToken)
 									|| tokenKind.CeqAny(SyntaxKind.IsKeyword, SyntaxKind.AsKeyword))
 								&& SelectionIs<SyntaxNode>()) {
 								AddCommand(MyToolBar, IconIds.SelectBlock, R.CMD_SelectBlock, SelectNodeAsKind<SyntaxNode>);
 							}
-							else if (tokenKind >= SyntaxKind.NumericLiteralToken && tokenKind <= SyntaxKind.StringLiteralToken) {
+							else if (tokenKind.IsBetween(SyntaxKind.NumericLiteralToken, SyntaxKind.StringLiteralToken)
+								|| tokenKind.CeqAny(CodeAnalysisHelper.SingleLineRawStringLiteralToken, CodeAnalysisHelper.MultiLineRawStringLiteralToken)) {
+								if (token.Span.Length > View.Selection.StreamSelectionSpan.Length) {
+									AddCommand(MyToolBar, IconIds.SelectText, R.CMD_SelectBlock, SelectNodeAsKind<SyntaxNode>);
+								}
 								AddEditorCommand(MyToolBar, IconIds.FindReference, "Edit.FindAllReferences", R.CMD_FindAllReferences);
+							}
+							else if (tokenKind.CeqAny(SyntaxKind.InterpolatedStringStartToken, SyntaxKind.InterpolatedStringEndToken, SyntaxKind.InterpolatedStringTextToken, SyntaxKind.InterpolatedStringToken)) {
+								AddCommand(MyToolBar, IconIds.SelectText, R.CMD_SelectBlock, SelectNodeAsKind<InterpolatedStringExpressionSyntax>);
 							}
 							break;
 					}

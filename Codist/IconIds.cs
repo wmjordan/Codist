@@ -187,6 +187,7 @@ namespace Codist
 		public const int QuickAction = KnownImageIds.IntellisenseLightBulb;
 		public const int SelectCode = KnownImageIds.BlockSelection;
 		public const int SelectBlock = KnownImageIds.MatchBrace;
+		public const int SelectText = KnownImageIds.RectangleSelection;
 		public const int SelectAll = KnownImageIds.SelectAll;
 		public const int Open = KnownImageIds.Open;
 		public const int OpenFolder = KnownImageIds.OpenFolder;
