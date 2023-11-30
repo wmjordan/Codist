@@ -2644,4 +2644,7 @@ Ctrl: 仅直接继承的接口</value>
   <data name="CMD_DeleteSwitchSection" xml:space="preserve">
     <value>删除 Switch 条件</value>
   </data>
+  <data name="CMD_SortLines" xml:space="preserve">
+    <value>Sort Lines</value>
+  </data>
 </root>

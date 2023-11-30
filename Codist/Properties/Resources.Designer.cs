@@ -1717,6 +1717,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Sort Lines.
+        /// </summary>
+        internal static string CMD_SortLines {
+            get {
+                return ResourceManager.GetString("CMD_SortLines", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Split to Nested &lt;if&gt;.
         /// </summary>
         internal static string CMD_SplitToNested {

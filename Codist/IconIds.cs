@@ -215,6 +215,7 @@ namespace Codist
 		public const int NewGuid = KnownImageIds.NewNamedSet;
 		public const int IncrementNumber = KnownImageIds.Counter;
 		public const int JoinLines = KnownImageIds.Join;
+		public const int SortLines = KnownImageIds.SortAscending;
 		public const int Unindent = KnownImageIds.DecreaseIndent;
 		public const int Indent = KnownImageIds.IncreaseIndent;
 		public const int StageSelectedRange = KnownImageIds.Add;

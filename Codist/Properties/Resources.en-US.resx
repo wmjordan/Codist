@@ -2658,4 +2658,7 @@ Ctrl: Directly inherited interfaces only</value>
   <data name="CMD_DeleteSwitchSection" xml:space="preserve">
     <value>Delete Switch Section</value>
   </data>
+  <data name="CMD_SortLines" xml:space="preserve">
+    <value>Sort Lines</value>
+  </data>
 </root>
