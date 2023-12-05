@@ -21,8 +21,7 @@ namespace Codist
 		readonly SolutionDocumentEvents _DocumentEvents = new SolutionDocumentEvents();
 
 		private ServicesHelper() {
-			ThreadHelper.ThrowIfNotOnUIThread();
-			(ServiceProvider.GlobalProvider.GetService(typeof(SComponentModel)) as IComponentModel ?? throw new TypeLoadException($"Could not load {nameof(SComponentModel)}"))
+			(Get<IComponentModel, SComponentModel>() ?? throw new TypeLoadException($"Could not load {nameof(SComponentModel)}"))
 				.DefaultCompositionService
 				.SatisfyImportsOnce(this);
 			PostInitialization();
@@ -137,7 +136,7 @@ namespace Codist
 						}
 						if (item.BaseNames == null) {
 							r.CreateClassificationType(item.Name, Enumerable.Empty<IClassificationType>());
-							item.Exported = true;
+							item.MarkExported();
 							e++;
 						}
 						else {
@@ -145,7 +144,7 @@ namespace Codist
 							cts.RemoveAll(i => i == null);
 							r.CreateClassificationType(item.Name, cts);
 							e++;
-							item.Exported = true;
+							item.MarkExported();
 						}
 					}
 				}
@@ -161,6 +160,11 @@ namespace Codist
 				public ExportEntry(string name, List<string> baseNames) {
 					Name = name;
 					BaseNames = baseNames;
+				}
+
+				public void MarkExported() {
+					Exported = true;
+					$"Export classification type: {Name}".Log();
 				}
 
 				public override string ToString() {
