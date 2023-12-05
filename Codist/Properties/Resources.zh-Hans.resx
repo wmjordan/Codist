@@ -2647,4 +2647,7 @@ Ctrl: 仅直接继承的接口</value>
   <data name="CMD_SortLines" xml:space="preserve">
     <value>Sort Lines</value>
   </data>
+  <data name="T_FailedToSaveStyleFile" xml:space="preserve">
+    <value>在保存语法样式配置文件时出错:</value>
+  </data>
 </root>

@@ -2661,4 +2661,7 @@ Ctrl: Directly inherited interfaces only</value>
   <data name="CMD_SortLines" xml:space="preserve">
     <value>Sort Lines</value>
   </data>
+  <data name="T_FailedToSaveStyleFile" xml:space="preserve">
+    <value>Error occured while saving style file:</value>
+  </data>
 </root>

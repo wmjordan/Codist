@@ -6201,6 +6201,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error occured while saving style file:.
+        /// </summary>
+        internal static string T_FailedToSaveStyleFile {
+            get {
+                return ResourceManager.GetString("T_FailedToSaveStyleFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Fields.
         /// </summary>
         internal static string T_Fields {

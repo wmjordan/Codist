@@ -120,6 +120,7 @@ namespace Codist
 		public string BrowserParameter { get; set; }
 		public string TaskManagerPath { get; set; }
 		public string TaskManagerParameter { get; set; }
+		public string SyntaxHighlightThemeFolder { get; set; }
 		internal bool IsChanged => _ConfigManager?.IsChanged ?? false;
 
 		public static void RegisterLoadHandler(Action<Config> handler) {
@@ -274,9 +275,9 @@ namespace Codist
 			if (Application.Current.MainWindow.Visibility == Visibility.Visible) {
 				UpdateDisplay(config);
 			}
-			else {
-				Application.Current.MainWindow.IsVisibleChanged += MainWindow_IsVisibleChanged;
-			}
+			//else {
+			//	Application.Current.MainWindow.IsVisibleChanged += MainWindow_IsVisibleChanged;
+			//}
 			"Config loaded".Log();
 			return config;
 		}
@@ -287,10 +288,10 @@ namespace Codist
 		}
 
 		static void MainWindow_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) {
-			if ((bool)e.NewValue) {
-				Application.Current.MainWindow.IsVisibleChanged -= MainWindow_IsVisibleChanged;
-				UpdateDisplay(Instance);
-			}
+			//if ((bool)e.NewValue) {
+			//	Application.Current.MainWindow.IsVisibleChanged -= MainWindow_IsVisibleChanged;
+			//	UpdateDisplay(Instance);
+			//}
 		}
 
 		public static void ResetStyles() {

@@ -66,6 +66,7 @@ namespace Codist.Options
 		readonly UiLock _Lock = new UiLock();
 		IWpfTextView _WpfTextView;
 		string _CurrentViewCategory;
+		string _ThemeFolder;
 		IFormatCache _FormatCache;
 		TextFormattingRunProperties _DefaultFormat;
 		StyleSettingsButton _SelectedStyleButton;
@@ -366,6 +367,7 @@ namespace Codist.Options
 			FormatStore.EditorBackgroundChanged += FormatStore_EditorBackgroundChanged;
 			FormatStore.ClassificationFormatMapChanged += RefreshList;
 			IsVisibleChanged += WindowIsVisibleChanged;
+			_ThemeFolder = Config.Instance.SyntaxHighlightThemeFolder;
 			Config.Instance.BeginUpdate();
 		}
 
@@ -1258,13 +1260,20 @@ namespace Codist.Options
 				DefaultExt = "styles",
 				Filter = R.T_HighlightSettingFileFilter
 			};
-			if (d.ShowDialog() == true) {
+			if (String.IsNullOrEmpty(_ThemeFolder) == false) {
 				try {
+					d.InitialDirectory = _ThemeFolder;
+				}
+				catch (System.Security.SecurityException) { }
+			}
+			try {
+				if (d.ShowDialog() == true) {
 					LoadTheme(d.FileName);
+					_ThemeFolder = System.IO.Path.GetDirectoryName(d.FileName);
 				}
-				catch (Exception ex) {
-					MessageWindow.Error(ex.Message, R.T_FailedToLoadStyleFile);
-				}
+			}
+			catch (Exception ex) {
+				MessageWindow.Error(ex.Message, R.T_FailedToLoadStyleFile);
 			}
 		}
 		void ExportTheme() {
@@ -1274,8 +1283,20 @@ namespace Codist.Options
 				DefaultExt = "styles",
 				Filter = R.T_HighlightSettingFileFilter
 			};
-			if (d.ShowDialog() == true) {
-				Config.Instance.SaveConfig(d.FileName, true);
+			if (String.IsNullOrEmpty(_ThemeFolder) == false) {
+				try {
+					d.InitialDirectory = _ThemeFolder;
+				}
+				catch (System.Security.SecurityException) { }
+			}
+			try {
+				if (d.ShowDialog() == true) {
+					Config.Instance.SaveConfig(d.FileName, true);
+					_ThemeFolder = System.IO.Path.GetDirectoryName(d.FileName);
+				}
+			}
+			catch (Exception ex) {
+				MessageWindow.Error(ex.Message, R.T_FailedToSaveStyleFile);
 			}
 		}
 		void ResetTheme() {
@@ -1324,6 +1345,10 @@ namespace Codist.Options
 		}
 		void Ok() {
 			IsClosing = true;
+			if (_ThemeFolder != Config.Instance.SyntaxHighlightThemeFolder) {
+				Config.Instance.SyntaxHighlightThemeFolder = _ThemeFolder;
+				Config.Instance.FireConfigChangedEvent(Features.None);
+			}
 			Config.Instance.EndUpdate(true);
 			Close();
 		}
