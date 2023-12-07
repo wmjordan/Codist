@@ -45,7 +45,13 @@ namespace Codist
 		}
 
 		public static void OpenInExplorer(string folder, string file) {
-			OpenPathInExplorer(folder, Path.Combine(folder, file));
+			try {
+				file = Path.Combine(folder, file);
+			}
+			catch (Exception ex) {
+				Controls.MessageWindow.Error(ex, R.T_ErrorOpeningFile);
+			}
+			OpenPathInExplorer(folder, file);
 		}
 
 		static void OpenPathInExplorer(string folder, string path) {
