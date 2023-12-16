@@ -20,6 +20,7 @@ namespace Codist.Taggers
 			if (Config.Instance.Features.MatchFlags(Features.SyntaxHighlight) == false
 				|| CommentTagger.IsCommentTaggable(buffer) == false
 				|| buffer.MayBeEditor() == false && textView.TextBuffer.ContentType.IsOfType("RoslynPreviewContentType") == false
+				|| textView.Roles.Contains("STICKYSCROLL_TEXT_VIEW")
 				) {
 				return null;
 			}
