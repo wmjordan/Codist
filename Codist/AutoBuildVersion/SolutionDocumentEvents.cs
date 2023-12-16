@@ -49,10 +49,6 @@ namespace Codist
 				WriteBuildText(DateTime.Now.ToLongTimeString() + " " + R.T_BuildFinished + Environment.NewLine);
 			}
 
-			// hack: workaround to fix a bug in VS that causes build animation does not stop
-			object icon = (short)Microsoft.VisualStudio.Shell.Interop.Constants.SBAI_Build;
-			ServicesHelper.Get<IVsStatusbar, SVsStatusbar>().Animation(0, ref icon);
-
 			if (Config.Instance.BuildOptions.MatchFlags(BuildOptions.ShowOutputPaneAfterBuild)
 				&& CodistPackage.DebuggerStatus == DebuggerStatus.Design) {
 				_OutputWindowPane?.Activate();
@@ -72,7 +68,6 @@ namespace Codist
 				PrintProperties(CodistPackage.DTE.Solution.Properties, "Solution " + CodistPackage.DTE.Solution.FileName);
 			}
 
-			_LockChangeTracking = true;
 			return VSConstants.S_OK;
 		}
 
@@ -99,6 +94,7 @@ namespace Codist
 			// This method is called when a specific project begins building.
 			var project = proj.GetExtObjectAs<Project>();
 			if (project != null) {
+				_LockChangeTracking = true;
 				if (Config.Instance.BuildOptions.MatchFlags(BuildOptions.PrintSolutionProjectProperties)) {
 					PrintProperties(project.Properties, "project " + project.Name);
 					PrintProperties(project.ConfigurationManager.ActiveConfiguration.Properties, $"project {project.Name} active config");
@@ -175,6 +171,7 @@ namespace Codist
 			_OutputWindowPane?.OutputString(text);
 		}
 		[Conditional("DEBUG")]
+		[Conditional("LOG")]
 		static void WriteText(string text) {
 			VsShellHelper.OutputLine(text);
 		}
