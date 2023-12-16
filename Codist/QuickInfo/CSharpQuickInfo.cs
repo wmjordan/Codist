@@ -32,15 +32,11 @@ namespace Codist.QuickInfo
 		protected override Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
 			// Map the trigger point down to our buffer.
 			var buffer = session.GetSourceBuffer(out var triggerPoint);
-			ITextSnapshot snapshot;
-			Document doc;
-			return buffer != null
-				&& (doc = (snapshot = buffer.CurrentSnapshot).GetOpenDocumentInCurrentContextWithChanges()) != null
-				? InternalGetQuickInfoItemAsync(session, snapshot, triggerPoint, doc, cancellationToken)
+			return buffer != null ? InternalGetQuickInfoItemAsync(session, buffer, triggerPoint, cancellationToken)
 				: Task.FromResult<QuickInfoItem>(null);
 		}
 
-		async Task<QuickInfoItem> InternalGetQuickInfoItemAsync(IAsyncQuickInfoSession session, ITextSnapshot currentSnapshot, SnapshotPoint triggerPoint, Document document, CancellationToken cancellationToken) {
+		async Task<QuickInfoItem> InternalGetQuickInfoItemAsync(IAsyncQuickInfoSession session, ITextBuffer textBuffer, SnapshotPoint triggerPoint, CancellationToken cancellationToken) {
 			ISymbol symbol;
 			SyntaxNode node;
 			ImmutableArray<ISymbol> candidates;
@@ -49,10 +45,13 @@ namespace Codist.QuickInfo
 			if (QuickInfoOverride.CheckCtrlSuppression()) {
 				return null;
 			}
-			var semanticModel = await document.GetSemanticModelAsync(cancellationToken);
+			var ctx = SemanticContext.GetHovered();
+			await ctx.UpdateAsync(textBuffer, cancellationToken);
+			var semanticModel = ctx.SemanticModel;
 			if (semanticModel == null) {
 				return null;
 			}
+			var currentSnapshot = textBuffer.CurrentSnapshot;
 			if (_SpecialProject == null) {
 				_SpecialProject = new SpecialProjectInfo(semanticModel);
 			}
@@ -341,7 +340,7 @@ namespace Codist.QuickInfo
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation)) {
 				if (isConvertedType == false) {
-					container.Add(await ShowAvailabilityAsync(document, token, cancellationToken).ConfigureAwait(false));
+					container.Add(await ShowAvailabilityAsync(ctx.Document, token, cancellationToken).ConfigureAwait(false));
 				}
 				ctor = node.Parent as ObjectCreationExpressionSyntax;
 				OverrideDocumentation(node,
