@@ -363,7 +363,8 @@ namespace Codist
 											Height = 1,
 											Background = ThemeHelper.DocumentTextBrush,
 											Margin = WpfHelper.MiddleVerticalMargin,
-											Opacity = 0.5
+											Opacity = 0.5,
+											MinWidth = 100
 										}.Bind(FrameworkElement.WidthProperty, new Binding {
 											RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor, typeof(ThemedTipText), 1),
 											Path = new PropertyPath("ActualWidth")
