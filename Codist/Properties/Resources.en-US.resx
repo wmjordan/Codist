@@ -2664,4 +2664,19 @@ Ctrl: Directly inherited interfaces only</value>
   <data name="T_FailedToSaveStyleFile" xml:space="preserve">
     <value>Error occured while saving style file:</value>
   </data>
+  <data name="CMD_FilterToHeading1" xml:space="preserve">
+    <value>Filter to heading 1</value>
+  </data>
+  <data name="CMD_FilterToHeading2" xml:space="preserve">
+    <value>Filter to heading 2</value>
+  </data>
+  <data name="CMD_FilterToHeading3" xml:space="preserve">
+    <value>Filter to heading 3</value>
+  </data>
+  <data name="CMD_FilterToHeading4" xml:space="preserve">
+    <value>Filter to heading 4</value>
+  </data>
+  <data name="CMD_FilterToHeading5" xml:space="preserve">
+    <value>Filter to heading 5</value>
+  </data>
 </root>

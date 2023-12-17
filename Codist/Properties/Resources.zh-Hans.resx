@@ -2650,4 +2650,19 @@ Ctrl: 仅直接继承的接口</value>
   <data name="T_FailedToSaveStyleFile" xml:space="preserve">
     <value>在保存语法样式配置文件时出错:</value>
   </data>
+  <data name="CMD_FilterToHeading1" xml:space="preserve">
+    <value>筛选到标题 1</value>
+  </data>
+  <data name="CMD_FilterToHeading2" xml:space="preserve">
+    <value>筛选到标题 2</value>
+  </data>
+  <data name="CMD_FilterToHeading3" xml:space="preserve">
+    <value>筛选到标题 3</value>
+  </data>
+  <data name="CMD_FilterToHeading4" xml:space="preserve">
+    <value>筛选到标题 4</value>
+  </data>
+  <data name="CMD_FilterToHeading5" xml:space="preserve">
+    <value>筛选到标题 5</value>
+  </data>
 </root>

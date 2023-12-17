@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 
@@ -48,6 +49,11 @@ namespace Codist.Controls
 		}
 
 		internal void PerformClick() {
+			OnClick();
+		}
+
+		internal void Press() {
+			IsPressed = !IsPressed;
 			OnClick();
 		}
 

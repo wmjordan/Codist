@@ -35,6 +35,7 @@ namespace Codist.NaviBar
 		readonly TaggerResult _Tags;
 		readonly ThemedToolBarText _ActiveTitleLabel;
 		MarkdownList _TitleList;
+		int _FilterLevel;
 		LocationItem[] _Titles;
 		readonly ThemedImageButton _ActiveItem;
 		ITextSearchService2 _TextSearch;
@@ -123,11 +124,8 @@ namespace Codist.NaviBar
 		public override void ShowRootItemMenu(int parameter) {
 			_ActiveItem.IsHighlighted = true;
 			var titles = _Titles = Array.ConvertAll(_Tags.GetTags(), t => new LocationItem(t));
-			var menu = new MarkdownList(this) {
+			var menu = new MarkdownList(this, titles) {
 				ItemsControlMaxHeight = View.ViewportHeight / 2,
-				ItemsSource = titles,
-				SelectedIndex = GetSelectedTagIndex(titles, View.GetCaretPosition().Position),
-				FilteredItems = new System.Windows.Data.ListCollectionView(titles)
 			};
 			menu.ScrollToSelectedItem();
 			menu.MouseLeftButtonUp += MenuItemSelect;
@@ -202,9 +200,20 @@ namespace Codist.NaviBar
 			readonly ThemedTextBox _FinderBox;
 			Predicate<object> _Filter;
 
-			public MarkdownList(MarkdownBar bar) {
+			public MarkdownList(MarkdownBar bar, LocationItem[] titles) {
 				Style = SharedDictionaryManager.VirtualList.Get<Style>(typeof(VirtualList));
 				Container = bar.ViewOverlay;
+				ItemsSource = titles;
+				SelectedIndex = GetSelectedTagIndex(titles, bar.View.GetCaretPosition().Position);
+				FilteredItems = new System.Windows.Data.ListCollectionView(titles);
+
+				var b = new ThemedButton[5] {
+					new ThemedButton(IconIds.Heading1, R.CMD_FilterToHeading1, ShowHeading1),
+					new ThemedButton(IconIds.Heading2, R.CMD_FilterToHeading2, ShowHeading2),
+					new ThemedButton(IconIds.Heading3, R.CMD_FilterToHeading3, ShowHeading3),
+					new ThemedButton(IconIds.Heading4, R.CMD_FilterToHeading4, ShowHeading4),
+					new ThemedButton(IconIds.Heading5, R.CMD_FilterToHeading5, ShowHeading5),
+				};
 				Header = new StackPanel {
 					Margin = WpfHelper.MenuItemMargin,
 					Children = {
@@ -215,7 +224,10 @@ namespace Codist.NaviBar
 								ThemeHelper.GetImage(IconIds.Search).WrapMargin(WpfHelper.GlyphMargin),
 								(_FinderBox = new ThemedTextBox { MinWidth = 150 }),
 								new ThemedControlGroup { Margin = WpfHelper.SmallHorizontalMargin }
-									.AddRange(new ThemedButton(IconIds.ClearFilter, R.CMD_ClearFilter, ClearFilter).SetValue(ToolTipService.SetPlacement, PlacementMode.Left))
+									.AddRange(
+										b[0], b[1], b[2], b[3], b[4],
+										new ThemedButton(IconIds.ClearFilter, R.CMD_ClearFilter, ClearFilter).SetValue(ToolTipService.SetPlacement, PlacementMode.Left)
+									)
 							}
 						},
 					}
@@ -227,6 +239,9 @@ namespace Codist.NaviBar
 				_FinderBox.TextChanged += SearchCriteriaChanged;
 				_FinderBox.SetOnVisibleSelectAll();
 				_Bar = bar;
+				if (bar._FilterLevel != 0) {
+					b[bar._FilterLevel - 1].Press();
+				}
 			}
 
 			protected override void OnPreviewKeyDown(KeyEventArgs e) {
@@ -250,34 +265,75 @@ namespace Codist.NaviBar
 
 			void RefreshItemsSource() {
 				if (_Filter != null) {
-					_Bar._TitleList.FilteredItems.Filter = _Filter;
-					_Bar._TitleList.ItemsSource = _Bar._TitleList.FilteredItems;
+					FilteredItems.Filter = _Filter;
+					ItemsSource = FilteredItems;
 				}
 				else {
-					_Bar._TitleList.ItemsSource = _Bar._Titles;
+					ItemsSource = _Bar._Titles;
 				}
+			}
+
+			void ShowHeading1() {
+				ShowHeading(1);
+			}
+			void ShowHeading2() {
+				ShowHeading(2);
+			}
+			void ShowHeading3() {
+				ShowHeading(3);
+			}
+			void ShowHeading4() {
+				ShowHeading(4);
+			}
+			void ShowHeading5() {
+				ShowHeading(5);
+			}
+
+			void ShowHeading(int heading) {
+				_Bar._FilterLevel = heading;
+				SearchCriteriaChanged(this, null);
 			}
 
 			void ClearFilter() {
 				if (_FinderBox.Text.Length > 0) {
+					_Bar._FilterLevel = 0;
 					_FinderBox.Text = String.Empty;
 					_FinderBox.Focus();
+				}
+				else if (_Bar._FilterLevel != 0) {
+					_Bar._FilterLevel = 0;
+					_Filter = null;
+					RefreshItemsSource();
 				}
 			}
 
 			void SearchCriteriaChanged(object sender, TextChangedEventArgs e) {
 				if (String.IsNullOrWhiteSpace(_FinderBox.Text)) {
-					_Filter = null;
-					RefreshItemsSource();
-					return;
+					if (_Bar._FilterLevel == 0) {
+						_Filter = null;
+					}
+					else {
+						_Filter = o => ((LocationItem)o).Level <= _Bar._FilterLevel;
+					}
 				}
-				var k = _FinderBox.Text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-				var comparison = Char.IsUpper(k[0][0]) ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
-				_Filter = o => MatchKeywords(((LocationItem)o).Text, k, comparison);
+				else {
+					var k = _FinderBox.Text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+					var comparison = Char.IsUpper(k[0][0]) ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+					if (_Bar._FilterLevel == 0) {
+						_Filter = o => MatchKeywords((LocationItem)o, k, comparison);
+					}
+					else {
+						_Filter = o => {
+							var item = (LocationItem)o;
+							return MatchKeywords(item, k, comparison) && item.Level <= _Bar._FilterLevel;
+						};
+					}
+				}
 				RefreshItemsSource();
 
-				bool MatchKeywords(string text, string[] keywords, StringComparison c) {
+				bool MatchKeywords(LocationItem title, string[] keywords, StringComparison c) {
 					var m = 0;
+					var text = title.Text;
 					foreach (var item in keywords) {
 						if ((m = text.IndexOf(item, m, c)) == -1) {
 							return false;
@@ -287,6 +343,7 @@ namespace Codist.NaviBar
 				}
 			}
 		}
+
 		sealed class LocationItem : ListItem
 		{
 			static Thickness
@@ -296,6 +353,7 @@ namespace Codist.NaviBar
 				__H6Padding = new Thickness(40, 0, 0, 0);
 			readonly TaggedContentSpan _Span;
 			readonly int _ImageId;
+			readonly int _Level;
 
 			public LocationItem(TaggedContentSpan span) {
 				_Span = span;
@@ -303,24 +361,30 @@ namespace Codist.NaviBar
 				var ct = span.Tag.ClassificationType;
 				if (ct.CeqAny(__H1, __DummyTag1)) {
 					Content.FontWeight = FontWeights.Bold;
+					_Level = 1;
 					_ImageId = IconIds.Heading1;
 				}
 				else if (ct.CeqAny(__H2, __DummyTag2)) {
+					_Level = 2;
 					_ImageId = IconIds.Heading2;
 				}
 				else if (ct.CeqAny(__H3, __DummyTag3)) {
+					_Level = 3;
 					_ImageId = IconIds.Heading3;
 					Content.Padding = __H3Padding;
 				}
 				else if (ct.CeqAny(__H4, __DummyTag4)) {
+					_Level = 4;
 					_ImageId = IconIds.Heading4;
 					Content.Padding = __H4Padding;
 				}
 				else if (ct.CeqAny(__H5, __DummyTag5)) {
+					_Level = 5;
 					_ImageId = IconIds.Heading5;
 					Content.Padding = __H5Padding;
 				}
 				else if (ct.CeqAny(__H6, __DummyTag6)) {
+					_Level = 6;
 					_ImageId = IconIds.None;
 					Content.Padding = __H6Padding;
 				}
@@ -328,6 +392,7 @@ namespace Codist.NaviBar
 
 			public override int ImageId => _ImageId;
 			public TaggedContentSpan Span => _Span;
+			public int Level => _Level;
 			public string Text => _Span.ContentText;
 			public void GoToSource(ITextView view) {
 				view.SelectSpan(_Span.Start + _Span.ContentOffset, _Span.ContentLength, 1);

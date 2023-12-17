@@ -582,6 +582,51 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Filter to heading 1.
+        /// </summary>
+        internal static string CMD_FilterToHeading1 {
+            get {
+                return ResourceManager.GetString("CMD_FilterToHeading1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Filter to heading 2.
+        /// </summary>
+        internal static string CMD_FilterToHeading2 {
+            get {
+                return ResourceManager.GetString("CMD_FilterToHeading2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Filter to heading 3.
+        /// </summary>
+        internal static string CMD_FilterToHeading3 {
+            get {
+                return ResourceManager.GetString("CMD_FilterToHeading3", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Filter to heading 4.
+        /// </summary>
+        internal static string CMD_FilterToHeading4 {
+            get {
+                return ResourceManager.GetString("CMD_FilterToHeading4", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Filter to heading 5.
+        /// </summary>
+        internal static string CMD_FilterToHeading5 {
+            get {
+                return ResourceManager.GetString("CMD_FilterToHeading5", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Find....
         /// </summary>
         internal static string CMD_Find {
