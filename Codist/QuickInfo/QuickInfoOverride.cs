@@ -606,11 +606,11 @@ namespace Codist.QuickInfo
 				// 6. exception
 				// 7. captured variables
 				if (_Override.OverrideBuiltInXmlDoc) {
-					var items = doc.IsItemsHost ? (IList)doc.GetParent<ItemsControl>().Items : doc.Children;
 					var v16orLater = CodistPackage.VsVersion.Major >= 16;
+					var items = doc.IsItemsHost ? (IList)doc.GetParent<ItemsControl>().Items : doc.Children;
 					ClearDefaultDocumentationItems(doc, v16orLater, items);
 					if (_Override.DocElement != null) {
-						OverrideDocElement(items);
+						OverrideDocElement(items, v16orLater);
 					}
 					if (_Override.ExceptionDoc != null) {
 						OverrideExceptionDocElement(doc, v16orLater, items);
@@ -637,10 +637,10 @@ namespace Codist.QuickInfo
 				}
 			}
 
-			void OverrideDocElement(IList items) {
+			void OverrideDocElement(IList items, bool v16orLater) {
 				try {
 					var d = _Override.DocElement;
-					if (items.Count > 1 && items[1] is TextBlock) {
+					if (items.Count > 1 && (items[1] is TextBlock || v16orLater && items[1] is StackPanel)) {
 						items.RemoveAt(1);
 						items.Insert(1, d);
 					}
