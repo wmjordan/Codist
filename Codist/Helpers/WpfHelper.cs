@@ -88,7 +88,7 @@ namespace Codist
 		}
 		public static InlineCollection AppendLineWithMargin(this InlineCollection inlines) {
 			inlines.Add(new LineBreak());
-			inlines.Add(new InlineUIContainer(new Border { Width = 1, Height = 3 }));
+			inlines.Add(new InlineUIContainer(new Border { Width = 1, Height = 5 }));
 			inlines.Add(new LineBreak());
 			return inlines;
 		}
