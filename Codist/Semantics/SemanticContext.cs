@@ -74,7 +74,7 @@ namespace Codist
 				return symbol;
 			}
 			var s = w.CurrentSolution;
-			var sr = symbol.DeclaringSyntaxReferences.FirstOrDefault(r => r.SyntaxTree != null);
+			var sr = symbol.GetSourceReferences().FirstOrDefault(r => r.SyntaxTree != null);
 			try {
 				doc = GetDocument(sr?.SyntaxTree);
 				return Microsoft.CodeAnalysis.FindSymbols.SymbolFinder

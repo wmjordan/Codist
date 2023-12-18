@@ -1043,15 +1043,21 @@ namespace Codist
 		}
 
 		public static ImmutableArray<SyntaxReference> GetSourceReferences(this ISymbol symbol) {
+			var source = symbol.DeclaringSyntaxReferences;
 			if (symbol is IMethodSymbol m) {
 				if (m.PartialDefinitionPart != null) {
-					return symbol.DeclaringSyntaxReferences.AddRange(m.PartialDefinitionPart.DeclaringSyntaxReferences);
+					source = source.AddRange(m.PartialDefinitionPart.DeclaringSyntaxReferences);
 				}
 				if (m.PartialImplementationPart != null) {
-					return symbol.DeclaringSyntaxReferences.AddRange(m.PartialImplementationPart.DeclaringSyntaxReferences);
+					source = source.AddRange(m.PartialImplementationPart.DeclaringSyntaxReferences);
+				}
+				if (m.MethodKind == MethodKind.Constructor
+					&& source.Length == 0
+					&& (symbol = m.ContainingType) != null) {
+					source = source.AddRange(symbol.DeclaringSyntaxReferences);
 				}
 			}
-			return symbol.DeclaringSyntaxReferences;
+			return source;
 		}
 
 		public static Location ToLocation(this SyntaxReference syntaxReference) {

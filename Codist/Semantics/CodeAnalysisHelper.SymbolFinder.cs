@@ -423,7 +423,7 @@ namespace Codist
 			var a = result.ToArray();
 			if (sourceCodeOnly) {
 				Array.Sort(a, (x, y) => {
-					int i = String.CompareOrdinal(x.Key.DeclaringSyntaxReferences[0].SyntaxTree.FilePath, y.Key.DeclaringSyntaxReferences[0].SyntaxTree.FilePath);
+					int i = String.CompareOrdinal(x.Key.GetSourceReferences()[0].SyntaxTree.FilePath, y.Key.GetSourceReferences()[0].SyntaxTree.FilePath);
 					return i != 0 ? i
 						: (i = String.CompareOrdinal(x.Key.ContainingType?.Name, y.Key.ContainingType?.Name)) != 0 ? i
 						: String.CompareOrdinal(x.Key.Name, y.Key.Name);

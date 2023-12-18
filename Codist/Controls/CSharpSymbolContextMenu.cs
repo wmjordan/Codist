@@ -647,7 +647,7 @@ namespace Codist.Controls
 				var loc = _Node.SyntaxTree.FilePath;
 				foreach (var sr in _Node.FindReferencingSymbols(_SemanticContext.SemanticModel, true)) {
 					var s = sr.Key;
-					var sl = s.DeclaringSyntaxReferences[0];
+					var sl = s.GetSourceReferences()[0];
 					SymbolItem i;
 					if (sl.SyntaxTree.FilePath != loc) {
 						i = m.Add(sl.ToLocation());
