@@ -422,7 +422,12 @@ namespace Codist.Controls
 			void HandleExecuteEvent(RoutedEventArgs e) {
 				var h = _ClickHandler;
 				if (h != null && _Handled == false) {
-					h.Invoke(this, e);
+					try {
+						h.Invoke(this, e);
+					}
+					catch (Exception ex) {
+						MessageWindow.Error(ex, "Error when executing command: " + ((ThemedMenuText)Header).GetText());
+					}
 					_Handled = true;
 				}
 			}
