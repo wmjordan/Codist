@@ -53,12 +53,12 @@ namespace Codist.Taggers
 	[TagType(typeof(IClassificationTag))]
 	sealed class CSharpTaggerProvider : IViewTaggerProvider
 	{
-		static readonly string[] __TaggableRoles = new[] { PredefinedTextViewRoles.Document, PredefinedTextViewRoles.EmbeddedPeekTextView };
+		static readonly string[] __TaggableRoles = new[] { PredefinedTextViewRoles.Document, PredefinedTextViewRoles.EmbeddedPeekTextView, PredefinedTextViewRoles.PreviewTextView };
 
 		// note: we could have used WeakDictionary to hold our references,
 		//   and release references when the view is finalized
 		//   unfortunately memory leak in VS sometimes prevents IWpfTextView from being released properly,
-		//   thus the WeakDictionary can't be used
+		//   thus the WeakDictionary won't help
 		readonly Dictionary<ITextView, Dictionary<ITextBuffer, CSharpTagger>> _Taggers = new Dictionary<ITextView, Dictionary<ITextBuffer, CSharpTagger>>();
 
 		// note: cache the latest used tagger to improve performance
