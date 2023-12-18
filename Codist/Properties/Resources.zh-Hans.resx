@@ -2665,4 +2665,7 @@ Ctrl: 仅直接继承的接口</value>
   <data name="CMD_FilterToHeading5" xml:space="preserve">
     <value>筛选到标题 5</value>
   </data>
+  <data name="T_StackTrace" xml:space="preserve">
+    <value>堆栈跟踪:</value>
+  </data>
 </root>

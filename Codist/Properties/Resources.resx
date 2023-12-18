@@ -2679,4 +2679,7 @@ Ctrl: Directly inherited interfaces only</value>
   <data name="CMD_FilterToHeading5" xml:space="preserve">
     <value>Filter to heading 5</value>
   </data>
+  <data name="T_StackTrace" xml:space="preserve">
+    <value>Stack trace:</value>
+  </data>
 </root>

@@ -7386,6 +7386,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Stack trace:.
+        /// </summary>
+        internal static string T_StackTrace {
+            get {
+                return ResourceManager.GetString("T_StackTrace", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Standard colors:.
         /// </summary>
         internal static string T_StandardColors {

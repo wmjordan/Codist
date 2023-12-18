@@ -124,10 +124,10 @@ namespace Codist.Controls
 			return new MessageWindow(content, null, MessageBoxButton.OK, MessageBoxImage.Error).ShowDialog();
 		}
 		public static bool? Error(Exception content, string description) {
-			return new MessageWindow($"{description}{Environment.NewLine}{content}", null, MessageBoxButton.OK, MessageBoxImage.Error).ShowDialog();
+			return new MessageWindow(GetErrorDescription(description, content), null, MessageBoxButton.OK, MessageBoxImage.Error).ShowDialog();
 		}
 		public static bool? Error(Exception content, string description, string title) {
-			return new MessageWindow($"{description}{Environment.NewLine}{content}", title, MessageBoxButton.OK, MessageBoxImage.Error).ShowDialog();
+			return new MessageWindow(GetErrorDescription(description, content), title, MessageBoxButton.OK, MessageBoxImage.Error).ShowDialog();
 		}
 		public static bool? OkCancel(object content) {
 			return new MessageWindow(content, null, MessageBoxButton.OKCancel, MessageBoxImage.Question).ShowDialog();
@@ -137,6 +137,15 @@ namespace Codist.Controls
 		}
 		public static bool? AskYesNoCancel(object content) {
 			return new MessageWindow(content, null, MessageBoxButton.YesNoCancel, MessageBoxImage.Question).ShowDialog();
+		}
+		static StackPanel GetErrorDescription(string description, Exception exception) {
+			return new StackPanel {
+				Children = {
+					MakeText(description).SetProperty(TextBlock.FontSizeProperty, ThemeHelper.ToolTipFontSize * 1.5d),
+					MakeText(exception.Message),
+					MakeText(R.T_StackTrace + Environment.NewLine + exception.StackTrace)
+				}
+			};
 		}
 
 		public object Message {
@@ -155,6 +164,12 @@ namespace Codist.Controls
 					Padding = WpfHelper.MiddleMargin,
 				}.ReferenceProperty(ForegroundProperty, CommonControlsColors.TextBoxTextBrushKey);
 			}
+		}
+
+		static ThemedTipText MakeText(string text) {
+			return new ThemedTipText(text) {
+				Padding = WpfHelper.MiddleMargin,
+			}.ReferenceProperty(ForegroundProperty, CommonControlsColors.TextBoxTextBrushKey);
 		}
 
 		void DefaultButton_Click(object sender, RoutedEventArgs e) {
