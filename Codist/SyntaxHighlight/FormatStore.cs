@@ -484,6 +484,9 @@ namespace Codist.SyntaxHighlight
 
 				if (newStyles.Count != 0) {
 					_PropertiesCache.Clear();
+					if (_EditorFormatMap.IsInBatchUpdate) {
+						_PendingChange.PendEvent(EventKind.Refresh);
+					}
 					LockEvent(nameof(Apply));
 					_EditorFormatMap.BeginBatchUpdate();
 					$"[{_Category}] update formats {newStyles.Count}".Log();
