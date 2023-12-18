@@ -264,10 +264,7 @@ namespace Codist
 								list = list == null
 									? new ListContext(e.Attribute("type")?.Value)
 									: new ListContext(e.Attribute("type")?.Value, list);
-								if (e.FirstNode?.NodeType == XmlNodeType.Text) {
-									inlines.Add(new LineBreak());
-								}
-								InternalRender(e, inlines, list);
+								RenderBlockContent(inlines, list, e, BLOCK_OTHER);
 								list = list.Parent;
 								break;
 							case "para":
