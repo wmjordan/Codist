@@ -30,7 +30,7 @@ namespace Codist.SyntaxHighlight
 
 		static readonly Dictionary<IClassificationType, List<IClassificationType>> __ClassificationTypeStore = InitClassificationTypes(__SyntaxStyleCache.Keys);
 
-		static readonly Dictionary<IClassificationType, bool> __UnsupportedClassificationType = InitFormattableClassificationType();
+		static readonly Dictionary<IClassificationType, bool> __ClassificationTypeFormattabilities = InitFormattableClassificationType();
 
 		static readonly Highlighter __EditorHighlighter = Highlight(Constants.CodeText);
 		#endregion
@@ -107,9 +107,9 @@ namespace Codist.SyntaxHighlight
 
 		public static bool IsFormattableClassificationType(this IClassificationType type) {
 			return type != null
-				&& (__UnsupportedClassificationType.TryGetValue(type, out var f)
+				&& (__ClassificationTypeFormattabilities.TryGetValue(type, out var f)
 					? f
-					: (__UnsupportedClassificationType[type] = IsFormattable(type)));
+					: (__ClassificationTypeFormattabilities[type] = IsFormattable(type)));
 		}
 
 		/// <summary>

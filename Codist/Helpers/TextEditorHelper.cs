@@ -972,24 +972,23 @@ namespace Codist
 				while (true) {
 					if (line.Extent.IsEmpty) {
 						spans.Add(line.Extent);
+						continue;
 					}
-					else {
-						lineStart = line.Start.Position;
-						indentStart = p = lineStart + Math.Min(line.Length - 1, indentation);
-						while (p > lineStart) {
-							if (snapshot[p].IsCodeWhitespaceChar() == false) {
-								indentStart = p;
-								break;
-							}
-							--p;
-						}
-						if (indentStart >= endOfSelection) {
+					lineStart = line.Start.Position;
+					indentStart = p = lineStart + Math.Min(line.Length - 1, indentation);
+					while (p > lineStart) {
+						if (snapshot[p].IsCodeWhitespaceChar() == false) {
+							indentStart = p;
 							break;
 						}
-						extent = new SnapshotSpan(snapshot, Span.FromBounds(indentStart, line.End));
-						spans.Add(extent);
-						sb.Append(extent.GetText().TrimEnd());
+						--p;
 					}
+					if (indentStart >= endOfSelection) {
+						break;
+					}
+					extent = new SnapshotSpan(snapshot, Span.FromBounds(indentStart, line.End));
+					spans.Add(extent);
+					sb.Append(extent.GetText().TrimEnd());
 
 					if (n < endLineNumber) {
 						sb.AppendLine();
@@ -1123,12 +1122,12 @@ namespace Codist
 			return textView == null ? null : GetWpfTextView(textView);
 		}
 
-		public static IWpfTextView GetWpfTextView(this System.Windows.UIElement element) {
+		public static IWpfTextView GetWpfTextView(this UIElement element) {
 			foreach (var item in __WpfTextViews) {
 				if (item.VisualElement.IsVisible == false) {
 					continue;
 				}
-				if (item.VisualElement.Contains(element.TranslatePoint(new System.Windows.Point(0,0), item.VisualElement))) {
+				if (item.VisualElement.Contains(element.TranslatePoint(new Point(0,0), item.VisualElement))) {
 					return item;
 				}
 			}

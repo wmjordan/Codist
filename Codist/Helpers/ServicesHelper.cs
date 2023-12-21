@@ -15,6 +15,9 @@ using Microsoft.VisualStudio.Utilities;
 
 namespace Codist
 {
+	/// <summary>
+	/// Initiates fundamental services and information for Codist to run.
+	/// </summary>
 	sealed class ServicesHelper
 	{
 		// We initialize the SolutionDocumentEvents instance here since ServicesHelper is called by many places in Codist, usually sooner than CodistPackage.InitializeAsync
@@ -45,7 +48,7 @@ namespace Codist
 		public IContentTypeRegistryService ContentTypeRegistry { get; private set; }
 
 		[Import]
-		public Microsoft.VisualStudio.Utilities.IFileExtensionRegistryService FileExtensionRegistry { get; private set; }
+		public IFileExtensionRegistryService FileExtensionRegistry { get; private set; }
 
 		[Import]
 		public IEditorFormatMapService EditorFormatMap { get; private set; }
