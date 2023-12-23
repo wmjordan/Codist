@@ -158,7 +158,8 @@ namespace Codist
 				b = new ThemedTipText { FontSize = ThemeHelper.ToolTipFontSize, FontFamily = ThemeHelper.ToolTipFont }
 					.Append(ThemeHelper.GetImage(IconIds.Return).WrapMargin(WpfHelper.GlyphMargin))
 					.Append(GetRefType(s), Keyword);
-				if ((ct = rt.GetUnderlyingSymbol().ContainingType) != null) {
+				if ((ct = rt.GetUnderlyingSymbol().ContainingType) != null
+					&& rt.Kind != SymbolKind.TypeParameter) {
 					ShowContainingTypes(ct, b);
 				}
 				b.AddSymbol(rt, false, this)
