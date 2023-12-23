@@ -456,6 +456,7 @@ namespace Codist.SyntaxHighlight
 				}
 				finally {
 					_ClassificationFormatMap.EndBatchUpdate();
+					_PendingChange.PendingEvents ^= EventKind.Refresh;
 					UnlockEvent();
 				}
 
@@ -486,6 +487,7 @@ namespace Codist.SyntaxHighlight
 					_PropertiesCache.Clear();
 					if (_EditorFormatMap.IsInBatchUpdate) {
 						_PendingChange.PendEvent(EventKind.Refresh);
+						return;
 					}
 					LockEvent(nameof(Apply));
 					_EditorFormatMap.BeginBatchUpdate();
