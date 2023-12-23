@@ -17,7 +17,7 @@ namespace Codist.Controls
 			_DocumentFilter = CreateButton(IconIds.File, R.T_SearchCurrentDocument);
 			_ProjectFilter = CreateButton(IconIds.Project, R.T_SearchCurrentProject);
 			Margin = WpfHelper.SmallHorizontalMargin;
-			Content = new ThemedControlGroup().AddRange(_DocumentFilter, _ProjectFilter);
+			Content = new ThemedControlGroup(_DocumentFilter, _ProjectFilter);
 			_DocumentFilter.IsChecked = true;
 		}
 

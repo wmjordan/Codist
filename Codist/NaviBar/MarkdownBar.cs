@@ -207,12 +207,13 @@ namespace Codist.NaviBar
 				SelectedIndex = GetSelectedTagIndex(titles, bar.View.GetCaretPosition().Position);
 				FilteredItems = new System.Windows.Data.ListCollectionView(titles);
 
-				var b = new ThemedButton[5] {
+				var b = new ThemedButton[] {
 					new ThemedButton(IconIds.Heading1, R.CMD_FilterToHeading1, ShowHeading1),
 					new ThemedButton(IconIds.Heading2, R.CMD_FilterToHeading2, ShowHeading2),
 					new ThemedButton(IconIds.Heading3, R.CMD_FilterToHeading3, ShowHeading3),
 					new ThemedButton(IconIds.Heading4, R.CMD_FilterToHeading4, ShowHeading4),
 					new ThemedButton(IconIds.Heading5, R.CMD_FilterToHeading5, ShowHeading5),
+					new ThemedButton(IconIds.ClearFilter, R.CMD_ClearFilter, ClearFilter)
 				};
 				Header = new StackPanel {
 					Margin = WpfHelper.MenuItemMargin,
@@ -223,11 +224,7 @@ namespace Codist.NaviBar
 							Children = {
 								ThemeHelper.GetImage(IconIds.Search).WrapMargin(WpfHelper.GlyphMargin),
 								(_FinderBox = new ThemedTextBox { MinWidth = 150 }),
-								new ThemedControlGroup { Margin = WpfHelper.SmallHorizontalMargin }
-									.AddRange(
-										b[0], b[1], b[2], b[3], b[4],
-										new ThemedButton(IconIds.ClearFilter, R.CMD_ClearFilter, ClearFilter).SetValue(ToolTipService.SetPlacement, PlacementMode.Left)
-									)
+								new ThemedControlGroup(b) { Margin = WpfHelper.SmallHorizontalMargin }
 							}
 						},
 					}

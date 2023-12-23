@@ -178,12 +178,10 @@ namespace Codist.Options
 														Margin = WpfHelper.SmallMargin,
 														ToolTip = R.OT_FilterStyleNamesTip
 													}.Set(ref _SettingsFilterBox),
-													new ThemedControlGroup { Margin = WpfHelper.SmallVerticalMargin }
-														.AddRange(
-															new ThemedToggleButton(IconIds.FilterCustomized, R.OT_ShowCustomizedStylesTip).Set(ref _OverriddenStyleFilterButton),
-															new ThemedImageButton(IconIds.Add, R.CMD_Add).SetValue(ToolTipService.SetPlacement, PlacementMode.Left).Set(ref _AddTagButton),
-															new ThemedImageButton(IconIds.Remove, R.CMD_Remove).SetValue(ToolTipService.SetPlacement, PlacementMode.Left).Set(ref _RemoveTagButton),
-															new ThemedButton(ThemeHelper.GetImage(IconIds.ClearFilter), R.CMD_ClearFilter).SetValue(ToolTipService.SetPlacement, PlacementMode.Left).Set(ref _ClearFilterButton)),
+													new ThemedControlGroup(new ThemedToggleButton(IconIds.FilterCustomized, R.OT_ShowCustomizedStylesTip).Set(ref _OverriddenStyleFilterButton),
+															new ThemedImageButton(IconIds.Add, R.CMD_Add).Set(ref _AddTagButton),
+															new ThemedImageButton(IconIds.Remove, R.CMD_Remove).Set(ref _RemoveTagButton),
+															new ThemedButton(ThemeHelper.GetImage(IconIds.ClearFilter), R.CMD_ClearFilter).Set(ref _ClearFilterButton)) { Margin = WpfHelper.SmallVerticalMargin },
 												}
 											}
 										}.SetValue(Grid.SetColumn, 1)

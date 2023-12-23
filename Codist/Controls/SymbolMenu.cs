@@ -31,15 +31,14 @@ namespace Codist.Controls
 						new Separator()
 					}
 			};
-			HeaderButtons = new ThemedControlGroup { Opacity = 0.8 }
-				.AddRange(
-					new ThemedButton(IconIds.Copy, R.CMD_CopyListContent, CopyListContent).SetProperty(ToolTipService.PlacementProperty, PlacementMode.Left),
-					new ThemedToggleButton(IconIds.TogglePinning, R.CMD_Pin, TogglePinButton),
-					new ThemedButton(IconIds.Close, R.CMD_Close, () => {
-						var a = _ExternalAdornment;
-						a.RemoveAndDispose(this);
-						a.FocusOnTextView();
-					}).SetProperty(ToolTipService.PlacementProperty, PlacementMode.Left))
+			HeaderButtons = new ThemedControlGroup(
+				new ThemedButton(IconIds.Copy, R.CMD_CopyListContent, CopyListContent),
+				new ThemedToggleButton(IconIds.TogglePinning, R.CMD_Pin, TogglePinButton),
+				new ThemedButton(IconIds.Close, R.CMD_Close, () => {
+					var a = _ExternalAdornment;
+					a.RemoveAndDispose(this);
+					a.FocusOnTextView();
+				})) { Opacity = 0.8 }
 				.HandleEvent(MouseEnterEvent, MouseEnterHeader)
 				.HandleEvent(MouseLeaveEvent, MouseLeaveHeader);
 			MouseLeftButtonUp += MenuItemSelect;

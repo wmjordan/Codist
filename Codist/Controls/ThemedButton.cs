@@ -3,7 +3,6 @@ using System.Windows;
 using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 
@@ -126,7 +125,6 @@ namespace Codist.Controls
 				}
 			};
 			ToolTip = toolTip;
-			ToolTipService.SetPlacement(this, PlacementMode.Left);
 			this.ReferenceCrispImageBackground(EnvironmentColors.MainWindowActiveCaptionColorKey);
 		}
 
@@ -169,12 +167,17 @@ namespace Codist.Controls
 			this.ReferenceProperty(BorderBrushProperty, CommonControlsColors.TextBoxBorderBrushKey);
 		}
 
+		public ThemedControlGroup(params Control[] controls) : this() {
+			AddRange(controls);
+		}
+
 		public ThemedControlGroup AddRange(params Control[] controls) {
 			foreach (var item in controls) {
 				item.Padding = WpfHelper.NoMargin;
 				item.Margin = WpfHelper.NoMargin;
 				item.BorderThickness = WpfHelper.NoMargin;
 				item.MinHeight = 10;
+				item.SetValue(ToolTipService.PlacementProperty, PlacementMode.Left);
 				_ControlPanel.Add(item);
 			}
 			return this;
