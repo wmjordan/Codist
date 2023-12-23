@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.ComponentModel.Composition;
-using System.Linq;
-using System.Reflection;
 using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Shell;
@@ -81,99 +77,17 @@ namespace Codist
 
 		void PostInitialization() {
 			#region Create classification types for syntax highlight
-			var e = new ClassificationTypeExporter(ClassificationTypeRegistry, ContentTypeRegistry);
-			e.FindClassificationTypes<SymbolMarkerStyleTypes>();
-			e.FindClassificationTypes<CommentStyleTypes>();
-			e.FindClassificationTypes<CSharpStyleTypes>();
-			e.FindClassificationTypes<MarkdownStyleTypes>();
-			e.FindClassificationTypes<XmlStyleTypes>();
-			e.FindClassificationTypes<PrivateStyleTypes>();
+			var e = new SyntaxHighlight.ClassificationTypeExporter(ClassificationTypeRegistry, ContentTypeRegistry, ClassificationFormatMap);
+			e.RegisterClassificationTypes<SyntaxHighlight.SymbolMarkerStyleTypes>();
+			e.RegisterClassificationTypes<SyntaxHighlight.CommentStyleTypes>();
+			e.RegisterClassificationTypes<SyntaxHighlight.CSharpStyleTypes>();
+			e.RegisterClassificationTypes<SyntaxHighlight.MarkdownStyleTypes>();
+			e.RegisterClassificationTypes<SyntaxHighlight.XmlStyleTypes>();
+			e.RegisterClassificationTypes<SyntaxHighlight.PrivateStyleTypes>();
 			//note: do not add the following line, or highlight will get corrupted
 			//e.FindClassificationDefinitions<CppStyleTypes>();
 			e.ExportClassificationTypes();
 			#endregion
-		}
-
-		sealed class ClassificationTypeExporter
-		{
-			readonly IClassificationTypeRegistryService _Classifications;
-			readonly IContentTypeRegistryService _ContentTypes;
-			readonly List<ExportEntry> _Entries = new List<ExportEntry>();
-
-			public ClassificationTypeExporter(IClassificationTypeRegistryService classifications, IContentTypeRegistryService contentTypes) {
-				_Classifications = classifications;
-				_ContentTypes = contentTypes;
-			}
-
-			public void FindClassificationTypes<TStyle>() where TStyle : Enum {
-				var t = typeof(TStyle);
-				var r = _Classifications;
-
-				// skip classification types which do not have a corresponding content type
-				var c = t.GetCustomAttribute<CategoryAttribute>();
-				if (c != null && _ContentTypes.GetContentType(c.Category) == null) {
-					return;
-				}
-
-				foreach (var field in t.GetFields()) {
-					var name = field.GetCustomAttribute<ClassificationTypeAttribute>()?.ClassificationTypeNames;
-					if (String.IsNullOrEmpty(name)
-						|| r.GetClassificationType(name) != null
-						|| field.GetCustomAttribute<InheritanceAttribute>() != null) {
-						continue;
-					}
-					var baseNames = new List<string>(field.GetCustomAttributes<BaseDefinitionAttribute>().Select(d => d.BaseDefinition).Where(i => String.IsNullOrEmpty(i) == false));
-					_Entries.Add(new ExportEntry(name, baseNames.Count != 0 ? baseNames : null));
-				}
-			}
-
-			public void ExportClassificationTypes() {
-				var e = 0;
-				int lastExported;
-				var r = _Classifications;
-				do {
-					lastExported = e;
-					foreach (var item in _Entries) {
-						if (item.Exported || r.GetClassificationType(item.Name) != null) {
-							continue;
-						}
-						if (item.BaseNames == null) {
-							r.CreateClassificationType(item.Name, Enumerable.Empty<IClassificationType>());
-							item.MarkExported();
-							e++;
-						}
-						else {
-							var cts = item.BaseNames.ConvertAll(r.GetClassificationType);
-							cts.RemoveAll(i => i == null);
-							r.CreateClassificationType(item.Name, cts);
-							e++;
-							item.MarkExported();
-						}
-					}
-				}
-				while (e < _Entries.Count && lastExported != e);
-			}
-
-			sealed class ExportEntry
-			{
-				public readonly string Name;
-				public readonly List<string> BaseNames;
-				public bool Exported;
-
-				public ExportEntry(string name, List<string> baseNames) {
-					Name = name;
-					BaseNames = baseNames;
-				}
-
-				public void MarkExported() {
-					Exported = true;
-					$"Export classification type: {Name}".Log();
-				}
-
-				public override string ToString() {
-					return $"{Name} ({(Exported ? "E" : "?")})";
-				}
-			}
 		}
 	}
 }

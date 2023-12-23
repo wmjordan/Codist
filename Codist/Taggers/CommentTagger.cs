@@ -33,7 +33,7 @@ namespace Codist.Taggers
 
 		protected CommentTagger(IClassificationTypeRegistryService registry, ITextView textView, ITextBuffer buffer) {
 			if (__CommentClassifications == null) {
-				var t = typeof(CommentStyleTypes);
+				var t = typeof(SyntaxHighlight.CommentStyleTypes);
 				var styleNames = Enum.GetNames(t);
 				__CommentClassifications = new ClassificationTag[styleNames.Length];
 				foreach (var styleName in styleNames) {
