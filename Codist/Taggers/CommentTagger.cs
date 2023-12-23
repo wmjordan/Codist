@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using System.Windows;
 using CLR;
@@ -20,6 +21,7 @@ namespace Codist.Taggers
 		TaggerResult _Tags;
 		ITextView _TextView;
 		ITextBuffer _Buffer;
+		bool _Tagging;
 
 #if DEBUG
 		readonly HashSet<string> _ClassificationTypes = new HashSet<string>();
@@ -52,8 +54,6 @@ namespace Codist.Taggers
 			buffer.Changed += TextBuffer_Changed;
 			buffer.ContentTypeChanged += TextBuffer_ContentTypeChanged;
 			_Tags = textView.Properties.GetProperty<TaggerResult>(typeof(TaggerResult));
-			_Aggregator = textView.Properties.GetProperty<ITagAggregator<IClassificationTag>>("TagAggregator");
-			_Aggregator.BatchedTagsChanged += AggregatorBatchedTagsChanged;
 		}
 
 		internal FrameworkElement Margin { get; set; }
@@ -75,17 +75,18 @@ namespace Codist.Taggers
 		public IEnumerable<ITagSpan<IClassificationTag>> GetTags(NormalizedSnapshotSpanCollection spans) {
 			if (spans.Count == 0
 				|| Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.SpecialComment) == false
-				|| _Tags is null) {
-				yield break;
+				|| _Tags is null
+				|| _Tagging) {
+				return Enumerable.Empty<ITagSpan<IClassificationTag>>();
 			}
-
+			_Tagging = true;
 			var snapshot = spans[0].Snapshot;
 			IEnumerable<IMappingTagSpan<IClassificationTag>> tagSpans;
 			try {
 				if (_Tags.LastParsed == 0 && _FullParseAtFirstLoad) {
 					// perform a full parse at the first time
 					Debug.WriteLine("Full parse");
-					tagSpans = _Aggregator.GetTags(snapshot.ToSnapshotSpan());
+					tagSpans = GetTagAggregator().GetTags(snapshot.ToSnapshotSpan());
 					_Tags.LastParsed = snapshot.Length;
 				}
 				else {
@@ -93,15 +94,21 @@ namespace Codist.Taggers
 					//var end = spans[spans.Count - 1].End;
 					//Debug.WriteLine($"Get tag [{start.Position}..{end.Position})");
 
-					tagSpans = _Aggregator.GetTags(spans);
+					tagSpans = GetTagAggregator().GetTags(spans);
 				}
 			}
 			catch (ObjectDisposedException ex) {
 				// HACK: TagAggregator could be disposed during editing, to be investigated further
+				(ex.ObjectName + " is disposed").Log();
 				Debug.WriteLine(ex.Message);
-				yield break;
+				_Tagging = false;
+				return Enumerable.Empty<ITagSpan<IClassificationTag>>();
 			}
 
+			return GetTags(tagSpans, snapshot);
+		}
+
+		IEnumerable<ITagSpan<IClassificationTag>> GetTags(IEnumerable<IMappingTagSpan<IClassificationTag>> tagSpans, ITextSnapshot snapshot) {
 			TaggedContentSpan ts, s = null;
 			foreach (var tagSpan in tagSpans) {
 				var ss = tagSpan.Span.GetSpans(snapshot);
@@ -121,6 +128,7 @@ namespace Codist.Taggers
 				// note: Don't use the TagsChanged event, otherwise infinite loops will occur
 				//TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(s.Span));
 			}
+			_Tagging = false;
 		}
 
 		protected virtual TaggedContentSpan TagComments(SnapshotSpan snapshotSpan, IMappingTagSpan<IClassificationTag> tagSpan) {
@@ -235,6 +243,15 @@ namespace Codist.Taggers
 				: (__CommentClasses[classification] = classification.Classification.IndexOf("Comment", StringComparison.OrdinalIgnoreCase) != -1);
 		}
 
+		ITagAggregator<IClassificationTag> GetTagAggregator() {
+			if (_Aggregator != null) {
+				return _Aggregator;
+			}
+			var a = ServicesHelper.Instance.ViewTagAggregatorFactory.CreateTagAggregator<IClassificationTag>(_TextView);
+			a.BatchedTagsChanged += AggregatorBatchedTagsChanged;
+			return _Aggregator = a;
+		}
+
 		void AggregatorBatchedTagsChanged(object sender, BatchedTagsChangedEventArgs args) {
 			Margin?.InvalidateVisual();
 		}
@@ -297,14 +314,16 @@ namespace Codist.Taggers
 		#region IDisposable Support
 		public void Dispose() {
 			if (_Tags != null) {
-				_Aggregator.BatchedTagsChanged -= AggregatorBatchedTagsChanged;
-				_Aggregator = null;
+				if (_Aggregator != null) {
+					_Aggregator.BatchedTagsChanged -= AggregatorBatchedTagsChanged;
+					_Aggregator = null;
+				}
 				_Tags.Reset();
 				_Tags = null;
 				_Buffer.Changed -= TextBuffer_Changed;
 				_Buffer.ContentTypeChanged -= TextBuffer_ContentTypeChanged;
 				_Buffer = null;
-				_TextView.Properties.RemoveProperty(nameof(CommentTagger));
+				_TextView.RemoveProperty<CommentTagger>();
 				_TextView = null;
 				Margin = null;
 			}
