@@ -290,14 +290,6 @@ namespace Codist
 		#endregion
 		#endregion
 
-		public static bool Mark<TKey>(this IPropertyOwner owner, TKey mark) {
-			if (owner.Properties.ContainsProperty(mark) == false) {
-				owner.Properties.AddProperty(mark, mark);
-				return true;
-			}
-			return false;
-		}
-
 		#region Selection
 		public static void AddSelection(this IMultiSelectionBroker selectionBroker, Span span) {
 			selectionBroker.AddSelection(new Selection(span.CreateSnapshotSpan(selectionBroker.CurrentSnapshot)));
@@ -1018,6 +1010,36 @@ namespace Codist
 		}
 		#endregion
 
+		#region Properties
+		public static bool Mark<TKey>(this IPropertyOwner owner, TKey mark) {
+			if (owner.Properties.ContainsProperty(mark) == false) {
+				owner.Properties.AddProperty(mark, mark);
+				return true;
+			}
+			return false;
+		}
+		public static TObject GetOrCreateSingletonProperty<TObject>(this IPropertyOwner propertyOwner)
+			where TObject : class, new() {
+			return propertyOwner.Properties.GetOrCreateSingletonProperty(() => new TObject());
+		}
+		public static TObject GetOrCreateSingletonProperty<TObject>(this IPropertyOwner propertyOwner, Func<TObject> factory)
+			where TObject : class {
+			return propertyOwner.Properties.GetOrCreateSingletonProperty(typeof(TObject), factory);
+		}
+		public static TObject CreateProperty<TObject>(this IPropertyOwner propertyOwner)
+			where TObject : class, new() {
+			var o = new TObject();
+			propertyOwner.Properties.AddProperty(typeof(TObject), o);
+			return o;
+		}
+		public static bool TryGetProperty<TObject>(this IPropertyOwner propertyOwner, out TObject value) {
+			return propertyOwner.Properties.TryGetProperty(typeof(TObject), out value);
+		}
+		public static bool RemoveProperty<TObject>(this IPropertyOwner propertyOwner) {
+			return propertyOwner.Properties.RemoveProperty(typeof(TObject));
+		}
+		#endregion
+
 		#region TextView and editor
 		public static event EventHandler<TextViewCreatedEventArgs> ActiveTextViewChanged;
 
@@ -1037,10 +1059,7 @@ namespace Codist
 					|| textBuffer is IProjectionBuffer pb && pb.SourceBuffers.Any(MayBeEditor))
 				&& textBuffer.ContentType.IsOfType("RoslynPreviewContentType") == false;
 		}
-		public static TObject GetOrCreateSingletonProperty<TObject>(this IPropertyOwner propertyOwner)
-			where TObject : class, new() {
-			return propertyOwner.Properties.GetOrCreateSingletonProperty(() => new TObject());
-		}
+
 		public static ITextDocument GetTextDocument(this ITextBuffer textBuffer) {
 			return textBuffer.Properties.TryGetProperty<ITextDocument>(typeof(ITextDocument), out var d) ? d : null;
 		}

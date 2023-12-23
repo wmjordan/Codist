@@ -28,7 +28,8 @@ namespace Codist.Taggers
 			_Tags = syntaxHighlightEnabled ? HeaderClassificationTypes : DummyHeaderTags;
 			_TextView = textView;
 			_TextBuffer = buffer;
-			_FullParseAtFirstLoad = textView.Roles.Contains(PredefinedTextViewRoles.PreviewTextView) == false;
+			_FullParseAtFirstLoad = textView.Roles.Contains(PredefinedTextViewRoles.PreviewTextView) == false
+				&& textView.Roles.Contains(PredefinedTextViewRoles.Document);
 			buffer.ContentTypeChanged += Buffer_ContentTypeChanged;
 			textView.Closed += TextView_Closed;
 		}
@@ -38,21 +39,29 @@ namespace Codist.Taggers
 		protected override void Parse(SnapshotSpan span, ICollection<TaggedContentSpan> results) {
 			int l = span.Length, start = span.Start;
 			if (l < 1 || span.Start.GetChar() != '#') {
-				Result.ClearRange(start, l);
-				return;
+				goto MISMATCH;
 			}
-			int c = 1, w = 0;
+
+			int level = 1, w = 0;
 			var s = span.Snapshot;
-			for (int i = 1, p = start; i < l; i++, p++) {
+			for (int i = 1, p = start + 1; i < l; i++, p++) {
 				switch (s[p]) {
-					case '#': if (w == 0) { ++c; } continue;
+					case '#':
+						++level;
+						continue;
 					case ' ':
-					case '\t': continue;
+					case '\t':
+						goto TAGGED;
 				}
-				break;
+				goto MISMATCH;
 			}
-			w += c;
-			results.Add(new TaggedContentSpan(_Tags[c], span, w, l - w));
+			TAGGED:
+			w += level;
+			results.Add(new TaggedContentSpan(_Tags[level], span, w, l - w));
+			return;
+
+			MISMATCH:
+			Result.ClearRange(start, l);
 		}
 
 		static ClassificationTag[] InitHeaderClassificationTypes() {
