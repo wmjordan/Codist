@@ -46,5 +46,60 @@ namespace TestProject
 		public bool M<T>(in Type @in, in DateTime date, ref DateTime date2, [Name(nameof(T))] out T val) { val = default; return false; }
 
 		public int M(DayOfWeek val = DayOfWeek.Monday) { return (int)val; }
+
+		public bool TestComplex() {
+			return new Complex(1, 2) + new Complex(2, 3) < new Complex(3, 4) << 1;
+		}
+	}
+
+	/// <summary>
+	/// Complex structure.
+	/// </summary>
+	struct Complex
+	{
+		public Complex(float x, float y) {
+			X = x;
+			Y = y;
+		}
+
+		public float X { get; }
+		public float Y { get; }
+
+		/// <summary>
+		/// Adds two <see cref="Complex"/> instances.
+		/// </summary>
+		public static Complex operator +(Complex a, Complex b) {
+			return new Complex(a.X + b.X, a.Y + b.Y);
+		}
+		public Complex Add(Complex other) {
+			return this + other;
+		}
+		/// <summary>
+		/// Subtracts two <see cref="Complex"/> instances.
+		/// </summary>
+		public static Complex operator -(Complex a, Complex b) {
+			return new Complex(a.X - b.X, a.Y - b.Y);
+		}
+		public Complex Subtract(Complex other) {
+			return this - other;
+		}
+		/// <summary>
+		/// Is <see cref="X"/> of <paramref name="a"/> smaller than the one in <paramref name="b"/>.
+		/// </summary>
+		public static bool operator <(Complex a, Complex b) {
+			return a.X < b.X;
+		}
+		/// <summary>
+		/// Is <see cref="X"/> of <paramref name="a"/> larger than the one in <paramref name="b"/>.
+		/// </summary>
+		public static bool operator >(Complex a, Complex b) {
+			return a.X > b.X;
+		}
+		/// <summary>
+		/// Offsets a <see cref="Complex"/>.
+		/// </summary>
+		public static Complex operator <<(Complex a, int x) {
+			return new Complex(a.X + x, a.Y + x);
+		}
 	}
 }

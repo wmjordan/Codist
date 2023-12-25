@@ -150,7 +150,6 @@ namespace TestProject
 			var i = Convert<long, int>(l);
 			// Hover to test the display of anonymous type as type arguments
 			Print(new { a = 1, b = 2, c = 3, d = new { x = 1, y = l } }, new { X = 1, Y = new Dictionary<int, int>() });
-			var c = new Complex(1, 2) + new Complex(2, 3) < new Complex(3, 4) << 1;
 		}
 
 		static class SharedConstants
@@ -181,50 +180,5 @@ namespace TestProject
 
 		public string Name { get; }
 		public Type Type { get; }
-	}
-
-	/// <summary>
-	/// Complex structure.
-	/// </summary>
-	struct Complex
-	{
-		public Complex(float x, float y) {
-			X = x;
-			Y = y;
-		}
-
-		public float X { get; }
-		public float Y { get; }
-
-		/// <summary>
-		/// Adds two <see cref="Complex"/> instances.
-		/// </summary>
-		public static Complex operator + (Complex a, Complex b) {
-			return new Complex(a.X + b.X, a.Y + b.Y);
-		}
-		/// <summary>
-		/// Subtracts two <see cref="Complex"/> instances.
-		/// </summary>
-		public static Complex operator - (Complex a, Complex b) {
-			return new Complex(a.X - b.X, a.Y - b.Y);
-		}
-		/// <summary>
-		/// Is <see cref="X"/> of <paramref name="a"/> smaller than the one in <paramref name="b"/>.
-		/// </summary>
-		public static bool operator < (Complex a, Complex b) {
-			return a.X < b.X;
-		}
-		/// <summary>
-		/// Is <see cref="X"/> of <paramref name="a"/> larger than the one in <paramref name="b"/>.
-		/// </summary>
-		public static bool operator > (Complex a, Complex b) {
-			return a.X > b.X;
-		}
-		/// <summary>
-		/// Offsets a <see cref="Complex"/>.
-		/// </summary>
-		public static Complex operator << (Complex a, int x) {
-			return new Complex(a.X + x, a.Y + x);
-		}
 	}
 }
