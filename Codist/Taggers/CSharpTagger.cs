@@ -797,7 +797,7 @@ namespace Codist.Taggers
 				else if (symbol.IsVirtual) {
 					tags.Add(__Classifications.VirtualMember);
 				}
-				else if (symbol.IsAbstract) {
+				else if (symbol.IsAbstract && symbol.Kind != SymbolKind.NamedType) {
 					tags.Add(__Classifications.AbstractMember);
 				}
 				EXIT:
