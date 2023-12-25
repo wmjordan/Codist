@@ -351,6 +351,8 @@ The Markdown navigation bar lists all titles appear in a Markdown document.
 
 Similarly, you can type in the search box to filter down the titles.
 
+From version 7.8 on, there are buttons near the search box to limit displaying titles to specific levels.
+
 ## Smart Bar
 
   The *Smart Bar* is a context-aware tool bar that appears automatically when you select some text, or double tap the _Shift_ key on your keyboard.
