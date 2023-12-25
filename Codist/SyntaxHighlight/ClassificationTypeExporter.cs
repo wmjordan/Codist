@@ -45,7 +45,7 @@ namespace Codist.SyntaxHighlight
 				}
 				var baseNames = new List<string>();
 				var orders = new List<(string, bool)>();
-				SyntaxHighlight.StyleAttribute style = null;
+				StyleAttribute style = null;
 				foreach (var attr in field.GetCustomAttributes()) {
 					if (attr is BaseDefinitionAttribute baseDef
 						&& String.IsNullOrWhiteSpace(baseDef.BaseDefinition) == false) {
@@ -59,7 +59,7 @@ namespace Codist.SyntaxHighlight
 							orders.Add((order.After, false));
 						}
 					}
-					else if (attr is SyntaxHighlight.StyleAttribute s) {
+					else if (attr is StyleAttribute s) {
 						style = s;
 					}
 				}
@@ -86,8 +86,10 @@ namespace Codist.SyntaxHighlight
 					else {
 						var cts = item.BaseNames.ConvertAll(r.GetClassificationType);
 						cts.RemoveAll(i => i == null);
-						e++;
-						item.MarkExported(r.CreateClassificationType(item.Name, cts));
+						if (cts.Count != 0) {
+							e++;
+							item.MarkExported(r.CreateClassificationType(item.Name, cts));
+						}
 					}
 				}
 			}
@@ -175,45 +177,46 @@ namespace Codist.SyntaxHighlight
 		List<Entry> GetExportedEntriesOrderByDependency() {
 			var r = _Entries.FindAll(i => i.Exported && i.BaseNames == null && i.Orders == null);
 			int e = r.Count, lastExported;
-			var h = new Dictionary<string, bool>();
+			var exported = new Dictionary<string, bool>();
 			bool o;
-			foreach (var item in r) {
+			foreach (var item in _Entries) {
 				if (item.Exported) {
-					h.Add(item.Name, item.BaseNames == null && item.Orders == null);
+					exported.Add(item.Name, item.BaseNames == null && item.Orders == null);
 				}
 			}
 			do {
 				lastExported = e;
-				foreach (var item in _Entries) {
-					if (item.Exported == false
-						|| item.BaseNames == null && item.Orders == null
-						|| h.TryGetValue(item.Name, out o) && o) {
+				foreach (var entry in _Entries) {
+					if (entry.Exported == false
+						|| entry.BaseNames == null && entry.Orders == null
+						|| exported.TryGetValue(entry.Name, out o) && o) {
 						goto NEXT;
 					}
 
-					if (item.BaseNames != null) {
-						foreach (var baseName in item.BaseNames) {
-							if (h.TryGetValue(baseName, out o) == false || o) {
+					if (entry.BaseNames != null) {
+						foreach (var baseName in entry.BaseNames) {
+							if (exported.TryGetValue(baseName, out o) == false // not defined in Codist
+								|| o // exported
+								) {
 								continue;
 							}
 							goto NEXT;
 						}
 					}
 
-					if (item.Orders != null) {
-						foreach (var (classificationType, before) in item.Orders) {
-							if (h.TryGetValue(classificationType, out o) == false || o) {
+					if (entry.Orders != null) {
+						foreach (var (classificationType, before) in entry.Orders) {
+							if (exported.TryGetValue(classificationType, out o) == false
+								|| o
+								|| classificationType == Priority.High || classificationType == Priority.Low) {
 								continue;
-							}
-							if (classificationType == Priority.High || classificationType == Priority.Low) {
-								break;
 							}
 							goto NEXT;
 						}
 					}
 
-					h[item.Name] = true;
-					r.Add(item);
+					exported[entry.Name] = true;
+					r.Add(entry);
 					++e;
 				NEXT:;
 				}
@@ -221,7 +224,7 @@ namespace Codist.SyntaxHighlight
 			foreach (var item in _Entries) {
 				if (item.Exported
 					&& item.Orders != null
-					&& h.TryGetValue(item.Name, out o)
+					&& exported.TryGetValue(item.Name, out o)
 					&& o == false) {
 					r.Add(item);
 				}
@@ -234,11 +237,11 @@ namespace Codist.SyntaxHighlight
 			public readonly string Name;
 			public readonly List<string> BaseNames;
 			public readonly List<(string classificationType, bool before)> Orders;
-			public readonly SyntaxHighlight.StyleAttribute Style;
+			public readonly StyleAttribute Style;
 			public IClassificationType ClassificationType;
 			public bool Exported => ClassificationType != null;
 
-			public Entry(string name, List<string> baseNames, List<(string, bool)> orders, SyntaxHighlight.StyleAttribute style) {
+			public Entry(string name, List<string> baseNames, List<(string, bool)> orders, StyleAttribute style) {
 				Name = name;
 				BaseNames = baseNames;
 				Orders = orders;
