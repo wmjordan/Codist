@@ -48,7 +48,8 @@ namespace Codist.Taggers
 				}
 			}
 
-			_FullParseAtFirstLoad = textView.Roles.Contains(PredefinedTextViewRoles.PreviewTextView) == false;
+			_FullParseAtFirstLoad = textView.Roles.Contains(PredefinedTextViewRoles.PreviewTextView) == false
+				&& textView.Roles.Contains(PredefinedTextViewRoles.Document);
 			_Buffer = buffer;
 			_TextView = textView;
 			buffer.Changed += TextBuffer_Changed;
