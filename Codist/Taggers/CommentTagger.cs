@@ -188,20 +188,16 @@ namespace Codist.Taggers
 
 			// ignore whitespaces in content
 			while (contentStart < tl) {
-				if (Char.IsWhiteSpace(text[contentStart])) {
-					++contentStart;
-				}
-				else {
+				if (Char.IsWhiteSpace(text[contentStart]) == false) {
 					break;
 				}
+				++contentStart;
 			}
 			while (contentEnd > contentStart) {
-				if (Char.IsWhiteSpace(text[contentEnd - 1])) {
-					--contentEnd;
-				}
-				else {
+				if (Char.IsWhiteSpace(text[contentEnd - 1]) == false) {
 					break;
 				}
+				--contentEnd;
 			}
 
 			switch (label.StyleApplication) {
