@@ -561,6 +561,9 @@ namespace Codist.Commands
 					if (type.Name == "__ComObject" && type.Namespace == "System") {
 						return new Run(ReflectionHelper.GetTypeNameFromComObject(value) ?? "System.__ComObject") { Foreground = f.Class };
 					}
+					if (value is Project p) {
+						return new TypeRun(type, p.Name, f);
+					}
 					var toString = type.GetMethod("ToString", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public, null, Type.EmptyTypes, null);
 					if (toString?.DeclaringType != typeof(object)) {
 						goto default;
@@ -604,7 +607,10 @@ namespace Codist.Commands
 		{
 			readonly Type _Type;
 
-			public TypeRun(Type type, SymbolFormatter formatter) : base(GetTypeName(type)) {
+			public TypeRun(Type type, SymbolFormatter formatter) : this(type, GetTypeName(type), formatter) {
+			}
+
+			public TypeRun(Type type, string alias, SymbolFormatter formatter) : base(alias) {
 				_Type = type;
 				Foreground = GetTypeBrush(formatter, type);
 				ToolTip = String.Empty;
