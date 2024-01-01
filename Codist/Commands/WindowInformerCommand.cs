@@ -472,7 +472,14 @@ namespace Codist.Commands
 			Section section = new Section {
 				Margin = __SectionIndent,
 				Blocks = {
-					new Paragraph(new Run(title) { FontSize = 18, FontWeight = FontWeights.Bold, Foreground = SymbolFormatter.Instance.Class }) { TextIndent = -5, Margin = WpfHelper.SmallMargin }
+					new Paragraph(new Run(title) {
+						FontSize = 18,
+						FontWeight = FontWeights.Bold,
+						Foreground = SymbolFormatter.Instance.Class
+					}) {
+						TextIndent = -5,
+						Margin = WpfHelper.SmallMargin
+					}
 				}
 			};
 			blocks.Add(section);
@@ -482,7 +489,14 @@ namespace Codist.Commands
 			Section section = new Section {
 				Margin = __SectionIndent,
 				Blocks = {
-					new Paragraph(new Run(title) { FontSize = fontSize, FontWeight = FontWeights.Bold, Foreground = SymbolFormatter.Instance.Class }) { TextIndent = -10, Margin = WpfHelper.SmallMargin }
+					new Paragraph(new Run(title) {
+						FontSize = fontSize,
+						FontWeight = FontWeights.Bold,
+						Foreground = SymbolFormatter.Instance.Class
+					}) {
+						TextIndent = -10,
+						Margin = WpfHelper.SmallMargin
+					}
 				}
 			};
 			blocks.Add(section);
@@ -594,8 +608,12 @@ namespace Codist.Commands
 			}
 		}
 		static string GetTypeName(Type type) {
-			return (type.DeclaringType != null ? $"{GetTypeName(type.DeclaringType)}+{type.Name}" : type.Name)
-				+ (type.IsGenericType ? $"<{String.Join(",", type.GenericTypeArguments.Select(GetTypeName))}>" : String.Empty);
+			return (type.DeclaringType != null
+				? $"{GetTypeName(type.DeclaringType)}+{type.Name}"
+				: type.Name)
+				+ (type.IsGenericType
+					? $"<{String.Join(",", type.GenericTypeArguments.Select(GetTypeName))}>"
+					: String.Empty);
 		}
 		static Brush GetTypeBrush(SymbolFormatter f, Type type) {
 			return type.IsClass ? f.Class
@@ -634,17 +652,6 @@ namespace Codist.Commands
 					ToolTip = tip;
 					ToolTipService.SetShowDuration(this, 10000);
 				}
-			}
-		}
-
-		sealed class ObjectRun : Run
-		{
-			readonly object _Object;
-
-			public ObjectRun(Object value, string alias, SymbolFormatter formatter) : base(alias ?? value.ToString()) {
-				_Object = value;
-				Foreground = GetTypeBrush(formatter, value.GetType());
-				ToolTip = String.Empty;
 			}
 		}
 	}
