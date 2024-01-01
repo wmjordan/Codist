@@ -18,7 +18,7 @@ namespace Codist.SyntaxHighlight
 		readonly IClassificationTypeRegistryService _Classifications;
 		readonly IContentTypeRegistryService _ContentTypes;
 		readonly IClassificationFormatMapService _FormatMaps;
-		private readonly IEditorFormatMapService _EditorFormatMaps;
+		readonly IEditorFormatMapService _EditorFormatMaps;
 		readonly List<Entry> _Entries = new List<Entry>();
 
 		public ClassificationTypeExporter(IClassificationTypeRegistryService classifications, IContentTypeRegistryService contentTypes, IClassificationFormatMapService formatMaps, IEditorFormatMapService editorFormatMaps) {
@@ -100,6 +100,16 @@ namespace Codist.SyntaxHighlight
 			UpdateClassificationFormatMap(_FormatMaps.GetClassificationFormatMap(Constants.CodeText), _EditorFormatMaps.GetEditorFormatMap(Constants.CodeText), r.GetClassificationType);
 		}
 
+		public void UpdateClassificationFormatMap(string category) {
+			UpdateClassificationFormatMap(_FormatMaps.GetClassificationFormatMap(category), _EditorFormatMaps.GetEditorFormatMap(category), _Classifications.GetClassificationType);
+		}
+
+		// This method creates `TextFormattingRunProperties` for `IClassificationType`s defined
+		//   in Codist. The `TextFormattingRunProperties` instances are inserted to `IClassificationFormatMap`
+		//   with consideration of [BaseDefinition] and [Order] attributes.
+		//   However, only [OrderAttribute(After)] is handled, [Order(Before)] is not treated as purposed.
+		// Note: there is a bug in VS that it sometimes reorders `TextFormattingRunProperties` added to
+		//   `IClassificationFormatMap`for some unknown reasons after Codist arranges them in this method.
 		void UpdateClassificationFormatMap(IClassificationFormatMap classificationFormatMap, IEditorFormatMap editorFormatMap, Func<string, IClassificationType> getCt) {
 			var m = classificationFormatMap;
 			var typePriorities = new Dictionary<IClassificationType, int>(100);
@@ -154,8 +164,8 @@ namespace Codist.SyntaxHighlight
 				}
 				if (p != 0) {
 					// note: since GetExportedEntriesOrderByDependency has sorted entries by dependency,
-					//   and in Codist, only BaseDefinition and Order After priorities are coded
-					//   for extended `IClassificationType`s, we assign higher priority for later populated
+					//   and in Codist, only [BaseDefinition] and [Order] After priorities are coded
+					//   for extended `IClassificationType`s, we give higher precedency for later populated
 					//   `IClassificationType`s
 					#region Assign priority order to new IClassificationType
 					if (priorityGroups.TryGetValue(p, out var chain)) {
@@ -173,7 +183,7 @@ namespace Codist.SyntaxHighlight
 					}
 					continue;
 				}
-			// note: orders are ignored if priority = High or Low
+			// note: orders are ignored if priority = High
 			//   since all classification types exported are defined in Codist (in control),
 			//   and the aforementioned situation does not exist, so we just skip handling that
 			HIGH:
@@ -193,6 +203,9 @@ namespace Codist.SyntaxHighlight
 			}
 		}
 
+		// This method returns a List that considering dependencies defined by [BaseDefinition] and [Order]
+		// Independent entries will be returned first.
+		// The most dependent entries will be returned at the end of the list.
 		List<Entry> GetExportedEntriesOrderByDependency() {
 			var r = _Entries.FindAll(i => i.Exported && i.BaseNames == null && i.Orders == null);
 			int e = r.Count, lastExported;
