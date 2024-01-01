@@ -491,7 +491,7 @@ namespace Codist.Commands
 		static Section NewIndentSection(Section block, string title) {
 			Append(block, title);
 			Section section = new Section {
-				Margin = new Thickness(block.Margin.Left + 10, 0, 0, 0),
+				Margin = new Thickness(block.Margin.Left, 0, 0, 0),
 			};
 			block.Blocks.Add(section);
 			return section;
