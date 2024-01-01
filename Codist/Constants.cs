@@ -243,6 +243,7 @@ namespace Codist
 		public const string MarkdownVsUrl = "vsMarkdown_url";
 
 		internal const string CodistPrefix = "Codist: ";
+		public const string CodistComment = CodistPrefix + "Comment";
 		//! Important
 		//# Notice
 		public const string EmphasisComment = CodistPrefix + "Emphasis";

@@ -77,7 +77,7 @@ namespace Codist
 
 		void PostInitialization() {
 			#region Create classification types for syntax highlight
-			var e = new SyntaxHighlight.ClassificationTypeExporter(ClassificationTypeRegistry, ContentTypeRegistry, ClassificationFormatMap);
+			var e = new SyntaxHighlight.ClassificationTypeExporter(ClassificationTypeRegistry, ContentTypeRegistry, ClassificationFormatMap, EditorFormatMap);
 			e.RegisterClassificationTypes<SyntaxHighlight.SymbolMarkerStyleTypes>();
 			e.RegisterClassificationTypes<SyntaxHighlight.CommentStyleTypes>();
 			e.RegisterClassificationTypes<SyntaxHighlight.CSharpStyleTypes>();

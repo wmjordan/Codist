@@ -434,41 +434,20 @@ namespace Codist.SyntaxHighlight
 				try {
 					var formats = _ClassificationFormatMap.CurrentPriorityOrder;
 					$"Refresh priority {formats.Count}".Log();
-					var semanticBrace = Config.Instance.SpecialHighlightOptions.HasAnyFlag(SpecialHighlightOptions.AllParentheses);
-					var boldBrace = Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.SpecialPunctuation);
 					_PropertiesCache.Clear();
 					foreach (var item in formats) {
 						if (item.IsFormattableClassificationType()) {
 							var p = _ClassificationFormatMap.GetTextProperties(item);
 							$"[{_Category}] refresh classification {item.Classification} ({p.Print()})".Log();
-							// hack: workaround for punctuation format properties that voids settings of semanticBrace or boldBrace
-							if ((semanticBrace && p.ForegroundBrushEmpty == false
-								|| boldBrace && p.BoldEmpty == false)
-								&& item.Classification == Constants.CodePunctuation) {
-								WorkaroundPunctuationStyle(_EditorFormatMap, semanticBrace, boldBrace);
-							}
-							else {
-								_ClassificationFormatMap.SetTextProperties(item, p);
-							}
+							_ClassificationFormatMap.SetTextProperties(item, p);
 							_PropertiesCache[item] = p;
 						}
 					}
 				}
 				finally {
 					_ClassificationFormatMap.EndBatchUpdate();
-					_PendingChange.PendingEvents ^= EventKind.Refresh;
+					_PendingChange.PendingEvents = _PendingChange.PendingEvents.SetFlags(EventKind.Refresh, false);
 					UnlockEvent();
-				}
-
-				void WorkaroundPunctuationStyle(IEditorFormatMap map, bool s, bool b) {
-					var m = map.GetProperties(Constants.CodePunctuation);
-					if (s) {
-						m.SetBrush(null);
-					}
-					if (b) {
-						m.SetBold(null);
-					}
-					map.SetProperties(Constants.CodePunctuation, m);
 				}
 			}
 
@@ -483,25 +462,26 @@ namespace Codist.SyntaxHighlight
 					}
 				}
 
-				if (newStyles.Count != 0) {
-					_PropertiesCache.Clear();
-					if (_EditorFormatMap.IsInBatchUpdate) {
-						_PendingChange.PendEvent(EventKind.Refresh);
-						return;
+				if (newStyles.Count == 0) {
+					return;
+				}
+				if (_EditorFormatMap.IsInBatchUpdate) {
+					_PendingChange.PendEvent(EventKind.Apply);
+					return;
+				}
+				_PropertiesCache.Clear();
+				LockEvent(nameof(Apply));
+				_EditorFormatMap.BeginBatchUpdate();
+				$"[{_Category}] update formats {newStyles.Count}".Log();
+				try {
+					foreach (var item in newStyles) {
+						$"[{_Category}] apply format {item.Key}".Log();
+						_EditorFormatMap.SetProperties(item.Key, item.Value);
 					}
-					LockEvent(nameof(Apply));
-					_EditorFormatMap.BeginBatchUpdate();
-					$"[{_Category}] update formats {newStyles.Count}".Log();
-					try {
-						foreach (var item in newStyles) {
-							$"[{_Category}] apply format {item.Key}".Log();
-							_EditorFormatMap.SetProperties(item.Key, item.Value);
-						}
-					}
-					finally {
-						_EditorFormatMap.EndBatchUpdate();
-						UnlockEvent();
-					}
+				}
+				finally {
+					_EditorFormatMap.EndBatchUpdate();
+					UnlockEvent();
 				}
 			}
 
@@ -957,6 +937,10 @@ namespace Codist.SyntaxHighlight
 						FiringEvent = EventKind.ClassificationFormat;
 						ClassificationFormatMapChanged?.Invoke(highlighter, new EventArgs<IEnumerable<IClassificationType>>(highlighter.GetChangedClassificationTypes()));
 					}
+					if (PendingEvents.MatchFlags(EventKind.Apply)) {
+						FiringEvent = EventKind.Apply;
+						highlighter.Apply();
+					}
 					if (PendingEvents.MatchFlags(EventKind.Refresh)) {
 						FiringEvent = EventKind.Refresh;
 						highlighter.Refresh();
@@ -1358,7 +1342,8 @@ namespace Codist.SyntaxHighlight
 				ClassificationFormat = 1 << 1,
 				Background = 1 << 2,
 				DefaultText = 1 << 3,
-				Refresh = 1 << 4
+				Apply = 1 << 4,
+				Refresh = 1 << 5
 			}
 		}
 	}

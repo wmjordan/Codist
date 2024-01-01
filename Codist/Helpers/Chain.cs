@@ -11,7 +11,7 @@ namespace Codist
 		}
 	}
 
-	/// <summary>A light-weight append-only single linked list.</summary>
+	/// <summary>A light-weight add-only single linked list.</summary>
 	/// <typeparam name="T">Type of the item on the list.</typeparam>
 	sealed class Chain<T> : IEnumerable<T>
 	{
@@ -24,6 +24,7 @@ namespace Codist
 		}
 
 		public bool IsEmpty => _Head == null;
+		public T Last => _Tail != null ? _Tail.Value : default;
 
 		public Chain<T> Add(T item) {
 			if (_Head != null) {

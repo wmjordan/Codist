@@ -287,6 +287,40 @@ namespace Codist
 		public static void Remove(this IEditorFormatMap map, string formatName, string key) {
 			map.GetProperties(formatName).Remove(key);
 		}
+		public static TextFormattingRunProperties AsFormatProperties(this ResourceDictionary resource) {
+			var r = TextFormattingRunProperties.CreateTextFormattingRunProperties();
+			foreach (System.Collections.DictionaryEntry item in resource) {
+				switch (item.Key.ToString()) {
+					case EditorFormatDefinition.ForegroundBrushId:
+						r = r.SetForegroundBrush(item.Value as WpfBrush); break;
+					case EditorFormatDefinition.ForegroundColorId:
+						r = r.SetForeground((WpfColor)item.Value); break;
+					case ClassificationFormatDefinition.ForegroundOpacityId:
+						r = r.SetForegroundOpacity((double)item.Value); break;
+					case EditorFormatDefinition.BackgroundBrushId:
+						r = r.SetBackgroundBrush(item.Value as WpfBrush); break;
+					case EditorFormatDefinition.BackgroundColorId:
+						r = r.SetBackground((WpfColor)item.Value); break;
+					case ClassificationFormatDefinition.BackgroundOpacityId:
+						r = r.SetBackgroundOpacity((double)item.Value); break;
+					case ClassificationFormatDefinition.IsBoldId:
+						r = r.SetBold((bool)item.Value); break;
+					case ClassificationFormatDefinition.IsItalicId:
+						r = r.SetItalic((bool)item.Value); break;
+					case ClassificationFormatDefinition.TextDecorationsId:
+						r = r.SetTextDecorations(item.Value as TextDecorationCollection); break;
+					case ClassificationFormatDefinition.TypefaceId:
+						r = r.SetTypeface(item.Value as Typeface); break;
+					case ClassificationFormatDefinition.FontHintingSizeId:
+						r = r.SetFontHintingEmSize((double)item.Value); break;
+					case ClassificationFormatDefinition.FontRenderingSizeId:
+						r = r.SetFontRenderingEmSize((double)item.Value); break;
+					case ClassificationFormatDefinition.TextEffectsId:
+						r = r.SetTextEffects(item.Value as TextEffectCollection); break;
+				}
+			}
+			return r;
+		}
 		#endregion
 		#endregion
 

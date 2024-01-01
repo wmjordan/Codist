@@ -18,12 +18,14 @@ namespace Codist.SyntaxHighlight
 		readonly IClassificationTypeRegistryService _Classifications;
 		readonly IContentTypeRegistryService _ContentTypes;
 		readonly IClassificationFormatMapService _FormatMaps;
+		private readonly IEditorFormatMapService _EditorFormatMaps;
 		readonly List<Entry> _Entries = new List<Entry>();
 
-		public ClassificationTypeExporter(IClassificationTypeRegistryService classifications, IContentTypeRegistryService contentTypes, IClassificationFormatMapService formatMaps) {
+		public ClassificationTypeExporter(IClassificationTypeRegistryService classifications, IContentTypeRegistryService contentTypes, IClassificationFormatMapService formatMaps, IEditorFormatMapService editorFormatMaps) {
 			_Classifications = classifications;
 			_ContentTypes = contentTypes;
 			_FormatMaps = formatMaps;
+			_EditorFormatMaps = editorFormatMaps;
 		}
 
 		public void RegisterClassificationTypes<TStyle>() where TStyle : Enum {
@@ -95,42 +97,47 @@ namespace Codist.SyntaxHighlight
 			}
 			while (e < _Entries.Count && lastExported != e);
 
-			UpdateClassificationFormatMap(_FormatMaps.GetClassificationFormatMap(Constants.CodeText), r.GetClassificationType);
+			UpdateClassificationFormatMap(_FormatMaps.GetClassificationFormatMap(Constants.CodeText), _EditorFormatMaps.GetEditorFormatMap(Constants.CodeText), r.GetClassificationType);
 		}
 
-		void UpdateClassificationFormatMap(IClassificationFormatMap classificationFormatMap, Func<string, IClassificationType> getCt) {
+		void UpdateClassificationFormatMap(IClassificationFormatMap classificationFormatMap, IEditorFormatMap editorFormatMap, Func<string, IClassificationType> getCt) {
 			var m = classificationFormatMap;
-			var cpo = new Dictionary<IClassificationType, int>();
-			int p = 0;
+			var typePriorities = new Dictionary<IClassificationType, int>(100);
+			var priorityGroups = new Dictionary<int, Chain<IClassificationType>>(19);
+			int priority = 0;
 			var orders = m.CurrentPriorityOrder;
 			foreach (var item in orders) {
 				if (item != null) {
-					cpo[item] = ++p;
+					typePriorities[item] = ++priority;
 				}
 			}
 			var batch = m.IsInBatchUpdate;
 			if (batch == false) {
 				m.BeginBatchUpdate();
 			}
-			foreach (var entry in GetExportedEntriesOrderByDependency()) {
-				var f = entry.GetTextFormattingRunProperties();
-				var bp = 0;
-				IClassificationType bct = null;
+			var expOrders = GetExportedEntriesOrderByDependency();
+			foreach (var entry in expOrders) {
+				var f = entry.GetTextFormattingRunProperties(editorFormatMap.GetProperties(m.GetEditorFormatMapKey(entry.ClassificationType)));
+				var p = 0;
+				int tp;
+				IClassificationType bct = null, ct;
 				var lower = false;
 				if (entry.BaseNames != null) {
+					// gets highest priority of base types
 					foreach (var item in entry.BaseNames) {
-						var ct = getCt(item);
-						if (ct != null && cpo.TryGetValue(ct, out var ctp) && ctp > bp) {
-							bp = ctp;
+						ct = getCt(item);
+						if (ct != null && typePriorities.TryGetValue(ct, out tp) && tp > p) {
+							p = tp;
 							bct = ct;
 						}
 					}
 				}
 				if (entry.Orders != null) {
+					// gets highest priority of dependency-ordered types
 					foreach (var (classificationType, before) in entry.Orders) {
-						var ct = getCt(classificationType);
-						if (ct != null && cpo.TryGetValue(ct, out var ctp) && ctp > bp) {
-							bp = ctp;
+						ct = getCt(classificationType);
+						if (ct != null && typePriorities.TryGetValue(ct, out tp) && tp > p) {
+							p = tp;
 							bct = ct;
 							lower = before;
 						}
@@ -138,12 +145,28 @@ namespace Codist.SyntaxHighlight
 							goto HIGH;
 						}
 						else if (classificationType == Priority.Low) {
-							goto LOW;
+							p = 1;
+							bct = orders[0];
+							lower = true;
+							break;
 						}
 					}
 				}
-				if (bp != 0) {
-					AssignOrderForClassificationType(cpo, entry.ClassificationType, bp + (lower ? 0 : 1));
+				if (p != 0) {
+					// note: since GetExportedEntriesOrderByDependency has sorted entries by dependency,
+					//   and in Codist, only BaseDefinition and Order After priorities are coded
+					//   for extended `IClassificationType`s, we assign higher priority for later populated
+					//   `IClassificationType`s
+					#region Assign priority order to new IClassificationType
+					if (priorityGroups.TryGetValue(p, out var chain)) {
+						bct = chain.Last;
+					}
+					else {
+						priorityGroups[p] = chain = new Chain<IClassificationType>(bct);
+					}
+					chain.Add(entry.ClassificationType);
+					AssignOrderForClassificationType(typePriorities, entry.ClassificationType, p);
+					#endregion
 					m.AddExplicitTextProperties(entry.ClassificationType, f, bct);
 					if (lower == false) {
 						m.SwapPriorities(bct, entry.ClassificationType);
@@ -154,12 +177,8 @@ namespace Codist.SyntaxHighlight
 			//   since all classification types exported are defined in Codist (in control),
 			//   and the aforementioned situation does not exist, so we just skip handling that
 			HIGH:
-				AssignOrderForClassificationType(cpo, entry.ClassificationType, ++p);
+				AssignOrderForClassificationType(typePriorities, entry.ClassificationType, ++priority);
 				m.AddExplicitTextProperties(entry.ClassificationType, f);
-				continue;
-			LOW:
-				AssignOrderForClassificationType(cpo, entry.ClassificationType, 1);
-				m.AddExplicitTextProperties(entry.ClassificationType, f, orders[0]);
 			}
 			if (batch == false) {
 				m.EndBatchUpdate();
@@ -169,7 +188,7 @@ namespace Codist.SyntaxHighlight
 #if DEBUG
 				od.Add(ct, order);
 #else
-				cpo[ct] = order;
+				od[ct] = order;
 #endif
 			}
 		}
@@ -248,8 +267,8 @@ namespace Codist.SyntaxHighlight
 				Style = style;
 			}
 
-			public TextFormattingRunProperties GetTextFormattingRunProperties() {
-				var f = TextFormattingRunProperties.CreateTextFormattingRunProperties();
+			public TextFormattingRunProperties GetTextFormattingRunProperties(System.Windows.ResourceDictionary resourceDictionary) {
+				var f = resourceDictionary.AsFormatProperties();
 				var s = Style;
 				if (s != null) {
 					if (s.Bold) {
