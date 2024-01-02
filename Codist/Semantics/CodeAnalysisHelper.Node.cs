@@ -223,6 +223,10 @@ namespace Codist
 			return false;
 		}
 
+		public static bool HasCapturedVariable(this SyntaxNode node, SemanticModel semanticModel) {
+			return semanticModel.AnalyzeDataFlow(node).CapturedInside.Length != 0;
+		}
+
 		public static string GetName(this NameSyntax name) {
 			if (name == null) {
 				return null;

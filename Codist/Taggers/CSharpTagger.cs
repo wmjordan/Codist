@@ -469,14 +469,11 @@ namespace Codist.Taggers
 			static TagSpan<IClassificationTag> ClassifyLambdaExpression(TextSpan itemSpan, ITextSnapshot snapshot, SemanticModel semanticModel, CompilationUnitSyntax unitCompilation) {
 				if (HighlightOptions.CapturingLambda) {
 					var node = unitCompilation.FindNode(itemSpan, true, true);
-					if (node is LambdaExpressionSyntax) {
-						var ss = node.AncestorsAndSelf().FirstOrDefault(i => i is StatementSyntax || i is ExpressionSyntax && i.IsKind(SyntaxKind.IdentifierName) == false);
-						if (ss != null) {
-							var df = semanticModel.AnalyzeDataFlow(ss);
-							if (df.ReadInside.Any(i => (i as ILocalSymbol)?.IsConst != true && df.VariablesDeclared.Contains(i) == false)) {
-								return CreateClassificationSpan(snapshot, itemSpan, CSharpClassifications.Instance.VariableCapturedExpression);
-							}
-						}
+					if (node is LambdaExpressionSyntax
+						&& node.AncestorsAndSelf()
+							.FirstOrDefault(i => i is StatementSyntax || i is ExpressionSyntax && i.IsKind(SyntaxKind.IdentifierName) == false)
+							?.HasCapturedVariable(semanticModel) == true) {
+						return CreateClassificationSpan(snapshot, itemSpan, CSharpClassifications.Instance.VariableCapturedExpression);
 					}
 				}
 				return null;
@@ -611,12 +608,14 @@ namespace Codist.Taggers
 								}
 								break;
 							case SymbolKind.Method:
-								if (HighlightOptions.LocalFunctionDeclaration
-									|| ((IMethodSymbol)symbol).MethodKind != MethodKind.LocalFunction) {
-									tags.Add(__Classifications.NestedDeclaration);
-								}
 								if (((IMethodSymbol)symbol).MethodKind == MethodKind.LocalFunction) {
-									tags.Add(__Classifications.LocalFunctionDeclaration);
+									tags.Add(HighlightOptions.LocalFunctionDeclaration ? __Classifications.NestedDeclaration : __Classifications.LocalFunctionDeclaration);
+									if (node.HasCapturedVariable(semanticModel)) {
+										tags.Add(CSharpClassifications.Instance.VariableCapturedExpression);
+									}
+								}
+								else {
+									tags.Add(__Classifications.NestedDeclaration);
 								}
 								break;
 							case SymbolKind.Property:

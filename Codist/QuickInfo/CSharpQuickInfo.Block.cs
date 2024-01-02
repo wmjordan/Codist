@@ -60,8 +60,7 @@ namespace Codist.QuickInfo
 					? node.AncestorsAndSelf().FirstOrDefault(i => i is StatementSyntax || i is ExpressionSyntax && i.IsKind(SyntaxKind.IdentifierName) == false)
 					: symbol.GetSyntaxNode(cancellationToken);
 				if (ss != null) {
-					var df = semanticModel.AnalyzeDataFlow(ss);
-					var captured = df.ReadInside.RemoveAll(i => df.VariablesDeclared.Contains(i) || (i as ILocalSymbol)?.IsConst == true);
+					var captured = semanticModel.AnalyzeDataFlow(ss).CapturedInside;
 					if (captured.Length > 0) {
 						var p = new ThemedTipParagraph(IconIds.ReadVariables, new ThemedTipText().Append(R.T_CapturedVariables, true));
 						int i = 0;
