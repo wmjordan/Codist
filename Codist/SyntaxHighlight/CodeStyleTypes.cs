@@ -319,8 +319,9 @@ namespace Codist.SyntaxHighlight
 		LocalFunctionDeclaration,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpVariableCapturedExpression)]
-		[BaseDefinition(Constants.CodeOperator)]
 		[BaseDefinition(Constants.CSharpMethodName)]
+		[Order(After = Constants.CodeOperator)]
+		[Order(After = Constants.CSharpLocalFunctionDeclarationName)]
 		[Style(Bold = true)]
 		[Description("Declaration of expression which captures external variable")]
 		VariableCapturedExpression,
