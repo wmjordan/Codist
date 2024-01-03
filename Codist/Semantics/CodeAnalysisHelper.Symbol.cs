@@ -10,7 +10,6 @@ using CLR;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.FindSymbols;
 using Microsoft.VisualStudio.Utilities;
 
 namespace Codist
@@ -713,6 +712,45 @@ namespace Codist
 				case SpecialType.System_Single: return "float";
 				case SpecialType.System_Double: return "double";
 				case SpecialType.System_String: return "string";
+			}
+			return null;
+		}
+
+		public static string GetSpecialMethodName(this IMethodSymbol m) {
+			switch (m.MethodKind) {
+				case MethodKind.UserDefinedOperator:
+					switch (m.Name) {
+						case WellKnownMemberNames.EqualityOperatorName: return "==";
+						case WellKnownMemberNames.InequalityOperatorName: return "!=";
+						case WellKnownMemberNames.AdditionOperatorName: return "+";
+						case WellKnownMemberNames.BitwiseAndOperatorName: return "&";
+						case WellKnownMemberNames.BitwiseOrOperatorName: return "|";
+						case WellKnownMemberNames.DecrementOperatorName: return "--";
+						case WellKnownMemberNames.DivisionOperatorName: return "/";
+						case WellKnownMemberNames.ExclusiveOrOperatorName: return "^";
+						case WellKnownMemberNames.GreaterThanOperatorName: return ">";
+						case WellKnownMemberNames.GreaterThanOrEqualOperatorName: return ">=";
+						case WellKnownMemberNames.IncrementOperatorName: return "++";
+						case WellKnownMemberNames.LeftShiftOperatorName: return "<<";
+						case WellKnownMemberNames.LessThanOperatorName: return "<";
+						case WellKnownMemberNames.LessThanOrEqualOperatorName: return "<=";
+						case WellKnownMemberNames.LogicalAndOperatorName: return "&&";
+						case WellKnownMemberNames.LogicalNotOperatorName: return "!";
+						case WellKnownMemberNames.LogicalOrOperatorName: return "||";
+						case WellKnownMemberNames.ModulusOperatorName: return "%";
+						case WellKnownMemberNames.MultiplyOperatorName: return "*";
+						case WellKnownMemberNames.RightShiftOperatorName: return ">>";
+						case WellKnownMemberNames.SubtractionOperatorName: return "-";
+						case WellKnownMemberNames.UnsignedLeftShiftOperatorName: return "<<<";
+						case WellKnownMemberNames.UnsignedRightShiftOperatorName: return ">>>";
+					}
+					break;
+				case MethodKind.Conversion:
+					switch (m.Name) {
+						case WellKnownMemberNames.ImplicitConversionName: return "implicit";
+						case WellKnownMemberNames.ExplicitConversionName: return "explicit";
+					}
+					break;
 			}
 			return null;
 		}

@@ -183,9 +183,26 @@ namespace Codist.Controls
 				t.Margin = new Thickness(10 * IndentLevel, 0, 0, 0);
 			}
 			if (includeType && symbol.ContainingType != null) {
-				t.Append(symbol.ContainingType.Name + symbol.ContainingType.GetParameterString() + ".", ThemeHelper.SystemGrayTextBrush);
+				t.Append($"{symbol.ContainingType.Name}{symbol.ContainingType.GetParameterString()}.", ThemeHelper.SystemGrayTextBrush);
+			}
+			if (symbol.Kind == SymbolKind.Method) {
+				var m = symbol as IMethodSymbol;
+				var exp = m.GetSpecialMethodName();
+				if (exp != null) {
+					switch (m.MethodKind) {
+						case MethodKind.UserDefinedOperator:
+							t.Append(exp, SymbolFormatter.Instance.Method);
+							goto PARAMETER;
+						case MethodKind.Conversion:
+							t.Append(exp, SymbolFormatter.Instance.Keyword)
+								.Append(" ")
+								.AddSymbol(m.ReturnType, false, SymbolFormatter.Instance);
+							goto PARAMETER;
+					}
+				}
 			}
 			t.Append(symbol.GetOriginalName(), SymbolFormatter.Instance.GetBrush(symbol));
+			PARAMETER:
 			if (includeParameter) {
 				t.Append(symbol.GetParameterString(), ThemeHelper.SystemGrayTextBrush);
 			}
