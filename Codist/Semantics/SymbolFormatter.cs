@@ -273,6 +273,10 @@ namespace Codist
 			var n = ImmutableArray.CreateBuilder<INamedTypeSymbol>();
 			do {
 				n.Add(type);
+				if (n.Count > 50) {
+					MessageWindow.Error(String.Join(Environment.NewLine, n.Select(i => i.Name)), "Too many containing types");
+					break;
+				}
 			} while ((type = type.ContainingType) != null);
 			for (int i = n.Count - 1; i >= 0; i--) {
 				signature.AddSymbol(n[i], false, this).Append(".");
@@ -292,6 +296,10 @@ namespace Codist
 			do {
 				n.Add(ns);
 				ns = ns.ContainingNamespace;
+				if (n.Count > 50) {
+					MessageWindow.Error(String.Join(Environment.NewLine, n.Select(i => i.Name)), "Too many containing namespaces");
+					break;
+				}
 			} while (ns?.IsGlobalNamespace == false);
 			for (int i = n.Count - 1; i > 0; i--) {
 				loc.AddSymbol(n[i], false, Namespace).Append(".");
@@ -903,18 +911,14 @@ namespace Codist
 				case SyntaxKind.PropertyDeclaration:
 				case SyntaxKind.IndexerDeclaration: return Property;
 				case SyntaxKind.FieldDeclaration: return ((BaseFieldDeclarationSyntax)node).Modifiers.Any(SyntaxKind.ConstKeyword) ? Const : Field;
-				case SyntaxKind.ConstructorDeclaration:
-					return GetBrush(node.Parent);
+				case SyntaxKind.ConstructorDeclaration: return GetBrush(node.Parent);
 				case SyntaxKind.MethodDeclaration:
-				case SyntaxKind.LocalFunctionStatement:
-					return Method;
+				case SyntaxKind.LocalFunctionStatement: return Method;
 				case SyntaxKind.ClassDeclaration:
 				case SyntaxKind.DestructorDeclaration:
-				case CodeAnalysisHelper.RecordDeclaration:
-					return Class;
+				case CodeAnalysisHelper.RecordDeclaration: return Class;
 				case SyntaxKind.StructDeclaration:
-				case CodeAnalysisHelper.RecordStructDeclaration:
-					return Struct;
+				case CodeAnalysisHelper.RecordStructDeclaration: return Struct;
 				case SyntaxKind.InterfaceDeclaration: return Interface;
 				case SyntaxKind.EventDeclaration:
 				case SyntaxKind.EventFieldDeclaration: return Event;

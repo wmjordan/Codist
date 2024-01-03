@@ -534,7 +534,7 @@ namespace Codist.NaviBar
 						var v = vi.Value?.ToString();
 						if (v != null) {
 							if (vi.Value.IsKind(CodeAnalysisHelper.ImplicitObjectCreationExpression)) {
-								v = "new " + (fieldItem.SyntaxNode.Parent as VariableDeclarationSyntax).Type.ToString() + vi.Value.GetImplicitObjectCreationArgumentList().ToString();
+								v = $"new {(fieldItem.SyntaxNode.Parent as VariableDeclarationSyntax).Type}{vi.Value.GetImplicitObjectCreationArgumentList()}";
 							}
 							fieldItem.Hint = ShowInitializerIndicator() + (v.Length > 200 ? v.Substring(0, 200) : v);
 						}
@@ -555,7 +555,8 @@ namespace Codist.NaviBar
 				void ShowPropertyValue(SymbolItem propertyItem) {
 					var p = (PropertyDeclarationSyntax)propertyItem.SyntaxNode;
 					if (p.Initializer != null) {
-						propertyItem.Hint = ShowInitializerIndicator() + (p.Initializer.Value.IsKind(CodeAnalysisHelper.ImplicitObjectCreationExpression) ? "new " + p.Type.ToString() + p.Initializer.Value.GetImplicitObjectCreationArgumentList().ToString() : p.Initializer.Value.ToString());
+						propertyItem.Hint = ShowInitializerIndicator()
+							+ (p.Initializer.Value.IsKind(CodeAnalysisHelper.ImplicitObjectCreationExpression) ? $"new {p.Type}{p.Initializer.Value.GetImplicitObjectCreationArgumentList()}" : p.Initializer.Value.ToString());
 					}
 					else if (p.ExpressionBody != null) {
 						propertyItem.Hint = p.ExpressionBody.ToString();
