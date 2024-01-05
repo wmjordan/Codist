@@ -149,16 +149,21 @@ namespace Codist.NaviBar
 			ShowRootItemMenu(0);
 		}
 
-		static int GetSelectedTagIndex(LocationItem[] titles, int p) {
+		int GetSelectedTagIndex() {
+			var titles = _Titles;
+			var p = View.GetCaretPosition().Position;
 			if (titles == null) {
 				return -1;
 			}
 			int selectedIndex = -1;
 			for (int i = 0; i < titles.Length; i++) {
-				if (titles[i].Span.Start > p) {
+				var item = titles[i];
+				if (item.Span.Start > p) {
 					break;
 				}
-				selectedIndex = i;
+				if (_FilterLevel == 0 || item.Level <= _FilterLevel) {
+					selectedIndex = i;
+				}
 			}
 			return selectedIndex;
 		}
@@ -204,7 +209,7 @@ namespace Codist.NaviBar
 				Style = SharedDictionaryManager.VirtualList.Get<Style>(typeof(VirtualList));
 				Container = bar.ViewOverlay;
 				ItemsSource = titles;
-				SelectedIndex = GetSelectedTagIndex(titles, bar.View.GetCaretPosition().Position);
+				SelectedIndex = bar.GetSelectedTagIndex();
 				FilteredItems = new System.Windows.Data.ListCollectionView(titles);
 
 				var b = new ThemedButton[] {
@@ -261,12 +266,20 @@ namespace Codist.NaviBar
 			}
 
 			void RefreshItemsSource() {
+				var s = _Bar.GetSelectedTagIndex();
 				if (_Filter != null) {
 					FilteredItems.Filter = _Filter;
 					ItemsSource = FilteredItems;
+					if (s >= 0) {
+						SelectedItem = _Bar._Titles[s];
+					}
+					else {
+						SelectedIndex = -1;
+					}
 				}
 				else {
 					ItemsSource = _Bar._Titles;
+					SelectedIndex = s;
 				}
 			}
 
