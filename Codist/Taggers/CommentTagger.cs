@@ -21,7 +21,6 @@ namespace Codist.Taggers
 		TaggerResult _Tags;
 		ITextView _TextView;
 		ITextBuffer _Buffer;
-		bool _Tagging;
 
 #if DEBUG
 		readonly HashSet<string> _ClassificationTypes = new HashSet<string>();
@@ -76,11 +75,9 @@ namespace Codist.Taggers
 		public IEnumerable<ITagSpan<IClassificationTag>> GetTags(NormalizedSnapshotSpanCollection spans) {
 			if (spans.Count == 0
 				|| Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.SpecialComment) == false
-				|| _Tags is null
-				|| _Tagging) {
+				|| _Tags is null) {
 				return Enumerable.Empty<ITagSpan<IClassificationTag>>();
 			}
-			_Tagging = true;
 			var snapshot = spans[0].Snapshot;
 			IEnumerable<IMappingTagSpan<IClassificationTag>> tagSpans;
 			try {
@@ -102,7 +99,6 @@ namespace Codist.Taggers
 				// HACK: TagAggregator could be disposed during editing, to be investigated further
 				(ex.ObjectName + " is disposed").Log();
 				Debug.WriteLine(ex.Message);
-				_Tagging = false;
 				return Enumerable.Empty<ITagSpan<IClassificationTag>>();
 			}
 
@@ -129,7 +125,6 @@ namespace Codist.Taggers
 				// note: Don't use the TagsChanged event, otherwise infinite loops will occur
 				//TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(s.Span));
 			}
-			_Tagging = false;
 		}
 
 		protected virtual TaggedContentSpan TagComments(SnapshotSpan snapshotSpan, IMappingTagSpan<IClassificationTag> tagSpan) {
