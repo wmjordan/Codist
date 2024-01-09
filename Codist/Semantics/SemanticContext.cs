@@ -329,7 +329,7 @@ namespace Codist
 				return ImmutableArray<SyntaxNode>.Empty;
 			}
 			var nodes = ImmutableArray.CreateBuilder<SyntaxNode>(5);
-			while (node != null) {
+			do {
 				if (node.FullSpan.Contains(position)) {
 					var nodeKind = node.Kind();
 					if (nodeKind != SyntaxKind.VariableDeclaration
@@ -337,8 +337,8 @@ namespace Codist
 						nodes.Add(node);
 					}
 				}
-				node = node.Parent;
 			}
+			while ((node = node.Parent) != null);
 			nodes.Reverse();
 			if (nodes.Count > 0) {
 				var members = model.Compilation.Members;
