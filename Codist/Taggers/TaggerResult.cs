@@ -13,6 +13,9 @@ namespace Codist.Taggers
 
 		// hack We assume that it is thread-safe to organize the tags with this
 		readonly SortedSet<TaggedContentSpan> _Tags = new SortedSet<TaggedContentSpan>(Comparer<TaggedContentSpan>.Create((x, y) => {
+			if (ReferenceEquals(x, y)) {
+				return 0;
+			}
 			var s1 = x.Start;
 			var s2 = y.Start;
 			return s1 < s2 ?
