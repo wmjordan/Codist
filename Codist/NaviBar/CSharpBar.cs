@@ -159,13 +159,17 @@ namespace Codist.NaviBar
 				}
 				CHECK_NODE:
 				if (Items[i] is BarItem ni) {
-					if (ni.ItemType == BarItemType.Node && ((NodeItem)ni).Node == nodes[i2]) {
-						// keep the item if corresponding node is not updated
-						++i;
-						continue;
-					}
-					if (ni.ItemType == BarItemType.Namespace) {
-						i = FirstNodeIndex;
+					switch (ni.ItemType) {
+						case BarItemType.Node:
+							if (((NodeItem)ni).Node == nodes[i2]) {
+								// keep the item if corresponding node is not updated
+								++i;
+								continue;
+							}
+							break;
+						case BarItemType.Namespace:
+							i = FirstNodeIndex;
+							break;
 					}
 				}
 				break;
