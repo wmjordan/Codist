@@ -438,6 +438,10 @@ namespace Codist.SyntaxHighlight
 					foreach (var item in formats) {
 						if (item.IsFormattableClassificationType()) {
 							var p = _ClassificationFormatMap.GetTextProperties(item);
+							// C/C++ styles can somehow get reverted, here we forcefully reinforce our highlights 
+							if (Highlight(item, out var newStyle) != FormatChanges.None) {
+								p = newStyle.Value.MergeFormatProperties(p);
+							}
 							$"[{_Category}] refresh classification {item.Classification} ({p.Print()})".Log();
 							_ClassificationFormatMap.SetTextProperties(item, p);
 							_PropertiesCache[item] = p;
