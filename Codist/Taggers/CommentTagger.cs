@@ -15,7 +15,7 @@ namespace Codist.Taggers
 	abstract class CommentTagger : ITagger<IClassificationTag>, IDisposable
 	{
 		static ClassificationTag[] __CommentClassifications;
-		static readonly Dictionary<IClassificationType, bool> __CommentClasses = new Dictionary<IClassificationType, bool>();
+		static Dictionary<IClassificationType, bool> __CommentClasses = new Dictionary<IClassificationType, bool>(ClassificationTypeComparer.Instance);
 		readonly bool _FullParseAtFirstLoad;
 		ITagAggregator<IClassificationTag> _Aggregator;
 		TaggerResult _Tags;
@@ -230,9 +230,16 @@ namespace Codist.Taggers
 		}
 
 		static bool IsComment(IClassificationType classification) {
-			return __CommentClasses.TryGetValue(classification, out var c)
-				? c
-				: (__CommentClasses[classification] = classification.Classification.IndexOf("Comment", StringComparison.OrdinalIgnoreCase) != -1);
+			if (__CommentClasses.TryGetValue(classification, out var c)) {
+				return c;
+			}
+			// since this is a rare case, we don't use concurrent dictionary,
+			//   but use collection cloning and atomic replacement instead
+			//   to save some CPU resource for the above normal path
+			var d = new Dictionary<IClassificationType, bool>(__CommentClasses, ClassificationTypeComparer.Instance);
+			c = d[classification] = classification.Classification.IndexOf("Comment", StringComparison.OrdinalIgnoreCase) != -1;
+			__CommentClasses = d;
+			return c;
 		}
 
 		ITagAggregator<IClassificationTag> GetTagAggregator() {
@@ -406,6 +413,19 @@ namespace Codist.Taggers
 
 			protected override int GetCommentEndIndex(string comment) {
 				return comment.EndsWith("-->", StringComparison.Ordinal) ? comment.Length - 3 : comment.Length;
+			}
+		}
+
+		sealed class ClassificationTypeComparer : IEqualityComparer<IClassificationType>
+		{
+			internal static readonly ClassificationTypeComparer Instance = new ClassificationTypeComparer();
+
+			public bool Equals(IClassificationType x, IClassificationType y) {
+				return ReferenceEquals(x, y) || x?.Classification == y?.Classification;
+			}
+
+			public int GetHashCode(IClassificationType t) {
+				return t?.Classification.GetHashCode() ?? 0;
 			}
 		}
 	}
