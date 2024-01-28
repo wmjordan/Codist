@@ -117,7 +117,8 @@ namespace Codist.QuickInfo
 	abstract class SingletonQuickInfoSource : IAsyncQuickInfoSource
 	{
 		Task<QuickInfoItem> IAsyncQuickInfoSource.GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
-			return session.Properties.ContainsProperty(GetType())
+			return Config.Instance.Features.MatchFlags(Features.SuperQuickInfo) == false
+				|| session.Properties.ContainsProperty(GetType())
 				? Task.FromResult<QuickInfoItem>(null)
 				: InternalGetQuickInfoItemAsync(session, cancellationToken);
 		}
