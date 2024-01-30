@@ -117,10 +117,21 @@ namespace Codist.QuickInfo
 	abstract class SingletonQuickInfoSource : IAsyncQuickInfoSource
 	{
 		Task<QuickInfoItem> IAsyncQuickInfoSource.GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
-			return Config.Instance.Features.MatchFlags(Features.SuperQuickInfo) == false
-				|| session.Properties.ContainsProperty(GetType())
-				? Task.FromResult<QuickInfoItem>(null)
-				: InternalGetQuickInfoItemAsync(session, cancellationToken);
+			// do not show Quick Info when user is hovering on the SmartBar or the SymbolList
+			if (session.TextView.Properties.ContainsProperty(SmartBars.SmartBar.QuickInfoSuppressionId)
+				|| session.TextView.Properties.ContainsProperty(Controls.TextViewOverlay.QuickInfoSuppressionId)) {
+				return DismissQuickInfoOnSpecialUIElementsAsync(session);
+			}
+			if (Config.Instance.Features.MatchFlags(Features.SuperQuickInfo) == false
+				|| session.Properties.ContainsProperty(GetType())) {
+				return Task.FromResult<QuickInfoItem>(null);
+			}
+			return InternalGetQuickInfoItemAsync(session, cancellationToken);
+		}
+
+		static async Task<QuickInfoItem> DismissQuickInfoOnSpecialUIElementsAsync(IAsyncQuickInfoSession session) {
+			await session.DismissAsync();
+			return null;
 		}
 
 		protected abstract Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken);

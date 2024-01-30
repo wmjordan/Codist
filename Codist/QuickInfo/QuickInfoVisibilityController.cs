@@ -20,9 +20,6 @@ namespace Codist.QuickInfo
 			//   or CtrlQuickInfo is off and shift is pressed
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.CtrlQuickInfo)
 				^ Keyboard.Modifiers.MatchFlags(ModifierKeys.Shift)
-				// do not show Quick Info when user is hovering on the SmartBar or the SymbolList
-				|| session.TextView.Properties.ContainsProperty(SmartBars.SmartBar.QuickInfoSuppressionId)
-				|| session.TextView.Properties.ContainsProperty(Controls.TextViewOverlay.QuickInfoSuppressionId)
 				) {
 				await session.DismissAsync();
 			}
