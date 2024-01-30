@@ -121,9 +121,6 @@ namespace Codist
 				if (showContainer) {
 					b.Append(ThemeHelper.GetImage(cs.GetImageId()).WrapMargin(WpfHelper.GlyphMargin));
 				}
-				if ((ct = cs.GetUnderlyingSymbol().ContainingType) != null) {
-					ShowContainingTypes(ct, b);
-				}
 
 				if (showContainer) {
 					b.AddSymbol(cs, false, this).Append(" ");
@@ -158,17 +155,13 @@ namespace Codist
 				b = new ThemedTipText { FontSize = ThemeHelper.ToolTipFontSize, FontFamily = ThemeHelper.ToolTipFont }
 					.Append(ThemeHelper.GetImage(IconIds.Return).WrapMargin(WpfHelper.GlyphMargin))
 					.Append(GetRefType(s), Keyword);
-				if ((ct = rt.GetUnderlyingSymbol().ContainingType) != null
-					&& rt.Kind != SymbolKind.TypeParameter) {
-					ShowContainingTypes(ct, b);
-				}
 				b.AddSymbol(rt, false, this)
 					.Append(rt.IsAwaitable() ? $" ({R.T_Awaitable})" : String.Empty);
 				p.Add(b);
 			}
 			#endregion
 
-			#region Generic type parameters
+			#region Generic type constraints
 			switch (s.Kind) {
 				case SymbolKind.NamedType:
 					t = (INamedTypeSymbol)symbol;
@@ -209,7 +202,8 @@ namespace Codist
 				Foreground = PlainText,
 				FontFamily = ThemeHelper.ToolTipFont,
 				FontSize = ThemeHelper.ToolTipFontSize
-			}.AddSymbol(symbol, true, this);
+			};
+			Format(signature.Inlines, symbol, null, true, true);
 			TextEditorWrapper.CreateFor(signature);
 			signature.Inlines.FirstInline.FontSize = ThemeHelper.ToolTipFontSize * 1.2;
 
@@ -269,17 +263,18 @@ namespace Codist
 			return signature;
 		}
 
-		void ShowContainingTypes(INamedTypeSymbol type, TextBlock signature) {
-			var n = ImmutableArray.CreateBuilder<INamedTypeSymbol>();
+		void ShowContainingTypes(INamedTypeSymbol type, InlineCollection text) {
+			var n = new Stack<INamedTypeSymbol>();
 			do {
-				n.Add(type);
+				n.Push(type);
 				if (n.Count > 50) {
 					MessageWindow.Error(String.Join(Environment.NewLine, n.Select(i => i.Name)), "Too many containing types");
 					break;
 				}
 			} while ((type = type.ContainingType) != null);
-			for (int i = n.Count - 1; i >= 0; i--) {
-				signature.AddSymbol(n[i], false, this).Append(".");
+			while (n.Count != 0) {
+				FormatTypeName(text, n.Pop(), null, false);
+				text.Add(".");
 			}
 		}
 
@@ -693,7 +688,7 @@ namespace Codist
 			return null;
 		}
 
-		internal void Format(InlineCollection text, ISymbol symbol, string alias, bool bold) {
+		internal void Format(InlineCollection text, ISymbol symbol, string alias, bool bold, bool excludeContainingTypes = false) {
 			switch (symbol.Kind) {
 				case SymbolKind.ArrayType:
 					FormatArrayType(text, (IArrayTypeSymbol)symbol, alias, bold);
@@ -707,6 +702,9 @@ namespace Codist
 					FormatMethodName(text, symbol, alias, bold);
 					return;
 				case SymbolKind.NamedType:
+					if (excludeContainingTypes == false && symbol.ContainingType != null) {
+						ShowContainingTypes(symbol.ContainingType, text);
+					}
 					FormatTypeName(text, symbol, alias, bold);
 					return;
 				case SymbolKind.Namespace:
