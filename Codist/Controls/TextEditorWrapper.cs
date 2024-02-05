@@ -48,12 +48,10 @@ namespace Codist.Controls
 		object _Editor;
 
 		public static TextEditorWrapper CreateFor(TextBlock text) {
-			if (__IsInitialized == false) {
+			if (__IsInitialized == false || __SelectableProperty.Get(text)) {
 				return null;
 			}
-			if (__SelectableProperty.Get(text)) {
-				return null;
-			}
+
 			text.Focusable = true;
 			var textContainer = __TextContainerProp.GetValue(text);
 			var editor = new TextEditorWrapper(textContainer, text, false);
