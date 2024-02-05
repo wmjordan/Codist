@@ -927,7 +927,7 @@ namespace Codist.QuickInfo
 			}
 			if (options.MatchFlags(QuickInfoOptions.InterfaceMembers)
 				&& typeSymbol.TypeKind == TypeKind.Interface) {
-				var declarationType = (node.Parent.Parent as BaseListSyntax)?.Parent;
+				var declarationType = (node.Parent.UnqualifyExceptNamespace().Parent as BaseListSyntax)?.Parent;
 				var declaredClass = declarationType?.Kind()
 					.CeqAny(SyntaxKind.ClassDeclaration, SyntaxKind.StructDeclaration, CodeAnalysisHelper.RecordDeclaration, CodeAnalysisHelper.RecordStructDeclaration) == true
 					? semanticModel.GetDeclaredSymbol(declarationType, cancellationToken) as INamedTypeSymbol
