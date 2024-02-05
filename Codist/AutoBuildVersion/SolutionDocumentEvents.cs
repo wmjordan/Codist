@@ -141,7 +141,7 @@ namespace Codist
 				AutoBuildVersion.BuildSetting.Load(project)?.RewriteVersion(project, configDisplayName);
 			}
 			catch (Exception ex) {
-				MessageWindow.Error(ex, "Changing version number failed.");
+				MessageWindow.Error(ex, "Changing version number failed.", null, new Source());
 			}
 		}
 
@@ -279,5 +279,7 @@ namespace Codist
 			return VSConstants.S_OK;
 		}
 		#endregion
+
+		struct Source { }
 	}
 }

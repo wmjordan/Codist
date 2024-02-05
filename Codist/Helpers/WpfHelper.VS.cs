@@ -312,7 +312,7 @@ namespace Codist
 						_Symbol.GoToDefinition();
 					}
 					catch (Exception ex) {
-						MessageWindow.Error(ex);
+						MessageWindow.Error(ex, null, null, this);
 					}
 				}
 				QuickInfo.QuickInfoOverride.DismissQuickInfo(this);

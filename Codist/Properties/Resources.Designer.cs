@@ -5983,6 +5983,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Don&apos;t report this error until VS restarts.
+        /// </summary>
+        internal static string T_DontReportUntilRestart {
+            get {
+                return ResourceManager.GetString("T_DontReportUntilRestart", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Dot.
         /// </summary>
         internal static string T_Dot {

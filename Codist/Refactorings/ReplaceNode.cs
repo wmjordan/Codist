@@ -52,7 +52,7 @@ namespace Codist.Refactorings
 				RefactorInternal(context);
 			}
 			catch (Exception ex) when (System.Diagnostics.Debugger.IsAttached == false) {
-				MessageWindow.Error(ex, Title);
+				MessageWindow.Error(ex, Title, null, this);
 			}
 		}
 

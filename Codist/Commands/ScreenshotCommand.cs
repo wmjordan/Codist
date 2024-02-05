@@ -38,10 +38,11 @@ namespace Codist.Commands
 						WpfHelper.ScreenShot(g, f.FileName, (int)g.ActualWidth, (int)g.ActualHeight);
 					}
 					catch (Exception ex) {
-						MessageWindow.Error(ex, R.T_FailedToSaveScreenshot.Replace("<NAME>", doc.Name));
+						MessageWindow.Error(ex, R.T_FailedToSaveScreenshot.Replace("<NAME>", doc.Name), null, new Source());
 					}
 				}
 			}
 		}
+		struct Source { }
 	}
 }

@@ -319,7 +319,7 @@ namespace Codist.Controls
 				// ignore
 			}
 			catch (Exception ex) {
-				MessageWindow.Error(ex);
+				MessageWindow.Error(ex, null, null, this);
 				e.Handled = true;
 				return;
 			}

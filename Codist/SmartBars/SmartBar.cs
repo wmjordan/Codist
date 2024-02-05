@@ -457,7 +457,7 @@ namespace Codist.SmartBars
 						await asyncClickHandler(ctx);
 					}
 					catch (Exception ex) {
-						MessageWindow.Error(ex);
+						MessageWindow.Error(ex, null, null, this);
 					}
 				}
 				else {
@@ -494,7 +494,7 @@ namespace Codist.SmartBars
 						await asyncClickHandler(ctx);
 					}
 					catch (Exception ex) {
-						MessageWindow.Error(ex);
+						MessageWindow.Error(ex, null, null, this);
 					}
 				}
 				TryHideToolBar(ctx);

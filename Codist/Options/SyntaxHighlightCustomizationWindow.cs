@@ -1392,7 +1392,7 @@ namespace Codist.Options
 					PreviewLabelStyle(_Preview, t);
 				}
 				catch (Exception ex) {
-					MessageWindow.Error(ex, "Set Preview style error for " + _Preview.Text);
+					MessageWindow.Error(ex, "Set Preview style error for " + _Preview.Text, null, this);
 				}
 				this.ReferenceStyle(VsResourceKeys.ButtonStyleKey);
 				Click += clickHandler;

@@ -208,7 +208,7 @@ namespace Codist.QuickInfo
 					_symbol.GoToDefinition();
 				}
 				catch (Exception ex) {
-					MessageWindow.Error(ex);
+					MessageWindow.Error(ex, null, null, this);
 				}
 			}
 
@@ -445,7 +445,7 @@ namespace Codist.QuickInfo
 					}
 				}
 				catch (Exception ex) {
-					Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Render, (Action<Exception>)((e) => MessageWindow.Error(e.ToString(), R.T_SuperQuickInfo)), ex);
+					Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Render, (Action<(Exception error, UIOverride src)>)((e) => MessageWindow.Error(e.error, null, R.T_SuperQuickInfo, e.src)), (ex, this));
 					return;
 				}
 			EXIT:

@@ -426,7 +426,7 @@ namespace Codist.Controls
 						h.Invoke(this, e);
 					}
 					catch (Exception ex) {
-						MessageWindow.Error(ex, "Error when executing command: " + ((ThemedMenuText)Header).GetText());
+						MessageWindow.Error(ex, "Error when executing command: " + ((ThemedMenuText)Header).GetText(), null, this);
 					}
 					_Handled = true;
 				}

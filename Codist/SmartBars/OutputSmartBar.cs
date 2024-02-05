@@ -27,7 +27,7 @@ namespace Codist.SmartBars
 				t = TryGetPathFromView(View, out p);
 			}
 			catch (Exception ex) {
-				MessageWindow.Error(ex);
+				MessageWindow.Error(ex, null, null, this);
 				return;
 			}
 			switch (p) {
