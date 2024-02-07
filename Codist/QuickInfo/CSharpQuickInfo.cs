@@ -67,7 +67,8 @@ namespace Codist.QuickInfo
 				? QuickInfoOverride.CreateOverride(session)
 				: null;
 			var container = new InfoContainer();
-			ClassifyToken:
+			ObjectCreationExpressionSyntax ctor = null;
+		ClassifyToken:
 			switch (token.Kind()) {
 				case SyntaxKind.WhitespaceTrivia:
 				case SyntaxKind.SingleLineCommentTrivia:
@@ -286,7 +287,6 @@ namespace Codist.QuickInfo
 					return null;
 			}
 
-			ObjectCreationExpressionSyntax ctor;
 		PROCESS:
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter)) {
 				ShowParameterInfo(container, node, semanticModel, cancellationToken);
@@ -342,10 +342,10 @@ namespace Codist.QuickInfo
 				if (isConvertedType == false) {
 					container.Add(await ShowAvailabilityAsync(ctx.Document, token, cancellationToken).ConfigureAwait(false));
 				}
-				ctor = node.Parent as ObjectCreationExpressionSyntax;
+				ctor = node.Parent.UnqualifyExceptNamespace() as ObjectCreationExpressionSyntax;
 				OverrideDocumentation(node,
 					o,
-					ctor?.Type == node
+					ctor != null
 						? semanticModel.GetSymbolInfo(ctor, cancellationToken).Symbol ?? symbol
 						: symbol,
 					semanticModel,
@@ -358,8 +358,10 @@ namespace Codist.QuickInfo
 				ShowSymbolInfo(session, container, node, symbol, semanticModel, cancellationToken);
 			}
 		RETURN:
-			ctor = node.Parent as ObjectCreationExpressionSyntax;
-			if (ctor != null && ctor.Type == node) {
+			if (ctor == null) {
+				ctor = node.Parent.UnqualifyExceptNamespace() as ObjectCreationExpressionSyntax;
+			}
+			if (ctor != null) {
 				symbol = semanticModel.GetSymbolOrFirstCandidate(ctor, cancellationToken) ?? symbol;
 				if (symbol == null) {
 					return null;
