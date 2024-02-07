@@ -64,6 +64,7 @@
   <ItemGroup>
     <Compile Include="Colors.cs" />
     <Compile Include="Comments.cs" />
+    <Compile Include="CS12_0.cs" />
     <Compile Include="CS11_0.cs" />
     <Compile Include="CS10_0.cs" />
     <Compile Include="CS6_0.cs" />
