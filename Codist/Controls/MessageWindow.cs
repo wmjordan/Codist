@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
+using CLR;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using R = Codist.Properties.Resources;
@@ -106,14 +107,11 @@ namespace Codist.Controls
 					_DefaultButton.IsCancel = true;
 					break;
 			}
-			int img;
-			switch (icon) {
-				case MessageBoxImage.Question: img = IconIds.Question; break;
-				case MessageBoxImage.Error: img = IconIds.Error; break;
-				case MessageBoxImage.Warning: img = IconIds.Stop; break;
-				case MessageBoxImage.Information: img = IconIds.Info; break;
-				default: img = 0; break;
-			}
+			int img = icon.Case(MessageBoxImage.Question, IconIds.Question,
+				MessageBoxImage.Error, IconIds.Error,
+				MessageBoxImage.Warning, IconIds.Stop,
+				MessageBoxImage.Information, IconIds.Info,
+				0);
 			if (img != 0) {
 				_Icon.Content = ThemeHelper.GetImage(img, ThemeHelper.LargeIconSize);
 			}

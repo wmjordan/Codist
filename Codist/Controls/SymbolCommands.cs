@@ -130,10 +130,8 @@ namespace Codist.Controls
 				}
 				else {
 					foreach (INamedTypeSymbol impl in implementations) {
-						if (impl.IsGenericType || impl.CanConvertTo(st)) {
-							if (d.TryAdd(impl)) {
-								m.Add(impl, false);
-							}
+						if ((impl.IsGenericType || impl.CanConvertTo(st)) && d.TryAdd(impl)) {
+							m.Add(impl, false);
 						}
 					}
 				}
