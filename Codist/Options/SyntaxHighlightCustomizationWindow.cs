@@ -172,7 +172,7 @@ namespace Codist.Options
 											Child = new StackPanel {
 												Orientation = Orientation.Horizontal,
 												Children = {
-													ThemeHelper.GetImage(IconIds.Filter).WrapMargin(WpfHelper.GlyphMargin),
+													ThemeHelper.GetImage(IconIds.Filter).ReferenceCrispImageBackground(EnvironmentColors.ToolWindowBackgroundColorKey).WrapMargin(WpfHelper.GlyphMargin),
 													new ThemedTextBox {
 														Width = 120,
 														Margin = WpfHelper.SmallMargin,
