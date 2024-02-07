@@ -153,10 +153,19 @@ namespace Codist
 			}
 			else if (s.Kind != SymbolKind.Method || ((IMethodSymbol)s).IsTypeSpecialMethod() == false) {
 				b = new ThemedTipText { FontSize = ThemeHelper.ToolTipFontSize, FontFamily = ThemeHelper.ToolTipFont }
-					.Append(ThemeHelper.GetImage(IconIds.Return).WrapMargin(WpfHelper.GlyphMargin))
-					.Append(GetRefType(s), Keyword);
-				b.AddSymbol(rt, false, this)
-					.Append(rt.IsAwaitable() ? $" ({R.T_Awaitable})" : String.Empty);
+					.Append(ThemeHelper.GetImage(IconIds.Return).WrapMargin(WpfHelper.GlyphMargin));
+				if (rt.TypeKind != TypeKind.Delegate) {
+					b.Append(GetRefType(s), Keyword);
+					b.AddSymbol(rt, false, this)
+						.Append(rt.IsAwaitable() ? $" ({R.T_Awaitable})" : String.Empty);
+				}
+				else {
+					var invoke = ((INamedTypeSymbol)rt).DelegateInvokeMethod;
+					b.Append("delegate ", Keyword)
+						.Append(GetRefType(invoke), Keyword)
+						.AddSymbol(invoke.ReturnType, null, this)
+						.AddParameters(invoke.Parameters, this);
+				}
 				p.Add(b);
 			}
 			#endregion
