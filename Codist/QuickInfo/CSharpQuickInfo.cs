@@ -191,6 +191,9 @@ namespace Codist.QuickInfo
 						&& node.Parent.IsKind(SyntaxKind.ElementAccessExpression)) {
 						symbol = semanticModel.GetSymbolInfo((ElementAccessExpressionSyntax)node.Parent, cancellationToken).Symbol;
 					}
+					else if (node.IsKind(CodeAnalysisHelper.CollectionExpression)) {
+						symbol = semanticModel.GetTypeInfo(node, cancellationToken).ConvertedType;
+					}
 					if (symbol == null) {
 						goto case SyntaxKind.OpenParenToken;
 					}

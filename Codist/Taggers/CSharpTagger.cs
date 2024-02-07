@@ -347,7 +347,7 @@ namespace Codist.Taggers
 							return HighlightOptions.AllBraces ? ClassifyCurlyBraces(itemSpan, snapshot, unitCompilation) : null;
 						case '[':
 						case ']':
-							return HighlightOptions.AttributeAnnotation ? ClassifyBrackets(itemSpan, snapshot, semanticModel, unitCompilation, cancellationToken) : null;
+							return ClassifyBrackets(itemSpan, snapshot, semanticModel, unitCompilation, cancellationToken);
 					}
 				}
 				return null;
@@ -461,6 +461,7 @@ namespace Codist.Taggers
 							: null;
 					case SyntaxKind.ImplicitStackAllocArrayCreationExpression:
 					case SyntaxKind.ImplicitArrayCreationExpression:
+					case CodeAnalysisHelper.CollectionExpression:
 						return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.MemberBraceTags.Constructor);
 				}
 				return null;

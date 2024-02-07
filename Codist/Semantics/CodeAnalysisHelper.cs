@@ -45,6 +45,7 @@ namespace Codist
 		internal const SyntaxKind RecordKeyword = (SyntaxKind)8444;
 		internal const SyntaxKind RequiredKeyword = (SyntaxKind)8447;
 		internal const SyntaxKind ImplicitObjectCreationExpression = (SyntaxKind)8659;
+		internal const SyntaxKind CollectionExpression = (SyntaxKind)9076;
 		internal const SyntaxKind FileScopedNamespaceDeclaration = (SyntaxKind)8845;
 		internal const SyntaxKind RecursivePattern = (SyntaxKind)9020;
 		internal const SyntaxKind PositionalPatternClause = (SyntaxKind)9023;
