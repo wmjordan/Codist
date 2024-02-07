@@ -11,7 +11,6 @@ using Codist.Controls;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
@@ -350,6 +349,8 @@ namespace Codist.QuickInfo
 					o,
 					ctor != null
 						? semanticModel.GetSymbolInfo(ctor, cancellationToken).Symbol ?? symbol
+						: node.Parent.IsKind(CodeAnalysisHelper.PrimaryConstructorBaseType)
+						? (symbol = semanticModel.GetSymbolInfo(node.Parent, cancellationToken).Symbol ?? symbol)
 						: symbol,
 					semanticModel,
 					cancellationToken);

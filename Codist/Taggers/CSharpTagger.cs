@@ -519,6 +519,7 @@ namespace Codist.Taggers
 					case SyntaxKind.DestructorDeclaration:
 					case CodeAnalysisHelper.ImplicitObjectCreationExpression:
 					case CodeAnalysisHelper.WithInitializerExpression:
+					case CodeAnalysisHelper.PrimaryConstructorBaseType:
 						return tag.Constructor;
 					case SyntaxKind.IndexerDeclaration:
 					case SyntaxKind.PropertyDeclaration:
