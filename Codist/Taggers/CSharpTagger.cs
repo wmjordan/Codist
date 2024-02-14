@@ -297,34 +297,43 @@ namespace Codist.Taggers
 			}
 			static TagSpan<IClassificationTag> ClassifyOperator(TextSpan itemSpan, ITextSnapshot snapshot, SemanticModel semanticModel, CompilationUnitSyntax unitCompilation, CancellationToken cancellationToken) {
 				var node = unitCompilation.FindNode(itemSpan);
-				if (node.RawKind == (int)SyntaxKind.DestructorDeclaration) {
-					return CreateClassificationSpan(snapshot, itemSpan, TransientTags.DestructorDeclaration);
-				}
-				if (node.IsKind(SyntaxKind.ArrowExpressionClause)) {
-					switch (node.Parent.Kind()) {
-						case SyntaxKind.MethodDeclaration:
-							return CreateClassificationSpan(snapshot, itemSpan, CSharpClassifications.Instance.Method);
-						case SyntaxKind.PropertyDeclaration:
-						case SyntaxKind.GetAccessorDeclaration:
-						case SyntaxKind.SetAccessorDeclaration:
-						case SyntaxKind.IndexerDeclaration:
-							return CreateClassificationSpan(snapshot, itemSpan, CSharpClassifications.Instance.Property);
-						case SyntaxKind.AddAccessorDeclaration:
-						case SyntaxKind.RemoveAccessorDeclaration:
-							return CreateClassificationSpan(snapshot, itemSpan, CSharpClassifications.Instance.Event);
-						case SyntaxKind.ConstructorDeclaration:
-						case SyntaxKind.DestructorDeclaration:
-							return CreateClassificationSpan(snapshot, itemSpan, CSharpClassifications.Instance.ConstructorMethod);
-					}
-					return null;
+				ClassificationTag tag;
+				switch ((SyntaxKind)node.RawKind) {
+					case SyntaxKind.DestructorDeclaration:
+						tag = TransientTags.DestructorDeclaration;
+						goto CREATE_SPAN;
+					case CodeAnalysisHelper.SwitchExpressionArm:
+						tag = __GeneralClassifications.BranchingKeyword;
+						goto CREATE_SPAN;
+					case SyntaxKind.ArrowExpressionClause:
+						switch (node.Parent.Kind()) {
+							case SyntaxKind.MethodDeclaration:
+							case SyntaxKind.LocalFunctionStatement:
+								tag = TransientTags.MethodDeclaration;
+								goto CREATE_SPAN;
+							case SyntaxKind.PropertyDeclaration:
+							case SyntaxKind.GetAccessorDeclaration:
+							case SyntaxKind.SetAccessorDeclaration:
+							case SyntaxKind.IndexerDeclaration:
+								tag = TransientTags.PropertyDeclaration;
+								goto CREATE_SPAN;
+							case SyntaxKind.AddAccessorDeclaration:
+							case SyntaxKind.RemoveAccessorDeclaration:
+								tag = TransientTags.EventDeclaration;
+								goto CREATE_SPAN;
+							case SyntaxKind.ConstructorDeclaration:
+							case SyntaxKind.DestructorDeclaration:
+								tag = TransientTags.ConstructorDeclaration;
+								goto CREATE_SPAN;
+						}
+						return null;
 				}
 				if (semanticModel.GetSymbol(node.IsKind(SyntaxKind.Argument) ? ((ArgumentSyntax)node).Expression : node, cancellationToken) is IMethodSymbol opMethod) {
 					if (opMethod.MethodKind == MethodKind.UserDefinedOperator) {
-						return CreateClassificationSpan(snapshot,
-							itemSpan,
-							node.RawKind == (int)SyntaxKind.OperatorDeclaration
+						tag = node.RawKind == (int)SyntaxKind.OperatorDeclaration
 								? TransientTags.OverrideDeclaration
-								: __Classifications.OverrideMember);
+								: __Classifications.OverrideMember;
+						goto CREATE_SPAN;
 					}
 					if (opMethod.MethodKind == MethodKind.LambdaMethod) {
 						var l = ClassifyLambdaExpression(itemSpan, snapshot, semanticModel, unitCompilation);
@@ -334,6 +343,8 @@ namespace Codist.Taggers
 					}
 				}
 				return null;
+				CREATE_SPAN:
+				return CreateClassificationSpan(snapshot, itemSpan, tag);
 			}
 
 			static TagSpan<IClassificationTag> ClassifyPunctuation(TextSpan itemSpan, ITextSnapshot snapshot, SemanticModel semanticModel, CompilationUnitSyntax unitCompilation, CancellationToken cancellationToken) {
