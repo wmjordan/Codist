@@ -114,7 +114,7 @@ namespace Codist.Taggers
 					var classifiedSpans = Classifier.GetClassifiedSpans(semanticModel, textSpan, workspace, cancellationToken);
 					var lastTriviaSpan = default(TextSpan);
 					SyntaxNode node;
-					TagSpan<IClassificationTag> tag = null;
+					TagSpan<IClassificationTag> tag;
 					var r = GetAttributeNotationSpan(snapshot, textSpan, compilationUnit);
 					if (r != null) {
 						tags.Add(r);
@@ -127,10 +127,8 @@ namespace Codist.Taggers
 							case Constants.CodeKeywordControl:
 								node = compilationUnit.FindNode(item.TextSpan, true, true);
 								if (node is MemberDeclarationSyntax || node is AccessorDeclarationSyntax) {
-									tag = ClassifyDeclarationKeyword(item.TextSpan, snapshot, node, compilationUnit, out var tag2);
-									if (tag2 != null) {
-										tags.Add(tag2);
-									}
+									ClassifyDeclarationKeyword(item.TextSpan, snapshot, node, compilationUnit, tags);
+									continue;
 								}
 								else {
 									tag = ClassifyKeyword(item.TextSpan, snapshot, node, compilationUnit);
@@ -180,8 +178,8 @@ namespace Codist.Taggers
 				return null;
 			}
 
-			static TagSpan<IClassificationTag> ClassifyDeclarationKeyword(TextSpan itemSpan, ITextSnapshot snapshot, SyntaxNode node, CompilationUnitSyntax unitCompilation, out TagSpan<IClassificationTag> secondaryTag) {
-				secondaryTag = null;
+			static void ClassifyDeclarationKeyword(TextSpan itemSpan, ITextSnapshot snapshot, SyntaxNode node, CompilationUnitSyntax unitCompilation, Chain<ITagSpan<IClassificationTag>> tags) {
+				ClassificationTag tag;
 				switch (unitCompilation.FindToken(itemSpan.Start).Kind()) {
 					case SyntaxKind.SealedKeyword:
 					case SyntaxKind.OverrideKeyword:
@@ -189,27 +187,33 @@ namespace Codist.Taggers
 					case SyntaxKind.VirtualKeyword:
 					case SyntaxKind.ProtectedKeyword:
 					case SyntaxKind.NewKeyword:
-						return CreateClassificationSpan(snapshot, itemSpan, __Classifications.AbstractionKeyword);
+						tag = __Classifications.AbstractionKeyword;
+						break;
 					case SyntaxKind.ThisKeyword:
-						return CreateClassificationSpan(snapshot, itemSpan, __Classifications.Declaration);
+						tag = __Classifications.Declaration;
+						break;
 					case SyntaxKind.UnsafeKeyword:
 					case SyntaxKind.FixedKeyword:
-						return CreateClassificationSpan(snapshot, itemSpan, __Classifications.ResourceKeyword);
+						tag = __Classifications.ResourceKeyword;
+						break;
 					case SyntaxKind.ExplicitKeyword:
 					case SyntaxKind.ImplicitKeyword:
-						secondaryTag = CreateClassificationSpan(snapshot, ((ConversionOperatorDeclarationSyntax)node).Type.Span, __Classifications.NestedDeclaration);
-						return CreateClassificationSpan(snapshot, itemSpan, __GeneralClassifications.TypeCastKeyword);
+						tags.Add(CreateClassificationSpan(snapshot, ((ConversionOperatorDeclarationSyntax)node).Type.Span, __Classifications.NestedDeclaration));
+						tag = __GeneralClassifications.TypeCastKeyword;
+						break;
 					case SyntaxKind.ReadOnlyKeyword:
-						return CreateClassificationSpan(snapshot, itemSpan, __GeneralClassifications.TypeCastKeyword);
+						tag = __GeneralClassifications.TypeCastKeyword;
+						break;
 					case CodeAnalysisHelper.RecordKeyword: // workaround for missing classification type for record identifier
 						itemSpan = ((TypeDeclarationSyntax)node).Identifier.Span;
-						return CreateClassificationSpan(snapshot,
-							itemSpan,
-							node.IsKind(CodeAnalysisHelper.RecordDeclaration)
+						tag = node.IsKind(CodeAnalysisHelper.RecordDeclaration)
 								? TransientTags.StructDeclaration
-								: TransientTags.ClassDeclaration);
+								: TransientTags.ClassDeclaration;
+						break;
+					default:
+						return;
 				}
-				return null;
+				tags.Add(CreateClassificationSpan(snapshot, itemSpan, tag));
 			}
 
 			static TagSpan<IClassificationTag> ClassifyKeyword(TextSpan itemSpan, ITextSnapshot snapshot, SyntaxNode node, CompilationUnitSyntax unitCompilation) {
