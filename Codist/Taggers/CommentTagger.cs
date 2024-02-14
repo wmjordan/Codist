@@ -16,6 +16,34 @@ namespace Codist.Taggers
 	{
 		static ClassificationTag[] __CommentClassifications;
 		static Dictionary<IClassificationType, bool> __CommentClasses = new Dictionary<IClassificationType, bool>(ClassificationTypeComparer.Instance);
+		static readonly Dictionary<string, CodeType> __CodeTypeExtensions = InitCodeTypeExtensions();
+
+		static Dictionary<string, CodeType> InitCodeTypeExtensions() {
+			return new Dictionary<string, CodeType>(StringComparer.OrdinalIgnoreCase) {
+				{ "js", CodeType.Js },
+				{ "c", CodeType.C },
+				{ "cpp", CodeType.C },
+				{ "h", CodeType.C },
+				{ "cxx", CodeType.C },
+				{ "css", CodeType.Css },
+				{ "cshtml", CodeType.CSharp },
+				{ "html", CodeType.Markup },
+				{ "xhtml", CodeType.Markup },
+				{ "xaml", CodeType.Markup },
+				{ "xml", CodeType.Markup },
+				{ "xsl", CodeType.Markup },
+				{ "xslt", CodeType.Markup },
+				{ "xsd", CodeType.Markup },
+				{ "sql", CodeType.Sql },
+				{ "py", CodeType.Python },
+				{ "sh", CodeType.BashShell },
+				{ "ps1", CodeType.BashShell },
+				{ "cmd", CodeType.Batch },
+				{ "bat", CodeType.Batch },
+				{ "ini", CodeType.Ini },
+			};
+		}
+
 		readonly bool _FullParseAtFirstLoad;
 		ITagAggregator<IClassificationTag> _Aggregator;
 		TaggerResult _Tags;
@@ -63,11 +91,21 @@ namespace Codist.Taggers
 
 		public static CommentTagger Create(IClassificationTypeRegistryService registry, ITextView textView, ITextBuffer textBuffer) {
 			switch (GetCodeType(textBuffer)) {
-				case CodeType.CSharp: return new CSharpCommentTagger(registry, textView, textBuffer);
-				case CodeType.Markup: return new MarkupCommentTagger(registry, textView, textBuffer);
-				case CodeType.C: return new CCommentTagger(registry, textView, textBuffer);
-				case CodeType.Css: return new CssCommentTagger(registry, textView, textBuffer);
-				case CodeType.Js: return new JsCommentTagger(registry, textView, textBuffer);
+				case CodeType.CSharp:
+					return new CSharpCommentTagger(registry, textView, textBuffer);
+				case CodeType.C:
+				case CodeType.Css:
+				case CodeType.Js:
+				case CodeType.Sql:
+					return new SlashStarCommentTagger(registry, textView, textBuffer);
+				case CodeType.Batch:
+					return new BatchFileCommentTagger(registry, textView, textBuffer);
+				case CodeType.Markup:
+					return new MarkupCommentTagger(registry, textView, textBuffer);
+				case CodeType.Python:
+				case CodeType.BashShell:
+				case CodeType.Ini:
+					return new CommonCommentTagger(registry, textView, textBuffer);
 			}
 			return null;
 		}
@@ -265,36 +303,18 @@ namespace Codist.Taggers
 				: t.IsOfType("code++.css") ? CodeType.Css
 				: t.IsOfType("TypeScript") || t.IsOfType("JavaScript") ? CodeType.Js
 				: t.IsOfType("C/C++") ? CodeType.C
+				: t.IsOfType("code++.MagicPython") ? CodeType.Python
+				: t.IsOfType("code++.Shell Script (Bash)") || t.IsOfType("InBoxPowerShell") ? CodeType.BashShell
+				: t.IsOfType("code++.Batch File") ? CodeType.Batch
+				: t.IsOfType("code++.Ini") ? CodeType.Ini
 				: CodeType.None;
 			if (c != CodeType.None) {
 				return c;
 			}
 			var f = textBuffer.GetTextDocument()?.FilePath;
-			if (f == null) {
-				return CodeType.None;
-			}
-			switch (f.Substring(f.LastIndexOf('.') + 1).ToLowerInvariant()) {
-				case "js": return CodeType.Js;
-				case "c":
-				case "cpp":
-				case "h":
-				case "cxx":
-					return CodeType.C;
-				case "css":
-					return CodeType.Css;
-				case "cshtml":
-					return CodeType.CSharp;
-				case "html":
-				case "htmlx":
-				case "xaml":
-				case "xml":
-				case "xls":
-				case "xlst":
-				case "xsd":
-				case "config":
-					return CodeType.Markup;
-			}
-			return CodeType.None;
+			return f != null && __CodeTypeExtensions.TryGetValue(f.Substring(f.LastIndexOf('.') + 1), out var type)
+				? type
+				: CodeType.None;
 		}
 
 		void TextBuffer_Changed(object sender, TextContentChangedEventArgs args) {
@@ -331,35 +351,57 @@ namespace Codist.Taggers
 
 		enum CodeType
 		{
-			None, CSharp, Markup, C, Css, Js
+			None, CSharp, Markup, C, Css, Js, Sql, Python, Batch, BashShell, Ini
 		}
 
-		sealed class CCommentTagger : CommentTagger
+		sealed class SlashStarCommentTagger : CommentTagger
 		{
-			public CCommentTagger(IClassificationTypeRegistryService registry, ITextView textView, ITextBuffer buffer) : base(registry, textView, buffer) {
+			public SlashStarCommentTagger(IClassificationTypeRegistryService registry, ITextView textView, ITextBuffer buffer) : base(registry, textView, buffer) {
 			}
 
 			protected override int GetCommentStartIndex(string comment) {
-				if (comment.Length > 2 && comment[0] == '/' && (comment[1] == '/' || comment[1] == '*')) {
-					return 2;
-				}
-				return -1;
+				return GetStartIndexOfMultilineSlashStartComment(comment, 0);
 			}
 			protected override int GetCommentEndIndex(string comment) {
-				return comment.EndsWith("*/", StringComparison.Ordinal) ? comment.Length - 2 : comment.Length;
+				return GetEndIndexOfMultilineSlashStartComment(comment);
+			}
+
+			internal static int GetStartIndexOfMultilineSlashStartComment(string comment, int defaultStartIndex = 0) {
+				if (comment.Length >= 2 && comment[0] == '/' && comment[1] == '*') {
+					var i = 2;
+					var l = comment.Length;
+					char c;
+					if (comment[l - 1] == '/' && comment[l - 2] == '*') {
+						l -= 2;
+					}
+					while (i < l) {
+						if (Char.IsWhiteSpace(c = comment[i]) || c == '*') {
+							i++;
+							continue;
+						}
+						break;
+					}
+					return i;
+				}
+				return defaultStartIndex;
+			}
+			static int GetEndIndexOfMultilineSlashStartComment(string comment) {
+				int l = comment.Length;
+				return l >= 2 && comment[l - 1] == '/' && comment[l - 2] == '*' ? l - 2 : l;
 			}
 		}
 
-		sealed class CssCommentTagger : CommentTagger
+		sealed class CommonCommentTagger : CommentTagger
 		{
-			public CssCommentTagger(IClassificationTypeRegistryService registry, ITextView textView, ITextBuffer buffer) : base(registry, textView, buffer) {
+			public CommonCommentTagger(IClassificationTypeRegistryService registry, ITextView textView, ITextBuffer buffer) : base(registry, textView, buffer) {
 			}
 
 			protected override int GetCommentStartIndex(string comment) {
 				return 0;
 			}
+
 			protected override int GetCommentEndIndex(string comment) {
-				return comment == "*/" ? 0 : comment.Length;
+				return comment.Length;
 			}
 		}
 
@@ -380,25 +422,10 @@ namespace Codist.Taggers
 				return base.TagComments(snapshotSpan, tagSpan);
 			}
 			protected override int GetCommentStartIndex(string comment) {
-				return comment.Length > 2 && comment[0] == '/' && (comment[1] == '/' || comment[1] == '*')
-					? 2
-					: -1;
+				return SlashStarCommentTagger.GetStartIndexOfMultilineSlashStartComment(comment, -1);
 			}
 			protected override int GetCommentEndIndex(string comment) {
 				return comment[1] == '*' ? comment.Length - 2 : comment.Length;
-			}
-		}
-
-		sealed class JsCommentTagger : CommentTagger
-		{
-			public JsCommentTagger(IClassificationTypeRegistryService registry, ITextView textView, ITextBuffer buffer) : base(registry, textView, buffer) {
-			}
-
-			protected override int GetCommentStartIndex(string comment) {
-				return 0;
-			}
-			protected override int GetCommentEndIndex(string comment) {
-				return comment.EndsWith("*/", StringComparison.Ordinal) ? comment.Length - 2 : comment.Length;
 			}
 		}
 
@@ -413,6 +440,24 @@ namespace Codist.Taggers
 
 			protected override int GetCommentEndIndex(string comment) {
 				return comment.EndsWith("-->", StringComparison.Ordinal) ? comment.Length - 3 : comment.Length;
+			}
+		}
+
+		sealed class BatchFileCommentTagger : CommentTagger
+		{
+			public BatchFileCommentTagger(IClassificationTypeRegistryService registry, ITextView textView, ITextBuffer buffer) : base(registry, textView, buffer) {
+			}
+
+			protected override int GetCommentStartIndex(string comment) {
+				return comment.Length > 2
+					? comment[0] == ':' && comment[1] == ':' ? 2
+						: comment[0].CeqAny('r', 'R') && comment[1].CeqAny('e', 'E') && comment[2].CeqAny('m', 'M') ? 3
+						: 0
+					: 0;
+			}
+
+			protected override int GetCommentEndIndex(string comment) {
+				return comment.Length;
 			}
 		}
 
