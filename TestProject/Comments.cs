@@ -28,10 +28,10 @@ namespace TestProject
 	}
 
 	//note: Turns on "Override default XML Doc" of Super Quick Info, and move your mouse
-	// on to the following code to see the overriden quick info in effect
+	// on to the following code to see the overridden quick info in effect
 	/// <summary>
 	/// <para>Codist can override the existing Quick Info.</para>
-	/// <para>The overriden Quick Info does not show qualified names to
+	/// <para>The overridden Quick Info does not show qualified names to
 	/// make the text more concise.<br/>
 	/// Nevertheless, you can hover your mouse onto the members to see their full names.</para>
 	/// <list type="number">
@@ -44,7 +44,7 @@ namespace TestProject
 	/// <see cref="ConcreteClass.Method"/>, or <see cref="ConcreteClass.Method{TGeneric}"/>.</para>
 	/// <para>The "<c>para</c>" elements no longer render empty lines.</para>
 	/// <para>You can style your comment with <b>bold</b>, <i>italic</i> and <u>underline</u>, or <b><i><u>combinations of them</u></i></b>.</para>
-	/// <para>You can separate contents with horizontal lines with <c>&lt;hr/></c> tags and sematically segment your paragraphs with <c>&lt;h1></c> to <c>&lt;h6></c> tags.</para>
+	/// <para>You can separate contents with horizontal lines with <c>&lt;hr/></c> tags and semantically segment your paragraphs with <c>&lt;h1></c> to <c>&lt;h6></c> tags.</para>
 	/// <h1>Heading 1</h1>
 	/// <hr/>
 	/// <para>See also: <seealso cref="NamespaceDoc"/>, <seealso cref="Test"/></para>
@@ -64,7 +64,7 @@ namespace TestProject
 		/** hover on <see cref="Test"/> to see its text only XML doc, 
 		 * if "Allow text only XML Doc option" is turned on */
 		void Test() {
-			// hover on Comments to see overriden XML Doc
+			// hover on Comments to see overridden XML Doc
 			var c = new Comments();
 			/* hover on the FormatDate method to see the content of "returns"
 			   hover on DateTime.Now or "yyyy-MM-dd" to see the parameter XML Doc*/
@@ -83,7 +83,7 @@ namespace TestProject
 		}
 
 		/// <summary>
-		/// Parses text as hexdemical number.
+		/// Parses text as hexadecimal number.
 		/// </summary>
 		/// <param name="text">The text to be parsed as hex.</param>
 		/// <returns>The result number.</returns>
