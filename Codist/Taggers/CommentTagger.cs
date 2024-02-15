@@ -22,11 +22,14 @@ namespace Codist.Taggers
 			return new Dictionary<string, CodeType>(StringComparer.OrdinalIgnoreCase) {
 				{ "js", CodeType.Js },
 				{ "c", CodeType.C },
+				{ "cc", CodeType.C },
 				{ "cpp", CodeType.C },
+				{ "hpp", CodeType.C },
 				{ "h", CodeType.C },
 				{ "cxx", CodeType.C },
 				{ "css", CodeType.Css },
 				{ "cshtml", CodeType.CSharp },
+				{ "go", CodeType.Go },
 				{ "html", CodeType.Markup },
 				{ "xhtml", CodeType.Markup },
 				{ "xaml", CodeType.Markup },
@@ -94,6 +97,9 @@ namespace Codist.Taggers
 				case CodeType.CSharp:
 					return new CSharpCommentTagger(registry, textView, textBuffer);
 				case CodeType.C:
+				case CodeType.Go:
+				case CodeType.Rust:
+					return new CCommentTagger(registry, textView, textBuffer);
 				case CodeType.Css:
 				case CodeType.Js:
 				case CodeType.Sql:
@@ -299,7 +305,7 @@ namespace Codist.Taggers
 		static CodeType GetCodeType(ITextBuffer textBuffer) {
 			var t = textBuffer.ContentType;
 			var c = t.IsOfType(Constants.CodeTypes.CSharp) || t.IsOfType("HTMLXProjection") ? CodeType.CSharp
-				: t.IsOfType("html") || t.IsOfType("htmlx") || t.IsOfType("XAML") || t.IsOfType("XML") || t.IsOfType(Constants.CodeTypes.HtmlxProjection) ? CodeType.Markup
+				: t.IsOfType("html") || t.IsOfType("htmlx") || t.IsOfType("XAML") || t.IsOfType("XML") || t.IsOfType(Constants.CodeTypes.HtmlxProjection) || t.IsOfType("code++.NAnt Build File") ? CodeType.Markup
 				: t.IsOfType("code++.css") ? CodeType.Css
 				: t.IsOfType("TypeScript") || t.IsOfType("JavaScript") ? CodeType.Js
 				: t.IsOfType("C/C++") ? CodeType.C
@@ -307,6 +313,8 @@ namespace Codist.Taggers
 				: t.IsOfType("code++.Shell Script (Bash)") || t.IsOfType("InBoxPowerShell") ? CodeType.BashShell
 				: t.IsOfType("code++.Batch File") ? CodeType.Batch
 				: t.IsOfType("code++.Ini") ? CodeType.Ini
+				: t.IsOfType("code++.Go") ? CodeType.Go
+				: t.IsOfType("code++.Rust") ? CodeType.Rust
 				: CodeType.None;
 			if (c != CodeType.None) {
 				return c;
@@ -351,7 +359,21 @@ namespace Codist.Taggers
 
 		enum CodeType
 		{
-			None, CSharp, Markup, C, Css, Js, Sql, Python, Batch, BashShell, Ini
+			None, CSharp, Markup, C, Css, Go, Rust, Js, Sql, Python, Batch, BashShell, Ini
+		}
+
+		sealed class CommonCommentTagger : CommentTagger
+		{
+			public CommonCommentTagger(IClassificationTypeRegistryService registry, ITextView textView, ITextBuffer buffer) : base(registry, textView, buffer) {
+			}
+
+			protected override int GetCommentStartIndex(string comment) {
+				return 0;
+			}
+
+			protected override int GetCommentEndIndex(string comment) {
+				return comment.Length;
+			}
 		}
 
 		sealed class SlashStarCommentTagger : CommentTagger
@@ -391,17 +413,17 @@ namespace Codist.Taggers
 			}
 		}
 
-		sealed class CommonCommentTagger : CommentTagger
+		sealed class CCommentTagger : CommentTagger
 		{
-			public CommonCommentTagger(IClassificationTypeRegistryService registry, ITextView textView, ITextBuffer buffer) : base(registry, textView, buffer) {
+			public CCommentTagger(IClassificationTypeRegistryService registry, ITextView textView, ITextBuffer buffer) : base(registry, textView, buffer) {
 			}
 
 			protected override int GetCommentStartIndex(string comment) {
-				return 0;
+				return comment.Length > 2 && comment[1] == '/' ? 2
+					: SlashStarCommentTagger.GetStartIndexOfMultilineSlashStartComment(comment, -1);
 			}
-
 			protected override int GetCommentEndIndex(string comment) {
-				return comment.Length;
+				return comment[1] == '*' ? comment.Length - 2 : comment.Length;
 			}
 		}
 
@@ -422,7 +444,11 @@ namespace Codist.Taggers
 				return base.TagComments(snapshotSpan, tagSpan);
 			}
 			protected override int GetCommentStartIndex(string comment) {
-				return SlashStarCommentTagger.GetStartIndexOfMultilineSlashStartComment(comment, -1);
+				return comment.Length > 2
+					? comment[1] == '/'
+						? 2
+						: SlashStarCommentTagger.GetStartIndexOfMultilineSlashStartComment(comment, -1)
+					: -1;
 			}
 			protected override int GetCommentEndIndex(string comment) {
 				return comment[1] == '*' ? comment.Length - 2 : comment.Length;
@@ -449,11 +475,14 @@ namespace Codist.Taggers
 			}
 
 			protected override int GetCommentStartIndex(string comment) {
-				return comment.Length > 2
-					? comment[0] == ':' && comment[1] == ':' ? 2
-						: comment[0].CeqAny('r', 'R') && comment[1].CeqAny('e', 'E') && comment[2].CeqAny('m', 'M') ? 3
-						: 0
-					: 0;
+				switch (comment[0]) {
+					case ':':
+						return comment[1] == ':' ? 2 : 0;
+					case 'r':
+					case 'R':
+						return comment[1].CeqAny('e', 'E') && comment[2].CeqAny('m', 'M') ? 3 : 0;
+				}
+				return 0;
 			}
 
 			protected override int GetCommentEndIndex(string comment) {
