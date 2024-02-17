@@ -48,7 +48,7 @@ namespace Codist
 		public static GdiColor DocumentTextColor { get; private set; }
 		public static WpfBrush DocumentTextBrush { get; private set; }
 		public static WpfBrush FileTabProvisionalSelectionBrush { get; private set; }
-		public static GdiColor ToolWindowBackgroundColor { get; private set; }
+		public static WpfColor ToolWindowBackgroundColor { get; private set; }
 		public static WpfColor TitleBackgroundColor { get; private set; }
 		public static WpfBrush TitleTextBrush { get; private set; }
 		public static WpfBrush ToolTipBackgroundBrush { get; private set; }
@@ -76,13 +76,13 @@ namespace Codist
 		static KeyValuePair<Guid, string> GetCurrentThemeInfo() {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			var i = ServicesHelper.Get<Interop.IVsColorThemeService, Interop.SVsColorThemeService>();
-			if (i != null) {
-				var t = i.CurrentTheme;
-				$"Current theme: {t.Name} ({t.ThemeId})".Log();
-				return new KeyValuePair<Guid, string>(t.ThemeId, t.Name);
+			if (i == null) {
+				"Failed to cast IVsColorThemeService.".Log();
+				return CompatibleGetThemeInfo();
 			}
-			"Failed to cast IVsColorThemeService.".Log();
-			return CompatibleGetThemeInfo();
+			var t = i.CurrentTheme;
+			$"Current theme: {t.Name} ({t.ThemeId})".Log();
+			return new KeyValuePair<Guid, string>(t.ThemeId, t.Name);
 		}
 
 		// in VS 2022, SVsColorThemeService somehow can't be cast to IVsColorThemeService,
@@ -196,7 +196,7 @@ namespace Codist
 			DocumentTextColor = CommonDocumentColors.PageTextColorKey.GetGdiColor();
 			DocumentTextBrush = new WpfBrush(DocumentTextColor.ToWpfColor());
 			FileTabProvisionalSelectionBrush = EnvironmentColors.FileTabProvisionalSelectedActiveBrushKey.GetWpfBrush();
-			ToolWindowBackgroundColor = EnvironmentColors.ToolWindowBackgroundColorKey.GetGdiColor();
+			ToolWindowBackgroundColor = EnvironmentColors.ToolWindowBackgroundColorKey.GetWpfColor();
 			TitleBackgroundColor = EnvironmentColors.MainWindowActiveCaptionColorKey.GetWpfColor();
 			TitleTextBrush = EnvironmentColors.MainWindowActiveCaptionTextBrushKey.GetWpfBrush();
 			ToolTipBackgroundBrush = EnvironmentColors.ToolTipBrushKey.GetWpfBrush();
@@ -232,7 +232,8 @@ namespace Codist
 			internal static readonly Dictionary<string, int> Map = CreateMap();
 
 			static Dictionary<string, int> CreateMap() {
-				var d = new Dictionary<string, int>(3760);
+				const int FIELD_COUNT_OF_KnownImageIds = 3760;
+				var d = new Dictionary<string, int>(FIELD_COUNT_OF_KnownImageIds);
 				var intType = typeof(int);
 				foreach (var item in typeof(KnownImageIds).GetFields()) {
 					if (item.FieldType == intType) {
