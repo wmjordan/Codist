@@ -82,7 +82,7 @@ namespace Codist.Taggers
 
 		void FeatureToggle(ConfigUpdatedEventArgs args) {
 			bool enabled;
-			if (args.UpdatedFeature == Features.SyntaxHighlight
+			if (args.UpdatedFeature.MatchFlags(Features.SyntaxHighlight)
 				&& (enabled = Config.Instance.Features.MatchFlags(Features.SyntaxHighlight)) != _Enabled) {
 				_Enabled = enabled;
 				foreach (var item in _Taggers) {
