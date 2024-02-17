@@ -1283,7 +1283,7 @@ namespace Codist
 				var ctn = item.GetCustomAttribute<ClassificationTypeAttribute>().ClassificationTypeNames;
 				var setFormatBrush = ReflectionHelper.CreateSetPropertyMethod<SymbolFormatter, Brush>(item.Name);
 				r.Add(ctn, (ct, f) => {
-					var brush = (ct == Constants.CodePlainText ? FormatStore.EditorDefaultTextProperties :  FormatStore.GetCachedEditorProperty(ct) ?? FormatStore.EditorDefaultTextProperties).ForegroundBrush;
+					var brush = (ct == Constants.CodePlainText ? FormatStore.EditorDefaultTextProperties :  FormatStore.GetRunPriorities(ct) ?? FormatStore.EditorDefaultTextProperties).ForegroundBrush;
 					if (f._BrushConfigurator != null) {
 						brush = f._BrushConfigurator(brush);
 					}
@@ -1294,7 +1294,7 @@ namespace Codist
 		}
 
 		void FormatMap_FormatMappingChanged(object sender, EventArgs<IReadOnlyList<string>> e) {
-			if (sender != FormatStore.EditorFormatCache) {
+			if (sender is IFormatCache c && c.Category != Constants.CodeText) {
 				return;
 			}
 			foreach (var item in e.Data) {

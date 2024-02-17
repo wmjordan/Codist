@@ -32,7 +32,7 @@ namespace Codist.SyntaxHighlight
 
 		static readonly Dictionary<IClassificationType, bool> __ClassificationTypeFormattabilities = InitFormattableClassificationType();
 
-		static readonly Highlighter __EditorHighlighter = Highlight(Constants.CodeText);
+		static readonly IClassificationFormatMap __DefaultClassificationFormatMap = ServicesHelper.Instance.ClassificationFormatMap.GetClassificationFormatMap(Constants.CodeText);
 		#endregion
 
 		/// <summary>
@@ -40,9 +40,9 @@ namespace Codist.SyntaxHighlight
 		/// </summary>
 		internal static bool IdentifySymbolSource { get; private set; }
 
-		internal static TextFormattingRunProperties EditorDefaultTextProperties => __EditorHighlighter.DefaultTextProperties;
+		internal static IClassificationFormatMap DefaultClassificationFormatMap => __DefaultClassificationFormatMap;
 
-		internal static IFormatCache EditorFormatCache => __EditorHighlighter;
+		internal static TextFormattingRunProperties EditorDefaultTextProperties => __DefaultClassificationFormatMap.DefaultTextProperties;
 
 		/// <summary>
 		/// Event for editor background color changes.
@@ -85,6 +85,7 @@ namespace Codist.SyntaxHighlight
 				//   we can avoid redundantly applying highlight styles to the same kinds of views
 				//   by caching applied categories
 				$"[{category}] highlighter created".Log();
+				ServicesHelper.Instance.ClassificationTypeExporter.UpdateClassificationFormatMap(category);
 				highlighter.SubscribeConfigUpdateHandler();
 				highlighter.SubscribeFormatMappingChanges();
 				highlighter.DetectThemeColorCompatibilityWithBackground();
@@ -156,17 +157,10 @@ namespace Codist.SyntaxHighlight
 				}
 			}
 		}
-
-		/// <summary>
-		/// Gets cached <see cref="TextFormattingRunProperties"/> from code editor.
-		/// </summary>
-		public static TextFormattingRunProperties GetCachedEditorProperty(IClassificationType classificationType) {
-			return __EditorHighlighter.GetCachedProperty(classificationType);
-		}
-		public static TextFormattingRunProperties GetCachedEditorProperty(string classificationType) {
+		public static TextFormattingRunProperties GetRunPriorities(string classificationType) {
 			var ct = __GetClassificationType(classificationType);
 			return ct != null
-				? GetCachedEditorProperty(ct)
+				? __DefaultClassificationFormatMap.GetRunProperties(__DefaultClassificationFormatMap.GetEditorFormatMapKey(ct))
 				: null;
 		}
 

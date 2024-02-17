@@ -460,7 +460,7 @@ namespace Codist.Margins
 				internal static Brush RegionForeground, RegionBackground;
 
 				static PenStore() {
-					CreatePens(FormatStore.EditorFormatCache.ClassificationFormatMap);
+					CreatePens(FormatStore.DefaultClassificationFormatMap);
 					FormatStore.ClassificationFormatMapChanged += FormatStore_ClassificationFormatMapChanged;
 				}
 

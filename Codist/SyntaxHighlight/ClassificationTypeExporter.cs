@@ -96,8 +96,6 @@ namespace Codist.SyntaxHighlight
 				}
 			}
 			while (e < _Entries.Count && lastExported != e);
-
-			UpdateClassificationFormatMap(_FormatMaps.GetClassificationFormatMap(Constants.CodeText), _EditorFormatMaps.GetEditorFormatMap(Constants.CodeText), r.GetClassificationType);
 		}
 
 		public void UpdateClassificationFormatMap(string category) {

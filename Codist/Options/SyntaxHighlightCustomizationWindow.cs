@@ -683,7 +683,7 @@ namespace Codist.Options
 			}
 		}
 
-		static string GetHeuristicActiveClassification(IEnumerable<IClassificationType> classifications) {
+		string GetHeuristicActiveClassification(IEnumerable<IClassificationType> classifications) {
 			IClassificationType t = null;
 			int level = 0;
 			foreach (var item in classifications) {
@@ -714,7 +714,7 @@ namespace Codist.Options
 							level = 2;
 						}
 						if (t != null && level < 3) {
-							var p = FormatStore.GetCachedEditorProperty(item);
+							var p = _FormatCache.GetCachedProperty(item);
 							if (p.ForegroundBrushEmpty == false
 								&& p.ForegroundBrushSame(FormatStore.EditorDefaultTextProperties.ForegroundBrush) == false) {
 								t = item;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.Composition;
+using CLR;
 using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Shell;
@@ -23,7 +24,7 @@ namespace Codist
 			(Get<IComponentModel, SComponentModel>() ?? throw new TypeLoadException($"Could not load {nameof(SComponentModel)}"))
 				.DefaultCompositionService
 				.SatisfyImportsOnce(this);
-			PostInitialization();
+			PostInitialization(ClassificationTypeExporter = new SyntaxHighlight.ClassificationTypeExporter(ClassificationTypeRegistry, ContentTypeRegistry, ClassificationFormatMap, EditorFormatMap));
 		}
 
 		public static ServicesHelper Instance { get; } = new ServicesHelper();
@@ -70,23 +71,23 @@ namespace Codist
 		[Import]
 		public ITextUndoHistoryRegistry TextUndoHistoryService { get; private set; }
 
+		internal SyntaxHighlight.ClassificationTypeExporter ClassificationTypeExporter { get; }
+
 		public static TInterface Get<TInterface, VSInterface>() where TInterface : class {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			return ServiceProvider.GlobalProvider.GetService(typeof(VSInterface)) as TInterface;
 		}
 
-		void PostInitialization() {
+		static void PostInitialization(SyntaxHighlight.ClassificationTypeExporter cte) {
 			#region Create classification types for syntax highlight
-			var e = new SyntaxHighlight.ClassificationTypeExporter(ClassificationTypeRegistry, ContentTypeRegistry, ClassificationFormatMap, EditorFormatMap);
-			e.RegisterClassificationTypes<SyntaxHighlight.SymbolMarkerStyleTypes>();
-			e.RegisterClassificationTypes<SyntaxHighlight.CommentStyleTypes>();
-			e.RegisterClassificationTypes<SyntaxHighlight.CSharpStyleTypes>();
-			e.RegisterClassificationTypes<SyntaxHighlight.MarkdownStyleTypes>();
-			e.RegisterClassificationTypes<SyntaxHighlight.XmlStyleTypes>();
-			e.RegisterClassificationTypes<SyntaxHighlight.PrivateStyleTypes>();
-			//note: do not add the following line, or highlight will get corrupted
-			//e.FindClassificationDefinitions<CppStyleTypes>();
-			e.ExportClassificationTypes();
+			cte.RegisterClassificationTypes<SyntaxHighlight.SymbolMarkerStyleTypes>();
+			cte.RegisterClassificationTypes<SyntaxHighlight.CommentStyleTypes>();
+			cte.RegisterClassificationTypes<SyntaxHighlight.CSharpStyleTypes>();
+			cte.RegisterClassificationTypes<SyntaxHighlight.MarkdownStyleTypes>();
+			cte.RegisterClassificationTypes<SyntaxHighlight.XmlStyleTypes>();
+			cte.RegisterClassificationTypes<SyntaxHighlight.PrivateStyleTypes>();
+			//e.RegisterClassificationTypes<SyntaxHighlight.CppStyleTypes>();
+			cte.ExportClassificationTypes();
 			#endregion
 		}
 	}
