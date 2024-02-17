@@ -12,7 +12,7 @@ namespace Codist
 		public static int GetImageId(this ISymbol symbol) {
 			switch (symbol.Kind) {
 				case SymbolKind.Assembly: return KnownImageIds.Assembly;
-				case SymbolKind.DynamicType: return KnownImageIds.Dynamic;
+				case SymbolKind.DynamicType: return KnownImageIds.StatusHelp;
 				case SymbolKind.Event: return GetEventImageId((IEventSymbol)symbol);
 				case SymbolKind.Field: return GetFieldImageId((IFieldSymbol)symbol);
 				case SymbolKind.Label: return KnownImageIds.Label;
