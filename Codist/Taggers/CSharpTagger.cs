@@ -304,7 +304,7 @@ namespace Codist.Taggers
 				ClassificationTag tag;
 				switch ((SyntaxKind)node.RawKind) {
 					case SyntaxKind.DestructorDeclaration:
-						tag = TransientTags.DestructorDeclaration;
+						tag = __Classifications.ResourceKeyword;
 						goto CREATE_SPAN;
 					case CodeAnalysisHelper.SwitchExpressionArm:
 						tag = __GeneralClassifications.BranchingKeyword;
@@ -313,30 +313,28 @@ namespace Codist.Taggers
 						switch (node.Parent.Kind()) {
 							case SyntaxKind.MethodDeclaration:
 							case SyntaxKind.LocalFunctionStatement:
-								tag = TransientTags.MethodDeclaration;
+								tag = __Classifications.Method;
 								goto CREATE_SPAN;
 							case SyntaxKind.PropertyDeclaration:
 							case SyntaxKind.GetAccessorDeclaration:
 							case SyntaxKind.SetAccessorDeclaration:
 							case SyntaxKind.IndexerDeclaration:
-								tag = TransientTags.PropertyDeclaration;
+								tag = __Classifications.Property;
 								goto CREATE_SPAN;
 							case SyntaxKind.AddAccessorDeclaration:
 							case SyntaxKind.RemoveAccessorDeclaration:
-								tag = TransientTags.EventDeclaration;
+								tag = __Classifications.Event;
 								goto CREATE_SPAN;
 							case SyntaxKind.ConstructorDeclaration:
 							case SyntaxKind.DestructorDeclaration:
-								tag = TransientTags.ConstructorDeclaration;
+								tag = __Classifications.ConstructorMethod;
 								goto CREATE_SPAN;
 						}
 						return null;
 				}
 				if (semanticModel.GetSymbol(node.IsKind(SyntaxKind.Argument) ? ((ArgumentSyntax)node).Expression : node, cancellationToken) is IMethodSymbol opMethod) {
 					if (opMethod.MethodKind == MethodKind.UserDefinedOperator) {
-						tag = node.RawKind == (int)SyntaxKind.OperatorDeclaration
-								? TransientTags.OverrideDeclaration
-								: __Classifications.OverrideMember;
+						tag = __Classifications.OverrideMember;
 						goto CREATE_SPAN;
 					}
 					if (opMethod.MethodKind == MethodKind.LambdaMethod) {
@@ -489,7 +487,7 @@ namespace Codist.Taggers
 						&& node.AncestorsAndSelf()
 							.FirstOrDefault(i => i is StatementSyntax || i is ExpressionSyntax && i.IsKind(SyntaxKind.IdentifierName) == false)
 							?.HasCapturedVariable(semanticModel) == true) {
-						return CreateClassificationSpan(snapshot, itemSpan, CSharpClassifications.Instance.VariableCapturedExpression);
+						return CreateClassificationSpan(snapshot, itemSpan, __Classifications.VariableCapturedExpression);
 					}
 				}
 				return null;
@@ -855,7 +853,6 @@ namespace Codist.Taggers
 
 		static class HighlightOptions
 		{
-			static readonly bool __Dummy = Init();
 			public static TransientKeywordTagHolder KeywordBraceTags { get; private set; }
 			public static TransientMemberTagHolder MemberDeclarationBraceTags { get; private set; }
 			public static TransientMemberTagHolder MemberBraceTags { get; private set; }
@@ -863,10 +860,9 @@ namespace Codist.Taggers
 			// use fields to cache option flags
 			public static bool AllBraces, AllParentheses, LocalFunctionDeclaration, NonPrivateField, StyleConstructorAsType, CapturingLambda, AttributeAnnotation;
 
-			static bool Init() {
+			static HighlightOptions() {
 				Config.RegisterUpdateHandler(UpdateCSharpHighlighterConfig);
 				UpdateCSharpHighlighterConfig(new ConfigUpdatedEventArgs(Config.Instance, Features.SyntaxHighlight));
-				return true;
 			}
 
 			static void UpdateCSharpHighlighterConfig(ConfigUpdatedEventArgs e) {
