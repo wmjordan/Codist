@@ -38,6 +38,7 @@ namespace Codist
 			memberOptions: SymbolDisplayMemberOptions.IncludeContainingType,
 			genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
 			miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
+		#region Compatibility constants (for older VS versions)
 		internal const SyntaxKind DotDotToken = (SyntaxKind)8222;
 		internal const SyntaxKind QuestionQuestionEqualsToken = (SyntaxKind)8284;
 		internal const SyntaxKind WithKeyword = (SyntaxKind)8442;
@@ -63,6 +64,7 @@ namespace Codist
 		internal const SymbolKind FunctionPointerType = (SymbolKind)20;
 		internal const TypeKind FunctionPointer = (TypeKind)13;
 		internal const MethodKind FunctionPointerMethod = (MethodKind)18;
+		#endregion
 
 		public static Span GetLineSpan(this SyntaxNode node) {
 			var s = node.SyntaxTree.GetLineSpan(node.Span);
