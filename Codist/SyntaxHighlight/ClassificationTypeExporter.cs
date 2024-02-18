@@ -123,8 +123,7 @@ namespace Codist.SyntaxHighlight
 			if (batch == false) {
 				m.BeginBatchUpdate();
 			}
-			var expOrders = GetExportedEntriesOrderByDependency();
-			foreach (var entry in expOrders) {
+			foreach (var entry in GetExportedEntriesOrderByDependency()) {
 				var f = entry.GetTextFormattingRunProperties(editorFormatMap.GetProperties(m.GetEditorFormatMapKey(entry.ClassificationType)));
 				var p = 0;
 				int tp;
