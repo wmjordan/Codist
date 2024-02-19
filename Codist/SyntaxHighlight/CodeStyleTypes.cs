@@ -72,13 +72,13 @@ namespace Codist.SyntaxHighlight
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeTypeParameterName)]
 		TypeParameterName,
-		[Category(Constants.SyntaxCategory.General)]
-		[ClassificationType(ClassificationTypeNames = Constants.CodeFormalLanguage)]
-		FormalLanguage,
-		[Category(Constants.SyntaxCategory.General)]
-		[ClassificationType(ClassificationTypeNames = Constants.CodeIdentifier)]
-		[Description("A base style shared by type, type member, local, parameter, etc.")]
-		Identifier,
+		//[Category(Constants.SyntaxCategory.General)]
+		//[ClassificationType(ClassificationTypeNames = Constants.CodeFormalLanguage)]
+		//FormalLanguage,
+		//[Category(Constants.SyntaxCategory.General)]
+		//[ClassificationType(ClassificationTypeNames = Constants.CodeIdentifier)]
+		//[Description("A base style shared by type, type member, local, parameter, etc.")]
+		//Identifier,
 		[Category(Constants.SyntaxCategory.General)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeNumber)]
 		Number,
