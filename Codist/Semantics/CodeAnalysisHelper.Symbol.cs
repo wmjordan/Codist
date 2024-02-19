@@ -142,6 +142,12 @@ namespace Codist
 			}
 			return symbol as IMethodSymbol;
 		}
+
+		public static ImmutableArray<ISymbol> GetCapturedVariables(this SemanticModel semanticModel, SyntaxNode range) {
+			var f = semanticModel.AnalyzeDataFlow(range);
+			var c = f.CapturedInside;
+			return c.Length != 0 ? c.RemoveRange(f.VariablesDeclared) : c;
+		}
 		#endregion
 
 		#region Assembly and namespace
