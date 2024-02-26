@@ -156,7 +156,25 @@ namespace Codist.Refactorings
 			}
 		}
 
-		sealed class SealClassRefactoring : ReplaceText
+		abstract class DeclarationModifierRefactoring : ReplaceText
+		{
+			protected static MemberDeclarationSyntax GetDeclarationNode(SemanticContext ctx) {
+				var node = ctx.Node;
+				if (node.IsKind(SyntaxKind.VariableDeclarator)) {
+					node = node.Parent.Parent;
+				}
+				return node as MemberDeclarationSyntax;
+			}
+
+			protected static int GetModifierInsertionPoint(MemberDeclarationSyntax node) {
+				var attrList = node.GetAttributes(out _);
+				return attrList.Count != 0
+					? attrList[attrList.Count - 1].FullSpan.End
+					: node.SpanStart;
+			}
+		}
+
+		sealed class SealClassRefactoring : DeclarationModifierRefactoring
 		{
 			public override int IconId => IconIds.SealedClass;
 			public override string Title => R.CMD_SealClass;
@@ -173,6 +191,7 @@ namespace Codist.Refactorings
 						case SyntaxKind.SealedKeyword:
 						case SyntaxKind.AbstractKeyword:
 						case SyntaxKind.StaticKeyword:
+						case SyntaxKind.VirtualKeyword:
 							return false;
 					}
 				}
@@ -182,14 +201,23 @@ namespace Codist.Refactorings
 			public override void Refactor(SemanticContext ctx) {
 				const int LENGTH_OF_SEALED = 6;
 				var d = ctx.Node as ClassDeclarationSyntax;
-				ctx.View.Edit(d, (view, decl, edit) => {
-					edit.Insert(decl.Keyword.SpanStart, "sealed ");
+				var m = d.Modifiers;
+				var insertAt = m.FullSpan.Length == 0 ? d.SpanStart
+					: m[0].IsAnyKind(SyntaxKind.PublicKeyword, SyntaxKind.InternalKeyword, SyntaxKind.PrivateKeyword, SyntaxKind.ProtectedKeyword) ? m[0].FullSpan.End
+					: GetModifierInsertionPoint(d);
+				ctx.View.Edit(insertAt, (view, param, edit) => {
+					edit.Insert(param, "sealed ");
+				});
+				ctx.View.SelectSpan(insertAt, LENGTH_OF_SEALED, 1);
+			}
+		}
+
 				});
 				ctx.View.SelectSpan(d.Keyword.SpanStart, LENGTH_OF_SEALED, 1);
 			}
 		}
 
-		sealed class ChangeAccessibilityRefactoring : ReplaceText
+		sealed class ChangeAccessibilityRefactoring : DeclarationModifierRefactoring
 		{
 			readonly SyntaxKind _KeywordKind;
 			readonly int _IconId;
@@ -224,17 +252,10 @@ namespace Codist.Refactorings
 				return node != null && CanChangeAccessibility(node);
 			}
 
-			static MemberDeclarationSyntax GetDeclarationNode(SemanticContext ctx) {
-				var node = ctx.Node;
-				if (node.IsKind(SyntaxKind.VariableDeclarator)) {
-					node = node.Parent.Parent;
-				}
-				return node as MemberDeclarationSyntax;
-			}
-
 			bool CanChangeAccessibility(MemberDeclarationSyntax d) {
-				var m = GetModifiers(d);
-				if (m.Any(_KeywordKind)
+				var m = d.GetModifiers(out var canHaveModifier);
+				if (canHaveModifier == false
+					|| m.Any(_KeywordKind)
 					|| m.Any(SyntaxKind.OverrideKeyword)
 					|| d.IsKind(SyntaxKind.EnumMemberDeclaration)) {
 					return false;
@@ -257,38 +278,10 @@ namespace Codist.Refactorings
 				return true;
 			}
 
-			static SyntaxTokenList GetModifiers(MemberDeclarationSyntax d) {
-				if (d is BaseTypeDeclarationSyntax t) {
-					return t.Modifiers;
-				}
-				if (d is BaseMethodDeclarationSyntax m) {
-					return m.Modifiers;
-				}
-				if (d is BaseFieldDeclarationSyntax f) {
-					return f.Modifiers;
-				}
-				if (d is BasePropertyDeclarationSyntax p) {
-					return p.Modifiers;
-				}
-				return default;
-			}
-
 			public override void Refactor(SemanticContext ctx) {
 				var d = GetDeclarationNode(ctx);
-				SyntaxTokenList modifiers;
-				if (d is BaseTypeDeclarationSyntax t) {
-					modifiers = t.Modifiers;
-				}
-				else if (d is BaseMethodDeclarationSyntax m) {
-					modifiers = m.Modifiers;
-				}
-				else if (d is BaseFieldDeclarationSyntax f) {
-					modifiers = f.Modifiers;
-				}
-				else if (d is BasePropertyDeclarationSyntax p) {
-					modifiers = p.Modifiers;
-				}
-				else {
+				SyntaxTokenList modifiers = d.GetModifiers(out var canHaveModifier);
+				if (canHaveModifier == false) {
 					return;
 				}
 
@@ -325,7 +318,9 @@ namespace Codist.Refactorings
 					return;
 				}
 
-				var tp = d.GetFirstToken().SpanStart;
+				var tp = modifiers.Count != 0
+					? modifiers.Span.Start
+					: GetModifierInsertionPoint(d);
 				ctx.View.Edit((tp, modifier), (view, param, edit) => edit.Insert(param.tp, param.modifier + " "));
 				ctx.View.SelectSpan(tp, modifier.Length, 1);
 			}

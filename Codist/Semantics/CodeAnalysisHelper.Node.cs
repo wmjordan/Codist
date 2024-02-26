@@ -557,6 +557,49 @@ namespace Codist
 			return null;
 		}
 
+		public static SyntaxList<AttributeListSyntax> GetAttributes(this MemberDeclarationSyntax declaration, out bool canHaveAttributes) {
+			canHaveAttributes = true;
+			if (declaration is BaseTypeDeclarationSyntax t) {
+				return t.AttributeLists;
+			}
+			if (declaration is BaseMethodDeclarationSyntax m) {
+				return m.AttributeLists;
+			}
+			if (declaration is BaseFieldDeclarationSyntax f) {
+				return f.AttributeLists;
+			}
+			if (declaration is BasePropertyDeclarationSyntax p) {
+				return p.AttributeLists;
+			}
+			if (declaration is DelegateDeclarationSyntax d) {
+				return d.AttributeLists;
+			}
+			canHaveAttributes = false;
+			return default;
+		}
+
+		public static SyntaxTokenList GetModifiers(this MemberDeclarationSyntax declaration, out bool canHaveModifier) {
+			canHaveModifier = true;
+			if (declaration is BaseTypeDeclarationSyntax t) {
+				return t.Modifiers;
+			}
+			if (declaration is BaseMethodDeclarationSyntax m) {
+				return m.Modifiers;
+			}
+			if (declaration is BaseFieldDeclarationSyntax f) {
+				return f.Modifiers;
+			}
+			if (declaration is BasePropertyDeclarationSyntax p) {
+				return p.Modifiers;
+			}
+			if (declaration is DelegateDeclarationSyntax d) {
+				return d.Modifiers;
+			}
+			canHaveModifier = false;
+			return default;
+		}
+
+
 		public static string GetDeclarationSignature(this SyntaxNode node, int position = 0) {
 			switch (node.Kind()) {
 				case SyntaxKind.ClassDeclaration:
