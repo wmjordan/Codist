@@ -1688,14 +1688,14 @@ namespace Codist.Options
 
 		sealed class CSharpAdditionalHighlightConfigPage : ContentControl
 		{
-			readonly OptionBox<SpecialHighlightOptions> _MarkSpecialPunctuationBox, _HighlightDeclarationBracesBox, _HighlightParameterBracesBox, _HighlightCastParenthesesBox, _HighlightBranchBracesBox, _HighlightLoopBracesBox, _HighlightResourceBracesBox,
+			readonly OptionBox<SpecialHighlightOptions> _BoldSemanticPunctuationBox, _HighlightDeclarationBracesBox, _HighlightParameterBracesBox, _HighlightCastParenthesesBox, _HighlightBranchBracesBox, _HighlightLoopBracesBox, _HighlightResourceBracesBox,
 				_HighlightLocalFunctionDeclarationBox, _HighlightNonPrivateFieldDeclarationBox, _HighlightConstructorAsTypeBox, _HighlightCapturingLambdaBox;
 
 			public CSharpAdditionalHighlightConfigPage() {
 				var o = Config.Instance.SpecialHighlightOptions;
 				Content = new StackPanel { Margin = WpfHelper.SmallMargin }.Add(i => new Border { Padding = WpfHelper.SmallMargin, Child = i }, new UIElement[] {
 						new TitleBox(R.OT_BracesAndParentheses),
-						(_MarkSpecialPunctuationBox = o.CreateOptionBox(SpecialHighlightOptions.SpecialPunctuation, UpdateConfig, R.OT_BoldBraces)),
+						(_BoldSemanticPunctuationBox = o.CreateOptionBox(SpecialHighlightOptions.BoldSemanticPunctuation, UpdateConfig, R.OT_BoldBraces)),
 						new DescriptionBox(R.OT_BoldBracesNote),
 						(_HighlightDeclarationBracesBox = o.CreateOptionBox(SpecialHighlightOptions.DeclarationBrace, UpdateConfig, R.OT_DeclarationBraces)),
 						(_HighlightParameterBracesBox = o.CreateOptionBox(SpecialHighlightOptions.ParameterBrace, UpdateConfig, R.OT_MethodParameterBraces)),
@@ -1714,7 +1714,7 @@ namespace Codist.Options
 					item.WrapMargin(__SubOptionMargin);
 					item.ReferenceStyle(VsResourceKeys.CheckBoxStyleKey);
 				}
-				_MarkSpecialPunctuationBox.ReferenceStyle(VsResourceKeys.CheckBoxStyleKey);
+				_BoldSemanticPunctuationBox.ReferenceStyle(VsResourceKeys.CheckBoxStyleKey);
 				_HighlightLocalFunctionDeclarationBox.ReferenceStyle(VsResourceKeys.CheckBoxStyleKey);
 				_HighlightNonPrivateFieldDeclarationBox.ReferenceStyle(VsResourceKeys.CheckBoxStyleKey);
 				_HighlightConstructorAsTypeBox.ReferenceStyle(VsResourceKeys.CheckBoxStyleKey);

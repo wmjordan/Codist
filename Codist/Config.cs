@@ -819,14 +819,17 @@ namespace Codist
 	public enum SpecialHighlightOptions
 	{
 		None,
+		// comment tagger
 		SpecialComment = 1,
 		DeclarationBrace = 1 << 1,
 		ParameterBrace = 1 << 2,
-		SymbolIdentifier = 1 << 3,
 		BranchBrace = 1 << 4,
 		LoopBrace = 1 << 5,
 		ResourceBrace = 1 << 6,
 		CastBrace = 1 << 7,
+		BoldSemanticPunctuation = 1 << 8,
+		// bold semantic punctuation
+		[Obsolete]
 		SpecialPunctuation = 1 << 8,
 		LocalFunctionDeclaration = 1 << 10,
 		NonPrivateField = 1 << 11,
@@ -835,7 +838,7 @@ namespace Codist
 		SearchResult = 1 << 20,
 		Default = SpecialComment,
 		AllParentheses = ParameterBrace | CastBrace | BranchBrace | LoopBrace | ResourceBrace,
-		AllBraces = DeclarationBrace | ParameterBrace | CastBrace | BranchBrace | LoopBrace | ResourceBrace | SpecialPunctuation
+		AllBraces = DeclarationBrace | ParameterBrace | CastBrace | BranchBrace | LoopBrace | ResourceBrace | BoldSemanticPunctuation
 	}
 
 	[Flags]

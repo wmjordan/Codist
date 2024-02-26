@@ -273,10 +273,10 @@ namespace Codist.SyntaxHighlight
 				}
 				config.Styles = null;
 			}
-			UpdateIdentifySymbolSource(cache);
+			UpdateHighlightOptions(cache);
 		}
 
-		static void UpdateIdentifySymbolSource(Dictionary<string, StyleBase> cache) {
+		static void UpdateHighlightOptions(Dictionary<string, StyleBase> cache) {
 			StyleBase style;
 			IdentifySymbolSource = cache.TryGetValue(Constants.CSharpMetadataSymbol, out style) && style.IsSet
 				|| cache.TryGetValue(Constants.CSharpUserSymbol, out style) && style.IsSet;
