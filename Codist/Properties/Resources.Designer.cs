@@ -2906,7 +2906,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Highlight lambda expressions that capture variables.
+        ///   Looks up a localized string similar to Highlight lambda expressions or local functions that capture variables.
         /// </summary>
         internal static string OT_CapturingLambda {
             get {

@@ -1993,7 +1993,7 @@ Shift：匹配整个单词</value>
     <value>属性</value>
   </data>
   <data name="OT_CapturingLambda" xml:space="preserve">
-    <value>突出显示捕获变量的 lambda 表达式</value>
+    <value>突出显示捕获变量的 lambda 表达式或本地函数</value>
   </data>
   <data name="CMD_QuickAction" xml:space="preserve">
     <value>快速操作和重构...</value>
