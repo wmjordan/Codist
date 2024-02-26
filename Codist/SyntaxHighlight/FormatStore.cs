@@ -411,6 +411,7 @@ namespace Codist.SyntaxHighlight
 				_Formatters.Pop();
 				if (--_Lock == 0 && _PendingChange.PendingEvents != EventKind.None) {
 					_PendingChange.FireEvents(this);
+					UpdateHighlightOptions(__SyntaxStyleCache);
 					_ChangedFormatItems.Clear();
 				}
 			}
@@ -652,7 +653,6 @@ namespace Codist.SyntaxHighlight
 				}
 
 				$"[{_Category}] overridden {newStyles.Count} styles".Log();
-				UpdateIdentifySymbolSource(__SyntaxStyleCache);
 				try {
 					if (newStyles.Count != 0) {
 						if (_EditorFormatMap.IsInBatchUpdate == false) {
