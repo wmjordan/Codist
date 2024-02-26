@@ -873,8 +873,8 @@ namespace Codist.Taggers
 				AllBraces = o.HasAnyFlag(SpecialHighlightOptions.AllBraces);
 				AllParentheses = o.HasAnyFlag(SpecialHighlightOptions.AllParentheses);
 				CapturingLambda = o.MatchFlags(SpecialHighlightOptions.CapturingLambdaExpression);
-				var sp = o.MatchFlags(SpecialHighlightOptions.SpecialPunctuation);
-				if (sp) {
+				var bold = o.MatchFlags(SpecialHighlightOptions.BoldSemanticPunctuation);
+				if (bold) {
 					KeywordBraceTags = TransientKeywordTagHolder.Bold.Clone();
 					MemberBraceTags = TransientMemberTagHolder.BoldBraces.Clone();
 					MemberDeclarationBraceTags = TransientMemberTagHolder.BoldDeclarationBraces.Clone();
@@ -885,20 +885,20 @@ namespace Codist.Taggers
 					MemberDeclarationBraceTags = TransientMemberTagHolder.DeclarationBraces.Clone();
 				}
 				if (o.MatchFlags(SpecialHighlightOptions.BranchBrace) == false) {
-					KeywordBraceTags.Branching = sp ? ClassificationTagHelper.BoldTag : null;
+					KeywordBraceTags.Branching = bold ? ClassificationTagHelper.BoldTag : null;
 				}
 				if (o.MatchFlags(SpecialHighlightOptions.CastBrace) == false) {
-					KeywordBraceTags.TypeCast = sp ? ClassificationTagHelper.BoldTag : null;
+					KeywordBraceTags.TypeCast = bold ? ClassificationTagHelper.BoldTag : null;
 				}
 				if (o.MatchFlags(SpecialHighlightOptions.LoopBrace) == false) {
-					KeywordBraceTags.Loop = sp ? ClassificationTagHelper.BoldTag : null;
+					KeywordBraceTags.Loop = bold ? ClassificationTagHelper.BoldTag : null;
 				}
 				if (o.MatchFlags(SpecialHighlightOptions.ResourceBrace) == false) {
-					KeywordBraceTags.Resource = sp ? ClassificationTagHelper.BoldTag : null;
+					KeywordBraceTags.Resource = bold ? ClassificationTagHelper.BoldTag : null;
 				}
 				if (o.MatchFlags(SpecialHighlightOptions.ParameterBrace) == false) {
-					MemberBraceTags.Constructor = sp ? ClassificationTagHelper.BoldTag : null;
-					MemberBraceTags.Method = sp ? ClassificationTagHelper.BoldTag : null;
+					MemberBraceTags.Constructor = bold ? ClassificationTagHelper.BoldTag : null;
+					MemberBraceTags.Method = bold ? ClassificationTagHelper.BoldTag : null;
 				}
 				if (o.MatchFlags(SpecialHighlightOptions.DeclarationBrace) == false) {
 					MemberDeclarationBraceTags.Class
@@ -912,7 +912,7 @@ namespace Codist.Taggers
 						= MemberDeclarationBraceTags.Namespace
 						= MemberDeclarationBraceTags.Property
 						= MemberDeclarationBraceTags.Struct
-						= sp ? ClassificationTagHelper.BoldDeclarationBraceTag : ClassificationTagHelper.DeclarationBraceTag;
+						= bold ? ClassificationTagHelper.BoldDeclarationBraceTag : ClassificationTagHelper.DeclarationBraceTag;
 				}
 				LocalFunctionDeclaration = o.MatchFlags(SpecialHighlightOptions.LocalFunctionDeclaration);
 				NonPrivateField = o.MatchFlags(SpecialHighlightOptions.NonPrivateField);

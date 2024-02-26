@@ -28,7 +28,7 @@ namespace Codist.QuickInfo
 	/// <summary>Provides size limitation, selectable text blocks, icon for warning messages, etc. to Quick Info.</summary>
 	[Export(typeof(IAsyncQuickInfoSourceProvider))]
 	[Name(nameof(QuickInfoOverrideController))]
-	[Order(After = "Default Quick Info Presenter")]
+	[Order(After = nameof(QuickInfoVisibilityController))]
 	[ContentType(Constants.CodeTypes.Text)]
 	sealed class QuickInfoOverrideProvider : IAsyncQuickInfoSourceProvider
 	{
@@ -44,7 +44,7 @@ namespace Codist.QuickInfo
 	/// </summary>
 	[Export(typeof(IAsyncQuickInfoSourceProvider))]
 	[Name("Color Quick Info")]
-	[Order(After = "Default Quick Info Presenter")]
+	[Order(After = nameof(QuickInfoVisibilityController))]
 	[ContentType(Constants.CodeTypes.Text)]
 	sealed class ColorQuickInfoControllerProvider : IAsyncQuickInfoSourceProvider
 	{
@@ -57,7 +57,7 @@ namespace Codist.QuickInfo
 
 	[Export(typeof(IAsyncQuickInfoSourceProvider))]
 	[Name(CSharpQuickInfo.Name)]
-	[Order(After = "Default Quick Info Presenter")]
+	[Order(After = nameof(QuickInfoVisibilityController))]
 	[ContentType(Constants.CodeTypes.CSharp)]
 	sealed class CSharpQuickInfoSourceProvider : IAsyncQuickInfoSourceProvider
 	{
@@ -99,7 +99,7 @@ namespace Codist.QuickInfo
 	/// <summary>Controls background of quick info.</summary>
 	[Export(typeof(IAsyncQuickInfoSourceProvider))]
 	[Name(nameof(QuickInfoBackgroundController))]
-	[Order(After = "Default Quick Info Presenter")]
+	[Order(After = nameof(QuickInfoVisibilityController))]
 	[ContentType(Constants.CodeTypes.Text)]
 	sealed class QuickInfoBackgroundControllerProvider : IAsyncQuickInfoSourceProvider
 	{
@@ -117,21 +117,11 @@ namespace Codist.QuickInfo
 	abstract class SingletonQuickInfoSource : IAsyncQuickInfoSource
 	{
 		Task<QuickInfoItem> IAsyncQuickInfoSource.GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
-			// do not show Quick Info when user is hovering on the SmartBar or the SymbolList
-			if (session.TextView.Properties.ContainsProperty(SmartBars.SmartBar.QuickInfoSuppressionId)
-				|| session.TextView.Properties.ContainsProperty(Controls.TextViewOverlay.QuickInfoSuppressionId)) {
-				return DismissQuickInfoOnSpecialUIElementsAsync(session);
-			}
 			if (Config.Instance.Features.MatchFlags(Features.SuperQuickInfo) == false
 				|| session.Properties.ContainsProperty(GetType())) {
 				return Task.FromResult<QuickInfoItem>(null);
 			}
 			return InternalGetQuickInfoItemAsync(session, cancellationToken);
-		}
-
-		static async Task<QuickInfoItem> DismissQuickInfoOnSpecialUIElementsAsync(IAsyncQuickInfoSession session) {
-			await session.DismissAsync();
-			return null;
 		}
 
 		protected abstract Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken);

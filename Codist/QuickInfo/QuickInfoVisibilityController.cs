@@ -9,7 +9,24 @@ namespace Codist.QuickInfo
 {
 	sealed class QuickInfoVisibilityController : SingletonQuickInfoSource
 	{
-		protected override async Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
+		protected override Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
+			// do not show Quick Info when user is hovering on the SmartBar or the SymbolList
+			if (session.TextView.Properties.ContainsProperty(SmartBars.SmartBar.QuickInfoSuppressionId)
+				|| session.TextView.Properties.ContainsProperty(Controls.TextViewOverlay.QuickInfoSuppressionId)) {
+				return DismissQuickInfoOnSpecialUIElementsAsync(session);
+			}
+			if (Config.Instance.Features.MatchFlags(Features.SuperQuickInfo) == false) {
+				return Task.FromResult<QuickInfoItem>(null);
+			}
+			return GetAsync(session, cancellationToken);
+		}
+
+		static async Task<QuickInfoItem> DismissQuickInfoOnSpecialUIElementsAsync(IAsyncQuickInfoSession session) {
+			await session.DismissAsync();
+			return null;
+		}
+
+		static async Task<QuickInfoItem> GetAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
 			var delay = Config.Instance.QuickInfo.DelayDisplay;
 			if (delay > 50) {
 				await Task.Delay(delay, cancellationToken);
