@@ -16,6 +16,7 @@ namespace Codist.Refactorings
 		public static readonly ReplaceText WrapInIf = new WrapInTextRefactoring(R.CMD_SurroundWithIf, "#if DEBUG", "#endif", 4/*lengthof("#if ")*/, 5/*lengthof(DEBUG)*/);
 		public static readonly ReplaceText CommentToRegion = new CommentToRegionRefactoring();
 		public static readonly ReplaceText SealClass = new SealClassRefactoring();
+		public static readonly ReplaceText MakeStatic = new StaticRefactoring();
 		public static readonly ReplaceText MakePublic = new ChangeAccessibilityRefactoring(SyntaxKind.PublicKeyword);
 		public static readonly ReplaceText MakeProtected = new ChangeAccessibilityRefactoring(SyntaxKind.ProtectedKeyword);
 		public static readonly ReplaceText MakeInternal = new ChangeAccessibilityRefactoring(SyntaxKind.InternalKeyword);
@@ -212,8 +213,49 @@ namespace Codist.Refactorings
 			}
 		}
 
+		sealed class StaticRefactoring : DeclarationModifierRefactoring
+		{
+			public override int IconId => IconIds.StaticMember;
+			public override string Title => R.CMD_MakeStatic;
+
+			public override bool Accept(RefactoringContext ctx) {
+				if (GetDeclarationNode(ctx.SemanticContext) is MemberDeclarationSyntax d) {
+					var m = d.GetModifiers(out var canHaveModifier);
+					return canHaveModifier
+						&& d.IsAnyKind(SyntaxKind.ConstructorDeclaration, SyntaxKind.DestructorDeclaration) == false
+						&& CanBeStatic(m);
+				}
+				return false;
+			}
+
+			static bool CanBeStatic(SyntaxTokenList modifiers) {
+				foreach (var item in modifiers) {
+					switch (item.Kind()) {
+						case SyntaxKind.StaticKeyword:
+						case SyntaxKind.OverrideKeyword:
+						case SyntaxKind.SealedKeyword:
+						case SyntaxKind.VirtualKeyword:
+						case SyntaxKind.AbstractKeyword:
+							return false;
+					}
+				}
+				return true;
+			}
+
+			public override void Refactor(SemanticContext ctx) {
+				const int LENGTH_OF_STATIC = 6;
+				var d = GetDeclarationNode(ctx);
+				if (d == null) {
+					return;
+				}
+				var m = d.GetModifiers(out var canHaveModifier);
+				var insertAt = m.FullSpan.Length == 0 ? d.SpanStart
+					: m[0].IsAnyKind(SyntaxKind.PublicKeyword, SyntaxKind.InternalKeyword, SyntaxKind.PrivateKeyword, SyntaxKind.ProtectedKeyword) ? m[0].FullSpan.End
+					: GetModifierInsertionPoint(d);
+				ctx.View.Edit(insertAt, (view, param, edit) => {
+					edit.Insert(param, "static ");
 				});
-				ctx.View.SelectSpan(d.Keyword.SpanStart, LENGTH_OF_SEALED, 1);
+				ctx.View.SelectSpan(insertAt, LENGTH_OF_STATIC, 1);
 			}
 		}
 

@@ -2685,4 +2685,7 @@ Ctrl: Directly inherited interfaces only</value>
   <data name="T_DontReportUntilRestart" xml:space="preserve">
     <value>Don't report this error until VS restarts</value>
   </data>
+  <data name="CMD_MakeStatic" xml:space="preserve">
+    <value>Make Static</value>
+  </data>
 </root>

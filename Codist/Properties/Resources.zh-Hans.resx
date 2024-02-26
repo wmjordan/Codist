@@ -2671,4 +2671,7 @@ Ctrl: 仅直接继承的接口</value>
   <data name="T_DontReportUntilRestart" xml:space="preserve">
     <value>在 Visual Studio 重启之前不要再报告此错误</value>
   </data>
+  <data name="CMD_MakeStatic" xml:space="preserve">
+    <value>改成静态</value>
+  </data>
 </root>

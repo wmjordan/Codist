@@ -1138,6 +1138,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Make Static.
+        /// </summary>
+        internal static string CMD_MakeStatic {
+            get {
+                return ResourceManager.GetString("CMD_MakeStatic", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Mark &lt;NAME&gt;.
         /// </summary>
         internal static string CMD_Mark {
