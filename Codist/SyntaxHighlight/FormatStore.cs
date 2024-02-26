@@ -641,7 +641,6 @@ namespace Codist.SyntaxHighlight
 				foreach (var item in changedItems) {
 					HighlightRecursive(__GetClassificationType(item), dedup, newStyles);
 				}
-
 				if (bgChanged || fsChanged) {
 					foreach (var item in __SyntaxStyleCache) {
 						if (bgChanged && item.Value.BackColor.A > 0
@@ -653,6 +652,7 @@ namespace Codist.SyntaxHighlight
 				}
 
 				$"[{_Category}] overridden {newStyles.Count} styles".Log();
+				UpdateIdentifySymbolSource(__SyntaxStyleCache);
 				try {
 					if (newStyles.Count != 0) {
 						if (_EditorFormatMap.IsInBatchUpdate == false) {
