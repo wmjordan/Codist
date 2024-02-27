@@ -129,15 +129,19 @@ namespace Codist.Controls
 				return;
 			}
 			if (e.Key == Key.Enter) {
-				GoToSourceAsync(SelectedIndex == -1 && HasItems
-					? ItemContainerGenerator.Items[0] as SymbolItem
-					: SelectedItem as SymbolItem);
+				System.Collections.ObjectModel.ReadOnlyCollection<object> items;
+				var item = SelectedIndex == -1 && HasItems && (items = ItemContainerGenerator.Items).Count != 0
+					? items[0] as SymbolItem
+					: SelectedItem as SymbolItem;
+				if (item != null) {
+					GoToSourceAsync(item);
+				}
 				e.Handled = true;
 			}
 
 			async void GoToSourceAsync(SymbolItem i) {
 				try {
-					await i?.GoToSourceAsync();
+					await i.GoToSourceAsync();
 				}
 				catch (OperationCanceledException) {
 				}
