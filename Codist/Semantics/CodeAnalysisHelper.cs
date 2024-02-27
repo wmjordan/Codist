@@ -79,6 +79,11 @@ namespace Codist
 			return NonPublicOrFutureAccessors.GetWarningLevel(csErrorCode);
 		}
 
+		// gets parameter list in primary constructor
+		public static ParameterListSyntax GetParameterList(this TypeDeclarationSyntax typeDeclaration) {
+			return NonPublicOrFutureAccessors.GetParameterList(typeDeclaration);
+		}
+
 		static partial class NonPublicOrFutureAccessors
 		{
 			public static readonly Func<SyntaxNode, NameSyntax> GetFileScopedNamespaceName = ReflectionHelper.CreateGetPropertyMethod<SyntaxNode, NameSyntax>("Name", typeof(NamespaceDeclarationSyntax).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Syntax.FileScopedNamespaceDeclarationSyntax"));
@@ -86,6 +91,8 @@ namespace Codist
 			public static readonly Func<ExpressionSyntax, ArgumentListSyntax> GetImplicitObjectCreationArgumentList = ReflectionHelper.CreateGetPropertyMethod<ExpressionSyntax, ArgumentListSyntax>("ArgumentList", typeof(ExpressionSyntax).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Syntax.BaseObjectCreationExpressionSyntax"));
 
 			public static readonly Func<int, int> GetWarningLevel = ReflectionHelper.CallStaticFunc<int, int>(typeof(LanguageVersionFacts).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.ErrorFacts")?.GetMethod("GetWarningLevel", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)) ?? (Func<int, int>)((int _) => 3);
+
+			public static readonly Func<TypeDeclarationSyntax, ParameterListSyntax> GetParameterList = ReflectionHelper.CreateGetPropertyMethod<TypeDeclarationSyntax, ParameterListSyntax>("ParameterList", typeof(TypeDeclarationSyntax));
 		}
 
 		[Flags]

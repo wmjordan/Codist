@@ -223,6 +223,8 @@ namespace Codist.Refactorings
 					var m = d.GetModifiers(out var canHaveModifier);
 					return canHaveModifier
 						&& d.IsAnyKind(SyntaxKind.ConstructorDeclaration, SyntaxKind.DestructorDeclaration) == false
+						&& (d is TypeDeclarationSyntax t == false
+							|| t.GetParameterList() == null) // exclude primary constructor
 						&& CanBeStatic(m);
 				}
 				return false;
