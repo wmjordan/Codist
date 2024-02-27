@@ -19,7 +19,7 @@ namespace Codist.Refactorings
 			ReplaceNode.InlineVariable,
 			ReplaceNode.While,
 			ReplaceNode.AsToCast,
-			ReplaceText.SealClass,
+			ReplaceText.SealType,
 			ReplaceNode.DuplicateMethodDeclaration,
 			ReplaceText.MakeStatic,
 			ReplaceText.MakePublic,

@@ -15,7 +15,7 @@ namespace Codist.Refactorings
 		public static readonly ReplaceText WrapInRegion = new WrapInTextRefactoring(R.CMD_SurroundWithRegion, "#region RegionName", "#endregion", 8/*lengthof("#region ")*/, 10/*lengthof(RegionName)*/);
 		public static readonly ReplaceText WrapInIf = new WrapInTextRefactoring(R.CMD_SurroundWithIf, "#if DEBUG", "#endif", 4/*lengthof("#if ")*/, 5/*lengthof(DEBUG)*/);
 		public static readonly ReplaceText CommentToRegion = new CommentToRegionRefactoring();
-		public static readonly ReplaceText SealClass = new SealClassRefactoring();
+		public static readonly ReplaceText SealType = new SealTypeRefactoring();
 		public static readonly ReplaceText MakeStatic = new StaticRefactoring();
 		public static readonly ReplaceText MakePublic = new ChangeAccessibilityRefactoring(SyntaxKind.PublicKeyword);
 		public static readonly ReplaceText MakeProtected = new ChangeAccessibilityRefactoring(SyntaxKind.ProtectedKeyword);
@@ -175,15 +175,22 @@ namespace Codist.Refactorings
 			}
 		}
 
-		sealed class SealClassRefactoring : DeclarationModifierRefactoring
+		sealed class SealTypeRefactoring : DeclarationModifierRefactoring
 		{
+			string _Title;
 			public override int IconId => IconIds.SealedClass;
-			public override string Title => R.CMD_SealClass;
+			public override string Title => _Title;
 
 			public override bool Accept(RefactoringContext ctx) {
 				var node = ctx.Node;
-				return node.IsKind(SyntaxKind.ClassDeclaration)
-					&& CanBeSealed(((ClassDeclarationSyntax)node).Modifiers);
+				if (node.IsAnyKind(SyntaxKind.ClassDeclaration, CodeAnalysisHelper.RecordDeclaration)
+					&& CanBeSealed(((TypeDeclarationSyntax)node).Modifiers)) {
+					_Title = node.IsKind(CodeAnalysisHelper.RecordDeclaration)
+						? R.CMD_SealRecord
+						: R.CMD_SealClass;
+					return true;
+				}
+				return false;
 			}
 
 			static bool CanBeSealed(SyntaxTokenList modifiers) {
@@ -201,7 +208,7 @@ namespace Codist.Refactorings
 
 			public override void Refactor(SemanticContext ctx) {
 				const int LENGTH_OF_SEALED = 6;
-				var d = ctx.Node as ClassDeclarationSyntax;
+				var d = ctx.Node as TypeDeclarationSyntax;
 				var m = d.Modifiers;
 				var insertAt = m.FullSpan.Length == 0 ? d.SpanStart
 					: m[0].IsAnyKind(SyntaxKind.PublicKeyword, SyntaxKind.InternalKeyword, SyntaxKind.PrivateKeyword, SyntaxKind.ProtectedKeyword) ? m[0].FullSpan.End
@@ -222,7 +229,7 @@ namespace Codist.Refactorings
 				if (GetDeclarationNode(ctx.SemanticContext) is MemberDeclarationSyntax d) {
 					var m = d.GetModifiers(out var canHaveModifier);
 					return canHaveModifier
-						&& d.IsAnyKind(SyntaxKind.ConstructorDeclaration, SyntaxKind.DestructorDeclaration) == false
+						&& d.IsAnyKind(SyntaxKind.ConstructorDeclaration, SyntaxKind.DestructorDeclaration, CodeAnalysisHelper.RecordDeclaration, CodeAnalysisHelper.RecordStructDeclaration) == false
 						&& (d is TypeDeclarationSyntax t == false
 							|| t.GetParameterList() == null) // exclude primary constructor
 						&& CanBeStatic(m);

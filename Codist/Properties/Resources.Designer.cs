@@ -1643,6 +1643,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Seal Record.
+        /// </summary>
+        internal static string CMD_SealRecord {
+            get {
+                return ResourceManager.GetString("CMD_SealRecord", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Search Type Member.
         /// </summary>
         internal static string CMD_SearchClassMember {

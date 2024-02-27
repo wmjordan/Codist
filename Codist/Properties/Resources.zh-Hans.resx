@@ -2683,4 +2683,7 @@ Ctrl: 仅直接继承的接口</value>
   <data name="OT_TrimBeforeSurroundTip" xml:space="preserve">
     <value>在插入配对符号之前，删除选中内容首尾的空格和制表符</value>
   </data>
+  <data name="CMD_SealRecord" xml:space="preserve">
+    <value>将记录密封</value>
+  </data>
 </root>

@@ -2697,4 +2697,7 @@ Ctrl: Directly inherited interfaces only</value>
   <data name="OT_TrimBeforeSurroundTip" xml:space="preserve">
     <value>Before inserting paired punctuations, trim space and tab characters around selection</value>
   </data>
+  <data name="CMD_SealRecord" xml:space="preserve">
+    <value>Seal Record</value>
+  </data>
 </root>
