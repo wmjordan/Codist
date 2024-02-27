@@ -72,6 +72,8 @@ namespace Codist
 		[DefaultValue(JumpListOptions.Default)]
 		public JumpListOptions JumpListOptions { get; set; } = JumpListOptions.Default;
 
+		public AutoSurroundSelectionOptions AutoSurroundSelectionOptions { get; set; }
+
 		[DefaultValue(0d)]
 		public double TopSpace { get; set; }
 		[DefaultValue(0d)]
@@ -441,6 +443,9 @@ namespace Codist
 		}
 		internal void Set(JumpListOptions options, bool set) {
 			JumpListOptions = JumpListOptions.SetFlags(options, set);
+		}
+		internal void Set(AutoSurroundSelectionOptions options, bool set) {
+			AutoSurroundSelectionOptions = AutoSurroundSelectionOptions.SetFlags(options, set);
 		}
 
 		static void LoadStyleEntries<TStyle, TStyleType> (List<TStyle> styles, bool removeFontNames)
@@ -940,6 +945,13 @@ namespace Codist
 		DemostrationMode = 1 << 1,
 		NoScaling = 1 << 2,
 		Default = SafeMode | DemonstrationMode | NoScaling
+	}
+
+	[Flags]
+	public enum AutoSurroundSelectionOptions
+	{
+		None,
+		Trim
 	}
 
 	public enum ScrollbarMarkerStyle

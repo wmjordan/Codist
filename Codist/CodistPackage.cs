@@ -28,6 +28,7 @@ namespace Codist
 	[ProvideOptionPage(typeof(Options.WebSearchPage), Constants.NameOfMe, "Web Search", 200, 308, true, Sort = 70)]
 	[ProvideOptionPage(typeof(Options.WrapTextPage), Constants.NameOfMe, "Smart Bar\\Wrap Text", 200, 310, true, Sort = 80)]
 	[ProvideOptionPage(typeof(Options.ExtensionDeveloperPage), Constants.NameOfMe, "Extension development", 200, 309, true, Sort = 90)]
+	[ProvideOptionPage(typeof(Options.AutoSurroundSelectionPage), Constants.NameOfMe, "Auto Pair Puncuation", 200, 311, true, Sort = 100)]
 	[ProvideMenuResource("Menus.ctmenu", 1)]
 	//[ProvideToolWindow(typeof(Commands.SymbolFinderWindow), Style = VsDockStyle.Tabbed, Window = EnvDTE.Constants.vsWindowKindProperties))]
 	[ProvideAutoLoad(UIContextGuids80.NoSolution, PackageAutoLoadFlags.BackgroundLoad)]

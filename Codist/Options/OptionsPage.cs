@@ -1367,4 +1367,40 @@ namespace Codist.Options
 			}
 		}
 	}
+
+	[Guid("496442FC-A36A-4C7A-B312-5D84B2631565")]
+	sealed class AutoSurroundSelectionPage : OptionsPage
+	{
+		PageControl _Child;
+
+		protected override Features Feature => Features.AutoSurround;
+		protected override UIElement Child => _Child ?? (_Child = new PageControl(this));
+
+		sealed class PageControl : OptionsPageContainer
+		{
+			readonly OptionBox<AutoSurroundSelectionOptions> _TrimSelection;
+
+			public PageControl(OptionsPage page) : base(page) {
+				AddPage(R.OT_General,
+					new Note(R.OT_AutoSurroundSelectionNote),
+
+					_TrimSelection = Config.Instance.AutoSurroundSelectionOptions.CreateOptionBox(AutoSurroundSelectionOptions.Trim, UpdateConfig, R.OT_TrimBeforeSurround)
+						.SetLazyToolTip(() => R.OT_TrimBeforeSurroundTip)
+					);
+			}
+
+			protected override void LoadConfig(Config config) {
+				var o = config.AutoSurroundSelectionOptions;
+				_TrimSelection.UpdateWithOption(o);
+			}
+
+			void UpdateConfig(AutoSurroundSelectionOptions options, bool set) {
+				if (Page.IsConfigUpdating) {
+					return;
+				}
+				Config.Instance.Set(options, set);
+				Config.Instance.FireConfigChangedEvent(Features.None);
+			}
+		}
+	}
 }

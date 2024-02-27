@@ -2789,6 +2789,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to This page changes the behavior of the auto surround feature, which automatically insert paired punctuations around selections when typing the leading punctuation.
+        /// </summary>
+        internal static string OT_AutoSurroundSelectionNote {
+            get {
+                return ResourceManager.GetString("OT_AutoSurroundSelectionNote", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Base type.
         /// </summary>
         internal static string OT_BaseType {
@@ -4897,6 +4906,24 @@ namespace Codist.Properties {
         internal static string OT_TopMarginTip {
             get {
                 return ResourceManager.GetString("OT_TopMarginTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Trim whitespace before surrounding text.
+        /// </summary>
+        internal static string OT_TrimBeforeSurround {
+            get {
+                return ResourceManager.GetString("OT_TrimBeforeSurround", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Before inserting paired punctuations, trim space and tab characters around selection.
+        /// </summary>
+        internal static string OT_TrimBeforeSurroundTip {
+            get {
+                return ResourceManager.GetString("OT_TrimBeforeSurroundTip", resourceCulture);
             }
         }
         

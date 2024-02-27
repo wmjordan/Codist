@@ -61,9 +61,16 @@ namespace Codist.Commands
 			var oldSpans = view.Selection.SelectedSpans;
 			var startText = args.TypedChar.ToString();
 			var history = ServicesHelper.Instance.TextUndoHistoryService.GetHistory(view.TextBuffer);
+			var trim = Config.Instance.AutoSurroundSelectionOptions.MatchFlags(AutoSurroundSelectionOptions.Trim);
 			using (var transaction = history.CreateTransaction(startText + R.T_AutoSurround + endText))
 			using (var edit = view.TextBuffer.CreateEdit()) {
 				foreach (var span in oldSpans) {
+					if (trim
+						&& span.IsEmpty == false
+						&& TryTrimSpan(span, out var trimStart, out var trimEnd)) {
+						edit.Delete(Span.FromBounds(span.Start.Position, trimStart));
+						edit.Delete(Span.FromBounds(trimEnd, span.End.Position));
+					}
 					edit.Insert(span.Start, startText);
 					edit.Insert(span.End, endText);
 				}
@@ -72,6 +79,32 @@ namespace Codist.Commands
 			}
 			view.GetMultiSelectionBroker().AddSelectionRange(UpdateSelections(oldSpans, newText));
 			return true;
+		}
+
+		static bool TryTrimSpan(SnapshotSpan span, out int trimStart, out int trimEnd) {
+			var s = span.Snapshot;
+			var to = span.End.Position;
+			var from = span.Start.Position;
+			while (from < to) {
+				if (s[from].CeqAny(' ', '\t')) {
+					++from;
+				}
+				else {
+					break;
+				}
+			}
+			trimStart = from;
+			--to;
+			while (from < to) {
+				if (s[to].CeqAny(' ', '\t')) {
+					--to;
+				}
+				else {
+					break;
+				}
+			}
+			trimEnd = to + 1;
+			return from != span.Start.Position || trimEnd != span.End.Position;
 		}
 
 		public CommandState GetCommandState(TypeCharCommandArgs args) {

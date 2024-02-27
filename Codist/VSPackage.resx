@@ -160,4 +160,7 @@
   <data name="310" xml:space="preserve">
     <value>Wrap Text</value>
   </data>
+  <data name="311" xml:space="preserve">
+    <value>Auto Pair Punctuation</value>
+  </data>
 </root>

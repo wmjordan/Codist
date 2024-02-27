@@ -2688,4 +2688,13 @@ Ctrl: Directly inherited interfaces only</value>
   <data name="CMD_MakeStatic" xml:space="preserve">
     <value>Make Static</value>
   </data>
+  <data name="OT_AutoSurroundSelectionNote" xml:space="preserve">
+    <value>This page changes the behavior of the auto surround feature, which automatically insert paired punctuations around selections when typing the leading punctuation</value>
+  </data>
+  <data name="OT_TrimBeforeSurround" xml:space="preserve">
+    <value>Trim whitespace before surrounding text</value>
+  </data>
+  <data name="OT_TrimBeforeSurroundTip" xml:space="preserve">
+    <value>Before inserting paired punctuations, trim space and tab characters around selection</value>
+  </data>
 </root>

@@ -156,4 +156,7 @@
   <data name="310" xml:space="preserve">
     <value>环绕文本</value>
   </data>
+  <data name="311" xml:space="preserve">
+    <value>配对符号包围选区</value>
+  </data>
 </root>
