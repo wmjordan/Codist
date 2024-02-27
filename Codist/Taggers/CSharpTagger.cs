@@ -313,6 +313,7 @@ namespace Codist.Taggers
 						switch (node.Parent.Kind()) {
 							case SyntaxKind.MethodDeclaration:
 							case SyntaxKind.LocalFunctionStatement:
+							case SyntaxKind.OperatorDeclaration:
 								tag = __Classifications.Method;
 								goto CREATE_SPAN;
 							case SyntaxKind.PropertyDeclaration:
@@ -331,12 +332,11 @@ namespace Codist.Taggers
 								goto CREATE_SPAN;
 						}
 						return null;
+					case SyntaxKind.OperatorDeclaration:
+						tag = TransientTags.OverloadedOperatorDeclaration;
+						goto CREATE_SPAN;
 				}
 				if (semanticModel.GetSymbol(node.IsKind(SyntaxKind.Argument) ? ((ArgumentSyntax)node).Expression : node, cancellationToken) is IMethodSymbol opMethod) {
-					if (opMethod.MethodKind == MethodKind.UserDefinedOperator) {
-						tag = __Classifications.OverrideMember;
-						goto CREATE_SPAN;
-					}
 					if (opMethod.MethodKind == MethodKind.LambdaMethod) {
 						var l = ClassifyLambdaExpression(itemSpan, snapshot, semanticModel, unitCompilation);
 						if (l != null) {
@@ -476,6 +476,8 @@ namespace Codist.Taggers
 					case SyntaxKind.ImplicitArrayCreationExpression:
 					case CodeAnalysisHelper.CollectionExpression:
 						return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.MemberBraceTags.Constructor);
+					case CodeAnalysisHelper.ListPatternExpression:
+						return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.KeywordBraceTags.Branching);
 				}
 				return null;
 			}
@@ -849,6 +851,8 @@ namespace Codist.Taggers
 			public static readonly ClassificationTag DestructorDeclaration = ClassificationTagHelper.CreateTransientClassificationTag(__Classifications.ResourceKeyword, __Classifications.NestedDeclaration);
 
 			public static readonly ClassificationTag OverrideDeclaration = ClassificationTagHelper.CreateTransientClassificationTag(__Classifications.OverrideMember, __Classifications.NestedDeclaration);
+
+			public static readonly ClassificationTag OverloadedOperatorDeclaration = ClassificationTagHelper.CreateTransientClassificationTag(__Classifications.Method, __Classifications.NestedDeclaration, __GeneralClassifications.OverloadedOperator);
 		}
 
 		static class HighlightOptions
