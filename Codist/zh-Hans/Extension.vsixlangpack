@@ -2,6 +2,6 @@
 <PackageLanguagePackManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011">
 	<Metadata>
 		<DisplayName>Codist</DisplayName>
-		<Description xml:space="preserve">C# 程序员的增效利器，包含高级语法样式、超级代码提示、导航栏、智能工具栏、滚动条标记、代码重构、自动更新版本号、to-do 任务注释标记、显示效果优化等功能。</Description>
+		<Description xml:space="preserve">C# 程序员的增效利器，包含超级代码提示、高级语法样式、to-do 任务注释标记、导航栏、智能工具栏、滚动条标记、代码重构、自动更新版本号、显示效果优化等功能。</Description>
 	</Metadata>
 </PackageLanguagePackManifest>
