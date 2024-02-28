@@ -87,7 +87,7 @@ namespace Codist.QuickInfo
 					}
 					else if (node.IsKind(SyntaxKind.Interpolation)) {
 						symbol = semanticModel.Compilation.GetSpecialType(SpecialType.System_String);
-						isConvertedType = true;
+						isConvertedType = symbol != null;
 						goto PROCESS;
 					}
 					if (o != null) {
@@ -114,22 +114,19 @@ namespace Codist.QuickInfo
 				case SyntaxKind.AmpersandAmpersandToken:
 				case SyntaxKind.BarBarToken:
 					symbol = semanticModel.Compilation.GetSpecialType(SpecialType.System_Boolean);
-					isConvertedType = true;
+					isConvertedType = symbol != null;
 					break;
 				case SyntaxKind.EqualsGreaterThanToken:
 					if ((node = unitCompilation.FindNode(token.Span)).IsKind(CodeAnalysisHelper.SwitchExpressionArm) && node.Parent.IsKind(CodeAnalysisHelper.SwitchExpression)) {
 						symbol = semanticModel.GetTypeInfo(node.Parent, cancellationToken).ConvertedType;
-						isConvertedType = true;
+						isConvertedType = symbol != null;
 					}
 					break;
 				case SyntaxKind.ExclamationEqualsToken:
 				case SyntaxKind.EqualsEqualsToken:
-					symbol = semanticModel.GetTypeInfo(unitCompilation.FindNode(token.Span, false, true), cancellationToken).ConvertedType;
-					isConvertedType = true;
-					break;
 				case SyntaxKind.EqualsToken:
-					symbol = semanticModel.GetTypeInfo(unitCompilation.FindNode(token.GetPreviousToken().Span), cancellationToken).ConvertedType;
-					isConvertedType = true;
+					symbol = semanticModel.GetTypeInfo(unitCompilation.FindNode(token.Span, false, true), cancellationToken).ConvertedType;
+					isConvertedType = symbol != null;
 					break;
 				case SyntaxKind.NullKeyword:
 				case SyntaxKind.DefaultKeyword:
@@ -190,11 +187,14 @@ namespace Codist.QuickInfo
 						&& node.Parent.IsKind(SyntaxKind.ElementAccessExpression)) {
 						symbol = semanticModel.GetSymbolInfo((ElementAccessExpressionSyntax)node.Parent, cancellationToken).Symbol;
 					}
-					else if (node.IsKind(CodeAnalysisHelper.CollectionExpression)) {
+					else if (node.IsAnyKind(CodeAnalysisHelper.CollectionExpression, CodeAnalysisHelper.ListPatternExpression)) {
 						symbol = semanticModel.GetTypeInfo(node, cancellationToken).ConvertedType;
 					}
 					if (symbol == null) {
 						goto case SyntaxKind.OpenParenToken;
+					}
+					else {
+						isConvertedType = true;
 					}
 					break;
 				case SyntaxKind.UsingKeyword:
@@ -375,7 +375,7 @@ namespace Codist.QuickInfo
 				}
 			}
 			o?.ApplyClickAndGo(symbol);
-			if (container.ItemCount == 0) {
+			if (container.ItemCount == 0 && isConvertedType == false) {
 				if (symbol != null) {
 					// place holder
 					container.Add(new ContentPresenter() { Name = "SymbolPlaceHolder" });
