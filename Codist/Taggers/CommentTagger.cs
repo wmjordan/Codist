@@ -167,6 +167,7 @@ namespace Codist.Taggers
 			if (s != null) {
 				TagAdded?.Invoke(this, EventArgs.Empty);
 				// note: Don't use the TagsChanged event, otherwise infinite loops will occur
+				//   since we take advantages of ITagAggregator<IClassificationTag>
 				//TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(s.Span));
 			}
 		}

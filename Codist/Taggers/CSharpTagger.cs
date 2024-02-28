@@ -92,11 +92,21 @@ namespace Codist.Taggers
 
 		internal static class Tagger
 		{
+			#region cache tag results for reusing among subsequent calls for the same spans
+			static readonly WeakReference<IEnumerable<SnapshotSpan>> __LastSpans = new WeakReference<IEnumerable<SnapshotSpan>>(null);
+			static TagHolder __LastTags;
+			#endregion
+
 			public static IEnumerable<ITagSpan<IClassificationTag>> GetTags(IEnumerable<SnapshotSpan> spans, SemanticState result, CancellationToken cancellationToken) {
 				try {
-					return GetTagsInternal(spans, result, cancellationToken);
+					if (__LastSpans.TryGetTarget(out var lastSpans) && lastSpans == spans) {
+						return __LastTags;
+					}
+					__LastSpans.SetTarget(spans);
+					return __LastTags = GetTagsInternal(spans, result, cancellationToken);
 				}
 				catch (OperationCanceledException) {
+					__LastSpans.SetTarget(null);
 					return Enumerable.Empty<ITagSpan<IClassificationTag>>();
 				}
 			}
@@ -489,6 +499,7 @@ namespace Codist.Taggers
 					case SyntaxKind.ImplicitStackAllocArrayCreationExpression:
 					case SyntaxKind.ImplicitArrayCreationExpression:
 					case CodeAnalysisHelper.CollectionExpression:
+					case SyntaxKind.AttributeArgument:
 						tag = __Classifications.ConstructorMethod;
 						break;
 					case CodeAnalysisHelper.ListPatternExpression:
