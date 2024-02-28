@@ -207,7 +207,6 @@
     <Compile Include="Semantics\CSharpParser.cs" />
     <Compile Include="Taggers\TaggedContentSpan.cs" />
     <Compile Include="Taggers\TaggerFactories.cs" />
-    <Compile Include="Taggers\TransientClassificationTagHolder.cs" />
     <Compile Include="Taggers\Classifications.cs" />
     <Compile Include="Taggers\CustomTagger.cs" />
     <Compile Include="Taggers\FindResultTagger.cs" />

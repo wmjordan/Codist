@@ -826,12 +826,19 @@ namespace Codist
 		None,
 		// comment tagger
 		SpecialComment = 1,
-		DeclarationBrace = 1 << 1,
-		ParameterBrace = 1 << 2,
-		BranchBrace = 1 << 4,
-		LoopBrace = 1 << 5,
-		ResourceBrace = 1 << 6,
-		CastBrace = 1 << 7,
+		SemanticPunctuation = 1 << 1,
+		[Obsolete]
+		DeclarationBrace = SemanticPunctuation,
+		[Obsolete]
+		ParameterBrace = SemanticPunctuation,
+		[Obsolete]
+		BranchBrace = SemanticPunctuation,
+		[Obsolete]
+		LoopBrace = SemanticPunctuation,
+		[Obsolete]
+		ResourceBrace = SemanticPunctuation,
+		[Obsolete]
+		CastBrace = SemanticPunctuation,
 		BoldSemanticPunctuation = 1 << 8,
 		// bold semantic punctuation
 		[Obsolete]

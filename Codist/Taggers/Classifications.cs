@@ -9,28 +9,32 @@ namespace Codist.Taggers
 		public static readonly GeneralClassifications Instance = new GeneralClassifications(ServicesHelper.Instance.ClassificationTypeRegistry);
 
 		GeneralClassifications(IClassificationTypeRegistryService registry) {
+			AbstractionKeyword = registry.GetClassificationTag(Constants.CSharpAbstractionKeyword);
+			Bold = registry.GetClassificationTag(Constants.CodeBold);
 			BranchingKeyword = registry.GetClassificationTag(Constants.CSharpBranchingKeyword);
 			ControlFlowKeyword = registry.GetClassificationTag(Constants.CSharpControlFlowKeyword);
 			Identifier = registry.GetClassificationTag(Constants.CodeIdentifier);
+			Keyword = registry.GetClassificationTag(Constants.CodeKeyword);
 			LoopKeyword = registry.GetClassificationTag(Constants.CSharpLoopKeyword);
-			TypeCastKeyword = registry.GetClassificationTag(Constants.CSharpTypeCastKeyword);
-			Punctuation = registry.GetClassificationTag(Constants.CodePunctuation);
 			Operator = registry.GetClassificationTag(Constants.CodeOperator);
 			OverloadedOperator = registry.GetClassificationTag(Constants.CodeOverloadedOperator);
-			Keyword = registry.GetClassificationTag(Constants.CodeKeyword);
-			Bold = registry.GetClassificationTag(Constants.CodeBold);
+			Punctuation = registry.GetClassificationTag(Constants.CodePunctuation);
+			ResourceKeyword = registry.GetClassificationTag(Constants.CSharpResourceKeyword);
+			TypeCastKeyword = registry.GetClassificationTag(Constants.CSharpTypeCastKeyword);
 		}
 
+		public ClassificationTag AbstractionKeyword { get; }
+		public ClassificationTag Bold { get; }
 		public ClassificationTag BranchingKeyword { get; }
 		public ClassificationTag ControlFlowKeyword { get; }
 		public ClassificationTag Identifier { get; }
-		public ClassificationTag LoopKeyword { get; }
-		public ClassificationTag TypeCastKeyword { get; }
 		public ClassificationTag Keyword { get; }
+		public ClassificationTag LoopKeyword { get; }
 		public ClassificationTag Operator { get; }
 		public ClassificationTag OverloadedOperator { get; }
 		public ClassificationTag Punctuation { get; }
-		public ClassificationTag Bold { get; }
+		public ClassificationTag ResourceKeyword { get; }
+		public ClassificationTag TypeCastKeyword { get; }
 	}
 
 	sealed class CSharpClassifications
@@ -39,7 +43,6 @@ namespace Codist.Taggers
 
 		CSharpClassifications(IClassificationTypeRegistryService registry) {
 			AbstractMember = registry.GetClassificationTag(Constants.CSharpAbstractMemberName);
-			AbstractionKeyword = registry.GetClassificationTag(Constants.CSharpAbstractionKeyword);
 			AliasNamespace = registry.GetClassificationTag(Constants.CSharpAliasNamespaceName);
 			AttributeName = registry.GetClassificationTag(Constants.CSharpAttributeName);
 			AttributeNotation = registry.GetClassificationTag(Constants.CSharpAttributeNotation);
@@ -70,7 +73,6 @@ namespace Codist.Taggers
 			ReadOnlyField = registry.GetClassificationTag(Constants.CSharpReadOnlyFieldName);
 			ReadOnlyStruct = registry.GetClassificationTag(Constants.CSharpReadOnlyStructName);
 			RefStruct = registry.GetClassificationTag(Constants.CSharpRefStructName);
-			ResourceKeyword = registry.GetClassificationTag(Constants.CSharpResourceKeyword);
 			PrivateMember = registry.GetClassificationTag(Constants.CSharpPrivateMemberName);
 			SealedMember = registry.GetClassificationTag(Constants.CSharpSealedMemberName);
 			StaticMember = registry.GetClassificationTag(Constants.CSharpStaticMemberName);
@@ -85,8 +87,6 @@ namespace Codist.Taggers
 		}
 
 		public ClassificationTag AbstractMember { get; }
-
-		public ClassificationTag AbstractionKeyword { get; }
 
 		public ClassificationTag AliasNamespace { get; }
 
@@ -151,8 +151,6 @@ namespace Codist.Taggers
 		public ClassificationTag ReadOnlyStruct { get; }
 
 		public ClassificationTag RefStruct { get; }
-
-		public ClassificationTag ResourceKeyword { get; }
 
 		public ClassificationTag SealedMember { get; }
 

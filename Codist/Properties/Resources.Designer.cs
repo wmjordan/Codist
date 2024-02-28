@@ -2843,29 +2843,29 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Apply bold style to following braces.
-        /// </summary>
-        internal static string OT_BoldBraces {
-            get {
-                return ResourceManager.GetString("OT_BoldBraces", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to When the following checkboxes are checked, braces and parentheses will be highlighted by their semantic syntax styles.
-        /// </summary>
-        internal static string OT_BoldBracesNote {
-            get {
-                return ResourceManager.GetString("OT_BoldBracesNote", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Bold style prefer __underscore__.
         /// </summary>
         internal static string OT_BoldPreferUnderscore {
             get {
                 return ResourceManager.GetString("OT_BoldPreferUnderscore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use bold style.
+        /// </summary>
+        internal static string OT_BoldPunctuations {
+            get {
+                return ResourceManager.GetString("OT_BoldPunctuations", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Make semantic related punctuations and operators bold.
+        /// </summary>
+        internal static string OT_BoldPunctuationsNote {
+            get {
+                return ResourceManager.GetString("OT_BoldPunctuationsNote", resourceCulture);
             }
         }
         
@@ -4307,6 +4307,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Punctuations and Operators.
+        /// </summary>
+        internal static string OT_PunctuationsAndOperators {
+            get {
+                return ResourceManager.GetString("OT_PunctuationsAndOperators", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Quick info background:.
         /// </summary>
         internal static string OT_QuickInfoBackground {
@@ -4510,6 +4519,24 @@ namespace Codist.Properties {
         internal static string OT_SelectionTip {
             get {
                 return ResourceManager.GetString("OT_SelectionTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Highlight with semantic syntax styles.
+        /// </summary>
+        internal static string OT_SemanticPunctuations {
+            get {
+                return ResourceManager.GetString("OT_SemanticPunctuations", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Highlight resource, control flow, type cast, declaration and etc. related punctuations and operators with corresponding syntax highlight styles.
+        /// </summary>
+        internal static string OT_SemanticPunctuationsNote {
+            get {
+                return ResourceManager.GetString("OT_SemanticPunctuationsNote", resourceCulture);
             }
         }
         

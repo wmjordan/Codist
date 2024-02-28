@@ -1523,11 +1523,11 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   <data name="OT_ApplyToNonPrivateField" xml:space="preserve">
     <value>Apply to non-private fields</value>
   </data>
-  <data name="OT_BoldBraces" xml:space="preserve">
-    <value>Apply bold style to following braces</value>
+  <data name="OT_BoldPunctuations" xml:space="preserve">
+    <value>Use bold style</value>
   </data>
-  <data name="OT_BoldBracesNote" xml:space="preserve">
-    <value>When the following checkboxes are checked, braces and parentheses will be highlighted by their semantic syntax styles</value>
+  <data name="OT_BoldPunctuationsNote" xml:space="preserve">
+    <value>Make semantic related punctuations and operators bold</value>
   </data>
   <data name="OT_BracesAndParentheses" xml:space="preserve">
     <value>Braces and Parentheses</value>
@@ -2699,5 +2699,14 @@ Ctrl: Directly inherited interfaces only</value>
   </data>
   <data name="CMD_SealRecord" xml:space="preserve">
     <value>Seal Record</value>
+  </data>
+  <data name="OT_PunctuationsAndOperators" xml:space="preserve">
+    <value>Punctuations and Operators</value>
+  </data>
+  <data name="OT_SemanticPunctuations" xml:space="preserve">
+    <value>Highlight with semantic syntax styles</value>
+  </data>
+  <data name="OT_SemanticPunctuationsNote" xml:space="preserve">
+    <value>Highlight resource, control flow, type cast, declaration and etc. related punctuations and operators with corresponding syntax highlight styles</value>
   </data>
 </root>

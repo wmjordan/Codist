@@ -1604,11 +1604,11 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   <data name="OT_BranceBraces" xml:space="preserve">
     <value>与分支相关的括号</value>
   </data>
-  <data name="OT_BoldBraces" xml:space="preserve">
-    <value>将以下括号变成粗体</value>
+  <data name="OT_BoldPunctuations" xml:space="preserve">
+    <value>使用粗体</value>
   </data>
-  <data name="OT_BoldBracesNote" xml:space="preserve">
-    <value>当下列复选框被选中时，相关的括号将以其对应的关键字语法颜色着色</value>
+  <data name="OT_BoldPunctuationsNote" xml:space="preserve">
+    <value>将语义相关的标点符号和运算符标记为粗体</value>
   </data>
   <data name="OT_ApplyToNonPrivateField" xml:space="preserve">
     <value>应用到非私有的字段</value>
@@ -2685,5 +2685,14 @@ Ctrl: 仅直接继承的接口</value>
   </data>
   <data name="CMD_SealRecord" xml:space="preserve">
     <value>将记录密封</value>
+  </data>
+  <data name="OT_PunctuationsAndOperators" xml:space="preserve">
+    <value>标点符号和运算符</value>
+  </data>
+  <data name="OT_SemanticPunctuations" xml:space="preserve">
+    <value>使用相关语义突出显示</value>
+  </data>
+  <data name="OT_SemanticPunctuationsNote" xml:space="preserve">
+    <value>使用和资源、控制流、类型转换、成员声明等语法显示设置，突出显示相关的符号和运算符</value>
   </data>
 </root>

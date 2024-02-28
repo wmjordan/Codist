@@ -1688,21 +1688,17 @@ namespace Codist.Options
 
 		sealed class CSharpAdditionalHighlightConfigPage : ContentControl
 		{
-			readonly OptionBox<SpecialHighlightOptions> _BoldSemanticPunctuationBox, _HighlightDeclarationBracesBox, _HighlightParameterBracesBox, _HighlightCastParenthesesBox, _HighlightBranchBracesBox, _HighlightLoopBracesBox, _HighlightResourceBracesBox,
+			readonly OptionBox<SpecialHighlightOptions> _BoldSemanticPunctuationBox, _SemanticPunctuationBox,
 				_HighlightLocalFunctionDeclarationBox, _HighlightNonPrivateFieldDeclarationBox, _HighlightConstructorAsTypeBox, _HighlightCapturingLambdaBox;
 
 			public CSharpAdditionalHighlightConfigPage() {
 				var o = Config.Instance.SpecialHighlightOptions;
 				Content = new StackPanel { Margin = WpfHelper.SmallMargin }.Add(i => new Border { Padding = WpfHelper.SmallMargin, Child = i }, new UIElement[] {
-						new TitleBox(R.OT_BracesAndParentheses),
-						(_BoldSemanticPunctuationBox = o.CreateOptionBox(SpecialHighlightOptions.BoldSemanticPunctuation, UpdateConfig, R.OT_BoldBraces)),
-						new DescriptionBox(R.OT_BoldBracesNote),
-						(_HighlightDeclarationBracesBox = o.CreateOptionBox(SpecialHighlightOptions.DeclarationBrace, UpdateConfig, R.OT_DeclarationBraces)),
-						(_HighlightParameterBracesBox = o.CreateOptionBox(SpecialHighlightOptions.ParameterBrace, UpdateConfig, R.OT_MethodParameterBraces)),
-						(_HighlightCastParenthesesBox = o.CreateOptionBox(SpecialHighlightOptions.CastBrace, UpdateConfig, R.OT_TypeCastBraces)),
-						(_HighlightBranchBracesBox = o.CreateOptionBox(SpecialHighlightOptions.BranchBrace, UpdateConfig, R.OT_BranceBraces)),
-						(_HighlightLoopBracesBox = o.CreateOptionBox(SpecialHighlightOptions.LoopBrace, UpdateConfig, R.OT_LoopBraces)),
-						(_HighlightResourceBracesBox = o.CreateOptionBox(SpecialHighlightOptions.ResourceBrace, UpdateConfig, R.OT_ResourceBraces)),
+						new TitleBox(R.OT_PunctuationsAndOperators),
+						(_SemanticPunctuationBox = o.CreateOptionBox(SpecialHighlightOptions.SemanticPunctuation, UpdateConfig, R.OT_SemanticPunctuations)),
+						new DescriptionBox(R.OT_SemanticPunctuationsNote),
+						(_BoldSemanticPunctuationBox = o.CreateOptionBox(SpecialHighlightOptions.BoldSemanticPunctuation, UpdateConfig, R.OT_BoldPunctuations)),
+						new DescriptionBox(R.OT_BoldPunctuationsNote),
 
 						new TitleBox(R.OT_MemberStyles),
 						(_HighlightLocalFunctionDeclarationBox = o.CreateOptionBox(SpecialHighlightOptions.LocalFunctionDeclaration, UpdateConfig, R.OT_ApplyToLocalFunction)),
@@ -1710,15 +1706,16 @@ namespace Codist.Options
 						(_HighlightConstructorAsTypeBox = o.CreateOptionBox(SpecialHighlightOptions.UseTypeStyleOnConstructor, UpdateConfig, R.OT_StyleConstructorAsType)),
 						(_HighlightCapturingLambdaBox = o.CreateOptionBox(SpecialHighlightOptions.CapturingLambdaExpression, UpdateConfig, R.OT_CapturingLambda)),
 					});
-				foreach (var item in new[] { _HighlightDeclarationBracesBox, _HighlightParameterBracesBox, _HighlightCastParenthesesBox, _HighlightBranchBracesBox, _HighlightLoopBracesBox, _HighlightResourceBracesBox }) {
-					item.WrapMargin(__SubOptionMargin);
+				foreach (var item in new[] {
+					_BoldSemanticPunctuationBox,
+					_SemanticPunctuationBox,
+					_HighlightLocalFunctionDeclarationBox,
+					_HighlightNonPrivateFieldDeclarationBox,
+					_HighlightConstructorAsTypeBox,
+					_HighlightCapturingLambdaBox
+				}) {
 					item.ReferenceStyle(VsResourceKeys.CheckBoxStyleKey);
 				}
-				_BoldSemanticPunctuationBox.ReferenceStyle(VsResourceKeys.CheckBoxStyleKey);
-				_HighlightLocalFunctionDeclarationBox.ReferenceStyle(VsResourceKeys.CheckBoxStyleKey);
-				_HighlightNonPrivateFieldDeclarationBox.ReferenceStyle(VsResourceKeys.CheckBoxStyleKey);
-				_HighlightConstructorAsTypeBox.ReferenceStyle(VsResourceKeys.CheckBoxStyleKey);
-				_HighlightCapturingLambdaBox.ReferenceStyle(VsResourceKeys.CheckBoxStyleKey);
 			}
 
 			void UpdateConfig(SpecialHighlightOptions options, bool set) {
