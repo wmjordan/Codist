@@ -266,6 +266,7 @@ namespace Codist.SyntaxHighlight
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpTypeCastKeyword)]
 		[BaseDefinition(Constants.CodeKeyword)]
 		[Description("Keyword: as, is, in, ref, out, inheriting from Keyword")]
+		[Order(After = Constants.CSharpLoopKeyword)]
 		TypeCastKeyword,
 		[Category(Constants.SyntaxCategory.Keyword)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpResourceKeyword)]
@@ -318,22 +319,22 @@ namespace Codist.SyntaxHighlight
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpOverrideMemberName)]
 		[BaseDefinition(Constants.CodeFormalLanguage)]
-		[Description("Name of overriding member, inheriting from Identifier")]
+		[Description("Name of overriding member, inheriting from formal language")]
 		OverrideMemberName,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpAbstractMemberName)]
 		[BaseDefinition(Constants.CodeFormalLanguage)]
-		[Description("Name of abstract member, inheriting from Identifier")]
+		[Description("Name of abstract member, inheriting from formal language")]
 		AbstractMemberName,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[BaseDefinition(Constants.CodeFormalLanguage)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpVirtualMemberName)]
-		[Description("Name of virtual member, inheriting from Identifier")]
+		[Description("Name of virtual member, inheriting from formal language")]
 		VirtualMemberName,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[BaseDefinition(Constants.CodeIdentifier)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpPrivateMemberName)]
-		[Description("Name of private member, inheriting from Identifier")]
+		[Description("Name of private member, inheriting from formal language")]
 		PrivateMemberName,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpLocalDeclarationName)]
