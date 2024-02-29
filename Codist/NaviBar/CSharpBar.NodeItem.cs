@@ -110,9 +110,9 @@ namespace Codist.NaviBar
 					|| kind == SyntaxKind.RegionDirectiveTrivia) {
 					// Hack: since SelectNode will move the cursor to the end of the span--the beginning of next node,
 					//    it will make next node selected, which is undesired in most cases
-					Bar.View.Selection.SelectionChanged -= Bar.Update;
+					Bar.View.Caret.PositionChanged -= Bar.Update;
 					Bar.View.SelectNode(Node, Keyboard.Modifiers != ModifierKeys.Control);
-					Bar.View.Selection.SelectionChanged += Bar.Update;
+					Bar.View.Caret.PositionChanged += Bar.Update;
 				}
 				else {
 					Node.GetIdentifierToken().GetLocation().GoToSource();
