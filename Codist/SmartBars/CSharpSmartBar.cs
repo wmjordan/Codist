@@ -10,6 +10,7 @@ using Codist.Controls;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
@@ -346,7 +347,8 @@ namespace Codist.SmartBars
 		bool SelectionIs<TNode>() where TNode : SyntaxNode {
 			var s = View.Selection.SelectedSpans.FirstOrDefault().ToTextSpan();
 			foreach (var item in _Context.NodeIncludeTrivia.AncestorsAndSelf()) {
-				if (item is TNode && item.Span.Contains(s) && item.Span != s) {
+				TextSpan span;
+				if (item is TNode && (span = item.Span).Contains(s) && span != s) {
 					return true;
 				}
 			}
@@ -356,7 +358,8 @@ namespace Codist.SmartBars
 		void SelectNodeAsKind<TNode>(CommandContext ctx) where TNode : SyntaxNode {
 			var s = View.Selection.SelectedSpans.FirstOrDefault().ToTextSpan();
 			foreach (var item in _Context.NodeIncludeTrivia.AncestorsAndSelf()) {
-				if (item is TNode && item.Span.Contains(s) && item.Span != s) {
+				TextSpan span;
+				if (item is TNode && (span = item.Span).Contains(s) && span != s) {
 					ctx.KeepToolBar(false);
 					item.SelectNode(false);
 					ctx.KeepToolBar(true);

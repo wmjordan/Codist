@@ -110,11 +110,12 @@ namespace Codist.NaviBar
 			}
 			var n = _SemanticContext.GetNode(p, false, false);
 			while (n != null && node.Contains(n)) {
-				if (n.Span.Start != span.Start
-					&& n.Span.Length != span.Length) {
+				var nodeSpan = n.Span;
+				if (nodeSpan.Start != span.Start
+					&& nodeSpan.Length != span.Length) {
 					var nodeKind = n.Kind();
 					if (nodeKind != SyntaxKind.Block) {
-						span = n.Span.CreateSnapshotSpan(View.TextSnapshot);
+						span = nodeSpan.CreateSnapshotSpan(View.TextSnapshot);
 						ViewOverlay.AddRangeAdornment(span, ThemeHelper.MenuHoverBackgroundColor, nodeKind.IsSyntaxBlock() || nodeKind.IsDeclaration() ? 1 : 0);
 					}
 				}
@@ -149,7 +150,8 @@ namespace Codist.NaviBar
 		async Task UpdateAsync(CancellationToken token) {
 			var nodes = await UpdateModelAndGetContainingNodesAsync(token);
 			await SyncHelper.SwitchToMainThreadAsync(token);
-			int ic = Items.Count, c = Math.Min(ic, nodes.Length);
+			ItemCollection items = Items;
+			int ic = items.Count, c = Math.Min(ic, nodes.Length);
 			int i, i2;
 			#region Remove outdated nodes on NaviBar
 			const int FirstNodeIndex = 2; // exclude root and globalNs node
@@ -158,7 +160,7 @@ namespace Codist.NaviBar
 					return;
 				}
 				CHECK_NODE:
-				if (Items[i] is BarItem ni) {
+				if (items[i] is BarItem ni) {
 					switch (ni.ItemType) {
 						case BarItemType.Node:
 							if (((NodeItem)ni).Node == nodes[i2]) {
@@ -174,14 +176,14 @@ namespace Codist.NaviBar
 				}
 				break;
 			}
-			c = Items.Count;
+			c = items.Count;
 			if (i == FirstNodeIndex && _RootItem.FilterText.Length == 0) {
 				// clear type and namespace menu items if a type is changed
 				_RootItem.ClearSymbolList();
 			}
 			// remove outdated nodes
 			while (c > i) {
-				Items.RemoveAndDisposeAt(--c);
+				items.RemoveAndDisposeAt(--c);
 			}
 			#endregion
 			#region Add updated nodes
@@ -209,18 +211,18 @@ namespace Codist.NaviBar
 							newItem.ReferencedSymbols.AddRange(node.FindRelatedTypes(_SemanticContext.SemanticModel, token).Take(5));
 						}
 					}
-					Items.Add(newItem);
+					items.Add(newItem);
 				}
 				++i2;
 			}
 			#endregion
 			#region Add external referenced nodes in node range
 			if (memberNode == null) {
-				memberNode = Items.GetFirst<NodeItem>(n => n.HasReferencedSymbols);
+				memberNode = items.GetFirst((Predicate<NodeItem>)(n => n.HasReferencedSymbols));
 			}
 			if (memberNode?.HasReferencedSymbols == true) {
 				foreach (var doc in memberNode.ReferencedSymbols) {
-					Items.Add(new SymbolNodeItem(doc));
+					items.Add(new SymbolNodeItem(doc));
 				}
 			}
 			#endregion

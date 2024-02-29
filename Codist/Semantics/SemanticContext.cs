@@ -113,7 +113,8 @@ namespace Codist
 				}
 			}
 			var matches = new List<MemberDeclarationSyntax>(3);
-			var s = node.GetDeclarationSignature(node.SpanStart);
+			int nodeStart = node.SpanStart;
+			var s = node.GetDeclarationSignature(nodeStart);
 			foreach (var item in root.Members) {
 				MatchDeclarationNode(item, matches, s, node);
 			}
@@ -131,9 +132,7 @@ namespace Codist
 			switch (matches.Count) {
 				case 1: return matches[0];
 				case 0: return match;
-				default:
-					var p = node.SpanStart;
-					return matches.OrderBy(i => Math.Abs(i.SpanStart - p)).First();
+				default: return matches.OrderBy(i => Math.Abs(i.SpanStart - nodeStart)).First();
 			}
 		}
 
@@ -177,20 +176,20 @@ namespace Codist
 			var sm = SemanticModel;
 			return node.SyntaxTree == sm.SyntaxTree
 				? Task.FromResult(sm.GetSymbol(node, cancellationToken))
-				: RefreshSymbol(node, sm, cancellationToken);
+				: RefreshSymbol(this, node, sm, cancellationToken);
 
-			async Task<ISymbol> RefreshSymbol(SyntaxNode n, SemanticModel m, CancellationToken ct) {
-				var doc = GetDocument(n.SyntaxTree);
+			async Task<ISymbol> RefreshSymbol(SemanticContext me, SyntaxNode n, SemanticModel m, CancellationToken ct) {
+				var doc = me.GetDocument(n.SyntaxTree);
 				// doc no longer exists
 				if (doc == null) {
 					return null;
 				}
 				m = await doc.GetSemanticModelAsync(ct).ConfigureAwait(false);
-				if (n.SpanStart >= m.SyntaxTree.Length) {
+				var p = n.SpanStart;
+				if (p >= m.SyntaxTree.Length) {
 					return null;
 				}
 				// find the new node in the new model
-				var p = n.SpanStart;
 				foreach (var item in m.SyntaxTree.GetChanges(n.SyntaxTree)) {
 					if (item.Span.Start > p) {
 						break;
@@ -203,7 +202,6 @@ namespace Codist
 				}
 				n = newNode;
 				return m.GetSymbol(n, ct);
-
 			}
 		}
 

@@ -11,6 +11,7 @@ using Codist.Controls;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using R = Codist.Properties.Resources;
@@ -255,7 +256,7 @@ namespace Codist.NaviBar
 				byte regionJustStart = UNDEFINED; // undefined, prevent #endregion show up on top of menu items
 				bool selected = false;
 				int pos = Bar.View.GetCaretPosition();
-				SyntaxNode lastNode = null;
+				TextSpan lastNodeSpan = default;
 				foreach (var child in scope) {
 					var childKind = child.Kind();
 					if (childKind.IsMemberDeclaration() == false && childKind.IsTypeDeclaration() == false) {
@@ -264,23 +265,23 @@ namespace Codist.NaviBar
 					if (directives != null) {
 						for (var i = 0; i < directives.Count; i++) {
 							var d = directives[i];
-							if (d.SpanStart < child.SpanStart) {
+							int directiveStart = d.SpanStart;
+							if (directiveStart < child.SpanStart) {
 								if (d.IsKind(SyntaxKind.RegionDirectiveTrivia)) {
-									if (lastNode == null || lastNode.Span.Contains(d.SpanStart) == false) {
+									if (lastNodeSpan.Contains(directiveStart) == false) {
 										AddStartRegion(d, isExternal);
 									}
 									regionJustStart = TRUE;
 								}
 								else if (d.IsKind(SyntaxKind.EndRegionDirectiveTrivia)) {
 									// don't show #endregion if preceding item is #region
-									if (regionJustStart == FALSE) {
-										if (lastNode == null || lastNode.Span.Contains(d.SpanStart) == false) {
-											var item = new SymbolItem(_Menu);
-											_Menu.Add(item);
-											item.Content
-												.Append("#endregion ").Append(d.GetDeclarationSignature())
-												.Foreground = ThemeHelper.SystemGrayTextBrush;
-										}
+									if (regionJustStart == FALSE
+										&& lastNodeSpan.Contains(directiveStart) == false) {
+										var item = new SymbolItem(_Menu);
+										_Menu.Add(item);
+										item.Content
+											.Append("#endregion ").Append(d.GetDeclarationSignature())
+											.Foreground = ThemeHelper.SystemGrayTextBrush;
 									}
 								}
 								directives.RemoveAt(i);
@@ -310,7 +311,7 @@ namespace Codist.NaviBar
 							AddReturnType(i, child);
 						}
 						if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.RegionInMember) == false) {
-							lastNode = child;
+							lastNodeSpan = child.Span;
 						}
 					}
 					// a member is added between #region and #endregion
@@ -319,7 +320,7 @@ namespace Codist.NaviBar
 				if (directives != null) {
 					foreach (var item in directives) {
 						if (item.IsKind(SyntaxKind.RegionDirectiveTrivia)
-							&& (lastNode == null || lastNode.Span.Contains(item.SpanStart) == false)) {
+							&& (lastNodeSpan.Contains(item.SpanStart) == false)) {
 							AddStartRegion(item, isExternal);
 						}
 					}
@@ -456,17 +457,21 @@ namespace Codist.NaviBar
 					}
 					if (p.AccessorList != null) {
 						var a = p.AccessorList.Accessors;
+						AccessorDeclarationSyntax item;
 						if (a.Count == 2) {
 							if (a.Any(i => i.RawKind == (int)CodeAnalysisHelper.InitAccessorDeclaration)) {
 								AddIcon(ref icons, IconIds.InitonlyProperty);
 							}
-							else if (a[0].Body == null && a[0].ExpressionBody == null && a[1].Body == null && a[1].ExpressionBody == null) {
+							else if ((item = a[0]).Body == null
+								&& item.ExpressionBody == null
+								&& (item = a[1]).Body == null
+								&& item.ExpressionBody == null) {
 								AddIcon(ref icons, IconIds.AutoProperty);
 								return icons;
 							}
 						}
 						else if (a.Count == 1) {
-							if (a[0].Body == null && a[0].ExpressionBody == null) {
+							if ((item = a[0]).Body == null && item.ExpressionBody == null) {
 								AddIcon(ref icons, IconIds.ReadonlyProperty);
 								return icons;
 							}
