@@ -416,7 +416,7 @@ namespace Codist.QuickInfo
 						? OverrideXmlDocGetSignature(p)
 						: null;
 					_Override.ErrorTags?.Clear();
-					MakeTextualContentSelectableWithIcon(p);
+					MakeTextualContentSelectableWithIcon(GetItems(p));
 					if (_Override.Session.Options == QuickInfoSessionOptions.TrackMouse) {
 						if (p.GetParent<FrameworkElement>(e => e.GetType().Name == "WpfToolTipControl") is ContentControl tip
 							&& tip.Content is FrameworkElement c) {
@@ -454,8 +454,7 @@ namespace Codist.QuickInfo
 				this.GetParent<Border>().Collapse();
 			}
 
-			void MakeTextualContentSelectableWithIcon(Panel p) {
-				var items = GetItems(p);
+			void MakeTextualContentSelectableWithIcon(IList items) {
 				for (int i = 0; i < items.Count; i++) {
 					if (items[i] is DependencyObject qi
 						&& ((qi as FrameworkElement)?.IsCodistQuickInfoItem()) != true) {
@@ -469,6 +468,10 @@ namespace Codist.QuickInfo
 								Text = vi.TextSnapshot.GetText(),
 								Margin = WpfHelper.MiddleBottomMargin
 							}.SetGlyph(ThemeHelper.GetImage(IconIds.Info));
+							continue;
+						}
+						if (qi is ItemsControl ic) {
+							MakeTextualContentSelectableWithIcon(ic.Items);
 							continue;
 						}
 						foreach (var tb in qi.GetDescendantChildren((Predicate<TextBlock>)null, WorkaroundForTypeScriptQuickInfo)) {
