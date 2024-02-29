@@ -228,9 +228,10 @@ namespace Codist.Refactorings
 			public override bool Accept(RefactoringContext ctx) {
 				if (GetDeclarationNode(ctx.SemanticContext) is MemberDeclarationSyntax d) {
 					var m = d.GetModifiers(out var canHaveModifier);
+					TypeDeclarationSyntax t;
 					return canHaveModifier
 						&& d.IsAnyKind(SyntaxKind.ConstructorDeclaration, SyntaxKind.DestructorDeclaration, CodeAnalysisHelper.RecordDeclaration, CodeAnalysisHelper.RecordStructDeclaration) == false
-						&& (d is TypeDeclarationSyntax t == false
+						&& ((t = d as TypeDeclarationSyntax) == null
 							|| t.GetParameterList() == null) // exclude primary constructor
 						&& CanBeStatic(m);
 				}

@@ -17,7 +17,6 @@ namespace Codist.Taggers
 			Keyword = registry.GetClassificationTag(Constants.CodeKeyword);
 			LoopKeyword = registry.GetClassificationTag(Constants.CSharpLoopKeyword);
 			Operator = registry.GetClassificationTag(Constants.CodeOperator);
-			OverloadedOperator = registry.GetClassificationTag(Constants.CodeOverloadedOperator);
 			Punctuation = registry.GetClassificationTag(Constants.CodePunctuation);
 			ResourceKeyword = registry.GetClassificationTag(Constants.CSharpResourceKeyword);
 			TypeCastKeyword = registry.GetClassificationTag(Constants.CSharpTypeCastKeyword);
@@ -31,7 +30,6 @@ namespace Codist.Taggers
 		public ClassificationTag Keyword { get; }
 		public ClassificationTag LoopKeyword { get; }
 		public ClassificationTag Operator { get; }
-		public ClassificationTag OverloadedOperator { get; }
 		public ClassificationTag Punctuation { get; }
 		public ClassificationTag ResourceKeyword { get; }
 		public ClassificationTag TypeCastKeyword { get; }

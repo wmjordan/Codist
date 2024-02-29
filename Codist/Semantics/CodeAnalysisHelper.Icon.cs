@@ -462,12 +462,12 @@ namespace Codist
 					: IconIds.ImplicitConversion;
 			}
 
-			int GetExpressionIcon(ExpressionSyntax node) {
-				switch (node.Kind()) {
+			int GetExpressionIcon(ExpressionSyntax exp) {
+				switch (exp.Kind()) {
 					case SyntaxKind.InvocationExpression: return KnownImageIds.InvokeMethod;
 				}
-				return node is AssignmentExpressionSyntax ? KnownImageIds.Assign
-					: node is BinaryExpressionSyntax || node is PrefixUnaryExpressionSyntax || node is PostfixUnaryExpressionSyntax ? KnownImageIds.Operator
+				return exp is AssignmentExpressionSyntax ? KnownImageIds.Assign
+					: exp is BinaryExpressionSyntax || exp is PrefixUnaryExpressionSyntax || exp is PostfixUnaryExpressionSyntax ? KnownImageIds.Operator
 					: KnownImageIds.Action;
 			}
 		}

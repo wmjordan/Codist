@@ -113,7 +113,6 @@ namespace Codist
 			#region Containing symbol
 			var cs = s.ContainingSymbol;
 			ThemedTipText b; // text block for symbol
-			INamedTypeSymbol ct; // containing type
 			if (cs != null) {
 				var showNs = Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.SymbolLocation) == false && cs.Kind == SymbolKind.Namespace;
 				var showContainer = showNs == false && s.Kind != SymbolKind.Namespace && cs.Kind != SymbolKind.Namespace;
@@ -195,7 +194,7 @@ namespace Codist
 				case SymbolKind.Discard:
 					goto END;
 			}
-			if (cs != null && (t = symbol.GetContainingTypes().FirstOrDefault(ct => ct.IsGenericType)) != null) {
+			if (cs != null && (t = symbol.GetContainingTypes().FirstOrDefault(i => i.IsGenericType)) != null) {
 				ShowGenericTypeConstraints(p, t);
 			}
 			#endregion
