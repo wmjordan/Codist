@@ -244,7 +244,7 @@ namespace Codist.Controls
 		}
 
 		static bool IsStaticProperty(SymbolItem s) {
-			return (s.Symbol as IPropertySymbol)?.IsStatic == true;
+			return s.Symbol is IPropertySymbol ps && ps.IsStatic;
 		}
 		void SetupListForVsUIColors(Guid category) {
 			ContainerType = SymbolListType.PredefinedColors;
@@ -268,7 +268,9 @@ namespace Codist.Controls
 		}
 		void SetupListForKnownColors() {
 			ContainerType = SymbolListType.PredefinedColors;
-			IconProvider = s => ((s.Symbol as IFieldSymbol)?.IsStatic == true) ? GetColorPreviewIcon(ColorHelper.GetBrush(s.Symbol.Name) ?? ColorHelper.GetSystemBrush(s.Symbol.Name)) : null;
+			IconProvider = s => ((s.Symbol is IFieldSymbol f) && f.IsStatic)
+				? GetColorPreviewIcon(ColorHelper.GetBrush(s.Symbol.Name) ?? ColorHelper.GetSystemBrush(s.Symbol.Name))
+				: null;
 		}
 		void SetupListForKnownImageIds() {
 			ContainerType = SymbolListType.VsKnownImage;
@@ -398,8 +400,8 @@ namespace Codist.Controls
 			catch (OperationCanceledException) {
 				// ignore
 			}
-			catch (Exception) {
-				// ignore
+			catch (Exception ex) {
+				ex.Log();
 			}
 		}
 
@@ -474,7 +476,7 @@ namespace Codist.Controls
 		static void ShowSourceReference(TextBlock text, Location location) {
 			var sourceTree = location.SourceTree;
 			var sourceSpan = location.SourceSpan;
-			var sourceText = sourceTree.GetText();
+			var sourceText = sourceTree.GetText(default);
 			var t = sourceText.ToString(new TextSpan(Math.Max(sourceSpan.Start - 100, 0), Math.Min(sourceSpan.Start, 100)));
 			int i = t.LastIndexOfAny(new[] { '\r', '\n' });
 			text.Append(i != -1 ? t.Substring(i).TrimStart() : t.TrimStart())
@@ -487,10 +489,10 @@ namespace Codist.Controls
 
 		#region ISymbolFilterable
 		SymbolFilterKind ISymbolFilterable.SymbolFilterKind {
-			get => ContainerType == SymbolListType.TypeList ? SymbolFilterKind.Type
-				: ContainerType == SymbolListType.SymbolReferrers ? SymbolFilterKind.Usage
-				: ContainerType == SymbolListType.NodeList ? SymbolFilterKind.Node
-				: SymbolFilterKind.Member;
+			get => ContainerType.Case(SymbolListType.TypeList, SymbolFilterKind.Type,
+				SymbolListType.SymbolReferrers, SymbolFilterKind.Usage,
+				SymbolListType.NodeList, SymbolFilterKind.Node,
+				SymbolFilterKind.Member);
 		}
 
 		void ISymbolFilterable.Filter(string[] keywords, int filterFlags) {
@@ -641,31 +643,31 @@ namespace Codist.Controls
 			if (e.LeftButton == MouseButtonState.Pressed
 				&& (item = GetMouseEventData(e)) != null
 				&& item.SyntaxNode != null) {
-				Handler(item, e);
+				Handler(this, item, e);
 			}
 
-			async void Handler(SymbolItem i, MouseEventArgs args) {
-				if (await SemanticContext.UpdateAsync(default).ConfigureAwait(false) == false) {
+			async void Handler(SymbolList me, SymbolItem i, MouseEventArgs args) {
+				if (await me.SemanticContext.UpdateAsync(default).ConfigureAwait(false) == false) {
 					return;
 				}
 				await i.RefreshSyntaxNodeAsync().ConfigureAwait(false);
-				await SyncHelper.SwitchToMainThreadAsync();
+				await SyncHelper.SwitchToMainThreadAsync(default);
 				var s = args.Source as FrameworkElement;
-				MouseMove -= BeginDragHandler;
-				DragOver += DragOverHandler;
-				Drop += DropHandler;
-				DragEnter += DragOverHandler;
-				DragLeave += DragLeaveHandler;
-				QueryContinueDrag += QueryContinueDragHandler;
+				me.MouseMove -= me.BeginDragHandler;
+				me.DragOver += me.DragOverHandler;
+				me.Drop += me.DropHandler;
+				me.DragEnter += me.DragOverHandler;
+				me.DragLeave += me.DragLeaveHandler;
+				me.QueryContinueDrag += me.QueryContinueDragHandler;
 				var r = DragDrop.DoDragDrop(s, i, DragDropEffects.Copy | DragDropEffects.Move);
-				if (Footer is TextBlock t) {
+				if (me.Footer is TextBlock t) {
 					t.Text = null;
 				}
-				DragOver -= DragOverHandler;
-				Drop -= DropHandler;
-				DragEnter -= DragOverHandler;
-				DragLeave -= DragLeaveHandler;
-				QueryContinueDrag -= QueryContinueDragHandler;
+				me.DragOver -= me.DragOverHandler;
+				me.Drop -= me.DropHandler;
+				me.DragEnter -= me.DragOverHandler;
+				me.DragLeave -= me.DragLeaveHandler;
+				me.QueryContinueDrag -= me.QueryContinueDragHandler;
 			}
 		}
 
@@ -673,8 +675,10 @@ namespace Codist.Controls
 			var li = GetDragEventTarget(e);
 			SymbolItem target, source;
 			// todo Enable dragging child before parent node
-			if (li != null && (target = li.Content as SymbolItem)?.SyntaxNode != null
-				&& (source = GetDragData(e)) != null && source != target
+			if (li != null
+				&& (target = li.Content as SymbolItem)?.SyntaxNode != null
+				&& (source = GetDragData(e)) != null
+				&& source != target
 				&& (source.SyntaxNode.SyntaxTree.FilePath != target.SyntaxNode.SyntaxTree.FilePath
 					|| source.SyntaxNode.Span.IntersectsWith(target.SyntaxNode.Span) == false)) {
 				var copy = e.KeyStates.MatchFlags(DragDropKeyStates.ControlKey);

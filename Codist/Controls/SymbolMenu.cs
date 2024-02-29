@@ -4,7 +4,6 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using Microsoft.VisualStudio.Utilities;
 using R = Codist.Properties.Resources;
-using System.Windows.Controls.Primitives;
 
 namespace Codist.Controls
 {
@@ -34,11 +33,8 @@ namespace Codist.Controls
 			HeaderButtons = new ThemedControlGroup(
 				new ThemedButton(IconIds.Copy, R.CMD_CopyListContent, CopyListContent),
 				new ThemedToggleButton(IconIds.TogglePinning, R.CMD_Pin, TogglePinButton),
-				new ThemedButton(IconIds.Close, R.CMD_Close, () => {
-					var a = _ExternalAdornment;
-					a.RemoveAndDispose(this);
-					a.FocusOnTextView();
-				})) { Opacity = 0.8 }
+				new ThemedButton(IconIds.Close, R.CMD_Close, CloseMenu))
+				{ Opacity = 0.8 }
 				.HandleEvent(MouseEnterEvent, MouseEnterHeader)
 				.HandleEvent(MouseLeaveEvent, MouseLeaveHeader);
 			MouseLeftButtonUp += MenuItemSelect;
@@ -63,6 +59,12 @@ namespace Codist.Controls
 			((ThemedToggleButton)e.Source).Content = ThemeHelper.GetImage((IsPinned = !IsPinned) ? IconIds.Pin : IconIds.Unpin);
 		}
 
+		void CloseMenu() {
+			var a = _ExternalAdornment;
+			a.RemoveAndDispose(this);
+			a.FocusOnTextView();
+		}
+
 		public void Show(UIElement relativeElement = null) {
 			ShowMenu(relativeElement);
 			UpdateNumbers();
@@ -82,7 +84,9 @@ namespace Codist.Controls
 			PreviewKeyUp -= OnMenuKeyUp;
 			PreviewKeyUp += OnMenuKeyUp;
 
-			var p = positionElement != null ? positionElement.TranslatePoint(new Point(positionElement.RenderSize.Width, 0), _ExternalAdornment) : Mouse.GetPosition(_ExternalAdornment);
+			var p = positionElement != null
+				? positionElement.TranslatePoint(new Point(positionElement.RenderSize.Width, 0), _ExternalAdornment)
+				: Mouse.GetPosition(_ExternalAdornment);
 			_ExternalAdornment.Position(this, p, 100);
 			Visibility = Visibility.Visible;
 		}
@@ -121,8 +125,8 @@ namespace Codist.Controls
 				try {
 					Clipboard.SetDataObject(sb.ToString());
 				}
-				catch (System.Runtime.InteropServices.ExternalException) {
-					// ignore
+				catch (System.Runtime.InteropServices.ExternalException ex) {
+					ex.Log();
 				}
 			}
 			_FilterBox.FocusFilterBox();

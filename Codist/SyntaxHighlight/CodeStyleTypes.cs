@@ -3,12 +3,13 @@ using Microsoft.VisualStudio.Language.StandardClassification;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Utilities;
 
-// note: enums defined in this file are used in
+// note:
+// enums defined in this file are used in
 // 1. grouped syntax styles used in SyntaxHighlightCustomizationWindow
 // 2. extra `IClassificationType`s that used by syntax highlighter, exported via `ServiceHelper`
 // 3. style configuration names in old versions of Codist, prior to version 5
 //
-// enum fields have some attributes
+// enum fields can have the following attributes
 // 1. Category: group styles in SyntaxHighlightCustomizationWindow
 // 2. ClassificationType.ClassificationTypeNames: name the exported IClassificationType
 // 3. BaseDefinition: define base classification types

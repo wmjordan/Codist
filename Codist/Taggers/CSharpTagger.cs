@@ -90,7 +90,7 @@ namespace Codist.Taggers
 			}
 		}
 
-		internal static class Tagger
+		static class Tagger
 		{
 			#region cache tag results for reusing among subsequent calls for the same spans
 			static readonly WeakReference<IEnumerable<SnapshotSpan>> __LastSpans = new WeakReference<IEnumerable<SnapshotSpan>>(null);
