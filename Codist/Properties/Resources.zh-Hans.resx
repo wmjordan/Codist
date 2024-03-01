@@ -2678,7 +2678,7 @@ Ctrl: 仅直接继承的接口</value>
     <value>本页面更改自动插入配对符号包围选中内容的行为</value>
   </data>
   <data name="OT_TrimBeforeSurround" xml:space="preserve">
-    <value>插入配对符号前删除空白字符</value>
+    <value>插入配对符号前删除首尾空白字符</value>
   </data>
   <data name="OT_TrimBeforeSurroundTip" xml:space="preserve">
     <value>在插入配对符号之前，删除选中内容首尾的空格和制表符</value>

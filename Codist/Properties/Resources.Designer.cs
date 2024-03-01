@@ -4946,7 +4946,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Trim whitespace before surrounding text.
+        ///   Looks up a localized string similar to Trim whitespace before surrounding punctuations.
         /// </summary>
         internal static string OT_TrimBeforeSurround {
             get {
