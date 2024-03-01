@@ -95,8 +95,9 @@ namespace Codist
 			}
 			return semanticModel.Compilation.GetSpecialType(type);
 		}
+		static readonly string[] __SystemNamespace = new[] { "System" };
 		public static INamedTypeSymbol GetSystemTypeSymbol(this SemanticModel semanticModel, string typeName) {
-			return semanticModel.GetTypeSymbol(typeName, nameof(System));
+			return semanticModel.GetTypeSymbol(typeName, __SystemNamespace);
 		}
 		public static INamedTypeSymbol GetTypeSymbol(this SemanticModel semanticModel, string name, params string[] namespaces) {
 			return GetNamespaceSymbol(semanticModel, namespaces)?.GetTypeMembers(name).FirstOrDefault();

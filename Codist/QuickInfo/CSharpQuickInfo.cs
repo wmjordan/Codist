@@ -225,7 +225,7 @@ namespace Codist.QuickInfo
 					if (token.IsKind(SyntaxKind.EndRegionKeyword)) {
 						goto case SyntaxKind.EndRegionKeyword;
 					}
-					else if (token.IsKind(SyntaxKind.EndIfKeyword)) {
+					if (token.IsKind(SyntaxKind.EndIfKeyword)) {
 						goto case SyntaxKind.EndIfKeyword;
 					}
 					return null;
@@ -1029,12 +1029,14 @@ namespace Codist.QuickInfo
 
 		sealed class SpecialProjectInfo
 		{
+			static readonly string[] __PlatformUINamespace = new[] { "Microsoft", "VisualStudio", "PlatformUI" },
+				__ShellNamespace = new[] { "Microsoft", "VisualStudio", "Shell" };
 			readonly SemanticModel _Model;
 			int _MayBeVsProject;
 
 			public bool MayBeVsProject => _MayBeVsProject != 0
 				? _MayBeVsProject == 1
-				: (_MayBeVsProject = _Model.GetNamespaceSymbol("Microsoft", "VisualStudio", "PlatformUI") != null || _Model.GetTypeSymbol(nameof(VsColors), "Microsoft", "VisualStudio", "Shell") != null ? 1 : -1) == 1;
+				: (_MayBeVsProject = _Model.GetNamespaceSymbol(__PlatformUINamespace) != null || _Model.GetTypeSymbol(nameof(VsColors), __ShellNamespace) != null ? 1 : -1) == 1;
 
 			public SpecialProjectInfo(SemanticModel model) {
 				_Model = model;
