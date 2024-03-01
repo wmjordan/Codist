@@ -120,7 +120,7 @@ namespace Codist
 			if ((symbol.ContainingSymbol as ITypeSymbol)?.TypeKind == TypeKind.Delegate) {
 				symbol = symbol.ContainingSymbol;
 			}
-			string c = symbol.GetDocumentationCommentXml(null, true);
+			string c = symbol.GetUnderlyingSymbol().GetDocumentationCommentXml(null, true);
 			if (String.IsNullOrEmpty(c)) {
 				return false;
 			}

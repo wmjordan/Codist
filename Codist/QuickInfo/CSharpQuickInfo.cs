@@ -213,6 +213,10 @@ namespace Codist.QuickInfo
 					if (node is BinaryExpressionSyntax) {
 						goto PROCESS;
 					}
+					if (node.IsKind(SyntaxKind.TypeArgumentList)) {
+						symbol = semanticModel.GetSymbolInfo(node = node.Parent, cancellationToken).Symbol;
+						goto PROCESS;
+					}
 					else {
 						goto case SyntaxKind.OpenParenToken;
 					}

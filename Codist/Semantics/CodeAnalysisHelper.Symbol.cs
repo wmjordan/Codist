@@ -342,6 +342,10 @@ namespace Codist
 					return ((IAliasSymbol)symbol).Target.GetUnderlyingSymbol();
 				case SymbolKind.Discard:
 					return ((IDiscardSymbol)symbol).Type.GetUnderlyingSymbol();
+				case SymbolKind.Method:
+					return ((IMethodSymbol)symbol).MethodKind == MethodKind.BuiltinOperator
+						? symbol.ContainingType.GetMembers(symbol.Name)[0]
+						: symbol;
 			}
 			return symbol;
 		}
