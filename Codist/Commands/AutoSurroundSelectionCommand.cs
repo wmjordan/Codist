@@ -13,16 +13,18 @@ namespace Codist.Commands
 {
 	internal abstract class AutoSurroundSelectionCommandBase : ICommandHandler<TypeCharCommandArgs>
 	{
-		static readonly Dictionary<char, string> __CommonPairs = new Dictionary<char, string>() {
-			{ '\'', "'" },
-			{ '"', "\"" },
-			{ '(', ")" },
-			{ '{', "}" },
-			{ '[', "]" },
-			{ '<', ">" },
-		};
-		static readonly Dictionary<char, string> __TextPairs = IsChineseEnvironment() == false ? __CommonPairs
-			: new Dictionary<char, string>(__CommonPairs) {
+		static readonly string[] __CommonPairs = InitCommonPairs();
+		static string[] InitCommonPairs() {
+			var p = new string[127];
+			p['\''] = "'";
+			p['"'] = "\"";
+			p['('] = ")";
+			p['{'] = "}";
+			p['['] = "]";
+			p['<'] = ">";
+			return p;
+		}
+		static readonly Dictionary<char, string> __ChineseTextPairs = IsChineseEnvironment() ? new Dictionary<char, string>() {
 				{ '\u201C', "\u201D" }, // full-width quotation mark ""
 				{ '\u2018', "\u2019" }, // full-width single quotation mark ''
 				{ '\uFF08', "\uFF09" }, // full-width parentheses ()
@@ -36,14 +38,21 @@ namespace Codist.Commands
 				{ '\u3008', "\u3009" }, // single angle bracket <>
 				{ '\u300C', "\u300D" }, // corner bracket
 				{ '\u300E', "\u300F" }, // white corner bracket
-			};
+			} : null;
+		static readonly Func<char, string> __GetTextPairForChinese = InitTextPairForChinese();
+		static Func<char, string> InitTextPairForChinese() {
+			if (IsChineseEnvironment()) {
+				return ch => __ChineseTextPairs.TryGetValue(ch, out var p) ? p : null;
+			}
+			return (char ch) => null;
+		}
 
 		static bool IsChineseEnvironment() {
 			return System.Globalization.CultureInfo.CurrentCulture.LCID.CeqAny(2052, 3076, 5124, 1028, 4100)
 				|| R.Culture.LCID.CeqAny(2052, 3076, 5124, 1028, 4100);
 		}
 
-		protected abstract Dictionary<char, string> TextPairs { get; }
+		protected abstract string GetEndTextForTypedChar(char ch);
 
 		public abstract string DisplayName { get; }
 
@@ -53,7 +62,8 @@ namespace Codist.Commands
 
 		bool ProcessChar(TypeCharCommandArgs args) {
 			ITextView view = args.TextView;
-			if (view.Selection.IsEmpty || TextPairs.TryGetValue(args.TypedChar, out var endText) == false) {
+			string endText;
+			if (view.Selection.IsEmpty || (endText = GetEndTextForTypedChar(args.TypedChar)) == null) {
 				return false;
 			}
 
@@ -129,7 +139,9 @@ namespace Codist.Commands
 		sealed class TextAndCode : AutoSurroundSelectionCommandBase
 		{
 			public override string DisplayName => "TextAutoSurroundCommand";
-			protected override Dictionary<char, string> TextPairs => __TextPairs;
+			protected override string GetEndTextForTypedChar(char ch) {
+				return ch < 127 ? __CommonPairs[ch] : __GetTextPairForChinese(ch);
+			}
 		}
 
 		[Export(typeof(ICommandHandler))]
@@ -141,14 +153,21 @@ namespace Codist.Commands
 		[TextViewRole(PredefinedTextViewRoles.Editable)]
 		sealed class Markdown : AutoSurroundSelectionCommandBase
 		{
-			static readonly Dictionary<char, string> __MarkdownPairs = new Dictionary<char, string>(__TextPairs) {
-				{ '`', "`" },
-				{ '*', "*" },
-				{ '_', "_" },
-				{ '~', "~" },
-			};
+			static readonly string[] __MarkdownPairs = InitMarkdownPairs();
+			static string[] InitMarkdownPairs()
+			{
+				var p = new string[__CommonPairs.Length];
+				__CommonPairs.CopyTo(p, 0);
+				p['`'] = "`";
+				p['*'] = "*";
+				p['_'] = "_";
+				p['~'] = "~";
+				return p;
+			}
 			public override string DisplayName => "MarkdownAutoSurroundCommand";
-			protected override Dictionary<char, string> TextPairs => __MarkdownPairs;
+			protected override string GetEndTextForTypedChar(char ch) {
+				return ch < 127 ? __MarkdownPairs[ch] : __GetTextPairForChinese(ch);
+			}
 		}
 	}
 }
