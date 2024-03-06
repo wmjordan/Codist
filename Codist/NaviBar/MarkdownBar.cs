@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -33,27 +34,37 @@ namespace Codist.NaviBar
 			__DummyTag5 = MarkdownTagger.DummyHeaderTags[5].ClassificationType,
 			__DummyTag6 = MarkdownTagger.DummyHeaderTags[6].ClassificationType;
 		readonly TaggerResult _Tags;
+		readonly ThemedImageButton _ActiveTitle;
 		readonly ThemedToolBarText _ActiveTitleLabel;
+		readonly List<ThemedImageButton> _TagButtons = new List<ThemedImageButton>();
 		MarkdownList _TitleList;
 		int _FilterLevel;
 		LocationItem[] _Titles;
-		readonly ThemedImageButton _ActiveItem;
 		ITextSearchService2 _TextSearch;
+		ITextStructureNavigator _TextNavigator;
+		ThemedImageButton _RepeatAction;
 
 		public MarkdownBar(IWpfTextView view, ITextSearchService2 textSearch) : base(view) {
 			_TextSearch = textSearch;
+			_TextNavigator = ServicesHelper.Instance.TextStructureNavigator.GetTextStructureNavigator(view.TextBuffer);
 			_Tags = view.Properties.GetProperty<TaggerResult>(typeof(TaggerResult));
 			Name = nameof(MarkdownBar);
 			BindView();
 			_ActiveTitleLabel = new ThemedToolBarText(DefaultActiveTitle);
-			_ActiveItem = new ThemedImageButton(IconIds.Headings, _ActiveTitleLabel);
-			_ActiveItem.Click += ShowTitleList;
-			Items.Add(_ActiveItem);
-			//AddItem(KnownImageIds.Bold, ToggleBold);
-			//AddItem(KnownImageIds.Italic, ToggleItalic);
-			//AddItem(KnownImageIds.MarkupTag, ToggleCode);
-			//AddItem(KnownImageIds.HyperLink, ToggleHyperLink);
-			//AddItem(KnownImageIds.StrikeThrough, ToggleStrikeThrough);
+			Items.Add(_ActiveTitle = new ThemedImageButton(IconIds.Headings, _ActiveTitleLabel)
+				.HandleEvent(ButtonBase.ClickEvent, ShowTitleList));
+			AddTagButton(IconIds.TagBold, R.CMD_MarkBold, ToggleBold);
+			AddTagButton(IconIds.TagItalic, R.CMD_MarkItalic, ToggleItalic);
+			AddTagButton(IconIds.TagCode, R.CMD_MarkCode, ToggleCode);
+			AddTagButton(IconIds.TagHyperLink, R.CMD_MarkLink, ToggleHyperLink);
+			AddTagButton(IconIds.TagStrikeThrough, R.CMD_MarkStrikeThrough, ToggleStrikeThrough);
+			AddTagButton(IconIds.Heading1, R.CMD_Heading1, MarkHeading1);
+			AddTagButton(IconIds.Heading2, R.CMD_Heading2, MarkHeading2);
+			AddTagButton(IconIds.Heading3, R.CMD_Heading3, MarkHeading3);
+			AddTagButton(IconIds.UnorderedList, R.CMD_UnorderedList, MarkUnorderedList);
+			AddTagButton(IconIds.Indent, R.CMD_Indent, (s, args) => TextEditorHelper.ExecuteEditorCommand("Edit.IncreaseLineIndent"));
+			AddTagButton(IconIds.Unindent, R.CMD_Unindent, (s, args) => TextEditorHelper.ExecuteEditorCommand("Edit.DecreaseLineIndent"));
+			Items.AddRange(_TagButtons);
 			view.Closed += View_Closed;
 		}
 
@@ -68,6 +79,8 @@ namespace Codist.NaviBar
 				View.Caret.PositionChanged -= Update;
 				View.TextBuffer.PostChanged -= Update;
 			}
+			View.VisualElement.PreviewKeyDown -= ClearRepeatAction;
+			View.VisualElement.MouseLeftButtonUp -= RepeatAction;
 		}
 
 		void Update(object sender, EventArgs e) {
@@ -81,7 +94,44 @@ namespace Codist.NaviBar
 				_TitleList.SelectedItem = null;
 				_TitleList.Dispose();
 				_TitleList = null;
-				_ActiveItem.IsHighlighted = false;
+				_ActiveTitle.IsHighlighted = false;
+			}
+		}
+
+		void RepeatAction(object sender, EventArgs e) {
+			_RepeatAction?.PerformClick();
+		}
+
+		void ClearRepeatAction(object sender, EventArgs e) {
+			if (_RepeatAction != null) {
+				_RepeatAction = null;
+				View.VisualElement.MouseLeftButtonUp -= RepeatAction;
+				View.VisualElement.PreviewKeyDown -= ClearRepeatAction;
+				foreach (var item in _TagButtons) {
+					item.IsChecked = false;
+				}
+			}
+		}
+
+		void AddTagButton(int iconId, string toolTip, RoutedEventHandler clickHandler) {
+			_TagButtons.Add(new ThemedImageButton(iconId) { ToolTip = new CommandToolTip(iconId, toolTip + "\r\nRight click: repeat command on subsequent selection (Esc to cancel)") }
+				.HandleEvent(ButtonBase.ClickEvent, clickHandler)
+				.HandleEvent(MouseRightButtonUpEvent, StickTagButton));
+		}
+
+		void StickTagButton(object sender, RoutedEventArgs e) {
+			if (sender is ThemedImageButton b) {
+				if (b.IsChecked) {
+					b.IsChecked = false;
+					_RepeatAction = null;
+				}
+				else {
+					ClearRepeatAction(null, null);
+					b.IsChecked = true;
+					_RepeatAction = b;
+					View.VisualElement.MouseLeftButtonUp += RepeatAction;
+					View.VisualElement.PreviewKeyDown += ClearRepeatAction;
+				}
 			}
 		}
 
@@ -98,8 +148,7 @@ namespace Codist.NaviBar
 		}
 
 		void ToggleHyperLink(object sender, RoutedEventArgs e) {
-			var m = WrapWith("[", "](url)", false);
-			foreach (var s in m) {
+			foreach (var s in WrapWith("[", "](url)", false)) {
 				if (s.Snapshot != null) {
 					// select the "url"
 					View.Selection.Select(new SnapshotSpan(s.Snapshot, s.Start.Position + s.Length - 4, 3), false);
@@ -113,6 +162,22 @@ namespace Codist.NaviBar
 			WrapWith("~~", "~~", true);
 		}
 
+		void MarkHeading1(object sender, RoutedEventArgs e) {
+			MarkdownHelper.MarkList(View, MarkdownHelper.Heading1, true, MarkdownHelper.HeadingGlyph);
+		}
+
+		void MarkHeading2(object sender, RoutedEventArgs e) {
+			MarkdownHelper.MarkList(View, MarkdownHelper.Heading2, true, MarkdownHelper.HeadingGlyph);
+		}
+
+		void MarkHeading3(object sender, RoutedEventArgs e) {
+			MarkdownHelper.MarkList(View, MarkdownHelper.Heading3, true, MarkdownHelper.HeadingGlyph);
+		}
+
+		void MarkUnorderedList(object sender, RoutedEventArgs e) {
+			MarkdownHelper.MarkList(View, MarkdownHelper.UnorderedList, true, default, true);
+		}
+
 		void ShowTitleList(object sender, RoutedEventArgs e) {
 			if (_TitleList != null) {
 				HideMenu();
@@ -122,7 +187,7 @@ namespace Codist.NaviBar
 		}
 
 		public override void ShowRootItemMenu(int parameter) {
-			_ActiveItem.IsHighlighted = true;
+			_ActiveTitle.IsHighlighted = true;
 			var titles = _Titles = Array.ConvertAll(_Tags.GetTags(), t => new LocationItem(t));
 			var menu = new MarkdownList(this, titles) {
 				ItemsControlMaxHeight = View.ViewportHeight / 2,
@@ -134,6 +199,7 @@ namespace Codist.NaviBar
 			}
 			if (_TitleList != menu) {
 				if (_TitleList != null) {
+					_TitleList.MouseLeftButtonUp -= MenuItemSelect;
 					ViewOverlay.Remove(_TitleList);
 					_TitleList.Dispose();
 				}
@@ -141,7 +207,7 @@ namespace Codist.NaviBar
 				_TitleList = menu;
 			}
 			if (menu != null) {
-				Canvas.SetLeft(menu, _ActiveItem.TransformToVisual(_ActiveItem.GetParent<Grid>()).Transform(new Point()).X - View.VisualElement.TranslatePoint(new Point(), View.VisualElement.GetParent<Grid>()).X);
+				Canvas.SetLeft(menu, _ActiveTitle.TransformToVisual(_ActiveTitle.GetParent<Grid>()).Transform(new Point()).X - View.VisualElement.TranslatePoint(new Point(), View.VisualElement.GetParent<Grid>()).X);
 				Canvas.SetTop(menu, -1);
 			}
 		}
@@ -176,6 +242,13 @@ namespace Codist.NaviBar
 		}
 
 		IEnumerable<SnapshotSpan> WrapWith(string prefix, string suffix, bool selectModified) {
+			if (View.Selection.IsEmpty) {
+				var e = _TextNavigator.GetExtentOfWord(View.Caret.Position.BufferPosition);
+				if (e.IsSignificant == false || e.Span.IsEmpty) {
+					return Enumerable.Empty<SnapshotSpan>();
+				}
+				View.SelectSpan(e.Span);
+			}
 			string s = View.GetFirstSelectionText();
 			var modified = View.WrapWith(prefix, suffix);
 			if (s != null && Keyboard.Modifiers.MatchFlags(ModifierKeys.Control | ModifierKeys.Shift)
@@ -193,10 +266,14 @@ namespace Codist.NaviBar
 			view.Closed -= View_Closed;
 			view.Properties.RemoveProperty(typeof(TaggerResult));
 			_TextSearch = null;
+			_TextNavigator = null;
 			if (_TitleList != null) {
+				_TitleList.MouseLeftButtonUp -= MenuItemSelect;
 				_TitleList.Dispose();
 				_TitleList = null;
 			}
+			_TagButtons.Clear();
+			_RepeatAction = null;
 		}
 
 		sealed class MarkdownList : VirtualList

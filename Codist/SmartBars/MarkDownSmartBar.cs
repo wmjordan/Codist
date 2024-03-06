@@ -23,6 +23,11 @@ namespace Codist.SmartBars
 			AddCommand(MyToolBar, IconIds.TagCode, R.CMD_MarkCode, MarkCode);
 			AddCommand(MyToolBar, IconIds.TagHyperLink, R.CMD_MarkLink, MarkUrl);
 			AddCommand(MyToolBar, IconIds.TagStrikeThrough, R.CMD_MarkStrikeThrough, ctx => WrapWith(ctx, "~~", "~~", true));
+			AddCommand(MyToolBar, IconIds.Heading1, R.CMD_Heading1, MarkHeading1);
+			AddCommand(MyToolBar, IconIds.Heading2, R.CMD_Heading2, MarkHeading2);
+			AddCommand(MyToolBar, IconIds.Heading3, R.CMD_Heading3, MarkHeading3);
+			AddCommand(MyToolBar, IconIds.UnorderedList, R.CMD_UnorderedList, MarkUnorderedList);
+			AddCommand(MyToolBar, IconIds.Indent, R.CMD_Indent, ctx => TextEditorHelper.ExecuteEditorCommand("Edit.IncreaseLineIndent"));
 		}
 
 		void MarkBold(CommandContext ctx) {
@@ -75,7 +80,7 @@ namespace Codist.SmartBars
 				}
 				var u = MaybeUrl(clip);
 				var m = u && clip.IndexOf(')') < 0
-					? WrapWith(ctx, "[", "](" + clip + ")", false)
+					? WrapWith(ctx, "[", $"]({clip})", false)
 					: WrapWith(ctx, "[", "](url)", false);
 				foreach (var s in m) {
 					if (s.Snapshot != null) {
@@ -96,6 +101,26 @@ namespace Codist.SmartBars
 		static bool MaybeUrl(string text) {
 			return text?.Length > 7
 				&& (text.StartsWith("http://", StringComparison.Ordinal) || text.StartsWith("https://", StringComparison.Ordinal));
+		}
+
+		void MarkUnorderedList(CommandContext ctx) {
+			MarkList(ctx, MarkdownHelper.UnorderedList, true, default, true);
+		}
+
+		void MarkHeading1(CommandContext ctx) {
+			MarkList(ctx, MarkdownHelper.Heading1, true, MarkdownHelper.HeadingGlyph);
+		}
+
+		void MarkHeading2(CommandContext ctx) {
+			MarkList(ctx, MarkdownHelper.Heading2, true, MarkdownHelper.HeadingGlyph);
+		}
+
+		void MarkHeading3(CommandContext ctx) {
+			MarkList(ctx, MarkdownHelper.Heading3, true, MarkdownHelper.HeadingGlyph);
+		}
+
+		static void MarkList(CommandContext ctx, string leadingText, bool skipEmptyLine, char replaceLeadingGlyph = '\0', bool allowLeadingWhitespace = false) {
+			MarkdownHelper.MarkList(ctx.View, leadingText, skipEmptyLine, replaceLeadingGlyph, allowLeadingWhitespace);
 		}
 	}
 }

@@ -87,6 +87,7 @@
     <Compile Include="AutoBuildVersion\BuildSetting.cs" />
     <Compile Include="AutoBuildVersion\VersionRewriteMode.cs" />
     <Compile Include="AutoBuildVersion\VersionSetting.cs" />
+    <Compile Include="Semantics\MarkdownHelper.cs" />
     <Compile Include="SyntaxHighlight\ClassificationTypeExporter.cs" />
     <Compile Include="SyntaxHighlight\CodeStyleTypes.cs" />
     <Compile Include="Commands\AutoBuildVersionWindow.cs" />

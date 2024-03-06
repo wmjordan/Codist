@@ -931,6 +931,33 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Mark Heading 1.
+        /// </summary>
+        internal static string CMD_Heading1 {
+            get {
+                return ResourceManager.GetString("CMD_Heading1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Mark Heading 2.
+        /// </summary>
+        internal static string CMD_Heading2 {
+            get {
+                return ResourceManager.GetString("CMD_Heading2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Mark Heading 3.
+        /// </summary>
+        internal static string CMD_Heading3 {
+            get {
+                return ResourceManager.GetString("CMD_Heading3", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Highlight.
         /// </summary>
         internal static string CMD_Highlight {
@@ -2010,6 +2037,15 @@ namespace Codist.Properties {
         internal static string CMD_UnmarkSymbol {
             get {
                 return ResourceManager.GetString("CMD_UnmarkSymbol", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Mark Unordered List.
+        /// </summary>
+        internal static string CMD_UnorderedList {
+            get {
+                return ResourceManager.GetString("CMD_UnorderedList", resourceCulture);
             }
         }
         

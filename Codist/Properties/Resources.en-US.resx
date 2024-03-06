@@ -2709,4 +2709,16 @@ Ctrl: Directly inherited interfaces only</value>
   <data name="OT_SemanticPunctuationsNote" xml:space="preserve">
     <value>Highlight resource, control flow, type cast, declaration and etc. related punctuations and operators with corresponding syntax highlight styles</value>
   </data>
+  <data name="CMD_Heading1" xml:space="preserve">
+    <value>Mark Heading 1</value>
+  </data>
+  <data name="CMD_Heading2" xml:space="preserve">
+    <value>Mark Heading 2</value>
+  </data>
+  <data name="CMD_Heading3" xml:space="preserve">
+    <value>Mark Heading 3</value>
+  </data>
+  <data name="CMD_UnorderedList" xml:space="preserve">
+    <value>Mark Unordered List</value>
+  </data>
 </root>

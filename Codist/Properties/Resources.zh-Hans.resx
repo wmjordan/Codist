@@ -2695,4 +2695,16 @@ Ctrl: 仅直接继承的接口</value>
   <data name="OT_SemanticPunctuationsNote" xml:space="preserve">
     <value>使用和资源、控制流、类型转换、成员声明等语法显示设置，突出显示相关的符号和运算符</value>
   </data>
+  <data name="CMD_Heading1" xml:space="preserve">
+    <value>标记标题 1</value>
+  </data>
+  <data name="CMD_Heading2" xml:space="preserve">
+    <value>标记标题 2</value>
+  </data>
+  <data name="CMD_Heading3" xml:space="preserve">
+    <value>标记标题 3</value>
+  </data>
+  <data name="CMD_UnorderedList" xml:space="preserve">
+    <value>标记无序列表</value>
+  </data>
 </root>
