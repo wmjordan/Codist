@@ -89,8 +89,8 @@ namespace Codist.Taggers
 
 		internal FrameworkElement Margin { get; set; }
 
-		protected abstract int GetCommentStartIndex(string comment);
-		protected abstract int GetCommentEndIndex(string comment);
+		protected abstract int GetCommentStartIndex(SnapshotSpan content);
+		protected abstract int GetCommentEndIndex(SnapshotSpan content);
 
 		public static CommentTagger Create(IClassificationTypeRegistryService registry, ITextView textView, ITextBuffer textBuffer) {
 			switch (GetCodeType(textBuffer)) {
@@ -178,16 +178,15 @@ namespace Codist.Taggers
 				return null;
 			}
 			_Tags.ClearRange(snapshotSpan.Start, snapshotSpan.Length);
-			var text = snapshotSpan.GetText();
 			//NOTE: markup comment span does not include comment start token
-			var endOfCommentStartToken = GetCommentStartIndex(text);
+			var endOfCommentStartToken = GetCommentStartIndex(snapshotSpan);
 			if (endOfCommentStartToken < 0) {
 				return null;
 			}
-			var tl = text.Length;
+			var spanLength = snapshotSpan.Length;
 			var commentStart = endOfCommentStartToken;
-			while (commentStart < tl) {
-				if (Char.IsWhiteSpace(text[commentStart])) {
+			while (commentStart < spanLength) {
+				if (Char.IsWhiteSpace(snapshotSpan.CharAt(commentStart))) {
 					++commentStart;
 				}
 				else {
@@ -195,19 +194,19 @@ namespace Codist.Taggers
 				}
 			}
 
-			var contentEnd = GetCommentEndIndex(text);
+			var contentEnd = GetCommentEndIndex(snapshotSpan);
 
 			ClassificationTag tag = null;
 			CommentLabel label = null;
 			var contentStart = 0;
 			foreach (var item in Config.Instance.Labels) {
 				var c = commentStart + item.LabelLength;
-				if (c >= tl
-					|| text.IndexOf(item.Label, commentStart, item.Comparison) != commentStart) {
+				if (c >= spanLength
+					|| snapshotSpan.HasTextAtOffset(item.Label, item.IgnoreCase, commentStart) == false) {
 					continue;
 				}
 
-				var followingChar = text[c];
+				var followingChar = snapshotSpan.CharAt(c);
 				if (item.AllowPunctuationDelimiter && Char.IsPunctuation(followingChar)) {
 					c++;
 				}
@@ -227,14 +226,14 @@ namespace Codist.Taggers
 			}
 
 			// ignore whitespaces in content
-			while (contentStart < tl) {
-				if (Char.IsWhiteSpace(text[contentStart]) == false) {
+			while (contentStart < spanLength) {
+				if (Char.IsWhiteSpace(snapshotSpan.CharAt(contentStart)) == false) {
 					break;
 				}
 				++contentStart;
 			}
 			while (contentEnd > contentStart) {
-				if (Char.IsWhiteSpace(text[contentEnd - 1]) == false) {
+				if (Char.IsWhiteSpace(snapshotSpan.CharAt(contentEnd - 1)) == false) {
 					break;
 				}
 				--contentEnd;
@@ -368,12 +367,12 @@ namespace Codist.Taggers
 			public CommonCommentTagger(IClassificationTypeRegistryService registry, ITextView textView, ITextBuffer buffer) : base(registry, textView, buffer) {
 			}
 
-			protected override int GetCommentStartIndex(string comment) {
+			protected override int GetCommentStartIndex(SnapshotSpan content) {
 				return 0;
 			}
 
-			protected override int GetCommentEndIndex(string comment) {
-				return comment.Length;
+			protected override int GetCommentEndIndex(SnapshotSpan content) {
+				return content.Length;
 			}
 		}
 
@@ -382,23 +381,23 @@ namespace Codist.Taggers
 			public SlashStarCommentTagger(IClassificationTypeRegistryService registry, ITextView textView, ITextBuffer buffer) : base(registry, textView, buffer) {
 			}
 
-			protected override int GetCommentStartIndex(string comment) {
-				return GetStartIndexOfMultilineSlashStartComment(comment, 0);
+			protected override int GetCommentStartIndex(SnapshotSpan content) {
+				return GetStartIndexOfMultilineSlashStartComment(content, 0);
 			}
-			protected override int GetCommentEndIndex(string comment) {
-				return GetEndIndexOfMultilineSlashStartComment(comment);
+			protected override int GetCommentEndIndex(SnapshotSpan content) {
+				return GetEndIndexOfMultilineSlashStartComment(content);
 			}
 
-			internal static int GetStartIndexOfMultilineSlashStartComment(string comment, int defaultStartIndex = 0) {
-				if (comment.Length >= 2 && comment[0] == '/' && comment[1] == '*') {
+			internal static int GetStartIndexOfMultilineSlashStartComment(SnapshotSpan content, int defaultStartIndex = 0) {
+				if (content.Length >= 2 && content.CharAt(0) == '/' && content.CharAt(1) == '*') {
 					var i = 2;
-					var l = comment.Length;
+					var l = content.Length;
 					char c;
-					if (comment[l - 1] == '/' && comment[l - 2] == '*') {
+					if (content.CharAt(l - 1) == '/' && content.CharAt(l - 2) == '*') {
 						l -= 2;
 					}
 					while (i < l) {
-						if (Char.IsWhiteSpace(c = comment[i]) || c == '*') {
+						if (Char.IsWhiteSpace(c = content.CharAt(i)) || c == '*') {
 							i++;
 							continue;
 						}
@@ -408,9 +407,9 @@ namespace Codist.Taggers
 				}
 				return defaultStartIndex;
 			}
-			static int GetEndIndexOfMultilineSlashStartComment(string comment) {
-				int l = comment.Length;
-				return l >= 2 && comment[l - 1] == '/' && comment[l - 2] == '*' ? l - 2 : l;
+			static int GetEndIndexOfMultilineSlashStartComment(SnapshotSpan content) {
+				int l = content.Length;
+				return l >= 2 && content.CharAt(l - 1) == '/' && content.CharAt(l - 2) == '*' ? l - 2 : l;
 			}
 		}
 
@@ -419,12 +418,12 @@ namespace Codist.Taggers
 			public CCommentTagger(IClassificationTypeRegistryService registry, ITextView textView, ITextBuffer buffer) : base(registry, textView, buffer) {
 			}
 
-			protected override int GetCommentStartIndex(string comment) {
-				return comment.Length > 2 && comment[1] == '/' ? 2
-					: SlashStarCommentTagger.GetStartIndexOfMultilineSlashStartComment(comment, -1);
+			protected override int GetCommentStartIndex(SnapshotSpan content) {
+				return content.Length > 2 && content.CharAt(1) == '/' ? 2
+					: SlashStarCommentTagger.GetStartIndexOfMultilineSlashStartComment(content, -1);
 			}
-			protected override int GetCommentEndIndex(string comment) {
-				return comment[1] == '*' ? comment.Length - 2 : comment.Length;
+			protected override int GetCommentEndIndex(SnapshotSpan content) {
+				return content.CharAt(1) == '*' ? content.Length - 2 : content.Length;
 			}
 		}
 
@@ -444,15 +443,15 @@ namespace Codist.Taggers
 				}
 				return base.TagComments(snapshotSpan, tagSpan);
 			}
-			protected override int GetCommentStartIndex(string comment) {
-				return comment.Length > 2
-					? comment[1] == '/'
+			protected override int GetCommentStartIndex(SnapshotSpan content) {
+				return content.Length > 2
+					? content.CharAt(1) == '/'
 						? 2
-						: SlashStarCommentTagger.GetStartIndexOfMultilineSlashStartComment(comment, -1)
+						: SlashStarCommentTagger.GetStartIndexOfMultilineSlashStartComment(content, -1)
 					: -1;
 			}
-			protected override int GetCommentEndIndex(string comment) {
-				return comment[1] == '*' ? comment.Length - 2 : comment.Length;
+			protected override int GetCommentEndIndex(SnapshotSpan content) {
+				return content.CharAt(1) == '*' ? content.Length - 2 : content.Length;
 			}
 		}
 
@@ -461,12 +460,12 @@ namespace Codist.Taggers
 			public MarkupCommentTagger(IClassificationTypeRegistryService registry, ITextView textView, ITextBuffer buffer) : base(registry, textView, buffer) {
 			}
 
-			protected override int GetCommentStartIndex(string comment) {
+			protected override int GetCommentStartIndex(SnapshotSpan content) {
 				return 0;
 			}
 
-			protected override int GetCommentEndIndex(string comment) {
-				return comment.EndsWith("-->", StringComparison.Ordinal) ? comment.Length - 3 : comment.Length;
+			protected override int GetCommentEndIndex(SnapshotSpan content) {
+				return content.EndsWith("-->") ? content.Length - 3 : content.Length;
 			}
 		}
 
@@ -475,19 +474,19 @@ namespace Codist.Taggers
 			public BatchFileCommentTagger(IClassificationTypeRegistryService registry, ITextView textView, ITextBuffer buffer) : base(registry, textView, buffer) {
 			}
 
-			protected override int GetCommentStartIndex(string comment) {
-				switch (comment[0]) {
+			protected override int GetCommentStartIndex(SnapshotSpan content) {
+				switch (content.CharAt(0)) {
 					case ':':
-						return comment[1] == ':' ? 2 : 0;
+						return content.CharAt(1) == ':' ? 2 : 0;
 					case 'r':
 					case 'R':
-						return comment[1].CeqAny('e', 'E') && comment[2].CeqAny('m', 'M') ? 3 : 0;
+						return content.CharAt(1).CeqAny('e', 'E') && content.CharAt(2).CeqAny('m', 'M') ? 3 : 0;
 				}
 				return 0;
 			}
 
-			protected override int GetCommentEndIndex(string comment) {
-				return comment.Length;
+			protected override int GetCommentEndIndex(SnapshotSpan content) {
+				return content.Length;
 			}
 		}
 

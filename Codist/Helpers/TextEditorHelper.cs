@@ -116,6 +116,49 @@ namespace Codist
 		public static SnapshotSpan MapTo(this ITextSnapshot oldSnapshot, TextSpan span, ITextSnapshot newSnapshot) {
 			return new SnapshotSpan(oldSnapshot.CreateTrackingPoint(span.Start, PointTrackingMode.Negative).GetPoint(newSnapshot), span.Length);
 		}
+
+		public static char CharAt(this SnapshotSpan span, int index) {
+			return span.Snapshot[span.Start.Position + index];
+		}
+		public static bool HasTextAtOffset(this SnapshotSpan span, string text, bool ignoreCase = false, int offset = 0) {
+			return ignoreCase ? span.HasTextAtOffsetIgnoreCase(text, offset) : span.HasTextAtOffset(text, offset);
+		}
+		public static bool EndsWith(this SnapshotSpan span, string text) {
+			return span.HasTextAtOffset(text, span.Length - text.Length);
+		}
+		static bool HasTextAtOffset(this SnapshotSpan span, string text, int offset) {
+			int l;
+			if (span.Length < offset + (l = text.Length)) {
+				return false;
+			}
+			var snapshot = span.Snapshot;
+			var start = span.Start.Position + offset;
+			for (int i = 0; i < l; i++) {
+				if (snapshot[start + i] != text[i]) {
+					return false;
+				}
+			}
+			return true;
+		}
+		static bool HasTextAtOffsetIgnoreCase(this SnapshotSpan span, string text, int offset) {
+			int l;
+			if (span.Length < offset + (l = text.Length)) {
+				return false;
+			}
+			var snapshot = span.Snapshot;
+			var start = span.Start.Position + offset;
+			for (int i = 0; i < l; i++) {
+				if (AreEqualIgnoreCase(snapshot[start + i], text[i]) == false) {
+					return false;
+				}
+			}
+			return true;
+		}
+		static bool AreEqualIgnoreCase(char a, char b) {
+			return a == b
+				|| a.IsBetween('a', 'z') && a - ('a' - 'A') == b
+				|| a.IsBetween('A', 'Z') && a + ('a' - 'A') == b;
+		}
 		#endregion
 
 		#region Classification
@@ -374,7 +417,11 @@ namespace Codist
 				return TokenType.None;
 			}
 			TokenType r = TokenType.None, t;
-			foreach (var selection in view.Selection.SelectedSpans) {
+			var selectedSpans = view.Selection.SelectedSpans;
+			if (selectedSpans.Count > 1000) {
+				return TokenType.None;
+			}
+			foreach (var selection in selectedSpans) {
 				if (selection.Length > 128 || (t = GetSelectionTokenType(selection)) == TokenType.None) {
 					return TokenType.None;
 				}
@@ -1132,11 +1179,13 @@ namespace Codist
 		}
 
 		public static bool IsCodeWhitespaceChar(this char ch) {
-			return ch == ' ' || ch == '\t';
+			return ch.CeqAny(' ', '\t');
 		}
 		public static bool LikeContentType(this ITextBuffer textBuffer, string typeName) {
 			var n = textBuffer.ContentType.TypeName;
-			return n.IndexOf(typeName) != -1 || n.StartsWith(typeName, StringComparison.OrdinalIgnoreCase) || n.EndsWith(typeName, StringComparison.OrdinalIgnoreCase);
+			return n.IndexOf(typeName) != -1
+				|| n.StartsWith(typeName, StringComparison.OrdinalIgnoreCase)
+				|| n.EndsWith(typeName, StringComparison.OrdinalIgnoreCase);
 		}
 		public static bool LikeContentType(this IContentType contentType, string typeName) {
 			return contentType.TypeName.IndexOf(typeName) != -1;

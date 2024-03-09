@@ -35,12 +35,8 @@ namespace Codist.Taggers
 		}
 		internal int LabelLength { get; private set; }
 		/// <summary>Gets or sets whether the label is case-sensitive.</summary>
-		public bool IgnoreCase {
-			get => Comparison == StringComparison.OrdinalIgnoreCase;
-			set => Comparison = value ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
-		}
+		public bool IgnoreCase { get; set; }
 		public CommentStyleApplication StyleApplication { get; set; }
-		internal StringComparison Comparison { get; private set; }
 		/// <summary>Gets or sets the comment style.</summary>
 		public CommentStyleTypes StyleID { get; set; }
 
@@ -53,7 +49,7 @@ namespace Codist.Taggers
 			label.StyleID = StyleID;
 			label._Label = _Label;
 			label.LabelLength = LabelLength;
-			label.Comparison = Comparison;
+			label.IgnoreCase = IgnoreCase;
 		}
 	}
 }
