@@ -82,7 +82,12 @@ namespace Codist.Taggers
 				&& textView.Roles.Contains(PredefinedTextViewRoles.Document);
 			_Buffer = buffer;
 			_TextView = textView;
-			buffer.Changed += TextBuffer_Changed;
+			if (buffer is ITextBuffer2 b) {
+				b.ChangedOnBackground += TextBuffer_Changed;
+			}
+			else {
+				buffer.ChangedLowPriority += TextBuffer_Changed;
+			}
 			buffer.ContentTypeChanged += TextBuffer_ContentTypeChanged;
 			_Tags = textView.Properties.GetProperty<TaggerResult>(typeof(TaggerResult));
 		}
@@ -347,7 +352,12 @@ namespace Codist.Taggers
 				}
 				_Tags.Reset();
 				_Tags = null;
-				_Buffer.Changed -= TextBuffer_Changed;
+				if (_Buffer is ITextBuffer2 b) {
+					b.ChangedOnBackground -= TextBuffer_Changed;
+				}
+				else {
+					_Buffer.ChangedLowPriority -= TextBuffer_Changed;
+				}
 				_Buffer.ContentTypeChanged -= TextBuffer_ContentTypeChanged;
 				_Buffer = null;
 				_TextView.RemoveProperty<CommentTagger>();

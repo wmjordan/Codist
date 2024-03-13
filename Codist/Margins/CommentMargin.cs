@@ -54,7 +54,7 @@ namespace Codist.Margins
 			Visibility = Config.Instance.MarkerOptions.HasAnyFlag(MarkerOptions.CodeMarginMask) ? Visibility.Visible : Visibility.Collapsed;
 
 			Config.RegisterUpdateHandler(UpdateCommentMarginConfig);
-			_TextView.TextBuffer.Changed += TextView_TextBufferChanged;
+			_TextView.TextBuffer.ChangedLowPriority += TextView_TextBufferChanged;
 			IsVisibleChanged += Margin_VisibilityChanged;
 			_ScrollBar.TrackSpanChanged += ScrollBar_TrackSpanChanged;
 
@@ -97,12 +97,12 @@ namespace Codist.Margins
 			var visible = Visibility == Visibility.Visible;
 			if (setVisible == false && visible) {
 				Visibility = Visibility.Collapsed;
-				_TextView.TextBuffer.Changed -= TextView_TextBufferChanged;
+				_TextView.TextBuffer.ChangedLowPriority -= TextView_TextBufferChanged;
 				_ScrollBar.TrackSpanChanged -= ScrollBar_TrackSpanChanged;
 			}
 			else if (setVisible && visible == false) {
 				Visibility = Visibility.Visible;
-				_TextView.TextBuffer.Changed += TextView_TextBufferChanged;
+				_TextView.TextBuffer.ChangedLowPriority += TextView_TextBufferChanged;
 				_ScrollBar.TrackSpanChanged += ScrollBar_TrackSpanChanged;
 			}
 			if (Visibility == Visibility.Visible) {
@@ -235,7 +235,7 @@ namespace Codist.Margins
 		public override void Dispose() {
 			if (_TextView != null) {
 				Config.UnregisterUpdateHandler(UpdateCommentMarginConfig);
-				_TextView.TextBuffer.Changed -= TextView_TextBufferChanged;
+				_TextView.TextBuffer.ChangedLowPriority -= TextView_TextBufferChanged;
 				_TextView.Properties.RemoveProperty(nameof(CommentTaggerProvider));
 				_TextView.Properties.RemoveProperty(typeof(TaggerResult));
 				_TextView = null;

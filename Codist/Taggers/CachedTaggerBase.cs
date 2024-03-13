@@ -15,7 +15,7 @@ namespace Codist.Taggers
 
 		protected CachedTaggerBase(ITextView textView) {
 			_TextView = textView;
-			_TextView.TextBuffer.Changed += TextView_TextBufferChanged;
+			_TextView.TextBuffer.ChangedLowPriority += TextView_TextBufferChanged;
 			_Tags = textView.GetOrCreateSingletonProperty<TaggerResult>();
 			textView.Closed += TextView_Closed;
 		}
@@ -67,7 +67,7 @@ namespace Codist.Taggers
 		void TextView_Closed(object sender, EventArgs e) {
 			if (_TextView != null) {
 				_TaggedContents.Clear();
-				_TextView.TextBuffer.Changed -= TextView_TextBufferChanged;
+				_TextView.TextBuffer.ChangedLowPriority -= TextView_TextBufferChanged;
 				_TextView.Properties.RemoveProperty(typeof(TaggerResult));
 				_TextView.Closed -= TextView_Closed;
 				_TextView = null;

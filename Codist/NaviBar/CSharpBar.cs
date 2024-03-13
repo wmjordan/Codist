@@ -87,7 +87,7 @@ namespace Codist.NaviBar
 				UnbindView();
 			}
 			_Buffer = View.TextBuffer;
-			View.TextBuffer.Changed += TextBuffer_Changed;
+			View.TextBuffer.ChangedLowPriority += TextBuffer_Changed;
 			View.Caret.PositionChanged += Update;
 			ViewOverlay.ChildRemoved += ViewOverlay_MenuRemoved;
 			Config.RegisterUpdateHandler(UpdateCSharpNaviBarConfig);
@@ -97,7 +97,7 @@ namespace Codist.NaviBar
 
 		protected override void UnbindView() {
 			View.Caret.PositionChanged -= Update;
-			View.TextBuffer.Changed -= TextBuffer_Changed;
+			View.TextBuffer.ChangedLowPriority -= TextBuffer_Changed;
 			ViewOverlay.ChildRemoved -= ViewOverlay_MenuRemoved;
 			Config.UnregisterUpdateHandler(UpdateCSharpNaviBarConfig);
 		}
