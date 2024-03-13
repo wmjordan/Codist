@@ -564,7 +564,7 @@ namespace Codist.Options
 			var cts = new HashSet<IClassificationType>();
 			_SelectedStyleButton = null;
 			foreach (var c in classifications) {
-				if (c is TextEditorHelper.ClassificationCategory) {
+				if (c.IsClassificationCategory()) {
 					l.Add(new Label {
 						Content = c.Classification,
 						Padding = WpfHelper.SmallMargin,

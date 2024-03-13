@@ -173,6 +173,10 @@ namespace Codist
 			return new ClassificationCategory(classificationType);
 		}
 
+		public static bool IsClassificationCategory(this IClassificationType classificationType) {
+			return classificationType is ClassificationCategory;
+		}
+
 		public static IEqualityComparer<IClassificationType> GetClassificationTypeComparer() {
 			return ClassificationTypeComparer.Instance;
 		}
@@ -1352,7 +1356,7 @@ namespace Codist
 		/// <summary>
 		/// A dummy classification type simply to serve the purpose of grouping classification types in the configuration list
 		/// </summary>
-		internal sealed class ClassificationCategory : IClassificationType
+		sealed class ClassificationCategory : IClassificationType
 		{
 			public ClassificationCategory(string classification) {
 				Classification = classification;
@@ -1364,7 +1368,7 @@ namespace Codist
 			public bool IsOfType(string type) { return false; }
 		}
 
-		internal sealed class ClassificationTypeComparer : IEqualityComparer<IClassificationType>
+		sealed class ClassificationTypeComparer : IEqualityComparer<IClassificationType>
 		{
 			public static readonly ClassificationTypeComparer Instance = new ClassificationTypeComparer();
 

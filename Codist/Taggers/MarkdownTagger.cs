@@ -19,13 +19,13 @@ namespace Codist.Taggers
 			new ClassificationTag(TextEditorHelper.CreateClassificationCategory(Constants.CodeText))
 		}; // used when syntax highlight is disabled
 
-		readonly ClassificationTag[] _Tags;
+		readonly ClassificationTag[] _ClassificationTags;
 		readonly bool _FullParseAtFirstLoad;
 		ITextView _TextView;
 		ITextBuffer _TextBuffer;
 
 		public MarkdownTagger(ITextView textView, ITextBuffer buffer, bool syntaxHighlightEnabled) : base(textView) {
-			_Tags = syntaxHighlightEnabled ? HeaderClassificationTypes : DummyHeaderTags;
+			_ClassificationTags = syntaxHighlightEnabled ? HeaderClassificationTypes : DummyHeaderTags;
 			_TextView = textView;
 			_TextBuffer = buffer;
 			_FullParseAtFirstLoad = textView.Roles.Contains(PredefinedTextViewRoles.PreviewTextView) == false
@@ -57,7 +57,7 @@ namespace Codist.Taggers
 			}
 			TAGGED:
 			w += level;
-			results.Add(new TaggedContentSpan(_Tags[level], span, w, l - w));
+			results.Add(new TaggedContentSpan(_ClassificationTags[level], span, w, l - w));
 			return;
 
 			MISMATCH:
