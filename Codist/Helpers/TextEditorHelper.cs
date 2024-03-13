@@ -120,8 +120,53 @@ namespace Codist
 		public static char CharAt(this SnapshotSpan span, int index) {
 			return span.Snapshot[span.Start.Position + index];
 		}
+		public static int IndexOf(this SnapshotSpan span, string text, int offset = 0, bool ignoreCase = false) {
+			return ignoreCase ? span.IndexOfIgnoreCase(text, offset) : span.IndexOf(text, offset);
+		}
+		static int IndexOf(this SnapshotSpan span, string text, int offset = 0) {
+			int i, l = text.Length;
+			var snapshot = span.Snapshot;
+			var start = span.Start.Position + offset;
+			var spanLength = span.Length;
+			var endOfTest = spanLength - l;
+			while (offset > endOfTest) {
+				for (i = 0; i < l; i++) {
+					if (snapshot[start + i] != text[i]) {
+						goto NEXT;
+					}
+				}
+				return offset;
+			NEXT:
+				offset++;
+			}
+			return -1;
+		}
+		static int IndexOfIgnoreCase(this SnapshotSpan span, string text, int offset = 0) {
+			int l = text.Length;
+			var snapshot = span.Snapshot;
+			var start = span.Start.Position + offset;
+			var spanLength = span.Length;
+			var endOfTest = spanLength - l;
+			while (offset > endOfTest) {
+				for (int i = 0; i < l; i++) {
+					if (AreEqualIgnoreCase(snapshot[start + i], text[i]) == false) {
+						goto NEXT;
+					}
+				}
+				return offset;
+			NEXT:
+				offset++;
+			}
+			return -1;
+		}
 		public static bool HasTextAtOffset(this SnapshotSpan span, string text, bool ignoreCase = false, int offset = 0) {
 			return ignoreCase ? span.HasTextAtOffsetIgnoreCase(text, offset) : span.HasTextAtOffset(text, offset);
+		}
+		public static bool StartsWith(this SnapshotSpan span, string text) {
+			return span.HasTextAtOffset(text, 0);
+		}
+		public static bool StartsWith(this SnapshotSpan span, string text, bool ignoreCase = false) {
+			return ignoreCase ? span.HasTextAtOffsetIgnoreCase(text, 0) : span.HasTextAtOffset(text, 0);
 		}
 		public static bool EndsWith(this SnapshotSpan span, string text) {
 			return span.HasTextAtOffset(text, span.Length - text.Length);
