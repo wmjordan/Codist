@@ -982,6 +982,7 @@ namespace Codist
 			var sb = b.Resource;
 			var p = 0;
 			bool newLine = false, noSlash = NoSlash(view);
+			char c;
 			for (int i = 0; i < t.Length; i++) {
 				switch (t[i]) {
 					case '\r':
@@ -1012,7 +1013,7 @@ namespace Codist
 							}
 						}
 					CHECK_NEW_LINE:
-						if (newLine == false || n <= i) {
+						if (newLine == false) {
 							continue;
 						}
 						if (sb == null) {
@@ -1025,7 +1026,12 @@ namespace Codist
 						else {
 							sb.Append(t, p, i - p);
 						}
-						if (i > 0 && t[n] != '.' && NeedSpace("([<'\"", t[i - 1]) && n < t.Length && NeedSpace(")]>'\"", t[n])) {
+						if (i > 0
+							&& n < t.Length
+							&& (c = t[n]).CeqAny('.', ')', ']', '>', '\'', '<') == false
+							&& c < 0x2E80
+							&& (c = t[i - 1]).CeqAny('(', '[', '<', '\'', '>') == false
+							&& c < 0x2E80) {
 							sb.Append(' ');
 						}
 						i = n;
@@ -1043,9 +1049,6 @@ namespace Codist
 				b.Dispose();
 			}
 
-			bool NeedSpace(string tokens, char c) {
-				return tokens.IndexOf(c) == -1 && c < 0x2E80;
-			}
 			bool NoSlash(ITextView v) {
 				var ct = v.TextBuffer.ContentType;
 				return ct.IsOfType(Constants.CodeTypes.CSharp)
