@@ -278,11 +278,14 @@ namespace Codist
 			}
 		}
 		public static void DebugPrintCurrentPriorityOrder(this IClassificationFormatMap formatMap) {
+			var sb = new System.Text.StringBuilder(2000);
+			var i = 0;
 			foreach (var item in formatMap.CurrentPriorityOrder) {
-				if (item != null) {
-					System.Diagnostics.Debug.WriteLine(item.Classification);
-				}
+				sb.Append((++i).ToText())
+					.Append('\t')
+					.AppendLine(item?.Classification ?? "?");
 			}
+			System.Diagnostics.Debug.WriteLine(sb.ToString());
 		}
 		#region Format ResourceDictionary
 		public static WpfColor GetBackgroundColor(this IEditorFormatMap formatMap) {
