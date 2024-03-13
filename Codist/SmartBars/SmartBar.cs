@@ -87,6 +87,7 @@ namespace Codist.SmartBars
 		protected ITextSearchService2 TextSearchService => _TextSearchService;
 		protected CancellationToken CancellationToken => _Cancellation?.Token ?? new CancellationToken(true);
 		protected virtual BarType Type => BarType.General;
+		protected virtual bool JoinLinesCommandOnToolBar => false;
 
 		protected void AddCommand(ToolBar toolBar, int imageId, string tooltip, Action<CommandContext> handler) {
 			toolBar.Items.Add(new CommandButton(this, imageId, tooltip, handler));
@@ -109,7 +110,7 @@ namespace Codist.SmartBars
 				if (Type.CeqAny(BarType.CSharp, BarType.Cpp) == false) {
 					AddCommentCommand(ToolBar);
 				}
-				if (multiline && Type.CeqAny(BarType.Markdown, BarType.PlainText)) {
+				if (multiline && JoinLinesCommandOnToolBar) {
 					AddCommand(ToolBar, IconIds.JoinLines, R.CMD_JoinLines, ctx => ctx.View.JoinSelectedLines());
 				}
 				AddSpecialFormatCommand();
@@ -632,6 +633,7 @@ namespace Codist.SmartBars
 			CSharp,
 			Cpp,
 			Markdown,
+			Markup,
 			PlainText,
 			Output
 		}

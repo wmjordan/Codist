@@ -63,6 +63,10 @@ namespace Codist.SmartBars
 			else if (contentType.IsOfType(Constants.CodeTypes.CPlusPlus)) {
 				new CppSmartBar(textView, _TextSearchService);
 			}
+			else if (contentType.IsOfType(Constants.CodeTypes.Xml)
+				|| contentType.IsOfType(Constants.CodeTypes.Xaml)) {
+				new MarkupSmartBar(textView, _TextSearchService);
+			}
 			else {
 				new SmartBar(textView, _TextSearchService);
 			}

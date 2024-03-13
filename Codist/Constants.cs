@@ -25,6 +25,7 @@ namespace Codist
 			public const string Markdown = "Markdown";
 			public const string VsMarkdown = "vs-markdown";
 			public const string Xml = "XML";
+			public const string Xaml = "XAML";
 			public const string Projection = "projection";
 			public const string FindResults = "FindResults";
 			public const string Output = "Output";
