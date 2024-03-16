@@ -42,7 +42,6 @@ namespace Codist.NaviBar
 		LocationItem[] _Titles;
 		ITextSearchService2 _TextSearch;
 		ITextStructureNavigator _TextNavigator;
-		ThemedImageButton _RepeatAction;
 
 		public MarkdownBar(IWpfTextView view, ITextSearchService2 textSearch) : base(view) {
 			_TextSearch = textSearch;
@@ -57,10 +56,13 @@ namespace Codist.NaviBar
 			AddTagButton(IconIds.TagItalic, R.CMD_MarkItalic, ToggleItalic);
 			AddTagButton(IconIds.TagCode, R.CMD_MarkCode, ToggleCode);
 			AddTagButton(IconIds.TagHyperLink, R.CMD_MarkLink, ToggleHyperLink);
+			AddTagButton(IconIds.TagHighlight, R.CMD_MarkHighlight, ToggleHighlight);
 			AddTagButton(IconIds.TagStrikeThrough, R.CMD_MarkStrikeThrough, ToggleStrikeThrough);
+			AddTagButton(IconIds.TagUnderline, R.CMD_MarkUnderline, ToggleUnderline);
 			AddTagButton(IconIds.Heading1, R.CMD_Heading1, MarkHeading1);
 			AddTagButton(IconIds.Heading2, R.CMD_Heading2, MarkHeading2);
 			AddTagButton(IconIds.Heading3, R.CMD_Heading3, MarkHeading3);
+			AddTagButton(IconIds.Quotation, R.CMD_MarkQuotation, MarkQuotation);
 			AddTagButton(IconIds.UnorderedList, R.CMD_UnorderedList, MarkUnorderedList);
 			AddTagButton(IconIds.Indent, R.CMD_Indent, (s, args) => TextEditorHelper.ExecuteEditorCommand("Edit.IncreaseLineIndent"));
 			AddTagButton(IconIds.Unindent, R.CMD_Unindent, (s, args) => TextEditorHelper.ExecuteEditorCommand("Edit.DecreaseLineIndent"));
@@ -81,6 +83,7 @@ namespace Codist.NaviBar
 			}
 			View.VisualElement.PreviewKeyDown -= ClearRepeatAction;
 			View.VisualElement.MouseLeftButtonUp -= RepeatAction;
+			View.UnregisterRepeatingAction();
 		}
 
 		void Update(object sender, EventArgs e) {
@@ -98,49 +101,71 @@ namespace Codist.NaviBar
 			}
 		}
 
-		void RepeatAction(object sender, EventArgs e) {
-			_RepeatAction?.PerformClick();
-		}
-
-		void ClearRepeatAction(object sender, EventArgs e) {
-			if (_RepeatAction != null) {
-				_RepeatAction = null;
-				View.VisualElement.MouseLeftButtonUp -= RepeatAction;
-				View.VisualElement.PreviewKeyDown -= ClearRepeatAction;
-				foreach (var item in _TagButtons) {
-					item.IsChecked = false;
-				}
-			}
-		}
-
-		void AddTagButton(int iconId, string toolTip, RoutedEventHandler clickHandler) {
-			_TagButtons.Add(new ThemedImageButton(iconId) { ToolTip = new CommandToolTip(iconId, toolTip + "\r\nRight click: repeat command on subsequent selection (Esc to cancel)") }
-				.HandleEvent(ButtonBase.ClickEvent, clickHandler)
-				.HandleEvent(MouseRightButtonUpEvent, StickTagButton));
-		}
-
 		void StickTagButton(object sender, RoutedEventArgs e) {
 			if (sender is ThemedImageButton b) {
 				if (b.IsChecked) {
 					b.IsChecked = false;
-					_RepeatAction = null;
+					View.UnregisterRepeatingAction();
 				}
 				else {
-					ClearRepeatAction(null, null);
+					View.UnregisterRepeatingAction();
 					b.IsChecked = true;
-					_RepeatAction = b;
+					View.RegisterRepeatingAction(b.PerformClick, CancelRepeatAction);
 					View.VisualElement.MouseLeftButtonUp += RepeatAction;
 					View.VisualElement.PreviewKeyDown += ClearRepeatAction;
 				}
 			}
 		}
 
+		void RepeatAction(object sender, EventArgs e) {
+			View.TryRepeatAction();
+		}
+
+		void ClearRepeatAction(object sender, EventArgs e) {
+			View.UnregisterRepeatingAction();
+		}
+
+		void CancelRepeatAction() {
+			View.VisualElement.MouseLeftButtonUp -= RepeatAction;
+			View.VisualElement.PreviewKeyDown -= ClearRepeatAction;
+			foreach (var item in _TagButtons) {
+				item.IsChecked = false;
+			}
+		}
+
+		void AddTagButton(int iconId, string toolTip, RoutedEventHandler clickHandler) {
+			_TagButtons.Add(new ThemedImageButton(iconId) { ToolTip = new CommandToolTip(iconId, $"{toolTip}{Environment.NewLine}{R.T_RepeatCommandOnSelection}") }
+				.HandleEvent(ButtonBase.ClickEvent, CheckStickyButton)
+				.HandleEvent(ButtonBase.ClickEvent, clickHandler)
+				.HandleEvent(MouseRightButtonUpEvent, StickTagButton));
+		}
+
+		void CheckStickyButton(object sender, RoutedEventArgs e) {
+			if (e.Source is ThemedImageButton b
+				&& b.IsChecked
+				&& (b.InputHitTest(Mouse.GetPosition(b)) as DependencyObject).GetParentOrSelf<ThemedImageButton>() == b) {
+				View.UnregisterRepeatingAction();
+				e.Handled = true;
+				return;
+			}
+		}
+
 		void ToggleBold(object sender, RoutedEventArgs e) {
-			WrapWith("**", "**", true);
+			if (Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.UnderscoreBold)) {
+				WrapWith("__", "__", true);
+			}
+			else {
+				WrapWith("**", "**", true);
+			}
 		}
 
 		void ToggleItalic(object sender, RoutedEventArgs e) {
-			WrapWith("_", "_", true);
+			if (Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.UnderscoreItalic)) {
+				WrapWith("_", "_", true);
+			}
+			else {
+				WrapWith("*", "*", true);
+			}
 		}
 
 		void ToggleCode(object sender, RoutedEventArgs e) {
@@ -162,6 +187,14 @@ namespace Codist.NaviBar
 			WrapWith("~~", "~~", true);
 		}
 
+		void ToggleHighlight(object sender, RoutedEventArgs e) {
+			WrapWith("==", "==", true);
+		}
+
+		void ToggleUnderline(object sender, RoutedEventArgs e) {
+			WrapWith("<u>", "</u>", true);
+		}
+
 		void MarkHeading1(object sender, RoutedEventArgs e) {
 			MarkdownHelper.MarkList(View, MarkdownHelper.Heading1, true, MarkdownHelper.HeadingGlyph);
 		}
@@ -176,6 +209,10 @@ namespace Codist.NaviBar
 
 		void MarkUnorderedList(object sender, RoutedEventArgs e) {
 			MarkdownHelper.MarkList(View, MarkdownHelper.UnorderedList, true, default, true);
+		}
+
+		void MarkQuotation(object sender, RoutedEventArgs e) {
+			MarkdownHelper.MarkList(View, MarkdownHelper.Quotation, true, default, true);
 		}
 
 		void ShowTitleList(object sender, RoutedEventArgs e) {
@@ -273,7 +310,6 @@ namespace Codist.NaviBar
 				_TitleList = null;
 			}
 			_TagButtons.Clear();
-			_RepeatAction = null;
 		}
 
 		sealed class MarkdownList : VirtualList

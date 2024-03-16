@@ -1203,6 +1203,16 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Toggle Highlight Mark
+        ///Ctrl: toggle and select next..
+        /// </summary>
+        internal static string CMD_MarkHighlight {
+            get {
+                return ResourceManager.GetString("CMD_MarkHighlight", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Toggle Italic Mark
         ///Ctrl: toggle and select next.
         /// </summary>
@@ -1218,6 +1228,15 @@ namespace Codist.Properties {
         internal static string CMD_MarkLink {
             get {
                 return ResourceManager.GetString("CMD_MarkLink", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Mark Quotation.
+        /// </summary>
+        internal static string CMD_MarkQuotation {
+            get {
+                return ResourceManager.GetString("CMD_MarkQuotation", resourceCulture);
             }
         }
         
@@ -1238,6 +1257,16 @@ namespace Codist.Properties {
         internal static string CMD_MarkSymbol {
             get {
                 return ResourceManager.GetString("CMD_MarkSymbol", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Toggle Underline Mark
+        ///Ctrl: toggle and select next..
+        /// </summary>
+        internal static string CMD_MarkUnderline {
+            get {
+                return ResourceManager.GetString("CMD_MarkUnderline", resourceCulture);
             }
         }
         
@@ -7189,6 +7218,15 @@ namespace Codist.Properties {
         internal static string T_Remarks {
             get {
                 return ResourceManager.GetString("T_Remarks", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Right click: repeat command on subsequent selection (Esc to cancel).
+        /// </summary>
+        internal static string T_RepeatCommandOnSelection {
+            get {
+                return ResourceManager.GetString("T_RepeatCommandOnSelection", resourceCulture);
             }
         }
         

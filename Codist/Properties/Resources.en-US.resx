@@ -2721,4 +2721,18 @@ Ctrl: Directly inherited interfaces only</value>
   <data name="CMD_UnorderedList" xml:space="preserve">
     <value>Mark Unordered List</value>
   </data>
+  <data name="CMD_MarkHighlight" xml:space="preserve">
+    <value>Toggle Highlight Mark
+Ctrl: toggle and select next.</value>
+  </data>
+  <data name="CMD_MarkUnderline" xml:space="preserve">
+    <value>Toggle Underline Mark
+Ctrl: toggle and select next.</value>
+  </data>
+  <data name="T_RepeatCommandOnSelection" xml:space="preserve">
+    <value>Right click: repeat command on subsequent selection (Esc to cancel)</value>
+  </data>
+  <data name="CMD_MarkQuotation" xml:space="preserve">
+    <value>Mark Quotation</value>
+  </data>
 </root>

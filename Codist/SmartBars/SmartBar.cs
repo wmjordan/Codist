@@ -340,7 +340,8 @@ namespace Codist.SmartBars
 				_SelectionStatus = 0;
 				return;
 			}
-			if (Interlocked.CompareExchange(ref _SelectionStatus, Selecting, 0) != 0) {
+			if (_View.HasRepeatingAction()
+				|| Interlocked.CompareExchange(ref _SelectionStatus, Selecting, 0) != 0) {
 				return;
 			}
 			SyncHelper.CancelAndDispose(ref _Cancellation, true);

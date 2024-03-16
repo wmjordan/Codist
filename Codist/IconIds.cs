@@ -110,6 +110,7 @@ namespace Codist
 		public const int Heading3 = KnownImageIds.FlagGreen;
 		public const int Heading4 = KnownImageIds.FlagTurquoise;
 		public const int Heading5 = KnownImageIds.FlagPurple;
+		public const int Quotation = KnownImageIds.TextArea;
 		public const int UnorderedList = KnownImageIds.BulletList;
 		public const int OrderedList = KnownImageIds.OrderedList;
 		public const int ReferencedXmlDoc = KnownImageIds.GoToNextComment;
@@ -170,6 +171,7 @@ namespace Codist
 		public const int TagUnderline = KnownImageIds.Underline;
 		public const int TagHyperLink = KnownImageIds.HyperLink;
 		public const int TagStrikeThrough = KnownImageIds.StrikeThrough;
+		public const int TagHighlight = KnownImageIds.Highlighter;
 		public const int Marks = KnownImageIds.FlagGroup;
 		public const int MarkSymbol = KnownImageIds.Flag;
 		public const int UnmarkSymbol = KnownImageIds.FlagOutline;

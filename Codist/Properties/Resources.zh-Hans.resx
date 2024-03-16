@@ -2707,4 +2707,18 @@ Ctrl: 仅直接继承的接口</value>
   <data name="CMD_UnorderedList" xml:space="preserve">
     <value>标记无序列表</value>
   </data>
+  <data name="CMD_MarkHighlight" xml:space="preserve">
+    <value>切换高亮标记
+Ctrl: 切换标记并选择下一处</value>
+  </data>
+  <data name="CMD_MarkUnderline" xml:space="preserve">
+    <value>切换下划线标记
+Ctrl: 切换标记并选择下一处</value>
+  </data>
+  <data name="T_RepeatCommandOnSelection" xml:space="preserve">
+    <value>右键点击: 在后续的文本选择操作中重复此命令（按 Esc 键或其它命令退出）</value>
+  </data>
+  <data name="CMD_MarkQuotation" xml:space="preserve">
+    <value>标记为引文</value>
+  </data>
 </root>

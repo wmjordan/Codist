@@ -17,6 +17,7 @@ namespace Codist
 		public const string Heading5 = "##### ";
 		public const string Heading6 = "###### ";
 		public const string UnorderedList = "- ";
+		public const string Quotation = "> ";
 
 		/// <summary>
 		/// Applies heading and list style format to each line.

@@ -87,6 +87,7 @@
     <Compile Include="AutoBuildVersion\BuildSetting.cs" />
     <Compile Include="AutoBuildVersion\VersionRewriteMode.cs" />
     <Compile Include="AutoBuildVersion\VersionSetting.cs" />
+    <Compile Include="Commands\CancelRepeatingActionCommand.cs" />
     <Compile Include="Semantics\MarkdownHelper.cs" />
     <Compile Include="SmartBars\MarkupSmartBar.cs" />
     <Compile Include="SyntaxHighlight\ClassificationTypeExporter.cs" />

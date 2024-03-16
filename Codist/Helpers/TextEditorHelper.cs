@@ -1312,6 +1312,39 @@ namespace Codist
 
 		#endregion
 
+		#region Action Repeater
+		/// <summary>
+		/// Register an <see cref="Action"/> which associated with a <see cref="IPropertyOwner"/> and can be invoked later.
+		/// </summary>
+		public static void RegisterRepeatingAction(this IPropertyOwner propertyOwner, Action action, Action unloadAction) {
+			if (action != null) {
+				propertyOwner.Properties[typeof(RepeatingAction)] = new RepeatingAction(action, unloadAction);
+			}
+			else {
+				propertyOwner.RemoveProperty<RepeatingAction>();
+			}
+		}
+		public static bool UnregisterRepeatingAction(this IPropertyOwner propertyOwner) {
+			if (propertyOwner.Properties.TryGetProperty(typeof(RepeatingAction), out RepeatingAction action)) {
+				action.Unregister();
+				propertyOwner.RemoveProperty<RepeatingAction>();
+				return true;
+			}
+			return false;
+		}
+		public static bool HasRepeatingAction(this IPropertyOwner propertyOwner) {
+			return propertyOwner.Properties.TryGetProperty(typeof(RepeatingAction), out RepeatingAction _);
+		}
+		/// <summary>
+		/// Try to invoke the repeatable <see cref="Action"/> registered by <see cref="RegisterRepeatingAction(IPropertyOwner, Action)"/>.
+		/// </summary>
+		public static void TryRepeatAction(this IPropertyOwner propertyOwner) {
+			if (propertyOwner.Properties.TryGetProperty(typeof(RepeatingAction), out RepeatingAction action)) {
+				action.Run();
+			}
+		}
+		#endregion
+
 		[Export(typeof(IWpfTextViewCreationListener))]
 		[ContentType(Constants.CodeTypes.Code)]
 		[ContentType(Constants.CodeTypes.Text)]
@@ -1457,6 +1490,22 @@ namespace Codist
 				ThreadHelper.ThrowIfNotOnUIThread();
 				_Context?.Restore();
 				base.DisposeNativeResources();
+			}
+		}
+
+		sealed class RepeatingAction
+		{
+			readonly Action _RepeatAction, _UnregisterAction;
+
+			public RepeatingAction(Action repeatAction, Action unregisterAction) {
+				_RepeatAction = repeatAction;
+				_UnregisterAction = unregisterAction;
+			}
+			public void Run() {
+				_RepeatAction();
+			}
+			public void Unregister() {
+				_UnregisterAction();
 			}
 		}
 	}
