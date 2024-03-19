@@ -23,6 +23,7 @@ namespace Codist.SmartBars
 			AddCommand(MyToolBar, IconIds.TagItalic, R.CMD_MarkItalic, MarkItalic);
 			AddCommand(MyToolBar, IconIds.TagCode, R.CMD_MarkCode, MarkCode);
 			AddCommand(MyToolBar, IconIds.TagHyperLink, R.CMD_MarkLink, MarkUrl);
+			AddCommand(MyToolBar, IconIds.TagHighlight, R.CMD_MarkHighlight, MarkHighlight);
 			AddCommand(MyToolBar, IconIds.TagStrikeThrough, R.CMD_MarkStrikeThrough, ctx => WrapWith(ctx, "~~", "~~", true));
 			AddCommand(MyToolBar, IconIds.Heading1, R.CMD_Heading1, MarkHeading1);
 			AddCommand(MyToolBar, IconIds.Heading2, R.CMD_Heading2, MarkHeading2);
@@ -56,6 +57,10 @@ namespace Codist.SmartBars
 			else {
 				WrapWith(ctx, "`", "`", true);
 			}
+		}
+
+		void MarkHighlight(CommandContext ctx) {
+			WrapWith(ctx, "==", "==", true);
 		}
 
 		void MarkUrl(CommandContext ctx) {
