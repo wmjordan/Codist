@@ -787,7 +787,8 @@ namespace Codist
 					inline = symbol.Render("delegate*", true, GetBrushForMethod(method));
 					break;
 				case MethodKind.ExplicitInterfaceImplementation:
-					inline = method.Render(method.ExplicitInterfaceImplementations[0].Name, bold, Method);
+					var implementations = method.ExplicitInterfaceImplementations;
+					inline = method.Render(implementations.Length != 0 ? implementations[0].Name : symbol.Name, bold, Method);
 					break;
 				default:
 					inline = symbol.Render(alias, bold, Method);
