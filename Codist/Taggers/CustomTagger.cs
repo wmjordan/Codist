@@ -21,17 +21,19 @@ namespace Codist.Taggers
 			if (_Taggers.Length == 0) {
 				return;
 			}
-			var t = span.GetText();
 			foreach (var tagger in _Taggers) {
-				tagger.GetTags(t, ref span, results);
+				tagger.GetTags(in span, results);
 			}
 		}
 
-		public static TextTaggerBase GetStartWithTagger(IClassificationTag tag, string prefix, bool skipLeadingWhitespace, StringComparison comparison) {
-			return new StartWithTagger { Prefix = prefix, StringComparison = comparison, Tag = tag, SkipLeadingWhitespace = skipLeadingWhitespace };
+		public static TextTaggerBase GetStartWithTagger(IClassificationTag tag, string prefix, bool skipLeadingWhitespace, bool ignoreCase) {
+			return new StartWithTagger { Prefix = prefix, IgnoreCase = ignoreCase, Tag = tag, SkipLeadingWhitespace = skipLeadingWhitespace };
 		}
-		public static TextTaggerBase GetRegexTagger(IClassificationTag tag, string pattern, int useGroup, StringComparison comparison) {
-			return new RegexTagger { Pattern = pattern, StringComparison = comparison, UseGroup = useGroup, Tag = tag };
+		public static TextTaggerBase GetContainsTagger(IClassificationTag tag, string pattern, bool ignoreCase) {
+			return new ContainsTextTagger { Content = pattern, IgnoreCase = ignoreCase, Tag = tag };
+		}
+		public static TextTaggerBase GetRegexTagger(IClassificationTag tag, string pattern, int useGroup, bool ignoreCase) {
+			return new RegexTagger { Pattern = pattern, IgnoreCase = ignoreCase, UseGroup = useGroup, Tag = tag };
 		}
 
 		sealed class StartWithTagger : TextTaggerBase
@@ -45,19 +47,20 @@ namespace Codist.Taggers
 				set { _Prefix = value; _PrefixLength = value.Length; }
 			}
 
-			public override void GetTags(string text, ref SnapshotSpan span, ICollection<TaggedContentSpan> results) {
+			public override void GetTags(in SnapshotSpan span, ICollection<TaggedContentSpan> results) {
 				if (SkipLeadingWhitespace) {
-					for (int i = 0; i < text.Length; i++) {
-						if (Char.IsWhiteSpace(text[i]) == false) {
-							if (text.IndexOf(_Prefix, i, _PrefixLength, StringComparison) == i) {
-								results.Add(new TaggedContentSpan(Tag, span, i += _PrefixLength, text.Length - i));
+					var l = span.Length;
+					for (int i = 0; i < l; i++) {
+						if (Char.IsWhiteSpace(span.CharAt(i)) == false) {
+							if (span.HasTextAtOffset(_Prefix, IgnoreCase, i)) {
+								results.Add(new TaggedContentSpan(Tag, span, i += _PrefixLength, l - i));
 							}
 							return;
 						}
 					}
 				}
-				else if (text.StartsWith(Prefix, StringComparison)) {
-					results.Add(new TaggedContentSpan(Tag, span, _PrefixLength, text.Length - _PrefixLength));
+				else if (span.StartsWith(_Prefix, IgnoreCase)) {
+					results.Add(new TaggedContentSpan(Tag, span, _PrefixLength, span.Length - _PrefixLength));
 				}
 			}
 		}
@@ -69,10 +72,10 @@ namespace Codist.Taggers
 
 			public string Content { get => _Content; set { _Content = value; _ContentLength = value.Length; } }
 
-			public override void GetTags(string text, ref SnapshotSpan span, ICollection<TaggedContentSpan> results) {
-				int i = text.IndexOf(_Content, StringComparison);
+			public override void GetTags(in SnapshotSpan span, ICollection<TaggedContentSpan> results) {
+				var i = span.IndexOf(_Content, 0, IgnoreCase);
 				if (i >= 0) {
-					results.Add(new TaggedContentSpan(Tag, span.Snapshot, span.Start.Position + i, span.Length - i, i, text.Length - _ContentLength));
+					results.Add(new TaggedContentSpan(Tag, span.Snapshot, span.Start.Position + i, span.Length - i, i, span.Length - _ContentLength));
 				}
 			}
 		}
@@ -88,11 +91,11 @@ namespace Codist.Taggers
 			}
 			public int UseGroup { get; set; }
 
-			public override void GetTags(string text, ref SnapshotSpan span, ICollection<TaggedContentSpan> results) {
+			public override void GetTags(in SnapshotSpan span, ICollection<TaggedContentSpan> results) {
 				if (_Expression == null) {
 					_Expression = new Regex(_Pattern, MakeRegexOptions());
 				}
-				var m = _Expression.Match(text);
+				var m = _Expression.Match(span.GetText());
 				if (m.Success == false) {
 					return;
 				}
@@ -109,10 +112,9 @@ namespace Codist.Taggers
 				}
 			}
 
-			private RegexOptions MakeRegexOptions() {
-				var c = StringComparison;
-				return (c == StringComparison.OrdinalIgnoreCase || c == StringComparison.CurrentCultureIgnoreCase || c == StringComparison.InvariantCultureIgnoreCase ? RegexOptions.IgnoreCase : RegexOptions.None)
-					| (c != StringComparison.CurrentCultureIgnoreCase && c != StringComparison.CurrentCulture ? RegexOptions.CultureInvariant : RegexOptions.None)
+			RegexOptions MakeRegexOptions() {
+				return (IgnoreCase ? RegexOptions.IgnoreCase : RegexOptions.None)
+					| RegexOptions.CultureInvariant
 					| RegexOptions.Compiled;
 			}
 		}
@@ -121,8 +123,8 @@ namespace Codist.Taggers
 	abstract class TextTaggerBase : ITextTagger
 	{
 		public IClassificationTag Tag { get; set; }
-		public virtual StringComparison StringComparison { get; set; }
+		public bool IgnoreCase { get; set; }
 
-		public abstract void GetTags(string text, ref SnapshotSpan span, ICollection<TaggedContentSpan> results);
+		public abstract void GetTags(in SnapshotSpan span, ICollection<TaggedContentSpan> results);
 	}
 }

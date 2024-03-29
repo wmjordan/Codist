@@ -8,8 +8,8 @@ namespace Codist.Taggers
 	/// <summary>Interface for text-based custom tagger.</summary>
 	interface ITextTagger
 	{
-		StringComparison StringComparison { get; set; }
-		void GetTags(string text, ref SnapshotSpan span, ICollection<TaggedContentSpan> results);
+		bool IgnoreCase { get; set; }
+		void GetTags(in SnapshotSpan span, ICollection<TaggedContentSpan> results);
 	}
 
 	/// <summary>
