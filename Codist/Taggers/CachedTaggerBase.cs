@@ -50,7 +50,7 @@ namespace Codist.Taggers
 			foreach (var span in parseSpans) {
 				Parse(span, _TaggedContents);
 				foreach (var item in _TaggedContents) {
-					yield return _Tags.Add(item);
+					yield return item.ContentLength == 0 ? item : _Tags.Add(item);
 				}
 			}
 		}

@@ -47,6 +47,7 @@ namespace Codist
 			public const string Xml = "XML";
 			public const string Highlight = nameof(Highlight);
 			public const string Heading = nameof(Heading);
+			public const string Block = nameof(Block);
 			public const string Task = nameof(Task);
 			public const string GeneralTask = "General Task";
 			public const string Source = nameof(Source);
@@ -236,6 +237,10 @@ namespace Codist
 		public const string MarkdownHeading4 = "Markdown: Heading 4";
 		public const string MarkdownHeading5 = "Markdown: Heading 5";
 		public const string MarkdownHeading6 = "Markdown: Heading 6";
+		public const string MarkdownQuotation = "Markdown: Quotation";
+		public const string MarkdownOrderedList = "Markdown: Ordered List";
+		public const string MarkdownUnorderedList = "Markdown: Unordered List";
+		public const string MarkdownUnderline = "Markdown: Underline";
 		public const string MarkdownVsBold = "vsMarkdown_bold";
 		public const string MarkdownVsItalic = "vsMarkdown_italic";
 		public const string MarkdownVsStrikethrough = "vsMarkdown_strikethrough";

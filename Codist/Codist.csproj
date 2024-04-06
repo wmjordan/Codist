@@ -208,6 +208,7 @@
     <Compile Include="SyntaxHighlight\SymbolMarkerStyle.cs" />
     <Compile Include="SyntaxHighlight\XmlCodeStyle.cs" />
     <Compile Include="Semantics\CSharpParser.cs" />
+    <Compile Include="Taggers\MarkdownTitleTag.cs" />
     <Compile Include="Taggers\TaggedContentSpan.cs" />
     <Compile Include="Taggers\TaggerFactories.cs" />
     <Compile Include="Taggers\Classifications.cs" />

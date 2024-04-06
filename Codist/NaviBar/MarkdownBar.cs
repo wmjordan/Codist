@@ -20,19 +20,6 @@ namespace Codist.NaviBar
 	public sealed class MarkdownBar : NaviBar
 	{
 		const string DefaultActiveTitle = "Headings";
-		static readonly IClassificationType
-			__H1 = MarkdownTagger.HeaderClassificationTypes[1].ClassificationType,
-			__H2 = MarkdownTagger.HeaderClassificationTypes[2].ClassificationType,
-			__H3 = MarkdownTagger.HeaderClassificationTypes[3].ClassificationType,
-			__H4 = MarkdownTagger.HeaderClassificationTypes[4].ClassificationType,
-			__H5 = MarkdownTagger.HeaderClassificationTypes[5].ClassificationType,
-			__H6 = MarkdownTagger.HeaderClassificationTypes[6].ClassificationType,
-			__DummyTag1 = MarkdownTagger.DummyHeaderTags[1].ClassificationType,
-			__DummyTag2 = MarkdownTagger.DummyHeaderTags[2].ClassificationType,
-			__DummyTag3 = MarkdownTagger.DummyHeaderTags[3].ClassificationType,
-			__DummyTag4 = MarkdownTagger.DummyHeaderTags[4].ClassificationType,
-			__DummyTag5 = MarkdownTagger.DummyHeaderTags[5].ClassificationType,
-			__DummyTag6 = MarkdownTagger.DummyHeaderTags[6].ClassificationType;
 		readonly TaggerResult _Tags;
 		readonly ThemedImageButton _ActiveTitle;
 		readonly ThemedToolBarText _ActiveTitleLabel;
@@ -88,7 +75,7 @@ namespace Codist.NaviBar
 
 		void Update(object sender, EventArgs e) {
 			HideMenu();
-			_ActiveTitleLabel.Text = _Tags.GetPrecedingTaggedSpan(View.GetCaretPosition().Position)?.ContentText ?? DefaultActiveTitle;
+			_ActiveTitleLabel.Text = _Tags.GetPrecedingTaggedSpan(View.GetCaretPosition(), i => i.Tag is MarkdownTitleTag)?.ContentText ?? DefaultActiveTitle;
 		}
 
 		void HideMenu() {
@@ -212,7 +199,7 @@ namespace Codist.NaviBar
 		}
 
 		void MarkQuotation(object sender, RoutedEventArgs e) {
-			MarkdownHelper.MarkList(View, MarkdownHelper.Quotation, true, default, true);
+			MarkdownHelper.MarkList(View, MarkdownHelper.Quotation, false, default, true);
 		}
 
 		void ShowTitleList(object sender, RoutedEventArgs e) {
@@ -225,7 +212,11 @@ namespace Codist.NaviBar
 
 		public override void ShowRootItemMenu(int parameter) {
 			_ActiveTitle.IsHighlighted = true;
-			var titles = _Titles = Array.ConvertAll(_Tags.GetTags(), t => new LocationItem(t));
+			var tags = _Tags.GetTags(i => i.Tag is MarkdownTitleTag);
+			var titles = _Titles = new LocationItem[tags.Length];
+			for (int i = 0; i < titles.Length; i++) {
+				titles[i] = new LocationItem(tags[i]);
+			}
 			var menu = new MarkdownList(this, titles) {
 				ItemsControlMaxHeight = View.ViewportHeight / 2,
 			};
@@ -481,35 +472,37 @@ namespace Codist.NaviBar
 			public LocationItem(TaggedContentSpan span) {
 				_Span = span;
 				Content = new ThemedMenuText(span.ContentText);
-				var ct = span.Tag.ClassificationType;
-				if (ct.CeqAny(__H1, __DummyTag1)) {
-					Content.FontWeight = FontWeights.Bold;
-					_Level = 1;
-					_ImageId = IconIds.Heading1;
-				}
-				else if (ct.CeqAny(__H2, __DummyTag2)) {
-					_Level = 2;
-					_ImageId = IconIds.Heading2;
-				}
-				else if (ct.CeqAny(__H3, __DummyTag3)) {
-					_Level = 3;
-					_ImageId = IconIds.Heading3;
-					Content.Padding = __H3Padding;
-				}
-				else if (ct.CeqAny(__H4, __DummyTag4)) {
-					_Level = 4;
-					_ImageId = IconIds.Heading4;
-					Content.Padding = __H4Padding;
-				}
-				else if (ct.CeqAny(__H5, __DummyTag5)) {
-					_Level = 5;
-					_ImageId = IconIds.Heading5;
-					Content.Padding = __H5Padding;
-				}
-				else if (ct.CeqAny(__H6, __DummyTag6)) {
-					_Level = 6;
-					_ImageId = IconIds.None;
-					Content.Padding = __H6Padding;
+				var ct = ((MarkdownTitleTag)span.Tag).TitleLevel;
+				switch (ct) {
+					case 1:
+						Content.FontWeight = FontWeights.Bold;
+						_Level = 1;
+						_ImageId = IconIds.Heading1;
+						return;
+					case 2:
+						_Level = 2;
+						_ImageId = IconIds.Heading2;
+						return;
+					case 3:
+						_Level = 3;
+						_ImageId = IconIds.Heading3;
+						Content.Padding = __H3Padding;
+						return;
+					case 4:
+						_Level = 4;
+						_ImageId = IconIds.Heading4;
+						Content.Padding = __H4Padding;
+						return;
+					case 5:
+						_Level = 5;
+						_ImageId = IconIds.Heading5;
+						Content.Padding = __H5Padding;
+						return;
+					case 6:
+						_Level = 6;
+						_ImageId = IconIds.None;
+						Content.Padding = __H6Padding;
+						return;
 				}
 			}
 

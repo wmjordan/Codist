@@ -204,6 +204,34 @@ namespace Codist
 				|| a.IsBetween('a', 'z') && a - ('a' - 'A') == b
 				|| a.IsBetween('A', 'Z') && a + ('a' - 'A') == b;
 		}
+		public static bool IsEmptyOrWhitespace(this SnapshotSpan span) {
+			if (span.Length == 0) {
+				return true;
+			}
+			var snapshot = span.Snapshot;
+			var start = span.Start.Position;
+			var end = span.End.Position;
+			for (int i = start; i < end; i++) {
+				if (snapshot[i].CeqAny(' ', '\t') == false) {
+					return false;
+				}
+			}
+			return true;
+		}
+		public static int GetContentStart(this SnapshotSpan span) {
+			if (span.Length == 0) {
+				return -1;
+			}
+			var snapshot = span.Snapshot;
+			var start = span.Start.Position;
+			var end = span.End.Position;
+			for (int i = start; i < end; i++) {
+				if (snapshot[i].CeqAny(' ', '\t') == false) {
+					return i;
+				}
+			}
+			return -1;
+		}
 		#endregion
 
 		#region Classification

@@ -627,28 +627,46 @@ namespace Codist.SyntaxHighlight
 		None,
 		[Category(Constants.SyntaxCategory.Heading)]
 		[ClassificationType(ClassificationTypeNames = Constants.MarkdownHeading1)]
+		[Order(Before = Constants.MarkdownVsBold)]
 		[Style(Bold = true, Size = 28)]
 		Heading1,
 		[Category(Constants.SyntaxCategory.Heading)]
 		[ClassificationType(ClassificationTypeNames = Constants.MarkdownHeading2)]
+		[Order(Before = Constants.MarkdownVsBold)]
 		[Style(Bold = true, Size = 24)]
 		Heading2,
 		[Category(Constants.SyntaxCategory.Heading)]
 		[ClassificationType(ClassificationTypeNames = Constants.MarkdownHeading3)]
+		[Order(Before = Constants.MarkdownVsBold)]
 		[Style(Bold = true, Size = 20)]
 		Heading3,
 		[Category(Constants.SyntaxCategory.Heading)]
 		[ClassificationType(ClassificationTypeNames = Constants.MarkdownHeading4)]
+		[Order(Before = Constants.MarkdownVsBold)]
 		[Style(Bold = true, Size = 18)]
 		Heading4,
 		[Category(Constants.SyntaxCategory.Heading)]
 		[ClassificationType(ClassificationTypeNames = Constants.MarkdownHeading5)]
+		[Order(Before = Constants.MarkdownVsBold)]
 		[Style(Bold = true, Size = 16)]
 		Heading5,
 		[Category(Constants.SyntaxCategory.Heading)]
 		[ClassificationType(ClassificationTypeNames = Constants.MarkdownHeading6)]
+		[Order(Before = Constants.MarkdownVsBold)]
 		[Style(Bold = true, Size = 14)]
 		Heading6,
+		[Category(Constants.SyntaxCategory.Block)]
+		[ClassificationType(ClassificationTypeNames = Constants.MarkdownQuotation)]
+		[Order(Before = Constants.MarkdownVsBold)]
+		Quotation,
+		[Category(Constants.SyntaxCategory.Block)]
+		[ClassificationType(ClassificationTypeNames = Constants.MarkdownOrderedList)]
+		[Order(Before = Constants.MarkdownVsBold)]
+		OrderedList,
+		[Category(Constants.SyntaxCategory.Block)]
+		[ClassificationType(ClassificationTypeNames = Constants.MarkdownUnorderedList)]
+		[Order(Before = Constants.MarkdownVsBold)]
+		UnorderedList,
 		[Category(Constants.SyntaxCategory.Style)]
 		[ClassificationType(ClassificationTypeNames = Constants.MarkdownVsBold)]
 		[Inheritance]

@@ -40,13 +40,15 @@ namespace Codist.Taggers
 			Start = start;
 			Length = length;
 		}
-
-		public bool Contains(int position) {
-			return position >= Start && position < End;
+		public bool Contains(SnapshotPoint point) {
+			return TrackingSpan.GetSpan(point.Snapshot).Span.Contains(point);
 		}
 		public bool Update(ITextSnapshot snapshot) {
-			if (TrackingSpan.TextBuffer != snapshot.TextBuffer) {
+			if (TextSnapshot == snapshot) {
 				return true;
+			}
+			if (TrackingSpan.TextBuffer != snapshot.TextBuffer) {
+				return false;
 			}
 			var span = TrackingSpan.GetSpan(snapshot);
 			if ((Length = span.Length) > 0) {
