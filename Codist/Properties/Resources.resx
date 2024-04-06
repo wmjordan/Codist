@@ -2735,4 +2735,7 @@ Ctrl: toggle and select next.</value>
   <data name="CMD_MarkQuotation" xml:space="preserve">
     <value>Mark Quotation</value>
   </data>
+  <data name="T_Headings" xml:space="preserve">
+    <value>Headings</value>
+  </data>
 </root>

@@ -2721,4 +2721,7 @@ Ctrl: 切换标记并选择下一处</value>
   <data name="CMD_MarkQuotation" xml:space="preserve">
     <value>标记为引文</value>
   </data>
+  <data name="T_Headings" xml:space="preserve">
+    <value>标题</value>
+  </data>
 </root>

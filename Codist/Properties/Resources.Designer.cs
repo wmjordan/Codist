@@ -6491,6 +6491,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Headings.
+        /// </summary>
+        internal static string T_Headings {
+            get {
+                return ResourceManager.GetString("T_Headings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to HEX.
         /// </summary>
         internal static string T_Hexadecimal {

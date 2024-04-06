@@ -10,7 +10,6 @@ using Codist.Controls;
 using Codist.Taggers;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Text;
-using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Operations;
 using R = Codist.Properties.Resources;
@@ -19,7 +18,6 @@ namespace Codist.NaviBar
 {
 	public sealed class MarkdownBar : NaviBar
 	{
-		const string DefaultActiveTitle = "Headings";
 		readonly TaggerResult _Tags;
 		readonly ThemedImageButton _ActiveTitle;
 		readonly ThemedToolBarText _ActiveTitleLabel;
@@ -36,7 +34,7 @@ namespace Codist.NaviBar
 			_Tags = view.Properties.GetProperty<TaggerResult>(typeof(TaggerResult));
 			Name = nameof(MarkdownBar);
 			BindView();
-			_ActiveTitleLabel = new ThemedToolBarText(DefaultActiveTitle);
+			_ActiveTitleLabel = new ThemedToolBarText(R.T_Headings);
 			Items.Add(_ActiveTitle = new ThemedImageButton(IconIds.Headings, _ActiveTitleLabel)
 				.HandleEvent(ButtonBase.ClickEvent, ShowTitleList));
 			AddTagButton(IconIds.TagBold, R.CMD_MarkBold, ToggleBold);
@@ -75,7 +73,7 @@ namespace Codist.NaviBar
 
 		void Update(object sender, EventArgs e) {
 			HideMenu();
-			_ActiveTitleLabel.Text = _Tags.GetPrecedingTaggedSpan(View.GetCaretPosition(), i => i.Tag is MarkdownTitleTag)?.ContentText ?? DefaultActiveTitle;
+			_ActiveTitleLabel.Text = _Tags.GetPrecedingTaggedSpan(View.GetCaretPosition(), i => i.Tag is MarkdownTitleTag)?.ContentText ?? R.T_Headings;
 		}
 
 		void HideMenu() {
