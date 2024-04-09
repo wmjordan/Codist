@@ -155,7 +155,10 @@ namespace Codist
 						}
 					case TypeKind.Interface:
 						switch (t.DeclaredAccessibility) {
-							case Accessibility.Public: return KnownImageIds.InterfacePublic;
+							case Accessibility.Public:
+								return t.IsDisposable() || t.IsAsyncDisposable()
+									? IconIds.Disposable
+									: KnownImageIds.InterfacePublic;
 							case Accessibility.Protected:
 							case Accessibility.ProtectedOrInternal:
 								return KnownImageIds.InterfaceProtected;

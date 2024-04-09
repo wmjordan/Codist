@@ -941,6 +941,12 @@ namespace Codist
 				&& symbol.ContainingNamespace.IsExplicitNamespace() == false;
 		}
 
+		public static bool IsAsyncDisposable(this ISymbol symbol) {
+			return symbol.Name == "IAsyncDisposable"
+				&& (symbol = symbol.ContainingNamespace)?.Name == nameof(System)
+				&& symbol.ContainingNamespace.IsExplicitNamespace() == false;
+		}
+
 		public static bool IsObsolete(this ISymbol symbol) {
 			switch (symbol.Kind) {
 				case SymbolKind.Property:

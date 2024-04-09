@@ -148,11 +148,11 @@ namespace Codist.QuickInfo
 			void ListInterfacesSortedByNamespace(ThemedTipDocument d, ImmutableArray<INamedTypeSymbol>.Builder di, ImmutableArray<(INamedTypeSymbol intf, ITypeSymbol baseType)>.Builder ii) {
 				var allInterfaces = new List<(string, ThemedTipParagraph)>(di.Count + ii.Count);
 				foreach (var item in di) {
-					allInterfaces.Add((item.ToDisplayString(CodeAnalysisHelper.QualifiedTypeNameFormat), new ThemedTipParagraph(item.IsDisposable() ? IconIds.Disposable : item.GetImageId(), ToUIText(item))));
+					allInterfaces.Add((item.ToDisplayString(CodeAnalysisHelper.QualifiedTypeNameFormat), new ThemedTipParagraph(item.GetImageId(), ToUIText(item))));
 				}
 				foreach (var (intf, baseType) in ii) {
 					allInterfaces.Add((intf.ToDisplayString(CodeAnalysisHelper.QualifiedTypeNameFormat), new ThemedTipParagraph(
-						intf.IsDisposable() ? IconIds.Disposable : intf.GetImageId(),
+						intf.GetImageId(),
 						ToUIText(intf)
 							.Append(" : ", SymbolFormatter.SemiTransparent.PlainText)
 							.Append(ThemeHelper.GetImage(baseType.GetImageId()).WrapMargin(WpfHelper.GlyphMargin).SetOpacity(SymbolFormatter.TransparentLevel))
@@ -166,7 +166,7 @@ namespace Codist.QuickInfo
 
 			void ListInterfacesInLogicalOrder(ThemedTipDocument d, ImmutableArray<INamedTypeSymbol>.Builder di, ImmutableArray<(INamedTypeSymbol intf, ITypeSymbol baseType)>.Builder ii) {
 				foreach (var item in di) {
-					d.Append(new ThemedTipParagraph(item.IsDisposable() ? IconIds.Disposable : item.GetImageId(), ToUIText(item)));
+					d.Append(new ThemedTipParagraph(item.GetImageId(), ToUIText(item)));
 				}
 				foreach (var (intf, baseType) in ii) {
 					d.Append(new ThemedTipParagraph(
