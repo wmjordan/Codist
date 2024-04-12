@@ -275,7 +275,10 @@ namespace Codist.Controls
 		void SetupListForKnownImageIds() {
 			ContainerType = SymbolListType.VsKnownImage;
 			IconProvider = s => {
-				return s.Symbol is IFieldSymbol f && f.HasConstantValue && f.Type.SpecialType == SpecialType.System_Int32
+				return s.Symbol is IFieldSymbol f
+					&& f.HasConstantValue
+					&& f.Type.SpecialType == SpecialType.System_Int32
+					&& f.DeclaredAccessibility == Accessibility.Public
 					? ThemeHelper.GetImage((int)f.ConstantValue)
 					: null;
 			};

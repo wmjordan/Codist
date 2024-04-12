@@ -810,7 +810,9 @@ namespace Codist.QuickInfo
 				ShowDeclarationModifier(qiContent, field);
 			}
 			if (field.HasConstantValue) {
-				if (field.ConstantValue is int fc && _SpecialProject.MayBeVsProject) {
+				if (field.ConstantValue is int fc
+					&& field.DeclaredAccessibility == Accessibility.Public
+					&& _SpecialProject.MayBeVsProject) {
 					ShowKnownImageId(qiContent, field, fc);
 				}
 				ShowConstInfo(qiContent, field, field.ConstantValue);
