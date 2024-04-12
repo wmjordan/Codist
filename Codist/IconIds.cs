@@ -14,12 +14,12 @@ namespace Codist
 		public const int StaticMember = KnownImageIds.Link;
 		public const int InstanceMember = KnownImageIds.BuildQueue;
 		public const int DefaultInterfaceImplementation = KnownImageIds.AddInterface;
-		public const int ReadonlyField = KnownImageIds.Field | KnownImageIds.Lock << BadgeShift;
-		public const int ReadonlyProperty = KnownImageIds.Property | KnownImageIds.Lock << BadgeShift;
-		public const int ReadonlyMethod = KnownImageIds.Method | KnownImageIds.Lock << BadgeShift;
-		public const int ReadonlyType = KnownImageIds.Type | KnownImageIds.Lock << BadgeShift;
+		public const int ReadonlyField = KnownImageIds.Field | KnownImageIds.OverlayLock << OverlayShift | FullOverlayMask;
+		public const int ReadonlyProperty = KnownImageIds.Property | KnownImageIds.OverlayLock << OverlayShift | FullOverlayMask;
+		public const int ReadonlyMethod = KnownImageIds.Method | KnownImageIds.OverlayLock << OverlayShift | FullOverlayMask;
+		public const int ReadonlyType = KnownImageIds.Type | KnownImageIds.OverlayLock << OverlayShift | FullOverlayMask;
 		public const int RefMember = KnownImageIds.DraggedCurrentInstructionPointer;
-		public const int InitonlyProperty = KnownImageIds.Property | KnownImageIds.New << BadgeShift;
+		public const int InitonlyProperty = KnownImageIds.Property | KnownImageIds.New << OverlayShift;
 		public const int AutoProperty = KnownImageIds.PropertyShortcut;
 		public const int VolatileField = KnownImageIds.SetProactiveCaching;
 		public const int AbstractClass = KnownImageIds.AbstractClass;
@@ -50,7 +50,7 @@ namespace Codist
 		public const int Event = KnownImageIds.Event;
 		public const int Method = KnownImageIds.Method;
 		public const int Constructor = KnownImageIds.Type;
-		public const int Destructor = KnownImageIds.Type | KnownImageIds.Cancel << BadgeShift;
+		public const int Destructor = KnownImageIds.Type | KnownImageIds.OverlayOffline << OverlayShift | FullOverlayMask;
 		public const int EnumField = KnownImageIds.EnumerationItemPublic;
 		public const int GenericDefinition = KnownImageIds.Template;
 		public const int Region = KnownImageIds.Numeric;
@@ -124,11 +124,11 @@ namespace Codist
 		public const int RefVariables = KnownImageIds.GlobalVariable;
 		public const int TypeAndDelegate = KnownImageIds.EntityContainer;
 		public const int ReturnValue = KnownImageIds.ReturnValue;
-		public const int AnonymousType = KnownImageIds.UserDataType;
+		public const int AnonymousType = KnownImageIds.GroupByType;
 		public const int ParameterCandidate = KnownImageIds.ParameterWarning;
-		public const int SymbolCandidate = KnownImageIds.CodeInformation;
+		public const int SymbolCandidate = KnownImageIds.Field | KnownImageIds.OverlayWarning << OverlayShift | FullOverlayMask;
 		public const int InterfaceImplementation = KnownImageIds.ImplementInterface;
-		public const int Disposable = KnownImageIds.InterfacePublic | KnownImageIds.StatusSecurityWarning << BadgeShift;
+		public const int Disposable = KnownImageIds.InterfacePublic | KnownImageIds.OverlayWarning << OverlayShift | FullOverlayMask;
 		public const int Discard = KnownImageIds.HiddenFile;
 		public const int BaseTypes = KnownImageIds.ParentChild;
 		public const int MethodOverloads = KnownImageIds.MethodSet;
@@ -282,16 +282,22 @@ namespace Codist
 		public const int DetachEvent = KnownImageIds.EventMissing;
 		public const int TriggerEvent = KnownImageIds.Event;
 		#endregion
-		#region Badge
-		const int BadgeShift = 16, BadgeImageMask = (1 << BadgeShift) - 1;
-		public static bool HasBadge(this int iconId) {
-			return iconId > 1 << BadgeShift;
+		#region Overlay
+		const int OverlayShift = 16,
+			ImageMask = (1 << OverlayShift) - 1,
+			FullOverlayMask = 1 << (OverlayShift * 2 - 1),
+			OverlayMask = ImageMask ^ 1 << (OverlayShift - 1);
+		public static bool HasOverlay(this int iconId) {
+			return (uint)iconId > 1 << OverlayShift;
 		}
-		public static int MakeBadgeImage(int iconId, int overlayId) {
-			return iconId | overlayId << BadgeShift;
+		public static int MakeOverlayImage(int iconId, int overlayId, bool fullOverlay) {
+			return iconId | (overlayId & OverlayMask) << OverlayShift | (fullOverlay ? FullOverlayMask : 0);
 		}
-		public static (int, int) DeconstructBadgeImage(this int badgedImage) {
-			return (badgedImage & BadgeImageMask, (badgedImage >> BadgeShift) & BadgeImageMask);
+		public static bool IsOverlay(this int overlayId) {
+			return (overlayId & 1 << (OverlayShift - 1)) != 0;
+		}
+		public static (int, int, bool) DeconstructIconOverlay(this int iconId) {
+			return (iconId & ImageMask, (iconId >> OverlayShift) & OverlayMask, (iconId & FullOverlayMask) != 0);
 		}
 		#endregion
 	}

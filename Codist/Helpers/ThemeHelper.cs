@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Controls;
+using CLR;
 using Codist.SyntaxHighlight;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Imaging;
@@ -163,8 +164,8 @@ namespace Codist
 		/// </summary>
 		/// <param name="imageId">The image id.</param>
 		public static System.Windows.FrameworkElement GetImage(int imageId, double size = 0) {
-			if (imageId.HasBadge()) {
-				return GetBadgedImage(imageId, size);
+			if (imageId.HasOverlay()) {
+				return MakeOverlayImage(imageId, size);
 			}
 			var moniker = new ImageMoniker {
 				Guid = KnownImageIds.ImageCatalogGuid,
@@ -180,12 +181,8 @@ namespace Codist
 			};
 		}
 
-		static Grid GetBadgedImage(int imageId, double size) {
-			var (baseImageId, overlayImageId) = imageId.DeconstructBadgeImage();
-			return GetBadgedImage(baseImageId, overlayImageId, size);
-		}
-
-		public static Grid GetBadgedImage(int baseImageId, int overlayImageId, double size = 0) {
+		static Grid MakeOverlayImage(int imageId, double size) {
+			var (baseImageId, overlayImageId, fullOverlay) = imageId.DeconstructIconOverlay();
 			var baseImage = new ImageMoniker { Guid = KnownImageIds.ImageCatalogGuid, Id = baseImageId };
 			var overlay = new ImageMoniker { Guid = KnownImageIds.ImageCatalogGuid, Id = overlayImageId };
 			if (size < 1) {
@@ -196,7 +193,13 @@ namespace Codist
 				Width = size,
 				Children = {
 					new CrispImage { Moniker = baseImage, Height = size, Width = size },
-					new CrispImage { Moniker = overlay, Height = size *= 0.6, Width = size, HorizontalAlignment = System.Windows.HorizontalAlignment.Right, VerticalAlignment = System.Windows.VerticalAlignment.Bottom }
+					new CrispImage {
+						Moniker = overlay,
+						Height = fullOverlay ? size : size *= 0.6,
+						Width = size,
+						HorizontalAlignment = System.Windows.HorizontalAlignment.Right,
+						VerticalAlignment = System.Windows.VerticalAlignment.Bottom
+					}
 				}
 			};
 		}
