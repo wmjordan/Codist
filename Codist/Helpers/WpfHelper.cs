@@ -52,15 +52,15 @@ namespace Codist
 			}
 			return block;
 		}
-		public static TextBlock SetGlyph(this TextBlock block, Image image) {
+		public static TextBlock SetGlyph(this TextBlock block, FrameworkElement glyph) {
 			var first = block.Inlines.FirstInline;
-			image.Margin = GlyphMargin;
-			var glyph = new InlineUIContainer(image) { BaselineAlignment = BaselineAlignment.TextTop };
+			glyph.Margin = GlyphMargin;
+			var container = new InlineUIContainer(glyph) { BaselineAlignment = BaselineAlignment.TextTop };
 			if (first != null) {
-				block.Inlines.InsertBefore(first, glyph);
+				block.Inlines.InsertBefore(first, container);
 			}
 			else {
-				block.Inlines.Add(glyph);
+				block.Inlines.Add(container);
 			}
 			return block;
 		}

@@ -162,7 +162,10 @@ namespace Codist
 		/// Gets a themed <see cref="Image"/> from a value defined in <see cref="KnownImageIds"/>
 		/// </summary>
 		/// <param name="imageId">The image id.</param>
-		public static CrispImage GetImage(int imageId, double size = 0) {
+		public static System.Windows.FrameworkElement GetImage(int imageId, double size = 0) {
+			if (imageId.HasBadge()) {
+				return GetBadgedImage(imageId, size);
+			}
 			var moniker = new ImageMoniker {
 				Guid = KnownImageIds.ImageCatalogGuid,
 				Id = imageId
@@ -176,7 +179,28 @@ namespace Codist
 				Width = size,
 			};
 		}
-		public static CrispImage GetImage(string monikerName, int size = 0) {
+
+		static Grid GetBadgedImage(int imageId, double size) {
+			var (baseImageId, overlayImageId) = imageId.DeconstructBadgeImage();
+			return GetBadgedImage(baseImageId, overlayImageId, size);
+		}
+
+		public static Grid GetBadgedImage(int baseImageId, int overlayImageId, double size = 0) {
+			var baseImage = new ImageMoniker { Guid = KnownImageIds.ImageCatalogGuid, Id = baseImageId };
+			var overlay = new ImageMoniker { Guid = KnownImageIds.ImageCatalogGuid, Id = overlayImageId };
+			if (size < 1) {
+				size = DefaultIconSize;
+			}
+			return new Grid {
+				Height = size,
+				Width = size,
+				Children = {
+					new CrispImage { Moniker = baseImage, Height = size, Width = size },
+					new CrispImage { Moniker = overlay, Height = size *= 0.6, Width = size, HorizontalAlignment = System.Windows.HorizontalAlignment.Right, VerticalAlignment = System.Windows.VerticalAlignment.Bottom }
+				}
+			};
+		}
+		public static System.Windows.FrameworkElement GetImage(string monikerName, int size = 0) {
 			return GetImage(KnownMonikerNameMap.Map.TryGetValue(monikerName, out int i) ? i : KnownImageIds.Blank, size);
 		}
 		public static void SetBackgroundForCrispImage(this System.Windows.DependencyObject target, WpfColor color) {

@@ -42,15 +42,18 @@ namespace Codist.Controls
 			return this;
 		}
 		public ThemedTipDocument AppendParagraph(int iconId, TextBlock content) {
-			_Container.RowDefinitions.Add(new RowDefinition());
 			FrameworkElement icon;
 			if (iconId == 0) {
 				icon = new Border { Height = WpfHelper.IconRightMargin, Width = PlaceHolderSize };
 			}
 			else {
 				icon = ThemeHelper.GetImage(iconId).WrapMargin(WpfHelper.GlyphMargin);
-				icon.SetValue(VerticalAlignmentProperty, VerticalAlignment.Top);
 			}
+			return AppendParagraph(icon, content);
+		}
+		public ThemedTipDocument AppendParagraph(FrameworkElement icon, TextBlock content) {
+			_Container.RowDefinitions.Add(new RowDefinition());
+			icon.SetValue(VerticalAlignmentProperty, VerticalAlignment.Top);
 			icon.SetValue(Grid.RowProperty, _RowCount);
 			_Container.Children.Add(icon);
 			content.SetValue(Grid.RowProperty, _RowCount);

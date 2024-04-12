@@ -342,7 +342,7 @@ namespace Codist.QuickInfo
 				return ServicesHelper.Instance.ViewTagAggregatorFactory.CreateTagAggregator<IErrorTag>(_Session.TextView);
 			}
 
-			public CrispImage GetIconForErrorText(TextBlock textBlock) {
+			public FrameworkElement GetIconForErrorText(TextBlock textBlock) {
 				var f = textBlock.Inlines.FirstInline;
 				var tt = ((f as Hyperlink)?.Inlines.FirstInline as Run)?.Text;
 				if (tt == null) {
@@ -457,7 +457,7 @@ namespace Codist.QuickInfo
 			void MakeTextualContentSelectableWithIcon(IList items) {
 				for (int i = 0; i < items.Count; i++) {
 					if (items[i] is DependencyObject qi
-						&& ((qi as FrameworkElement)?.IsCodistQuickInfoItem()) != true) {
+						&& (qi as FrameworkElement)?.IsCodistQuickInfoItem() != true) {
 						if (qi is TextBlock t) {
 							OverrideTextBlock(t);
 							continue;
@@ -689,7 +689,7 @@ namespace Codist.QuickInfo
 					&& TextEditorWrapper.CreateFor(t) != null
 					&& t.Inlines.FirstInline is InlineUIContainer == false) {
 					t.TextWrapping = TextWrapping.Wrap;
-					CrispImage icon = _Override.GetIconForErrorText(t);
+					var icon = _Override.GetIconForErrorText(t);
 					if (icon != null) {
 						t.SetGlyph(icon);
 					}
@@ -721,7 +721,7 @@ namespace Codist.QuickInfo
 				_TagHolder?.Clear();
 			}
 
-			public CrispImage GetErrorIcon(string code, ITagAggregator<IErrorTag> tagger, SnapshotSpan span) {
+			public FrameworkElement GetErrorIcon(string code, ITagAggregator<IErrorTag> tagger, SnapshotSpan span) {
 				if (GetTags(tagger, span).TryGetValue(code, out var error)) {
 					if (code[0] == 'C' && code[1] == 'S' && error == PredefinedErrorTypeNames.Warning) {
 						return CodeAnalysisHelper.GetWarningLevel(ToErrorCode(code, 2)) < 3

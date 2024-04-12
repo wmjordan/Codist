@@ -14,12 +14,12 @@ namespace Codist
 		public const int StaticMember = KnownImageIds.Link;
 		public const int InstanceMember = KnownImageIds.BuildQueue;
 		public const int DefaultInterfaceImplementation = KnownImageIds.AddInterface;
-		public const int ReadonlyField = KnownImageIds.EncapsulateField;
-		public const int ReadonlyProperty = KnownImageIds.MoveProperty;
-		public const int ReadonlyMethod = KnownImageIds.MoveMethod;
-		public const int ReadonlyType = KnownImageIds.TextBlock;
+		public const int ReadonlyField = KnownImageIds.Field | KnownImageIds.Lock << BadgeShift;
+		public const int ReadonlyProperty = KnownImageIds.Property | KnownImageIds.Lock << BadgeShift;
+		public const int ReadonlyMethod = KnownImageIds.Method | KnownImageIds.Lock << BadgeShift;
+		public const int ReadonlyType = KnownImageIds.Type | KnownImageIds.Lock << BadgeShift;
 		public const int RefMember = KnownImageIds.DraggedCurrentInstructionPointer;
-		public const int InitonlyProperty = KnownImageIds.NewProperty;
+		public const int InitonlyProperty = KnownImageIds.Property | KnownImageIds.New << BadgeShift;
 		public const int AutoProperty = KnownImageIds.PropertyShortcut;
 		public const int VolatileField = KnownImageIds.SetProactiveCaching;
 		public const int AbstractClass = KnownImageIds.AbstractClass;
@@ -28,7 +28,6 @@ namespace Codist
 		public const int SealedEvent = KnownImageIds.EventSealed;
 		public const int SealedProperty = KnownImageIds.PropertySealed;
 		public const int RequiredMember = KnownImageIds.StatusRequired;
-		public const int Destructor = KnownImageIds.DeleteEntity;
 		public const int PublicConstructor = KnownImageIds.TypePublic;
 		public const int ProtectedConstructor = KnownImageIds.TypeProtected;
 		public const int InternalConstructor = KnownImageIds.TypeInternal;
@@ -51,6 +50,7 @@ namespace Codist
 		public const int Event = KnownImageIds.Event;
 		public const int Method = KnownImageIds.Method;
 		public const int Constructor = KnownImageIds.Type;
+		public const int Destructor = KnownImageIds.Type | KnownImageIds.Cancel << BadgeShift;
 		public const int EnumField = KnownImageIds.EnumerationItemPublic;
 		public const int GenericDefinition = KnownImageIds.Template;
 		public const int Region = KnownImageIds.Numeric;
@@ -128,7 +128,7 @@ namespace Codist
 		public const int ParameterCandidate = KnownImageIds.ParameterWarning;
 		public const int SymbolCandidate = KnownImageIds.CodeInformation;
 		public const int InterfaceImplementation = KnownImageIds.ImplementInterface;
-		public const int Disposable = KnownImageIds.ReferenceWarning;
+		public const int Disposable = KnownImageIds.InterfacePublic | KnownImageIds.StatusSecurityWarning << BadgeShift;
 		public const int Discard = KnownImageIds.HiddenFile;
 		public const int BaseTypes = KnownImageIds.ParentChild;
 		public const int MethodOverloads = KnownImageIds.MethodSet;
@@ -281,6 +281,18 @@ namespace Codist
 		public const int AttachEvent = KnownImageIds.AddEvent;
 		public const int DetachEvent = KnownImageIds.EventMissing;
 		public const int TriggerEvent = KnownImageIds.Event;
+		#endregion
+		#region Badge
+		const int BadgeShift = 16, BadgeImageMask = (1 << BadgeShift) - 1;
+		public static bool HasBadge(this int iconId) {
+			return iconId > 1 << BadgeShift;
+		}
+		public static int MakeBadgeImage(int iconId, int overlayId) {
+			return iconId | overlayId << BadgeShift;
+		}
+		public static (int, int) DeconstructBadgeImage(this int badgedImage) {
+			return (badgedImage & BadgeImageMask, (badgedImage >> BadgeShift) & BadgeImageMask);
+		}
 		#endregion
 	}
 }
