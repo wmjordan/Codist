@@ -123,12 +123,21 @@ namespace Codist
 		public static int IndexOf(this SnapshotSpan span, string text, int offset = 0, bool ignoreCase = false) {
 			return ignoreCase ? span.IndexOfIgnoreCase(text, offset) : span.IndexOf(text, offset);
 		}
+		public static int IndexOf(this SnapshotSpan span, string text, int offset, int count, bool ignoreCase = false) {
+			if (offset + count < span.Length) {
+				span = new SnapshotSpan(span.Start + offset, count);
+			}
+			return ignoreCase ? span.IndexOfIgnoreCase(text, 0) : span.IndexOf(text, 0);
+		}
 		static int IndexOf(this SnapshotSpan span, string text, int offset = 0) {
 			int i, l = text.Length;
 			var snapshot = span.Snapshot;
 			var start = span.Start.Position + offset;
 			var spanLength = span.Length;
 			var endOfTest = spanLength - l;
+			if (endOfTest < l) {
+				return -1;
+			}
 			while (offset > endOfTest) {
 				for (i = 0; i < l; i++) {
 					if (snapshot[start + i] != text[i]) {
@@ -147,6 +156,9 @@ namespace Codist
 			var start = span.Start.Position + offset;
 			var spanLength = span.Length;
 			var endOfTest = spanLength - l;
+			if (endOfTest < l) {
+				return -1;
+			}
 			while (offset > endOfTest) {
 				for (int i = 0; i < l; i++) {
 					if (AreEqualIgnoreCase(snapshot[start + i], text[i]) == false) {
@@ -737,21 +749,22 @@ namespace Codist
 			var psLength = prefixLen + suffix.Length;
 			var modified = new Chain<Span>();
 			var offset = 0;
+			int strippedLength;
 			using (var edit = view.TextSnapshot.TextBuffer.CreateEdit()) {
 				foreach (var item in view.Selection.SelectedSpans) {
 					var t = item.GetText();
 					// remove surrounding items
-					if (t.Length > psLength
+					if ((strippedLength = item.Length - psLength) > 0
 						&& t.StartsWith(prefix, StringComparison.Ordinal)
 						&& t.EndsWith(suffix, StringComparison.Ordinal)
-						&& t.IndexOf(prefix, prefixLen, t.Length - psLength) <= t.IndexOf(suffix, prefixLen, t.Length - psLength)) {
-						if (edit.Replace(item, t.Substring(prefixLen, t.Length - psLength))) {
-							modified.Add(new Span(item.Start.Position + offset, item.Length - psLength));
+						&& t.IndexOf(prefix, prefixLen, strippedLength) <= t.IndexOf(suffix, prefixLen, strippedLength)) {
+						if (edit.Replace(item, t.Substring(prefixLen, strippedLength))) {
+							modified.Add(new Span(item.Start.Position + offset, strippedLength));
 							offset -= psLength;
 						}
 					}
 					// surround items
-					else if (edit.Replace(item, prefix + t + suffix)) {
+					else if (edit.Replace(item, $"{prefix}{t}{suffix}")) {
 						modified.Add(new Span(item.Start.Position + offset, item.Length + psLength));
 						offset += psLength;
 					}
@@ -771,22 +784,23 @@ namespace Codist
 			var substitution = wrapText.Substitution;
 			var psLength = prefix.Length + suffix.Length;
 			var offset = 0;
+			int strippedLength;
 			using (var edit = view.TextSnapshot.TextBuffer.CreateEdit()) {
 				foreach (var item in view.Selection.SelectedSpans) {
 					var t = item.GetText();
 					// remove surrounding items
 					if (substitution == null
-						&& t.Length > psLength
+						&& (strippedLength = item.Length - psLength) > 0
 						&& t.StartsWith(prefix, StringComparison.Ordinal)
 						&& t.EndsWith(suffix, StringComparison.Ordinal)
-						&& t.IndexOf(prefix, prefix.Length, t.Length - psLength) <= t.IndexOf(suffix, prefix.Length, t.Length - psLength)) {
-						if (edit.Replace(item, t = t.Substring(prefix.Length, t.Length - psLength))) {
-							modified.Add(new Span(item.Start.Position + offset, item.Length - psLength));
+						&& t.IndexOf(prefix, prefix.Length, strippedLength) <= t.IndexOf(suffix, prefix.Length, strippedLength)) {
+						if (edit.Replace(item, t.Substring(prefix.Length, strippedLength))) {
+							modified.Add(new Span(item.Start.Position + offset, strippedLength));
 							offset -= psLength;
 						}
 					}
 					// surround items
-					else if (edit.Replace(item, t = wrapText.Wrap(t))) {
+					else if (edit.Replace(item, wrapText.Wrap(t))) {
 						modified.Add(new Span(item.Start.Position + offset, item.Length + psLength));
 						offset += psLength;
 					}
