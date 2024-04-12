@@ -146,7 +146,7 @@ namespace Codist.Controls
 				: (UIElement)MakeText(error.ToString());
 			var w = ShowErrorWindow(content, title, source);
 			bool? result = w.ShowDialog();
-			if (result == true && w._SuppressExceptionBox.IsChecked == true) {
+			if (result == true && source != null && w._SuppressExceptionBox.IsChecked == true) {
 				ExceptionFilter.Ignore(source);
 			}
 			return result;
