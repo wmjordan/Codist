@@ -345,7 +345,7 @@ namespace Codist
 					return ((IDiscardSymbol)symbol).Type.GetUnderlyingSymbol();
 				case SymbolKind.Method:
 					return ((IMethodSymbol)symbol).MethodKind == MethodKind.BuiltinOperator
-						? symbol.ContainingType.GetMembers(symbol.Name)[0]
+						? symbol.ContainingType.GetMembers(symbol.Name).FirstOrDefault()
 						: symbol;
 			}
 			return symbol;
