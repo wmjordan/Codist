@@ -152,14 +152,14 @@ namespace Codist.SmartBars
 
 		protected void AddEditorCommand(ToolBar toolBar, int imageId, string command, string tooltip) {
 			TH.ThrowIfNotOnUIThread();
-			if (CodistPackage.DTE.Commands.Item(command).IsAvailable) {
+			if (TextEditorHelper.IsCommandAvailable(command)) {
 				AddCommand(toolBar, imageId, tooltip, (ctx) => TextEditorHelper.ExecuteEditorCommand(command));
 			}
 		}
 
 		protected void AddEditorCommand(ToolBar toolBar, int imageId, string command, string tooltip, string rightClickCommand) {
 			TH.ThrowIfNotOnUIThread();
-			if (CodistPackage.DTE.Commands.Item(command).IsAvailable) {
+			if (TextEditorHelper.IsCommandAvailable(command)) {
 				AddCommand(toolBar, imageId, tooltip, (ctx) => TextEditorHelper.ExecuteEditorCommand(ctx.RightClick ? rightClickCommand : command));
 			}
 		}
@@ -184,8 +184,14 @@ namespace Codist.SmartBars
 			_ToolBarTray.Visibility = Visibility.Hidden;
 			ToolBar.DisposeCollection();
 			ToolBar2.DisposeCollection();
-			await AddCommandsAsync(cancellationToken);
-			AddCommands();
+			try {
+				await AddCommandsAsync(cancellationToken);
+				AddCommands();
+			}
+			catch (Exception ex) {
+				MessageWindow.Error(ex, null, null, this);
+				return;
+			}
 			SetToolBarPosition();
 			if (ToolBar2.Items.Count == 0) {
 				ToolBar2.Visibility = Visibility.Collapsed;

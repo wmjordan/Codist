@@ -162,7 +162,7 @@ namespace Codist.SmartBars
 		}
 
 		protected void AddCommentCommand(System.Windows.Controls.ToolBar toolBar) {
-			if (CodistPackage.DTE.Commands.Item("Edit.CommentSelection").IsAvailable) {
+			if (TextEditorHelper.IsCommandAvailable("Edit.CommentSelection")) {
 				AddCommand(toolBar, IconIds.Comment, R.CMD_CommentSelection, ctx => {
 					if (ctx.RightClick) {
 						ctx.View.ExpandSelectionToLine();
@@ -377,7 +377,7 @@ namespace Codist.SmartBars
 				r.Add(new CommandItem(IconIds.FormatSelection, R.CMD_FormatSelection, _ => TextEditorHelper.ExecuteEditorCommand("Edit.FormatSelection")));
 				if (View.IsMultilineSelected()) {
 					r.Add(new CommandItem(IconIds.JoinLines, R.CMD_JoinLines, ctx => ctx.View.JoinSelectedLines()));
-					if (CodistPackage.DTE.Commands.Item("Edit.SortLines").IsAvailable) {
+					if (TextEditorHelper.IsCommandAvailable("Edit.SortLines")) {
 						r.Add(new CommandItem(IconIds.SortLines, R.CMD_SortLines, ctx => TextEditorHelper.ExecuteEditorCommand("Edit.SortLines")));
 					}
 				}

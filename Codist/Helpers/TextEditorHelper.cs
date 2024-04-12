@@ -875,11 +875,21 @@ namespace Codist
 			}
 		}
 
-		public static void TryExecuteCommand(this EnvDTE80.DTE2 dte, string command, string args = "") {
+		public static bool IsCommandAvailable(string command) {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			try {
-				if (dte.Commands.Item(command).IsAvailable) {
-					dte.ExecuteCommand(command, args);
+				return CodistPackage.DTE.Commands.Item(command).IsAvailable;
+			}
+			catch (ArgumentException) {
+				return false;
+			}
+		}
+
+		public static void ExecuteEditorCommand(string command, string args = "") {
+			ThreadHelper.ThrowIfNotOnUIThread();
+			try {
+				if (IsCommandAvailable(command)) {
+					CodistPackage.DTE.ExecuteCommand(command, args);
 				}
 			}
 			catch (System.Runtime.InteropServices.COMException ex) {
@@ -888,10 +898,6 @@ namespace Codist
 					System.Diagnostics.Debugger.Break();
 				}
 			}
-		}
-
-		public static void ExecuteEditorCommand(string command, string args = "") {
-			CodistPackage.DTE.TryExecuteCommand(command, args);
 		}
 
 		/// <summary>
