@@ -2724,4 +2724,7 @@ Ctrl: 切换标记并选择下一处</value>
   <data name="T_Headings" xml:space="preserve">
     <value>标题</value>
   </data>
+  <data name="OT_HideCopilotButton" xml:space="preserve">
+    <value>隐藏 Github Copilot 按钮</value>
+  </data>
 </root>

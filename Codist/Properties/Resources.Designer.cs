@@ -3540,6 +3540,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Hide Github Copilot button.
+        /// </summary>
+        internal static string OT_HideCopilotButton {
+            get {
+                return ResourceManager.GetString("OT_HideCopilotButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Hide feedback button.
         /// </summary>
         internal static string OT_HideFeedbackButton {

@@ -797,7 +797,7 @@ namespace Codist.Options
 		sealed class PageControl : OptionsPageContainer
 		{
 			readonly Controls.IntegerBox _TopSpace, _BottomSpace;
-			readonly OptionBox<DisplayOptimizations> _MainWindow, _CodeWindow, _MenuLayoutOverride, _HideSearchBox, _HideAccountBox, _HideFeedbackButton, _CpuMonitor, _MemoryMonitor, _DriveMonitor, _NetworkMonitor;
+			readonly OptionBox<DisplayOptimizations> _MainWindow, _CodeWindow, _MenuLayoutOverride, _HideSearchBox, _HideAccountBox, _HideFeedbackButton, _HideCodePilotButton, _CpuMonitor, _MemoryMonitor, _DriveMonitor, _NetworkMonitor;
 			readonly OptionBox<BuildOptions> _BuildTimestamp, _ShowOutputWindowAfterBuild;
 			readonly TextBox _TaskManagerPath, _TaskManagerParameter;
 			readonly Button _BrowseTaskManagerPath;
@@ -876,6 +876,7 @@ namespace Codist.Options
 							Config.Instance.DisplayOptimizations.CreateOptionBox(DisplayOptimizations.HideSearchBox, UpdateHideSearchBoxOption, R.OT_HideSearchBox).Set(ref _HideSearchBox),
 							Config.Instance.DisplayOptimizations.CreateOptionBox(DisplayOptimizations.HideAccountBox, UpdateHideAccountBoxOption, R.OT_HideAccountIcon).Set(ref _HideAccountBox),
 							Config.Instance.DisplayOptimizations.CreateOptionBox(DisplayOptimizations.HideFeedbackBox, UpdateHideFeedbackButtonOption, R.OT_HideFeedbackButton).Set(ref _HideFeedbackButton),
+							Config.Instance.DisplayOptimizations.CreateOptionBox(DisplayOptimizations.HideCopilotButton, UpdateHideCodePilotButtonOption, R.OT_HideCopilotButton).Set(ref _HideCodePilotButton),
 						}
 					}
 					.ForEachChild((CheckBox b) => b.MinWidth = MinColumnWidth)
@@ -897,6 +898,7 @@ namespace Codist.Options
 				};
 
 				_MenuLayoutOverride.IsEnabled = CodistPackage.VsVersion.Major == 15;
+				_HideCodePilotButton.IsEnabled = CodistPackage.VsVersion.Major > 17 || CodistPackage.VsVersion.Major == 17 && CodistPackage.VsVersion.Minor > 9;
 			}
 
 			protected override void LoadConfig(Config config) {
@@ -908,6 +910,7 @@ namespace Codist.Options
 				_HideAccountBox.UpdateWithOption(o);
 				_HideFeedbackButton.UpdateWithOption(o);
 				_HideSearchBox.UpdateWithOption(o);
+				_HideCodePilotButton.UpdateWithOption(o);
 				_BuildTimestamp.UpdateWithOption(config.BuildOptions);
 				_ShowOutputWindowAfterBuild.UpdateWithOption(config.BuildOptions);
 			}
@@ -971,6 +974,10 @@ namespace Codist.Options
 
 			void UpdateHideFeedbackButtonOption(DisplayOptimizations options, bool value) {
 				ToggleTitleBarElement(options, value, DisplayOptimizations.HideFeedbackBox);
+			}
+
+			void UpdateHideCodePilotButtonOption(DisplayOptimizations options, bool value) {
+				ToggleTitleBarElement(options, value, DisplayOptimizations.HideCopilotButton);
 			}
 
 			void ToggleTitleBarElement(DisplayOptimizations options, bool value, DisplayOptimizations element) {

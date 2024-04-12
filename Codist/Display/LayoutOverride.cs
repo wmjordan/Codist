@@ -35,23 +35,24 @@ namespace Codist.Display
 			if (g is null || g.Children.Count < 2) {
 				return;
 			}
-			string boxName;
+			Predicate<FrameworkElement> controlMatcher;
 			switch (element) {
-				case DisplayOptimizations.HideSearchBox: boxName = CodistPackage.VsVersion.Major == 15 ? "PART__SearchBox" : "SearchBox"; break;
-				case DisplayOptimizations.HideAccountBox: boxName = "IDCardGrid"; break;
-				case DisplayOptimizations.HideFeedbackBox: boxName = "FeedbackButton"; break;
+				case DisplayOptimizations.HideSearchBox: controlMatcher = CodistPackage.VsVersion.Major == 15 ? ControlNameMatcher.PART__SearchBox.Match : ControlNameMatcher.SearchBox.Match; break;
+				case DisplayOptimizations.HideAccountBox: controlMatcher = ControlNameMatcher.IDCardGrid.Match; break;
+				case DisplayOptimizations.HideFeedbackBox: controlMatcher = ControlNameMatcher.FeedbackButton.Match; break;
+				case DisplayOptimizations.HideCopilotButton: controlMatcher = ControlTypeMatcher.CopilotBadgeControl.Match; break;
 				default: return;
 			}
 			var t = CodistPackage.VsVersion.Major == 15
-				? g.GetFirstVisualChild<FrameworkElement>(i => i.Name == boxName)
+				? g.GetFirstVisualChild(controlMatcher)
 					?.GetParent<ContentPresenter>(i => System.Windows.Media.VisualTreeHelper.GetParent(i) is StackPanel)
-				: g.GetFirstVisualChild<FrameworkElement>(i => i.Name == boxName)
+				: g.GetFirstVisualChild(controlMatcher)
 					?.GetParent<ContentPresenter>(i => i.Name == "DataTemplatePresenter");
 			if (t != null) {
 				t.ToggleVisibility(show);
 			}
 			else if (element != DisplayOptimizations.HideSearchBox
-				|| g.GetFirstVisualChild<UserControl>(i => i.GetType().Name == "PackageAllInOneSearchButtonPresenter")
+				|| g.GetFirstVisualChild<UserControl>(ControlTypeMatcher.PackageAllInOneSearchButtonPresenter.Match)
 					?.GetParent<ContentPresenter>(i => i.Name == "DataTemplatePresenter")
 					?.ToggleVisibility(show) == null) {
 				__LayoutElementNotFound = true;
@@ -163,7 +164,7 @@ namespace Codist.Display
 			if (options.MatchFlags(DisplayOptimizations.MainWindow)) {
 				WpfHelper.SetUITextRenderOptions(Application.Current.MainWindow, true);
 			}
-			if (__LayoutElementNotFound && options.HasAnyFlag(DisplayOptimizations.HideSearchBox | DisplayOptimizations.HideFeedbackBox | DisplayOptimizations.HideAccountBox)) {
+			if (__LayoutElementNotFound && options.HasAnyFlag(DisplayOptimizations.HideUIElements)) {
 				// hack: the UI elements to hide may not be added to app window when this method is executed
 				//    the solution load event is exploited to compensate that
 				SolutionEvents.OnAfterBackgroundSolutionLoadComplete += OverrideLayoutAfterSolutionLoad;
@@ -180,6 +181,7 @@ namespace Codist.Display
 			ToggleUIElement(DisplayOptimizations.HideSearchBox, !options.MatchFlags(DisplayOptimizations.HideSearchBox));
 			ToggleUIElement(DisplayOptimizations.HideAccountBox, !options.MatchFlags(DisplayOptimizations.HideAccountBox));
 			ToggleUIElement(DisplayOptimizations.HideFeedbackBox, !options.MatchFlags(DisplayOptimizations.HideFeedbackBox));
+			ToggleUIElement(DisplayOptimizations.HideCopilotButton, !options.MatchFlags(DisplayOptimizations.HideCopilotButton));
 			WpfHelper.SetUITextRenderOptions(Application.Current.MainWindow, options.MatchFlags(DisplayOptimizations.MainWindow));
 		}
 
@@ -197,6 +199,9 @@ namespace Codist.Display
 			}
 			if (options.MatchFlags(DisplayOptimizations.HideFeedbackBox)) {
 				ToggleUIElement(DisplayOptimizations.HideFeedbackBox, false);
+			}
+			if (options.MatchFlags(DisplayOptimizations.HideCopilotButton) && CodistPackage.VsVersion.Major > 16) {
+				ToggleUIElement(DisplayOptimizations.HideCopilotButton, false);
 			}
 		}
 
@@ -224,6 +229,35 @@ namespace Codist.Display
 			}
 			public InteractiveControlContainer(UIElement content) {
 				Content = content;
+			}
+		}
+
+		readonly struct ControlNameMatcher
+		{
+			internal static readonly ControlNameMatcher PART__SearchBox = new ControlNameMatcher("PART__SearchBox");
+			internal static readonly ControlNameMatcher SearchBox = new ControlNameMatcher("SearchBox");
+			internal static readonly ControlNameMatcher IDCardGrid = new ControlNameMatcher("IDCardGrid");
+			internal static readonly ControlNameMatcher FeedbackButton = new ControlNameMatcher("FeedbackButton");
+
+			readonly string _Name;
+			ControlNameMatcher(string name) {
+				_Name = name;
+			}
+			public bool Match(FrameworkElement control) {
+				return control.Name == _Name;
+			}
+		}
+		readonly struct ControlTypeMatcher
+		{
+			internal static readonly ControlTypeMatcher PackageAllInOneSearchButtonPresenter = new ControlTypeMatcher("PackageAllInOneSearchButtonPresenter");
+			internal static readonly ControlTypeMatcher CopilotBadgeControl = new ControlTypeMatcher("CopilotBadgeControl");
+
+			readonly string _Name;
+			ControlTypeMatcher(string name) {
+				_Name = name;
+			}
+			public bool Match(FrameworkElement control) {
+				return control.GetType().Name == _Name;
 			}
 		}
 	}

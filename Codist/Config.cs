@@ -750,10 +750,12 @@ namespace Codist
 		HideSearchBox = 1 << 3,
 		HideFeedbackBox = 1 << 4,
 		HideAccountBox = 1 << 5,
-		ShowCpu = 1 << 6,
-		ShowMemory = 1 << 7,
-		ShowDrive = 1 << 8,
-		ShowNetwork = 1	<< 9,
+		HideCopilotButton = 1 << 6,
+		HideUIElements = HideSearchBox | HideFeedbackBox | HideAccountBox | HideCopilotButton,
+		ShowCpu = 1 << 10,
+		ShowMemory = 1 << 11,
+		ShowDrive = 1 << 12,
+		ShowNetwork = 1	<< 13,
 		ResourceMonitors = ShowCpu | ShowMemory | ShowDrive | ShowNetwork
 	}
 
