@@ -279,9 +279,9 @@ namespace Codist.NaviBar
 			var modified = View.WrapWith(prefix, suffix);
 			if (s != null && Keyboard.Modifiers.MatchFlags(ModifierKeys.Control | ModifierKeys.Shift)
 				&& View.FindNext(_TextSearch, s, TextEditorHelper.GetFindOptionsFromKeyboardModifiers()) == false) {
-				//
+				return modified;
 			}
-			else if (selectModified && modified != null) {
+			if (selectModified && modified != null) {
 				View.SelectSpans(modified);
 			}
 			return modified;
