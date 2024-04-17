@@ -34,7 +34,7 @@ namespace Codist
 				var start = startLine.Start;
 				var end = v.Selection.End.Position;
 				var endLine = ts.GetLineFromPosition(end);
-				while (start < end) {
+				do {
 					if (p.skipEmptyLine == false
 						|| startLine.Length != 0
 							&& startLine.CountLinePrecedingWhitespace() < startLine.Length) {
@@ -51,7 +51,7 @@ namespace Codist
 					}
 					start = startLine.EndIncludingLineBreak;
 					startLine = ts.GetLineFromPosition(start);
-				}
+				} while (start < end);
 			});
 		}
 
