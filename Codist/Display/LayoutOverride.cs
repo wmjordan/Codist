@@ -5,6 +5,8 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Events;
 using Microsoft.VisualStudio.PlatformUI;
 using CLR;
+using System.Threading;
+using SysTasks = System.Threading.Tasks;
 
 namespace Codist.Display
 {
@@ -16,7 +18,7 @@ namespace Codist.Display
 		static Border __TitleBlock;
 		static readonly string __RootSuffix = GetRootSuffix();
 		static readonly string __DefaultTitle = "Visual Studio" + __RootSuffix;
-		static bool __LayoutElementNotFound;
+		static int __Retrial;
 
 		static string GetRootSuffix() {
 			var args = Environment.GetCommandLineArgs();
@@ -28,12 +30,12 @@ namespace Codist.Display
 			return null;
 		}
 
-		public static void ToggleUIElement(DisplayOptimizations element, bool show) {
+		public static bool ToggleUIElement(DisplayOptimizations element, bool show) {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			var w = Application.Current.MainWindow;
 			var g = w.GetFirstVisualChild<Grid>(i => i.Name == "RootGrid");
 			if (g is null || g.Children.Count < 2) {
-				return;
+				return false;
 			}
 			Predicate<FrameworkElement> controlMatcher;
 			switch (element) {
@@ -41,7 +43,7 @@ namespace Codist.Display
 				case DisplayOptimizations.HideAccountBox: controlMatcher = ControlNameMatcher.IDCardGrid.Match; break;
 				case DisplayOptimizations.HideFeedbackBox: controlMatcher = ControlNameMatcher.FeedbackButton.Match; break;
 				case DisplayOptimizations.HideCopilotButton: controlMatcher = ControlTypeMatcher.CopilotBadgeControl.Match; break;
-				default: return;
+				default: return false;
 			}
 			var t = CodistPackage.VsVersion.Major == 15
 				? g.GetFirstVisualChild(controlMatcher)
@@ -55,8 +57,9 @@ namespace Codist.Display
 				|| g.GetFirstVisualChild<UserControl>(ControlTypeMatcher.PackageAllInOneSearchButtonPresenter.Match)
 					?.GetParent<ContentPresenter>(i => i.Name == "DataTemplatePresenter")
 					?.ToggleVisibility(show) == null) {
-				__LayoutElementNotFound = true;
+				return false;
 			}
+			return true;
 		}
 
 		public static void CompactMenu() {
@@ -160,14 +163,12 @@ namespace Codist.Display
 			if (options.MatchFlags(DisplayOptimizations.CompactMenu)) {
 				CompactMenu();
 			}
-			InitHideElements(options);
 			if (options.MatchFlags(DisplayOptimizations.MainWindow)) {
 				WpfHelper.SetUITextRenderOptions(Application.Current.MainWindow, true);
 			}
-			if (__LayoutElementNotFound && options.HasAnyFlag(DisplayOptimizations.HideUIElements)) {
-				// hack: the UI elements to hide may not be added to app window when this method is executed
-				//    the solution load event is exploited to compensate that
-				SolutionEvents.OnAfterBackgroundSolutionLoadComplete += OverrideLayoutAfterSolutionLoad;
+
+			if (options.HasAnyFlag(DisplayOptimizations.HideUIElements)) {
+				InitHideElements(options);
 			}
 		}
 
@@ -185,23 +186,28 @@ namespace Codist.Display
 			WpfHelper.SetUITextRenderOptions(Application.Current.MainWindow, options.MatchFlags(DisplayOptimizations.MainWindow));
 		}
 
-		static void OverrideLayoutAfterSolutionLoad(object sender, EventArgs e) {
-			SolutionEvents.OnAfterBackgroundSolutionLoadComplete -= OverrideLayoutAfterSolutionLoad;
-			InitHideElements(Config.Instance.DisplayOptimizations);
-		}
-
 		static void InitHideElements(DisplayOptimizations options) {
+			var done = true;
 			if (options.MatchFlags(DisplayOptimizations.HideSearchBox)) {
-				ToggleUIElement(DisplayOptimizations.HideSearchBox, false);
+				done &= ToggleUIElement(DisplayOptimizations.HideSearchBox, false);
 			}
 			if (options.MatchFlags(DisplayOptimizations.HideAccountBox)) {
-				ToggleUIElement(DisplayOptimizations.HideAccountBox, false);
+				done &= ToggleUIElement(DisplayOptimizations.HideAccountBox, false);
 			}
 			if (options.MatchFlags(DisplayOptimizations.HideFeedbackBox)) {
-				ToggleUIElement(DisplayOptimizations.HideFeedbackBox, false);
+				done &= ToggleUIElement(DisplayOptimizations.HideFeedbackBox, false);
 			}
 			if (options.MatchFlags(DisplayOptimizations.HideCopilotButton) && CodistPackage.VsVersion.Major > 16) {
-				ToggleUIElement(DisplayOptimizations.HideCopilotButton, false);
+				done &= ToggleUIElement(DisplayOptimizations.HideCopilotButton, false);
+			}
+
+			if (done == false && ++__Retrial < 10) {
+				_ = ThreadHelper.JoinableTaskFactory.RunAsync(async () => {
+					"Retry UI Layout override".Log();
+					await SysTasks.Task.Delay(3000);
+					await SyncHelper.SwitchToMainThreadAsync();
+					InitHideElements(Config.Instance.DisplayOptimizations);
+				});
 			}
 		}
 
