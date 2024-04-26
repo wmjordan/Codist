@@ -8,8 +8,6 @@ namespace Codist.Margins
 	public sealed class SymbolReferenceMarkerStyle
 	{
 		Color _ReferenceColor, _WriteColor;
-		SolidColorBrush _Reference, _Write;
-		Pen _SetNull;
 
 		public SymbolReferenceMarkerStyle() {
 			Reset();
@@ -21,7 +19,6 @@ namespace Codist.Margins
 			get => _ReferenceColor.ToHexString();
 			set {
 				UIHelper.ParseColor(value, out _ReferenceColor, out _);
-				_Reference = new SolidColorBrush(_ReferenceColor.A != 0 ? _ReferenceColor : DefaultReferenceMarkerColor);
 			}
 		}
 
@@ -31,23 +28,17 @@ namespace Codist.Margins
 			get => _WriteColor.ToHexString();
 			set {
 				UIHelper.ParseColor(value, out _WriteColor, out _);
-				_Write = new SolidColorBrush(_WriteColor.A != 0 ? _WriteColor : DefaultWriteMarkerColor);
-				_SetNull = _Write != null ? new Pen(_Write, 1) : null;
 			}
 		}
 
-		internal SolidColorBrush ReferenceMarkerBrush => _Reference;
-		internal SolidColorBrush WriteMarkerBrush => _Write;
-		internal Pen SetNullPen => _SetNull;
+		internal Color ReferenceMarker => _ReferenceColor;
+		internal Color WriteMarker => _WriteColor;
 		internal static Color DefaultReferenceMarkerColor => Colors.Aqua;
 		internal static Color DefaultWriteMarkerColor => Colors.Khaki;
 
 		public void Reset() {
 			_ReferenceColor = DefaultReferenceMarkerColor;
 			_WriteColor = DefaultWriteMarkerColor;
-			_Reference = new SolidColorBrush(_ReferenceColor);
-			_Write = new SolidColorBrush(_WriteColor);
-			_SetNull = new Pen(_Write, 1);
 		}
 	}
 }

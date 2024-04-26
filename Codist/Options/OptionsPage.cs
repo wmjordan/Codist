@@ -691,9 +691,9 @@ namespace Codist.Options
 				_SymbolReference.BindDependentOptionControls(_SymbolReferenceButton, _SymbolWriteButton);
 				_DisableChangeTracker.IsEnabled = CodistPackage.VsVersion.Major >= 17;
 				_SymbolReferenceButton.DefaultColor = () => Margins.SymbolReferenceMarkerStyle.DefaultReferenceMarkerColor;
-				_SymbolReferenceButton.Color = Config.Instance.SymbolReferenceMarkerSettings.ReferenceMarkerBrush.Color;
+				_SymbolReferenceButton.Color = Config.Instance.SymbolReferenceMarkerSettings.ReferenceMarker;
 				_SymbolWriteButton.DefaultColor = () => Margins.SymbolReferenceMarkerStyle.DefaultWriteMarkerColor;
-				_SymbolWriteButton.Color = Config.Instance.SymbolReferenceMarkerSettings.WriteMarkerBrush.Color;
+				_SymbolWriteButton.Color = Config.Instance.SymbolReferenceMarkerSettings.WriteMarker;
 			}
 
 			protected override void LoadConfig(Config config) {

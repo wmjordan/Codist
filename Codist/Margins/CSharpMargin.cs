@@ -104,11 +104,13 @@ namespace Codist.Margins
 
 		void UpdateCSharpMembersMarginConfig(ConfigUpdatedEventArgs e) {
 			_Parser.StateUpdated -= ParserStateUpdated;
-			if (e.UpdatedFeature.HasAnyFlag(Features.ScrollbarMarkers) && Config.Instance.Features.MatchFlags(Features.ScrollbarMarkers)) {
+			if (e.UpdatedFeature.HasAnyFlag(Features.ScrollbarMarkers)
+				&& Config.Instance.Features.MatchFlags(Features.ScrollbarMarkers)) {
 				_Parser.StateUpdated += ParserStateUpdated;
 				if (_Parser.TryGetSemanticState(_View.TextSnapshot, out var state)) {
 					ParserStateUpdated(_Parser, new EventArgs<SemanticState>(state));
 				}
+				SymbolReferenceMarker.Refresh();
 			}
 			else {
 				if (Visibility == Visibility.Visible) {
@@ -149,14 +151,30 @@ namespace Codist.Margins
 
 		sealed class MemberMarker
 		{
+			// a lazy cache for related brushes, which should has its fields initialized or updated only in the Main thread
+			static PenStore __PenStore;
+
 			IVerticalScrollBar _ScrollBar;
 			CSharpMargin _Margin;
 			CodeBlock _CodeBlock;
 			List<DirectiveTriviaSyntax> _Regions;
 
+			static MemberMarker() {
+				FormatStore.ClassificationFormatMapChanged += FormatStore_ClassificationFormatMapChanged;
+			}
+
 			public MemberMarker(IVerticalScrollBar verticalScrollbar, CSharpMargin margin) {
 				_ScrollBar = verticalScrollbar;
 				_Margin = margin;
+				if (__PenStore == null) {
+					__PenStore = new PenStore();
+				}
+			}
+
+			static void FormatStore_ClassificationFormatMapChanged(object sender, EventArgs<IEnumerable<IClassificationType>> e) {
+				if (sender is IFormatCache c && c.Category == Constants.CodeText) {
+					__PenStore = null;
+				}
 			}
 
 			public async Task UpdateAsync(SemanticState state, CancellationToken ct) {
@@ -235,17 +253,18 @@ namespace Codist.Margins
 				const int showMemberDeclarationThreshold = 30, longDeclarationLines = 50, labelSize = 8;
 				var snapshot = _Margin._View.TextSnapshot;
 				var regions = _Regions;
+				var penStore = __PenStore ?? (__PenStore = new PenStore());
 				if (regions != null && Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.RegionDirective)) {
-					DrawRegions(drawingContext, labelSize, snapshot, regions);
+					DrawRegions(drawingContext, penStore, labelSize, snapshot, regions);
 				}
 
 				var codeBlock = _CodeBlock;
 				if (codeBlock != null && Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.MemberDeclaration)) {
-					DrawCodeBlockLines(drawingContext, showMemberDeclarationThreshold, longDeclarationLines, labelSize, snapshot, codeBlock.GetDescendants());
+					DrawCodeBlockLines(drawingContext, penStore, showMemberDeclarationThreshold, longDeclarationLines, labelSize, snapshot, codeBlock.GetDescendants());
 				}
 			}
 
-			void DrawCodeBlockLines(DrawingContext drawingContext, int showMemberDeclarationThreshold, int longDeclarationLines, int labelSize, ITextSnapshot snapshot, IEnumerable<CodeBlock> codeBlocks) {
+			void DrawCodeBlockLines(DrawingContext drawingContext, PenStore penStore, int showMemberDeclarationThreshold, int longDeclarationLines, int labelSize, ITextSnapshot snapshot, IEnumerable<CodeBlock> codeBlocks) {
 				var snapshotLength = snapshot.Length;
 				var memberLevel = 0;
 				var memberType = CodeMemberType.Root;
@@ -277,7 +296,7 @@ namespace Codist.Margins
 						y2 = _ScrollBar.GetYCoordinateOfBufferPosition(end);
 						pen = null;
 						if (lineCount >= longDeclarationLines) {
-							pen = PenStore.GetPenForCodeMemberType(type);
+							pen = penStore.GetPenForCodeMemberType(type);
 							drawingContext.DrawLine(pen, new Point(level, y1), new Point(_Margin.ActualWidth, y1));
 							drawingContext.DrawLine(pen, new Point(level, y1), new Point(level, y2));
 							drawingContext.DrawLine(pen, new Point(level, y2), new Point(_Margin.ActualWidth, y2));
@@ -285,7 +304,7 @@ namespace Codist.Margins
 						y2 -= y1;
 						if (y2 > showMemberDeclarationThreshold && block.Name != null) {
 							if (pen == null) {
-								pen = PenStore.GetPenForCodeMemberType(type);
+								pen = penStore.GetPenForCodeMemberType(type);
 							}
 							if (pen.Brush != null) {
 								text = WpfHelper.ToFormattedText(block.Name, labelSize, pen.Brush.Alpha(y2 / _Margin.ActualHeight * 0.5 + 0.5));
@@ -299,10 +318,10 @@ namespace Codist.Margins
 							// draw range for previous grouped members
 							y1 = _ScrollBar.GetYCoordinateOfBufferPosition(rangeFrom);
 							y2 = _ScrollBar.GetYCoordinateOfBufferPosition(rangeTo);
-							drawingContext.DrawLine(PenStore.GetPenForCodeMemberType(memberType), new Point(memberLevel, y1), new Point(memberLevel, y2));
+							drawingContext.DrawLine(penStore.GetPenForCodeMemberType(memberType), new Point(memberLevel, y1), new Point(memberLevel, y2));
 						}
 						// draw type declaration line
-						pen = PenStore.GetPenForCodeMemberType(type);
+						pen = penStore.GetPenForCodeMemberType(type);
 						y1 = _ScrollBar.GetYCoordinateOfBufferPosition(start);
 						y2 = _ScrollBar.GetYCoordinateOfBufferPosition(end);
 						drawingContext.DrawRectangle(pen.Brush.Alpha(1), pen, new Rect(level - (MarkerSize / 2), y1 - (MarkerSize / 2), MarkerSize, MarkerSize));
@@ -324,13 +343,13 @@ namespace Codist.Margins
 					}
 					if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.MethodDeclaration)) {
 						if (type == CodeMemberType.Method) {
-							if (PenStore.Method.Brush != null) {
-								drawingContext.DrawRectangle(PenStore.Method.Brush.Alpha(1), PenStore.Method, new Rect(level - (MarkerSize / 2), _ScrollBar.GetYCoordinateOfBufferPosition(start) - (MarkerSize / 2), MarkerSize, MarkerSize));
+							if (penStore.Method.Brush != null) {
+								drawingContext.DrawRectangle(penStore.Method.Brush.Alpha(1), penStore.Method, new Rect(level - (MarkerSize / 2), _ScrollBar.GetYCoordinateOfBufferPosition(start) - (MarkerSize / 2), MarkerSize, MarkerSize));
 							}
 						}
 						else if (type == CodeMemberType.Constructor) {
-							if (PenStore.Constructor.Brush != null) {
-								drawingContext.DrawRectangle(PenStore.Constructor.Brush.Alpha(1), PenStore.Constructor, new Rect(level - (MarkerSize / 2), _ScrollBar.GetYCoordinateOfBufferPosition(start) - (MarkerSize / 2), MarkerSize, MarkerSize));
+							if (penStore.Constructor.Brush != null) {
+								drawingContext.DrawRectangle(penStore.Constructor.Brush.Alpha(1), penStore.Constructor, new Rect(level - (MarkerSize / 2), _ScrollBar.GetYCoordinateOfBufferPosition(start) - (MarkerSize / 2), MarkerSize, MarkerSize));
 							}
 						}
 					}
@@ -343,7 +362,7 @@ namespace Codist.Margins
 							// draw range for previous grouped members
 							y1 = _ScrollBar.GetYCoordinateOfBufferPosition(rangeFrom);
 							y2 = _ScrollBar.GetYCoordinateOfBufferPosition(rangeTo);
-							drawingContext.DrawLine(PenStore.GetPenForCodeMemberType(memberType), new Point(level, y1), new Point(level, y2));
+							drawingContext.DrawLine(penStore.GetPenForCodeMemberType(memberType), new Point(level, y1), new Point(level, y2));
 						}
 						memberType = type;
 						rangeFrom = start;
@@ -355,7 +374,7 @@ namespace Codist.Margins
 					// draw range for previous grouped members
 					y1 = _ScrollBar.GetYCoordinateOfBufferPosition(rangeFrom);
 					y2 = _ScrollBar.GetYCoordinateOfBufferPosition(rangeTo);
-					drawingContext.DrawLine(PenStore.GetPenForCodeMemberType(memberType), new Point(memberLevel, y1), new Point(memberLevel, y2));
+					drawingContext.DrawLine(penStore.GetPenForCodeMemberType(memberType), new Point(memberLevel, y1), new Point(memberLevel, y2));
 				}
 				// adjust and write text on scrollbar margins
 				var tc = dt.Count;
@@ -386,11 +405,11 @@ namespace Codist.Margins
 				}
 			}
 
-			void DrawRegions(DrawingContext drawingContext, int labelSize, ITextSnapshot snapshot, List<DirectiveTriviaSyntax> regions) {
+			void DrawRegions(DrawingContext drawingContext, PenStore penStore, int labelSize, ITextSnapshot snapshot, List<DirectiveTriviaSyntax> regions) {
 				foreach (var region in regions.OfType<RegionDirectiveTriviaSyntax>()) {
 					var s = region.GetDeclarationSignature();
 					if (s != null) {
-						var text = WpfHelper.ToFormattedText(s, labelSize, PenStore.RegionForeground);
+						var text = WpfHelper.ToFormattedText(s, labelSize, penStore.RegionForeground);
 						SnapshotPoint rp;
 						try {
 							rp = new SnapshotPoint(snapshot, region.SpanStart);
@@ -399,8 +418,8 @@ namespace Codist.Margins
 							break;
 						}
 						var p = new Point(5, _ScrollBar.GetYCoordinateOfBufferPosition(rp) - text.Height / 2);
-						if (PenStore.RegionBackground != null) {
-							drawingContext.DrawRectangle(PenStore.RegionBackground, null, new Rect(p, new Size(text.Width, text.Height)));
+						if (penStore.RegionBackground != null) {
+							drawingContext.DrawRectangle(penStore.RegionBackground, null, new Rect(p, new Size(text.Width, text.Height)));
 						}
 						drawingContext.DrawText(text, p);
 					}
@@ -454,23 +473,31 @@ namespace Codist.Margins
 				Root, Class, Interface, Struct, Type = Struct, Enum, Delegate, Member, Constructor, Property, Method, Field, Event, Other, Unknown
 			}
 
-			static class PenStore
+			sealed class PenStore
 			{
-				internal static Pen Class, Interface, Struct, Enum, Event, Delegate, Constructor, Method, Property, Field, Region;
-				internal static Brush RegionForeground, RegionBackground;
+				internal readonly Pen Class, Interface, Struct, Enum, Event, Delegate, Constructor, Method, Property, Field, Region;
+				internal readonly Brush RegionForeground, RegionBackground;
 
-				static PenStore() {
-					CreatePens(FormatStore.DefaultClassificationFormatMap);
-					FormatStore.ClassificationFormatMapChanged += FormatStore_ClassificationFormatMapChanged;
+				public PenStore() {
+					var formatMap = FormatStore.DefaultClassificationFormatMap;
+					var f = SymbolFormatter.Instance;
+					Class = new Pen(f.Class.Alpha(TypeAlpha).MakeFrozen(), TypeLineSize).MakeFrozen();
+					Interface = new Pen(f.Interface.Alpha(TypeAlpha).MakeFrozen(), TypeLineSize).MakeFrozen();
+					Struct = new Pen(f.Struct.Alpha(TypeAlpha).MakeFrozen(), TypeLineSize).MakeFrozen();
+					Constructor = new Pen(formatMap.GetRunProperties(Constants.CSharpConstructorMethodName).ForegroundBrush.Alpha(MemberAlpha).MakeFrozen(), LineSize).MakeFrozen();
+					Delegate = new Pen(f.Delegate.Alpha(MemberAlpha).MakeFrozen(), LineSize).MakeFrozen();
+					Enum = new Pen(f.Enum.Alpha(TypeAlpha).MakeFrozen(), TypeLineSize).MakeFrozen();
+					Event = new Pen(f.Event.Alpha(MemberAlpha).MakeFrozen(), LineSize).MakeFrozen();
+					Field = new Pen(f.Field.Alpha(MemberAlpha).MakeFrozen(), LineSize).MakeFrozen();
+					Method = new Pen(f.Method.Alpha(MemberAlpha).MakeFrozen(), LineSize).MakeFrozen();
+					Property = new Pen(f.Property.Alpha(MemberAlpha).MakeFrozen(), LineSize).MakeFrozen();
+					var p = formatMap.GetRunProperties(Constants.CodePreprocessorText);
+					RegionForeground = p.ForegroundBrush.Clone().MakeFrozen();
+					RegionBackground = p.BackgroundBrush.Alpha(TypeAlpha).MakeFrozen();
+					Region = new Pen(RegionBackground ?? RegionForeground, TypeLineSize).MakeFrozen();
 				}
 
-				static void FormatStore_ClassificationFormatMapChanged(object sender, EventArgs<IEnumerable<IClassificationType>> e) {
-					if (sender is IFormatCache c && c.Category == Constants.CodeText) {
-						CreatePens(c.ClassificationFormatMap);
-					}
-				}
-
-				internal static Pen GetPenForCodeMemberType(CodeMemberType memberType) {
+				internal Pen GetPenForCodeMemberType(CodeMemberType memberType) {
 					switch (memberType) {
 						case CodeMemberType.Class: return Class;
 						case CodeMemberType.Interface: return Interface;
@@ -484,24 +511,6 @@ namespace Codist.Margins
 						case CodeMemberType.Field: return Field;
 					}
 					return null;
-				}
-
-				static void CreatePens(IClassificationFormatMap formatMap) {
-					var f = SymbolFormatter.Instance;
-					Class = new Pen(f.Class.Alpha(TypeAlpha), TypeLineSize);
-					Interface = new Pen(f.Interface.Alpha(TypeAlpha), TypeLineSize);
-					Struct = new Pen(f.Struct.Alpha(TypeAlpha), TypeLineSize);
-					Constructor = new Pen(formatMap.GetRunProperties(Constants.CSharpConstructorMethodName).ForegroundBrush.Alpha(MemberAlpha), LineSize);
-					Delegate = new Pen(f.Delegate.Alpha(MemberAlpha), LineSize);
-					Enum = new Pen(f.Enum.Alpha(TypeAlpha), TypeLineSize);
-					Event = new Pen(f.Event.Alpha(MemberAlpha), LineSize);
-					Field = new Pen(f.Field.Alpha(MemberAlpha), LineSize);
-					Method = new Pen(f.Method.Alpha(MemberAlpha), LineSize);
-					Property = new Pen(f.Property.Alpha(MemberAlpha), LineSize);
-					var p = formatMap.GetRunProperties(Constants.CodePreprocessorText);
-					RegionForeground = p.ForegroundBrush;
-					RegionBackground = p.BackgroundBrush.Alpha(TypeAlpha);
-					Region = new Pen(RegionBackground ?? RegionForeground, TypeLineSize);
 				}
 			}
 
@@ -526,7 +535,7 @@ namespace Codist.Margins
 		sealed class SymbolReferenceMarker
 		{
 			const double MarkerMargin = 1;
-			readonly Pen _DefinitionMarkerPen = new Pen(ThemeHelper.ToolWindowTextBrush, MarkerMargin);
+			static PenStore __PenStore;
 			IVerticalScrollBar _ScrollBar;
 			CSharpMargin _Margin;
 			List<ReferenceItem> _References;
@@ -536,6 +545,10 @@ namespace Codist.Margins
 			public SymbolReferenceMarker(IVerticalScrollBar verticalScrollbar, CSharpMargin margin) {
 				_ScrollBar = verticalScrollbar;
 				_Margin = margin;
+			}
+
+			internal static void Refresh() {
+				__PenStore = null;
 			}
 
 			internal void HookEvents() {
@@ -564,7 +577,7 @@ namespace Codist.Margins
 				}
 				var snapshot = _Margin._View.TextSnapshot;
 				var snapshotLength = snapshot.Length;
-				var config = Config.Instance.SymbolReferenceMarkerSettings;
+				var penStore = __PenStore ?? (__PenStore = new PenStore());
 				foreach (var item in refs) {
 					if (_Margin._Cancellation?.IsCancellationRequested != false) {
 						break;
@@ -576,18 +589,18 @@ namespace Codist.Margins
 					Pen p = null;
 					switch (item.Usage) {
 						case SymbolUsageKind.Write:
-							b = config.WriteMarkerBrush;
+							b = penStore.WriteMarker;
 							break;
 						case SymbolUsageKind.Write | SymbolUsageKind.SetNull:
 							b = null;
-							p = config.SetNullPen;
+							p = penStore.SetNullPen;
 							break;
 						case SymbolUsageKind.Usage:
-							b = config.ReferenceMarkerBrush;
-							p = _DefinitionMarkerPen;
+							b = penStore.ReferenceMarker;
+							p = penStore.DefinitionPen;
 							break;
 						default:
-							b = config.ReferenceMarkerBrush;
+							b = penStore.ReferenceMarker;
 							break;
 					}
 					var y = _ScrollBar.GetYCoordinateOfBufferPosition(new SnapshotPoint(snapshot, item.Position));
@@ -671,6 +684,20 @@ namespace Codist.Margins
 					#endregion
 				}
 				return r;
+			}
+
+			sealed class PenStore
+			{
+				public readonly SolidColorBrush WriteMarker, ReferenceMarker;
+				public readonly Pen SetNullPen, DefinitionPen;
+
+				public PenStore() {
+					var config = Config.Instance.SymbolReferenceMarkerSettings;
+					WriteMarker = new SolidColorBrush(config.WriteMarker).MakeFrozen();
+					ReferenceMarker = new SolidColorBrush(config.ReferenceMarker).MakeFrozen();
+					SetNullPen = new Pen(WriteMarker, 1).MakeFrozen();
+					DefinitionPen = new Pen(ThemeHelper.DocumentTextBrush.Clone().MakeFrozen(), 1).MakeFrozen();
+				}
 			}
 
 			readonly struct ReferenceItem
