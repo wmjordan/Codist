@@ -56,7 +56,7 @@ namespace Codist.Controls
 		}
 
 		void TogglePinButton(object sender, RoutedEventArgs e) {
-			((ThemedToggleButton)e.Source).Content = ThemeHelper.GetImage((IsPinned = !IsPinned) ? IconIds.Pin : IconIds.Unpin);
+			((ThemedToggleButton)e.Source).Content = VsImageHelper.GetImage((IsPinned = !IsPinned) ? IconIds.Pin : IconIds.Unpin);
 		}
 
 		void CloseMenu() {

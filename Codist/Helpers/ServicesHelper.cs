@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel.Composition;
-using CLR;
 using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Shell;
@@ -21,10 +20,12 @@ namespace Codist
 		readonly SolutionDocumentEvents _DocumentEvents = new SolutionDocumentEvents();
 
 		private ServicesHelper() {
+			"Initializing ServiceHelper".Log();
 			(Get<IComponentModel, SComponentModel>() ?? throw new TypeLoadException($"Could not load {nameof(SComponentModel)}"))
 				.DefaultCompositionService
 				.SatisfyImportsOnce(this);
 			PostInitialization(ClassificationTypeExporter = new SyntaxHighlight.ClassificationTypeExporter(ClassificationTypeRegistry, ContentTypeRegistry, ClassificationFormatMap, EditorFormatMap));
+			nameof(ServicesHelper).LogInitialized();
 		}
 
 		public static ServicesHelper Instance { get; } = new ServicesHelper();
@@ -80,6 +81,7 @@ namespace Codist
 
 		static void PostInitialization(SyntaxHighlight.ClassificationTypeExporter cte) {
 			#region Create classification types for syntax highlight
+			"Registering classification types".Log();
 			cte.RegisterClassificationTypes<SyntaxHighlight.SymbolMarkerStyleTypes>();
 			cte.RegisterClassificationTypes<SyntaxHighlight.CommentStyleTypes>();
 			cte.RegisterClassificationTypes<SyntaxHighlight.CSharpStyleTypes>();
@@ -88,6 +90,7 @@ namespace Codist
 			cte.RegisterClassificationTypes<SyntaxHighlight.PrivateStyleTypes>();
 			//e.RegisterClassificationTypes<SyntaxHighlight.CppStyleTypes>();
 			cte.ExportClassificationTypes();
+			"Classification types exported".Log();
 			#endregion
 		}
 	}

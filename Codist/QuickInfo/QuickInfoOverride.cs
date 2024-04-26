@@ -351,7 +351,7 @@ namespace Codist.QuickInfo
 						return null;
 					}
 					if (tt == "SPELL") {
-						return ThemeHelper.GetImage(IconIds.Suggestion);
+						return VsImageHelper.GetImage(IconIds.Suggestion);
 					}
 				}
 				var errorTagger = GetErrorTagger();
@@ -467,7 +467,7 @@ namespace Codist.QuickInfo
 							items[i] = new ThemedTipText {
 								Text = vi.TextSnapshot.GetText(),
 								Margin = WpfHelper.MiddleBottomMargin
-							}.SetGlyph(ThemeHelper.GetImage(IconIds.Info));
+							}.SetGlyph(VsImageHelper.GetImage(IconIds.Info));
 							continue;
 						}
 						if (qi is ItemsControl ic) {
@@ -482,7 +482,7 @@ namespace Codist.QuickInfo
 								item.Content = new ThemedTipText {
 									Text = v.TextSnapshot.GetText(),
 									Margin = WpfHelper.MiddleBottomMargin
-								}.SetGlyph(ThemeHelper.GetImage(IconIds.Info));
+								}.SetGlyph(VsImageHelper.GetImage(IconIds.Info));
 							}
 						}
 					}
@@ -547,7 +547,7 @@ namespace Codist.QuickInfo
 
 			Grid ShowAlternativeSignature() {
 				var s = _Override.ClickAndGoSymbol;
-				var icon = ThemeHelper.GetImage(s.GetImageId(), ThemeHelper.QuickInfoLargeIconSize)
+				var icon = VsImageHelper.GetImage(s.GetImageId(), ThemeHelper.QuickInfoLargeIconSize)
 					.AsSymbolLink(Keyboard.Modifiers == ModifierKeys.Control ? s.OriginalDefinition : s);
 				icon.VerticalAlignment = VerticalAlignment.Top;
 				var signature = SymbolFormatter.Instance.ShowSignature(s);
@@ -677,8 +677,8 @@ namespace Codist.QuickInfo
 			static CrispImage CreateEnlargedIcon(CrispImage icon) {
 				var bgIcon = new CrispImage {
 					Moniker = icon.Moniker,
-					Width = ThemeHelper.XLargeIconSize,
-					Height = ThemeHelper.XLargeIconSize
+					Width = VsImageHelper.XLargeIconSize,
+					Height = VsImageHelper.XLargeIconSize
 				};
 				bgIcon.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 				return bgIcon;
@@ -725,11 +725,11 @@ namespace Codist.QuickInfo
 				if (GetTags(tagger, span).TryGetValue(code, out var error)) {
 					if (code[0] == 'C' && code[1] == 'S' && error == PredefinedErrorTypeNames.Warning) {
 						return CodeAnalysisHelper.GetWarningLevel(ToErrorCode(code, 2)) < 3
-							? ThemeHelper.GetImage(IconIds.SevereWarning)
-							: ThemeHelper.GetImage(IconIds.Warning);
+							? VsImageHelper.GetImage(IconIds.SevereWarning)
+							: VsImageHelper.GetImage(IconIds.Warning);
 					}
 					var iconId = GetIconIdForErrorType(error);
-					return iconId != 0 ? ThemeHelper.GetImage(iconId).SetValue(ToolTipService.SetToolTip, error) : null;
+					return iconId != 0 ? VsImageHelper.GetImage(iconId).SetValue(ToolTipService.SetToolTip, error) : null;
 				}
 				return null;
 			}

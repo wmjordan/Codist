@@ -22,11 +22,11 @@ namespace Codist.Controls
 		}
 
 		public ThemedButton(int imageId, object toolTip, Action onClickHandler)
-			: this(ThemeHelper.GetImage(imageId), toolTip, onClickHandler) { }
+			: this(VsImageHelper.GetImage(imageId), toolTip, onClickHandler) { }
 		public ThemedButton(int imageId, string text, object toolTip, Action onClickHandler)
 			: this(new StackPanel {
 				Orientation = Orientation.Horizontal,
-				Children = { ThemeHelper.GetImage(imageId).WrapMargin(WpfHelper.GlyphMargin), new TextBlock { Text = text } }
+				Children = { VsImageHelper.GetImage(imageId).WrapMargin(WpfHelper.GlyphMargin), new TextBlock { Text = text } }
 			}, toolTip, onClickHandler) { }
 
 		public ThemedButton(object content, object toolTip, Action onClickHandler)
@@ -81,10 +81,10 @@ namespace Codist.Controls
 				(object)new StackPanel {
 					Orientation = Orientation.Horizontal,
 					Children = {
-						ThemeHelper.GetImage(imageId).WrapMargin(WpfHelper.SmallHorizontalMargin),
+						VsImageHelper.GetImage(imageId).WrapMargin(WpfHelper.SmallHorizontalMargin),
 						content
 					}
-				} : ThemeHelper.GetImage(imageId).WrapMargin(WpfHelper.SmallHorizontalMargin);
+				} : VsImageHelper.GetImage(imageId).WrapMargin(WpfHelper.SmallHorizontalMargin);
 			Header = content;
 			this.ReferenceStyle(typeof(ThemedImageButton))
 				.ReferenceCrispImageBackground(EnvironmentColors.MainWindowActiveCaptionColorKey);
@@ -121,7 +121,7 @@ namespace Codist.Controls
 		public ThemedToggleButton(int imageId, string toolTip) {
 			Content = new StackPanel {
 				Children = {
-					ThemeHelper.GetImage(imageId)
+					VsImageHelper.GetImage(imageId)
 				}
 			};
 			ToolTip = toolTip;

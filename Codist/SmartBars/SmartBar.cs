@@ -445,7 +445,7 @@ namespace Codist.SmartBars
 				this.SetLazyToolTip(() => new CommandToolTip(imageId, tooltip));
 				Cursor = Cursors.Hand;
 				BorderThickness = WpfHelper.TinyMargin;
-				Content = ThemeHelper.GetImage(imageId, (int)(ThemeHelper.DefaultIconSize * bar.View.ZoomFactor())).WrapMargin(WpfHelper.SmallMargin);
+				Content = VsImageHelper.GetImage(imageId, (int)(VsImageHelper.DefaultIconSize * bar.View.ZoomFactor())).WrapMargin(WpfHelper.SmallMargin);
 				this.InheritStyle<Button>(SharedDictionaryManager.ThemedControls);
 				this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 				Click += CommandButton_Click;
@@ -585,7 +585,7 @@ namespace Codist.SmartBars
 			public CommandMenuItem(SmartBar bar, CommandItem item) {
 				_SmartBar = bar;
 				CommandItem = item;
-				Icon = ThemeHelper.GetImage(item.ImageId);
+				Icon = VsImageHelper.GetImage(item.ImageId);
 				Header = new TextBlock { Text = item.Name };
 				item.ItemInitializer?.Invoke(this);
 				// the action is installed only when called by this method

@@ -22,7 +22,7 @@ namespace Codist.Controls
 		public SymbolFilterBox(ISymbolFilterable filter) {
 			Orientation = Orientation.Horizontal;
 			Margin = WpfHelper.MenuItemMargin;
-			Children.Add(ThemeHelper.GetImage(IconIds.Filter).WrapMargin(WpfHelper.GlyphMargin));
+			Children.Add(VsImageHelper.GetImage(IconIds.Filter).WrapMargin(WpfHelper.GlyphMargin));
 			Children.Add(_FilterBox = new ThemedTextBox {
 				MinWidth = 120,
 				Margin = WpfHelper.GlyphMargin,

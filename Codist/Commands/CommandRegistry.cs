@@ -22,6 +22,7 @@ namespace Codist.Commands
 			SemanticContextCommand.Initialize();
 			ToggleAutoBuildVersionCommand.Initialize();
 			WindowInformerCommand.Initialize();
+			nameof(CommandRegistry).LogInitialized();
 		}
 
 		static CommandID GetCommandID(Command command) {

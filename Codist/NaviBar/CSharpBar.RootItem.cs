@@ -40,7 +40,7 @@ namespace Codist.NaviBar
 							new StackPanel {
 								Orientation = Orientation.Horizontal,
 								Children = {
-									ThemeHelper.GetImage(IconIds.Search).WrapMargin(WpfHelper.GlyphMargin),
+									VsImageHelper.GetImage(IconIds.Search).WrapMargin(WpfHelper.GlyphMargin),
 									(_FinderBox = new MemberFinderBox() { MinWidth = 150, ToolTip = new ThemedToolTip(R.CMD_SearchDeclaration, R.T_SearchMemberTip) }),
 									(_ScopeBox = new SearchScopeBox {
 										Contents = {

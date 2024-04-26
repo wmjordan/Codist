@@ -12,7 +12,7 @@ namespace Codist.Controls
 
 		CommandToolTip(int imageId) {
 			Orientation = Orientation.Horizontal;
-			var icon = ThemeHelper.GetImage(imageId, ThemeHelper.MiddleIconSize).WrapMargin(WpfHelper.MiddleMargin);
+			var icon = VsImageHelper.GetImage(imageId, VsImageHelper.MiddleIconSize).WrapMargin(WpfHelper.MiddleMargin);
 			icon.VerticalAlignment = VerticalAlignment.Top;
 			Children.Add(icon);
 			this.ReferenceProperty(TextBlock.ForegroundProperty, EnvironmentColors.ToolTipTextBrushKey);

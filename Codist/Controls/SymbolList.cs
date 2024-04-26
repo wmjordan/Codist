@@ -279,7 +279,7 @@ namespace Codist.Controls
 					&& f.HasConstantValue
 					&& f.Type.SpecialType == SpecialType.System_Int32
 					&& f.DeclaredAccessibility == Accessibility.Public
-					? ThemeHelper.GetImage((int)f.ConstantValue)
+					? VsImageHelper.GetImage((int)f.ConstantValue)
 					: null;
 			};
 		}
@@ -287,7 +287,7 @@ namespace Codist.Controls
 			ContainerType = SymbolListType.VsKnownImage;
 			IconProvider = s => {
 				return s.Symbol is IPropertySymbol p && p.IsStatic
-					? ThemeHelper.GetImage(p.Name)
+					? VsImageHelper.GetImage(p.Name)
 					: null;
 			};
 		}
@@ -297,8 +297,8 @@ namespace Codist.Controls
 				BorderBrush = ThemeHelper.MenuTextBrush,
 				SnapsToDevicePixels = true,
 				Background = brush,
-				Height = ThemeHelper.DefaultIconSize,
-				Width = ThemeHelper.DefaultIconSize,
+				Height = VsImageHelper.DefaultIconSize,
+				Width = VsImageHelper.DefaultIconSize,
 			};
 		}
 		#endregion

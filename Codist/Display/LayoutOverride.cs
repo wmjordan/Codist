@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
+using CLR;
+using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Events;
-using Microsoft.VisualStudio.PlatformUI;
-using CLR;
-using System.Threading;
 using SysTasks = System.Threading.Tasks;
 
 namespace Codist.Display
@@ -155,7 +154,7 @@ namespace Codist.Display
 			__TitleBlock = null;
 		}
 
-		public static void InitializeLayoutOverride() {
+		public static void Initialize() {
 			var options = Config.Instance.DisplayOptimizations;
 			if (options == DisplayOptimizations.None) {
 				return;
@@ -170,6 +169,7 @@ namespace Codist.Display
 			if (options.HasAnyFlag(DisplayOptimizations.HideUIElements)) {
 				InitHideElements(options);
 			}
+			nameof(LayoutOverride).LogInitialized();
 		}
 
 		public static void Reload(DisplayOptimizations options) {

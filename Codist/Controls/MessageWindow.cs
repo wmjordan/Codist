@@ -113,7 +113,7 @@ namespace Codist.Controls
 				MessageBoxImage.Information, IconIds.Info,
 				0);
 			if (img != 0) {
-				_Icon.Content = ThemeHelper.GetImage(img, ThemeHelper.LargeIconSize);
+				_Icon.Content = VsImageHelper.GetImage(img, VsImageHelper.LargeIconSize);
 			}
 			else {
 				_Icon.Visibility = Visibility.Collapsed;

@@ -7,7 +7,7 @@ namespace Codist.Controls
 {
 	sealed class ThemedTipDocument : Border
 	{
-		const int PlaceHolderSize = WpfHelper.IconRightMargin + ThemeHelper.DefaultIconSize;
+		const int PlaceHolderSize = WpfHelper.IconRightMargin + VsImageHelper.DefaultIconSize;
 		readonly Grid _Container;
 		int _RowCount;
 
@@ -47,7 +47,7 @@ namespace Codist.Controls
 				icon = new Border { Height = WpfHelper.IconRightMargin, Width = PlaceHolderSize };
 			}
 			else {
-				icon = ThemeHelper.GetImage(iconId).WrapMargin(WpfHelper.GlyphMargin);
+				icon = VsImageHelper.GetImage(iconId).WrapMargin(WpfHelper.GlyphMargin);
 			}
 			return AppendParagraph(icon, content);
 		}

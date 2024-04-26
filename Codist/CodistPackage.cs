@@ -101,21 +101,31 @@ namespace Codist
 			await base.InitializeAsync(cancellationToken, progress);
 
 			SolutionEvents.OnAfterCloseSolution += (s, args) => Taggers.SymbolMarkManager.Clear();
+
+			// implicitly load config here, before switching to the main thread
+			var config = Config.Instance;
+
 			// When initialized asynchronously, the current thread may be a background thread at this point.
 			// Do any initialization that requires the UI thread after switching to the UI thread.
 			await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 
+			"Package initialization switched to main thread".Log();
 			//_extenderCookie = DTE.ObjectExtenders.RegisterExtenderProvider(VSConstants.CATID.CSharpFileProperties_string, BuildBots.AutoReplaceExtenderProvider.Name, new BuildBots.AutoReplaceExtenderProvider());
 			Commands.CommandRegistry.Initialize();
 			Display.JumpListEnhancer.Initialize();
-			Display.LayoutOverride.InitializeLayoutOverride();
+			Display.LayoutOverride.Initialize();
+			if (config.DisplayOptimizations != DisplayOptimizations.None) {
+				Display.ResourceMonitor.Reload(config.DisplayOptimizations);
+			}
+			//await Commands.FavoritesWindowCommand.InitializeAsync(this);
 
-			if (Config.Instance.InitStatus != InitStatus.Normal) {
+			if (config.InitStatus != InitStatus.Normal) {
 				InitializeOrUpgradeConfig();
+				"Config upgraded.".Log();
 			}
 			Commands.SyntaxCustomizerWindowCommand.Initialize();
 
-			"Package initialization finished".Log();
+			"Package initialization finished.".Log();
 			//ListEditorCommands();
 		}
 

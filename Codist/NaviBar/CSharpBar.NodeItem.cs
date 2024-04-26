@@ -513,7 +513,7 @@ namespace Codist.NaviBar
 					if (container == null) {
 						container = new StackPanel { Orientation = Orientation.Horizontal };
 					}
-					container.Children.Add(ThemeHelper.GetImage(imageId));
+					container.Children.Add(VsImageHelper.GetImage(imageId));
 				}
 			}
 

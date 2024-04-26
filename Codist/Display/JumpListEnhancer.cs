@@ -40,6 +40,7 @@ namespace Codist.Display
 			}
 
 			list.Apply();
+			nameof(JumpListEnhancer).LogInitialized();
         }
 
 		static void AddJumpListItem(JumpList list, string appPath, string title, string description, string arguments) {

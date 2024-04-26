@@ -18,7 +18,7 @@ namespace Codist.Controls
 			var referrers = await symbol.FindReferrersAsync(context.Document.Project, filter, nodeFilter);
 			await SyncHelper.SwitchToMainThreadAsync(default);
 			var m = new SymbolMenu(context, SymbolListType.SymbolReferrers);
-			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
+			m.Title.SetGlyph(VsImageHelper.GetImage(symbol.GetImageId()))
 				.AddSymbol(symbol, null, true, SymbolFormatter.Instance)
 				.Append(R.T_Referrers);
 			if (referrers != null) {
@@ -100,7 +100,7 @@ namespace Codist.Controls
 			foreach (var item in ovs) {
 				m.Add(item, item.ContainingType);
 			}
-			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
+			m.Title.SetGlyph(VsImageHelper.GetImage(symbol.GetImageId()))
 				.AddSymbol(symbol, null, true, SymbolFormatter.Instance)
 				.Append(R.T_Overrides)
 				.Append(c.ToString());
@@ -143,7 +143,7 @@ namespace Codist.Controls
 					}
 				}
 			}
-			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
+			m.Title.SetGlyph(VsImageHelper.GetImage(symbol.GetImageId()))
 				.AddSymbol(symbol, null, true, SymbolFormatter.Instance)
 				.Append(R.T_Implementations)
 				.Append(implementations.Count.ToString());
@@ -188,7 +188,7 @@ namespace Codist.Controls
 					m.ExtIconProvider = ExtIconProvider.Default.GetExtIcons;
 				}
 			}
-			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
+			m.Title.SetGlyph(VsImageHelper.GetImage(symbol.GetImageId()))
 				.AddSymbol(symbol, null, true, SymbolFormatter.Instance)
 				.Append(countLabel);
 			m.Show(positionElement);
@@ -226,7 +226,7 @@ namespace Codist.Controls
 
 		internal static void ShowLocations(this SemanticContext context, ISymbol symbol, ImmutableArray<SyntaxReference> locations, UIElement positionElement = null) {
 			var m = new SymbolMenu(context, SymbolListType.Locations);
-			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
+			m.Title.SetGlyph(VsImageHelper.GetImage(symbol.GetImageId()))
 				.AddSymbol(symbol, null, true, SymbolFormatter.Instance);
 			if (locations.Length != 0) {
 				m.Title.Append(R.T_SourceLocations).Append(locations.Length);
@@ -249,7 +249,7 @@ namespace Codist.Controls
 		static void ShowSymbolMenuForResult<TSymbol>(ISymbol symbol, SemanticContext context, List<TSymbol> members, string suffix, bool groupByType) where TSymbol : ISymbol {
 			members.Sort(CodeAnalysisHelper.CompareSymbol);
 			var m = new SymbolMenu(context);
-			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
+			m.Title.SetGlyph(VsImageHelper.GetImage(symbol.GetImageId()))
 				.AddSymbol(symbol, null, true, SymbolFormatter.Instance)
 				.Append(suffix);
 			INamedTypeSymbol containingType = null;
@@ -273,7 +273,7 @@ namespace Codist.Controls
 			}
 			members.Sort(CodeAnalysisHelper.CompareSymbol);
 			var m = new SymbolMenu(context);
-			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
+			m.Title.SetGlyph(VsImageHelper.GetImage(symbol.GetImageId()))
 				.AddSymbol(symbol, null, true, SymbolFormatter.Instance)
 				.Append(suffix);
 			foreach (var item in members) {

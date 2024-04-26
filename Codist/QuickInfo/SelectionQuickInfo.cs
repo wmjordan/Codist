@@ -82,7 +82,7 @@ namespace Codist.QuickInfo
 				}
 			}
 		RETURN:
-			return new QuickInfoItem(activeSpan.ToTrackingSpan(), info.SetGlyph(ThemeHelper.GetImage(IconIds.SelectCode)).Tag());
+			return new QuickInfoItem(activeSpan.ToTrackingSpan(), info.SetGlyph(VsImageHelper.GetImage(IconIds.SelectCode)).Tag());
 		}
 	}
 }

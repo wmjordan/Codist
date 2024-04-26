@@ -36,8 +36,6 @@ namespace Codist
 
 		public string Version { get; set; }
 		internal InitStatus InitStatus { get; private set; }
-		public string LogPath { get => LogHelper.LogPath; set => LogHelper.LogPath = value; }
-		public bool ShouldSerializeLogPath() => String.IsNullOrEmpty(LogPath) == false;
 
 		[DefaultValue(Features.All)]
 		public Features Features { get; set; } = Features.Default;
@@ -170,13 +168,14 @@ namespace Codist
 			$"Error: {handler} has not been registered as update handler".Log();
 		}
 
-		public static Config InitConfig() {
+		static Config InitConfig() {
 			if (File.Exists(ConfigPath) == false) {
 				var config = GetDefaultConfig();
 				config.InitStatus = InitStatus.FirstLoad;
 				return config;
 			}
 			try {
+				"Begin load config".Log();
 				var config = InternalLoadConfig(ConfigPath, StyleFilters.None);
 				if (System.Version.TryParse(config.Version, out var v) == false
 					|| v < System.Version.Parse(CurrentVersion)) {
@@ -274,7 +273,8 @@ namespace Codist
 				return Instance;
 			}
 
-			if (Application.Current.MainWindow.Visibility == Visibility.Visible) {
+			if (Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskContext.IsOnMainThread
+				&& Application.Current.MainWindow.Visibility == Visibility.Visible) {
 				UpdateDisplay(config);
 			}
 			//else {

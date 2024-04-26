@@ -21,7 +21,7 @@ namespace Codist.Controls
 			ItemsControlMaxHeight = 500;
 			HorizontalContentAlignment = HorizontalAlignment.Stretch;
 			Resources = SharedDictionaryManager.VirtualList;
-			this.ReferenceCrispImageBackground(EnvironmentColors.MainWindowActiveCaptionColorKey);
+this.ReferenceCrispImageBackground(EnvironmentColors.MainWindowActiveCaptionColorKey);
 		}
 
 		public UIElement Header {
@@ -143,7 +143,7 @@ namespace Codist.Controls
 
 		public abstract int ImageId { get; }
 		public UIElement Icon {
-			get => _Icon ?? ThemeHelper.GetImage(ImageId);
+			get => _Icon ?? VsImageHelper.GetImage(ImageId);
 			set => _Icon = value;
 		}
 		public string Hint { get; set; }

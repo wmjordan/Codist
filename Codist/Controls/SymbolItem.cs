@@ -28,7 +28,7 @@ namespace Codist.Controls
 		public SymbolUsageKind Usage { get; set; }
 
 		public int ImageId => _ImageId != 0 ? _ImageId : (_ImageId = Symbol != null ? Symbol.GetImageId() : SyntaxNode != null ? SyntaxNode.GetImageId() : -1);
-		public UIElement Icon => _Icon ?? (_Icon = Container?.IconProvider?.Invoke(this) ?? ThemeHelper.GetImage(ImageId != -1 ? ImageId : 0));
+		public UIElement Icon => _Icon ?? (_Icon = Container?.IconProvider?.Invoke(this) ?? VsImageHelper.GetImage(ImageId != -1 ? ImageId : 0));
 		public UIElement ExtIcon => Container?.ExtIconProvider?.Invoke(this);
 		public string Hint {
 			get => _Hint ?? (_Hint = Symbol != null && Container != null && Symbol.Kind == SymbolKind.Field ? GetSymbolConstantValue(Symbol, Container.ContainerType == SymbolListType.EnumFlags) : String.Empty);

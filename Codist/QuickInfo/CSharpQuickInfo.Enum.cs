@@ -65,7 +65,7 @@ namespace Codist.QuickInfo
 					SymbolFormatter.Instance.ShowFieldConstantText(ft.Inlines, f, isFlags);
 					g.Add(new TextBlock { Foreground = ThemeHelper.ToolTipTextBrush }
 							.AddSymbol(f, false, SymbolFormatter.Instance)
-							.SetGlyph(ThemeHelper.GetImage(IconIds.EnumField))
+							.SetGlyph(VsImageHelper.GetImage(IconIds.EnumField))
 							.SetValue(Grid.SetRow, rc))
 						.Add(ft
 							.SetValue(Grid.SetRow, rc)

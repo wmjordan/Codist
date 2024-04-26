@@ -329,7 +329,7 @@ namespace Codist.NaviBar
 						new StackPanel {
 							Orientation = Orientation.Horizontal,
 							Children = {
-								ThemeHelper.GetImage(IconIds.Search).WrapMargin(WpfHelper.GlyphMargin),
+								VsImageHelper.GetImage(IconIds.Search).WrapMargin(WpfHelper.GlyphMargin),
 								(_FinderBox = new ThemedTextBox { MinWidth = 150 }),
 								new ThemedControlGroup(b) { Margin = WpfHelper.SmallHorizontalMargin }
 							}

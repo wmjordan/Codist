@@ -81,7 +81,7 @@ namespace Codist.QuickInfo
 							SyntaxKind.ObjectInitializerExpression,
 							CodeAnalysisHelper.WithInitializerExpression)) {
 						container.Add(new ThemedTipText()
-							.SetGlyph(ThemeHelper.GetImage(IconIds.InstanceMember))
+							.SetGlyph(VsImageHelper.GetImage(IconIds.InstanceMember))
 							.Append(R.T_ExpressionCount)
 							.Append((node as InitializerExpressionSyntax).Expressions.Count.ToText(), true, false, __SymbolFormatter.Number));
 					}
@@ -231,13 +231,13 @@ namespace Codist.QuickInfo
 					return null;
 				case SyntaxKind.EndRegionKeyword:
 					container.Add(new ThemedTipText(R.T_EndOfRegion)
-						.SetGlyph(ThemeHelper.GetImage(IconIds.Region))
+						.SetGlyph(VsImageHelper.GetImage(IconIds.Region))
 						.Append((unitCompilation.FindNode(token.Span, true) as EndRegionDirectiveTriviaSyntax).GetRegion()?.GetDeclarationSignature(), true)
 						);
 					return CreateQuickInfoItem(session, token, container.ToUI());
 				case SyntaxKind.EndIfKeyword:
 					container.Add(new ThemedTipText(R.T_EndOfIf)
-						.SetGlyph(ThemeHelper.GetImage(IconIds.Region))
+						.SetGlyph(VsImageHelper.GetImage(IconIds.Region))
 						.Append((unitCompilation.FindNode(token.Span, true) as EndIfDirectiveTriviaSyntax).GetIf()?.GetDeclarationSignature(), true)
 						);
 					return CreateQuickInfoItem(session, token, container.ToUI());
@@ -673,12 +673,12 @@ namespace Codist.QuickInfo
 					foreach (var section in ((SwitchStatementSyntax)node).Sections) {
 						cases += section.Labels.Count;
 					}
-					qiContent.Add(new ThemedTipText($"{s} switch sections, {cases} cases").SetGlyph(ThemeHelper.GetImage(IconIds.Switch)));
+					qiContent.Add(new ThemedTipText($"{s} switch sections, {cases} cases").SetGlyph(VsImageHelper.GetImage(IconIds.Switch)));
 				}
 				else if (s == 1) {
 					s = ((SwitchStatementSyntax)node).Sections[0].Labels.Count;
 					if (s > 1) {
-						qiContent.Add(new ThemedTipText($"1 switch section, {s} cases").SetGlyph(ThemeHelper.GetImage(IconIds.Switch)));
+						qiContent.Add(new ThemedTipText($"1 switch section, {s} cases").SetGlyph(VsImageHelper.GetImage(IconIds.Switch)));
 					}
 				}
 			}
@@ -713,7 +713,7 @@ namespace Codist.QuickInfo
 				}
 				var symbol = semanticModel.GetSymbolInfo(node, cancellationToken).Symbol ?? semanticModel.GetDeclaredSymbol(node, cancellationToken);
 				var t = new ThemedTipText();
-				t.SetGlyph(ThemeHelper.GetImage(IconIds.ReturnValue));
+				t.SetGlyph(VsImageHelper.GetImage(IconIds.ReturnValue));
 				if (method != null) {
 					if (method.MethodKind == MethodKind.AnonymousFunction) {
 						t.Append(R.T_ReturnAnonymousFunction);
@@ -889,7 +889,7 @@ namespace Codist.QuickInfo
 			if (members.Length > 0) {
 				var info = new StackPanel().Add(new ThemedTipText(R.T_Type, true));
 				foreach (var type in members) {
-					var t = new ThemedTipText().SetGlyph(ThemeHelper.GetImage(type.GetImageId()));
+					var t = new ThemedTipText().SetGlyph(VsImageHelper.GetImage(type.GetImageId()));
 					__SymbolFormatter.ShowSymbolDeclaration(type, t, true, true);
 					t.AddSymbol(type, false, __SymbolFormatter);
 					info.Add(t);

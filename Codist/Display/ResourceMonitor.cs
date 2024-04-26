@@ -96,11 +96,12 @@ namespace Codist.Display
 			if (Interlocked.CompareExchange(ref __IsInited, 1, 0) == 0) {
 				__IsInited = 1;
 				statusPanel.Children.Insert(0, __MeterContainer);
-				__MeterContainer.MouseLeftButtonUp += StartTaskMgr;
+				__MeterContainer.MouseLeftButtonUp += StartTaskManager;
+				nameof(ResourceMonitor).LogInitialized();
 			}
 		}
 
-		static void StartTaskMgr(object sender, System.Windows.Input.MouseButtonEventArgs e) {
+		static void StartTaskManager(object sender, System.Windows.Input.MouseButtonEventArgs e) {
 			try {
 				ExternalCommand.OpenTaskManager();
 			}
@@ -115,7 +116,7 @@ namespace Codist.Display
 
 			protected Meter(int iconId, string tooltip) {
 				Orientation = Orientation.Horizontal;
-				Children.Add(ThemeHelper.GetImage(iconId).WrapMargin(WpfHelper.SmallHorizontalMargin));
+				Children.Add(VsImageHelper.GetImage(iconId).WrapMargin(WpfHelper.SmallHorizontalMargin));
 				Children.Add(_Label = new TextBlock { MinWidth = 40, VerticalAlignment = VerticalAlignment.Center }.ReferenceProperty(Control.ForegroundProperty, EnvironmentColors.StatusBarDefaultTextBrushKey));
 				ToolTip = new CommandToolTip(iconId, tooltip)
 					.ReferenceCrispImageBackground(EnvironmentColors.ToolTipColorKey);

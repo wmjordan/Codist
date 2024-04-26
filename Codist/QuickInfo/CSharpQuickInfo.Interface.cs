@@ -84,7 +84,7 @@ namespace Codist.QuickInfo
 						continue;
 					}
 					t.AddSymbol(member, false, SymbolFormatter.Instance)
-						.Append(ThemeHelper.GetImage(IconIds.MissingImplementation).WrapMargin(WpfHelper.SmallHorizontalMargin).SetOpacity(WpfHelper.DimmedOpacity));
+						.Append(VsImageHelper.GetImage(IconIds.MissingImplementation).WrapMargin(WpfHelper.SmallHorizontalMargin).SetOpacity(WpfHelper.DimmedOpacity));
 				}
 				else {
 					t.AddSymbol(member, false, SymbolFormatter.Instance);
@@ -155,7 +155,7 @@ namespace Codist.QuickInfo
 						intf.GetImageId(),
 						ToUIText(intf)
 							.Append(" : ", SymbolFormatter.SemiTransparent.PlainText)
-							.Append(ThemeHelper.GetImage(baseType.GetImageId()).WrapMargin(WpfHelper.GlyphMargin).SetOpacity(SymbolFormatter.TransparentLevel))
+							.Append(VsImageHelper.GetImage(baseType.GetImageId()).WrapMargin(WpfHelper.GlyphMargin).SetOpacity(SymbolFormatter.TransparentLevel))
 							.AddSymbol(baseType, false, SymbolFormatter.SemiTransparent))));
 				}
 				allInterfaces.Sort((x, y) => x.Item1.CompareTo(y.Item1));
@@ -173,7 +173,7 @@ namespace Codist.QuickInfo
 						intf.IsDisposable() ? IconIds.Disposable : intf.GetImageId(),
 						ToUIText(intf)
 							.Append(" : ", SymbolFormatter.SemiTransparent.PlainText)
-							.Append(ThemeHelper.GetImage(baseType.GetImageId()).WrapMargin(WpfHelper.GlyphMargin).SetOpacity(SymbolFormatter.TransparentLevel))
+							.Append(VsImageHelper.GetImage(baseType.GetImageId()).WrapMargin(WpfHelper.GlyphMargin).SetOpacity(SymbolFormatter.TransparentLevel))
 							.AddSymbol(baseType, false, SymbolFormatter.SemiTransparent)));
 				}
 			}

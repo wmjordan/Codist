@@ -172,16 +172,19 @@ namespace Codist.Options
 											Child = new StackPanel {
 												Orientation = Orientation.Horizontal,
 												Children = {
-													ThemeHelper.GetImage(IconIds.Filter).ReferenceCrispImageBackground(EnvironmentColors.ToolWindowBackgroundColorKey).WrapMargin(WpfHelper.GlyphMargin),
+													VsImageHelper.GetImage(IconIds.Filter)
+														.ReferenceCrispImageBackground(EnvironmentColors.ToolWindowBackgroundColorKey)
+														.WrapMargin(WpfHelper.GlyphMargin),
 													new ThemedTextBox {
 														Width = 120,
 														Margin = WpfHelper.SmallMargin,
 														ToolTip = R.OT_FilterStyleNamesTip
 													}.Set(ref _SettingsFilterBox),
-													new ThemedControlGroup(new ThemedToggleButton(IconIds.FilterCustomized, R.OT_ShowCustomizedStylesTip).Set(ref _OverriddenStyleFilterButton),
+													new ThemedControlGroup(new ThemedToggleButton(IconIds.FilterCustomized, R.OT_ShowCustomizedStylesTip)
+														.Set(ref _OverriddenStyleFilterButton),
 															new ThemedImageButton(IconIds.Add, R.CMD_Add).Set(ref _AddTagButton),
 															new ThemedImageButton(IconIds.Remove, R.CMD_Remove).Set(ref _RemoveTagButton),
-															new ThemedButton(ThemeHelper.GetImage(IconIds.ClearFilter), R.CMD_ClearFilter).Set(ref _ClearFilterButton)) { Margin = WpfHelper.SmallVerticalMargin },
+															new ThemedButton(VsImageHelper.GetImage(IconIds.ClearFilter), R.CMD_ClearFilter).Set(ref _ClearFilterButton)) { Margin = WpfHelper.SmallVerticalMargin },
 												}
 											}
 										}.SetValue(Grid.SetColumn, 1)
@@ -675,8 +678,8 @@ namespace Codist.Options
 				return new Border {
 					BorderThickness = WpfHelper.TinyMargin,
 					BorderBrush = ThemeHelper.ToolTipTextBrush,
-					Width = ThemeHelper.DefaultIconSize,
-					Height = ThemeHelper.DefaultIconSize,
+					Width = VsImageHelper.DefaultIconSize,
+					Height = VsImageHelper.DefaultIconSize,
 					Background = brush,
 					Margin = WpfHelper.GlyphMargin
 				};
@@ -1423,7 +1426,7 @@ namespace Codist.Options
 
 			void SetStyle(StyleBase style) {
 				_Style = style;
-				_StyleSetIndicator.Child = ThemeHelper.GetImage(style.IsSet ? IconIds.CustomizeStyle : IconIds.None);
+				_StyleSetIndicator.Child = VsImageHelper.GetImage(style.IsSet ? IconIds.CustomizeStyle : IconIds.None);
 			}
 
 			static TextBlock PreviewLabelStyle(TextBlock preview, TextFormattingRunProperties format) {
