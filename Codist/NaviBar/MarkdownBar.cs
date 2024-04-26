@@ -35,7 +35,7 @@ namespace Codist.NaviBar
 			Name = nameof(MarkdownBar);
 			BindView();
 			_ActiveTitleLabel = new ThemedToolBarText(R.T_Headings);
-			Items.Add(_ActiveTitle = new ThemedImageButton(IconIds.Headings, _ActiveTitleLabel)
+			Items.Add(_ActiveTitle = new ThemedImageButton(IconIds.Headings, _ActiveTitleLabel) { MaxWidth = 250 }
 				.HandleEvent(ButtonBase.ClickEvent, ShowTitleList));
 			AddTagButton(IconIds.TagBold, R.CMD_MarkBold, ToggleBold);
 			AddTagButton(IconIds.TagItalic, R.CMD_MarkItalic, ToggleItalic);
