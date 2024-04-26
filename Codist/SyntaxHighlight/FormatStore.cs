@@ -725,7 +725,11 @@ namespace Codist.SyntaxHighlight
 						style.LineColor = style.LineColor.InvertBrightness();
 					}
 				}
-				Config.Instance.QuickInfo.BackColor = Config.Instance.QuickInfo.BackColor.InvertBrightness();
+
+				var qi = Config.Instance.QuickInfo;
+				if (qi.BackColor.A != 0) {
+					qi.BackColor = qi.BackColor.InvertBrightness();
+				}
 			}
 
 			void HighlightRecursive(IClassificationType ct, HashSet<IClassificationType> dedup, List<KeyValuePair<string, ResourceDictionary>> updates) {
