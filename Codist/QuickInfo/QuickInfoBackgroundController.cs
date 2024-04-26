@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using CLR;
 using Microsoft.VisualStudio.Language.Intellisense;
 
 namespace Codist.QuickInfo
@@ -17,15 +18,22 @@ namespace Codist.QuickInfo
 			Config.RegisterUpdateHandler(ConfigUpdated);
 		}
 
-		void ConfigUpdated(ConfigUpdatedEventArgs obj) {
-			UpdateBackgroundBrush();
+		void ConfigUpdated(ConfigUpdatedEventArgs args) {
+			if (args.UpdatedFeature.MatchFlags(Features.SuperQuickInfo)) {
+				UpdateBackgroundBrush();
+			}
 		}
 
 		void UpdateBackgroundBrush() {
-			var bc = Config.Instance.QuickInfo.BackgroundColor;
-			if (String.IsNullOrEmpty(bc) == false && bc != Constants.EmptyColor) {
-				UIHelper.ParseColor(bc, out var c, out var o);
-				_Background = new SolidColorBrush(c);
+			var bc = Config.Instance.QuickInfo.BackColor;
+			var o = bc.A;
+			if (o != 0) {
+				if (_Background == null) {
+					_Background = new SolidColorBrush(bc.Alpha(Byte.MaxValue));
+				}
+				else {
+					_Background.Color = bc.Alpha(Byte.MaxValue);
+				}
 				if (o > 0) {
 					_Background.Opacity = o / 255d;
 				}

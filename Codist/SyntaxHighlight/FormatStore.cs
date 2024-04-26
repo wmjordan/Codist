@@ -729,6 +729,7 @@ namespace Codist.SyntaxHighlight
 				var qi = Config.Instance.QuickInfo;
 				if (qi.BackColor.A != 0) {
 					qi.BackColor = qi.BackColor.InvertBrightness();
+					Config.Instance.FireConfigChangedEvent(Features.SuperQuickInfo);
 				}
 			}
 
