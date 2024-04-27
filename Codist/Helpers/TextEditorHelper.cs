@@ -224,7 +224,7 @@ namespace Codist
 			var start = span.Start.Position;
 			var end = span.End.Position;
 			for (int i = start; i < end; i++) {
-				if (snapshot[i].CeqAny(' ', '\t') == false) {
+				if (snapshot[i].IsCodeWhitespaceChar() == false) {
 					return false;
 				}
 			}
@@ -238,7 +238,7 @@ namespace Codist
 			var start = span.Start.Position;
 			var end = span.End.Position;
 			for (int i = start; i < end; i++) {
-				if (snapshot[i].CeqAny(' ', '\t') == false) {
+				if (snapshot[i].IsCodeWhitespaceChar() == false) {
 					return i;
 				}
 			}
@@ -1283,6 +1283,12 @@ namespace Codist
 
 		public static bool IsCodeWhitespaceChar(this char ch) {
 			return ch.CeqAny(' ', '\t');
+		}
+		public static bool IsCodeWhitespaceOrNewLine(this char ch) {
+			return ch.CeqAny(' ', '\t', '\r', '\n');
+		}
+		public static bool IsNewLine(this char ch) {
+			return ch.CeqAny('\r', '\n');
 		}
 		public static bool LikeContentType(this ITextBuffer textBuffer, string typeName) {
 			var n = textBuffer.ContentType.TypeName;
