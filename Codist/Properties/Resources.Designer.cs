@@ -4831,6 +4831,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Symbol definition:.
+        /// </summary>
+        internal static string OT_SymbolDefinitionColor {
+            get {
+                return ResourceManager.GetString("OT_SymbolDefinitionColor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Containing namespace and assembly.
         /// </summary>
         internal static string OT_SymbolLocation {

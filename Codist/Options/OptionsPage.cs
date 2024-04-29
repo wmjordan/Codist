@@ -634,7 +634,7 @@ namespace Codist.Options
 		{
 			readonly OptionBox<MarkerOptions> _LineNumber, _Selection, _SpecialComment, _MarkerDeclarationLine, _LongMemberDeclaration, _TypeDeclaration, _MethodDeclaration, _RegionDirective, _CompilerDirective, _SymbolReference, _DisableChangeTracker;
 			readonly OptionBox<MarkerOptions>[] _Options;
-			readonly ColorButton _SymbolReferenceButton, _SymbolWriteButton;
+			readonly ColorButton _SymbolReferenceButton, _SymbolWriteButton, _SymbolDefinitionButton;
 
 			public PageControl(OptionsPage page) : base(page) {
 				var o = Config.Instance.MarkerOptions;
@@ -675,6 +675,10 @@ namespace Codist.Options
 							new StackPanel().MakeHorizontal().Add(
 								new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin }.Append(R.OT_WriteSymbolColor),
 								new ColorButton(Margins.SymbolReferenceMarkerStyle.DefaultWriteMarkerColor, R.T_Color, UpdateSymbolWriteColor).Set(ref _SymbolWriteButton)
+								),
+							new StackPanel().MakeHorizontal().Add(
+								new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin }.Append(R.OT_SymbolDefinitionColor),
+								new ColorButton(Margins.SymbolReferenceMarkerStyle.DefaultSymbolDefinitionColor, R.T_Color, UpdateSymbolDefinitionColor).Set(ref _SymbolDefinitionButton)
 								)
 						}
 					}.WrapMargin(SubOptionMargin)
@@ -688,12 +692,14 @@ namespace Codist.Options
 					item.WrapMargin(SubOptionMargin);
 				}
 				_MarkerDeclarationLine.BindDependentOptionControls(dubOptions);
-				_SymbolReference.BindDependentOptionControls(_SymbolReferenceButton, _SymbolWriteButton);
+				_SymbolReference.BindDependentOptionControls(_SymbolReferenceButton, _SymbolWriteButton, _SymbolDefinitionButton);
 				_DisableChangeTracker.IsEnabled = CodistPackage.VsVersion.Major >= 17;
 				_SymbolReferenceButton.DefaultColor = () => Margins.SymbolReferenceMarkerStyle.DefaultReferenceMarkerColor;
 				_SymbolReferenceButton.Color = Config.Instance.SymbolReferenceMarkerSettings.ReferenceMarker;
 				_SymbolWriteButton.DefaultColor = () => Margins.SymbolReferenceMarkerStyle.DefaultWriteMarkerColor;
 				_SymbolWriteButton.Color = Config.Instance.SymbolReferenceMarkerSettings.WriteMarker;
+				_SymbolDefinitionButton.DefaultColor = () => Margins.SymbolReferenceMarkerStyle.DefaultSymbolDefinitionColor;
+				_SymbolDefinitionButton.Color = Config.Instance.SymbolReferenceMarkerSettings.SymbolDefinition;
 			}
 
 			protected override void LoadConfig(Config config) {
@@ -727,6 +733,17 @@ namespace Codist.Options
 				Config.Instance.SymbolReferenceMarkerSettings.WriteMarkerColor = color.ToHexString();
 				if (color.A == 0) {
 					_SymbolWriteButton.Color = Margins.SymbolReferenceMarkerStyle.DefaultWriteMarkerColor;
+				}
+				Config.Instance.FireConfigChangedEvent(Features.ScrollbarMarkers);
+			}
+
+			void UpdateSymbolDefinitionColor(Color color) {
+				if (Page.IsConfigUpdating) {
+					return;
+				}
+				Config.Instance.SymbolReferenceMarkerSettings.SymbolDefinitionColor = color.ToHexString();
+				if (color.A == 0) {
+					_SymbolDefinitionButton.Color = Margins.SymbolReferenceMarkerStyle.DefaultSymbolDefinitionColor;
 				}
 				Config.Instance.FireConfigChangedEvent(Features.ScrollbarMarkers);
 			}

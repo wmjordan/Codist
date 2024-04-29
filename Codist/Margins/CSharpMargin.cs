@@ -696,7 +696,7 @@ namespace Codist.Margins
 					WriteMarker = new SolidColorBrush(config.WriteMarker).MakeFrozen();
 					ReferenceMarker = new SolidColorBrush(config.ReferenceMarker).MakeFrozen();
 					SetNullPen = new Pen(WriteMarker, 1).MakeFrozen();
-					DefinitionPen = new Pen(ThemeHelper.DocumentTextBrush.Clone().MakeFrozen(), 1).MakeFrozen();
+					DefinitionPen = new Pen(new SolidColorBrush(config.SymbolDefinition).MakeFrozen(), 1).MakeFrozen();
 				}
 			}
 
