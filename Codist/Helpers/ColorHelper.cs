@@ -137,6 +137,9 @@ namespace Codist
 		}
 
 		public static WpfColor InvertBrightness(this WpfColor color) {
+			if (color.A == 0) {
+				return color;
+			}
 			var g = color.ToGdiColor();
 			return FromHsl(g.GetHue(), g.GetSaturation(), 1 - g.GetBrightness()).Alpha(color.A);
 		}
