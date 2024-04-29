@@ -255,6 +255,7 @@ namespace Codist
 		public const int Opacity = KnownImageIds.FillOpacity;
 		public const int CustomizeStyle = KnownImageIds.StyleBlock;
 		public const int PickColor = KnownImageIds.ColorDialog;
+		public const int Brightness = KnownImageIds.Brightness;
 		public const int Reset = KnownImageIds.EmptyBucket;
 		public const int ResetTheme = KnownImageIds.CleanData;
 		public const int Cpu = KnownImageIds.Processor;
