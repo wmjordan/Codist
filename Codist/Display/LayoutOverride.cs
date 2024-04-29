@@ -56,6 +56,7 @@ namespace Codist.Display
 			else if (element != DisplayOptimizations.HideSearchBox
 				|| g.GetFirstVisualChild<UserControl>(ControlTypeMatcher.PackageAllInOneSearchButtonPresenter.Match)
 					?.GetParent<ContentPresenter>(i => i.Name == "DataTemplatePresenter")
+					?.GetParent<FrameworkElement>(i => i.Name == "PART_TitleBarLeftFrameControlContainer")
 					?.ToggleVisibility(show) == null) {
 				return false;
 			}
