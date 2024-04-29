@@ -3567,6 +3567,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Hide version info badge button.
+        /// </summary>
+        internal static string OT_HideInfoBadgeButton {
+            get {
+                return ResourceManager.GetString("OT_HideInfoBadgeButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Hide Quick Info until Shift key is pressed.
         /// </summary>
         internal static string OT_HideQuickInfoUntilShift {

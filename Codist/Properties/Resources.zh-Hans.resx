@@ -2727,6 +2727,9 @@ Ctrl: 切换标记并选择下一处</value>
   <data name="OT_HideCopilotButton" xml:space="preserve">
     <value>隐藏 Github Copilot 按钮</value>
   </data>
+  <data name="OT_HideInfoBadgeButton" xml:space="preserve">
+    <value>隐藏版本信息按钮</value>
+  </data>
   <data name="OT_SymbolDefinitionColor" xml:space="preserve">
     <value>符号定义标记:</value>
   </data>

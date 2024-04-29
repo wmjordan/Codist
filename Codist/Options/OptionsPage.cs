@@ -814,7 +814,7 @@ namespace Codist.Options
 		sealed class PageControl : OptionsPageContainer
 		{
 			readonly Controls.IntegerBox _TopSpace, _BottomSpace;
-			readonly OptionBox<DisplayOptimizations> _MainWindow, _CodeWindow, _MenuLayoutOverride, _HideSearchBox, _HideAccountBox, _HideFeedbackButton, _HideCodePilotButton, _CpuMonitor, _MemoryMonitor, _DriveMonitor, _NetworkMonitor;
+			readonly OptionBox<DisplayOptimizations> _MainWindow, _CodeWindow, _MenuLayoutOverride, _HideSearchBox, _HideAccountBox, _HideFeedbackButton, _HideCodePilotButton, _HideInfoBadgeButton, _CpuMonitor, _MemoryMonitor, _DriveMonitor, _NetworkMonitor;
 			readonly OptionBox<BuildOptions> _BuildTimestamp, _ShowOutputWindowAfterBuild;
 			readonly TextBox _TaskManagerPath, _TaskManagerParameter;
 			readonly Button _BrowseTaskManagerPath;
@@ -894,6 +894,7 @@ namespace Codist.Options
 							Config.Instance.DisplayOptimizations.CreateOptionBox(DisplayOptimizations.HideAccountBox, UpdateHideAccountBoxOption, R.OT_HideAccountIcon).Set(ref _HideAccountBox),
 							Config.Instance.DisplayOptimizations.CreateOptionBox(DisplayOptimizations.HideFeedbackBox, UpdateHideFeedbackButtonOption, R.OT_HideFeedbackButton).Set(ref _HideFeedbackButton),
 							Config.Instance.DisplayOptimizations.CreateOptionBox(DisplayOptimizations.HideCopilotButton, UpdateHideCodePilotButtonOption, R.OT_HideCopilotButton).Set(ref _HideCodePilotButton),
+							Config.Instance.DisplayOptimizations.CreateOptionBox(DisplayOptimizations.HideInfoBadgeButton, UpdateHideInfoBadgeButtonOption, R.OT_HideInfoBadgeButton).Set(ref _HideInfoBadgeButton),
 						}
 					}
 					.ForEachChild((CheckBox b) => b.MinWidth = MinColumnWidth)
@@ -928,6 +929,7 @@ namespace Codist.Options
 				_HideFeedbackButton.UpdateWithOption(o);
 				_HideSearchBox.UpdateWithOption(o);
 				_HideCodePilotButton.UpdateWithOption(o);
+				_HideInfoBadgeButton.UpdateWithOption(o);
 				_BuildTimestamp.UpdateWithOption(config.BuildOptions);
 				_ShowOutputWindowAfterBuild.UpdateWithOption(config.BuildOptions);
 			}
@@ -995,6 +997,10 @@ namespace Codist.Options
 
 			void UpdateHideCodePilotButtonOption(DisplayOptimizations options, bool value) {
 				ToggleTitleBarElement(options, value, DisplayOptimizations.HideCopilotButton);
+			}
+
+			void UpdateHideInfoBadgeButtonOption(DisplayOptimizations options, bool value) {
+				ToggleTitleBarElement(options, value, DisplayOptimizations.HideInfoBadgeButton);
 			}
 
 			void ToggleTitleBarElement(DisplayOptimizations options, bool value, DisplayOptimizations element) {

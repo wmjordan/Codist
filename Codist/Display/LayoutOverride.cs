@@ -42,6 +42,7 @@ namespace Codist.Display
 				case DisplayOptimizations.HideAccountBox: controlMatcher = ControlNameMatcher.IDCardGrid.Match; break;
 				case DisplayOptimizations.HideFeedbackBox: controlMatcher = ControlNameMatcher.FeedbackButton.Match; break;
 				case DisplayOptimizations.HideCopilotButton: controlMatcher = ControlTypeMatcher.CopilotBadgeControl.Match; break;
+				case DisplayOptimizations.HideInfoBadgeButton: controlMatcher = ControlTypeMatcher.InfoBadgeControl.Match; break;
 				default: return false;
 			}
 			var t = CodistPackage.VsVersion.Major == 15
@@ -257,6 +258,7 @@ namespace Codist.Display
 		{
 			internal static readonly ControlTypeMatcher PackageAllInOneSearchButtonPresenter = new ControlTypeMatcher("PackageAllInOneSearchButtonPresenter");
 			internal static readonly ControlTypeMatcher CopilotBadgeControl = new ControlTypeMatcher("CopilotBadgeControl");
+			internal static readonly ControlTypeMatcher InfoBadgeControl = new ControlTypeMatcher("InfoBadgeControl");
 
 			readonly string _Name;
 			ControlTypeMatcher(string name) {

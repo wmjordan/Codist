@@ -2741,6 +2741,9 @@ Ctrl: toggle and select next.</value>
   <data name="OT_HideCopilotButton" xml:space="preserve">
     <value>Hide Github Copilot button</value>
   </data>
+  <data name="OT_HideInfoBadgeButton" xml:space="preserve">
+    <value>Hide version info badge button</value>
+  </data>
   <data name="OT_SymbolDefinitionColor" xml:space="preserve">
     <value>Symbol definition:</value>
   </data>
