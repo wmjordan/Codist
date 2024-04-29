@@ -731,6 +731,18 @@ namespace Codist.SyntaxHighlight
 					qi.BackColor = qi.BackColor.InvertBrightness();
 					Config.Instance.FireConfigChangedEvent(Features.SuperQuickInfo);
 				}
+				var sm = Config.Instance.SymbolReferenceMarkerSettings;
+				if (sm.ReferenceMarker.A != 0 || sm.WriteMarker.A != 0 || sm.SymbolDefinition.A != 0) {
+					if (sm.ReferenceMarker.A != 0) {
+						sm.ReferenceMarker = sm.ReferenceMarker.InvertBrightness();
+					}
+					if (sm.WriteMarker.A != 0) {
+						sm.WriteMarker = sm.WriteMarker.InvertBrightness();
+					}
+					if (sm.SymbolDefinition.A != 0) {
+						sm.SymbolDefinition = sm.SymbolDefinition.InvertBrightness();
+					}
+				}
 			}
 
 			void HighlightRecursive(IClassificationType ct, HashSet<IClassificationType> dedup, List<KeyValuePair<string, ResourceDictionary>> updates) {
