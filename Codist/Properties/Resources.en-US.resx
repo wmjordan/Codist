@@ -2741,4 +2741,7 @@ Ctrl: toggle and select next.</value>
   <data name="OT_HideCopilotButton" xml:space="preserve">
     <value>Hide Github Copilot button</value>
   </data>
+  <data name="CMD_InvertBrightness" xml:space="preserve">
+    <value>Invert brightness</value>
+  </data>
 </root>

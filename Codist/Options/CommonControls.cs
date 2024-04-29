@@ -199,6 +199,7 @@ namespace Codist.Options
 					Items = {
 							new ThemedMenuItem(IconIds.PickColor, R.CMD_PickColor, PickColor),
 							new ThemedMenuItem(IconIds.Reset, R.CMD_ResetColor, ResetColor),
+							new ThemedMenuItem(IconIds.Brightness, R.CMD_InvertBrightness, InvertBrightness),
 							new ThemedMenuItem(IconIds.Copy, R.CMD_CopyColor, CopyColor),
 							new ThemedMenuItem(IconIds.Paste, R.CMD_PasteColor, PasteColor),
 						},
@@ -224,6 +225,10 @@ namespace Codist.Options
 
 		void ResetColor(object sender, RoutedEventArgs e) {
 			Color = default;
+		}
+
+		void InvertBrightness(object sender, RoutedEventArgs e) {
+			Color = Color.InvertBrightness();
 		}
 
 		static void CopyColor(Color color) {

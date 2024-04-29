@@ -1039,6 +1039,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invert brightness.
+        /// </summary>
+        internal static string CMD_InvertBrightness {
+            get {
+                return ResourceManager.GetString("CMD_InvertBrightness", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invert operator.
         /// </summary>
         internal static string CMD_InvertOperator {
