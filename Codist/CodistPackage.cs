@@ -192,7 +192,7 @@ namespace Codist
 
 		static class Vs
 		{
-			public static readonly Version Version = Application.Current.MainWindow.GetType().Assembly.GetName().Version;
+			public static readonly Version Version = new Version(Application.Current.MainWindow.GetType().Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version);
 		}
 	}
 #pragma warning restore VSTHRD010 // Invoke single-threaded types on Main thread
