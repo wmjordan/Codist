@@ -185,6 +185,7 @@ namespace Codist.Display
 			ToggleUIElement(DisplayOptimizations.HideAccountBox, !options.MatchFlags(DisplayOptimizations.HideAccountBox));
 			ToggleUIElement(DisplayOptimizations.HideFeedbackBox, !options.MatchFlags(DisplayOptimizations.HideFeedbackBox));
 			ToggleUIElement(DisplayOptimizations.HideCopilotButton, !options.MatchFlags(DisplayOptimizations.HideCopilotButton));
+			ToggleUIElement(DisplayOptimizations.HideInfoBadgeButton, !options.MatchFlags(DisplayOptimizations.HideInfoBadgeButton));
 			WpfHelper.SetUITextRenderOptions(Application.Current.MainWindow, options.MatchFlags(DisplayOptimizations.MainWindow));
 		}
 
@@ -201,6 +202,9 @@ namespace Codist.Display
 			}
 			if (options.MatchFlags(DisplayOptimizations.HideCopilotButton) && CodistPackage.VsVersion.Major > 16) {
 				done &= ToggleUIElement(DisplayOptimizations.HideCopilotButton, false);
+			}
+			if (options.MatchFlags(DisplayOptimizations.HideInfoBadgeButton)) {
+				done &= ToggleUIElement(DisplayOptimizations.HideInfoBadgeButton, false);
 			}
 
 			if (done == false && ++__Retrial < 10) {
