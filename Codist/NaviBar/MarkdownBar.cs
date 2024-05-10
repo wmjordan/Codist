@@ -277,7 +277,7 @@ namespace Codist.NaviBar
 			}
 			string s = View.GetFirstSelectionText();
 			var modified = View.WrapWith(prefix, suffix);
-			if (s != null && Keyboard.Modifiers.MatchFlags(ModifierKeys.Control | ModifierKeys.Shift)
+			if (s != null && Keyboard.Modifiers.HasAnyFlag(ModifierKeys.Control | ModifierKeys.Shift)
 				&& View.FindNext(_TextSearch, s, TextEditorHelper.GetFindOptionsFromKeyboardModifiers()) == false) {
 				return modified;
 			}
