@@ -683,7 +683,14 @@ namespace Codist.SyntaxHighlight
 				}
 			}
 
+			/// <summary>
+			/// This method counts major brightness of colors in a theme and compare it with the editor background. If the brightness does not match, it automatically inverts brightness of each colors in the theme.
+			/// </summary>
+			/// <remarks>Since syntax highlight colors are used majorly in primary document editor window, thus this method only works for the primary editor.</remarks>
 			internal void DetectThemeColorCompatibilityWithBackground() {
+				if (_Category != Constants.CodeText) {
+					return;
+				}
 				var isBackgroundDark = _ViewBackground.IsDark();
 				// color counter
 				int brightness = 0;
