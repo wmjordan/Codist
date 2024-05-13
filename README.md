@@ -607,12 +607,10 @@ Please [post New Issue](https://github.com/wmjordan/Codist/issues) in the [GitHu
 
 Your vote and feedback on the [Visual Studio Extension Marketplace](https://marketplace.visualstudio.com/items?itemName=wmj.Codist) are also welcomed.
 
-# Support Codist by Donation
+# Support Codist
 
-If you like _Codist_, consider [buying me a cup of Chinese tea](https://paypal.me/wmzuo/19.99).
+If you like _Codist_, consider [buying me a cup of Chinese tea](https://paypal.me/wmzuo/19.99). The recommended amount of donation is `$19.99`. However, you can [donate any amount of money as you like](https://paypal.me/wmzuo).
 
-You can donate any amount of money as you like. The recommended amount of donation is `$19.99`.
-
-6 donations have been received so far :)
+7 donations have been received so far :)
 
 Well, you have already reached here. Why not give Codist a ★★★★★ rating on the [Visual Studio Extension Marketplace](https://marketplace.visualstudio.com/items?itemName=wmj.Codist)?
