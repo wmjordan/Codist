@@ -631,6 +631,12 @@ namespace Codist
 			}
 		}
 
+		public static TFreezable MakeFrozen<TFreezable>(this TFreezable freezable)
+			where TFreezable : Freezable {
+			freezable.Freeze();
+			return freezable;
+		}
+
 		public static TItem Get<TItem>(this ResourceDictionary items, object key) {
 			return (items?.Contains(key) == true && items[key] is TItem item)
 				? item
