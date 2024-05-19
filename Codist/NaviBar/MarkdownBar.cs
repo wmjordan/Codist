@@ -288,7 +288,7 @@ namespace Codist.NaviBar
 			string s = View.GetFirstSelectionText();
 			var modified = View.WrapWith(prefix, suffix);
 			if (s != null && Keyboard.Modifiers.HasAnyFlag(ModifierKeys.Control | ModifierKeys.Shift)
-				&& View.FindNext(_TextSearch, s, TextEditorHelper.GetFindOptionsFromKeyboardModifiers()) == false) {
+				&& View.FindNext(_TextSearch, s, TextEditorHelper.GetFindOptionsFromKeyboardModifiers())) {
 				return modified;
 			}
 			if (selectModified && modified != null) {
