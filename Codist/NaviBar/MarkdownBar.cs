@@ -273,8 +273,18 @@ namespace Codist.NaviBar
 				if (e.IsSignificant == false || e.Span.IsEmpty) {
 					return Enumerable.Empty<SnapshotSpan>();
 				}
+				// unwrap if already wrapped
+				if (e.Span.Start.Position > prefix.Length
+					&& e.Span.End.Position + suffix.Length < View.TextSnapshot.Length) {
+					var exp = new SnapshotSpan(View.TextSnapshot, e.Span.Start - prefix.Length, e.Span.Length + prefix.Length + suffix.Length);
+					if (exp.StartsWith(prefix) && exp.EndsWith(suffix)) {
+						View.SelectSpan(exp);
+						goto WRAP;
+					}
+				}
 				View.SelectSpan(e.Span);
 			}
+			WRAP:
 			string s = View.GetFirstSelectionText();
 			var modified = View.WrapWith(prefix, suffix);
 			if (s != null && Keyboard.Modifiers.HasAnyFlag(ModifierKeys.Control | ModifierKeys.Shift)
