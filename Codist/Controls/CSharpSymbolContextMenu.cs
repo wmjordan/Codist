@@ -19,7 +19,7 @@ namespace Codist.Controls
 		public CSharpSymbolContextMenu(ISymbol symbol, SyntaxNode node, SemanticContext semanticContext) {
 			Resources = SharedDictionaryManager.ContextMenu;
 			Foreground = ThemeHelper.ToolWindowTextBrush;
-this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
+			this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 			_Host = new UIHost(symbol, node, semanticContext);
 		}
 
@@ -79,8 +79,10 @@ this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 				case SymbolKind.Field:
 					CreateCommandForMembers();
 					break;
-				case SymbolKind.Local:
 				case SymbolKind.Parameter:
+					CreateCommandForParameter();
+					goto case SymbolKind.Local;
+				case SymbolKind.Local:
 					CreateCommandsForReturnTypeCommand();
 					break;
 				case SymbolKind.NamedType:
@@ -276,6 +278,13 @@ this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 			}
 		}
 
+		void CreateCommandForParameter() {
+			var p = (IParameterSymbol)_Host.Symbol;
+			if (p.ContainingSymbol is IMethodSymbol m && m.MethodKind.CeqAny(MethodKind.Ordinary, MethodKind.Constructor, MethodKind.LocalFunction)) {
+				AddCommand(CommandId.FindParameterAssignments, _Host.Symbol.Name);
+			}
+		}
+
 		void CreateInstanceCommandsForType() {
 			AddCommand(CommandId.FindInstanceProducers);
 			AddCommand(CommandId.FindInstanceConsumers);
@@ -347,6 +356,7 @@ this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 			FindMethodsBySignature,
 			FindConstructorReferrers,
 			FindObjectInitializers,
+			FindParameterAssignments,
 			DebugUnitTest,
 			RunUnitTest,
 			FindInstanceProducers,
@@ -645,6 +655,11 @@ this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindSpecialGenericReturnTypeMembers(object sender, RoutedEventArgs e) {
 				await _SemanticContext.FindMembersAsync(_Symbol.GetReturnType().ResolveElementType().ResolveSingleGenericTypeArgument());
+			}
+
+			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
+			async void FindParameterAssignments(object sender, RoutedEventArgs e) {
+				await _SemanticContext.FindArgumentAssignmentsAsync(_Symbol as IParameterSymbol);
 			}
 
 			void FindReferencedSymbols(object sender, RoutedEventArgs e) {

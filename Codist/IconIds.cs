@@ -236,6 +236,7 @@ namespace Codist
 		public const int FindSymbolsWithName = KnownImageIds.DisplayName;
 		public const int FindOverloads = KnownImageIds.OverloadBehavior;
 		public const int FindMethodsMatchingSignature = KnownImageIds.ClassMethodReference;
+		public const int FindParameterAssignment = KnownImageIds.InputParameter;
 		public const int GoToReturnType = KnownImageIds.GoToDeclaration;
 		public const int GoToType = KnownImageIds.Type;
 		public const int GoToMember = KnownImageIds.Next;

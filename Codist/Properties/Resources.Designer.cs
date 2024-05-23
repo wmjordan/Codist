@@ -645,6 +645,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Find Assignments for &lt;NAME&gt;.
+        /// </summary>
+        internal static string CMD_FindAssignmentsFor {
+            get {
+                return ResourceManager.GetString("CMD_FindAssignmentsFor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Find Callers....
         /// </summary>
         internal static string CMD_FindCallers {
@@ -2284,6 +2293,15 @@ namespace Codist.Properties {
         internal static string CMDT_DarkTheme {
             get {
                 return ResourceManager.GetString("CMDT_DarkTheme", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Find all places and values where this parameter is assigned.
+        /// </summary>
+        internal static string CMDT_FindAssignmentsFor {
+            get {
+                return ResourceManager.GetString("CMDT_FindAssignmentsFor", resourceCulture);
             }
         }
         
@@ -5561,6 +5579,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to  assignment locations: .
+        /// </summary>
+        internal static string T_AssignmentLocations {
+            get {
+                return ResourceManager.GetString("T_AssignmentLocations", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Attribute:.
         /// </summary>
         internal static string T_Attribute {
@@ -6026,6 +6053,15 @@ namespace Codist.Properties {
         internal static string T_Default {
             get {
                 return ResourceManager.GetString("T_Default", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to (default).
+        /// </summary>
+        internal static string T_DefaultValue {
+            get {
+                return ResourceManager.GetString("T_DefaultValue", resourceCulture);
             }
         }
         

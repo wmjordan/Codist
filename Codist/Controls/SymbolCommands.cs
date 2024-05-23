@@ -224,6 +224,28 @@ namespace Codist.Controls
 			ShowSymbolMenuForResult(symbol, context, methods, R.T_SignatureMatch, true);
 		}
 
+		internal static async Task FindArgumentAssignmentsAsync(this SemanticContext context, IParameterSymbol parameter) {
+			var assignments = await parameter.FindParameterAssignmentsAsync(context.Document.Project, default);
+			await SyncHelper.SwitchToMainThreadAsync(default);
+			var m = new SymbolMenu(context, SymbolListType.SymbolReferrers);
+			m.Title.SetGlyph(VsImageHelper.GetImage(IconIds.Value))
+				.AddSymbol(parameter, null,true, SymbolFormatter.Instance);
+			if (assignments.Count != 0) {
+				m.Title.Append(R.T_AssignmentLocations).Append(assignments.Count);
+				if (parameter.HasExplicitDefaultValue) {
+					m.Title.AppendLine().Append(R.T_Default).Append(":").Append(parameter.ExplicitDefaultValue?.ToString() ?? "null");
+				}
+				foreach (var site in assignments) {
+					foreach (var location in site.locations) {
+						var symItem = m.Add(site.container, false);
+						symItem.Location = location.location ?? location.expression.GetLocation();
+						symItem.Hint = location.assignment == ArgumentAssignment.Default ? "(default)" : location.expression.NormalizeWhitespace().ToString();
+					}
+				}
+			}
+			m.Show();
+		}
+
 		internal static void ShowLocations(this SemanticContext context, ISymbol symbol, ImmutableArray<SyntaxReference> locations, UIElement positionElement = null) {
 			var m = new SymbolMenu(context, SymbolListType.Locations);
 			m.Title.SetGlyph(VsImageHelper.GetImage(symbol.GetImageId()))

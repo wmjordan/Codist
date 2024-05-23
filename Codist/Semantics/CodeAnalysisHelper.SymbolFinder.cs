@@ -549,6 +549,80 @@ namespace Codist
 			}
 		}
 
+		public static async Task<List<(ISymbol container, List<(ArgumentAssignment assignment, Location location, ExpressionSyntax expression)> locations)>> FindParameterAssignmentsAsync(this IParameterSymbol parameter, Project project, CancellationToken cancellationToken = default) {
+			var compilation = await project.GetCompilationAsync(cancellationToken).ConfigureAwait(false);
+			var members = new List<ISymbol>(10);
+			var assembly = compilation.Assembly;
+			var method = (parameter.ContainingSymbol as IMethodSymbol).OriginalDefinition;
+			bool isExt;
+			if (isExt = method.IsExtensionMethod) {
+				method = method.ReducedFrom ?? method;
+			}
+			var sites = new List<(ISymbol container, List<(ArgumentAssignment, Location, ExpressionSyntax)> locations)>();
+			var po = parameter.Ordinal;
+			var pn = parameter.Name;
+			var optional = parameter.IsOptional;
+			foreach (var callerInfo in await SymbolFinder.FindCallersAsync(method, project.Solution, cancellationToken)) {
+				if (cancellationToken.IsCancellationRequested) {
+					return sites;
+				}
+				var callerSites = new List<(ArgumentAssignment, Location, ExpressionSyntax)>();
+				foreach (var location in callerInfo.Locations) {
+					var callerNode = (await location.SourceTree.GetRootAsync()).FindNode(location.SourceSpan, false, false);
+					var argList = GetArguments(callerNode);
+					if (argList != null) {
+						var pi = po;
+						if (isExt) {
+							var isReduced = (compilation.GetSemanticModel(location.SourceTree).GetSymbolInfo(callerNode).Symbol as IMethodSymbol)?.MethodKind == MethodKind.ReducedExtension;
+							if (isReduced) {
+								if (po == 0) {
+									callerSites.Add((ArgumentAssignment.Normal, location, (callerNode.Parent as MemberAccessExpressionSyntax).Expression));
+									goto NEXT;
+								}
+								else {
+									pi = po - 1;
+								}
+							}
+						}
+						var args = argList.Arguments;
+						if (args.Count > pi && args[pi].NameColon == null) {
+							callerSites.Add((ArgumentAssignment.Normal, null, args[pi].Expression));
+							continue;
+						}
+						foreach (var arg in args) {
+							if (arg.NameColon?.Name.Identifier.Text == pn) {
+								callerSites.Add((ArgumentAssignment.NameValue, null, arg.Expression));
+								goto NEXT;
+							}
+						}
+						if (optional) {
+							callerSites.Add((ArgumentAssignment.Default, location, null));
+							goto NEXT;
+						}
+					}
+				NEXT:;
+				}
+				if (callerSites.Count != 0) {
+					sites.Add((callerInfo.CallingSymbol, callerSites));
+				}
+			}
+			return sites;
+		}
+
+		static ArgumentListSyntax GetArguments(SyntaxNode node) {
+			switch (node.Kind()) {
+				case SyntaxKind.IdentifierName:
+				case SyntaxKind.QualifiedName:
+					return node.FirstAncestorOrSelf<InvocationExpressionSyntax>()?.ArgumentList;
+				case SyntaxKind.BaseConstructorInitializer:
+				case SyntaxKind.ThisConstructorInitializer:
+					return ((ConstructorInitializerSyntax)node).ArgumentList;
+				case SyntaxKind.ObjectCreationExpression:
+					return ((ObjectCreationExpressionSyntax)node).ArgumentList;
+			}
+			return null;
+		}
+
 		/// <summary>Navigates upward through ancestral axis and find out the first node reflecting the usage.</summary>
 		public static SyntaxNode GetNodePurpose(this SyntaxNode node) {
 			NameSyntax originName;

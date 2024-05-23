@@ -2750,6 +2750,18 @@ Ctrl: toggle and select next.</value>
   <data name="CMD_InvertBrightness" xml:space="preserve">
     <value>Invert brightness</value>
   </data>
+  <data name="CMDT_FindAssignmentsFor" xml:space="preserve">
+    <value>Find all places and values where this parameter is assigned</value>
+  </data>
+  <data name="CMD_FindAssignmentsFor" xml:space="preserve">
+    <value>Find Assignments for &lt;NAME&gt;</value>
+  </data>
+  <data name="T_AssignmentLocations" xml:space="preserve">
+    <value> assignment locations: </value>
+  </data>
+  <data name="T_DefaultValue" xml:space="preserve">
+    <value>(default)</value>
+  </data>
   <data name="T_ErrorWhenExecutingCommand" xml:space="preserve">
     <value>Error when executing command:</value>
   </data>
