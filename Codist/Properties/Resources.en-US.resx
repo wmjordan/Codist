@@ -2506,7 +2506,7 @@ Ctrl: Match current symbol only, excluding base or derived symbols</value>
     <value>Search symbol having the same signature as current symbol
 Ctrl: Only search in source code</value>
   </data>
-  <data name="CMDT_FindReferencedSymbols" xml:space="preserve">
+  <data name="CMDT_ListReferencedSymbols" xml:space="preserve">
     <value>List symbols referenced within current symbol</value>
   </data>
   <data name="CMDT_FindReferrers" xml:space="preserve">
@@ -2524,7 +2524,7 @@ Ctrl: Match current symbol only, excluding base or derived symbols</value>
   <data name="CMDT_FindSymbolTypeExtensionMethods" xml:space="preserve">
     <value>Find extension methods for current symbol type</value>
   </data>
-  <data name="CMDT_FindSymbolTypeMembers" xml:space="preserve">
+  <data name="CMDT_ListSymbolTypeMembers" xml:space="preserve">
     <value>List members of current symbol type</value>
   </data>
   <data name="CMDT_GoToSymbolTypeDefinition" xml:space="preserve">

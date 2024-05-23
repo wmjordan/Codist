@@ -2491,7 +2491,7 @@ Ctrl: 仅匹配当前类，不匹配其它派生类或继承类</value>
     <value>查找和当前方法具有相同签名的其它方法
 Ctrl: 仅在源代码中查找</value>
   </data>
-  <data name="CMDT_FindReferencedSymbols" xml:space="preserve">
+  <data name="CMDT_ListReferencedSymbols" xml:space="preserve">
     <value>列出当前符号内引用的其它符号</value>
   </data>
   <data name="CMDT_FindReferrers" xml:space="preserve">
@@ -2509,8 +2509,8 @@ Ctrl: 仅匹配当前类，不匹配其它派生类或继承类</value>
   <data name="CMDT_FindSymbolTypeExtensionMethods" xml:space="preserve">
     <value>查找当前符号类型的扩展方法</value>
   </data>
-  <data name="CMDT_FindSymbolTypeMembers" xml:space="preserve">
-    <value>查找当前符号类型的成员</value>
+  <data name="CMDT_ListSymbolTypeMembers" xml:space="preserve">
+    <value>列出当前符号类型的成员</value>
   </data>
   <data name="CMDT_GoToSymbolTypeDefinition" xml:space="preserve">
     <value>转到当前符号类型的定义</value>

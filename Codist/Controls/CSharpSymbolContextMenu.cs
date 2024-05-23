@@ -480,7 +480,7 @@ this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 					case CommandId.FindReferrers:
 						return CreateItem(IconIds.FindReferrers, R.CMD_FindReferrers, FindReferrers, R.CMDT_FindReferrers);
 					case CommandId.FindReferencedSymbols:
-						return CreateItem(IconIds.FindReferencingSymbols, R.CMD_FindReferencedSymbols, FindReferencedSymbols, R.CMDT_FindReferencedSymbols);
+						return CreateItem(IconIds.FindReferencingSymbols, R.CMD_FindReferencedSymbols, FindReferencedSymbols, R.CMDT_ListReferencedSymbols);
 					case CommandId.ListSymbolMembers:
 						return CreateItem(IconIds.ListMembers, R.CMD_ListMembers, ListSymbolMembers);
 					case CommandId.FindSymbolsWithName:
@@ -515,13 +515,15 @@ this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 			public CustomMenuItem CreateCommand(CommandId commandId, string substitution) {
 				switch (commandId) {
 					case CommandId.ListReturnTypeMembers:
-						return CreateItem(IconIds.ListMembers, R.CMD_ListMembersOf, substitution, ListReturnTypeMembers, R.CMDT_FindSymbolTypeMembers);
+						return CreateItem(IconIds.ListMembers, R.CMD_ListMembersOf, substitution, ListReturnTypeMembers, R.CMDT_ListSymbolTypeMembers);
 					case CommandId.FindReturnTypeExtensionMethods:
 						return CreateItem(IconIds.ExtensionMethod, R.CMD_FindExtensionsFor, substitution, FindReturnTypeExtensionMethods, R.CMDT_FindSymbolTypeExtensionMethods);
 					case CommandId.GoToSymbolReturnType:
 						return CreateItem(IconIds.GoToReturnType, R.CMD_GoTo, substitution, GoToSymbolReturnType, R.CMDT_GoToSymbolTypeDefinition);
 					case CommandId.FindSpecialGenericReturnTypeMembers:
-						return CreateItem(IconIds.ListMembers, R.CMD_ListMembersOf, substitution, FindSpecialGenericReturnTypeMembers, R.CMDT_FindSymbolTypeMembers);
+						return CreateItem(IconIds.ListMembers, R.CMD_ListMembersOf, substitution, FindSpecialGenericReturnTypeMembers, R.CMDT_ListSymbolTypeMembers);
+					case CommandId.FindParameterAssignments:
+						return CreateItem(IconIds.FindParameterAssignment, R.CMD_FindAssignmentsFor, substitution, FindParameterAssignments, R.CMDT_FindAssignmentsFor);
 					case CommandId.GoToSpecialGenericSymbolReturnType:
 						return CreateItem(IconIds.GoToReturnType, R.CMD_GoTo, substitution, GoToSpecialGenericSymbolReturnType, R.CMDT_GoToSymbolTypeDefinition);
 					case CommandId.ListEventArgsMembers:

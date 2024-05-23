@@ -2378,15 +2378,6 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to List symbols referenced within current symbol.
-        /// </summary>
-        internal static string CMDT_FindReferencedSymbols {
-            get {
-                return ResourceManager.GetString("CMDT_FindReferencedSymbols", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Search places where active method is called, field/property is read/write
         ///Ctrl: Match current symbol only, excluding base or derived symbols.
         /// </summary>
@@ -2402,15 +2393,6 @@ namespace Codist.Properties {
         internal static string CMDT_FindSymbolTypeExtensionMethods {
             get {
                 return ResourceManager.GetString("CMDT_FindSymbolTypeExtensionMethods", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to List members of current symbol type.
-        /// </summary>
-        internal static string CMDT_FindSymbolTypeMembers {
-            get {
-                return ResourceManager.GetString("CMDT_FindSymbolTypeMembers", resourceCulture);
             }
         }
         
@@ -2449,6 +2431,24 @@ namespace Codist.Properties {
         internal static string CMDT_LightTheme {
             get {
                 return ResourceManager.GetString("CMDT_LightTheme", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to List symbols referenced within current symbol.
+        /// </summary>
+        internal static string CMDT_ListReferencedSymbols {
+            get {
+                return ResourceManager.GetString("CMDT_ListReferencedSymbols", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to List members of current symbol type.
+        /// </summary>
+        internal static string CMDT_ListSymbolTypeMembers {
+            get {
+                return ResourceManager.GetString("CMDT_ListSymbolTypeMembers", resourceCulture);
             }
         }
         
