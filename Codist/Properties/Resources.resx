@@ -2750,4 +2750,7 @@ Ctrl: toggle and select next.</value>
   <data name="CMD_InvertBrightness" xml:space="preserve">
     <value>Invert brightness</value>
   </data>
+  <data name="T_ErrorWhenExecutingCommand" xml:space="preserve">
+    <value>Error when executing command:</value>
+  </data>
 </root>

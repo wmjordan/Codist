@@ -6283,6 +6283,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error when executing command:.
+        /// </summary>
+        internal static string T_ErrorWhenExecutingCommand {
+            get {
+                return ResourceManager.GetString("T_ErrorWhenExecutingCommand", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Events.
         /// </summary>
         internal static string T_Events {

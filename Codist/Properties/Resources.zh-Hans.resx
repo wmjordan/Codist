@@ -2736,4 +2736,7 @@ Ctrl: 切换标记并选择下一处</value>
   <data name="CMD_InvertBrightness" xml:space="preserve">
     <value>切换色彩明暗度</value>
   </data>
+  <data name="T_ErrorWhenExecutingCommand" xml:space="preserve">
+    <value>在执行命令时出错:</value>
+  </data>
 </root>
