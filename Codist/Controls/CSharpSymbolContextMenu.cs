@@ -280,8 +280,8 @@ namespace Codist.Controls
 
 		void CreateCommandForParameter() {
 			var p = (IParameterSymbol)_Host.Symbol;
-			if (p.ContainingSymbol is IMethodSymbol m && m.MethodKind.CeqAny(MethodKind.Ordinary, MethodKind.Constructor, MethodKind.LocalFunction)) {
-				AddCommand(CommandId.FindParameterAssignments, _Host.Symbol.Name);
+			if (p.ContainingSymbol is IMethodSymbol m && m.MethodKind.CeqAny(MethodKind.Ordinary, MethodKind.Constructor, MethodKind.LocalFunction, MethodKind.ReducedExtension)) {
+				AddCommand(p.HasExplicitDefaultValue ? CommandId.FindParameterAssignmentsWithDefault : CommandId.FindParameterAssignments, _Host.Symbol.Name);
 			}
 		}
 
@@ -357,6 +357,7 @@ namespace Codist.Controls
 			FindConstructorReferrers,
 			FindObjectInitializers,
 			FindParameterAssignments,
+			FindParameterAssignmentsWithDefault,
 			DebugUnitTest,
 			RunUnitTest,
 			FindInstanceProducers,
@@ -534,6 +535,8 @@ namespace Codist.Controls
 						return CreateItem(IconIds.ListMembers, R.CMD_ListMembersOf, substitution, FindSpecialGenericReturnTypeMembers, R.CMDT_ListSymbolTypeMembers);
 					case CommandId.FindParameterAssignments:
 						return CreateItem(IconIds.FindParameterAssignment, R.CMD_FindAssignmentsFor, substitution, FindParameterAssignments, R.CMDT_FindAssignmentsFor);
+					case CommandId.FindParameterAssignmentsWithDefault:
+						return CreateItem(IconIds.FindParameterAssignment, R.CMD_FindAssignmentsFor, substitution, FindParameterAssignments, R.CMDT_FindAssignmentsFor + Environment.NewLine + R.CMDT_FindAssignmentsForOption);
 					case CommandId.GoToSpecialGenericSymbolReturnType:
 						return CreateItem(IconIds.GoToReturnType, R.CMD_GoTo, substitution, GoToSpecialGenericSymbolReturnType, R.CMDT_GoToSymbolTypeDefinition);
 					case CommandId.ListEventArgsMembers:
@@ -659,7 +662,7 @@ namespace Codist.Controls
 
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindParameterAssignments(object sender, RoutedEventArgs e) {
-				await _SemanticContext.FindArgumentAssignmentsAsync(_Symbol as IParameterSymbol);
+				await _SemanticContext.FindParameterAssignmentsAsync(_Symbol as IParameterSymbol, false, WpfHelper.IsControlDown ? ArgumentAssignmentFilter.ExplicitValue : WpfHelper.IsShiftDown ? ArgumentAssignmentFilter.DefaultValue : ArgumentAssignmentFilter.Undefined);
 			}
 
 			void FindReferencedSymbols(object sender, RoutedEventArgs e) {

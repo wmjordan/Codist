@@ -549,71 +549,100 @@ namespace Codist
 			}
 		}
 
-		public static async Task<List<(ISymbol container, List<(ArgumentAssignment assignment, Location location, ExpressionSyntax expression)> locations)>> FindParameterAssignmentsAsync(this IParameterSymbol parameter, Project project, CancellationToken cancellationToken = default) {
-			var compilation = await project.GetCompilationAsync(cancellationToken).ConfigureAwait(false);
-			var members = new List<ISymbol>(10);
-			var assembly = compilation.Assembly;
-			var method = (parameter.ContainingSymbol as IMethodSymbol).OriginalDefinition;
-			bool isExt;
-			if (isExt = method.IsExtensionMethod) {
+		public static async Task<IReadOnlyCollection<KeyValuePair<ISymbol, List<(ArgumentAssignment assignment, Location location, ExpressionSyntax expression)>>>> FindParameterAssignmentsAsync(this IParameterSymbol parameter, Project project, bool strict, ArgumentAssignmentFilter assignmentFilter,  CancellationToken cancellationToken = default) {
+			var method = (parameter.ContainingSymbol as IMethodSymbol);
+			bool mayBeExtension;
+			if (mayBeExtension = method.IsExtensionMethod) {
 				method = method.ReducedFrom ?? method;
 			}
-			var sites = new List<(ISymbol container, List<(ArgumentAssignment, Location, ExpressionSyntax)> locations)>();
 			var po = parameter.Ordinal;
 			var pn = parameter.Name;
 			var optional = parameter.IsOptional;
-			foreach (var callerInfo in await SymbolFinder.FindCallersAsync(method, project.Solution, cancellationToken)) {
+			var docs = ImmutableHashSet.CreateRange(project.GetRelatedProjectDocuments());
+			var modelCache = new System.Runtime.CompilerServices.ConditionalWeakTable<Document, SemanticModel>();
+			var symbolLocations = new Dictionary<ISymbol, List<(ArgumentAssignment, Location, ExpressionSyntax)>>();
+			List<(ArgumentAssignment, Location, ExpressionSyntax)> refList;
+			foreach (var callerInfo in await SymbolFinder.FindReferencesAsync(method, project.Solution, docs, cancellationToken)) {
 				if (cancellationToken.IsCancellationRequested) {
-					return sites;
+					return symbolLocations;
 				}
-				var callerSites = new List<(ArgumentAssignment, Location, ExpressionSyntax)>();
-				foreach (var location in callerInfo.Locations) {
-					var callerNode = (await location.SourceTree.GetRootAsync()).FindNode(location.SourceSpan, false, false);
+				foreach (var r in callerInfo.Locations) {
+					if (modelCache.TryGetValue(r.Document, out var model) == false) {
+						model = await r.Document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
+					}
+					var callerNode = (await r.Location.SourceTree.GetRootAsync(cancellationToken)).FindNode(r.Location.SourceSpan, false, false);
 					var argList = GetArguments(callerNode);
-					if (argList != null) {
-						var pi = po;
-						if (isExt) {
-							var isReduced = (compilation.GetSemanticModel(location.SourceTree).GetSymbolInfo(callerNode).Symbol as IMethodSymbol)?.MethodKind == MethodKind.ReducedExtension;
+					if (argList == null) {
+						continue;
+					}
+					var caller = model.GetEnclosingSymbol(r.Location.SourceSpan.Start);
+					while (caller.Kind == SymbolKind.Method && ((IMethodSymbol)caller).MethodKind == MethodKind.LambdaMethod) {
+						caller = caller.ContainingSymbol;
+					}
+					if (symbolLocations.TryGetValue(caller, out refList) == false) {
+						symbolLocations.Add(caller, refList = new List<(ArgumentAssignment, Location, ExpressionSyntax)>());
+					}
+					var pi = po;
+					if (strict || mayBeExtension) {
+						var callee = model.GetSymbolInfo(callerNode).Symbol;
+						if (strict && callee != method) {
+							continue;
+						}
+						if (mayBeExtension) {
+							var isReduced = (callee as IMethodSymbol)?.MethodKind == MethodKind.ReducedExtension;
 							if (isReduced) {
 								if (po == 0) {
-									callerSites.Add((ArgumentAssignment.Normal, location, (callerNode.Parent as MemberAccessExpressionSyntax).Expression));
-									goto NEXT;
+									if (assignmentFilter != ArgumentAssignmentFilter.DefaultValue) {
+										refList.Add((ArgumentAssignment.Normal, r.Location, (callerNode.Parent as MemberAccessExpressionSyntax).Expression));
+									}
+									continue;
 								}
 								else {
-									pi = po - 1;
+									--pi;
 								}
 							}
 						}
+					}
+
+					if (assignmentFilter != ArgumentAssignmentFilter.DefaultValue) {
 						var args = argList.Arguments;
 						if (args.Count > pi && args[pi].NameColon == null) {
-							callerSites.Add((ArgumentAssignment.Normal, null, args[pi].Expression));
+							refList.Add((ArgumentAssignment.Normal, null, args[pi].Expression));
 							continue;
 						}
 						foreach (var arg in args) {
 							if (arg.NameColon?.Name.Identifier.Text == pn) {
-								callerSites.Add((ArgumentAssignment.NameValue, null, arg.Expression));
+								refList.Add((ArgumentAssignment.NameValue, null, arg.Expression));
 								goto NEXT;
 							}
 						}
-						if (optional) {
-							callerSites.Add((ArgumentAssignment.Default, location, null));
-							goto NEXT;
-						}
+					}
+					if (optional && assignmentFilter != ArgumentAssignmentFilter.ExplicitValue) {
+						refList.Add((ArgumentAssignment.Default, r.Location, null));
 					}
 				NEXT:;
 				}
-				if (callerSites.Count != 0) {
-					sites.Add((callerInfo.CallingSymbol, callerSites));
-				}
 			}
-			return sites;
+			return symbolLocations;
 		}
 
 		static ArgumentListSyntax GetArguments(SyntaxNode node) {
 			switch (node.Kind()) {
 				case SyntaxKind.IdentifierName:
 				case SyntaxKind.QualifiedName:
-					return node.FirstAncestorOrSelf<InvocationExpressionSyntax>()?.ArgumentList;
+					node = node.UnqualifyExceptNamespace().Parent;
+					if (node is MemberAccessExpressionSyntax) {
+						node = node.Parent;
+					}
+					if (node is InvocationExpressionSyntax inv) {
+						return inv.ArgumentList;
+					}
+					if (node is ObjectCreationExpressionSyntax oc) {
+						return oc.ArgumentList;
+					}
+					break;
+				case CodeAnalysisHelper.ImplicitObjectCreationExpression:
+					return (node as ExpressionSyntax).GetImplicitObjectCreationArgumentList();
 				case SyntaxKind.BaseConstructorInitializer:
 				case SyntaxKind.ThisConstructorInitializer:
 					return ((ConstructorInitializerSyntax)node).ArgumentList;

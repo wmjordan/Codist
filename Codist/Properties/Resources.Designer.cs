@@ -645,7 +645,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Find Assignments for &lt;NAME&gt;.
+        ///   Looks up a localized string similar to Find Assignments for &lt;NAME&gt;....
         /// </summary>
         internal static string CMD_FindAssignmentsFor {
             get {
@@ -2302,6 +2302,16 @@ namespace Codist.Properties {
         internal static string CMDT_FindAssignmentsFor {
             get {
                 return ResourceManager.GetString("CMDT_FindAssignmentsFor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ctrl: Explicit assignment only
+        ///Shift: Assign by default only.
+        /// </summary>
+        internal static string CMDT_FindAssignmentsForOption {
+            get {
+                return ResourceManager.GetString("CMDT_FindAssignmentsForOption", resourceCulture);
             }
         }
         

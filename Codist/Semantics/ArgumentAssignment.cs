@@ -2,11 +2,17 @@
 
 namespace Codist
 {
-	[Flags]
 	enum ArgumentAssignment
 	{
 		Normal,
 		Default,
 		NameValue,
+	}
+
+	enum ArgumentAssignmentFilter
+	{
+		Undefined,
+		ExplicitValue,
+		DefaultValue
 	}
 }

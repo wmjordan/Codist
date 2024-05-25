@@ -2740,7 +2740,7 @@ Ctrl: 切换标记并选择下一处</value>
     <value>查找调用参数所属方法的位置和参数的值</value>
   </data>
   <data name="CMD_FindAssignmentsFor" xml:space="preserve">
-    <value>查找赋值给参数 &lt;NAME&gt; 的位置</value>
+    <value>查找赋值给参数 &lt;NAME&gt; 的位置...</value>
   </data>
   <data name="T_AssignmentLocations" xml:space="preserve">
     <value> 赋值调用位置: </value>
@@ -2750,5 +2750,9 @@ Ctrl: 切换标记并选择下一处</value>
   </data>
   <data name="T_ErrorWhenExecutingCommand" xml:space="preserve">
     <value>在执行命令时出错:</value>
+  </data>
+  <data name="CMDT_FindAssignmentsForOption" xml:space="preserve">
+    <value>Ctrl: 仅显示显式赋值的参数
+Shift: 仅显式默认赋值的参数</value>
   </data>
 </root>

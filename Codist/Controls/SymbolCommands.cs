@@ -224,22 +224,36 @@ namespace Codist.Controls
 			ShowSymbolMenuForResult(symbol, context, methods, R.T_SignatureMatch, true);
 		}
 
-		internal static async Task FindArgumentAssignmentsAsync(this SemanticContext context, IParameterSymbol parameter) {
-			var assignments = await parameter.FindParameterAssignmentsAsync(context.Document.Project, default);
+		internal static async Task FindParameterAssignmentsAsync(this SemanticContext context, IParameterSymbol parameter, bool strict = false, ArgumentAssignmentFilter assignmentFilter = ArgumentAssignmentFilter.Undefined) {
+			var assignments = await parameter.FindParameterAssignmentsAsync(context.Document.Project, strict, assignmentFilter, default);
+			var c = 0;
+			foreach (var item in assignments) {
+				c += item.Value.Count;
+			}
 			await SyncHelper.SwitchToMainThreadAsync(default);
 			var m = new SymbolMenu(context, SymbolListType.SymbolReferrers);
-			m.Title.SetGlyph(VsImageHelper.GetImage(IconIds.Value))
-				.AddSymbol(parameter, null,true, SymbolFormatter.Instance);
-			if (assignments.Count != 0) {
-				m.Title.Append(R.T_AssignmentLocations).Append(assignments.Count);
+			m.Title.SetGlyph(VsImageHelper.GetImage(IconIds.Argument))
+				.AddSymbol(parameter, null,true, SymbolFormatter.Instance)
+				.Append(R.T_AssignmentLocations).Append(c);
+			if (c != 0) {
 				if (parameter.HasExplicitDefaultValue) {
-					m.Title.AppendLine().Append(R.T_Default).Append(":").Append(parameter.ExplicitDefaultValue?.ToString() ?? "null");
+					m.Title.AppendLine().Append(VsImageHelper.GetImage(IconIds.Argument).WrapMargin(WpfHelper.GlyphMargin)).Append(R.T_Default).Append(" = ").Append(parameter.ExplicitDefaultValue?.ToString() ?? "null");
+					if (assignmentFilter == ArgumentAssignmentFilter.ExplicitValue) {
+						m.Title.AppendInfo("Explicit value only");
+					}
+					else if (assignmentFilter == ArgumentAssignmentFilter.DefaultValue) {
+						m.Title.AppendInfo("Default value only");
+					}
 				}
 				foreach (var site in assignments) {
-					foreach (var location in site.locations) {
-						var symItem = m.Add(site.container, false);
+					for (int i = 0; i < site.Value.Count; i++) {
+						var location = site.Value[i];
+						var symItem = m.Add(site.Key, false);
 						symItem.Location = location.location ?? location.expression.GetLocation();
 						symItem.Hint = location.assignment == ArgumentAssignment.Default ? "(default)" : location.expression.NormalizeWhitespace().ToString();
+						if (i != 0) {
+							symItem.IndentLevel = 1;
+						}
 					}
 				}
 			}
@@ -268,12 +282,15 @@ namespace Codist.Controls
 			m.Show(positionElement);
 		}
 
-		static void ShowSymbolMenuForResult<TSymbol>(ISymbol symbol, SemanticContext context, List<TSymbol> members, string suffix, bool groupByType) where TSymbol : ISymbol {
+		static void ShowSymbolMenuForResult<TSymbol>(ISymbol symbol, SemanticContext context, List<TSymbol> members, string suffix, bool groupByType, string info = null) where TSymbol : ISymbol {
 			members.Sort(CodeAnalysisHelper.CompareSymbol);
 			var m = new SymbolMenu(context);
 			m.Title.SetGlyph(VsImageHelper.GetImage(symbol.GetImageId()))
 				.AddSymbol(symbol, null, true, SymbolFormatter.Instance)
 				.Append(suffix);
+			if (info != null) {
+				m.Title.AppendInfo(info);
+			}
 			INamedTypeSymbol containingType = null;
 			foreach (var item in members) {
 				if (groupByType && item.ContainingType != containingType) {
@@ -343,6 +360,11 @@ namespace Codist.Controls
 				}
 				return r;
 			}
+		}
+
+		static TTextBlock AppendInfo<TTextBlock>(this TTextBlock text, string filterInfo)
+			where TTextBlock : System.Windows.Controls.TextBlock {
+			return text.AppendLine().Append(VsImageHelper.GetImage(IconIds.Info).WrapMargin(WpfHelper.GlyphMargin)).Append(filterInfo);
 		}
 	}
 }
