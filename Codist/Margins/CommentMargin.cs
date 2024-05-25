@@ -169,7 +169,7 @@ namespace Codist.Margins
 			Brush lastBrush = null;
 			var snapshot = _TextView.TextSnapshot;
 			var snapshotLength = snapshot.Length;
-			foreach (var tag in _Tags.GetTags()) {
+			foreach (var tag in _Tags.Tags) {
 				if (tag.End >= snapshotLength) {
 					continue;
 				}

@@ -30,12 +30,13 @@ namespace Codist.Taggers
 		/// <summary>The last parsed position.</summary>
 		public int LastParsed { get; set; }
 		public bool HasTag => _Tags.Count > 0;
+		/// <summary>Gets a sorted collection which contains parsed tags.</summary>
+		public IReadOnlyCollection<TaggedContentSpan> Tags => _Tags;
 		public int Count => _Tags.Count;
 
 		public TaggedContentSpan GetPrecedingTaggedSpan(SnapshotPoint position, Predicate<TaggedContentSpan> predicate) {
-			var tags = _Tags;
 			TaggedContentSpan t = null;
-			foreach (var tag in tags.GetViewBetween(new TaggedContentSpan(0, 0), new TaggedContentSpan(position.Position + 1, 0)).Reverse()) {
+			foreach (var tag in _Tags.GetViewBetween(new TaggedContentSpan(0, 0), new TaggedContentSpan(position.Position + 1, 0)).Reverse()) {
 				if (tag.Contains(position) && predicate(tag)) {
 					return tag;
 				}
@@ -54,8 +55,7 @@ namespace Codist.Taggers
 			return r;
 		}
 		public ImmutableArray<TaggedContentSpan> GetTags(Func<TaggedContentSpan, bool> predicate) {
-			return ImmutableArray.CreateRange(_Tags.Where(predicate))
-				.Sort((x, y) => x.Start - y.Start);
+			return ImmutableArray.CreateRange(_Tags.Where(predicate));
 		}
 
 		public TaggedContentSpan Add(TaggedContentSpan tag) {
