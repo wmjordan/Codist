@@ -18,6 +18,10 @@ namespace Codist.QuickInfo
 			if (overloads.Length < 2) {
 				return;
 			}
+			ShowOverloadsInfo(qiContent, method, overloads);
+		}
+
+		static void ShowOverloadsInfo(InfoContainer qiContent, IMethodSymbol method, System.Collections.Immutable.ImmutableArray<ISymbol> overloads) {
 			var re = method.MethodKind == MethodKind.ReducedExtension;
 			method = method.OriginalDefinition;
 			if (re) {

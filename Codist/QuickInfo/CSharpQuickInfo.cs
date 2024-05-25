@@ -910,13 +910,23 @@ namespace Codist.QuickInfo
 				&& typeSymbol.TypeParameters[0] != typeSymbol.TypeArguments[0]) {
 				ShowTypeArguments(qiContent, typeSymbol.TypeArguments, typeSymbol.TypeParameters);
 			}
-			if (typeSymbol.TypeKind == TypeKind.Class
+			if (typeSymbol.TypeKind.CeqAny(TypeKind.Class, TypeKind.Struct)
 				&& options.MatchFlags(QuickInfoOptions.MethodOverload)) {
-				node = node.GetObjectCreationNode();
-				if (node != null
-					&& semanticModel.GetSymbolOrFirstCandidate(node, cancellationToken) is IMethodSymbol method
-					&& _IsCandidate == false) {
-					ShowOverloadsInfo(qiContent, node, method, semanticModel, cancellationToken);
+				if (node.IsAnyKind(SyntaxKind.ClassDeclaration, SyntaxKind.StructDeclaration)
+					&& ((TypeDeclarationSyntax)node).GetParameterList() != null) {
+					// show overloads for primary constructors
+					var ctors = typeSymbol.GetMembers(".ctor");
+					if (ctors.Length > 1) {
+						ShowOverloadsInfo(qiContent, ctors[0] as IMethodSymbol, ctors);
+					}
+				}
+				else {
+					node = node.GetObjectCreationNode();
+					if (node != null
+						&& semanticModel.GetSymbolOrFirstCandidate(node, cancellationToken) is IMethodSymbol method
+						&& _IsCandidate == false) {
+						ShowOverloadsInfo(qiContent, node, method, semanticModel, cancellationToken);
+					}
 				}
 			}
 			if (options.MatchFlags(QuickInfoOptions.Declaration)
