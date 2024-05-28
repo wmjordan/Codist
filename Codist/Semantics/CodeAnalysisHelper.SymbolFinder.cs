@@ -603,18 +603,19 @@ namespace Codist
 							}
 						}
 					}
-
-					if (assignmentFilter != ArgumentAssignmentFilter.DefaultValue) {
-						var args = argList.Arguments;
-						if (args.Count > pi && args[pi].NameColon == null) {
+					var args = argList.Arguments;
+					if (args.Count > pi && args[pi].NameColon == null) {
+						if (assignmentFilter != ArgumentAssignmentFilter.DefaultValue) {
 							refList.Add((ArgumentAssignment.Normal, null, args[pi].Expression));
-							continue;
 						}
-						foreach (var arg in args) {
-							if (arg.NameColon?.Name.Identifier.Text == pn) {
+						continue;
+					}
+					foreach (var arg in args) {
+						if (arg.NameColon?.Name.Identifier.Text == pn) {
+							if (assignmentFilter != ArgumentAssignmentFilter.DefaultValue) {
 								refList.Add((ArgumentAssignment.NameValue, null, arg.Expression));
-								goto NEXT;
 							}
+							goto NEXT;
 						}
 					}
 					if (optional && assignmentFilter != ArgumentAssignmentFilter.ExplicitValue) {
