@@ -161,7 +161,8 @@ namespace Codist.Controls
 		}
 
 		void CreateCommandForMembers() {
-			if (_Host.Symbol.Kind != SymbolKind.Method || IsExternallyCallable(((IMethodSymbol)_Host.Symbol).MethodKind)) {
+			if (_Host.Symbol.Kind != SymbolKind.Method
+				|| IsExternallyCallable(((IMethodSymbol)_Host.Symbol).MethodKind)) {
 				AddCommand(CommandId.FindReferrers);
 			}
 			if (_Host.Symbol.MayHaveOverride()) {
@@ -244,11 +245,8 @@ namespace Codist.Controls
 
 		void CreateCommandsForReturnTypeCommand() {
 			var rt = _Host.Symbol.GetReturnType();
-			if (rt.SpecialType == SpecialType.System_Void
-				|| rt.SpecialType == SpecialType.System_Object
-				|| rt.TypeKind == TypeKind.TypeParameter
-				|| rt.TypeKind == TypeKind.Error
-				|| rt.TypeKind == TypeKind.Dynamic
+			if (rt.SpecialType.CeqAny(SpecialType.System_Void, SpecialType.System_Object)
+				|| rt.TypeKind.CeqAny(TypeKind.TypeParameter, TypeKind.Error, TypeKind.Dynamic)
 				|| rt.IsTupleType) {
 				return;
 			}
@@ -815,7 +813,7 @@ namespace Codist.Controls
 					case SyntaxKind.QualifiedName:
 						return IsTypeReference(p);
 					case SyntaxKind.DeclarationPattern:
-						return p.Parent.IsKind(SyntaxKind.IsPatternExpression) || p.Parent.IsKind(SyntaxKind.CasePatternSwitchLabel);
+						return p.Parent.IsAnyKind(SyntaxKind.IsPatternExpression, SyntaxKind.CasePatternSwitchLabel);
 				}
 				return false;
 			}

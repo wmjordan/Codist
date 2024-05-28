@@ -56,7 +56,7 @@ namespace Codist.Controls
 				ShowSymbolMenuForResult(symbol, context, classes.ToList(), R.T_DerivedClasses, false);
 				return;
 			}
-			var hierarchies = new Dictionary<INamedTypeSymbol, List<INamedTypeSymbol>>(CodeAnalysisHelper.GetNamedTypeComparer()) {
+			var hierarchies = new Dictionary<INamedTypeSymbol, List<INamedTypeSymbol>>(7, CodeAnalysisHelper.GetNamedTypeComparer()) {
 					{ type.OriginalDefinition, new List<INamedTypeSymbol>() }
 				};
 			INamedTypeSymbol t, bt;
@@ -237,13 +237,13 @@ namespace Codist.Controls
 				.Append(R.T_AssignmentLocations).Append(c);
 			if (c != 0) {
 				if (parameter.HasExplicitDefaultValue) {
-					m.Title.AppendLine().Append(VsImageHelper.GetImage(IconIds.Argument).WrapMargin(WpfHelper.GlyphMargin)).Append(R.T_Default).Append(" = ").Append(parameter.ExplicitDefaultValue?.ToString() ?? "null");
 					if (assignmentFilter == ArgumentAssignmentFilter.ExplicitValue) {
 						m.Title.AppendInfo("Explicit value only");
 					}
 					else if (assignmentFilter == ArgumentAssignmentFilter.DefaultValue) {
 						m.Title.AppendInfo("Default value only");
 					}
+					m.Title.AppendLine().Append(VsImageHelper.GetImage(IconIds.FindParameterAssignment).WrapMargin(WpfHelper.GlyphMargin)).Append(R.T_Default).Append(" = ").Append(parameter.ExplicitDefaultValue?.ToString() ?? "null");
 				}
 				foreach (var site in assignments) {
 					for (int i = 0; i < site.Value.Count; i++) {
