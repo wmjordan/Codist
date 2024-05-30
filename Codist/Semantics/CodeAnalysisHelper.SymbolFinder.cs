@@ -561,6 +561,7 @@ namespace Codist
 			var docs = ImmutableHashSet.CreateRange(project.GetRelatedProjectDocuments());
 			var modelCache = new System.Runtime.CompilerServices.ConditionalWeakTable<Document, SemanticModel>();
 			var symbolLocations = new Dictionary<ISymbol, List<(ArgumentAssignment, Location, ExpressionSyntax)>>();
+			var locationDedup = new HashSet<Location>(Comparers.SourceLocationComparer);
 			List<(ArgumentAssignment, Location, ExpressionSyntax)> refList;
 			foreach (var callerInfo in await SymbolFinder.FindReferencesAsync(method, project.Solution, docs, cancellationToken)) {
 				if (cancellationToken.IsCancellationRequested) {
@@ -569,6 +570,9 @@ namespace Codist
 				foreach (var r in callerInfo.Locations) {
 					if (modelCache.TryGetValue(r.Document, out var model) == false) {
 						model = await r.Document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
+					}
+					if (model.IsCSharp() == false || locationDedup.Add(r.Location) == false) {
+						continue;
 					}
 					var callerNode = (await r.Location.SourceTree.GetRootAsync(cancellationToken)).FindNode(r.Location.SourceSpan, false, false);
 					var argList = GetArguments(callerNode);
