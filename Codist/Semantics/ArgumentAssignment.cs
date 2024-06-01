@@ -7,6 +7,8 @@ namespace Codist
 		Normal,
 		Default,
 		NameValue,
+		ImplicitlyConverted,
+		ImplicitlyConvertedNameValue,
 	}
 
 	enum ArgumentAssignmentFilter

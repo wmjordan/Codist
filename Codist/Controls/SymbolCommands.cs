@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using CLR;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.FindSymbols;
 using R = Codist.Properties.Resources;
@@ -251,12 +252,16 @@ namespace Codist.Controls
 						var symItem = m.Add(site.Key, false);
 						symItem.Location = location.location ?? location.expression.GetLocation();
 						symItem.Hint = location.assignment == ArgumentAssignment.Default ? "(default)" : location.expression.NormalizeWhitespace().ToString();
+						if (location.assignment.CeqAny(ArgumentAssignment.ImplicitlyConverted, ArgumentAssignment.ImplicitlyConvertedNameValue)) {
+							symItem.Usage = SymbolUsageKind.TypeCast;
+						}
 						if (i != 0) {
 							symItem.IndentLevel = 1;
 						}
 					}
 				}
 			}
+			m.ExtIconProvider = ExtIconProvider.Default.GetExtIconsWithUsage;
 			m.Show();
 		}
 

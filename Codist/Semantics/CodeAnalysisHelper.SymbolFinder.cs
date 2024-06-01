@@ -608,16 +608,18 @@ namespace Codist
 						}
 					}
 					var args = argList.Arguments;
-					if (args.Count > pi && args[pi].NameColon == null) {
+					ArgumentSyntax arg;
+					if (args.Count > pi && (arg = args[pi]).NameColon == null) {
 						if (assignmentFilter != ArgumentAssignmentFilter.DefaultValue) {
-							refList.Add((ArgumentAssignment.Normal, null, args[pi].Expression));
+							refList.Add((HasImplicitConversion(model, arg, cancellationToken) ? ArgumentAssignment.Normal : ArgumentAssignment.ImplicitlyConverted, null, arg.Expression));
 						}
 						continue;
 					}
-					foreach (var arg in args) {
+					for (int i = 0; i < args.Count; i++) {
+						arg = args[i];
 						if (arg.NameColon?.Name.Identifier.Text == pn) {
 							if (assignmentFilter != ArgumentAssignmentFilter.DefaultValue) {
-								refList.Add((ArgumentAssignment.NameValue, null, arg.Expression));
+								refList.Add((HasImplicitConversion(model, arg, cancellationToken) ? ArgumentAssignment.NameValue : ArgumentAssignment.ImplicitlyConvertedNameValue, null, arg.Expression));
 							}
 							goto NEXT;
 						}
@@ -655,6 +657,11 @@ namespace Codist
 					return ((ObjectCreationExpressionSyntax)node).ArgumentList;
 			}
 			return null;
+		}
+
+		static bool HasImplicitConversion(SemanticModel model, ArgumentSyntax argument, CancellationToken cancellationToken) {
+			var typeInfo = model.GetTypeInfo(argument.Expression, cancellationToken);
+			return AreEqual(typeInfo.Type, typeInfo.ConvertedType, false);
 		}
 
 		/// <summary>Navigates upward through ancestral axis and find out the first node reflecting the usage.</summary>
