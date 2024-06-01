@@ -154,7 +154,7 @@ namespace Codist
 				}
 			}
 			#endregion
-			#region SeeAlso
+			#region See & SeeAlso
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.SeeAlsoDoc)) {
 				var seeAlsos = doc.SeeAlsos ?? doc.ExplicitInheritDoc?.SeeAlsos ?? doc.InheritedXmlDocs.FirstOrDefault(i => i.SeeAlsos != null)?.SeeAlsos;
 				ThemedTipText seeAlso = null;
@@ -490,7 +490,7 @@ namespace Codist
 					CreateLink(inlines, e, see);
 				}
 				else {
-					RenderXmlDocSymbol(see, inlines, SymbolKind.Alias);
+					RenderXmlDocSymbol(see, inlines, SymbolKind.Alias, e.Value);
 				}
 			}
 			else if ((see = e.Attribute("langword")?.Value) != null) {
@@ -552,21 +552,21 @@ namespace Codist
 			}
 		}
 
-		internal void RenderXmlDocSymbol(string symbol, InlineCollection inlines, SymbolKind symbolKind) {
+		internal void RenderXmlDocSymbol(string symbol, InlineCollection inlines, SymbolKind symbolKind, string alias = null) {
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.UseCodeFontForXmlDocSymbol)) {
 				inlines = UseCodeEditorFont(inlines);
 			}
 
 			switch (symbolKind) {
 				case SymbolKind.Parameter:
-					inlines.Add(symbol.Render(false, _SymbolFormatter.Parameter == null, _SymbolFormatter.Parameter));
+					inlines.Add((alias ?? symbol).Render(false, _SymbolFormatter.Parameter == null, _SymbolFormatter.Parameter));
 					return;
 				case SymbolKind.TypeParameter:
-					inlines.Add(symbol.Render(_SymbolFormatter.TypeParameter == null, false, _SymbolFormatter.TypeParameter));
+					inlines.Add((alias ?? symbol).Render(_SymbolFormatter.TypeParameter == null, false, _SymbolFormatter.TypeParameter));
 					return;
 				case SymbolKind.DynamicType:
 					// highlight keywords
-					inlines.Add(symbol.Render(_SymbolFormatter.Keyword));
+					inlines.Add((alias ?? symbol).Render(_SymbolFormatter.Keyword));
 					return;
 			}
 			var s = DocumentationCommentId.GetFirstSymbolForDeclarationId(symbol, _Compilation);
@@ -574,10 +574,11 @@ namespace Codist
 				ShowBrokenLink(inlines, symbol, _SymbolFormatter);
 				return;
 			}
-			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ContainingType)) {
+			if (alias == null
+				&& Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ContainingType)) {
 				ShowContainingType(inlines, s, SymbolFormatter.SemiTransparent);
 			}
-			_SymbolFormatter.Format(inlines, s, null, false);
+			_SymbolFormatter.Format(inlines, s, alias, false);
 
 			InlineCollection UseCodeEditorFont(InlineCollection ic) {
 				var span = new Span { FontFamily = ThemeHelper.CodeTextFont };
@@ -644,6 +645,7 @@ namespace Codist
 		static bool IsInlineElementName(string name) {
 			switch (name) {
 				case "see":
+				case "seealso":
 				case "paramref":
 				case "typeparamref":
 				case "b":
