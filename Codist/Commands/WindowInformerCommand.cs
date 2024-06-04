@@ -77,8 +77,8 @@ namespace Codist.Commands
 				}
 
 				s = NewSection(blocks, "IWpfTextView", SubSectionFontSize);
-				AppendNameValue(s, R.T_LineCount + " (TextSnapshot.LineCount)", view.TextSnapshot.LineCount);
-				AppendNameValue(s, R.T_CharacterCount + " (TextSnapshot.Length)", view.TextSnapshot.Length);
+				AppendNameValue(s, $"TextSnapshot.LineCount ({R.T_LineCount})", view.TextSnapshot.LineCount);
+				AppendNameValue(s, $"TextSnapshot.Length ({R.T_CharacterCount})", view.TextSnapshot.Length);
 
 				AppendNameValue(s, R.T_Selection, $"[{view.Selection.Start.Position.Position}-{view.Selection.End.Position.Position})");
 				AppendNameValue(s, R.T_SelectionLength, view.Selection.SelectedSpans.Sum(i => i.Length));
