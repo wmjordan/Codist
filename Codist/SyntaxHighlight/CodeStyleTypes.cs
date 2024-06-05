@@ -667,6 +667,12 @@ namespace Codist.SyntaxHighlight
 		[ClassificationType(ClassificationTypeNames = Constants.MarkdownUnorderedList)]
 		[Order(Before = Constants.MarkdownVsBold)]
 		UnorderedList,
+		[Category(Constants.SyntaxCategory.Block)]
+		[ClassificationType(ClassificationTypeNames = Constants.MarkdownCodeBlock)]
+		CodeBlock,
+		[Category(Constants.SyntaxCategory.Block)]
+		[ClassificationType(ClassificationTypeNames = Constants.MarkdownThematicBreak)]
+		ThematicBreak,
 		[Category(Constants.SyntaxCategory.Style)]
 		[ClassificationType(ClassificationTypeNames = Constants.MarkdownVsBold)]
 		[Inheritance]

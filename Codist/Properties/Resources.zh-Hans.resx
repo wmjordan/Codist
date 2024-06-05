@@ -2727,6 +2727,14 @@ Ctrl: 切换标记并选择下一处</value>
   <data name="OT_HideCopilotButton" xml:space="preserve">
     <value>隐藏 Github Copilot 按钮</value>
   </data>
+  <data name="CMD_MarkSubscript" xml:space="preserve">
+    <value>切换下标标记
+Ctrl: 切换标记并选择下一处</value>
+  </data>
+  <data name="CMD_MarkSuperscript" xml:space="preserve">
+    <value>切换上标标记
+Ctrl: 切换标记并选择下一处</value>
+  </data>
   <data name="OT_HideInfoBadgeButton" xml:space="preserve">
     <value>隐藏版本信息按钮</value>
   </data>

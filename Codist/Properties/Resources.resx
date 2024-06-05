@@ -2741,6 +2741,14 @@ Ctrl: toggle and select next.</value>
   <data name="OT_HideCopilotButton" xml:space="preserve">
     <value>Hide Github Copilot button</value>
   </data>
+  <data name="CMD_MarkSubscript" xml:space="preserve">
+    <value>Toggle Subscript Mark
+Ctrl: toggle and select next</value>
+  </data>
+  <data name="CMD_MarkSuperscript" xml:space="preserve">
+    <value>Toggle Superscript Mark
+Ctrl: toggle and select next</value>
+  </data>
   <data name="OT_HideInfoBadgeButton" xml:space="preserve">
     <value>Hide version info badge button</value>
   </data>

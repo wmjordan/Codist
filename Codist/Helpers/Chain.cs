@@ -24,7 +24,8 @@ namespace Codist
 		}
 
 		public bool IsEmpty => _Head == null;
-		public T Last => _Tail != null ? _Tail.Value : default;
+		public T Head => _Head != null ? _Head.Value : default;
+		public T Tail => _Tail != null ? _Tail.Value : default;
 
 		public Chain<T> Add(T item) {
 			if (_Head != null) {
@@ -33,6 +34,13 @@ namespace Codist
 			else {
 				_Head = _Tail = new Node(item);
 			}
+			return this;
+		}
+
+		public Chain<T> Insert(T item) {
+			_Head = new Node(item) {
+				Next = _Head
+			};
 			return this;
 		}
 
@@ -45,6 +53,10 @@ namespace Codist
 				t = t.Next;
 			}
 			return false;
+		}
+
+		public void Clear() {
+			_Head = _Tail = null;
 		}
 
 		public static Chain<T> operator +(Chain<T> chain, T item) {

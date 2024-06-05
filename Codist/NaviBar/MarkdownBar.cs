@@ -37,6 +37,11 @@ namespace Codist.NaviBar
 			_ActiveTitleLabel = new ThemedToolBarText(R.T_Headings);
 			Items.Add(_ActiveTitle = new ThemedImageButton(IconIds.Headings, _ActiveTitleLabel) { MaxWidth = 250 }
 				.HandleEvent(ButtonBase.ClickEvent, ShowTitleList));
+			AddTagButton(IconIds.Heading1, R.CMD_Heading1, MarkHeading1);
+			AddTagButton(IconIds.Heading2, R.CMD_Heading2, MarkHeading2);
+			AddTagButton(IconIds.Heading3, R.CMD_Heading3, MarkHeading3);
+			AddTagButton(IconIds.Quotation, R.CMD_MarkQuotation, MarkQuotation);
+			AddTagButton(IconIds.UnorderedList, R.CMD_UnorderedList, MarkUnorderedList);
 			AddTagButton(IconIds.TagBold, R.CMD_MarkBold, ToggleBold);
 			AddTagButton(IconIds.TagItalic, R.CMD_MarkItalic, ToggleItalic);
 			AddTagButton(IconIds.TagCode, R.CMD_MarkCode, ToggleCode);
@@ -44,11 +49,8 @@ namespace Codist.NaviBar
 			AddTagButton(IconIds.TagHighlight, R.CMD_MarkHighlight, ToggleHighlight);
 			AddTagButton(IconIds.TagStrikeThrough, R.CMD_MarkStrikeThrough, ToggleStrikeThrough);
 			AddTagButton(IconIds.TagUnderline, R.CMD_MarkUnderline, ToggleUnderline);
-			AddTagButton(IconIds.Heading1, R.CMD_Heading1, MarkHeading1);
-			AddTagButton(IconIds.Heading2, R.CMD_Heading2, MarkHeading2);
-			AddTagButton(IconIds.Heading3, R.CMD_Heading3, MarkHeading3);
-			AddTagButton(IconIds.Quotation, R.CMD_MarkQuotation, MarkQuotation);
-			AddTagButton(IconIds.UnorderedList, R.CMD_UnorderedList, MarkUnorderedList);
+			AddTagButton(IconIds.TagSuperscript, R.CMD_MarkSuperscript, ToggleSuperscript);
+			AddTagButton(IconIds.TagSubscript, R.CMD_MarkSubscript, ToggleSubscript);
 			AddTagButton(IconIds.Indent, R.CMD_Indent, (s, args) => TextEditorHelper.ExecuteEditorCommand("Edit.IncreaseLineIndent"));
 			AddTagButton(IconIds.Unindent, R.CMD_Unindent, (s, args) => TextEditorHelper.ExecuteEditorCommand("Edit.DecreaseLineIndent"));
 			Items.AddRange(_TagButtons);
@@ -73,7 +75,7 @@ namespace Codist.NaviBar
 
 		void Update(object sender, EventArgs e) {
 			HideMenu();
-			_ActiveTitleLabel.Text = _Tags.GetPrecedingTaggedSpan(View.GetCaretPosition(), i => i.Tag is MarkdownTitleTag)?.ContentText ?? R.T_Headings;
+			_ActiveTitleLabel.Text = _Tags.GetPrecedingTaggedSpan(View.GetCaretPosition(), i => i.Tag is MarkdownHeadingTag)?.ContentText ?? R.T_Headings;
 		}
 
 		void HideMenu() {
@@ -180,6 +182,14 @@ namespace Codist.NaviBar
 			WrapWith("<u>", "</u>", true);
 		}
 
+		void ToggleSuperscript(object sender, RoutedEventArgs e) {
+			WrapWith("<sup>", "</sup>", true);
+		}
+
+		void ToggleSubscript(object sender, RoutedEventArgs e) {
+			WrapWith("<sub>", "</sub>", true);
+		}
+
 		void MarkHeading1(object sender, RoutedEventArgs e) {
 			MarkdownHelper.MarkList(View, MarkdownHelper.Heading1, true, MarkdownHelper.HeadingGlyph);
 		}
@@ -210,7 +220,7 @@ namespace Codist.NaviBar
 
 		public override void ShowRootItemMenu(int parameter) {
 			_ActiveTitle.IsHighlighted = true;
-			var tags = _Tags.GetTags(i => i.Tag is MarkdownTitleTag);
+			var tags = _Tags.GetTags(i => i.Tag is MarkdownHeadingTag);
 			var titles = _Titles = new LocationItem[tags.Length];
 			for (int i = 0; i < titles.Length; i++) {
 				titles[i] = new LocationItem(tags[i]);
@@ -480,34 +490,27 @@ namespace Codist.NaviBar
 			public LocationItem(TaggedContentSpan span) {
 				_Span = span;
 				Content = new ThemedMenuText(span.ContentText);
-				var ct = ((MarkdownTitleTag)span.Tag).TitleLevel;
-				switch (ct) {
+				switch (_Level = ((MarkdownHeadingTag)span.Tag).Level) {
 					case 1:
 						Content.FontWeight = FontWeights.Bold;
-						_Level = 1;
 						_ImageId = IconIds.Heading1;
 						return;
 					case 2:
-						_Level = 2;
 						_ImageId = IconIds.Heading2;
 						return;
 					case 3:
-						_Level = 3;
 						_ImageId = IconIds.Heading3;
 						Content.Padding = __H3Padding;
 						return;
 					case 4:
-						_Level = 4;
 						_ImageId = IconIds.Heading4;
 						Content.Padding = __H4Padding;
 						return;
 					case 5:
-						_Level = 5;
 						_ImageId = IconIds.Heading5;
 						Content.Padding = __H5Padding;
 						return;
 					case 6:
-						_Level = 6;
 						_ImageId = IconIds.None;
 						Content.Padding = __H6Padding;
 						return;

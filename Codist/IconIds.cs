@@ -172,6 +172,8 @@ namespace Codist
 		public const int TagHyperLink = KnownImageIds.HyperLink;
 		public const int TagStrikeThrough = KnownImageIds.StrikeThrough;
 		public const int TagHighlight = KnownImageIds.Highlighter;
+		public const int TagSubscript = KnownImageIds.Subscript;
+		public const int TagSuperscript = KnownImageIds.Superscript;
 		public const int Marks = KnownImageIds.FlagGroup;
 		public const int MarkSymbol = KnownImageIds.Flag;
 		public const int UnmarkSymbol = KnownImageIds.FlagOutline;

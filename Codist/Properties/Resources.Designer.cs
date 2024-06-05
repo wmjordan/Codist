@@ -1269,6 +1269,26 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Toggle Subscript Mark
+        ///Ctrl: toggle and select next.
+        /// </summary>
+        internal static string CMD_MarkSubscript {
+            get {
+                return ResourceManager.GetString("CMD_MarkSubscript", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Toggle Superscript Mark
+        ///Ctrl: toggle and select next.
+        /// </summary>
+        internal static string CMD_MarkSuperscript {
+            get {
+                return ResourceManager.GetString("CMD_MarkSuperscript", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Mark...
         ///Mark symbol, breakpoint or bookmark.
         /// </summary>

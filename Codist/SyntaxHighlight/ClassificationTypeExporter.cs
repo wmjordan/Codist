@@ -166,7 +166,7 @@ namespace Codist.SyntaxHighlight
 					//   `IClassificationType`s
 					#region Assign priority order to new IClassificationType
 					if (priorityGroups.TryGetValue(p, out var chain)) {
-						bct = chain.Last;
+						bct = chain.Tail;
 					}
 					else {
 						priorityGroups[p] = chain = new Chain<IClassificationType>(bct);
