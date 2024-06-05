@@ -40,16 +40,17 @@ namespace Codist.Display
 			switch (element) {
 				case DisplayOptimizations.HideSearchBox: controlMatcher = CodistPackage.VsVersion.Major == 15 ? ControlNameMatcher.PART__SearchBox.Match : ControlNameMatcher.SearchBox.Match; break;
 				case DisplayOptimizations.HideAccountBox: controlMatcher = ControlNameMatcher.IDCardGrid.Match; break;
-				case DisplayOptimizations.HideFeedbackBox: controlMatcher = ControlNameMatcher.FeedbackButton.Match; break;
+				case DisplayOptimizations.HideFeedbackBox: controlMatcher = ControlAlternativeMatcher.FeedbackButton.Match; break;
 				case DisplayOptimizations.HideCopilotButton: controlMatcher = ControlTypeMatcher.CopilotBadgeControl.Match; break;
 				case DisplayOptimizations.HideInfoBadgeButton: controlMatcher = ControlTypeMatcher.InfoBadgeControl.Match; break;
 				default: return false;
 			}
-			var t = CodistPackage.VsVersion.Major == 15
-				? g.GetFirstVisualChild(controlMatcher)
-					?.GetParent<ContentPresenter>(i => System.Windows.Media.VisualTreeHelper.GetParent(i) is StackPanel)
-				: g.GetFirstVisualChild(controlMatcher)
-					?.GetParent<ContentPresenter>(i => i.Name == "DataTemplatePresenter");
+			var t = g.GetFirstVisualChild(controlMatcher);
+			if (t != null) {
+				t = CodistPackage.VsVersion.Major == 15
+					? t.GetParent<ContentPresenter>(i => System.Windows.Media.VisualTreeHelper.GetParent(i) is StackPanel)
+					: t.GetParent<ContentPresenter>(i => i.Name == "DataTemplatePresenter");
+			}
 			if (t != null) {
 				t.ToggleVisibility(show);
 			}
@@ -259,10 +260,24 @@ namespace Codist.Display
 				return control.Name == _Name;
 			}
 		}
+		readonly struct ControlAlternativeMatcher
+		{
+			internal static readonly ControlAlternativeMatcher FeedbackButton = new ControlAlternativeMatcher(ControlTypeMatcher.Feedback.Match, ControlNameMatcher.FeedbackButton.Match);
+
+			readonly Predicate<FrameworkElement> _PrimaryCondition, _AlternativeCondition;
+			ControlAlternativeMatcher(Predicate<FrameworkElement> condition1, Predicate<FrameworkElement> condition2) {
+				_PrimaryCondition = condition1;
+				_AlternativeCondition = condition2;
+			}
+			public bool Match(FrameworkElement control) {
+				return _PrimaryCondition(control) || _AlternativeCondition(control);
+			}
+		}
 		readonly struct ControlTypeMatcher
 		{
 			internal static readonly ControlTypeMatcher PackageAllInOneSearchButtonPresenter = new ControlTypeMatcher("PackageAllInOneSearchButtonPresenter");
 			internal static readonly ControlTypeMatcher CopilotBadgeControl = new ControlTypeMatcher("CopilotBadgeControl");
+			internal static readonly ControlTypeMatcher Feedback = new ControlTypeMatcher("SendASmileControl");
 			internal static readonly ControlTypeMatcher InfoBadgeControl = new ControlTypeMatcher("InfoBadgeControl");
 
 			readonly string _Name;
