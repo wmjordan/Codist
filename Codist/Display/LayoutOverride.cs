@@ -38,7 +38,7 @@ namespace Codist.Display
 			}
 			Predicate<FrameworkElement> controlMatcher;
 			switch (element) {
-				case DisplayOptimizations.HideSearchBox: controlMatcher = CodistPackage.VsVersion.Major == 15 ? ControlNameMatcher.PART__SearchBox.Match : ControlNameMatcher.SearchBox.Match; break;
+				case DisplayOptimizations.HideSearchBox: controlMatcher = CodistPackage.VsVersion.Major == 15 ? ControlNameMatcher.PART__SearchBox.Match : (Predicate<FrameworkElement>)ControlNameMatcher.SearchBox.Match; break;
 				case DisplayOptimizations.HideAccountBox: controlMatcher = ControlNameMatcher.IDCardGrid.Match; break;
 				case DisplayOptimizations.HideFeedbackBox: controlMatcher = ControlAlternativeMatcher.FeedbackButton.Match; break;
 				case DisplayOptimizations.HideCopilotButton: controlMatcher = ControlTypeMatcher.CopilotBadgeControl.Match; break;
