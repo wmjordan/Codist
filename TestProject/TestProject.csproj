@@ -88,14 +88,18 @@
     <Compile Include="VariableCaptures.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Test.css" />
-    <Content Include="Test.js" />
-    <Content Include="Test.xml" />
+    <Content Include="CommentTaggers\Test.css" />
+    <Content Include="CommentTaggers\Test.html" />
+    <Content Include="CommentTaggers\Test.js" />
+    <Content Include="CommentTaggers\Test.xml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
+    <None Include="CommentTaggers\Test.json" />
+    <None Include="CommentTaggers\Test.less" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
