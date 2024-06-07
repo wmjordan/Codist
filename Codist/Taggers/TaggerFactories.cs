@@ -18,22 +18,22 @@ namespace Codist.Taggers
 	{
 		public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag {
 			if (Config.Instance.Features.MatchFlags(Features.SyntaxHighlight) == false
+			#region Suppress CreateTagAggregator call
+				// note:
+				//   CommentTagger will call CreateTagAggregator<IClassificationTag>
+				//     to find out comments provided by other taggers,
+				//     and this provider method will also be called from that method.
+				//   we should return null when this happens, otherwise stack overflow will occur.
+				|| textView.TryGetProperty(out CommentTagger t)
+			#endregion
 				|| CommentTagger.IsCommentTaggable(buffer) == false
 				|| buffer.MayBeEditor() == false && textView.TextBuffer.ContentType.IsOfType("RoslynPreviewContentType") == false
 				|| textView.Roles.Contains("STICKYSCROLL_TEXT_VIEW")
 				) {
 				return null;
 			}
-			if (textView.TryGetProperty<TaggerResult>(out var tags)) {
-				return null;
-			}
-			else {
-				tags = textView.CreateProperty<TaggerResult>();
-			}
-			if (textView.TryGetProperty(out CommentTagger t)) {
-				return t as ITagger<T>;
-			}
-			t = textView.GetOrCreateSingletonProperty(() => CommentTagger.Create(ServicesHelper.Instance.ClassificationTypeRegistry, textView, buffer));
+			var tags = textView.GetOrCreateSingletonProperty<TaggerResult>();
+			textView.Properties.AddProperty(typeof(CommentTagger), t = CommentTagger.Create(ServicesHelper.Instance.ClassificationTypeRegistry, textView, buffer));
 			textView.Closed -= TextViewClosed;
 			textView.Closed += TextViewClosed;
 			return t as ITagger<T>;
