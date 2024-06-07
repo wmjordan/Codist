@@ -847,7 +847,7 @@ namespace Codist
 					}
 					else {
 						var a = _AttributeArguments.Arguments[index];
-						return (a.NameColon, a.Expression);
+						return (a.NameColon, a.NameEquals == null ? a.Expression : null);
 					}
 				}
 			}
