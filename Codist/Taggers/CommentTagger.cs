@@ -28,6 +28,8 @@ namespace Codist.Taggers
 				{ "h", CodeType.C },
 				{ "cxx", CodeType.C },
 				{ "css", CodeType.Css },
+				{ "less", CodeType.Common },
+				{ "json", CodeType.Common },
 				{ "cshtml", CodeType.CSharp },
 				{ "go", CodeType.Go },
 				{ "html", CodeType.Markup },
@@ -43,7 +45,7 @@ namespace Codist.Taggers
 				{ "ps1", CodeType.BashShell },
 				{ "cmd", CodeType.Batch },
 				{ "bat", CodeType.Batch },
-				{ "ini", CodeType.Ini },
+				{ "ini", CodeType.Common },
 			};
 		}
 
@@ -115,7 +117,7 @@ namespace Codist.Taggers
 					return new MarkupCommentTagger(registry, textView, textBuffer);
 				case CodeType.Python:
 				case CodeType.BashShell:
-				case CodeType.Ini:
+				case CodeType.Common:
 					return new CommonCommentTagger(registry, textView, textBuffer);
 			}
 			return null;
@@ -310,16 +312,20 @@ namespace Codist.Taggers
 		static CodeType GetCodeType(ITextBuffer textBuffer) {
 			var t = textBuffer.ContentType;
 			var c = t.IsOfType(Constants.CodeTypes.CSharp) || t.IsOfType("HTMLXProjection") ? CodeType.CSharp
-				: t.IsOfType("html") || t.IsOfType("htmlx") || t.IsOfType("XAML") || t.IsOfType("XML") || t.IsOfType(Constants.CodeTypes.HtmlxProjection) || t.IsOfType("code++.NAnt Build File") ? CodeType.Markup
-				: t.IsOfType("code++.css") ? CodeType.Css
-				: t.IsOfType("TypeScript") || t.IsOfType("JavaScript") ? CodeType.Js
 				: t.IsOfType("C/C++") ? CodeType.C
+				: t.IsOfType("TypeScript") || t.IsOfType("JavaScript") ? CodeType.Js
 				: t.IsOfType("code++.MagicPython") ? CodeType.Python
+				: t.IsOfType("html") || t.IsOfType("htmlx") || t.IsOfType("XAML") || t.IsOfType("XML") || t.IsOfType(Constants.CodeTypes.HtmlxProjection) ? CodeType.Markup
+				: t.IsOfType("Razor") ? CodeType.Common
+				: t.IsOfType("code++.css") ? CodeType.Css
+				: t.IsOfType("code++.LESS") ? CodeType.Common
+				: t.IsOfType("code++.JSON (Javascript Next)") ? CodeType.Common
 				: t.IsOfType("code++.Shell Script (Bash)") || t.IsOfType("InBoxPowerShell") ? CodeType.BashShell
 				: t.IsOfType("code++.Batch File") ? CodeType.Batch
-				: t.IsOfType("code++.Ini") ? CodeType.Ini
+				: t.IsOfType("code++.Ini") ? CodeType.Common
 				: t.IsOfType("code++.Go") ? CodeType.Go
 				: t.IsOfType("code++.Rust") ? CodeType.Rust
+				: t.IsOfType("code++.NAnt Build File") ? CodeType.Markup
 				: CodeType.None;
 			if (c != CodeType.None) {
 				return c;
@@ -369,7 +375,7 @@ namespace Codist.Taggers
 
 		enum CodeType
 		{
-			None, CSharp, Markup, C, Css, Go, Rust, Js, Sql, Python, Batch, BashShell, Ini
+			None, Common, CSharp, Markup, C, Css, Go, Rust, Js, Sql, Python, Batch, BashShell
 		}
 
 		sealed class CommonCommentTagger : CommentTagger
