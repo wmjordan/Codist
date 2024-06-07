@@ -490,7 +490,7 @@ namespace Codist
 					CreateLink(inlines, e, see);
 				}
 				else {
-					RenderXmlDocSymbol(see, inlines, SymbolKind.Alias, e.Value);
+					RenderXmlDocSymbol(see, inlines, SymbolKind.Alias, e.IsEmpty ? null : e.Value);
 				}
 			}
 			else if ((see = e.Attribute("langword")?.Value) != null) {
