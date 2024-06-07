@@ -46,14 +46,22 @@ namespace Codist.Taggers
 			}
 			return t;
 		}
-		/// <summary>Gets a sorted array which contains parsed tags.</summary>
-		public TaggedContentSpan[] GetTags() {
-			var tags = _Tags;
-			var r = new TaggedContentSpan[tags.Count];
-			tags.CopyTo(r);
-			//Array.Sort(r, (x, y) => x.Start - y.Start);
-			return r;
+		public IEnumerable<TaggedContentSpan> GetPrecedingTaggedSpans(SnapshotPoint position, Predicate<TaggedContentSpan> predicate) {
+			TaggedContentSpan t = null;
+			foreach (var tag in _Tags.GetViewBetween(new TaggedContentSpan(0, 0), new TaggedContentSpan(position.Position + 1, 0)).Reverse()) {
+				if (tag.Contains(position) && predicate(tag)) {
+					yield return tag;
+				}
+				else if (position > tag.Start && (t == null || tag.Start > t.Start) && predicate(tag)) {
+					t = tag;
+				}
+			}
+
+			if (t != null) {
+				yield return t;
+			}
 		}
+
 		public ImmutableArray<TaggedContentSpan> GetTags(Func<TaggedContentSpan, bool> predicate) {
 			return ImmutableArray.CreateRange(_Tags.Where(predicate));
 		}
