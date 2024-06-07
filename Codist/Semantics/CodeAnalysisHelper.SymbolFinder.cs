@@ -579,9 +579,14 @@ namespace Codist
 					if (argList == null) {
 						continue;
 					}
-					var caller = model.GetEnclosingSymbol(r.Location.SourceSpan.Start);
-					while (caller.Kind == SymbolKind.Method && ((IMethodSymbol)caller).MethodKind == MethodKind.LambdaMethod) {
-						caller = caller.ContainingSymbol;
+					ISymbol caller = argList.AttributeList.IsKind(SyntaxKind.AttributeArgumentList)
+						? model.GetSymbol(argList.AttributeList.GetAncestorOrSelfDeclaration())
+						: null;
+					if (caller == null) {
+						caller = model.GetEnclosingSymbol(r.Location.SourceSpan.Start);
+						while (caller.Kind == SymbolKind.Method && ((IMethodSymbol)caller).MethodKind == MethodKind.LambdaMethod) {
+							caller = caller.ContainingSymbol;
+						}
 					}
 					if (symbolLocations.TryGetValue(caller, out refList) == false) {
 						symbolLocations.Add(caller, refList = new List<(ArgumentAssignment, Location, ExpressionSyntax)>());
@@ -607,11 +612,11 @@ namespace Codist
 							}
 						}
 					}
-					var args = argList.Arguments;
-					ArgumentSyntax arg;
+					var args = argList;
+					(NameColonSyntax NameColon, ExpressionSyntax Expression) arg;
 					if (args.Count > pi && (arg = args[pi]).NameColon == null) {
 						if (assignmentFilter != ArgumentAssignmentFilter.DefaultValue) {
-							refList.Add((HasImplicitConversion(model, arg, cancellationToken) ? ArgumentAssignment.Normal : ArgumentAssignment.ImplicitlyConverted, null, arg.Expression));
+							refList.Add((HasImplicitConversion(model, arg.Expression, cancellationToken) ? ArgumentAssignment.Normal : ArgumentAssignment.ImplicitlyConverted, null, arg.Expression));
 						}
 						continue;
 					}
@@ -619,7 +624,7 @@ namespace Codist
 						arg = args[i];
 						if (arg.NameColon?.Name.Identifier.Text == pn) {
 							if (assignmentFilter != ArgumentAssignmentFilter.DefaultValue) {
-								refList.Add((HasImplicitConversion(model, arg, cancellationToken) ? ArgumentAssignment.NameValue : ArgumentAssignment.ImplicitlyConvertedNameValue, null, arg.Expression));
+								refList.Add((HasImplicitConversion(model, arg.Expression, cancellationToken) ? ArgumentAssignment.NameValue : ArgumentAssignment.ImplicitlyConvertedNameValue, null, arg.Expression));
 							}
 							goto NEXT;
 						}
@@ -633,7 +638,7 @@ namespace Codist
 			return symbolLocations;
 		}
 
-		static ArgumentListSyntax GetArguments(SyntaxNode node) {
+		static ArgumentListContainer GetArguments(SyntaxNode node) {
 			switch (node.Kind()) {
 				case SyntaxKind.IdentifierName:
 				case SyntaxKind.QualifiedName:
@@ -642,25 +647,28 @@ namespace Codist
 						node = node.Parent;
 					}
 					if (node is InvocationExpressionSyntax inv) {
-						return inv.ArgumentList;
+						return new ArgumentListContainer(inv.ArgumentList);
 					}
 					if (node is ObjectCreationExpressionSyntax oc) {
-						return oc.ArgumentList;
+						return new ArgumentListContainer(oc.ArgumentList);
+					}
+					if (node is AttributeSyntax a) {
+						return new ArgumentListContainer(a.ArgumentList);
 					}
 					break;
 				case CodeAnalysisHelper.ImplicitObjectCreationExpression:
-					return (node as ExpressionSyntax).GetImplicitObjectCreationArgumentList();
+					return new ArgumentListContainer((node as ExpressionSyntax).GetImplicitObjectCreationArgumentList());
 				case SyntaxKind.BaseConstructorInitializer:
 				case SyntaxKind.ThisConstructorInitializer:
-					return ((ConstructorInitializerSyntax)node).ArgumentList;
+					return new ArgumentListContainer(((ConstructorInitializerSyntax)node).ArgumentList);
 				case SyntaxKind.ObjectCreationExpression:
-					return ((ObjectCreationExpressionSyntax)node).ArgumentList;
+					return new ArgumentListContainer(((ObjectCreationExpressionSyntax)node).ArgumentList);
 			}
 			return null;
 		}
 
-		static bool HasImplicitConversion(SemanticModel model, ArgumentSyntax argument, CancellationToken cancellationToken) {
-			var typeInfo = model.GetTypeInfo(argument.Expression, cancellationToken);
+		static bool HasImplicitConversion(SemanticModel model, ExpressionSyntax expression, CancellationToken cancellationToken) {
+			var typeInfo = model.GetTypeInfo(expression, cancellationToken);
 			return AreEqual(typeInfo.Type, typeInfo.ConvertedType, false);
 		}
 
@@ -814,6 +822,35 @@ namespace Codist
 		static partial class Comparers
 		{
 			internal static readonly GenericEqualityComparer<SymbolCallerInfo> SymbolCallerInfoComparer = new GenericEqualityComparer<SymbolCallerInfo>((x, y) => x.CallingSymbol == y.CallingSymbol, o => o.CallingSymbol.GetHashCode());
+
+			internal static readonly GenericEqualityComparer<Location> SourceLocationComparer = new GenericEqualityComparer<Location>((x, y) => x.SourceTree == y.SourceTree && x.SourceSpan == y.SourceSpan, o => (o.SourceTree?.GetHashCode() ?? 0) ^ (o.SourceSpan.GetHashCode() << 8));
+		}
+
+		sealed class ArgumentListContainer
+		{
+			readonly AttributeArgumentListSyntax _AttributeArguments;
+			readonly ArgumentListSyntax _Arguments;
+
+			public ArgumentListContainer(ArgumentListSyntax argumentList) {
+				_Arguments = argumentList;
+			}
+			public ArgumentListContainer(AttributeArgumentListSyntax attributeArgumentList) {
+				_AttributeArguments = attributeArgumentList;
+			}
+			public SyntaxNode AttributeList => _Arguments ?? (SyntaxNode)_AttributeArguments;
+			public int Count => _Arguments != null ? _Arguments.Arguments.Count : _AttributeArguments.Arguments.Count;
+			public (NameColonSyntax NameColon, ExpressionSyntax Expression) this[int index] {
+				get{
+					if (_Arguments != null) {
+						var a = _Arguments.Arguments[index];
+						return (a.NameColon, a.Expression);
+					}
+					else {
+						var a = _AttributeArguments.Arguments[index];
+						return (a.NameColon, a.Expression);
+					}
+				}
+			}
 		}
 	}
 }
