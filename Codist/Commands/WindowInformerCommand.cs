@@ -19,7 +19,7 @@ using Window = EnvDTE.Window;
 namespace Codist.Commands
 {
 	/// <summary>A command which displays information about the active window pane.</summary>
-	internal static class WindowInformerCommand
+	static class WindowInformerCommand
 	{
 		const int SubSectionFontSize = 14;
 
@@ -45,18 +45,7 @@ namespace Codist.Commands
 
 		[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
 		static void DisplayWindowInfo(Window window) {
-			var tb = new RichTextBox {
-				BorderThickness = WpfHelper.NoMargin,
-				Background = ThemeHelper.DocumentPageBrush,
-				Foreground = ThemeHelper.DocumentTextBrush,
-				FontFamily = ThemeHelper.CodeTextFont,
-				IsDocumentEnabled = true,
-				IsReadOnly = true,
-				IsReadOnlyCaretVisible = true,
-				AcceptsReturn = false
-			};
-			tb.ApplyTemplate();
-			tb.GetFirstVisualChild<ScrollViewer>().ReferenceStyle(VsResourceKeys.ScrollViewerStyleKey);
+			var tb = new ThemedRichTextBox(true);
 			var blocks = tb.Document.Blocks;
 			blocks.Clear();
 			Section s;

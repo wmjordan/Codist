@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel.Design;
 using Codist.Controls;
 using Microsoft.VisualStudio.Shell;
 using R = Codist.Properties.Resources;
