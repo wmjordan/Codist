@@ -128,7 +128,7 @@ namespace Codist
 		public const int ParameterCandidate = KnownImageIds.ParameterWarning;
 		public const int SymbolCandidate = KnownImageIds.Field | KnownImageIds.OverlayWarning << OverlayShift | FullOverlayMask;
 		public const int InterfaceImplementation = KnownImageIds.ImplementInterface;
-		public const int Disposable = KnownImageIds.InterfacePublic | KnownImageIds.OverlayWarning << OverlayShift | FullOverlayMask;
+		public const int Disposable = KnownImageIds.InterfacePublic | KnownImageIds.Brush << OverlayShift;
 		public const int Discard = KnownImageIds.HiddenFile;
 		public const int BaseTypes = KnownImageIds.ParentChild;
 		public const int MethodOverloads = KnownImageIds.MethodSet;
