@@ -16,7 +16,7 @@ namespace Codist
 {
 	sealed class Config
 	{
-		internal const string CurrentVersion = "7.8.0";
+		internal const string CurrentVersion = "7.9.0";
 		const string ThemePrefix = "res:";
 		const int DefaultIconSize = 20;
 		internal const string LightTheme = ThemePrefix + "Light",
@@ -938,10 +938,11 @@ namespace Codist
 	public enum DeveloperOptions
 	{
 		None,
+		ShowWindowInformer = 1,
 		[Obsolete]
 		ShowDocumentContentType = 1,
-		ShowWindowInformer = 1,
 		ShowSyntaxClassificationInfo = 1 << 1,
+		ShowSupportedFileTypes = 1 << 2,
 		Default = None
 	}
 
