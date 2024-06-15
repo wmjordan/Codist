@@ -2777,4 +2777,12 @@ Ctrl: toggle and select next</value>
     <value>Ctrl: Explicit assignment only
 Shift: Assign by default only</value>
   </data>
+  <data name="CMD_ExtractLinesContainingSelection" xml:space="preserve">
+    <value>Extract Lines Containing Selection</value>
+  </data>
+  <data name="CMDT_ExtractLinesContainingSelection" xml:space="preserve">
+    <value>Copy all lines containing current selection into a new window
+Shift: Match whole word
+Ctrl: Match case</value>
+  </data>
 </root>

@@ -2763,4 +2763,12 @@ Ctrl: 切换标记并选择下一处</value>
     <value>Ctrl: 仅显示显式赋值的参数
 Shift: 仅显式默认赋值的参数</value>
   </data>
+  <data name="CMDT_ExtractLinesContainingSelection" xml:space="preserve">
+    <value>将文档中所有包含当前选中文字内容的行复制到一个新窗口
+Shift: 匹配整个单词
+Ctrl: 匹配大小写</value>
+  </data>
+  <data name="CMD_ExtractLinesContainingSelection" xml:space="preserve">
+    <value>提取包含选中文字的行</value>
+  </data>
 </root>

@@ -573,6 +573,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Extract Lines Containing Selection.
+        /// </summary>
+        internal static string CMD_ExtractLinesContainingSelection {
+            get {
+                return ResourceManager.GetString("CMD_ExtractLinesContainingSelection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Extract method....
         /// </summary>
         internal static string CMD_ExtractMethod {
@@ -2313,6 +2322,17 @@ namespace Codist.Properties {
         internal static string CMDT_DarkTheme {
             get {
                 return ResourceManager.GetString("CMDT_DarkTheme", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copy all lines containing current selection into a new window
+        ///Shift: Match whole word
+        ///Ctrl: Match case.
+        /// </summary>
+        internal static string CMDT_ExtractLinesContainingSelection {
+            get {
+                return ResourceManager.GetString("CMDT_ExtractLinesContainingSelection", resourceCulture);
             }
         }
         

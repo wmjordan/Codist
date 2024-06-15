@@ -476,6 +476,35 @@ namespace Codist.SmartBars
 				new CommandItem(IconIds.Replace, R.CMD_Replace, _ => TextEditorHelper.ExecuteEditorCommand("Edit.Replace")),
 				new CommandItem(IconIds.FindInFile, R.CMD_FindInFiles, _ => TextEditorHelper.ExecuteEditorCommand("Edit.FindinFiles")),
 				new CommandItem(IconIds.ReplaceInFolder, R.CMD_ReplaceInFiles, _ => TextEditorHelper.ExecuteEditorCommand("Edit.ReplaceinFiles")),
+				new CommandItem(IconIds.SelectCode, R.CMD_ExtractLinesContainingSelection, ctx => {
+					ThreadHelper.ThrowIfNotOnUIThread();
+					var snapshot = ctx.View.TextSnapshot;
+					var selection = ctx.View.GetFirstSelectionText();
+					var w = CodistPackage.DTE.ItemOperations.NewFile("General\\Text File", selection.Length > 30 ? selection.Substring(0, 30) : selection);
+					using (var sbr = ReusableStringBuilder.AcquireDefault(1000)) {
+						var sb = sbr.Resource;
+						var option = FindOptions.OrdinalComparison | FindOptions.SingleLine;
+						if (ctx.ModifierKeys.MatchFlags(ModifierKeys.Shift)) {
+							option |= FindOptions.WholeWord;
+						}
+						if (ctx.ModifierKeys.MatchFlags(ModifierKeys.Control)) {
+							option |= FindOptions.MatchCase;
+						}
+						SnapshotPoint p = new SnapshotPoint(snapshot, 0);
+						SnapshotSpan? occurrence;
+						while ((occurrence = ctx.TextSearchService.Find(p, selection, option)).HasValue) {
+							var line = snapshot.GetLineFromPosition(occurrence.Value.Start);
+							p = line.EndIncludingLineBreak;
+							sb.Append(line.GetTextIncludingLineBreak());
+						}
+						var view = w.Document.GetActiveWpfDocumentView();
+						using (var edit = view.TextBuffer.CreateEdit()) {
+							edit.Insert(0, sb.ToString());
+							edit.Apply();
+						}
+						w.Document.Saved = true;
+					}
+				}) { ToolTip = R.CMDT_ExtractLinesContainingSelection }
 			};
 		}
 		static CommandItem[] GetSurroundingCommands() {
