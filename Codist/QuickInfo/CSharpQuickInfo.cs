@@ -479,9 +479,9 @@ namespace Codist.QuickInfo
 			}
 		}
 
-		static ThemedTipDocument OverrideDocumentation(SyntaxNode node, IQuickInfoOverride qiWrapper, ISymbol symbol, SemanticModel semanticModel, CancellationToken cancellationToken) {
+		static void OverrideDocumentation(SyntaxNode node, IQuickInfoOverride qiWrapper, ISymbol symbol, SemanticModel semanticModel, CancellationToken cancellationToken) {
 			if (symbol == null) {
-				return null;
+				return;
 			}
 			var ms = symbol as IMethodSymbol;
 			if (symbol.Kind == SymbolKind.Method && ms?.IsAccessor() == true) {
@@ -541,7 +541,6 @@ namespace Codist.QuickInfo
 				}
 				qiWrapper.OverrideDocumentation(tip);
 			}
-			return tip;
 		}
 
 		static void ShowCandidateInfo(InfoContainer qiContent, ImmutableArray<ISymbol> candidates) {
