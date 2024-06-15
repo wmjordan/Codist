@@ -575,6 +575,7 @@ namespace Codist.SmartBars
 			public int ImageId { get; }
 			public Action<MenuItem> ItemInitializer { get; }
 			public string Name { get; }
+			public string ToolTip { get; set; }
 			public Func<CommandContext, Task> AsyncAction { get; }
 		}
 
@@ -587,6 +588,9 @@ namespace Codist.SmartBars
 				CommandItem = item;
 				Icon = VsImageHelper.GetImage(item.ImageId);
 				Header = new TextBlock { Text = item.Name };
+				if (item.ToolTip != null) {
+					this.SetLazyToolTip(() => new CommandToolTip(item.ImageId, item.Name, new ThemedTipText(item.ToolTip)));
+				}
 				item.ItemInitializer?.Invoke(this);
 				// the action is installed only when called by this method
 				if (item.Action != null) {
