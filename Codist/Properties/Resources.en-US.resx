@@ -2785,4 +2785,7 @@ Ctrl: Match case</value>
   <data name="CMD_ExtractLinesContainingSelection" xml:space="preserve">
     <value>Extract Lines Containing Selection</value>
   </data>
+  <data name="T_Code" xml:space="preserve">
+    <value>Code</value>
+  </data>
 </root>

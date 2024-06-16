@@ -2771,4 +2771,7 @@ Ctrl: 匹配大小写</value>
   <data name="CMD_ExtractLinesContainingSelection" xml:space="preserve">
     <value>提取包含选中文字的行</value>
   </data>
+  <data name="T_Code" xml:space="preserve">
+    <value>代码</value>
+  </data>
 </root>

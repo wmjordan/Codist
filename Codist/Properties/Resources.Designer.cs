@@ -5899,6 +5899,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Code.
+        /// </summary>
+        internal static string T_Code {
+            get {
+                return ResourceManager.GetString("T_Code", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to It is the first time for Codist running on your Visual Studio. Click here to.
         /// </summary>
         internal static string T_CodistFirstRun {

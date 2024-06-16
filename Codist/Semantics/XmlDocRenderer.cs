@@ -20,7 +20,6 @@ namespace Codist
 	sealed class XmlDocRenderer
 	{
 		const int LIST_UNDEFINED = -1, LIST_BULLET = -2, LIST_NOT_NUMERIC = -3;
-		const int BLOCK_PARA = 0, BLOCK_ITEM = 1, BLOCK_OTHER = 2, BLOCK_TITLE = 3;
 
 		static readonly Regex __FixWhitespaces = new Regex(" {2,}", RegexOptions.Compiled | RegexOptions.CultureInvariant);
 		readonly Compilation _Compilation;
@@ -250,6 +249,15 @@ namespace Codist
 			}
 			Render(content, text.Inlines);
 		}
+		public void Render(XElement content, FlowDocument document) {
+			if (content == null || IsEmptyElement(content)) {
+				return;
+			}
+			if (document.Blocks.FirstBlock is Paragraph p == false) {
+				document.Blocks.Add(p = new Paragraph());
+			}
+			Render(content, p.Inlines);
+		}
 		public void Render(XContainer content, InlineCollection inlines) {
 			InternalRender(content, inlines, null);
 		}
@@ -264,7 +272,7 @@ namespace Codist
 								list = list == null
 									? new ListContext(e.Attribute("type")?.Value)
 									: new ListContext(e.Attribute("type")?.Value, list);
-								RenderBlockContent(inlines, list, e, BLOCK_OTHER);
+								RenderBlockContent(inlines, list, e, BlockType.List);
 								list = list.Parent;
 								break;
 							case "para":
@@ -282,36 +290,33 @@ namespace Codist
 								}
 								break;
 							case "listheader":
-								RenderBlockContent(inlines, list, e, BLOCK_OTHER);
+								RenderBlockContent(inlines, list, e, BlockType.List);
 								break;
 							case "h1":
-								RenderBlockContent(inlines, list, e, BLOCK_TITLE).FontSize = ThemeHelper.ToolTipFontSize + 5;
+								RenderBlockContent(inlines, list, e, BlockType.Title).FontSize = ThemeHelper.ToolTipFontSize + 5;
 								break;
 							case "h2":
-								RenderBlockContent(inlines, list, e, BLOCK_TITLE).FontSize = ThemeHelper.ToolTipFontSize + 3;
+								RenderBlockContent(inlines, list, e, BlockType.Title).FontSize = ThemeHelper.ToolTipFontSize + 3;
 								break;
 							case "h3":
-								RenderBlockContent(inlines, list, e, BLOCK_TITLE).FontSize = ThemeHelper.ToolTipFontSize + 2;
+								RenderBlockContent(inlines, list, e, BlockType.Title).FontSize = ThemeHelper.ToolTipFontSize + 2;
 								break;
 							case "h4":
-								RenderBlockContent(inlines, list, e, BLOCK_TITLE).FontSize = ThemeHelper.ToolTipFontSize + 1;
+								RenderBlockContent(inlines, list, e, BlockType.Title).FontSize = ThemeHelper.ToolTipFontSize + 1;
 								break;
 							case "h5":
-								RenderBlockContent(inlines, list, e, BLOCK_TITLE).FontSize = ThemeHelper.ToolTipFontSize + 0.5;
+								RenderBlockContent(inlines, list, e, BlockType.Title).FontSize = ThemeHelper.ToolTipFontSize + 0.5;
 								break;
 							case "h6":
-								RenderBlockContent(inlines, list, e, BLOCK_TITLE);
+								RenderBlockContent(inlines, list, e, BlockType.Title);
 								break;
 							case "code":
 								++_IsCode;
-								var span = RenderBlockContent(inlines, list, e, BLOCK_OTHER);
-								span.FontFamily = GetCodeFont();
-								span.Background = ThemeHelper.ToolWindowBackgroundBrush;
-								span.Foreground = ThemeHelper.ToolWindowTextBrush;
+								RenderBlockContent(inlines, list, e, BlockType.Code);
 								--_IsCode;
 								break;
 							case "item":
-								RenderBlockContent(inlines, list, e, BLOCK_ITEM);
+								RenderBlockContent(inlines, list, e, BlockType.ListItem);
 								break;
 							case "see":
 							case "seealso":
@@ -326,7 +331,11 @@ namespace Codist
 							case "c":
 							case "tt":
 								++_IsCode;
-								StyleInner(e, inlines, new Span() { FontFamily = GetCodeFont(), Background = ThemeHelper.ToolWindowBackgroundBrush, Foreground = ThemeHelper.ToolWindowTextBrush });
+								StyleInner(e, inlines, new Span() {
+									FontFamily = GetCodeFont(),
+									Background = ThemeHelper.ToolWindowBackgroundBrush,
+									Foreground = ThemeHelper.ToolWindowTextBrush
+								});
 								--_IsCode;
 								break;
 							case "b":
@@ -356,16 +365,7 @@ namespace Codist
 							case "hr":
 								inlines.AddRange(new Inline[] {
 									new LineBreak(),
-									new InlineUIContainer(new Border {
-											Height = 1,
-											Background = ThemeHelper.DocumentTextBrush,
-											Margin = WpfHelper.MiddleVerticalMargin,
-											Opacity = 0.5,
-											MinWidth = 100
-										}.Bind(FrameworkElement.WidthProperty, new Binding {
-											RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor, typeof(ThemedTipText), 1),
-											Path = new PropertyPath("ActualWidth")
-										})),
+									CreateHorizontalRuler(),
 									new LineBreak() });
 								break;
 							//case "list":
@@ -412,6 +412,16 @@ namespace Codist
 				&& IsInlineElementName((lastNode.PreviousNode as XElement)?.Name.LocalName) == false) {
 				ParagraphCount++;
 			}
+		}
+
+		static InlineUIContainer CreateHorizontalRuler() {
+			return new InlineUIContainer(new Border {
+				Height = 1,
+				Background = ThemeHelper.DocumentTextBrush,
+				Margin = WpfHelper.MiddleVerticalMargin,
+				Opacity = 0.5,
+				MinWidth = 100
+			}.BindWidthAsAncestor(typeof(ThemedTipText)));
 		}
 
 		static bool IsUrl(string text) {
@@ -516,11 +526,11 @@ namespace Codist
 			return r;
 		}
 
-		Span RenderBlockContent(InlineCollection inlines, ListContext list, XElement e, int blockType) {
+		Span RenderBlockContent(InlineCollection inlines, ListContext list, XElement e, BlockType blockType) {
 			if (inlines.LastInline != null && inlines.LastInline is LineBreak == false) {
 				inlines.AppendLineWithMargin();
 			}
-			if (blockType == BLOCK_ITEM) {
+			if (blockType == BlockType.ListItem) {
 				PopulateListNumber(inlines, list);
 			}
 			else {
@@ -530,16 +540,44 @@ namespace Codist
 			if (_IsCode > 0) {
 				span.FontFamily = GetCodeFont();
 			}
-			if (blockType == BLOCK_TITLE) {
+			if (blockType == BlockType.Title) {
 				span.FontWeight = FontWeights.Bold;
+			}
+			else if (blockType == BlockType.Code) {
+				inlines.Add(CreateCodeBlockStart());
 			}
 			inlines.Add(span);
 			InternalRender(e, span.Inlines, list);
-			if (blockType != BLOCK_ITEM && e.NextNode != null
+			if (blockType != BlockType.ListItem && e.NextNode != null
 				&& IsInlineElementName((e.NextNode as XElement)?.Name.LocalName) == false) {
-				inlines.Add(new LineBreak());
+				inlines.Add(blockType == BlockType.Code ? CreateCodeBlockEnd() : new LineBreak());
 			}
 			return span;
+		}
+
+		static InlineUIContainer CreateCodeBlockStart() {
+			return new InlineUIContainer(new Border {
+				Child = new TextBlock {
+					Text = R.T_Code,
+					Padding = WpfHelper.MiddleHorizontalMargin,
+					Margin = WpfHelper.MiddleHorizontalMargin,
+					Foreground = ThemeHelper.MenuTextBrush,
+					Background = ThemeHelper.MenuHoverBackgroundBrush,
+					TextAlignment = TextAlignment.Left,
+					HorizontalAlignment = HorizontalAlignment.Left,
+				},
+				BorderBrush = ThemeHelper.ToolWindowBackgroundBrush,
+				BorderThickness = WpfHelper.TinyBottomMargin,
+				Margin = WpfHelper.MiddleVerticalMargin,
+			}.BindWidthAsAncestor(typeof(ThemedTipText)));
+		}
+
+		static InlineUIContainer CreateCodeBlockEnd() {
+			return new InlineUIContainer(new Border {
+				Height = 1,
+				Background = ThemeHelper.MenuHoverBackgroundBrush,
+				Margin = WpfHelper.MiddleVerticalMargin,
+			}.BindWidthAsAncestor(typeof(ThemedTipText)));
 		}
 
 		static void PopulateListNumber(InlineCollection text, ListContext list) {
@@ -744,6 +782,16 @@ namespace Codist
 				Parent = parent;
 			}
 		}
+
+		enum BlockType
+		{
+			Normal,
+			ListItem,
+			List,
+			Title,
+			Code
+		}
+
 		enum ListType
 		{
 			Number = 1,

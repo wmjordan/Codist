@@ -2785,4 +2785,7 @@ Shift: Assign by default only</value>
 Shift: Match whole word
 Ctrl: Match case</value>
   </data>
+  <data name="T_Code" xml:space="preserve">
+    <value>Code</value>
+  </data>
 </root>

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -38,6 +39,7 @@ namespace Codist
 		internal static readonly Thickness MiddleVerticalMargin = new Thickness(0, 6, 0, 6);
 		internal static readonly Thickness MiddleTopMargin = new Thickness(0, 6, 0, 0);
 		internal static readonly Thickness MiddleBottomMargin = new Thickness(0, 0, 0, 6);
+		internal static readonly Thickness TinyBottomMargin = new Thickness(0, 0, 0, 1);
 		internal static readonly Thickness MenuItemMargin = new Thickness(6, 0, 6, 0);
 
 		#region TextBlock and Run
@@ -305,6 +307,14 @@ namespace Codist
 			}
 			return element;
 		}
+		public static TElement BindWidthAsAncestor<TElement>(this TElement element, Type ancestor)
+			where TElement : FrameworkElement {
+			return element.Bind(FrameworkElement.WidthProperty, new Binding {
+				RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor, ancestor, 1),
+				Path = new PropertyPath("ActualWidth")
+			});
+		}
+
 		public static TElement ClearSpacing<TElement>(this TElement element)
 			where TElement : Control {
 			element.Margin = element.Padding = element.BorderThickness = NoMargin;
