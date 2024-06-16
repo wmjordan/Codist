@@ -615,6 +615,10 @@ namespace Codist
 					var args = argList;
 					(NameColonSyntax NameColon, ExpressionSyntax Expression) arg;
 					if (args.Count > pi && (arg = args[pi]).NameColon == null) {
+						if (arg.Expression == null
+							|| arg.Expression is IdentifierNameSyntax name && name.Span.Length == 0) {
+							goto DEFAULT_VALUE;
+						}
 						if (assignmentFilter != ArgumentAssignmentFilter.DefaultValue) {
 							refList.Add((HasImplicitConversion(model, arg.Expression, cancellationToken) ? ArgumentAssignment.Normal : ArgumentAssignment.ImplicitlyConverted, null, arg.Expression));
 						}
@@ -629,6 +633,7 @@ namespace Codist
 							goto NEXT;
 						}
 					}
+					DEFAULT_VALUE:
 					if (optional && assignmentFilter != ArgumentAssignmentFilter.ExplicitValue) {
 						refList.Add((ArgumentAssignment.Default, r.Location, null));
 					}
