@@ -363,10 +363,7 @@ namespace Codist
 								inlines.Add(new LineBreak());
 								break;
 							case "hr":
-								inlines.AddRange(new Inline[] {
-									new LineBreak(),
-									CreateHorizontalRuler(),
-									new LineBreak() });
+								inlines.Add(CreateHorizontalRuler());
 								break;
 							//case "list":
 							//case "description":
@@ -548,9 +545,13 @@ namespace Codist
 			}
 			inlines.Add(span);
 			InternalRender(e, span.Inlines, list);
-			if (blockType != BlockType.ListItem && e.NextNode != null
+			if (blockType == BlockType.Code) {
+				inlines.Add(CreateCodeBlockEnd());
+			}
+			else if (blockType != BlockType.ListItem
+				&& GetNextContentNode(e) != null
 				&& IsInlineElementName((e.NextNode as XElement)?.Name.LocalName) == false) {
-				inlines.Add(blockType == BlockType.Code ? CreateCodeBlockEnd() : new LineBreak());
+				inlines.Add(new LineBreak());
 			}
 			return span;
 		}
@@ -566,7 +567,7 @@ namespace Codist
 					TextAlignment = TextAlignment.Left,
 					HorizontalAlignment = HorizontalAlignment.Left,
 				},
-				BorderBrush = ThemeHelper.ToolWindowBackgroundBrush,
+				BorderBrush = ThemeHelper.MenuHoverBackgroundBrush,
 				BorderThickness = WpfHelper.TinyBottomMargin,
 				Margin = WpfHelper.MiddleVerticalMargin,
 			}.BindWidthAsAncestor(typeof(ThemedTipText)));
@@ -758,6 +759,24 @@ namespace Codist
 							continue;
 						}
 						return null;
+				}
+				return null;
+			}
+			return null;
+		}
+
+		static XNode GetNextContentNode(XElement element) {
+			XNode node = element;
+			while ((node = node.NextNode) != null) {
+				switch (node.NodeType) {
+					case XmlNodeType.Element: return node;
+					case XmlNodeType.Whitespace: continue;
+					case XmlNodeType.SignificantWhitespace: continue;
+					case XmlNodeType.Text:
+						if (((XText)node).Value.Trim().Length == 0) {
+							continue;
+						}
+						return node;
 				}
 				return null;
 			}
