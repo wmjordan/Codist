@@ -351,7 +351,8 @@ namespace Codist.NaviBar
 							Children = {
 								VsImageHelper.GetImage(IconIds.Search).WrapMargin(WpfHelper.GlyphMargin),
 								(_FinderBox = new ThemedTextBox { MinWidth = 150 }),
-								new ThemedControlGroup(b) { Margin = WpfHelper.SmallHorizontalMargin }
+								new ThemedControlGroup(b) { Margin = WpfHelper.SmallHorizontalMargin },
+								new ThemedControlGroup(new ThemedButton(IconIds.Copy, R.CMD_CopyListContent, CopyHeadings))
 							}
 						},
 					}
@@ -365,6 +366,20 @@ namespace Codist.NaviBar
 				_Bar = bar;
 				if (bar._FilterLevel != 0) {
 					b[bar._FilterLevel - 1].Press();
+				}
+			}
+
+			void CopyHeadings() {
+				using (var sbr = Microsoft.VisualStudio.Utilities.ReusableStringBuilder.AcquireDefault(100)) {
+					var sb = sbr.Resource;
+					foreach (var item in ItemsSource) {
+						if (item is LocationItem i) {
+							sb.Append('#', i.Level)
+								.Append(' ')
+								.AppendLine(i.Text);
+						}
+					}
+					Clipboard.SetDataObject(sb.ToString());
 				}
 			}
 
