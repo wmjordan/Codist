@@ -7,10 +7,9 @@ namespace Codist.Controls
 	{
 		public override DataTemplate SelectTemplate(object item, DependencyObject container) {
 			var c = container as FrameworkElement;
-			var i = item as SymbolItem;
-			return i is null || i.Symbol is null && i.SyntaxNode is null && i.Location is null
-				? c.FindResource("LabelTemplate") as DataTemplate
-				: c.FindResource("SymbolItemTemplate") as DataTemplate;
+			return item is SymbolItem s && (s.Symbol != null || s.SyntaxNode != null || s.Location != null)
+				? c.FindResource("SymbolItemTemplate") as DataTemplate
+				: c.FindResource("LabelTemplate") as DataTemplate;
 		}
 	}
 }

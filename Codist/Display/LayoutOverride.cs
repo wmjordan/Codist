@@ -51,16 +51,16 @@ namespace Codist.Display
 					? t.GetParent<ContentPresenter>(i => System.Windows.Media.VisualTreeHelper.GetParent(i) is StackPanel)
 					: t.GetParent<ContentPresenter>(i => i.Name == "DataTemplatePresenter");
 			}
-			if (t != null) {
-				t.ToggleVisibility(show);
-			}
-			else if (element != DisplayOptimizations.HideSearchBox
-				|| g.GetFirstVisualChild<UserControl>(ControlTypeMatcher.PackageAllInOneSearchButtonPresenter.Match)
+			if (t == null && element == DisplayOptimizations.HideSearchBox) {
+				t = g.GetFirstVisualChild<UserControl>(ControlTypeMatcher.PackageAllInOneSearchButtonPresenter.Match)
 					?.GetParent<ContentPresenter>(i => i.Name == "DataTemplatePresenter")
-					?.GetParent<FrameworkElement>(i => i.Name == "PART_TitleBarLeftFrameControlContainer")
-					?.ToggleVisibility(show) == null) {
+					?.GetParent<FrameworkElement>(i => i.Name == "PART_TitleBarLeftFrameControlContainer");
+			}
+
+			if (t == null) {
 				return false;
 			}
+			t.ToggleVisibility(show);
 			return true;
 		}
 

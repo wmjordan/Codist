@@ -3,7 +3,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Media;
 using System.Xml;
@@ -75,17 +74,20 @@ namespace Codist
 					tip.Tag = ParagraphCount;
 				}
 			}
-			if (symbol.HasSource() && Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.OrdinaryCommentDoc)) {
-				switch (symbol.Kind) {
-					case SymbolKind.Event:
-					case SymbolKind.Field:
-					case SymbolKind.Local:
-					case SymbolKind.Method:
-					case SymbolKind.NamedType:
-					case SymbolKind.Property:
+			switch (symbol.Kind) {
+				case SymbolKind.Event:
+				case SymbolKind.Field:
+				case SymbolKind.Local:
+				case SymbolKind.Method:
+				case SymbolKind.NamedType:
+				case SymbolKind.Property:
+					if (symbol.HasSource() && Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.OrdinaryCommentDoc)) {
 						RenderOrdinaryComment(symbol, tip);
-						break;
-				}
+					}
+					break;
+				case SymbolKind.Parameter:
+				case SymbolKind.TypeParameter:
+					return tip;
 			}
 			#endregion
 			#region Type parameter
@@ -431,7 +433,7 @@ namespace Codist
 			}
 			var lines = System.Collections.Immutable.ImmutableArray.CreateBuilder<(string t, int sc)>();
 			int c = Int32.MaxValue, i, ln = 0, last = 0;
-			bool cnt;
+			bool cnt; // content
 			using (var sbr = Microsoft.VisualStudio.Utilities.ReusableStringBuilder.AcquireDefault(100))
 			using (var r = new System.IO.StringReader(text)) {
 				var sb = sbr.Resource;
@@ -462,8 +464,8 @@ namespace Codist
 					lines.Add((l, i));
 				}
 				ln = 0;
-				foreach (var (t, sc) in lines) {
-					if (t.Length > 0 && sc >= c) {
+				foreach (var (t, spaces) in lines) {
+					if (t.Length > 0 && spaces >= c) {
 						sb.Append(t, c, t.Length - c);
 					}
 					if (++ln == last) {

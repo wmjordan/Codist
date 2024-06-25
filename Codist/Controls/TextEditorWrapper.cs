@@ -99,7 +99,7 @@ namespace Codist.Controls
 					Foreground = ThemeHelper.ToolWindowTextBrush,
 					IsEnabled = true
 				};
-m.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
+				m.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 				var newItem = new ThemedMenuItem {
 					Icon = VsImageHelper.GetImage(IconIds.Copy),
 					Header = R.CMD_CopySelection
