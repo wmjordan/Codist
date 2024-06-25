@@ -49,9 +49,9 @@ namespace Codist.Taggers
 		IEnumerable<ITagSpan<IClassificationTag>> ParseSpans(IEnumerable<SnapshotSpan> parseSpans) {
 			foreach (var span in parseSpans) {
 				Parse(span, _TaggedContents);
-				foreach (var item in _TaggedContents) {
-					yield return item.ContentLength == 0 ? item : _Tags.Add(item);
-				}
+			}
+			foreach (var item in _TaggedContents) {
+				yield return item.ContentLength == 0 ? item : _Tags.Add(item);
 			}
 		}
 
