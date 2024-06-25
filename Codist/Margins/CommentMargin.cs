@@ -15,18 +15,18 @@ namespace Codist.Margins
 	{
 		//ToDo: Configurable marker styles
 		//ToDo: Change brush colors according to user settings
-		static readonly Pen __CommentPen = new Pen(Brushes.LightGreen, 1);
+		static readonly Pen __CommentPen = new Pen(Brushes.LightGreen, 1).MakeFrozen();
 		static readonly SolidColorBrush __LineNumberBrush = Brushes.DarkGray;
-		static readonly Pen __LineNumberPen = new Pen(__LineNumberBrush, 1) { DashStyle = DashStyles.Dash };
+		static readonly Pen __LineNumberPen = new Pen(__LineNumberBrush, 1) { DashStyle = DashStyles.Dash }.MakeFrozen();
 		static readonly Pen __EmptyPen = new Pen();
-		static readonly SolidColorBrush __EmphasisBrush = new SolidColorBrush(Constants.CommentColor);
-		static readonly SolidColorBrush __ToDoBrush = new SolidColorBrush(Constants.ToDoColor);
-		static readonly SolidColorBrush __NoteBrush = new SolidColorBrush(Constants.NoteColor);
-		static readonly SolidColorBrush __HackBrush = new SolidColorBrush(Constants.HackColor);
-		static readonly SolidColorBrush __UndoneBrush = new SolidColorBrush(Constants.UndoneColor);
-		static readonly SolidColorBrush __TaskBrush = new SolidColorBrush(Constants.TaskColor);
+		static readonly SolidColorBrush __EmphasisBrush = new SolidColorBrush(Constants.CommentColor).MakeFrozen();
+		static readonly SolidColorBrush __ToDoBrush = new SolidColorBrush(Constants.ToDoColor).MakeFrozen();
+		static readonly SolidColorBrush __NoteBrush = new SolidColorBrush(Constants.NoteColor).MakeFrozen();
+		static readonly SolidColorBrush __HackBrush = new SolidColorBrush(Constants.HackColor).MakeFrozen();
+		static readonly SolidColorBrush __UndoneBrush = new SolidColorBrush(Constants.UndoneColor).MakeFrozen();
+		static readonly SolidColorBrush __TaskBrush = new SolidColorBrush(Constants.TaskColor).MakeFrozen();
 		static readonly SolidColorBrush __PreProcessorBrush = Brushes.Gray;
-		static readonly SolidColorBrush __TaskBackgroundBrush = Brushes.White.Alpha(0.5);
+		static readonly SolidColorBrush __TaskBackgroundBrush = Brushes.White.Alpha(0.3).MakeFrozen();
 		//note: this dictionary determines which style has a scrollbar marker
 		static readonly Dictionary<IClassificationType, Brush> __ClassificationBrushMapper = InitClassificationBrushMapper();
 
@@ -180,7 +180,8 @@ namespace Codist.Margins
 					continue;
 				}
 				var y = _ScrollBar.GetYCoordinateOfBufferPosition(tag.TrackingSpan.GetStartPoint(snapshot));
-				if (lastY + HalfMarkSize > y && lastBrush == b) {
+				double h = 0;
+				if (lastY > y && lastBrush == b) {
 					// avoid drawing too many closed markers
 					continue;
 				}
@@ -189,29 +190,33 @@ namespace Codist.Margins
 						continue;
 					}
 					DrawMark(drawingContext, b, y, 0);
+					h = MarkSize;
 				}
 				else if (b == __TaskBrush) {
 					if (!Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.SpecialComment)) {
 						continue;
 					}
-					DrawTaskMark(drawingContext, b, y, String.Empty, tag.ContentText);
+					h = DrawTaskMark(drawingContext, b, y, String.Empty, tag.ContentText);
 				}
 				else {
 					if (!Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.SpecialComment)) {
 						continue;
 					}
 					DrawCommentMark(drawingContext, b, y);
+					h = MarkSize;
 				}
-				lastY = y;
+				lastY = y + h;
 				lastBrush = b;
 			}
 		}
 
 		/// <summary>draws task name (inverted) and the task content</summary>
-		static void DrawTaskMark(DrawingContext dc, Brush brush, double y, string taskName, string taskContent) {
+		static double DrawTaskMark(DrawingContext dc, Brush brush, double y, string taskName, string taskContent) {
 			var tt = WpfHelper.ToFormattedText(taskContent, 9, brush);
-			dc.DrawRectangle(__TaskBackgroundBrush, __EmptyPen, new Rect(0, y - tt.Height / 2, tt.Width, tt.Height));
-			dc.DrawText(tt, new Point(0, y - tt.Height / 2));
+			var h = tt.Height / 2;
+			dc.DrawRectangle(__TaskBackgroundBrush, __EmptyPen, new Rect(0, y - h, tt.Width, tt.Height));
+			dc.DrawText(tt, new Point(0, y - h));
+			return tt.Height;
 		}
 
 		/// <summary>draws a rectangle, with a border</summary>

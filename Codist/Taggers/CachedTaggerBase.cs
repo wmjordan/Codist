@@ -30,20 +30,24 @@ namespace Codist.Taggers
 			if (spans.Count == 0) {
 				return Array.Empty<ITagSpan<IClassificationTag>>();
 			}
-			IEnumerable<SnapshotSpan> parseSpans;
-
 			if (_Tags.LastParsed == 0 && DoFullParseAtFirstLoad) {
-				var textSnapshot = _TextView.TextSnapshot;
-				// perform a full parse for the first time
-				System.Diagnostics.Debug.WriteLine("Full parse");
-				parseSpans = textSnapshot.Lines.Select(l => l.Extent);
-				_Tags.LastParsed = textSnapshot.Length;
+				return ParseSnapshot();
 			}
-			else {
-				parseSpans = spans;
-			}
+			var parseSpans = spans;
 			_TaggedContents.Clear();
 			return ParseSpans(parseSpans);
+		}
+
+		// perform a full parse for the first time
+		IEnumerable<ITagSpan<IClassificationTag>> ParseSnapshot() {
+			System.Diagnostics.Debug.WriteLine("Full parse");
+			var snapshot = _TextView.TextSnapshot;
+			foreach (var span in snapshot.Lines.Select(l => l.Extent)) {
+				Parse(span, _TaggedContents);
+			}
+			_Tags.AddRange(_TaggedContents);
+			_Tags.LastParsed = snapshot.Length;
+			return _TaggedContents;
 		}
 
 		IEnumerable<ITagSpan<IClassificationTag>> ParseSpans(IEnumerable<SnapshotSpan> parseSpans) {

@@ -76,6 +76,16 @@ namespace Codist.Taggers
 			return tag;
 		}
 
+		public void AddRange(IEnumerable<TaggedContentSpan> items) {
+			if (IsLocked) {
+				return;
+			}
+			var tags = _Tags;
+			foreach (var tag in items) {
+				tags.Add(tag);
+			}
+		}
+
 		public void ClearRange(int start, int length) {
 			var span = new TaggedContentSpan(start, length);
 			var tags = _Tags;
