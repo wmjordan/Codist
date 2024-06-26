@@ -1323,7 +1323,13 @@ namespace Codist
 		}
 
 		public static bool AreEqual(ITypeSymbol a, ITypeSymbol b, bool ignoreTypeConstraint) {
-			if (ReferenceEquals(a, b) || a.Equals(b)) {
+			if (ReferenceEquals(a, b)) {
+				return true;
+			}
+			if (a == null || b == null) {
+				return false;
+			}
+			if (a.Equals(b)) {
 				return true;
 			}
 			switch (a.TypeKind) {
