@@ -241,6 +241,8 @@ namespace Codist
 		public const string MarkdownOrderedList = "Markdown: Ordered List";
 		public const string MarkdownUnorderedList = "Markdown: Unordered List";
 		public const string MarkdownCodeBlock = "Markdown: Indented Code Block";
+		public const string MarkdownFencedCodeBlock = "Markdown: Fenced Code Block";
+		public const string MarkdownHtmlCodeBlock = "Markdown: HTML Code Block";
 		public const string MarkdownThematicBreak = "Markdown: Thematic Break (Horizontal Line)";
 		public const string MarkdownUnderline = "Markdown: Underline";
 		public const string MarkdownVsBold = "vsMarkdown_bold";
