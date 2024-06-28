@@ -95,10 +95,22 @@ namespace Codist.Margins
 		protected override void OnRender(DrawingContext drawingContext) {
 			base.OnRender(drawingContext);
 			if (Config.Instance.MarkerOptions.HasAnyFlag(MarkerOptions.MemberDeclaration | MarkerOptions.RegionDirective)) {
-				_MemberMarker.Render(drawingContext);
+				try {
+					_MemberMarker.Render(drawingContext);
+				}
+				catch (Exception ex) {
+					Controls.MessageWindow.Error(ex);
+					return;
+				}
 			}
 			if (Config.Instance.MarkerOptions.HasAnyFlag(MarkerOptions.SymbolReference)) {
-				_SymbolReferenceMarker.Render(drawingContext);
+				try {
+					_SymbolReferenceMarker.Render(drawingContext);
+				}
+				catch (Exception ex) {
+					Controls.MessageWindow.Error(ex);
+					return;
+				}
 			}
 		}
 

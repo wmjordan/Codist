@@ -160,7 +160,12 @@ namespace Codist.Margins
 		protected override void OnRender(DrawingContext drawingContext) {
 			base.OnRender(drawingContext);
 			if (_TextView?.IsClosed == false && _Tags.HasTag) {
-				DrawMarkers(drawingContext);
+				try {
+					DrawMarkers(drawingContext);
+				}
+				catch (Exception ex) {
+					Controls.MessageWindow.Error(ex);
+				}
 			}
 		}
 
