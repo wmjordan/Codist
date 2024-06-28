@@ -140,12 +140,12 @@ namespace Codist.Taggers
 							continue;
 						}
 						if (c.IsCodeWhitespaceOrNewLine()) {
+							++start;
 							break;
 						}
 						goto TRY_MERGE;
 					}
 					// todo: trim trailing header indicators and whitespaces
-					++start;
 					results.Add(_LastTaggedSpan = new TaggedContentSpan(HeaderClassificationTypes[n], s, lineStart, lineEnd - lineStart, start - lineStart, lineEnd - start));
 					return;
 				case '>':
