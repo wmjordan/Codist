@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using CLR;
 using Codist.Controls;
 using Microsoft.VisualStudio.Language.Intellisense;
@@ -43,8 +45,7 @@ namespace Codist.QuickInfo
 			}
 			var p1 = selection.Start.Position;
 			if (p1 > point || point > selection.End.Position) {
-				var tes = session.TextView.GetTextElementSpan(point);
-				if (tes.Contains(p1) == false) {
+				if (session.TextView.GetTextElementSpan(point).Contains(p1) == false) {
 					return null;
 				}
 			}
@@ -62,27 +63,106 @@ namespace Codist.QuickInfo
 			}
 			ThemedTipText info;
 			if (c == 1) {
-				var ch = point.Snapshot.GetText(p1, 1);
-				info = new ThemedTipText { Name = Name }
-					.Append(R.T_SelectedCharacter + "\"", true)
-					.Append(ch)
-					.Append("\" (Unicode: 0x" + ((int)ch[0]).ToString("X2") + ")");
-				goto RETURN;
+				return ShowCharacterInfo(activeSpan, point.Snapshot.GetText(p1, 1));
+			}
+			if (c == 2 && Char.IsHighSurrogate(point.Snapshot[p1])) {
+				return ShowCharacterInfo(activeSpan, point.Snapshot.GetText(p1, 2));
 			}
 			info = new ThemedTipText() { Name = Name }
 				.Append(R.T_Selection, true)
 				.Append($": {c} {R.T_Characters}");
 			if (lines > 1) {
-				info.Append($", {lines} {R.T_Spans}");
+				info.Append($", {lines.ToText()} {R.T_Spans}");
 			}
 			else {
 				lines = selection.StreamSelectionSpan.SnapshotSpan.GetLineSpan().Length;
 				if (lines > 0) {
-					info.Append(", " + (lines + 1).ToString() + R.T_Lines);
+					info.Append($", {(lines + 1).ToText()}{R.T_Lines}");
 				}
 			}
 		RETURN:
 			return new QuickInfoItem(activeSpan.ToTrackingSpan(), info.SetGlyph(VsImageHelper.GetImage(IconIds.SelectCode)).Tag());
+		}
+
+		static QuickInfoItem ShowCharacterInfo(SnapshotSpan activeSpan, string ch) {
+			var unicode = Char.ConvertToUtf32(ch, 0);
+			var codes = new StackPanel {
+				Margin = WpfHelper.SmallMargin,
+				Children = {
+					new ThemedTipText($"Unicode: {unicode}")
+				}
+			};
+			if (unicode > 127) {
+				codes.Add(new ThemedTipText($"UTF-8: 0x{InternalToHexBinString(Encoding.UTF8.GetBytes(ch))}"));
+				codes.Add(new ThemedTipText($"UTF-16: 0x{InternalToHexBinString(Encoding.Unicode.GetBytes(ch))}"));
+				var gb18030 = Encoding.GetEncoding("GB18030");
+				if (gb18030 != null) {
+					codes.Add(new ThemedTipText($"GB18030: 0x{InternalToHexBinString(gb18030.GetBytes(ch))}"));
+				}
+			}
+			return new QuickInfoItem(activeSpan.ToTrackingSpan(), new StackPanel {
+				Name = Name,
+				Children = {
+					new ThemedTipText(R.T_SelectedCharacter).SetGlyph(VsImageHelper.GetImage(IconIds.SelectCode)),
+					new StackPanel {
+						Orientation = Orientation.Horizontal,
+						Children = {
+							new ThemedTipText (ch) {
+								FontSize = ThemeHelper.ToolTipFontSize * 3,
+								Margin = WpfHelper.SmallMargin
+							},
+							codes
+						}
+					}
+				}
+			});
+		}
+
+		unsafe static string InternalToHexBinString(byte[] source) {
+			if (source == null) {
+				return String.Empty;
+			}
+			var length = source.Length;
+			if (length == 0) {
+				return String.Empty;
+			}
+			var result = new string(' ', length << 1);
+			fixed (char* p = result)
+			fixed (byte* bp = &source[0]) {
+				byte* b = bp;
+				byte* end = bp + length;
+				var mapper = HexBinByteValues.GetHexBinMapper();
+				int* h = (int*)p;
+				while (b < end) {
+					*(h++) = mapper[*(b++)];
+				}
+				return result;
+			}
+		}
+
+		static class HexBinByteValues
+		{
+			static readonly int[] __HexBins = InitHexBin();
+			internal static readonly ulong QuadupleZero = ((ulong)__HexBins[0]) << 32 | (uint)__HexBins[0];
+
+			unsafe static int[] InitHexBin() {
+				var v = new int[Byte.MaxValue + 1];
+				var a = new char[2];
+				const int A = 0x41 - 10;
+				for (int i = 0; i <= Byte.MaxValue; i++) {
+					var t = (byte)(i >> 4);
+					a[0] = (char)(t > 9 ? t + A : t + 0x30);
+					t = (byte)(i & 0x0F);
+					a[1] = (char)(t > 9 ? t + A : t + 0x30);
+					fixed (char* p = new string(a)) {
+						v[i] = *(int*)p;
+					}
+				}
+				return v;
+			}
+			public static int[] GetHexBinMapper() {
+				return __HexBins;
+			}
 		}
 	}
 }
