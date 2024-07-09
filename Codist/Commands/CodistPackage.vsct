@@ -80,7 +80,7 @@
 		<GuidSymbol name="guidCodistPackageCmdSet" value="{d668a130-cb52-4143-b389-55560823f3d6}">
 			<IDSymbol name="CodistMenuGroup" value="0x1020" />
 			<IDSymbol name="ScreenshotCommandId" value="0x4001" />
-			<IDSymbol name="GetContentTypeCommandId" value="0x4002" />
+			<IDSymbol name="ShowActiveWindowPropertiesId" value="0x4002" />
 			<IDSymbol name="EDIT_PROJECT_GROUP_ID" value="0x1000" />
 			<IDSymbol name="IncrementVsixVersionId" value="0x4003" />
 			<IDSymbol name="AutoBuildVersionWindowId" value="0x4009" />

@@ -21,7 +21,7 @@
 					<ToolTipText>Take a screenshot for the active code window</ToolTipText>
 				</Strings>
 			</Button>
-			<Button guid="guidCodistPackageCmdSet" id="GetContentTypeCommandId" priority="4133" type="Button">
+			<Button guid="guidCodistPackageCmdSet" id="ShowActiveWindowPropertiesId" priority="4133" type="Button">
 				<Parent guid="guidCodistPackageCmdSet" id="CodistMenuGroup" />
 				<Icon guid="ImageCatalogGuid" id="ContentType" />
 				<CommandFlag>DefaultInvisible</CommandFlag>
