@@ -32,6 +32,17 @@
 					<ToolTipText>Display properties of the active window</ToolTipText>
 				</Strings>
 			</Button>
+			<Button guid="guidCodistPackageCmdSet" id="ShowSupportedFileTypesId" priority="4134" type="Button">
+				<Parent guid="guidCodistPackageCmdSet" id="CodistMenuGroup" />
+				<Icon guid="ImageCatalogGuid" id="SourceFileGroup" />
+				<CommandFlag>DefaultInvisible</CommandFlag>
+				<CommandFlag>DynamicVisibility</CommandFlag>
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<Strings>
+					<ButtonText>Show Registered File Types...</ButtonText>
+					<ToolTipText>Display file types supported by Visual Studio</ToolTipText>
+				</Strings>
+			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="IncrementVsixVersionId" priority="0x0100" type="Button">
 				<Parent guid="guidCodistPackageCmdSet" id="EDIT_PROJECT_GROUP_ID" />
 				<Icon guid="ImageCatalogGuid" id="Counter" />

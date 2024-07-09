@@ -25,6 +25,17 @@
 					<ToolTipText>显示当前窗口的属性和文档属性</ToolTipText>
 				</Strings>
 			</Button>
+			<Button guid="guidCodistPackageCmdSet" id="ShowSupportedFileTypesId" priority="4134" type="Button">
+				<Parent guid="guidCodistPackageCmdSet" id="CodistMenuGroup" />
+				<Icon guid="ImageCatalogGuid" id="SourceFileGroup" />
+				<CommandFlag>DefaultInvisible</CommandFlag>
+				<CommandFlag>DynamicVisibility</CommandFlag>
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<Strings>
+					<ButtonText>显示已注册的文件类型...</ButtonText>
+					<ToolTipText>显示 Visual Studio 支持的文件类型</ToolTipText>
+				</Strings>
+			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="IncrementVsixVersionId" priority="0x0100" type="Button">
 				<Parent guid="guidCodistPackageCmdSet" id="EDIT_PROJECT_GROUP_ID" />
 				<Icon guid="ImageCatalogGuid" id="Counter" />

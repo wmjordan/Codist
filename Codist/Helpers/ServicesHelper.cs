@@ -49,6 +49,9 @@ namespace Codist
 		public IFileExtensionRegistryService FileExtensionRegistry { get; private set; }
 
 		[Import]
+		public IFileToContentTypeService FileToContentType { get; private set; }
+
+		[Import]
 		public IEditorFormatMapService EditorFormatMap { get; private set; }
 
 		[Import]
