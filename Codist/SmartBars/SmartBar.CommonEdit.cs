@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
 using CLR;
@@ -22,6 +23,7 @@ namespace Codist.SmartBars
 		static readonly CommandItem[] __WebCommands = GetWebCommands();
 		static readonly CommandItem[] __SurroundingCommands = GetSurroundingCommands();
 		static readonly CommandItem[] __DebugCommands = GetDebugCommands();
+		static readonly Regex __CapitalizeExpression = new Regex(@"(^|\b|[^\w\s])?_?([a-zA-Z])([a-zA-Z]*)(?=_|\b|$)", RegexOptions.Compiled);
 
 		WrapText _RecentWrapText;
 
@@ -431,8 +433,17 @@ namespace Codist.SmartBars
 			return new CommandItem[] {
 				new CommandItem(IconIds.Capitalize, R.CMD_Capitalize, ctx => {
 					ctx.KeepToolBarOnClick = true;
-					TextEditorHelper.ExecuteEditorCommand("Edit.Capitalize");
-				}),
+					if (ctx.ModifierKeys.MatchFlags(ModifierKeys.Control)) {
+						Replace(ctx, t => {
+							return __CapitalizeExpression.Replace(t, m => {
+								var g = m.Groups;
+								return String.Concat(g[1].Value, g[2].Value.ToUpperInvariant(), g[3].Value.ToLowerInvariant());
+							});}, true);
+					}
+					else {
+						TextEditorHelper.ExecuteEditorCommand("Edit.Capitalize");
+					}
+				}) { ToolTip = R.CMDT_Capitalize },
 				new CommandItem(IconIds.Uppercase, R.CMD_Uppercase, ctx => {
 					ctx.KeepToolBarOnClick = true;
 					TextEditorHelper.ExecuteEditorCommand("Edit.MakeUppercase");

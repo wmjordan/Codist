@@ -2788,4 +2788,8 @@ Ctrl: Match case</value>
   <data name="T_Code" xml:space="preserve">
     <value>Code</value>
   </data>
+  <data name="CMDT_Capitalize" xml:space="preserve">
+    <value>Make words in selection capitalized
+Ctrl: Convert underscore("_") separated words to capitalized words</value>
+  </data>
 </root>

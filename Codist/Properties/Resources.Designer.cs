@@ -2280,6 +2280,16 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Make words in selection capitalized
+        ///Ctrl: Convert underscore(&quot;_&quot;) separated words to capitalized words.
+        /// </summary>
+        internal static string CMDT_Capitalize {
+            get {
+                return ResourceManager.GetString("CMDT_Capitalize", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Open the syntax highlight configuration dialog window.
         /// </summary>
         internal static string CMDT_ConfigureSyntaxHighlight {
