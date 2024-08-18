@@ -315,9 +315,6 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\wechatQrcode.png" />
-    <Content Include="CLR.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="zh-Hans\Extension.vsixlangpack">
       <IncludeInVSIX>true</IncludeInVSIX>
       <SubType>Designer</SubType>
@@ -351,7 +348,7 @@
   <ItemGroup>
     <Reference Include="CLR, Version=2023.5.12.1617, Culture=neutral, PublicKeyToken=964c79fab758d6ea, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\CLR.dll</HintPath>
+      <HintPath>Lib\CLR.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.VisualStudio.CommandBars, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
