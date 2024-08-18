@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -91,6 +92,18 @@ namespace Codist
 					}
 				}
 			}
+		}
+
+		public static EnvDTE.Project GetActiveProjectInSolutionExplorer() {
+			ThreadHelper.ThrowIfNotOnUIThread();
+			if (CodistPackage.DTE.ToolWindows.SolutionExplorer.SelectedItems is object[] selectedObjects) {
+				foreach (EnvDTE.UIHierarchyItem hi in selectedObjects.OfType<EnvDTE.UIHierarchyItem>()) {
+					if (hi.Object is EnvDTE.Project item) {
+						return item;
+					}
+				}
+			}
+			return null;
 		}
 
 		public static EnvDTE.Project GetProject(string projectName) {

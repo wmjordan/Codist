@@ -22,15 +22,8 @@ namespace Codist.Commands
 
 		static Project GetSelectedProjectItem() {
 			ThreadHelper.ThrowIfNotOnUIThread();
-			if (CodistPackage.DTE.ToolWindows.SolutionExplorer.SelectedItems is object[] selectedObjects) {
-				foreach (UIHierarchyItem hi in selectedObjects.OfType<UIHierarchyItem>()) {
-					if (hi.Object is Project item
-						&& item.Kind == VsShellHelper.CSharpProjectKind) {
-						return item;
-					}
-				}
-			}
-			return null;
+			var p = VsShellHelper.GetActiveProjectInSolutionExplorer();
+			return p.Kind == VsShellHelper.CSharpProjectKind ? p : null;
 		}
 	}
 }
