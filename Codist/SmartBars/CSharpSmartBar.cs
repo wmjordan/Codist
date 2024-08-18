@@ -43,8 +43,11 @@ namespace Codist.SmartBars
 		ToolBar MyToolBar => ToolBar2;
 
 		protected override async Task AddCommandsAsync(CancellationToken cancellationToken) {
-			if (await UpdateAsync() && _Context.NodeIncludeTrivia != null) {
-				await AddContextualCommands(cancellationToken);
+			SemanticContext ctx;
+			if (await UpdateAsync()
+				&& cancellationToken.IsCancellationRequested == false
+				&& (ctx = _Context)?.NodeIncludeTrivia != null) {
+				await AddContextualCommandsAsync(ctx, cancellationToken);
 			}
 		}
 
@@ -76,17 +79,17 @@ namespace Codist.SmartBars
 			};
 		}
 
-		async Task AddContextualCommands(CancellationToken cancellationToken) {
-			var isReadOnly = _Context.View.IsCaretInReadOnlyRegion();
-			var node = _Context.NodeIncludeTrivia;
+		async Task AddContextualCommandsAsync(SemanticContext ctx, CancellationToken cancellationToken) {
+			var isReadOnly = ctx.View.IsCaretInReadOnlyRegion();
+			var node = ctx.NodeIncludeTrivia;
 			var nodeKind = node.Kind();
 			if (isReadOnly == false && nodeKind == SyntaxKind.XmlText) {
 				AddXmlDocCommands();
 				return;
 			}
-			var trivia = _Context.NodeTrivia;
+			var trivia = ctx.NodeTrivia;
 			if (trivia.RawKind == 0) {
-				var token = _Context.Token;
+				var token = ctx.Token;
 				var tokenKind = token.Kind();
 				if (token.Span.Contains(View.Selection, true)) {
 					switch (tokenKind) {
@@ -99,7 +102,7 @@ namespace Codist.SmartBars
 								|| node is TypeSyntax
 								|| node is AccessorDeclarationSyntax) {
 								// selection is within a symbol
-								_Symbol = await _Context.GetSymbolAsync(cancellationToken);
+								_Symbol = await ctx.GetSymbolAsync(cancellationToken);
 								if (_Symbol != null) {
 									AddSymbolCommands(nodeKind);
 								}
@@ -123,7 +126,7 @@ namespace Codist.SmartBars
 								}
 							}
 							else if (nodeKind == SyntaxKind.TypeParameter) {
-								_Symbol = SyncHelper.RunSync(() => _Context.GetSymbolAsync(cancellationToken));
+								_Symbol = SyncHelper.RunSync(() => ctx.GetSymbolAsync(cancellationToken));
 								if (_Symbol != null && isReadOnly == false) {
 									AddRenameCommand();
 								}
@@ -190,7 +193,7 @@ namespace Codist.SmartBars
 				}
 			}
 			if (isReadOnly == false) {
-				var refactoringContext = new Refactorings.RefactoringContext(_Context);
+				var refactoringContext = new Refactorings.RefactoringContext(ctx);
 				if (refactoringContext.SelectedStatementInfo.Items != null) {
 					AddEditorCommand(MyToolBar, IconIds.ExtractMethod, "Refactor.ExtractMethod", R.CMD_ExtractMethod);
 				}
@@ -203,16 +206,17 @@ namespace Codist.SmartBars
 		}
 
 		void ShowRefactorMenu(CommandContext ctx) {
+			SemanticContext c;
 			ctx.KeepToolBar(false);
-			if (UpdateSemanticModel() == false) {
+			if (UpdateSemanticModel() == false || (c = _Context) is null) {
 				return;
 			}
-			var m = new CSharpSymbolContextMenu(null, null, _Context) {
+			var m = new CSharpSymbolContextMenu(null, null, c) {
 				Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom,
 				PlacementTarget = ctx.Sender,
 			};
 			m.SetValue(TextBlock.ForegroundProperty, ThemeHelper.MenuTextBrush);
-			var rc = new Refactorings.RefactoringContext(_Context);
+			var rc = new Refactorings.RefactoringContext(c);
 			AddRefactoringCommands(m, Refactorings.All.Refactorings, rc);
 			ctx.Sender.ContextMenu = m;
 			m.CommandExecuted += HideSmartBar;
@@ -235,54 +239,56 @@ namespace Codist.SmartBars
 		}
 
 		async Task SelectSymbolOccurrencesAsync(CommandContext ctx) {
+			SemanticContext c;
 			ctx.KeepToolBar(false);
-			if (await UpdateAsync()) {
-				var selections = ctx.View.GetMultiSelectionBroker();
-				var symbol = _Symbol;
-				Span selectionOffsetSpan = default;
-				var tokenSpan = _Context.Token.Span.ToSpan();
-				var tokenLength = tokenSpan.Length;
-				if (selections.HasMultipleSelections == false) {
-					// if only part of the symbol token is selected,
-					// select that part in other occurrences too
-					selectionOffsetSpan = selections.PrimarySelection.Extent.SnapshotSpan.Span;
-					if (tokenSpan.Contains(selectionOffsetSpan)) {
-						selectionOffsetSpan = new Span(selectionOffsetSpan.Start - tokenSpan.Start, selectionOffsetSpan.Length);
-					}
+			if (await UpdateAsync() == false || (c = _Context) is null) {
+				return;
+			}
+			var selections = ctx.View.GetMultiSelectionBroker();
+			var symbol = _Symbol;
+			Span selectionOffsetSpan = default;
+			var tokenSpan = _Context.Token.Span.ToSpan();
+			var tokenLength = tokenSpan.Length;
+			if (selections.HasMultipleSelections == false) {
+				// if only part of the symbol token is selected,
+				// select that part in other occurrences too
+				selectionOffsetSpan = selections.PrimarySelection.Extent.SnapshotSpan.Span;
+				if (tokenSpan.Contains(selectionOffsetSpan)) {
+					selectionOffsetSpan = new Span(selectionOffsetSpan.Start - tokenSpan.Start, selectionOffsetSpan.Length);
 				}
-				await SelectSymbolDefinitionAndReferencesAsync(selections, symbol, tokenLength, selectionOffsetSpan);
-				#region Select others with same name
-				switch (symbol.Kind) {
-					case SymbolKind.NamedType:
-						if (symbol is INamedTypeSymbol t && t.TypeKind == TypeKind.Class) {
-							foreach (var tm in t.GetMembers()) {
-								if (tm.Kind == SymbolKind.Method
-									&& tm.IsImplicitlyDeclared == false
-									&& IsTypeNamedMethod((IMethodSymbol)tm)) {
-									await SelectSymbolDefinitionAndReferencesAsync(selections, tm, tokenLength, selectionOffsetSpan);
-								}
+			}
+			await SelectSymbolDefinitionAndReferencesAsync(c, selections, symbol, tokenLength, selectionOffsetSpan);
+			#region Select others with the same name
+			switch (symbol.Kind) {
+				case SymbolKind.NamedType:
+					if (symbol is INamedTypeSymbol t && t.TypeKind == TypeKind.Class) {
+						foreach (var tm in t.GetMembers()) {
+							if (tm.Kind == SymbolKind.Method
+								&& tm.IsImplicitlyDeclared == false
+								&& IsTypeNamedMethod((IMethodSymbol)tm)) {
+								await SelectSymbolDefinitionAndReferencesAsync(c, selections, tm, tokenLength, selectionOffsetSpan);
 							}
 						}
-						break;
-					case SymbolKind.Method:
-						if (symbol is IMethodSymbol m && IsTypeNamedMethod(m)) {
-							await SelectSymbolDefinitionAndReferencesAsync(selections, symbol = symbol.ContainingType, tokenLength, selectionOffsetSpan);
-							goto case SymbolKind.NamedType;
-						}
-						break;
-				}
-				#endregion
+					}
+					break;
+				case SymbolKind.Method:
+					if (symbol is IMethodSymbol m && IsTypeNamedMethod(m)) {
+						await SelectSymbolDefinitionAndReferencesAsync(c, selections, symbol = symbol.ContainingType, tokenLength, selectionOffsetSpan);
+						goto case SymbolKind.NamedType;
+					}
+					break;
 			}
+			#endregion
 
 			bool IsTypeNamedMethod(IMethodSymbol m) {
 				return m.MethodKind.CeqAny(MethodKind.Constructor, MethodKind.StaticConstructor, MethodKind.Destructor);
 			}
 
-			async Task SelectSymbolDefinitionAndReferencesAsync(IMultiSelectionBroker selections, ISymbol symbol, int tokenLength, Span selectionOffsetSpan) {
-				foreach (var refs in await Microsoft.CodeAnalysis.FindSymbols.SymbolFinder.FindReferencesAsync(symbol, _Context.Document.Project.Solution, System.Collections.Immutable.ImmutableHashSet.Create(_Context.Document), default)) {
+			async Task SelectSymbolDefinitionAndReferencesAsync(SemanticContext ctx, IMultiSelectionBroker selections, ISymbol symbol, int tokenLength, Span selectionOffsetSpan) {
+				foreach (var refs in await Microsoft.CodeAnalysis.FindSymbols.SymbolFinder.FindReferencesAsync(symbol, ctx.Document.Project.Solution, System.Collections.Immutable.ImmutableHashSet.Create(ctx.Document), default)) {
 					selections.AddSelections(FilterLocations(refs.Locations, tokenLength, selectionOffsetSpan));
 				}
-				selections.AddSelections(FilterDeclarationLocations(symbol.Locations, _Context.Compilation.SyntaxTree, tokenLength, selectionOffsetSpan));
+				selections.AddSelections(FilterDeclarationLocations(symbol.Locations, ctx.Compilation.SyntaxTree, tokenLength, selectionOffsetSpan));
 			}
 
 			IEnumerable<Span> FilterLocations(IEnumerable<Microsoft.CodeAnalysis.FindSymbols.ReferenceLocation> locations, int len, Span off) {
@@ -299,7 +305,7 @@ namespace Codist.SmartBars
 				}
 			}
 
-			Span Offset(Microsoft.CodeAnalysis.Text.TextSpan sourceSpan, int len, Span offsetSpan) {
+			Span Offset(TextSpan sourceSpan, int len, Span offsetSpan) {
 				return sourceSpan.Length == len && offsetSpan.Length != 0 ? new Span(sourceSpan.Start + offsetSpan.Start, offsetSpan.Length) : sourceSpan.ToSpan();
 			}
 		}
