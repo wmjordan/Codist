@@ -23,6 +23,7 @@ namespace Codist.Commands
 			ToggleAutoBuildVersionCommand.Initialize();
 			ShowSupportedFileTypesCommand.Initialize();
 			WindowInformerCommand.Initialize();
+			TransformDocumentCommand.Initialize();
 			nameof(CommandRegistry).LogInitialized();
 		}
 
@@ -48,5 +49,6 @@ namespace Codist.Commands
 		OpenDebugOutputFolder,
 		OpenReleaseOutputFolder,
 		ShowSupportedFileTypes,
+		TransformDocument
 	}
 }
