@@ -2792,4 +2792,8 @@ Ctrl: Match case</value>
     <value>Make words in selection capitalized
 Ctrl: Convert underscore("_") separated words to capitalized words</value>
   </data>
+  <data name="T_DiscardUnsavedChanges" xml:space="preserve">
+    <value>&lt;NAME&gt; is not saved.
+Discard its changes?</value>
+  </data>
 </root>

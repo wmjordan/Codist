@@ -24,11 +24,10 @@ namespace Codist.Commands
 				return;
 			}
 			const int YesButton = 6;
-			if (item.Saved == false && YesButton == VsShellUtilities.ShowMessageBox(CodistPackage.Instance, item.Name + " is not saved.\nDiscard its changes?", R.T_IncrementVersion, OLEMSGICON.OLEMSGICON_QUERY, OLEMSGBUTTON.OLEMSGBUTTON_YESNO, OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_SECOND)) {
+			if (item.Saved == false && YesButton == VsShellUtilities.ShowMessageBox(CodistPackage.Instance, R.T_DiscardUnsavedChanges.Replace("<NAME>", item.Name), R.T_IncrementVersion, OLEMSGICON.OLEMSGICON_QUERY, OLEMSGBUTTON.OLEMSGBUTTON_YESNO, OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_SECOND)) {
 				return;
 			}
-			string message;
-			bool error = IncrementVersion(item, out message) == false;
+			bool error = IncrementVersion(item, out string message) == false;
 			if (error) {
 				MessageWindow.Error(message, R.T_IncrementVersion);
 			}
@@ -64,17 +63,12 @@ namespace Codist.Commands
 		}
 
 		static ProjectItem GetSelectedProjectItem() {
-			ThreadHelper.ThrowIfNotOnUIThread();
-			var items = (object[])CodistPackage.DTE.ToolWindows.SolutionExplorer.SelectedItems;
-			foreach (UIHierarchyItem hi in items) {
-				var item = hi.Object as ProjectItem;
-				if (item != null
-					&& item.Name.EndsWith(".extension.vsixmanifest", StringComparison.OrdinalIgnoreCase)
-					&& item.FileCount > 0) {
-					return item;
-				}
-			}
-			return null;
+			return VsShellHelper.GetFirstSelectedItemInSolutionExplorer<ProjectItem>(IsVsixManifest);
+		}
+
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
+		static bool IsVsixManifest(ProjectItem item) {
+			return item.Name.EndsWith(".extension.vsixmanifest", StringComparison.OrdinalIgnoreCase) && item.FileCount > 0;
 		}
 	}
 }

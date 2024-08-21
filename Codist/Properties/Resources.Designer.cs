@@ -6234,6 +6234,16 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &lt;NAME&gt; is not saved.
+        ///Discard its changes?.
+        /// </summary>
+        internal static string T_DiscardUnsavedChanges {
+            get {
+                return ResourceManager.GetString("T_DiscardUnsavedChanges", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Documentation from .
         /// </summary>
         internal static string T_DocumentationFrom {

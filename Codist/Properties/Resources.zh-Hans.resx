@@ -2778,4 +2778,8 @@ Ctrl: 匹配大小写</value>
     <value>将选中内容的每个单词转换为首字母大写形式
 Ctrl: 将下划线分隔的单词转换为首字母大写的单词</value>
   </data>
+  <data name="T_DiscardUnsavedChanges" xml:space="preserve">
+    <value>&lt;NAME&gt; 尚未保存。
+是否放弃更改过的内容？</value>
+  </data>
 </root>

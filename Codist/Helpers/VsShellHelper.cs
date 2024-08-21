@@ -106,6 +106,20 @@ namespace Codist
 			return null;
 		}
 
+		public static TObj GetFirstSelectedItemInSolutionExplorer<TObj>(Predicate<TObj> predicate)
+			where TObj : class {
+			ThreadHelper.ThrowIfNotOnUIThread();
+			if (CodistPackage.DTE.ToolWindows.SolutionExplorer.SelectedItems is object[] selectedObjects) {
+				foreach (EnvDTE.UIHierarchyItem hi in selectedObjects.OfType<EnvDTE.UIHierarchyItem>()) {
+					if (hi.Object is TObj item
+						&& predicate(item)) {
+						return item;
+					}
+				}
+			}
+			return null;
+		}
+
 		public static EnvDTE.Project GetProject(string projectName) {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			var projects = CodistPackage.DTE.Solution.Projects;
