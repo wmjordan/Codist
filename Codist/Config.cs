@@ -367,6 +367,7 @@ namespace Codist
 			}
 			catch (Exception ex) {
 				ex.Log();
+				throw;
 			}
 			finally {
 				Styles = null;
@@ -587,7 +588,12 @@ namespace Codist
 				__Updated -= MarkUpdated;
 				if (apply) {
 					if (_Version != _OldVersion) {
-						Instance.SaveConfig(null);
+						try {
+							Instance.SaveConfig(null);
+						}
+						catch (Exception) {
+							// ignore
+						}
 						_OldVersion = _Version;
 					}
 				}

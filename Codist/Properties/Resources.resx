@@ -2796,4 +2796,7 @@ Ctrl: Convert underscore("_") separated words to capitalized words</value>
     <value>&lt;NAME&gt; is not saved.
 Discard its changes?</value>
   </data>
+  <data name="T_ErrorSavingConfig" xml:space="preserve">
+    <value>Error occurred while saving configuration file.</value>
+  </data>
 </root>

@@ -6398,6 +6398,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error occurred while saving configuration file..
+        /// </summary>
+        internal static string T_ErrorSavingConfig {
+            get {
+                return ResourceManager.GetString("T_ErrorSavingConfig", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Error when executing command:.
         /// </summary>
         internal static string T_ErrorWhenExecutingCommand {

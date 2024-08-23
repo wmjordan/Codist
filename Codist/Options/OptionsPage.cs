@@ -258,7 +258,13 @@ namespace Codist.Options
 					if (d.ShowDialog() != true) {
 						return;
 					}
-					Config.Instance.SaveConfig(d.FileName);
+
+					try {
+						Config.Instance.SaveConfig(d.FileName);
+					}
+					catch (Exception ex) {
+						MessageWindow.Error(ex, R.T_ErrorSavingConfig);
+					}
 				}
 				else {
 					try {
