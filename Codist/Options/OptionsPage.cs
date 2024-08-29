@@ -228,7 +228,7 @@ namespace Codist.Options
 						Title = R.T_LoadConfig,
 						FileName = "Codist.json",
 						DefaultExt = "json",
-						Filter = R.T_ConfigFileFilter
+						Filter = R.F_Config
 					};
 					if (d.ShowDialog() != true) {
 						return;
@@ -253,7 +253,7 @@ namespace Codist.Options
 						Title = R.T_SaveConfig,
 						FileName = "Codist.json",
 						DefaultExt = "json",
-						Filter = R.T_ConfigFileFilter
+						Filter = R.F_Config
 					};
 					if (d.ShowDialog() != true) {
 						return;
@@ -914,7 +914,7 @@ namespace Codist.Options
 						Title = R.OT_LocateTaskManager,
 						CheckFileExists = true,
 						AddExtension = true,
-						Filter = R.OT_ExecutableFileFilter
+						Filter = R.F_Executable
 					};
 					if (d.ShowDialog() == true) {
 						_TaskManagerPath.Text = d.FileName;
@@ -1152,7 +1152,7 @@ namespace Codist.Options
 						Title = R.OT_LocateBrowser,
 						CheckFileExists = true,
 						AddExtension = true,
-						Filter = R.OT_ExecutableFileFilter
+						Filter = R.F_Executable
 					};
 					if (d.ShowDialog() == true) {
 						_BrowserPath.Text = d.FileName;

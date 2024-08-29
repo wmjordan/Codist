@@ -887,9 +887,6 @@ Shift：粘贴并选中下一项（整个单词）</value>
   <data name="OT_EnableCommentTagger" xml:space="preserve">
     <value>启用注释标记器</value>
   </data>
-  <data name="T_ConfigFileFilter" xml:space="preserve">
-    <value>Codist 配置文件|*.json|所有文件|*.*</value>
-  </data>
   <data name="T_ErrorLoadingConfig" xml:space="preserve">
     <value>加载配置文件时出错: </value>
   </data>
@@ -977,7 +974,7 @@ Shift：粘贴并选中下一项（整个单词）</value>
   <data name="OT_InterfaceImplementation" xml:space="preserve">
     <value>接口实现</value>
   </data>
-  <data name="OT_ExecutableFileFilter" xml:space="preserve">
+  <data name="F_Executable" xml:space="preserve">
     <value>可执行文件(*.exe)|*.exe</value>
   </data>
   <data name="OT_ExtensionNote" xml:space="preserve">
@@ -1337,8 +1334,8 @@ https://github.com/snowie2000/mactype/releases</value>
 1. 右键单击智能工具栏上的“查找”按钮；
 2. 超级代码提示选中内容的右键菜单</value>
   </data>
-  <data name="OT_NaviBarShortcutKeys" xml:space="preserve">
-    <value>用于访问导航栏成员列表的默认快捷键：
+  <data name="F_Config" xml:space="preserve">
+    <value>Codist 配置文件|*.json|所有文件|*.*</value>
 Ctrl+1, Ctrl+1: Edit.SearchClassMember
 Ctrl+1, Ctrl+2: Edit.SearchDeclaration
 Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
@@ -1397,9 +1394,6 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   <data name="T_FailedToSaveScreenshot" xml:space="preserve">
     <value>无法保存屏幕截图到 &lt;NAME&gt;。</value>
   </data>
-  <data name="T_PngFileFilter" xml:space="preserve">
-    <value>PNG 图像文件 (*.png)|*.png</value>
-  </data>
   <data name="CMD_SaveScreenshot" xml:space="preserve">
     <value>保存代码窗口截图...</value>
   </data>
@@ -1417,6 +1411,9 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   </data>
   <data name="T_Options" xml:space="preserve">
     <value>选项</value>
+  </data>
+  <data name="T_PngFileFilter" xml:space="preserve">
+    <value>PNG 图像文件 (*.png)|*.png</value>
   </data>
   <data name="T_SelectedCode" xml:space="preserve">
     <value>选中代码的样式</value>
@@ -2777,6 +2774,9 @@ Ctrl: 匹配大小写</value>
   <data name="CMDT_Capitalize" xml:space="preserve">
     <value>将选中内容的每个单词转换为首字母大写形式
 Ctrl: 将下划线分隔的单词转换为首字母大写的单词</value>
+  </data>
+  <data name="F_Html" xml:space="preserve">
+    <value>网页文件|*.html|所有文件|*.*</value>
   </data>
   <data name="T_DiscardUnsavedChanges" xml:space="preserve">
     <value>&lt;NAME&gt; 尚未保存。

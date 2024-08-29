@@ -2718,6 +2718,42 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Codist configuration file|*.json|All files|*.*.
+        /// </summary>
+        internal static string F_Config {
+            get {
+                return ResourceManager.GetString("F_Config", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Executable files (*.exe)|*.exe.
+        /// </summary>
+        internal static string F_Executable {
+            get {
+                return ResourceManager.GetString("F_Executable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Codist syntax highlight settings file|*.styles|All files|*.*.
+        /// </summary>
+        internal static string F_HighlightSettings {
+            get {
+                return ResourceManager.GetString("F_HighlightSettings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to HTML files|*.html|All files|*.*.
+        /// </summary>
+        internal static string F_Html {
+            get {
+                return ResourceManager.GetString("F_Html", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {
         ///  &quot;CommentStyles&quot;: [
         ///    {
@@ -3443,15 +3479,6 @@ namespace Codist.Properties {
         internal static string OT_EnumMembersTip {
             get {
                 return ResourceManager.GetString("OT_EnumMembersTip", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Executable files (*.exe)|*.exe.
-        /// </summary>
-        internal static string OT_ExecutableFileFilter {
-            get {
-                return ResourceManager.GetString("OT_ExecutableFileFilter", resourceCulture);
             }
         }
         
@@ -5981,15 +6008,6 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Codist configuration file|*.json|All files|*.*.
-        /// </summary>
-        internal static string T_ConfigFileFilter {
-            get {
-                return ResourceManager.GetString("T_ConfigFileFilter", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Configuration:.
         /// </summary>
         internal static string T_Configuration {
@@ -6674,15 +6692,6 @@ namespace Codist.Properties {
         internal static string T_Hexadecimal {
             get {
                 return ResourceManager.GetString("T_Hexadecimal", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Codist syntax highlight setting file|*.styles|All files|*.*.
-        /// </summary>
-        internal static string T_HighlightSettingFileFilter {
-            get {
-                return ResourceManager.GetString("T_HighlightSettingFileFilter", resourceCulture);
             }
         }
         

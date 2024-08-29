@@ -1259,7 +1259,7 @@ namespace Codist.Options
 				Title = R.T_LoadSyntaxHighlightFile,
 				FileName = "Codist.styles",
 				DefaultExt = "styles",
-				Filter = R.T_HighlightSettingFileFilter
+				Filter = R.F_HighlightSettings
 			};
 			if (String.IsNullOrEmpty(_ThemeFolder) == false) {
 				try {
@@ -1282,7 +1282,7 @@ namespace Codist.Options
 				Title = R.T_SaveSyntaxHighlightFile,
 				FileName = "Codist.styles",
 				DefaultExt = "styles",
-				Filter = R.T_HighlightSettingFileFilter
+				Filter = R.F_HighlightSettings
 			};
 			if (String.IsNullOrEmpty(_ThemeFolder) == false) {
 				try {

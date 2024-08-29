@@ -940,7 +940,7 @@ ALL existing items will be REPLACE by default items.</value>
   <data name="OT_EnableCommentTagger" xml:space="preserve">
     <value>Enable comment tagger</value>
   </data>
-  <data name="OT_ExecutableFileFilter" xml:space="preserve">
+  <data name="F_Executable" xml:space="preserve">
     <value>Executable files (*.exe)|*.exe</value>
   </data>
   <data name="OT_ExtensionNote" xml:space="preserve">
@@ -1340,7 +1340,7 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   <data name="OT_WebSearchNote" xml:space="preserve">
     <value>This page defines search engines which can be accessed via right clicking the Find button on the Smart Bar or the selected content in Super Quick Info</value>
   </data>
-  <data name="T_ConfigFileFilter" xml:space="preserve">
+  <data name="F_Config" xml:space="preserve">
     <value>Codist configuration file|*.json|All files|*.*</value>
   </data>
   <data name="T_ErrorLoadingConfig" xml:space="preserve">
@@ -1592,8 +1592,8 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   <data name="T_Foreground" xml:space="preserve">
     <value>Foreground</value>
   </data>
-  <data name="T_HighlightSettingFileFilter" xml:space="preserve">
-    <value>Codist syntax highlight setting file|*.styles|All files|*.*</value>
+  <data name="F_HighlightSettings" xml:space="preserve">
+    <value>Codist syntax highlight settings file|*.styles|All files|*.*</value>
   </data>
   <data name="T_LeftGradient" xml:space="preserve">
     <value>Left gradient</value>
@@ -2791,6 +2791,9 @@ Ctrl: Match case</value>
   <data name="CMDT_Capitalize" xml:space="preserve">
     <value>Make words in selection capitalized
 Ctrl: Convert underscore("_") separated words to capitalized words</value>
+  </data>
+  <data name="F_Html" xml:space="preserve">
+    <value>HTML files|*.html|All files|*.*</value>
   </data>
   <data name="T_DiscardUnsavedChanges" xml:space="preserve">
     <value>&lt;NAME&gt; is not saved.
