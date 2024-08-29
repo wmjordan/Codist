@@ -306,8 +306,8 @@ namespace Codist.SyntaxHighlight
 			Key = classificationType;
 			Category = "General";
 		}
-		public SyntaxStyle(string classificationType, StyleBase baseStyle) : this(classificationType) {
-			baseStyle.CopyTo(baseStyle);
+		internal SyntaxStyle(string classificationType, StyleBase baseStyle) : this(classificationType) {
+			baseStyle.CopyTo(this);
 		}
 	}
 
