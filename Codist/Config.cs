@@ -333,7 +333,7 @@ namespace Codist
 			});
 		}
 
-		public void SaveConfig(string path, bool stylesOnly = false) {
+		public void SaveConfig(string path, bool stylesOnly = false, bool allStyles = false) {
 			path = path ?? ConfigPath;
 			try {
 				var d = Path.GetDirectoryName(path);
@@ -342,16 +342,17 @@ namespace Codist
 				}
 				object o;
 				bool isDarkStyle = ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(Constants.CodeText).GetBackgroundColor().IsDark();
+				var styles = allStyles ? GetAllStyles() : GetCustomizedStyles();
 				if (stylesOnly) {
 					o = new {
 						Version = CurrentVersion,
-						Styles = GetCustomizedStyles()
+						Styles = styles
 					};
 				}
 				else {
 					o = this;
 					Version = CurrentVersion;
-					Styles = GetCustomizedStyles().ToList();
+					Styles = styles.ToList();
 				}
 				File.WriteAllText(path, JsonConvert.SerializeObject(
 					o,
@@ -371,6 +372,11 @@ namespace Codist
 			}
 			finally {
 				Styles = null;
+			}
+
+			IEnumerable<SyntaxStyle> GetAllStyles() {
+				return FormatStore.GetAllStyles()
+					.Select(i => new SyntaxStyle(i.Key, i.Value));
 			}
 
 			IEnumerable<SyntaxStyle> GetCustomizedStyles() {

@@ -117,86 +117,8 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="CMD_ListMembers" xml:space="preserve">
-    <value>列出成员...</value>
-  </data>
-  <data name="CMD_Close" xml:space="preserve">
-    <value>关闭</value>
-  </data>
-  <data name="CMD_CopyQualifiedSymbolName" xml:space="preserve">
-    <value>复制类和符号名称</value>
-  </data>
-  <data name="CMD_CopySymbolName" xml:space="preserve">
-    <value>复制符号名称</value>
-  </data>
-  <data name="CMD_FindAllReferences" xml:space="preserve">
-    <value>查找所有引用</value>
-  </data>
-  <data name="CMD_FindCallers" xml:space="preserve">
-    <value>查找调用方...</value>
-  </data>
-  <data name="CMD_FindConstructorCallers" xml:space="preserve">
-    <value>查找构造函数调用方...</value>
-  </data>
-  <data name="CMD_FindDerivedClasses" xml:space="preserve">
-    <value>查找继承的类...</value>
-  </data>
-  <data name="CMD_FindExtensions" xml:space="preserve">
-    <value>查找扩展方法...</value>
-  </data>
-  <data name="CMD_FindExtensionsFor" xml:space="preserve">
-    <value>查找 &lt;TYPE&gt; 的扩展方法...</value>
-  </data>
-  <data name="CMD_FindImplementations" xml:space="preserve">
-    <value>查找接口实现...</value>
-  </data>
-  <data name="CMD_FindInstanceAsParameter" xml:space="preserve">
-    <value>查找以实例为参数的方法...</value>
-  </data>
-  <data name="CMD_FindInstanceProducer" xml:space="preserve">
-    <value>查找生成实例的成员...</value>
-  </data>
-  <data name="CMD_ListMembersOf" xml:space="preserve">
-    <value>列出 &lt;TYPE&gt; 的成员...</value>
-  </data>
-  <data name="CMD_FindMethodsSameSignature" xml:space="preserve">
-    <value>查找具有相同签名的方法...</value>
-  </data>
-  <data name="CMD_FindOverrides" xml:space="preserve">
-    <value>查找重载方法...</value>
-  </data>
-  <data name="CMD_FindReferencedSymbols" xml:space="preserve">
-    <value>查找引用的符号...</value>
-  </data>
-  <data name="CMD_FindReferrers" xml:space="preserve">
-    <value>查找引用...</value>
-  </data>
-  <data name="CMD_FindSymbolwithName" xml:space="preserve">
-    <value>查找名称带有 &lt;NAME&gt; 的符号...</value>
-  </data>
-  <data name="CMD_FindTypeReferrers" xml:space="preserve">
-    <value>查找类型引用...</value>
-  </data>
-  <data name="CMD_GoTo" xml:space="preserve">
-    <value>转到 &lt;TYPE&gt;</value>
-  </data>
-  <data name="CMD_GoToDefinition" xml:space="preserve">
-    <value>转到定义</value>
-  </data>
-  <data name="CMD_GotoMember" xml:space="preserve">
-    <value>转到成员</value>
-  </data>
-  <data name="CMD_GotoSymbol" xml:space="preserve">
-    <value>转到符号</value>
-  </data>
-  <data name="CMD_GotoType" xml:space="preserve">
-    <value>转到类型</value>
-  </data>
-  <data name="CMD_Pin" xml:space="preserve">
-    <value>固定</value>
-  </data>
-  <data name="CMD_SelectCode" xml:space="preserve">
-    <value>选择代码</value>
+  <data name="CMDT_SelectAll" xml:space="preserve">
+    <value>选中所有文本</value>
   </data>
   <data name="CMD_AddParallelWatch" xml:space="preserve">
     <value>添加并行监视</value>
@@ -213,14 +135,23 @@
   <data name="CMD_ClearFilter" xml:space="preserve">
     <value>清除筛选条件</value>
   </data>
+  <data name="CMD_Close" xml:space="preserve">
+    <value>关闭</value>
+  </data>
   <data name="CMD_CommentSelection" xml:space="preserve">
     <value>注释选中内容
 右键：注释整行</value>
+  </data>
+  <data name="CMD_CopyQualifiedSymbolName" xml:space="preserve">
+    <value>复制类和符号名称</value>
   </data>
   <data name="CMD_CopySelectedText" xml:space="preserve">
     <value>复制选中文本
 右键：复制整行
 Ctrl: 去除行首缩进</value>
+  </data>
+  <data name="CMD_CopySymbolName" xml:space="preserve">
+    <value>复制符号名称</value>
   </data>
   <data name="CMD_CutSelectedText" xml:space="preserve">
     <value>剪切选中文本
@@ -254,8 +185,53 @@ Shift：删除并选中下一项（整个单词）</value>
   <data name="CMD_Find" xml:space="preserve">
     <value>查找...</value>
   </data>
+  <data name="CMD_FindAllReferences" xml:space="preserve">
+    <value>查找所有引用</value>
+  </data>
+  <data name="CMD_FindCallers" xml:space="preserve">
+    <value>查找调用方...</value>
+  </data>
+  <data name="CMD_FindConstructorCallers" xml:space="preserve">
+    <value>查找构造函数调用方...</value>
+  </data>
+  <data name="CMD_FindDerivedClasses" xml:space="preserve">
+    <value>查找继承的类...</value>
+  </data>
+  <data name="CMD_FindExtensions" xml:space="preserve">
+    <value>查找扩展方法...</value>
+  </data>
+  <data name="CMD_FindExtensionsFor" xml:space="preserve">
+    <value>查找 &lt;TYPE&gt; 的扩展方法...</value>
+  </data>
+  <data name="CMD_FindImplementations" xml:space="preserve">
+    <value>查找接口实现...</value>
+  </data>
   <data name="CMD_FindInFiles" xml:space="preserve">
     <value>在文件中查找...</value>
+  </data>
+  <data name="CMD_FindInstanceAsParameter" xml:space="preserve">
+    <value>查找以实例为参数的方法...</value>
+  </data>
+  <data name="CMD_FindInstanceProducer" xml:space="preserve">
+    <value>查找生成实例的成员...</value>
+  </data>
+  <data name="CMD_ListMembers" xml:space="preserve">
+    <value>列出成员...</value>
+  </data>
+  <data name="CMD_ListMembersOf" xml:space="preserve">
+    <value>列出 &lt;TYPE&gt; 的成员...</value>
+  </data>
+  <data name="CMD_FindMethodsSameSignature" xml:space="preserve">
+    <value>查找具有相同签名的方法...</value>
+  </data>
+  <data name="CMD_FindOverrides" xml:space="preserve">
+    <value>查找重载方法...</value>
+  </data>
+  <data name="CMD_FindReferencedSymbols" xml:space="preserve">
+    <value>查找引用的符号...</value>
+  </data>
+  <data name="CMD_FindReferrers" xml:space="preserve">
+    <value>查找引用...</value>
   </data>
   <data name="CMD_FindReplace" xml:space="preserve">
     <value>查找下一个选中文本
@@ -263,6 +239,12 @@ Ctrl：匹配大小写
 Shift：匹配整个单词
 Alt：在下一个匹配位置插入光标
 右键：“查找及替换”菜单...</value>
+  </data>
+  <data name="CMD_FindSymbolwithName" xml:space="preserve">
+    <value>查找名称带有 &lt;NAME&gt; 的符号...</value>
+  </data>
+  <data name="CMD_FindTypeReferrers" xml:space="preserve">
+    <value>查找类型引用...</value>
   </data>
   <data name="CMD_FormatDocument" xml:space="preserve">
     <value>格式化文档</value>
@@ -274,12 +256,27 @@ Alt：在下一个匹配位置插入光标
     <value>文本格式...
 自动排版选中文本、编码解码、更改大小写等</value>
   </data>
+  <data name="CMD_GoTo" xml:space="preserve">
+    <value>转到 &lt;TYPE&gt;</value>
+  </data>
   <data name="CMD_GoToDeclaration" xml:space="preserve">
     <value>转到声明</value>
+  </data>
+  <data name="CMD_GoToDefinition" xml:space="preserve">
+    <value>转到定义</value>
   </data>
   <data name="CMD_GoToDefinitionPeek" xml:space="preserve">
     <value>转到定义
 右键：查看定义</value>
+  </data>
+  <data name="CMD_GotoMember" xml:space="preserve">
+    <value>转到成员</value>
+  </data>
+  <data name="CMD_GotoSymbol" xml:space="preserve">
+    <value>转到符号</value>
+  </data>
+  <data name="CMD_GotoType" xml:space="preserve">
+    <value>转到类型</value>
   </data>
   <data name="CMD_GUID" xml:space="preserve">
     <value>生成新的 GUID
@@ -319,6 +316,9 @@ Alt：在下一个匹配位置插入光标
 Ctrl：粘贴并选中下一项
 Shift：粘贴并选中下一项（整个单词）</value>
   </data>
+  <data name="CMD_Pin" xml:space="preserve">
+    <value>固定</value>
+  </data>
   <data name="CMD_RenameSymbol" xml:space="preserve">
     <value>重命名符号...</value>
   </data>
@@ -339,6 +339,9 @@ Shift：粘贴并选中下一项（整个单词）</value>
   </data>
   <data name="CMD_SelectAll" xml:space="preserve">
     <value>选择所有</value>
+  </data>
+  <data name="CMD_SelectCode" xml:space="preserve">
+    <value>选择代码</value>
   </data>
   <data name="CMD_SelectDirectiveRegion" xml:space="preserve">
     <value>选择指令区域</value>
@@ -397,9 +400,6 @@ Shift：粘贴并选中下一项（整个单词）</value>
   <data name="CMD_Uppercase" xml:space="preserve">
     <value>转为大写</value>
   </data>
-  <data name="CMDT_SelectAll" xml:space="preserve">
-    <value>选中所有文本</value>
-  </data>
   <data name="T_AsParameter" xml:space="preserve">
     <value> 作为参数</value>
   </data>
@@ -445,6 +445,9 @@ Shift：粘贴并选中下一项（整个单词）</value>
   <data name="T_LineOfCode" xml:space="preserve">
     <value>代码行数: </value>
   </data>
+  <data name="T_Members" xml:space="preserve">
+    <value> 成员 {count} (继承 {inherited})</value>
+  </data>
   <data name="T_Methods" xml:space="preserve">
     <value>方法</value>
   </data>
@@ -456,9 +459,6 @@ Shift：粘贴并选中下一项（整个单词）</value>
   </data>
   <data name="T_Overrides" xml:space="preserve">
     <value> 重载: </value>
-  </data>
-  <data name="T_Members" xml:space="preserve">
-    <value> 成员 {count} (继承 {inherited})</value>
   </data>
   <data name="T_Producers" xml:space="preserve">
     <value> 生成位置</value>
@@ -508,6 +508,9 @@ Shift：粘贴并选中下一项（整个单词）</value>
   <data name="CMD_Load" xml:space="preserve">
     <value>加载...</value>
   </data>
+  <data name="CMDT_OpenDonatePage" xml:space="preserve">
+    <value>用浏览器打开捐赠 Codist 项目的网页</value>
+  </data>
   <data name="CMD_PostIssue" xml:space="preserve">
     <value>发表建议或提交问题报告</value>
   </data>
@@ -523,8 +526,20 @@ Shift：粘贴并选中下一项（整个单词）</value>
   <data name="OT_ConfigurationFileTip" xml:space="preserve">
     <value>使用以下按钮备份你的配置，配置文件可共享给其他伙伴</value>
   </data>
+  <data name="CMD_DonateLink" xml:space="preserve">
+    <value>通过 PayPal 捐赠</value>
+  </data>
+  <data name="OT_DonateLinkTip" xml:space="preserve">
+    <value>建议的捐赠金额为人民币 49 元，但是，您可以根据您的经济状况，爱捐多少就捐多少</value>
+  </data>
+  <data name="OT_FeatureChangesTip" xml:space="preserve">
+    <value>更改将应用到新打开的文档窗口上，当前打开的文档窗口将不受影响</value>
+  </data>
   <data name="OT_FeatureControllers" xml:space="preserve">
     <value>特性控制</value>
+  </data>
+  <data name="OT_FeatureControllersTip" xml:space="preserve">
+    <value>使用以下复选框切换 Codist 的功能特性:</value>
   </data>
   <data name="OT_General" xml:space="preserve">
     <value>常规</value>
@@ -532,8 +547,38 @@ Shift：粘贴并选中下一项（整个单词）</value>
   <data name="OT_LatestRelease" xml:space="preserve">
     <value>最近发布版本:</value>
   </data>
+  <data name="OT_LoadConfigFileTip" xml:space="preserve">
+    <value>从文件恢复配置...</value>
+  </data>
+  <data name="OT_NavigationBarTip" xml:space="preserve">
+    <value>为 C# 和 Markdown 语言提供增强的导航栏</value>
+  </data>
   <data name="OT_ProjectWebSite" xml:space="preserve">
     <value>项目网站:</value>
+  </data>
+  <data name="OT_QuickInfoTip" xml:space="preserve">
+    <value>提供加强的代码工具提示</value>
+  </data>
+  <data name="OT_ReportBugsAndSuggestions" xml:space="preserve">
+    <value>报告 Codist 的错误和建议:</value>
+  </data>
+  <data name="OT_SaveConfigFileTip" xml:space="preserve">
+    <value>将配置备份到文件...</value>
+  </data>
+  <data name="OT_ScrollbarMarkerTip" xml:space="preserve">
+    <value>在滚动条上显示其它标记</value>
+  </data>
+  <data name="OT_SmartBarTip" xml:space="preserve">
+    <value>在代码编辑器中显示动态的浮动工具栏</value>
+  </data>
+  <data name="OT_SupportCodst" xml:space="preserve">
+    <value>支持 Codist!</value>
+  </data>
+  <data name="OT_SyntaxHighlightTip" xml:space="preserve">
+    <value>提供高级语法突出显示和注释标记器</value>
+  </data>
+  <data name="OT_ThankYou" xml:space="preserve">
+    <value>感谢您使用 Codist</value>
   </data>
   <data name="T_AnonymousType" xml:space="preserve">
     <value>匿名类型: </value>
@@ -541,14 +586,14 @@ Shift：粘贴并选中下一项（整个单词）</value>
   <data name="T_Argument" xml:space="preserve">
     <value>方法参数</value>
   </data>
-  <data name="T_ArgumentOf" xml:space="preserve">
-    <value> </value>
-  </data>
   <data name="T_ArgumentN" xml:space="preserve">
     <value>参数 &lt;N&gt;</value>
   </data>
   <data name="T_ArgumentNOf" xml:space="preserve">
     <value>参数 &lt;N&gt; </value>
+  </data>
+  <data name="T_ArgumentOf" xml:space="preserve">
+    <value> </value>
   </data>
   <data name="T_Assembly" xml:space="preserve">
     <value>程序集: </value>
@@ -556,41 +601,26 @@ Shift：粘贴并选中下一项（整个单词）</value>
   <data name="T_Attribute" xml:space="preserve">
     <value>特性:</value>
   </data>
+  <data name="T_AttributeOf" xml:space="preserve">
+    <value>特性 </value>
+  </data>
+  <data name="T_CapturedVariables" xml:space="preserve">
+    <value>捕获的变量</value>
+  </data>
   <data name="T_Chars" xml:space="preserve">
     <value>字数</value>
   </data>
   <data name="T_Color" xml:space="preserve">
     <value>颜色</value>
   </data>
-  <data name="T_CapturedVariables" xml:space="preserve">
-    <value>捕获的变量</value>
+  <data name="T_DeclaredVariable" xml:space="preserve">
+    <value>声明变量: </value>
   </data>
-  <data name="T_SuperQuickInfo" xml:space="preserve">
-    <value>超级代码提示</value>
+  <data name="T_DelegateSignature" xml:space="preserve">
+    <value>委托签名</value>
   </data>
-  <data name="T_SmartBar" xml:space="preserve">
-    <value>智能工具条</value>
-  </data>
-  <data name="T_ScrollbarMarkers" xml:space="preserve">
-    <value>滚动条标记</value>
-  </data>
-  <data name="T_ReturnAnonymousFunction" xml:space="preserve">
-    <value>返回匿名方法 </value>
-  </data>
-  <data name="T_ReturnFor" xml:space="preserve">
-    <value> </value>
-  </data>
-  <data name="T_Return" xml:space="preserve">
-    <value>返回 </value>
-  </data>
-  <data name="T_ReadVariable" xml:space="preserve">
-    <value>读取变量: </value>
-  </data>
-  <data name="T_NavigationBar" xml:space="preserve">
-    <value>导航栏</value>
-  </data>
-  <data name="T_SyntaxHighlight" xml:space="preserve">
-    <value>高级语法样式</value>
+  <data name="T_DocumentationFrom" xml:space="preserve">
+    <value>借用文档: </value>
   </data>
   <data name="T_EndOfRegion" xml:space="preserve">
     <value>#region 结束 </value>
@@ -610,6 +640,9 @@ Shift：粘贴并选中下一项（整个单词）</value>
   <data name="T_EnumUnderlyingType" xml:space="preserve">
     <value>Enum 基础类型: </value>
   </data>
+  <data name="T_ExplicitImplements" xml:space="preserve">
+    <value>显式实现接口: </value>
+  </data>
   <data name="T_HashCode" xml:space="preserve">
     <value>散列值</value>
   </data>
@@ -619,23 +652,23 @@ Shift：粘贴并选中下一项（整个单词）</value>
   <data name="T_Interface" xml:space="preserve">
     <value>接口:</value>
   </data>
+  <data name="T_Inherited" xml:space="preserve">
+    <value> (继承)</value>
+  </data>
   <data name="T_LambdaExpression" xml:space="preserve">
     <value>lambda 表达式</value>
   </data>
   <data name="T_Lines" xml:space="preserve">
     <value> 行</value>
   </data>
-  <data name="T_DocumentationFrom" xml:space="preserve">
-    <value>借用文档: </value>
+  <data name="T_Maybe" xml:space="preserve">
+    <value>可能是...</value>
   </data>
-  <data name="T_DelegateSignature" xml:space="preserve">
-    <value>委托签名</value>
+  <data name="T_MaybeArgument" xml:space="preserve">
+    <value>可能是</value>
   </data>
-  <data name="T_DeclaredVariable" xml:space="preserve">
-    <value>声明变量: </value>
-  </data>
-  <data name="T_ExplicitImplements" xml:space="preserve">
-    <value>显式实现接口: </value>
+  <data name="T_MaybeArgumentOf" xml:space="preserve">
+    <value> 参数</value>
   </data>
   <data name="T_Member" xml:space="preserve">
     <value>成员:</value>
@@ -646,8 +679,35 @@ Shift：粘贴并选中下一项（整个单词）</value>
   <data name="T_Namespace" xml:space="preserve">
     <value>名称空间: </value>
   </data>
+  <data name="T_NavigationBar" xml:space="preserve">
+    <value>导航栏</value>
+  </data>
+  <data name="T_ReadVariable" xml:space="preserve">
+    <value>读取变量: </value>
+  </data>
+  <data name="T_Return" xml:space="preserve">
+    <value>返回 </value>
+  </data>
+  <data name="T_ReturnAnonymousFunction" xml:space="preserve">
+    <value>返回匿名方法 </value>
+  </data>
+  <data name="T_ReturnFor" xml:space="preserve">
+    <value> </value>
+  </data>
+  <data name="T_ScrollbarMarkers" xml:space="preserve">
+    <value>滚动条标记</value>
+  </data>
+  <data name="T_SmartBar" xml:space="preserve">
+    <value>智能工具条</value>
+  </data>
+  <data name="T_SuperQuickInfo" xml:space="preserve">
+    <value>超级代码提示</value>
+  </data>
   <data name="T_SymbolUnavailableIn" xml:space="preserve">
     <value>符号在以下项目中不可用:</value>
+  </data>
+  <data name="T_SyntaxHighlight" xml:space="preserve">
+    <value>高级语法样式</value>
   </data>
   <data name="T_Text" xml:space="preserve">
     <value>文本</value>
@@ -657,21 +717,6 @@ Shift：粘贴并选中下一项（整个单词）</value>
   </data>
   <data name="T_TypeArgument" xml:space="preserve">
     <value>类型参数:</value>
-  </data>
-  <data name="T_MaybeArgument" xml:space="preserve">
-    <value>可能是</value>
-  </data>
-  <data name="T_MaybeArgumentOf" xml:space="preserve">
-    <value> 参数</value>
-  </data>
-  <data name="T_Maybe" xml:space="preserve">
-    <value>可能是...</value>
-  </data>
-  <data name="T_AttributeOf" xml:space="preserve">
-    <value>特性 </value>
-  </data>
-  <data name="T_Inherited" xml:space="preserve">
-    <value> (继承)</value>
   </data>
   <data name="T_BaseType" xml:space="preserve">
     <value>基类: </value>
@@ -718,26 +763,23 @@ Shift：粘贴并选中下一项（整个单词）</value>
   <data name="T_Spans" xml:space="preserve">
     <value>段</value>
   </data>
-  <data name="OT_ThankYou" xml:space="preserve">
-    <value>感谢您使用 Codist</value>
-  </data>
-  <data name="OT_SupportCodst" xml:space="preserve">
-    <value>支持 Codist!</value>
-  </data>
   <data name="T_Example" xml:space="preserve">
     <value>示例</value>
-  </data>
-  <data name="T_SeeAlso" xml:space="preserve">
-    <value>参见</value>
-  </data>
-  <data name="T_Returns" xml:space="preserve">
-    <value>返回值</value>
   </data>
   <data name="T_Remarks" xml:space="preserve">
     <value>备注</value>
   </data>
+  <data name="T_Returns" xml:space="preserve">
+    <value>返回值</value>
+  </data>
+  <data name="T_SeeAlso" xml:space="preserve">
+    <value>参见</value>
+  </data>
   <data name="CMD_SearchTitles" xml:space="preserve">
     <value>搜索标题</value>
+  </data>
+  <data name="CMDT_ConfigureSyntaxHighlight" xml:space="preserve">
+    <value>打开配置高级语法样式的对话框窗口</value>
   </data>
   <data name="CMD_Add" xml:space="preserve">
     <value>添加</value>
@@ -762,9 +804,6 @@ Shift：粘贴并选中下一项（整个单词）</value>
   </data>
   <data name="CMD_Update" xml:space="preserve">
     <value>更改</value>
-  </data>
-  <data name="CMDT_ConfigureSyntaxHighlight" xml:space="preserve">
-    <value>打开配置高级语法样式的对话框窗口</value>
   </data>
   <data name="OT_AdditionalQuickInfo" xml:space="preserve">
     <value>显示更多信息项</value>
@@ -884,21 +923,6 @@ Shift：粘贴并选中下一项（整个单词）</value>
   <data name="OT_CSharpNaviBarMenu" xml:space="preserve">
     <value>C# 导航栏的成员列表（下拉菜单）</value>
   </data>
-  <data name="OT_EnableCommentTagger" xml:space="preserve">
-    <value>启用注释标记器</value>
-  </data>
-  <data name="T_ErrorLoadingConfig" xml:space="preserve">
-    <value>加载配置文件时出错: </value>
-  </data>
-  <data name="T_LoadConfig" xml:space="preserve">
-    <value>加载 Codist 配置文件...</value>
-  </data>
-  <data name="T_NewVersionConfig" xml:space="preserve">
-    <value>加载的配置文件由 Codist 的较新版本创建，某些项可能未正确加载</value>
-  </data>
-  <data name="T_SaveConfig" xml:space="preserve">
-    <value>保存 Codist 配置文件...</value>
-  </data>
   <data name="OT_CSharpNote" xml:space="preserve">
     <value>此页面的选项更改 C# 代码工具提示的内容</value>
   </data>
@@ -908,71 +932,8 @@ Shift：粘贴并选中下一项（整个单词）</value>
   <data name="OT_DesclarationTip" xml:space="preserve">
     <value>如果一个成员不是公共实例的，则显示其声明信息，以及事件或委托签名</value>
   </data>
-  <data name="OT_SyntaxHighlightTip" xml:space="preserve">
-    <value>提供高级语法突出显示和注释标记器</value>
-  </data>
-  <data name="OT_DonateLinkTip" xml:space="preserve">
-    <value>建议的捐赠金额为人民币 49 元，但是，您可以根据您的经济状况，爱捐多少就捐多少</value>
-  </data>
-  <data name="OT_FeatureChangesTip" xml:space="preserve">
-    <value>更改将应用到新打开的文档窗口上，当前打开的文档窗口将不受影响</value>
-  </data>
-  <data name="OT_FeatureControllersTip" xml:space="preserve">
-    <value>使用以下复选框切换 Codist 的功能特性:</value>
-  </data>
-  <data name="OT_LoadConfigFileTip" xml:space="preserve">
-    <value>从文件恢复配置...</value>
-  </data>
-  <data name="OT_NavigationBarTip" xml:space="preserve">
-    <value>为 C# 和 Markdown 语言提供增强的导航栏</value>
-  </data>
-  <data name="OT_QuickInfoTip" xml:space="preserve">
-    <value>提供加强的代码工具提示</value>
-  </data>
-  <data name="OT_ReportBugsAndSuggestions" xml:space="preserve">
-    <value>报告 Codist 的错误和建议:</value>
-  </data>
-  <data name="OT_SaveConfigFileTip" xml:space="preserve">
-    <value>将配置备份到文件...</value>
-  </data>
-  <data name="OT_ScrollbarMarkerTip" xml:space="preserve">
-    <value>在滚动条上显示其它标记</value>
-  </data>
-  <data name="OT_SmartBarTip" xml:space="preserve">
-    <value>在代码编辑器中显示动态的浮动工具栏</value>
-  </data>
-  <data name="OT_InterfaceImplementationTip" xml:space="preserve">
-    <value>显示当前成员实现的接口成员</value>
-  </data>
-  <data name="OT_InterfaceMembers" xml:space="preserve">
-    <value>接口成员</value>
-  </data>
-  <data name="OT_InterfaceMembersTip" xml:space="preserve">
-    <value>显示接口的成员</value>
-  </data>
-  <data name="OT_Interfaces" xml:space="preserve">
-    <value>接口</value>
-  </data>
-  <data name="OT_InterfacesTip" xml:space="preserve">
-    <value>显示成员实现的接口</value>
-  </data>
-  <data name="OT_LimitSize" xml:space="preserve">
-    <value>限制内容尺寸</value>
-  </data>
-  <data name="OT_LimitContentSizeNote" xml:space="preserve">
-    <value>限制代码提示内容的最大尺寸，避免提示窗口占满屏幕</value>
-  </data>
-  <data name="OT_LineNumber" xml:space="preserve">
-    <value>行号</value>
-  </data>
-  <data name="OT_LineNumberTip" xml:space="preserve">
-    <value>在滚动条上绘制行号</value>
-  </data>
-  <data name="OT_LineOfCode" xml:space="preserve">
-    <value>代码行数</value>
-  </data>
-  <data name="OT_InterfaceImplementation" xml:space="preserve">
-    <value>接口实现</value>
+  <data name="OT_EnableCommentTagger" xml:space="preserve">
+    <value>启用注释标记器</value>
   </data>
   <data name="F_Executable" xml:space="preserve">
     <value>可执行文件(*.exe)|*.exe</value>
@@ -1055,24 +1016,57 @@ Shift：粘贴并选中下一项（整个单词）</value>
   <data name="OT_InheritXmlDocTip" xml:space="preserve">
     <value>如果当前符号中不存在文档，则显示基类或接口对应的 XML 文档注释</value>
   </data>
-  <data name="OT_ManualSmartBar" xml:space="preserve">
-    <value>手动显示智能工具栏</value>
+  <data name="OT_InterfaceImplementation" xml:space="preserve">
+    <value>接口实现</value>
   </data>
-  <data name="OT_LongMethodNameTip" xml:space="preserve">
-    <value>在滚动条上绘制长方法的名称</value>
+  <data name="OT_InterfaceImplementationTip" xml:space="preserve">
+    <value>显示当前成员实现的接口成员</value>
+  </data>
+  <data name="OT_InterfaceMembers" xml:space="preserve">
+    <value>接口成员</value>
+  </data>
+  <data name="OT_InterfaceMembersTip" xml:space="preserve">
+    <value>显示接口的成员</value>
+  </data>
+  <data name="OT_Interfaces" xml:space="preserve">
+    <value>接口</value>
+  </data>
+  <data name="OT_InterfacesTip" xml:space="preserve">
+    <value>显示成员实现的接口</value>
+  </data>
+  <data name="OT_LimitSize" xml:space="preserve">
+    <value>限制内容尺寸</value>
+  </data>
+  <data name="OT_LimitContentSizeNote" xml:space="preserve">
+    <value>限制代码提示内容的最大尺寸，避免提示窗口占满屏幕</value>
+  </data>
+  <data name="OT_LineNumber" xml:space="preserve">
+    <value>行号</value>
+  </data>
+  <data name="OT_LineNumberTip" xml:space="preserve">
+    <value>在滚动条上绘制行号</value>
+  </data>
+  <data name="OT_LineOfCode" xml:space="preserve">
+    <value>代码行数</value>
+  </data>
+  <data name="OT_LineOfCodeTip" xml:space="preserve">
+    <value>在导航栏的成员列表下方和工具提示中显示当前类型或成员的行数</value>
+  </data>
+  <data name="OT_LocateBrowser" xml:space="preserve">
+    <value>定位用于打开搜索结果的 Web 浏览器</value>
   </data>
   <data name="OT_LongMethodName" xml:space="preserve">
     <value>长方法的名称</value>
+  </data>
+  <data name="OT_LongMethodNameTip" xml:space="preserve">
+    <value>在滚动条上绘制长方法的名称</value>
   </data>
   <data name="OT_MacTypeLink" xml:space="preserve">
     <value>提示：为了获得最佳的文本渲染效果，建议使用 MacType。
 https://github.com/snowie2000/mactype/releases</value>
   </data>
-  <data name="OT_LocateBrowser" xml:space="preserve">
-    <value>定位用于打开搜索结果的 Web 浏览器</value>
-  </data>
-  <data name="OT_LineOfCodeTip" xml:space="preserve">
-    <value>在导航栏的成员列表下方和工具提示中显示当前类型或成员的行数</value>
+  <data name="OT_ManualSmartBar" xml:space="preserve">
+    <value>手动显示智能工具栏</value>
   </data>
   <data name="OT_ManualSmartBarTip" xml:space="preserve">
     <value>更改选择后，不要自动显示Smart Bar，请结合以下选项！</value>
@@ -1124,6 +1118,12 @@ https://github.com/snowie2000/mactype/releases</value>
   </data>
   <data name="OT_NaviBarNote" xml:space="preserve">
     <value>目前，导航栏仅适用于C＃和 MarkDown 文档</value>
+  </data>
+  <data name="OT_NaviBarShortcutKeys" xml:space="preserve">
+    <value>用于访问导航栏成员列表的默认快捷键：
+Ctrl+1, Ctrl+1: Edit.SearchClassMember
+Ctrl+1, Ctrl+2: Edit.SearchDeclaration
+Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   </data>
   <data name="OT_NaviBarUpdateNote" xml:space="preserve">
     <value>以上选项将在重新生成导航栏时生效</value>
@@ -1215,6 +1215,12 @@ https://github.com/snowie2000/mactype/releases</value>
   <data name="OT_ShowExceptionXmlDocTip" xml:space="preserve">
     <value>显示 &lt;exception/&gt; 文档注释的内容</value>
   </data>
+  <data name="OT_ShowMethodParameterName" xml:space="preserve">
+    <value>显示参数名称而不是参数类型</value>
+  </data>
+  <data name="OT_ShowMethodParameterNameTip" xml:space="preserve">
+    <value>在方法参数列表中显示参数名称</value>
+  </data>
   <data name="OT_ShowRemarksXmlDoc" xml:space="preserve">
     <value>显示 &lt;remarks/&gt; 文档注释</value>
   </data>
@@ -1251,17 +1257,11 @@ https://github.com/snowie2000/mactype/releases</value>
   <data name="OT_SymbolToolTipTip" xml:space="preserve">
     <value>在导航栏上显示项的代码提示</value>
   </data>
-  <data name="OT_SyntaxDetailTip" xml:space="preserve">
-    <value>在导航栏上的成员列表中显示语法节点（例如，foreach、while、赋值和其他语句）</value>
-  </data>
   <data name="OT_SyntaxDetail" xml:space="preserve">
     <value>语法细节</value>
   </data>
-  <data name="OT_ShowMethodParameterNameTip" xml:space="preserve">
-    <value>在方法参数列表中显示参数名称</value>
-  </data>
-  <data name="OT_ShowMethodParameterName" xml:space="preserve">
-    <value>显示参数名称而不是参数类型</value>
+  <data name="OT_SyntaxDetailTip" xml:space="preserve">
+    <value>在导航栏上的成员列表中显示语法节点（例如，foreach、while、赋值和其他语句）</value>
   </data>
   <data name="OT_SyntaxDiagnostics" xml:space="preserve">
     <value>语法分析调试</value>
@@ -1290,20 +1290,17 @@ https://github.com/snowie2000/mactype/releases</value>
   <data name="OT_ToggleSmartBarTip" xml:space="preserve">
     <value>使用 Shift 键切换智能工具栏的显示</value>
   </data>
-  <data name="OT_URLPattern" xml:space="preserve">
-    <value>URL 模式</value>
+  <data name="OTC_TopMargin" xml:space="preserve">
+    <value>上边距:</value>
   </data>
-  <data name="OT_URLSubstitution" xml:space="preserve">
-    <value>使用 ％u 表示搜索引擎 URL</value>
+  <data name="OT_TopMarginTip" xml:space="preserve">
+    <value>此选项每行代码上方添加边距</value>
   </data>
-  <data name="OT_UnlimitedSize" xml:space="preserve">
-    <value>如上面的值为 0，表示不限大小</value>
+  <data name="OT_TrimNonLetterRegion" xml:space="preserve">
+    <value>不显示 #region 名称的非字母字符</value>
   </data>
-  <data name="OT_TypeParameterTip" xml:space="preserve">
-    <value>显示类型参数的信息</value>
-  </data>
-  <data name="OT_TypeParameter" xml:space="preserve">
-    <value>类型参数</value>
+  <data name="OT_TrimNonLetterRegionTip" xml:space="preserve">
+    <value>不显示 #region 名称的非字母字符，例如，“====”、“****”之类的标记</value>
   </data>
   <data name="OT_TypeName" xml:space="preserve">
     <value>类型名称</value>
@@ -1311,20 +1308,26 @@ https://github.com/snowie2000/mactype/releases</value>
   <data name="OT_TypeNameTip" xml:space="preserve">
     <value>在滚动条上绘制声明类型的名称</value>
   </data>
-  <data name="OT_TrimNonLetterRegionTip" xml:space="preserve">
-    <value>不显示 #region 名称的非字母字符，例如，“====”、“****”之类的标记</value>
+  <data name="OT_TypeParameter" xml:space="preserve">
+    <value>类型参数</value>
   </data>
-  <data name="OT_TrimNonLetterRegion" xml:space="preserve">
-    <value>不显示 #region 名称的非字母字符</value>
+  <data name="OT_TypeParameterTip" xml:space="preserve">
+    <value>显示类型参数的信息</value>
   </data>
-  <data name="OT_TopMarginTip" xml:space="preserve">
-    <value>此选项每行代码上方添加边距</value>
+  <data name="OT_UnlimitedSize" xml:space="preserve">
+    <value>如上面的值为 0，表示不限大小</value>
   </data>
-  <data name="OT_ValueOfFieldsTip" xml:space="preserve">
-    <value>在导航栏的成员列表中显示字段和属性的初始值</value>
+  <data name="OT_URLPattern" xml:space="preserve">
+    <value>URL 模式</value>
+  </data>
+  <data name="OT_URLSubstitution" xml:space="preserve">
+    <value>使用 ％u 表示搜索引擎 URL</value>
   </data>
   <data name="OT_ValueOfFields" xml:space="preserve">
     <value>字段和属性的初始值</value>
+  </data>
+  <data name="OT_ValueOfFieldsTip" xml:space="preserve">
+    <value>在导航栏的成员列表中显示字段和属性的初始值</value>
   </data>
   <data name="OT_WebSearch" xml:space="preserve">
     <value>联网搜索</value>
@@ -1336,24 +1339,18 @@ https://github.com/snowie2000/mactype/releases</value>
   </data>
   <data name="F_Config" xml:space="preserve">
     <value>Codist 配置文件|*.json|所有文件|*.*</value>
-Ctrl+1, Ctrl+1: Edit.SearchClassMember
-Ctrl+1, Ctrl+2: Edit.SearchDeclaration
-Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   </data>
-  <data name="T_SourceReference" xml:space="preserve">
-    <value>引用符号的代码:</value>
+  <data name="T_ErrorLoadingConfig" xml:space="preserve">
+    <value>加载配置文件时出错: </value>
   </data>
-  <data name="T_CopyAfter" xml:space="preserve">
-    <value>复制到 &lt;NAME&gt; 后面</value>
+  <data name="T_LoadConfig" xml:space="preserve">
+    <value>加载 Codist 配置文件...</value>
   </data>
-  <data name="T_CopyBefore" xml:space="preserve">
-    <value>复制到 &lt;NAME&gt; 前面</value>
+  <data name="T_NewVersionConfig" xml:space="preserve">
+    <value>加载的配置文件由 Codist 的较新版本创建，某些项可能未正确加载</value>
   </data>
-  <data name="T_MoveAfter" xml:space="preserve">
-    <value>移动到 &lt;NAME&gt; 后面</value>
-  </data>
-  <data name="T_MoveBefore" xml:space="preserve">
-    <value>移动到 &lt;NAME&gt; 前面</value>
+  <data name="T_SaveConfig" xml:space="preserve">
+    <value>保存 Codist 配置文件...</value>
   </data>
   <data name="CMD_OpenFolder" xml:space="preserve">
     <value>打开文件夹</value>
@@ -1367,6 +1364,21 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   <data name="T_ContainingAssembly" xml:space="preserve">
     <value>所属程序集: </value>
   </data>
+  <data name="T_CopyAfter" xml:space="preserve">
+    <value>复制到 &lt;NAME&gt; 后面</value>
+  </data>
+  <data name="T_CopyBefore" xml:space="preserve">
+    <value>复制到 &lt;NAME&gt; 前面</value>
+  </data>
+  <data name="T_MoveAfter" xml:space="preserve">
+    <value>移动到 &lt;NAME&gt; 后面</value>
+  </data>
+  <data name="T_MoveBefore" xml:space="preserve">
+    <value>移动到 &lt;NAME&gt; 前面</value>
+  </data>
+  <data name="T_SourceReference" xml:space="preserve">
+    <value>引用符号的代码:</value>
+  </data>
   <data name="T_FailedToLaunchBrowser" xml:space="preserve">
     <value>打开浏览器搜索选中内容时出错:</value>
   </data>
@@ -1376,32 +1388,23 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   <data name="CMD_LearnMore" xml:space="preserve">
     <value>查看使用说明</value>
   </data>
-  <data name="CMD_SeeWhatsNew" xml:space="preserve">
-    <value>查看更新说明</value>
-  </data>
-  <data name="T_CodistFirstRun" xml:space="preserve">
-    <value>这是 Codist 第一次在你的 Visual Studio 上运行，请点击这里</value>
-  </data>
-  <data name="T_Or" xml:space="preserve">
-    <value> 或 </value>
-  </data>
-  <data name="T_SpecifyScreenshotLocation" xml:space="preserve">
-    <value>保存代码窗口截图</value>
-  </data>
-  <data name="T_CodistUpdated" xml:space="preserve">
-    <value>Codist 已经更新到 &lt;VERSION&gt;，请点击这里 </value>
-  </data>
-  <data name="T_FailedToSaveScreenshot" xml:space="preserve">
-    <value>无法保存屏幕截图到 &lt;NAME&gt;。</value>
-  </data>
   <data name="CMD_SaveScreenshot" xml:space="preserve">
     <value>保存代码窗口截图...</value>
   </data>
   <data name="CMD_SearchClassMember" xml:space="preserve">
     <value>查找类成员</value>
   </data>
+  <data name="CMD_SeeWhatsNew" xml:space="preserve">
+    <value>查看更新说明</value>
+  </data>
   <data name="T_AllLanguages" xml:space="preserve">
     <value>所有语言</value>
+  </data>
+  <data name="T_CodistFirstRun" xml:space="preserve">
+    <value>这是 Codist 第一次在你的 Visual Studio 上运行，请点击这里</value>
+  </data>
+  <data name="T_CodistUpdated" xml:space="preserve">
+    <value>Codist 已经更新到 &lt;VERSION&gt;，请点击这里 </value>
   </data>
   <data name="T_Common" xml:space="preserve">
     <value>通用</value>
@@ -1409,14 +1412,23 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   <data name="T_CustomizeSyntaxHighlightNote" xml:space="preserve">
     <value>要配置高级语法样式，请先打开一个代码文件，然后再执行此命令。</value>
   </data>
+  <data name="T_FailedToSaveScreenshot" xml:space="preserve">
+    <value>无法保存屏幕截图到 &lt;NAME&gt;。</value>
+  </data>
   <data name="T_Options" xml:space="preserve">
     <value>选项</value>
+  </data>
+  <data name="T_Or" xml:space="preserve">
+    <value> 或 </value>
   </data>
   <data name="T_PngFileFilter" xml:space="preserve">
     <value>PNG 图像文件 (*.png)|*.png</value>
   </data>
   <data name="T_SelectedCode" xml:space="preserve">
     <value>选中代码的样式</value>
+  </data>
+  <data name="T_SpecifyScreenshotLocation" xml:space="preserve">
+    <value>保存代码窗口截图</value>
   </data>
   <data name="T_SymbolMarkers" xml:space="preserve">
     <value>符号标记</value>
@@ -1432,6 +1444,25 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   </data>
   <data name="T_Tags" xml:space="preserve">
     <value>标签</value>
+  </data>
+  <data name="CMDT_DarkTheme" xml:space="preserve">
+    <value>加载为暗黑编辑环境设计的预定义主题</value>
+  </data>
+  <data name="CMDT_LightTheme" xml:space="preserve">
+    <value>加载为光亮编辑环境设计的预定义主题</value>
+  </data>
+  <data name="CMDT_LoadTheme" xml:space="preserve">
+    <value>加载语法样式主题...</value>
+  </data>
+  <data name="CMDT_ResetTheme" xml:space="preserve">
+    <value>重置语法样式主题为默认样式...</value>
+  </data>
+  <data name="CMDT_SaveTheme" xml:space="preserve">
+    <value>保存语法样式主题...
+Shift: 导出主题包含开发环境主题的样式</value>
+  </data>
+  <data name="CMDT_SimpleTheme" xml:space="preserve">
+    <value>加载预定义的简单主题</value>
   </data>
   <data name="CMD_Bold" xml:space="preserve">
     <value>粗体</value>
@@ -1472,86 +1503,53 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   <data name="CMD_Underline" xml:space="preserve">
     <value>下划线</value>
   </data>
-  <data name="CMDT_DarkTheme" xml:space="preserve">
-    <value>加载为暗黑编辑环境设计的预定义主题</value>
+  <data name="OT_ApplyToLocalFunction" xml:space="preserve">
+    <value>应用到本地方法</value>
   </data>
-  <data name="CMDT_LightTheme" xml:space="preserve">
-    <value>加载为光亮编辑环境设计的预定义主题</value>
+  <data name="OT_ApplyToNonPrivateField" xml:space="preserve">
+    <value>应用到非私有的字段</value>
   </data>
-  <data name="CMDT_LoadTheme" xml:space="preserve">
-    <value>加载语法样式主题...</value>
+  <data name="OT_BoldPunctuations" xml:space="preserve">
+    <value>使用粗体</value>
   </data>
-  <data name="T_StyleSettings" xml:space="preserve">
-    <value>语法样式配置:</value>
+  <data name="OT_BoldPunctuationsNote" xml:space="preserve">
+    <value>将语义相关的标点符号和运算符标记为粗体</value>
   </data>
-  <data name="T_Style" xml:space="preserve">
-    <value>样式:</value>
+  <data name="OT_BracesAndParentheses" xml:space="preserve">
+    <value>突出显示括号</value>
   </data>
-  <data name="T_SyntaxHighlightConfigNotice" xml:space="preserve">
-    <value>要配置其它语法样式，在代码窗口点击相应语法样式所在的位置，再切换到本窗口</value>
+  <data name="OT_BranceBraces" xml:space="preserve">
+    <value>与分支相关的括号</value>
   </data>
-  <data name="T_SyntaxStyles" xml:space="preserve">
-    <value>语法样式:</value>
+  <data name="OT_Content" xml:space="preserve">
+    <value>内容</value>
   </data>
-  <data name="T_Tag" xml:space="preserve">
-    <value>标签:</value>
+  <data name="OT_DeclarationBraces" xml:space="preserve">
+    <value>声明类或成员的括号</value>
   </data>
-  <data name="T_TopGradient" xml:space="preserve">
-    <value>从上到下渐变</value>
+  <data name="OT_LoopBraces" xml:space="preserve">
+    <value>与循环结构相关的括号</value>
   </data>
-  <data name="T_Solid" xml:space="preserve">
-    <value>净色</value>
+  <data name="OT_MemberStyles" xml:space="preserve">
+    <value>成员声明的特殊样式</value>
   </data>
-  <data name="T_Size" xml:space="preserve">
-    <value>尺寸:</value>
+  <data name="OT_MethodParameterBraces" xml:space="preserve">
+    <value>方法参数的括号</value>
   </data>
-  <data name="T_RightGradient" xml:space="preserve">
-    <value>从右到左渐变</value>
+  <data name="OT_ResourceBraces" xml:space="preserve">
+    <value>与资源管理和异常相关的括号</value>
   </data>
-  <data name="T_PredefinedThemes" xml:space="preserve">
-    <value>预定义的主题:</value>
+  <data name="OT_Tag" xml:space="preserve">
+    <value>标签</value>
   </data>
-  <data name="T_SaveSyntaxHighlightFile" xml:space="preserve">
-    <value>保存 Codist 高级语法样式配置文件...</value>
+  <data name="OT_TagContent" xml:space="preserve">
+    <value>标签和内容</value>
   </data>
-  <data name="T_OpacityNotSet" xml:space="preserve">
-    <value>未设置透明度</value>
+  <data name="OT_TypeCastBraces" xml:space="preserve">
+    <value>转换类型的括号</value>
   </data>
-  <data name="T_Opacity" xml:space="preserve">
-    <value>透明度: </value>
-  </data>
-  <data name="T_NotSet" xml:space="preserve">
-    <value>未设置</value>
-  </data>
-  <data name="T_LoadSyntaxHighlightFile" xml:space="preserve">
-    <value>加载 Codist 高级语法样式配置文件...</value>
-  </data>
-  <data name="T_LeftGradient" xml:space="preserve">
-    <value>从左到右渐变</value>
-  </data>
-  <data name="T_Foreground" xml:space="preserve">
-    <value>文本颜色</value>
-  </data>
-  <data name="T_Font" xml:space="preserve">
-    <value>字体:</value>
-  </data>
-  <data name="T_FailedToLoadStyleFile" xml:space="preserve">
-    <value>在加载语法样式配置文件时出错:</value>
-  </data>
-  <data name="T_EndWithPunctuation" xml:space="preserve">
-    <value>标签可尾随标点</value>
-  </data>
-  <data name="T_Default" xml:space="preserve">
-    <value>默认值</value>
-  </data>
-  <data name="T_ConfirmResetSyntaxHighlight" xml:space="preserve">
-    <value>您是否确认要将语法样式重置为默认值？</value>
-  </data>
-  <data name="T_CommentTagSettings" xml:space="preserve">
-    <value>注释标签设置:</value>
-  </data>
-  <data name="T_CaseSensitive" xml:space="preserve">
-    <value>区分标签大小写</value>
+  <data name="T_ApplyTo" xml:space="preserve">
+    <value>应用于:</value>
   </data>
   <data name="T_Background" xml:space="preserve">
     <value>背景颜色</value>
@@ -1565,71 +1563,38 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   <data name="T_BottomGradient" xml:space="preserve">
     <value>从下到上渐变</value>
   </data>
-  <data name="T_ApplyTo" xml:space="preserve">
-    <value>应用于:</value>
+  <data name="T_CaseSensitive" xml:space="preserve">
+    <value>区分标签大小写</value>
   </data>
-  <data name="OT_TypeCastBraces" xml:space="preserve">
-    <value>转换类型的括号</value>
+  <data name="T_CommentTagSettings" xml:space="preserve">
+    <value>注释标签设置:</value>
   </data>
-  <data name="OT_Tag" xml:space="preserve">
-    <value>标签</value>
+  <data name="T_ConfirmResetSyntaxHighlight" xml:space="preserve">
+    <value>您是否确认要将语法样式重置为默认值？</value>
   </data>
-  <data name="OT_TagContent" xml:space="preserve">
-    <value>标签和内容</value>
+  <data name="T_Default" xml:space="preserve">
+    <value>默认值</value>
   </data>
-  <data name="OT_ResourceBraces" xml:space="preserve">
-    <value>与资源管理和异常相关的括号</value>
+  <data name="T_EndWithPunctuation" xml:space="preserve">
+    <value>标签可尾随标点</value>
   </data>
-  <data name="OT_MethodParameterBraces" xml:space="preserve">
-    <value>方法参数的括号</value>
+  <data name="T_FailedToLoadStyleFile" xml:space="preserve">
+    <value>在加载语法样式配置文件时出错:</value>
   </data>
-  <data name="OT_MemberStyles" xml:space="preserve">
-    <value>成员声明的特殊样式</value>
+  <data name="T_Font" xml:space="preserve">
+    <value>字体:</value>
   </data>
-  <data name="OT_LoopBraces" xml:space="preserve">
-    <value>与循环结构相关的括号</value>
+  <data name="T_Foreground" xml:space="preserve">
+    <value>文本颜色</value>
   </data>
-  <data name="OT_DeclarationBraces" xml:space="preserve">
-    <value>声明类或成员的括号</value>
-  </data>
-  <data name="OT_Content" xml:space="preserve">
-    <value>内容</value>
-  </data>
-  <data name="OT_BracesAndParentheses" xml:space="preserve">
-    <value>突出显示括号</value>
-  </data>
-  <data name="OT_BranceBraces" xml:space="preserve">
-    <value>与分支相关的括号</value>
-  </data>
-  <data name="OT_BoldPunctuations" xml:space="preserve">
-    <value>使用粗体</value>
-  </data>
-  <data name="OT_BoldPunctuationsNote" xml:space="preserve">
-    <value>将语义相关的标点符号和运算符标记为粗体</value>
-  </data>
-  <data name="OT_ApplyToNonPrivateField" xml:space="preserve">
-    <value>应用到非私有的字段</value>
-  </data>
-  <data name="OT_ApplyToLocalFunction" xml:space="preserve">
-    <value>应用到本地方法</value>
-  </data>
-  <data name="CMDT_UndoHighlightChanges" xml:space="preserve">
-    <value>撤销改变</value>
-  </data>
-  <data name="CMDT_SimpleTheme" xml:space="preserve">
-    <value>加载预定义的简单主题</value>
-  </data>
-  <data name="CMDT_SaveTheme" xml:space="preserve">
-    <value>保存语法样式主题...</value>
-  </data>
-  <data name="CMDT_ResetTheme" xml:space="preserve">
-    <value>重置语法样式主题为默认样式...</value>
-  </data>
-  <data name="CMDT_SaveHighlightChanges" xml:space="preserve">
-    <value>确认更改</value>
-  </data>
-  <data name="T_HighlightSettingFileFilter" xml:space="preserve">
+  <data name="F_HighlightSettings" xml:space="preserve">
     <value>Codist 语法样式配置文件|*.styles|所有文件|*.*</value>
+  </data>
+  <data name="T_LeftGradient" xml:space="preserve">
+    <value>从左到右渐变</value>
+  </data>
+  <data name="T_LoadSyntaxHighlightFile" xml:space="preserve">
+    <value>加载 Codist 高级语法样式配置文件...</value>
   </data>
   <data name="T_NoCommentTagDefined" xml:space="preserve">
     <value>当前尚未定义注释标签。请使用“添加”按钮定义新的注释标签。</value>
@@ -1639,6 +1604,48 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   </data>
   <data name="T_NoSyntaxHighlightSelected" xml:space="preserve">
     <value>在代码窗口的当前位置没有对应的语法标记。</value>
+  </data>
+  <data name="T_NotSet" xml:space="preserve">
+    <value>未设置</value>
+  </data>
+  <data name="T_Opacity" xml:space="preserve">
+    <value>透明度: </value>
+  </data>
+  <data name="T_OpacityNotSet" xml:space="preserve">
+    <value>未设置透明度</value>
+  </data>
+  <data name="T_PredefinedThemes" xml:space="preserve">
+    <value>预定义的主题:</value>
+  </data>
+  <data name="T_RightGradient" xml:space="preserve">
+    <value>从右到左渐变</value>
+  </data>
+  <data name="T_SaveSyntaxHighlightFile" xml:space="preserve">
+    <value>保存 Codist 高级语法样式配置文件...</value>
+  </data>
+  <data name="T_Size" xml:space="preserve">
+    <value>尺寸:</value>
+  </data>
+  <data name="T_Solid" xml:space="preserve">
+    <value>净色</value>
+  </data>
+  <data name="T_Style" xml:space="preserve">
+    <value>样式:</value>
+  </data>
+  <data name="T_StyleSettings" xml:space="preserve">
+    <value>语法样式配置:</value>
+  </data>
+  <data name="T_SyntaxHighlightConfigNotice" xml:space="preserve">
+    <value>要配置其它语法样式，在代码窗口点击相应语法样式所在的位置，再切换到本窗口</value>
+  </data>
+  <data name="T_SyntaxStyles" xml:space="preserve">
+    <value>语法样式:</value>
+  </data>
+  <data name="T_Tag" xml:space="preserve">
+    <value>标签:</value>
+  </data>
+  <data name="T_TopGradient" xml:space="preserve">
+    <value>从上到下渐变</value>
   </data>
   <data name="OTC_Name" xml:space="preserve">
     <value>名称:</value>
@@ -1652,20 +1659,11 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   <data name="T_Themes" xml:space="preserve">
     <value>样式主题:</value>
   </data>
-  <data name="CMDT_OpenDonatePage" xml:space="preserve">
-    <value>用浏览器打开捐赠 Codist 项目的网页</value>
-  </data>
-  <data name="CMD_DonateLink" xml:space="preserve">
-    <value>通过 PayPal 捐赠</value>
-  </data>
-  <data name="OTC_TopMargin" xml:space="preserve">
-    <value>上边距:</value>
+  <data name="CMDT_OpenWechatQrCode" xml:space="preserve">
+    <value>打开作者的微信收款码</value>
   </data>
   <data name="CMD_WechatDonateLink" xml:space="preserve">
     <value>微信扫码捐赠</value>
-  </data>
-  <data name="CMDT_OpenWechatQrCode" xml:space="preserve">
-    <value>打开作者的微信收款码</value>
   </data>
   <data name="OT_LayoutOverride" xml:space="preserve">
     <value>更改开发环境布局</value>
@@ -2760,13 +2758,13 @@ Ctrl: 切换标记并选择下一处</value>
     <value>Ctrl: 仅显示显式赋值的参数
 Shift: 仅显式默认赋值的参数</value>
   </data>
+  <data name="CMD_ExtractLinesContainingSelection" xml:space="preserve">
+    <value>提取包含选中文字的行</value>
+  </data>
   <data name="CMDT_ExtractLinesContainingSelection" xml:space="preserve">
     <value>将文档中所有包含当前选中文字内容的行复制到一个新窗口
 Shift: 匹配整个单词
 Ctrl: 匹配大小写</value>
-  </data>
-  <data name="CMD_ExtractLinesContainingSelection" xml:space="preserve">
-    <value>提取包含选中文字的行</value>
   </data>
   <data name="T_Code" xml:space="preserve">
     <value>代码</value>
@@ -2777,6 +2775,12 @@ Ctrl: 将下划线分隔的单词转换为首字母大写的单词</value>
   </data>
   <data name="F_Html" xml:space="preserve">
     <value>网页文件|*.html|所有文件|*.*</value>
+  </data>
+  <data name="T_SpecifyLocation" xml:space="preserve">
+    <value>指定转换所得的文件保存位置</value>
+  </data>
+  <data name="T_TransformFailed" xml:space="preserve">
+    <value>文件 &lt;NAME&gt; 转换失败。</value>
   </data>
   <data name="T_DiscardUnsavedChanges" xml:space="preserve">
     <value>&lt;NAME&gt; 尚未保存。

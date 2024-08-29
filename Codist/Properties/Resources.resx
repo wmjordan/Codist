@@ -402,13 +402,13 @@ Shift: Paste and select next (whole word)</value>
   </data>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="Dark" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Dark Codist.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+    <value>..\Resources\Dark Codist.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="Light" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Light Codist.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+    <value>..\Resources\Light Codist.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="Simple" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Simple Codist.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+    <value>..\Resources\Simple Codist.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="T_AsParameter" xml:space="preserve">
     <value> as parameter</value>
@@ -1470,7 +1470,8 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
     <value>Confirm changes</value>
   </data>
   <data name="CMDT_SaveTheme" xml:space="preserve">
-    <value>Save syntax highlight theme...</value>
+    <value>Save syntax highlight theme...
+Shift: Save built-in default styles as well</value>
   </data>
   <data name="CMDT_SimpleTheme" xml:space="preserve">
     <value>Load a predefined simple theme</value>
@@ -1787,10 +1788,10 @@ Use space to separate multiple search terms.
     <value>Pale Light</value>
   </data>
   <data name="PaleLight" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\light pale codist.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+    <value>..\resources\light pale codist.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="PaleDark" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\dark pale codist.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+    <value>..\resources\dark pale codist.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="T_Binary" xml:space="preserve">
     <value>BIN</value>
@@ -2794,6 +2795,12 @@ Ctrl: Convert underscore("_") separated words to capitalized words</value>
   </data>
   <data name="F_Html" xml:space="preserve">
     <value>HTML files|*.html|All files|*.*</value>
+  </data>
+  <data name="T_SpecifyLocation" xml:space="preserve">
+    <value>Specify the location for saving the transformed markdown file</value>
+  </data>
+  <data name="T_TransformFailed" xml:space="preserve">
+    <value>Transformation for file &lt;NAME&gt; failed.</value>
   </data>
   <data name="T_DiscardUnsavedChanges" xml:space="preserve">
     <value>&lt;NAME&gt; is not saved.

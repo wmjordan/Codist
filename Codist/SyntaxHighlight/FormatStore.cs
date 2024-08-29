@@ -136,6 +136,79 @@ namespace Codist.SyntaxHighlight
 			return __SyntaxStyleCache;
 		}
 
+		public static IReadOnlyDictionary<string, StyleBase> GetAllStyles() {
+			var d = new Dictionary<string, StyleBase>(__SyntaxStyleCache.Count, StringComparer.OrdinalIgnoreCase);
+			foreach (var item in __SyntaxStyleCache) {
+				if (item.Value.IsSet) {
+					d.Add(item.Key, item.Value);
+				}
+			}
+			var efm = ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(Constants.CodeText);
+			var cfm = ServicesHelper.Instance.ClassificationFormatMap.GetClassificationFormatMap(Constants.CodeText);
+			foreach (var item in cfm.CurrentPriorityOrder) {
+				if (item == null || IsFormattableClassificationType(item) == false) {
+					continue;
+				}
+				var c = cfm.GetEditorFormatMapKey(item);
+				var r = efm.GetProperties(c);
+				SyntaxStyle s = d.TryGetValue(c, out var cs)
+					? MergeSyntaxStyle(c, r, cs)
+					: MakeSyntaxStyleFromResourceDictionary(c, r);
+				if (s.IsSet) {
+					d[c] = s;
+				}
+			}
+			return d;
+
+			SyntaxStyle MergeSyntaxStyle(string name, ResourceDictionary rd, StyleBase style) {
+				var s = new SyntaxStyle(name, style);
+				if (s.Bold == null) {
+					s.Bold = rd.GetBold();
+				}
+				if (s.Italic == null) {
+					s.Italic = rd.GetItalic();
+				}
+				if (s.ForeColor.A == 0) {
+					s.ForeColor = rd.GetColor();
+				}
+				if (s.BackColor.A == 0) {
+					s.BackColor = rd.GetBackgroundColor();
+				}
+				var tds = rd.GetTextDecorations();
+				if (tds != null) {
+					foreach (var td in tds) {
+						switch (td.Location) {
+							case TextDecorationLocation.Underline: s.Underline = true; break;
+							case TextDecorationLocation.OverLine: s.OverLine = true; break;
+							case TextDecorationLocation.Strikethrough: s.Strikethrough = true; break;
+						}
+					}
+				}
+				return s;
+			}
+
+			SyntaxStyle MakeSyntaxStyleFromResourceDictionary(string name, ResourceDictionary rd) {
+				var s = new SyntaxStyle(name) {
+					Bold = rd.GetBold(),
+					Italic = rd.GetItalic(),
+					ForeColor = rd.GetColor(),
+					BackColor = rd.GetBackgroundColor()
+				};
+				var tds = rd.GetTextDecorations();
+				if (tds != null) {
+					foreach (var td in tds) {
+						switch (td.Location) {
+							case TextDecorationLocation.Underline: s.Underline = true; break;
+							case TextDecorationLocation.OverLine: s.OverLine = true; break;
+							case TextDecorationLocation.Strikethrough: s.Strikethrough = true; break;
+						}
+					}
+				}
+
+				return s;
+			}
+		}
+
 		/// <summary>
 		/// Get descendant <see cref="IClassificationType"/>s of a given <paramref name="classificationType"/>.
 		/// </summary>

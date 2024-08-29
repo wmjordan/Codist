@@ -2621,7 +2621,8 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Save syntax highlight theme....
+        ///   Looks up a localized string similar to Save syntax highlight theme...
+        ///Shift: Save built-in default styles as well.
         /// </summary>
         internal static string CMDT_SaveTheme {
             get {
@@ -7710,6 +7711,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Specify the location for saving the transformed markdown file.
+        /// </summary>
+        internal static string T_SpecifyLocation {
+            get {
+                return ResourceManager.GetString("T_SpecifyLocation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Save screenshot file.
         /// </summary>
         internal static string T_SpecifyScreenshotLocation {
@@ -7967,6 +7977,15 @@ namespace Codist.Properties {
         internal static string T_TopGradient {
             get {
                 return ResourceManager.GetString("T_TopGradient", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Transformation for file &lt;NAME&gt; failed..
+        /// </summary>
+        internal static string T_TransformFailed {
+            get {
+                return ResourceManager.GetString("T_TransformFailed", resourceCulture);
             }
         }
         

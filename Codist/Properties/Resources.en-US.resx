@@ -402,13 +402,13 @@ Shift: Paste and select next (whole word)</value>
   </data>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="Dark" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Dark Codist.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+    <value>..\Resources\Dark Codist.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="Light" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Light Codist.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+    <value>..\Resources\Light Codist.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="Simple" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Simple Codist.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+    <value>..\Resources\Simple Codist.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="T_AsParameter" xml:space="preserve">
     <value> as parameter</value>
@@ -821,6 +821,12 @@ Use space to separate keywords.</value>
   </data>
   <data name="OT_AdditionalQuickInfoNote" xml:space="preserve">
     <value>The following options allow adding more items to the Quick Info</value>
+  </data>
+  <data name="OT_AddShowActiveWindowProperties" xml:space="preserve">
+    <value>Add "Show Active Window Properties" command to File menu</value>
+  </data>
+  <data name="OT_AddShowActiveWindowPropertiesTip" xml:space="preserve">
+    <value>Displays comprehensive information about the active window pane and its document</value>
   </data>
   <data name="OT_AddShowSyntaxClassifcationInfo" xml:space="preserve">
     <value>Add "Show Syntax Classification Info" command to Smart Bar</value>
@@ -1464,7 +1470,8 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
     <value>Confirm changes</value>
   </data>
   <data name="CMDT_SaveTheme" xml:space="preserve">
-    <value>Save syntax highlight theme...</value>
+    <value>Save syntax highlight theme...
+Shift: Save built-in default styles as well</value>
   </data>
   <data name="CMDT_SimpleTheme" xml:space="preserve">
     <value>Load a predefined simple theme</value>
@@ -1555,6 +1562,9 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   </data>
   <data name="OT_TypeCastBraces" xml:space="preserve">
     <value>Type cast parentheses</value>
+  </data>
+  <data name="T_ApplyTo" xml:space="preserve">
+    <value>Apply to:</value>
   </data>
   <data name="T_Background" xml:space="preserve">
     <value>Background</value>
@@ -1778,10 +1788,10 @@ Use space to separate multiple search terms.
     <value>Pale Light</value>
   </data>
   <data name="PaleLight" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\light pale codist.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+    <value>..\resources\light pale codist.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="PaleDark" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\dark pale codist.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+    <value>..\resources\dark pale codist.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="T_Binary" xml:space="preserve">
     <value>BIN</value>
@@ -2120,6 +2130,9 @@ Sent or received bytes per second through all network interfaces</value>
   <data name="OT_TaskManagerParameter" xml:space="preserve">
     <value>Task manager program parameter (optional):</value>
   </data>
+  <data name="CMD_DeleteContainingStatement" xml:space="preserve">
+    <value>Delete Containing Statement</value>
+  </data>
   <data name="CMD_WrapInIf" xml:space="preserve">
     <value>Wrap in &lt;if&gt;</value>
   </data>
@@ -2411,9 +2424,6 @@ Expression too long</value>
   <data name="CMD_SetNextStatement" xml:space="preserve">
     <value>Set Next Statement</value>
   </data>
-  <data name="T_ApplyTo" xml:space="preserve">
-    <value>Apply to:</value>
-  </data>
   <data name="T_FilePath" xml:space="preserve">
     <value>FilePath</value>
   </data>
@@ -2422,12 +2432,6 @@ Expression too long</value>
   </data>
   <data name="OT_ShowSeeContainingTypeTip" xml:space="preserve">
     <value>Displays containing type for cross referenced symbols in XML Doc</value>
-  </data>
-  <data name="OT_AddShowActiveWindowProperties" xml:space="preserve">
-    <value>Add "Show Active Window Properties" command to File menu</value>
-  </data>
-  <data name="OT_AddShowActiveWindowPropertiesTip" xml:space="preserve">
-    <value>Displays comprehensive information about the active window pane and its document</value>
   </data>
   <data name="T_TakenAddress" xml:space="preserve">
     <value>Taken Address (Unsafe): </value>
@@ -2455,9 +2459,6 @@ Expression too long</value>
   </data>
   <data name="T_Squiggle" xml:space="preserve">
     <value>Squiggle</value>
-  </data>
-  <data name="CMD_DeleteContainingStatement" xml:space="preserve">
-    <value>Delete Containing Statement</value>
   </data>
   <data name="CMD_OpenOutputFolder" xml:space="preserve">
     <value>Open Output Folder</value>
@@ -2777,13 +2778,13 @@ Ctrl: toggle and select next</value>
     <value>Ctrl: Explicit assignment only
 Shift: Assign by default only</value>
   </data>
+  <data name="CMD_ExtractLinesContainingSelection" xml:space="preserve">
+    <value>Extract Lines Containing Selection</value>
+  </data>
   <data name="CMDT_ExtractLinesContainingSelection" xml:space="preserve">
     <value>Copy all lines containing current selection into a new window
 Shift: Match whole word
 Ctrl: Match case</value>
-  </data>
-  <data name="CMD_ExtractLinesContainingSelection" xml:space="preserve">
-    <value>Extract Lines Containing Selection</value>
   </data>
   <data name="T_Code" xml:space="preserve">
     <value>Code</value>
@@ -2794,6 +2795,12 @@ Ctrl: Convert underscore("_") separated words to capitalized words</value>
   </data>
   <data name="F_Html" xml:space="preserve">
     <value>HTML files|*.html|All files|*.*</value>
+  </data>
+  <data name="T_SpecifyLocation" xml:space="preserve">
+    <value>Specify the location for saving the transformed markdown file</value>
+  </data>
+  <data name="T_TransformFailed" xml:space="preserve">
+    <value>Transformation for file &lt;NAME&gt; failed.</value>
   </data>
   <data name="T_DiscardUnsavedChanges" xml:space="preserve">
     <value>&lt;NAME&gt; is not saved.
