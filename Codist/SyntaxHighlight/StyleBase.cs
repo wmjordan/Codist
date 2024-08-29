@@ -306,6 +306,9 @@ namespace Codist.SyntaxHighlight
 			Key = classificationType;
 			Category = "General";
 		}
+		public SyntaxStyle(string classificationType, StyleBase baseStyle) : this(classificationType) {
+			baseStyle.CopyTo(baseStyle);
+		}
 	}
 
 	abstract class StyleBase<TStyle> : StyleBase where TStyle : Enum

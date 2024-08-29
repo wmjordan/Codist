@@ -376,7 +376,7 @@ namespace Codist
 			IEnumerable<SyntaxStyle> GetCustomizedStyles() {
 				return FormatStore.GetStyles()
 					.Where(i => i.Value?.IsSet == true)
-					.Select(i => { var s = new SyntaxStyle(i.Key); i.Value.CopyTo(s); return s; });
+					.Select(i => new SyntaxStyle(i.Key, i.Value));
 			}
 		}
 
