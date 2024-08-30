@@ -1252,6 +1252,10 @@ namespace Codist
 		public static ITextDocument GetTextDocument(this ITextBuffer textBuffer) {
 			return textBuffer.Properties.TryGetProperty<ITextDocument>(typeof(ITextDocument), out var d) ? d : null;
 		}
+		public static string GetText(this ITextBuffer textBuffer) {
+			return textBuffer.CurrentSnapshot.GetText();
+		}
+
 		public static string GetText(this ITextBuffer textBuffer, int start, int end) {
 			var e = textBuffer.CurrentSnapshot.Length;
 			if (start >= e) {

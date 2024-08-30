@@ -43,6 +43,17 @@
 					<ToolTipText>Display file types supported by Visual Studio</ToolTipText>
 				</Strings>
 			</Button>
+			<Button guid="guidCodistPackageCmdSet" id="TransformDocumentId" priority="4135" type="Button">
+				<Parent guid="guidCodistPackageCmdSet" id="CodistMenuGroup" />
+				<Icon guid="ImageCatalogGuid" id="XMLTransformation" />
+				<CommandFlag>DefaultInvisible</CommandFlag>
+				<CommandFlag>DynamicVisibility</CommandFlag>
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<Strings>
+					<ButtonText>Transform Document...</ButtonText>
+					<ToolTipText>Save active document to another format</ToolTipText>
+				</Strings>
+			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="IncrementVsixVersionId" priority="0x0100" type="Button">
 				<Parent guid="guidCodistPackageCmdSet" id="EDIT_PROJECT_GROUP_ID" />
 				<Icon guid="ImageCatalogGuid" id="Counter" />
@@ -163,6 +174,18 @@
 					<ToolTipText>Bring out the menu for refactoring code...</ToolTipText>
 					<CanonicalName>.Refactor.RefactoringCode</CanonicalName>
 					<LocCanonicalName>.Refactor.RefactoringCode</LocCanonicalName>
+				</Strings>
+			</Button>
+			<Button guid="guidCodistPackageCmdSet" id="FavoriteWindowCommandId" priority="0x1000" type="Button">
+				<Parent guid="guidSHLMainMenu" id="IDG_VS_VIEW_BROWSER" />
+				<Icon guid="ImageCatalogGuid" id="Favorite" />
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<Strings>
+					<MenuText>Favorites Window...</MenuText>
+					<ButtonText>Favorites</ButtonText>
+					<ToolTipText>Displays Favorite Window...</ToolTipText>
+					<CanonicalName>.View.FavoriteWindow</CanonicalName>
+					<LocCanonicalName>.View.FavoriteWindow</LocCanonicalName>
 				</Strings>
 			</Button>
 		</Buttons>

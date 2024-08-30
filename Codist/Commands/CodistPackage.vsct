@@ -82,6 +82,7 @@
 			<IDSymbol name="ScreenshotCommandId" value="0x4001" />
 			<IDSymbol name="ShowActiveWindowPropertiesId" value="0x4002" />
 			<IDSymbol name="ShowSupportedFileTypesId" value="0x400F" />
+			<IDSymbol name="TransformDocumentId" value="0x4010" />
 			<IDSymbol name="EDIT_PROJECT_GROUP_ID" value="0x1000" />
 			<IDSymbol name="IncrementVsixVersionId" value="0x4003" />
 			<IDSymbol name="AutoBuildVersionWindowId" value="0x4009" />
@@ -91,7 +92,7 @@
 			<IDSymbol name="OpenDebugOutputFolderId" value="0x400D" />
 			<IDSymbol name="OpenReleaseOutputFolderId" value="0x400E" />
 			<IDSymbol name="IDG_VS_TOOLS_OPTIONS" value="0x1020" />
-			<IDSymbol name="SymbolFinderWindowCommandId" value="0x4004" />
+			<IDSymbol name="FavoriteWindowCommandId" value="0x4004" />
 			<IDSymbol name="SyntaxCustomizeHighlightId" value="0x4005" />
 			<IDSymbol name="NaviBarSearchDeclarationId" value="0x4006" />
 			<IDSymbol name="NaviBarSearchActiveClassId" value="0x4007" />
