@@ -134,17 +134,17 @@ namespace Codist
 
 			public event EventHandler<EventArgs<SemanticState>> StateUpdated;
 
-			internal bool IsDisposed => _Parser == null;
+			public bool IsDisposed => _Parser == null;
 			public ITextBuffer TextBuffer => _Buffer;
 
 			public void Ref() {
 				_Ref++;
-				Debug.WriteLine($"Ref+ {_Ref} {_Name}");
+				$"Ref+ {_Ref} {_Name}".Log();
 			}
 
 			internal void Release() {
 				if (Interlocked.Exchange(ref _Parser, null) != null) {
-					Debug.WriteLine($"{_Name} tagger released");
+					$"{_Name} tagger released".Log();
 					ReleaseResources();
 					_Ref = 0;
 				}
@@ -274,7 +274,7 @@ namespace Codist
 			}
 
 			void WorkspaceChanged(object sender, WorkspaceChangeEventArgs args) {
-				Debug.WriteLine($"Workspace {args.Kind}: {args.DocumentId}");
+				$"Workspace {args.Kind}: {args.DocumentId}".Log();
 				var parser = _Parser;
 				if (parser == null) {
 					return;
@@ -308,17 +308,18 @@ namespace Codist
 			void TextBuffer_ContentTypeChanged(object sender, ContentTypeChangedEventArgs e) {
 				if (_IsInteractiveWindow == false
 					&& e.AfterContentType.IsOfType(Constants.CodeTypes.CSharp) == false) {
+					$"ContentType changed to {e.AfterContentType.DisplayName}".Log();
 					Dispose();
 				}
 			}
 
 			public void Dispose() {
 				if (--_Ref > 0) {
-					Debug.WriteLine($"Ref- {_Ref} {_Name}");
+					$"Ref- {_Ref} {_Name}".Log();
 					return;
 				}
 				if (Interlocked.Exchange(ref _Parser, null) != null) {
-					Debug.WriteLine($"{_Name} tagger disposed");
+					$"{_Name} tagger disposed".Log();
 					ReleaseResources();
 				}
 			}
@@ -402,7 +403,7 @@ namespace Codist
 					throw;
 				}
 				if (Interlocked.CompareExchange(ref _State, (int)ParserState.Completed, (int)ParserState.Working) == (int)ParserState.Working) {
-					Debug.WriteLine($"{snapshot.TextBuffer.GetDocument().GetDocId()} end parsing {snapshot.Version} on thread {Thread.CurrentThread.ManagedThreadId}");
+					$"{snapshot.TextBuffer.GetDocument().GetDocId()} end parsing {snapshot.Version} on thread {Thread.CurrentThread.ManagedThreadId}".Log();
 					_Callback(new SemanticState(workspace, model, snapshot, document));
 					Interlocked.CompareExchange(ref _State, (int)ParserState.Idle, (int)ParserState.Completed);
 				}

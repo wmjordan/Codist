@@ -108,6 +108,7 @@ namespace Codist.Taggers
 				return null;
 			}
 			if (_LastView == textView && _LastTextBuffer == buffer) {
+				_LastTagger.Ref();
 				return _LastTagger;
 			}
 

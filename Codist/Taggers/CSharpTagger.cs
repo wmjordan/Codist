@@ -25,13 +25,17 @@ namespace Codist.Taggers
 
 		ConcurrentQueue<SnapshotSpan> _PendingSpans = new ConcurrentQueue<SnapshotSpan>();
 		CancellationTokenSource _RenderBreaker;
-
+		int _Ref;
 		ITextBufferParser _Parser;
 
 		public CSharpTagger(CSharpParser parser, ITextBuffer buffer) {
 			_Parser = parser.GetParser(buffer);
 			_Parser.StateUpdated += HandleParseResult;
+			Ref();
 		}
+
+		public bool Disabled { get; set; }
+		public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 
 		void HandleParseResult(object sender, EventArgs<SemanticState> result) {
 			var pendingSpans = _PendingSpans;
@@ -47,9 +51,6 @@ namespace Codist.Taggers
 				}
 			}
 		}
-
-		public bool Disabled { get; set; }
-		public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 
 		public IEnumerable<ITagSpan<IClassificationTag>> GetTags(NormalizedSnapshotSpanCollection spans) {
 			var p = _Parser;
@@ -80,7 +81,14 @@ namespace Codist.Taggers
 			}
 		}
 
+		public void Ref() {
+			++_Ref;
+		}
+
 		public void Dispose() {
+			if (_Ref-- > 0) {
+				return;
+			}
 			_PendingSpans = null;
 			SyncHelper.CancelAndDispose(ref _RenderBreaker, false);
 			ITextBufferParser t = _Parser;
