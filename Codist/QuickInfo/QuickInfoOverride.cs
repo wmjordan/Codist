@@ -203,6 +203,7 @@ namespace Codist.QuickInfo
 				((TextBlock)sender).Background = Brushes.Transparent;
 			}
 
+			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			void GoToSource(object sender, MouseButtonEventArgs e) {
 				try {
 					_symbol.GoToDefinition();

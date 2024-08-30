@@ -1138,6 +1138,7 @@ namespace Codist
 		}
 
 		public static void GoToDefinition(this ISymbol symbol) {
+			Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
 			var r = symbol.GetSourceReferences();
 			if (r.Length == 1) {
 				r[0].GoToSource();
