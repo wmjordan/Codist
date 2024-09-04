@@ -114,6 +114,7 @@ namespace Codist.Taggers
 
 			if (_Taggers.TryGetValue(textView, out var bufferTaggers)) {
 				if (bufferTaggers.TryGetValue(buffer, out var tagger)) {
+					tagger.Ref();
 					return tagger;
 				}
 				bufferTaggers.Add(_LastTextBuffer = buffer, _LastTagger = CreateTagger());
