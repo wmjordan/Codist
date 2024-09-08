@@ -5,7 +5,6 @@
 	xmlns:vsp="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.15.0">
 	<Style x:Key="{x:Type nb:CSharpBar}" TargetType="{x:Type nb:CSharpBar}">
 		<Setter Property="OverridesDefaultStyle" Value="True"/>
-		<Setter Property="SnapsToDevicePixels" Value="True"/>
 		<Setter Property="Template">
 			<Setter.Value>
 				<ControlTemplate TargetType="{x:Type ToolBar}">
@@ -16,7 +15,6 @@
 	</Style>
 	<Style x:Key="{x:Type nb:MarkdownBar}" TargetType="{x:Type nb:MarkdownBar}">
 		<Setter Property="OverridesDefaultStyle" Value="True"/>
-		<Setter Property="SnapsToDevicePixels" Value="True"/>
 		<Setter Property="Template">
 			<Setter.Value>
 				<ControlTemplate TargetType="{x:Type ToolBar}">

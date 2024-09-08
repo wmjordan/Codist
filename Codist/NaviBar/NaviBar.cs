@@ -20,6 +20,8 @@ namespace Codist.NaviBar
 			this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 			textView.Properties.AddProperty(nameof(NaviBar), this);
 			Resources = SharedDictionaryManager.NavigationBar;
+			UseLayoutRounding = true;
+			SnapsToDevicePixels = true;
 			SetResourceReference(BackgroundProperty, VsBrushes.CommandBarMenuBackgroundGradientKey);
 			SetResourceReference(ForegroundProperty, VsBrushes.CommandBarTextInactiveKey);
 		}
