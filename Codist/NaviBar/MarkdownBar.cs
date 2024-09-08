@@ -325,6 +325,7 @@ namespace Codist.NaviBar
 		{
 			readonly MarkdownBar _Bar;
 			readonly ThemedTextBox _FinderBox;
+			readonly TextBlock _FilteredItemCount;
 			Predicate<object> _Filter;
 
 			public MarkdownList(MarkdownBar bar, LocationItem[] titles) {
@@ -357,10 +358,22 @@ namespace Codist.NaviBar
 						},
 					}
 				};
-				Footer = new TextBlock { Margin = WpfHelper.MenuItemMargin }
-						.ReferenceProperty(TextBlock.ForegroundProperty, EnvironmentColors.SystemGrayTextBrushKey)
-						.AddImage(IconIds.LineOfCode)
-						.Append(bar.View.TextSnapshot.LineCount);
+				Footer = new StackPanel {
+					Orientation = Orientation.Horizontal,
+					Children = {
+						new TextBlock { Margin = WpfHelper.MenuItemMargin }
+							.ReferenceProperty(TextBlock.ForegroundProperty, EnvironmentColors.SystemGrayTextBrushKey)
+							.AddImage(IconIds.Marks)
+							.Append(titles.Length),
+						new TextBlock { Margin = WpfHelper.MenuItemMargin, Visibility = Visibility.Collapsed }
+							.ReferenceProperty(TextBlock.ForegroundProperty, EnvironmentColors.SystemGrayTextBrushKey)
+							.Set(ref _FilteredItemCount),
+						new TextBlock { Margin = WpfHelper.MenuItemMargin }
+							.ReferenceProperty(TextBlock.ForegroundProperty, EnvironmentColors.SystemGrayTextBrushKey)
+							.AddImage(IconIds.LineOfCode)
+							.Append(bar.View.TextSnapshot.LineCount)
+					}
+				};
 				_FinderBox.TextChanged += SearchCriteriaChanged;
 				_FinderBox.SetOnVisibleSelectAll();
 				_Bar = bar;
@@ -407,6 +420,10 @@ namespace Codist.NaviBar
 				if (_Filter != null) {
 					FilteredItems.Filter = _Filter;
 					ItemsSource = FilteredItems;
+					_FilteredItemCount.Inlines.Clear();
+					_FilteredItemCount.Visibility = Visibility.Visible;
+					_FilteredItemCount.AddImage(IconIds.FilterCustomized)
+						.Append(FilteredItems.Count);
 					if (s >= 0) {
 						SelectedItem = _Bar._Titles[s];
 					}
@@ -415,6 +432,7 @@ namespace Codist.NaviBar
 					}
 				}
 				else {
+					_FilteredItemCount.Visibility = Visibility.Collapsed;
 					ItemsSource = _Bar._Titles;
 					SelectedIndex = s;
 				}
