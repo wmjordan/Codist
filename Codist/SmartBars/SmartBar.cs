@@ -166,9 +166,10 @@ namespace Codist.SmartBars
 
 		async Task CreateToolBarAsync(CancellationToken cancellationToken) {
 			await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
-			while ((Mouse.LeftButton == MouseButtonState.Pressed || Keyboard.Modifiers == ModifierKeys.Shift)
+			while ((Mouse.LeftButton == MouseButtonState.Pressed
+				|| Keyboard.Modifiers.HasAnyFlag(ModifierKeys.Shift | ModifierKeys.Control))
 				&& cancellationToken.IsCancellationRequested == false) {
-				// postpone the even handler until the mouse button is released
+				// postpone the even handler until the left mouse button and keyboard modifiers are released
 				await Task.Delay(100, cancellationToken);
 			}
 			if (_View?.Selection.IsEmpty == true
