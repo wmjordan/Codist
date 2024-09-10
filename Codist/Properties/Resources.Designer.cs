@@ -396,6 +396,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Delete Empty Lines.
+        /// </summary>
+        internal static string CMD_DeleteEmptyLines {
+            get {
+                return ResourceManager.GetString("CMD_DeleteEmptyLines", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Delete Enum.
         /// </summary>
         internal static string CMD_DeleteEnum {
@@ -2068,6 +2077,15 @@ namespace Codist.Properties {
         internal static string CMD_ToggleValue {
             get {
                 return ResourceManager.GetString("CMD_ToggleValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Trim Trailing Spaces.
+        /// </summary>
+        internal static string CMD_TrimTrailingSpaces {
+            get {
+                return ResourceManager.GetString("CMD_TrimTrailingSpaces", resourceCulture);
             }
         }
         

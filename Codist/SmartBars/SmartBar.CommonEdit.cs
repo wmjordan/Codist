@@ -377,13 +377,17 @@ namespace Codist.SmartBars
 			if (selection.Mode == TextSelectionMode.Stream) {
 				r.AddRange(__SurroundingCommands);
 				r.Add(new CommandItem(IconIds.FormatSelection, R.CMD_FormatSelection, _ => TextEditorHelper.ExecuteEditorCommand("Edit.FormatSelection")));
-				if (View.IsMultilineSelected()) {
+				if (arg.HasMultiLineSelection) {
 					r.Add(new CommandItem(IconIds.JoinLines, R.CMD_JoinLines, ctx => ctx.View.JoinSelectedLines()));
 					if (TextEditorHelper.IsCommandAvailable("Edit.SortLines")) {
 						r.Add(new CommandItem(IconIds.SortLines, R.CMD_SortLines, ctx => TextEditorHelper.ExecuteEditorCommand("Edit.SortLines")));
 					}
 				}
 			}
+			if (arg.HasMultiLineSelection) {
+				r.Add(new CommandItem(IconIds.DeleteEmptyLines, R.CMD_DeleteEmptyLines, ctx => ctx.View.DeleteEmptyLinesInSelection()));
+			}
+			r.Add(new CommandItem(IconIds.TrimTrailingSpaces, R.CMD_TrimTrailingSpaces, ctx => ctx.View.TrimTrailingSpaces()));
 			r.AddRange(__WebCommands);
 			r.AddRange(__CaseCommands);
 			return r;

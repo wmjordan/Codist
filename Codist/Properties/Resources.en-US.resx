@@ -2809,4 +2809,10 @@ Discard its changes?</value>
   <data name="T_ErrorSavingConfig" xml:space="preserve">
     <value>Error occurred while saving configuration file.</value>
   </data>
+  <data name="CMD_DeleteEmptyLines" xml:space="preserve">
+    <value>Delete Empty Lines</value>
+  </data>
+  <data name="CMD_TrimTrailingSpaces" xml:space="preserve">
+    <value>Trim Trailing Spaces</value>
+  </data>
 </root>

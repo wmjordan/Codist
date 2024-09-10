@@ -2789,4 +2789,10 @@ Ctrl: 将下划线分隔的单词转换为首字母大写的单词</value>
   <data name="T_ErrorSavingConfig" xml:space="preserve">
     <value>在保存配置文件时出错。</value>
   </data>
+  <data name="CMD_DeleteEmptyLines" xml:space="preserve">
+    <value>删除空行</value>
+  </data>
+  <data name="CMD_TrimTrailingSpaces" xml:space="preserve">
+    <value>删除尾随空格</value>
+  </data>
 </root>

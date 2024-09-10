@@ -397,6 +397,7 @@ namespace Codist.SmartBars
 		{
 			const ModifierKeys UnknownModifier = (ModifierKeys)(-1);
 			ModifierKeys _ModifierKeys = UnknownModifier;
+			int _MultiLine;
 
 			public CommandContext(SmartBar bar, Control control) {
 				Bar = bar;
@@ -412,7 +413,9 @@ namespace Codist.SmartBars
 			public IWpfTextView View => Bar.View;
 			public ITextSearchService2 TextSearchService => Bar.TextSearchService;
 			public CancellationToken CancellationToken => Bar._Cancellation.GetToken();
+
 			public ModifierKeys ModifierKeys => _ModifierKeys == UnknownModifier ? (_ModifierKeys = Keyboard.Modifiers) : _ModifierKeys;
+			public bool HasMultiLineSelection => (_MultiLine != 0 ? _MultiLine : _MultiLine = View.IsMultilineSelected() ? 2 : 1) > 1;
 
 			public void HideToolBar() {
 				Bar.HideToolBar();

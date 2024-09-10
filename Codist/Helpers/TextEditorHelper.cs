@@ -664,6 +664,27 @@ namespace Codist
 				view.ViewScroller.EnsureSpanVisible(first, EnsureSpanVisibleOptions.ShowStart);
 			}
 		}
+
+		public static IEnumerable<ITextSnapshotLine> GetSelectedLines(this ITextView view) {
+			ITextSnapshotLine l = null, startLine;
+			int end;
+			var snapshot = view.TextBuffer.CurrentSnapshot;
+			foreach (var span in view.Selection.SelectedSpans) {
+				startLine = snapshot.GetLineFromPosition(span.Start.Position);
+				end = snapshot.GetLineFromPosition(span.End.Position).Start.Position;
+				if (l == null || startLine.Start.Position != l.Start.Position) {
+					l = startLine;
+					yield return l;
+				}
+				while (startLine.Start.Position < end) {
+					startLine = snapshot.GetLineFromLineNumber(startLine.LineNumber + 1);
+					if (startLine != l) {
+						l = startLine;
+						yield return l;
+					}
+				}
+			}
+		}
 		#endregion
 
 		#region Edit
@@ -1197,6 +1218,53 @@ namespace Codist
 		BUILTIN_COPY:
 			ExecuteEditorCommand("Edit.Copy");
 		}
+
+		public static void DeleteEmptyLinesInSelection(this ITextView view) {
+			view.Edit((v, edit) => {
+				foreach (var line in v.GetSelectedLines()) {
+					if (line.IsEmptyOrWhitespace()) {
+						edit.Delete(line.ExtentIncludingLineBreak);
+					}
+				}
+			});
+		}
+
+		public static void TrimTrailingSpaces(this ITextView view) {
+			view.Edit((v, edit) => {
+				var snapshot = v.TextSnapshot;
+				foreach (var span in v.Selection.SelectedSpans) {
+					if (span.IsEmpty) {
+						continue;
+					}
+					var start = span.Start.Position;
+					var end = span.End.Position;
+					var startLine = snapshot.GetLineFromPosition(start);
+					var endLine = snapshot.GetLineFromPosition(end);
+					if (startLine.Start.Position != endLine.Start.Position) {
+						TrimSpanTrailingSpaces(edit, snapshot, start, startLine.End.Position);
+						while (startLine.EndIncludingLineBreak.Position < end
+							&& (start = (startLine = snapshot.GetLineFromLineNumber(startLine.LineNumber + 1)).Start.Position) < end) {
+							TrimSpanTrailingSpaces(edit, snapshot, start, startLine.End.Position);
+						}
+					}
+					else {
+						TrimSpanTrailingSpaces(edit, snapshot, start, end);
+					}
+				}
+			});
+		}
+
+		static void TrimSpanTrailingSpaces(ITextEdit edit, ITextSnapshot snapshot, int start, int end) {
+			int i;
+			for (i = end - 1; i >= start; i--) {
+				if (snapshot[i].IsCodeWhitespaceChar() == false) {
+					break;
+				}
+			}
+			if (++i != end) {
+				edit.Delete(i, end - i);
+			}
+		}
 		#endregion
 
 		#region Properties
@@ -1268,6 +1336,14 @@ namespace Codist
 				? String.Empty
 				: textBuffer.CurrentSnapshot.GetText(start, end - start);
 		}
+
+		public static bool IsEmptyOrWhitespace(this ITextSnapshotLine line) {
+			int i, end = line.End.Position;
+			var ts = line.Snapshot;
+			for (i = line.Start.Position; i < end && ts[i].IsCodeWhitespaceChar(); i++) { }
+			return i == end;
+		}
+
 		public static int CountLinePrecedingWhitespace(this ITextSnapshotLine line) {
 			var ts = line.Snapshot;
 			var s = line.Start.Position;
