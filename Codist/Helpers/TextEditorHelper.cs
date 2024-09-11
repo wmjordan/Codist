@@ -1345,14 +1345,15 @@ namespace Codist
 		}
 
 		public static int CountLinePrecedingWhitespace(this ITextSnapshotLine line) {
-			var ts = line.Snapshot;
-			var s = line.Start.Position;
-			int i = s;
-			while (ts[i].IsCodeWhitespaceChar()) {
-				++i;
-			}
-			return i - s;
+			return CountPrecedingWhitespace(line.Snapshot, line.Start.Position, line.End.Position);
 		}
+
+		public static int CountPrecedingWhitespace(this ITextSnapshot ts, int start, int end) {
+			int i;
+			for (i = start; i < end && ts[i].IsCodeWhitespaceChar(); i++) { }
+			return i - start;
+		}
+
 		public static string GetLinePrecedingWhitespace(this ITextSnapshotLine line) {
 			return line.Snapshot.GetText(line.Start, line.CountLinePrecedingWhitespace());
 		}

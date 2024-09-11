@@ -30,52 +30,39 @@ namespace Codist
 		public static void MarkList(ITextView view, string leadingText, bool skipEmptyLine, char replaceLeadingGlyph = '\0', bool allowLeadingWhitespace = false) {
 			view.Edit((leadingText, skipEmptyLine, allowLeadingWhitespace, replaceLeadingGlyph), (v, p, edit) => {
 				var ts = v.TextSnapshot;
-				var startLine = ts.GetLineFromPosition(v.Selection.Start.Position);
-				var start = startLine.Start;
-				var end = v.Selection.End.Position;
-				var endLine = ts.GetLineFromPosition(end);
-				do {
+				int ps, start, end;
+				foreach (var line in v.GetSelectedLines()) {
+					ps = -1;
 					if (p.skipEmptyLine == false
-						|| startLine.Length != 0
-							&& startLine.CountLinePrecedingWhitespace() < startLine.Length) {
+						|| line.Length != 0
+							&& (ps = line.CountLinePrecedingWhitespace()) < line.Length) {
+						start = line.Start.Position;
+						end = line.End.Position;
 						if (p.allowLeadingWhitespace) {
-							start += CountLeadingWhitespace(ts, start, end);
+							start += ps != -1 ? ps : ts.CountPrecedingWhitespace(start, end);
 						}
 						if (p.replaceLeadingGlyph != 0) {
-							var lg = CountLeadingGlyphsIncludingWhitespace(ts, start, startLine.End, p.replaceLeadingGlyph);
+							var lg = CountLeadingGlyphsAndWhitespace(ts, start, end, p.replaceLeadingGlyph);
 							if (lg != 0) {
+								if (lg == p.leadingText.Length && ts.GetText(start, lg) == p.leadingText) {
+									continue;
+								}
 								edit.Delete(start, lg);
 							}
 						}
 						edit.Insert(start, p.leadingText);
 					}
-					start = startLine.EndIncludingLineBreak;
-					startLine = ts.GetLineFromPosition(start);
-				} while (start < end);
+				}
 			});
 		}
 
-		static int CountLeadingWhitespace(ITextSnapshot snapshot, SnapshotPoint lineStart, SnapshotPoint lineEnd) {
-			var p = lineStart.Position;
-			while (lineStart < lineEnd) {
-				var c = snapshot[p];
-				if (c.IsCodeWhitespaceChar()) {
-					p++;
-				}
-				else {
-					break;
-				}
-			}
-			return p - lineStart.Position;
-		}
-
-		static int CountLeadingGlyphsIncludingWhitespace(ITextSnapshot snapshot, SnapshotPoint lineStart, SnapshotPoint lineEnd, char ch) {
-			var p = lineStart.Position;
+		static int CountLeadingGlyphsAndWhitespace(ITextSnapshot snapshot, int lineStart, int lineEnd, char glyph) {
+			var p = lineStart;
 			var m = true;
 			while (lineStart < lineEnd) {
 				var c = snapshot[p];
 				if (m == false) {
-					if (c == ch) {
+					if (c == glyph) {
 						p++;
 						m = true;
 						continue;
@@ -84,14 +71,14 @@ namespace Codist
 						return 0;
 					}
 				}
-				if (c.CeqAny(ch, ' ', '\t')) {
+				if (c.CeqAny(glyph, ' ', '\t')) {
 					p++;
 				}
 				else {
 					break;
 				}
 			}
-			return p - lineStart.Position;
+			return p - lineStart;
 		}
 	}
 }
