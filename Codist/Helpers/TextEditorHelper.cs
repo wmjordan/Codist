@@ -580,9 +580,16 @@ namespace Codist
 
 		public static bool IsMultilineSelected(this ITextView textView) {
 			var s = textView.Selection;
-			return s.IsEmpty == false
-				&& textView.TextSnapshot.GetLineNumberFromPosition(s.Start.Position)
-					!= textView.TextSnapshot.GetLineNumberFromPosition(s.End.Position);
+			if (s.IsEmpty == true) {
+				return false;
+			}
+			int lines = 0;
+			foreach (var item in textView.GetSelectedLines()) {
+				if (++lines > 1) {
+					return true;
+				}
+			}
+			return false;
 		}
 
 		public static void SelectNode(this SyntaxNode node, bool includeTrivia) {
