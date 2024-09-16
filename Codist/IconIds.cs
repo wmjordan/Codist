@@ -183,6 +183,7 @@ namespace Codist
 		public const int DeleteBreakpoint = KnownImageIds.DeleteBreakpoint;
 		public const int RunToCursor = KnownImageIds.GoToLast;
 		public const int SetNextStatement = KnownImageIds.GoToNextInList;
+		public const int EditSelection = KnownImageIds.CustomActionEditor;
 		public const int FormatSelection = KnownImageIds.FormatSelection;
 		public const int FormatDocument = KnownImageIds.FormatDocument;
 		public const int PartialDocumentCount = KnownImageIds.OpenDocumentFromCollection;
@@ -247,7 +248,8 @@ namespace Codist
 		public const int GoToSymbol = KnownImageIds.FindSymbol;
 		public const int GoToDeclaration = KnownImageIds.GoToDeclaration;
 		public const int Capitalize = KnownImageIds.Font;
-		public const int Uppercase = KnownImageIds.ASerif;
+		public const int Uppercase = KnownImageIds.IncreaseFontSize;
+		public const int Lowercase = KnownImageIds.DecreaseFontSize;
 		public const int HtmlEncode = KnownImageIds.ReloadXML;
 		public const int UrlEncode = KnownImageIds.DynamicWebSite;
 		public const int EditMatches = KnownImageIds.EditAssociation;

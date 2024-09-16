@@ -12,9 +12,7 @@ using CLR;
 using Codist.Controls;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Operations;
-using TH = Microsoft.VisualStudio.Shell.ThreadHelper;
 using VsBrushes = Microsoft.VisualStudio.Shell.VsBrushes;
-using R = Codist.Properties.Resources;
 
 namespace Codist.SmartBars
 {
@@ -87,9 +85,9 @@ namespace Codist.SmartBars
 		protected ITextSearchService2 TextSearchService => _TextSearchService;
 		protected CancellationToken CancellationToken => _Cancellation?.Token ?? new CancellationToken(true);
 		protected virtual BarType Type => BarType.General;
-		protected virtual bool JoinLinesCommandOnToolBar => false;
 		protected bool IsReadOnly { get; private set; }
 		protected bool IsMultilineSelected { get; private set; }
+		protected CommandItem QuickAccessCommand { get; private set; }
 
 		protected void AddCommand(ToolBar toolBar, int imageId, string tooltip, Action<CommandContext> handler) {
 			toolBar.Items.Add(new CommandButton(this, imageId, tooltip, handler));
@@ -110,8 +108,9 @@ namespace Codist.SmartBars
 				if (Type.CeqAny(BarType.CSharp, BarType.Cpp) == false) {
 					AddCommentCommand(ToolBar);
 				}
-				if (IsMultilineSelected && JoinLinesCommandOnToolBar) {
-					AddCommand(ToolBar, IconIds.JoinLines, R.CMD_JoinLines, ctx => ctx.View.JoinSelectedLines());
+				var q = QuickAccessCommand;
+				if (q?.QuickAccessCondition(this) == true) {
+					ToolBar.Items.Add(new CommandButton(this, q));
 				}
 				AddSpecialFormatCommand();
 				AddWrapTextCommand();
@@ -129,6 +128,7 @@ namespace Codist.SmartBars
 			}
 			AddDebuggerCommands();
 		}
+
 		protected virtual Task AddCommandsAsync(CancellationToken cancellationToken) {
 			return Task.CompletedTask;
 		}
@@ -450,6 +450,10 @@ namespace Codist.SmartBars
 				: this(bar, imageId, tooltip, null, null) {
 				_AsyncClickHandler = clickHandler;
 			}
+			public CommandButton(SmartBar bar, CommandItem item)
+				: this(bar, item.ImageId, item.ToolTip != null ? $"{item.Name}\n{item.ToolTip}" : item.Name, item.Action) {
+				_AsyncClickHandler = item.AsyncAction;
+			}
 			public CommandButton(SmartBar bar, int imageId, string tooltip, Action<CommandContext> clickHandler, Func<CommandContext, IEnumerable<CommandItem>> menuFactory) {
 				_Bar = bar;
 				_ClickHandler = clickHandler;
@@ -554,6 +558,7 @@ namespace Codist.SmartBars
 			public void Dispose() {
 				if (_Bar != null) {
 					_ClickHandler = null;
+					_AsyncClickHandler = null;
 					_MenuFactory = null;
 					if (ContextMenu != null) {
 						ClearContextMenu();
@@ -589,6 +594,12 @@ namespace Codist.SmartBars
 			public string Name { get; }
 			public string ToolTip { get; set; }
 			public Func<CommandContext, Task> AsyncAction { get; }
+			public Predicate<SmartBar> QuickAccessCondition { get; set; }
+
+			public static readonly Predicate<SmartBar> HasSelection = b => b._View.TryGetFirstSelectionSpan(out _);
+			public static readonly Predicate<SmartBar> HasEditableSelection = b => b.IsReadOnly == false && b._View.TryGetFirstSelectionSpan(out _);
+			public static readonly Predicate<SmartBar> Editable = b => b.IsReadOnly == false;
+			public static readonly Predicate<SmartBar> EditableAndMultiline = b => b.IsReadOnly == false && b.IsMultilineSelected;
 		}
 
 		protected sealed class CommandMenuItem : ThemedMenuItem, IDisposable
@@ -614,6 +625,8 @@ namespace Codist.SmartBars
 				MaxHeight = _SmartBar.View.ViewportHeight / 2;
 			}
 
+			public CommandItem CommandItem { get; }
+
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void AsyncClickHandler(object sender, RoutedEventArgs e) {
 				var bar = _SmartBar;
@@ -622,18 +635,9 @@ namespace Codist.SmartBars
 				}
 				var ctx = new CommandContext(bar, sender as Control);
 				await CommandItem.AsyncAction.Invoke(ctx);
+				AllowQuickAccessCommandWithCondition(bar);
 				if (ctx.KeepToolBarOnClick == false) {
 					bar.HideToolBar();
-				}
-			}
-
-			public CommandItem CommandItem { get; }
-
-			public override void Dispose() {
-				if (_SmartBar != null) {
-					Click -= ClickHandler;
-					_SmartBar = null;
-					base.Dispose();
 				}
 			}
 
@@ -644,8 +648,23 @@ namespace Codist.SmartBars
 				}
 				var ctx = new CommandContext(bar, s as Control);
 				CommandItem.Action(ctx);
+				AllowQuickAccessCommandWithCondition(bar);
 				if (ctx.KeepToolBarOnClick == false) {
 					bar.HideToolBar();
+				}
+			}
+
+			void AllowQuickAccessCommandWithCondition(SmartBar bar) {
+				if (CommandItem.QuickAccessCondition != null) {
+					bar.QuickAccessCommand = CommandItem;
+				}
+			}
+
+			public override void Dispose() {
+				if (_SmartBar != null) {
+					Click -= ClickHandler;
+					_SmartBar = null;
+					base.Dispose();
 				}
 			}
 		}

@@ -13,7 +13,6 @@ namespace Codist.SmartBars
 		}
 
 		protected override BarType Type => BarType.Markdown;
-		protected override bool JoinLinesCommandOnToolBar => true;
 
 		ToolBar MyToolBar => ToolBar2;
 

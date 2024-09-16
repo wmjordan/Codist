@@ -9,6 +9,5 @@ namespace Codist.SmartBars
 		}
 
 		protected override BarType Type => BarType.Markup;
-		protected override bool JoinLinesCommandOnToolBar => true;
 	}
 }
