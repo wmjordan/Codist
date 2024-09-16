@@ -80,10 +80,9 @@ namespace Codist.SmartBars
 		}
 
 		async Task AddContextualCommandsAsync(SemanticContext ctx, CancellationToken cancellationToken) {
-			var isReadOnly = ctx.View.IsCaretInReadOnlyRegion();
 			var node = ctx.NodeIncludeTrivia;
 			var nodeKind = node.Kind();
-			if (isReadOnly == false && nodeKind == SyntaxKind.XmlText) {
+			if (IsReadOnly == false && nodeKind == SyntaxKind.XmlText) {
 				AddXmlDocCommands();
 				return;
 			}
@@ -107,7 +106,7 @@ namespace Codist.SmartBars
 									AddSymbolCommands(nodeKind);
 								}
 
-								if (isReadOnly == false) {
+								if (IsReadOnly == false) {
 									if (_Symbol?.IsPublicConcreteInstance() == true) {
 										if (_Symbol.Kind == SymbolKind.Method) {
 											if (_Symbol.GetContainingTypes().All(t => t.IsPublicConcreteInstance())
@@ -127,12 +126,12 @@ namespace Codist.SmartBars
 							}
 							else if (nodeKind == SyntaxKind.TypeParameter) {
 								_Symbol = SyncHelper.RunSync(() => ctx.GetSymbolAsync(cancellationToken));
-								if (_Symbol != null && isReadOnly == false) {
+								if (_Symbol != null && IsReadOnly == false) {
 									AddRenameCommand();
 								}
 							}
 							if (_Symbol != null) {
-								if (isReadOnly == false) {
+								if (IsReadOnly == false) {
 									AddCommand(MyToolBar, IconIds.SelectAll, R.CMD_SelectSymbolInDocument, SelectSymbolOccurrencesAsync);
 								}
 								if (Config.Instance.Features.MatchFlags(Features.SyntaxHighlight)
@@ -167,7 +166,7 @@ namespace Codist.SmartBars
 				else if (nodeKind.IsRegionalDirective()) {
 					AddDirectiveCommands();
 				}
-				if (isReadOnly == false) {
+				if (IsReadOnly == false) {
 					if (tokenKind.CeqAny(SyntaxKind.TrueKeyword, SyntaxKind.FalseKeyword)) {
 						AddCommand(MyToolBar, IconIds.ToggleValue, R.CMD_ToggleValue, ctx => Replace(ctx, v => v == "true" ? "false" : "true", true));
 					}
@@ -192,7 +191,7 @@ namespace Codist.SmartBars
 					}
 				}
 			}
-			if (isReadOnly == false) {
+			if (IsReadOnly == false) {
 				var refactoringContext = new Refactorings.RefactoringContext(ctx);
 				if (refactoringContext.SelectedStatementInfo.Items != null) {
 					AddEditorCommand(MyToolBar, IconIds.ExtractMethod, "Refactor.ExtractMethod", R.CMD_ExtractMethod);

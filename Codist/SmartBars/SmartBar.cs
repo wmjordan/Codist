@@ -88,6 +88,8 @@ namespace Codist.SmartBars
 		protected CancellationToken CancellationToken => _Cancellation?.Token ?? new CancellationToken(true);
 		protected virtual BarType Type => BarType.General;
 		protected virtual bool JoinLinesCommandOnToolBar => false;
+		protected bool IsReadOnly { get; private set; }
+		protected bool IsMultilineSelected { get; private set; }
 
 		protected void AddCommand(ToolBar toolBar, int imageId, string tooltip, Action<CommandContext> handler) {
 			toolBar.Items.Add(new CommandButton(this, imageId, tooltip, handler));
@@ -97,20 +99,18 @@ namespace Codist.SmartBars
 		}
 
 		protected virtual void AddCommands() {
-			var readOnly = _View.IsCaretInReadOnlyRegion();
-			var multiline = _View.IsMultilineSelected();
-			if (readOnly == false) {
+			if (IsReadOnly == false) {
 				AddCutCommand();
 			}
 			AddCopyCommand();
-			if (readOnly == false) {
+			if (IsReadOnly == false) {
 				AddPasteCommand();
 				AddDuplicateCommand();
 				AddDeleteCommand();
 				if (Type.CeqAny(BarType.CSharp, BarType.Cpp) == false) {
 					AddCommentCommand(ToolBar);
 				}
-				if (multiline && JoinLinesCommandOnToolBar) {
+				if (IsMultilineSelected && JoinLinesCommandOnToolBar) {
 					AddCommand(ToolBar, IconIds.JoinLines, R.CMD_JoinLines, ctx => ctx.View.JoinSelectedLines());
 				}
 				AddSpecialFormatCommand();
@@ -120,7 +120,7 @@ namespace Codist.SmartBars
 			if (_IsDiffWindow) {
 				AddDiffCommands();
 			}
-			if (multiline == false) {
+			if (IsMultilineSelected == false) {
 				AddFindAndReplaceCommands();
 				AddViewInBrowserCommand();
 				if (Config.Instance.DeveloperOptions.MatchFlags(DeveloperOptions.ShowSyntaxClassificationInfo)) {
@@ -185,6 +185,8 @@ namespace Codist.SmartBars
 			_ToolBarTray.Visibility = Visibility.Hidden;
 			ToolBar.DisposeCollection();
 			ToolBar2.DisposeCollection();
+			IsReadOnly = _View.IsCaretInReadOnlyRegion();
+			IsMultilineSelected = _View.IsMultilineSelected();
 			try {
 				await AddCommandsAsync(cancellationToken);
 				AddCommands();

@@ -20,7 +20,6 @@ namespace Codist.SmartBars
 
 		protected override void AddCommands() {
 			base.AddCommands();
-			var isReadOnly = View.IsCaretInReadOnlyRegion();
 			AddCommand(MyToolBar, IconIds.GoToDefinition, R.CMD_GoToDefinition, ctx => {
 				TextEditorHelper.ExecuteEditorCommand("Edit.GoToDefinition", GetCurrentWord(ctx.View));
 			});
@@ -30,7 +29,7 @@ namespace Codist.SmartBars
 			AddCommand(MyToolBar, IconIds.FindReference, R.CMD_FindAllReferences, ctx => {
 				TextEditorHelper.ExecuteEditorCommand("Edit.FindAllReferences");
 			});
-			if (isReadOnly == false) {
+			if (IsReadOnly == false) {
 				//AddEditorCommand(MyToolBar, KnownImageIds.IntellisenseLightBulb, "EditorContextMenus.CodeWindow.QuickActionsForPosition", "Quick actions for position");
 				AddCommentCommand(MyToolBar);
 				AddEditorCommand(MyToolBar, IconIds.Uncomment, "Edit.UncommentSelection", R.CMD_UncommentSelection);
