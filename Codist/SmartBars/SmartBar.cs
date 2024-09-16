@@ -151,14 +151,12 @@ namespace Codist.SmartBars
 		}
 
 		protected void AddEditorCommand(ToolBar toolBar, int imageId, string command, string tooltip) {
-			TH.ThrowIfNotOnUIThread();
 			if (TextEditorHelper.IsCommandAvailable(command)) {
 				AddCommand(toolBar, imageId, tooltip, (ctx) => TextEditorHelper.ExecuteEditorCommand(command));
 			}
 		}
 
 		protected void AddEditorCommand(ToolBar toolBar, int imageId, string command, string tooltip, string rightClickCommand) {
-			TH.ThrowIfNotOnUIThread();
 			if (TextEditorHelper.IsCommandAvailable(command)) {
 				AddCommand(toolBar, imageId, tooltip, (ctx) => TextEditorHelper.ExecuteEditorCommand(ctx.RightClick ? rightClickCommand : command));
 			}
@@ -190,6 +188,9 @@ namespace Codist.SmartBars
 			try {
 				await AddCommandsAsync(cancellationToken);
 				AddCommands();
+			}
+			catch (OperationCanceledException) {
+				return;
 			}
 			catch (Exception ex) {
 				MessageWindow.Error(ex, null, null, this);
