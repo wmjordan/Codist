@@ -148,7 +148,7 @@ namespace Codist.SmartBars
 
 		static bool IsFileTypeRegisteredInVS(string fileName) {
 			try {
-				return ServicesHelper.Instance.FileExtensionRegistry.GetContentTypeForExtension(Path.GetExtension(fileName)).TypeName != "UNKNOWN";
+				return ServicesHelper.Instance.FileExtensionRegistry.GetContentTypeForExtension(Path.GetExtension(fileName)) != ServicesHelper.Instance.ContentTypeRegistry.UnknownContentType;
 			}
 			catch (ArgumentException) {
 				return false;
