@@ -326,6 +326,7 @@ namespace Codist
 		public const string CheckedInCaller = "Checked in caller";
 		public const string VSTHRD100 = "VSTHRD100:Avoid async void methods";
 		public const string EventHandler = "Event handler";
+		public const string ExceptionHandled = "Exception handled";
 	}
 
 	enum MarkerStyleTypes

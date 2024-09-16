@@ -225,6 +225,7 @@ namespace Codist.Commands
 		}
 
 		private void ExportToNewWindow(MarkdownDocument md) {
+			ThreadHelper.ThrowIfNotOnUIThread();
 			var w = CodistPackage.DTE.ItemOperations.NewFile("General\\HTML Page", _SourceName);
 			var view = w.Document.GetActiveWpfDocumentView();
 			using (var edit = view.TextBuffer.CreateEdit()) {

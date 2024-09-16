@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel.Design;
 using System.Xml.Linq;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -13,6 +12,7 @@ namespace Codist.Commands
 	{
 		public static void Initialize() {
 			Command.IncrementVsixVersion.Register(Execute, (s, args) => {
+				ThreadHelper.ThrowIfNotOnUIThread();
 				((OleMenuCommand)s).Visible = GetSelectedProjectItem() != null;
 			});
 		}

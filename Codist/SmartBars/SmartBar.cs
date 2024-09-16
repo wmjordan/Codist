@@ -298,6 +298,7 @@ namespace Codist.SmartBars
 				_LastShiftHit = DateTime.Now;
 			}
 
+			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.ExceptionHandled)]
 			async void CreateToolBar(SmartBar me, CancellationToken token) {
 				try {
 					await me.InternalCreateToolBarAsync(token);
@@ -360,6 +361,7 @@ namespace Codist.SmartBars
 			SyncHelper.CancelAndDispose(ref _Cancellation, true);
 			CreateToolBar(this, _Cancellation.Token);
 
+			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.ExceptionHandled)]
 			async void CreateToolBar(SmartBar me, CancellationToken token) {
 				try {
 					if (me._ToolBarTray.Visibility != Visibility.Visible) {

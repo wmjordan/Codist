@@ -7,6 +7,7 @@ namespace Codist.Commands
 	{
 		public static void Initialize() {
 			Command.ToggleAutoBuildVersion.Register(Execute, (s, args) => {
+				ThreadHelper.ThrowIfNotOnUIThread();
 				var c = (OleMenuCommand)s;
 				c.Visible = CodistPackage.DTE.Solution.Projects.Count > 0;
 				c.Checked = Config.Instance.SuppressAutoBuildVersion == false;

@@ -9,7 +9,10 @@ namespace Codist.Commands
 	internal static class AutoBuildVersionWindowCommand
 	{
 		public static void Initialize() {
-			Command.AutoBuildVersionWindow.Register(Execute, (s, args) => ((OleMenuCommand)s).Visible = GetSelectedProjectItem() != null);
+			Command.AutoBuildVersionWindow.Register(Execute, (s, args) => {
+				ThreadHelper.ThrowIfNotOnUIThread();
+				((OleMenuCommand)s).Visible = GetSelectedProjectItem() != null;
+			});
 		}
 
 		static void Execute(object sender, EventArgs e) {
