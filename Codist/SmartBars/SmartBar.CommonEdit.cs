@@ -332,7 +332,7 @@ namespace Codist.SmartBars
 			foreach (var item in Config.Instance.WrapTexts) {
 				yield return new CommandItem(IconIds.WrapText, String.IsNullOrEmpty(item.Name) ? item.Pattern : item.Name, ctx => {
 					if (WrapWith(ctx, item, true) != Enumerable.Empty<SnapshotSpan>()) {
-						_RecentWrapText = item;
+						ctx.Bar._RecentWrapText = item;
 					}
 				});
 			}
