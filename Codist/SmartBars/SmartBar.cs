@@ -203,12 +203,15 @@ namespace Codist.SmartBars
 			}
 			_ToolBarTray.Visibility = Visibility.Visible;
 			_ToolBarTray.Opacity = WpfHelper.DimmedOpacity;
+			_ToolBarTray.SizeChanged -= ToolBarSizeChanged;
 			_ToolBarTray.SizeChanged += ToolBarSizeChanged;
+			_View.VisualElement.MouseMove -= ViewMouseMove;
 			_View.VisualElement.MouseMove += ViewMouseMove;
 		}
 
 		protected void HideToolBar() {
 			_ToolBarTray.Visibility = Visibility.Hidden;
+			_ToolBarTray.SizeChanged -= ToolBarSizeChanged;
 			_View.VisualElement.MouseMove -= ViewMouseMove;
 			_LastShiftHit = DateTime.MinValue;
 		}
