@@ -131,41 +131,45 @@ namespace Codist
 		}
 		static int IndexOf(this SnapshotSpan span, string text, int offset = 0) {
 			int i, l = text.Length;
-			var snapshot = span.Snapshot;
-			var start = span.Start.Position + offset;
-			var spanLength = span.Length;
-			var endOfTest = spanLength - l;
-			if (endOfTest < l) {
+			if (span.Length < l) {
 				return -1;
 			}
-			while (offset > endOfTest) {
-				for (i = 0; i < l; i++) {
-					if (snapshot[start + i] != text[i]) {
-						goto NEXT;
+			var snapshot = span.Snapshot;
+			var start = offset = span.Start.Position + offset;
+			var end = span.End.Position - l;
+			char t0 = text[0];
+			while (offset < end) {
+				if (snapshot[offset] == t0) {
+					for (i = 1; i < l; i++) {
+						if (snapshot[offset + i] != text[i]) {
+							goto NEXT;
+						}
 					}
+					return offset - start;
 				}
-				return offset;
 			NEXT:
 				offset++;
 			}
 			return -1;
 		}
 		static int IndexOfIgnoreCase(this SnapshotSpan span, string text, int offset = 0) {
-			int l = text.Length;
-			var snapshot = span.Snapshot;
-			var start = span.Start.Position + offset;
-			var spanLength = span.Length;
-			var endOfTest = spanLength - l;
-			if (endOfTest < l) {
+			int i, l = text.Length;
+			if (span.Length < l) {
 				return -1;
 			}
-			while (offset > endOfTest) {
-				for (int i = 0; i < l; i++) {
-					if (AreEqualIgnoreCase(snapshot[start + i], text[i]) == false) {
-						goto NEXT;
+			var snapshot = span.Snapshot;
+			var start = offset = span.Start.Position + offset;
+			var end = span.End.Position - l;
+			char t0 = text[0];
+			while (offset < end) {
+				if (snapshot[offset] == t0) {
+					for (i = 1; i < l; i++) {
+						if (AreEqualIgnoreCase(snapshot[start + i], text[i]) == false) {
+							goto NEXT;
+						}
 					}
+					return offset - start;
 				}
-				return offset;
 			NEXT:
 				offset++;
 			}
@@ -252,6 +256,16 @@ namespace Codist
 			return t == null
 				? throw new KeyNotFoundException($"Missing ClassificationType ({classificationType})")
 				: new ClassificationTag(t);
+		}
+
+		public static bool TryGetClassificationTag(this IClassificationTypeRegistryService registry, string classificationType, out ClassificationTag tag) {
+			var t = registry.GetClassificationType(classificationType);
+			if (t != null) {
+				tag = new ClassificationTag(t);
+				return true;
+			}
+			tag = null;
+			return false;
 		}
 
 		public static IClassificationType CreateClassificationCategory(string classificationType) {
@@ -490,18 +504,15 @@ namespace Codist
 			return view.TryGetFirstSelectionSpan(out var span) ? span.GetText() : String.Empty;
 		}
 		public static SnapshotSpan FirstSelectionSpan(this ITextView view) {
-			NormalizedSnapshotSpanCollection spans = view.Selection.SelectedSpans;
-			return spans.Count != 0 ? spans[0] : new SnapshotSpan();
+			return view.GetMultiSelectionBroker().PrimarySelection.Extent.SnapshotSpan;
 		}
 		public static bool TryGetFirstSelectionSpan(this ITextView view, out SnapshotSpan span) {
-			if (view.Selection.IsEmpty || view.Selection.SelectedSpans.Count < 1) {
-				span = new SnapshotSpan();
+			var s = view.GetMultiSelectionBroker().PrimarySelection;
+			if (s.IsEmpty || (span = s.Extent.SnapshotSpan).IsEmpty) {
+				span = default;
 				return false;
 			}
-			else {
-				span = view.Selection.SelectedSpans[0];
-				return true;
-			}
+			return true;
 		}
 
 		public static TokenType GetSelectedTokenType(this ITextView view) {
