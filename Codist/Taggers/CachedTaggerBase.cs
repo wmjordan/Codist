@@ -23,11 +23,12 @@ namespace Codist.Taggers
 		protected ITextView TextView => _TextView;
 		public TaggerResult Result => _Tags;
 		protected abstract bool DoFullParseAtFirstLoad { get; }
+		public bool Disabled { get; set; }
 
 		public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 
 		public IEnumerable<ITagSpan<IClassificationTag>> GetTags(NormalizedSnapshotSpanCollection spans) {
-			if (spans.Count == 0) {
+			if (Disabled || spans.Count == 0) {
 				return Array.Empty<ITagSpan<IClassificationTag>>();
 			}
 			if (_Tags.LastParsed == 0 && DoFullParseAtFirstLoad) {

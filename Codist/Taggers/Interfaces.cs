@@ -1,17 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
-using Microsoft.VisualStudio.Text;
 
 namespace Codist.Taggers
 {
-	/// <summary>Interface for text-based custom tagger.</summary>
-	interface ITextTagger
-	{
-		bool IgnoreCase { get; set; }
-		void GetTags(in SnapshotSpan span, ICollection<TaggedContentSpan> results);
-	}
-
 	/// <summary>
 	/// A symbol temporarily bookmarked by <see cref="SymbolMarkManager"/> or <see cref="NaviBar.CSharpBar"/>.
 	/// </summary>
