@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
+using System.Windows;
 using System.Windows.Media;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Formatting;
 using Microsoft.VisualStudio.Utilities;
+using Newtonsoft.Json;
 
 namespace Codist.SyntaxHighlight
 {
@@ -20,6 +22,7 @@ namespace Codist.SyntaxHighlight
 		readonly IClassificationFormatMapService _FormatMaps;
 		readonly IEditorFormatMapService _EditorFormatMaps;
 		readonly List<Entry> _Entries = new List<Entry>();
+		readonly List<string> _CustomizedNames = new List<string>();
 
 		public ClassificationTypeExporter(IClassificationTypeRegistryService classifications, IContentTypeRegistryService contentTypes, IClassificationFormatMapService formatMaps, IEditorFormatMapService editorFormatMaps) {
 			_Classifications = classifications;
@@ -32,7 +35,7 @@ namespace Codist.SyntaxHighlight
 			var t = typeof(TStyle);
 			var r = _Classifications;
 
-			// skip classification types which do not have a corresponding content type
+			// skip classification types having an IContentType (defined in elsewhere)
 			var c = t.GetCustomAttribute<CategoryAttribute>();
 			if (c != null && _ContentTypes.GetContentType(c.Category) == null) {
 				return;
@@ -40,6 +43,7 @@ namespace Codist.SyntaxHighlight
 
 			foreach (var field in t.GetFields()) {
 				var name = field.GetCustomAttribute<ClassificationTypeAttribute>()?.ClassificationTypeNames;
+				// skip classification types which do not have a corresponding content type
 				if (String.IsNullOrEmpty(name)
 					|| r.GetClassificationType(name) != null
 					|| field.GetCustomAttribute<InheritanceAttribute>() != null) {
@@ -72,6 +76,52 @@ namespace Codist.SyntaxHighlight
 			}
 		}
 
+		static readonly char[] __ClassificationTypeDelimiters = [';', ','];
+		public void RegisterCustomizedClassificationTypes() {
+			if (System.IO.File.Exists(Config.CustomizedClassificationTypePath)) {
+				CustomizedClassificationTypes customTypes;
+				try {
+					customTypes = JsonConvert.DeserializeObject<CustomizedClassificationTypes>(System.IO.File.ReadAllText(Config.CustomizedClassificationTypePath));
+					(Config.CustomizedClassificationTypePath + " loaded").Log();
+				}
+				catch (Exception ex) {
+					ex.Log();
+					return;
+				}
+				if (!(customTypes?.Types?.Count > 0)) {
+					return;
+				}
+				var r = _Classifications;
+				foreach (var type in customTypes.Types) {
+					var name = type.Name;
+					if (String.IsNullOrEmpty(name) || r.GetClassificationType(name) != null) {
+						continue;
+					}
+					var baseNames = type.BaseOn?.Split(__ClassificationTypeDelimiters);
+					var before = type.Before?.Split(__ClassificationTypeDelimiters) ?? [];
+					var after = type.After?.Split(__ClassificationTypeDelimiters) ?? [];
+					var orders = (before.Length > 0 && after.Length > 0) ? new List<(string, bool)>() : null;
+					if (orders != null) {
+						foreach (var order in before) {
+							orders.Add((order, true));
+						}
+						foreach (var order in after) {
+							orders.Add((order, false));
+						}
+					}
+					var style = type.HasStyle ? new StyleAttribute(type.Foreground, type.Background) : null;
+					if (style != null) {
+						style.Bold = type.IsBold;
+						style.Italic = type.IsItalic;
+						style.Underline = type.IsUnderline;
+						style.Size = type.FontSize;
+					}
+					_Entries.Add(new Entry(name, baseNames?.ToList(), orders, style));
+					_CustomizedNames.Add(name);
+				}
+			}
+		}
+
 		public void ExportClassificationTypes() {
 			int e = 0, lastExported;
 			var r = _Classifications;
@@ -96,6 +146,10 @@ namespace Codist.SyntaxHighlight
 				}
 			}
 			while (e < _Entries.Count && lastExported != e);
+		}
+
+		public List<IClassificationType> GetCustomClassificationTypes() {
+			return _CustomizedNames.ConvertAll(_Classifications.GetClassificationType);
 		}
 
 		public void UpdateClassificationFormatMap(string category) {
@@ -287,6 +341,9 @@ namespace Codist.SyntaxHighlight
 					if (s.Italic) {
 						f = f.SetItalic(true);
 					}
+					if (s.Underline) {
+						f = f.SetTextDecorations(TextDecorations.Underline);
+					}
 					if (s.ForeColor.A != 0) {
 						f = f.SetForeground(s.ForeColor).SetForegroundBrush(new SolidColorBrush(s.ForeColor));
 					}
@@ -308,6 +365,45 @@ namespace Codist.SyntaxHighlight
 			public override string ToString() {
 				return $"{Name} ({(Exported ? "E" : "?")})";
 			}
+		}
+
+		sealed class CustomizedClassificationTypes
+		{
+			[JsonProperty("isDark")]
+			public bool IsDark { get; set; }
+
+			[JsonProperty("items")]
+			public List<CustomizedClassificationType> Types { get; } = new List<CustomizedClassificationType>();
+		}
+
+		sealed class CustomizedClassificationType
+		{
+			[JsonProperty("name")]
+			public string Name { get; set; }
+
+			[JsonProperty("baseOn")]
+			public string BaseOn { get; set; }
+
+			[JsonProperty("before")]
+			public string Before { get; set; }
+
+			[JsonProperty("after")]
+			public string After { get; set; }
+
+			[JsonProperty("bold")]
+			public bool IsBold { get; set; }
+			[JsonProperty("italic")]
+			public bool IsItalic { get; set; }
+			[JsonProperty("underline")]
+			public bool IsUnderline { get; set; }
+			[JsonProperty("fontSize")]
+			public float FontSize { get; set; }
+			[JsonProperty("foreground")]
+			public string Foreground { get; set; }
+			[JsonProperty("background")]
+			public string Background { get; set; }
+
+			internal bool HasStyle => IsBold || IsItalic || IsUnderline || FontSize > 0 || String.IsNullOrWhiteSpace(Foreground) == false || String.IsNullOrWhiteSpace(Background) == false;
 		}
 	}
 }

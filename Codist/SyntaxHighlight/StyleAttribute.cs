@@ -8,6 +8,7 @@ namespace Codist.SyntaxHighlight
 	{
 		public bool Bold { get; set; }
 		public bool Italic { get; set; }
+		public bool Underline { get; set; }
 		public double Size { get; set; }
 		public Color ForeColor { get; set; }
 		public Color BackColor { get; set; }

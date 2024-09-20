@@ -92,6 +92,7 @@ namespace Codist
 			cte.RegisterClassificationTypes<SyntaxHighlight.XmlStyleTypes>();
 			cte.RegisterClassificationTypes<SyntaxHighlight.PrivateStyleTypes>();
 			//e.RegisterClassificationTypes<SyntaxHighlight.CppStyleTypes>();
+			cte.RegisterCustomizedClassificationTypes();
 			cte.ExportClassificationTypes();
 			"Classification types exported".Log();
 			#endregion

@@ -110,6 +110,7 @@ namespace Codist.Options
 										new ClassificationCategoryItem(SyntaxStyleSource.Xml, "XML/HTML"),
 										new ClassificationCategoryItem(SyntaxStyleSource.CommentTagger, R.T_TaggedComments),
 										new ClassificationCategoryItem(SyntaxStyleSource.CommentLabels, "   "+R.T_Tags),
+										new ClassificationCategoryItem(SyntaxStyleSource.Custom, R.T_Customized),
 										new ClassificationCategoryItem(SyntaxStyleSource.PriorityOrder, R.T_AllLanguages)
 									}
 								}.Set(ref _SyntaxSourceBox).ReferenceStyle(VsResourceKeys.ThemedDialogListBoxStyleKey),
@@ -544,6 +545,7 @@ namespace Codist.Options
 				case SyntaxStyleSource.CPlusPlus: classifications = ToClassificationTypes(Config.Instance.CppStyles); break;
 				case SyntaxStyleSource.Markdown: classifications = ToClassificationTypes(Config.Instance.MarkdownStyles); break;
 				case SyntaxStyleSource.Xml: classifications = ToClassificationTypes(Config.Instance.XmlCodeStyles); break;
+				case SyntaxStyleSource.Custom: classifications = ServicesHelper.Instance.ClassificationTypeExporter.GetCustomClassificationTypes(); break;
 				case SyntaxStyleSource.CommentTagger: classifications = ToClassificationTypes(Config.Instance.CommentStyles); break;
 				case SyntaxStyleSource.PriorityOrder: classifications = GetClassificationsOrderByPriority(); break;
 				case SyntaxStyleSource.Selection:
@@ -1654,6 +1656,7 @@ namespace Codist.Options
 			Xml,
 			CommentTagger,
 			CommentLabels,
+			Custom,
 			PriorityOrder
 		}
 

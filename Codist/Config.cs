@@ -31,7 +31,9 @@ namespace Codist
 
 		ConfigManager _ConfigManager;
 
-		public static readonly string ConfigPath = $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\\{Constants.NameOfMe}\\Config.json";
+		public static readonly string ConfigDirectory = $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\\{Constants.NameOfMe}\\";
+		public static readonly string ConfigPath = $"{ConfigDirectory}Config.json";
+		public static readonly string CustomizedClassificationTypePath = $"{ConfigDirectory}ClassificationTypes.json";
 		public static Config Instance = InitConfig();
 
 		public string Version { get; set; }
