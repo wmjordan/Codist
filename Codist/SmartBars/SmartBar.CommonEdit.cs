@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -495,7 +496,13 @@ namespace Codist.SmartBars
 					ThreadHelper.ThrowIfNotOnUIThread();
 					var snapshot = ctx.View.TextSnapshot;
 					var selection = ctx.View.GetFirstSelectionText();
-					var w = CodistPackage.DTE.ItemOperations.NewFile("General\\Text File", selection.Length > 30 ? selection.Substring(0, 30) : selection);
+					var name = selection.Length > 30 ? selection.Substring(0, 30) : selection;
+					try {
+						name += Path.GetExtension(ctx.View.TextBuffer.GetTextDocument().FilePath);
+					}
+					catch (NullReferenceException) {}
+					catch (ArgumentException) {}
+					var w = CodistPackage.DTE.ItemOperations.NewFile("General\\Text File", name);
 					using (var sbr = ReusableStringBuilder.AcquireDefault(1000)) {
 						var sb = sbr.Resource;
 						var option = FindOptions.OrdinalComparison | FindOptions.SingleLine;
@@ -513,11 +520,13 @@ namespace Codist.SmartBars
 							sb.Append(line.GetTextIncludingLineBreak());
 						}
 						var view = w.Document.GetActiveWpfDocumentView();
+						view.TextBuffer.ChangeContentType(ctx.View.TextBuffer.ContentType, null);
 						using (var edit = view.TextBuffer.CreateEdit()) {
 							edit.Insert(0, sb.ToString());
 							edit.Apply();
 						}
 						w.Document.Saved = true;
+						view.TextBuffer.ClearUndoHistory();
 					}
 				}) { ToolTip = R.CMDT_ExtractLinesContainingSelection, QuickAccessCondition = CommandItem.HasSelection }
 			};

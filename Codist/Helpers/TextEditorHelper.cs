@@ -1355,6 +1355,13 @@ namespace Codist
 				: textBuffer.CurrentSnapshot.GetText(start, end - start);
 		}
 
+		public static void ClearUndoHistory(this ITextBuffer textBuffer) {
+			var s = ServicesHelper.Instance.TextUndoHistoryService;
+			if (s.TryGetHistory(textBuffer, out var history)) {
+				s.RemoveHistory(history);
+			}
+		}
+
 		public static bool IsEmptyOrWhitespace(this ITextSnapshotLine line) {
 			int i, end = line.End.Position;
 			var ts = line.Snapshot;
