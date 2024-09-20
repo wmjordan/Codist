@@ -280,9 +280,6 @@ namespace Codist
 				&& Application.Current.MainWindow.Visibility == Visibility.Visible) {
 				UpdateDisplay(config);
 			}
-			//else {
-			//	Application.Current.MainWindow.IsVisibleChanged += MainWindow_IsVisibleChanged;
-			//}
 			"Config loaded".Log();
 			return config;
 		}
@@ -290,13 +287,6 @@ namespace Codist
 		static void UpdateDisplay(Config config) {
 			Display.LayoutOverride.Reload(config.DisplayOptimizations);
 			Display.ResourceMonitor.Reload(config.DisplayOptimizations);
-		}
-
-		static void MainWindow_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) {
-			//if ((bool)e.NewValue) {
-			//	Application.Current.MainWindow.IsVisibleChanged -= MainWindow_IsVisibleChanged;
-			//	UpdateDisplay(Instance);
-			//}
 		}
 
 		public static void ResetStyles() {

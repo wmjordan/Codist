@@ -40,7 +40,7 @@ namespace Codist.Commands
 		}
 
 		public CommandState GetCommandState(RedoCommandArgs args) {
-			return CommandState.Unspecified;	
+			return CommandState.Unspecified;
 		}
 
 		public bool ExecuteCommand(RedoCommandArgs args, CommandExecutionContext executionContext) {
