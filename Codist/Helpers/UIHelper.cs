@@ -41,7 +41,7 @@ namespace Codist
 							&& ParseByte(colorText, 3, out g)
 							&& ParseByte(colorText, 5, out b)) {
 							color = WpfColor.FromRgb(r, g, b);
-							opacity = 0;
+							opacity = 0xFF;
 							return;
 						}
 						break;
