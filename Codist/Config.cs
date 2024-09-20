@@ -234,6 +234,7 @@ namespace Codist
 				DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
 				NullValueHandling = NullValueHandling.Ignore,
 				Error = (sender, args) => {
+					args.ErrorContext.Error.Log();
 					args.ErrorContext.Handled = true; // ignore json error
 				}
 			});
@@ -599,8 +600,9 @@ namespace Codist
 						try {
 							Instance.SaveConfig(null);
 						}
-						catch (Exception) {
+						catch (Exception ex) {
 							// ignore
+							ex.Log();
 						}
 						_OldVersion = _Version;
 					}
