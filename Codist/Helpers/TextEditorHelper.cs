@@ -659,7 +659,8 @@ namespace Codist
 			}
 			var b = view.GetMultiSelectionBroker();
 			var m = ServicesHelper.Instance.OutliningManager.GetOutliningManager(view);
-			SnapshotSpan first = default;
+			SnapshotSpan primary = default;
+			var caret = view.GetCaretPosition();
 			using (var o = b.BeginBatchOperation()) {
 				foreach (var span in spans) {
 					if (view.TextSnapshot != span.Snapshot) {
@@ -671,15 +672,15 @@ namespace Codist
 							m.Expand(c);
 						}
 					}
-					if (first.IsEmpty) {
-						first = span;
+					if (primary.IsEmpty && span.Contains(caret)) {
+						primary = span;
 					}
 					b.AddSelection(new Selection(span));
 				}
 			}
 
-			if (first.IsEmpty == false) {
-				view.ViewScroller.EnsureSpanVisible(first, EnsureSpanVisibleOptions.ShowStart);
+			if (primary.IsEmpty == false) {
+				view.ViewScroller.EnsureSpanVisible(primary, EnsureSpanVisibleOptions.ShowStart);
 			}
 		}
 
