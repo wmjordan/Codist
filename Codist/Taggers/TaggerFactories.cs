@@ -48,8 +48,8 @@ namespace Codist.Taggers
 			if (String.IsNullOrEmpty(p)) {
 				return null;
 			}
-			if (_Taggers.TryGetValue(textView, out var rt)) {
-				return MarkAndHookEvent(textView, rt, this);
+			if (_Taggers.TryGetValue(textView, out var ct)) {
+				return MarkAndHookEvent(textView, ct, this);
 			}
 			try {
 				t = CustomTagger.Get(textView, d);

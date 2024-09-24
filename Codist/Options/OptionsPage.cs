@@ -24,7 +24,7 @@ namespace Codist.Options
 		int _UILock;
 
 		protected OptionsPage() {
-			Config.RegisterLoadHandler (config => LoadConfig(config));
+			Config.RegisterLoadHandler(LoadConfig);
 		}
 
 		void LoadConfig(Config config) {
@@ -295,7 +295,7 @@ namespace Codist.Options
 			readonly OptionBox<QuickInfoOptions> _OverrideDefaultDocumentation, _DocumentationFromBaseType, _DocumentationFromInheritDoc, _TextOnlyDoc, _OrdinaryDoc, _ReturnsDoc, _RemarksDoc, _ExceptionDoc, _SeeAlsoDoc, _ExampleDoc, _AlternativeStyle, _ContainingType, _CodeFontForXmlDocSymbol;
 			readonly OptionBox<QuickInfoOptions> _NodeRange, _Attributes, _BaseType, _Declaration, _SymbolLocation, _Interfaces, _NumericValues, _String, _Parameter, _InterfaceImplementations, _TypeParameters, _NamespaceTypes, _MethodOverload, _InterfaceMembers, _EnumMembers;
 			readonly OptionBox<QuickInfoOptions>[] _Options;
-			readonly Controls.IntegerBox _MaxWidth, _MaxHeight, _DisplayDelay;
+			readonly IntegerBox _MaxWidth, _MaxHeight, _DisplayDelay;
 			readonly ColorButton _BackgroundButton;
 
 			public PageControl(OptionsPage page) : base(page) {
