@@ -44,7 +44,7 @@ namespace Codist.Taggers
 				if (snapshot != null) {
 					while (pendingSpans.TryDequeue(out var span)) {
 						if (snapshot == span.Snapshot) {
-							Debug.WriteLine($"Refresh span {span}");
+							$"Refresh span {span}".Log();
 							TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(span));
 						}
 					}
@@ -61,7 +61,7 @@ namespace Codist.Taggers
 				return Tagger.GetTags(spans, r, SyncHelper.CancelAndRetainToken(ref _RenderBreaker));
 			}
 			foreach (var item in spans) {
-				Debug.WriteLine($"Enqueue span {item}");
+				$"Enqueue span {item}".Log();
 				_PendingSpans.Enqueue(item);
 			}
 			return r == null

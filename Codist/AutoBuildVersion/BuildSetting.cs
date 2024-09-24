@@ -35,8 +35,8 @@ namespace Codist.AutoBuildVersion
 					: null;
 			}
 			catch (Exception ex) {
-				Debug.Write("Error loading " + nameof(BuildSetting) + " from " + configPath);
-				Debug.WriteLine(ex.ToString());
+				$"Error loading {nameof(BuildSetting)} from {configPath}".Log();
+				ex.Log();
 				return null;
 			}
 		}

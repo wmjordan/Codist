@@ -160,7 +160,7 @@ namespace Codist.Controls
 				&& _Editor != null
 				&& Copy()) {
 				e.Handled = true;
-				System.Diagnostics.Debug.WriteLine("Copied: " + Clipboard.GetText());
+				$"Copied: {Clipboard.GetText()}".Log();
 			}
 		}
 

@@ -113,7 +113,7 @@ namespace Codist.Controls
 				cs.OnColorComponentChanged(cc);
 			}
 			catch (Exception ex) {
-				Debug.WriteLine(ex.Message);
+				ex.Log();
 			}
 		}
 

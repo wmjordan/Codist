@@ -138,7 +138,7 @@ namespace Codist.Taggers
 			try {
 				if (_Tags.LastParsed == 0 && _FullParseAtFirstLoad) {
 					// perform a full parse at the first time
-					Debug.WriteLine("Full parse");
+					"Full parse".Log();
 					tagSpans = GetTagAggregator().GetTags(snapshot.ToSnapshotSpan());
 					_Tags.LastParsed = snapshot.Length;
 				}
@@ -153,7 +153,6 @@ namespace Codist.Taggers
 			catch (ObjectDisposedException ex) {
 				// HACK: TagAggregator could be disposed during editing, to be investigated further
 				(ex.ObjectName + " is disposed").Log();
-				Debug.WriteLine(ex.Message);
 				return Enumerable.Empty<ITagSpan<IClassificationTag>>();
 			}
 

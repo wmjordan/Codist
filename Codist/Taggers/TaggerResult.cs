@@ -97,7 +97,7 @@ namespace Codist.Taggers
 			if (Version == args.AfterVersion.VersionNumber) {
 				return;
 			}
-			Debug.WriteLine($"snapshot version: {args.AfterVersion.VersionNumber}");
+			$"New snapshot: {args.AfterVersion.VersionNumber}".Log();
 			var tags = _Tags;
 			var after = args.After;
 			tags.RemoveWhere(t => t.Update(after) == false);

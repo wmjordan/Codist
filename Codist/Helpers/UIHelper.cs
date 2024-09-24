@@ -61,9 +61,9 @@ namespace Codist
 				}
 			}
 			catch (Exception ex) {
-				System.Diagnostics.Debug.WriteLine(ex);
+				ex.Log();
 			}
-			EXIT:
+		EXIT:
 			color = WpfColors.Transparent;
 			opacity = 0;
 		}

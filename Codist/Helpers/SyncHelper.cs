@@ -42,7 +42,7 @@ namespace Codist
 				}
 				catch (Exception ex) {
 					// ignore error
-					Debug.WriteLine(ex.Message);
+					ex.Log();
 				}
 			});
 		}

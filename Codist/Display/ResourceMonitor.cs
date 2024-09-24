@@ -106,7 +106,7 @@ namespace Codist.Display
 				ExternalCommand.OpenTaskManager();
 			}
 			catch (Exception ex) {
-				Debug.WriteLine("Failed to start task manager: " + ex.ToString());
+				("Failed to start task manager: " + ex.ToString()).Log();
 			}
 		}
 
@@ -176,7 +176,7 @@ namespace Codist.Display
 					UpdateDisplay(_Value);
 				}
 				catch (Exception ex) {
-					Debug.WriteLine(ex);
+					ex.Log();
 				}
 			}
 		}
@@ -227,7 +227,7 @@ namespace Codist.Display
 					UpdateDisplay(_Values);
 				}
 				catch (Exception ex) {
-					Debug.WriteLine(ex);
+					ex.Log();
 				}
 			}
 		}

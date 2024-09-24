@@ -274,7 +274,7 @@ namespace Codist.Options
 						System.Diagnostics.Process.Start(Config.ConfigDirectory);
 					}
 					catch (Exception ex) {
-						System.Diagnostics.Debug.WriteLine(ex);
+						ex.Log();
 					}
 				}
 			}
