@@ -268,9 +268,10 @@ namespace Codist.Options
 				}
 				else {
 					try {
-						if (System.IO.File.Exists(Config.ConfigPath)) {
-							System.Diagnostics.Process.Start(System.IO.Path.GetDirectoryName(Config.ConfigPath));
+						if (System.IO.Directory.Exists(Config.ConfigDirectory) == false) {
+							System.IO.Directory.CreateDirectory(Config.ConfigDirectory);
 						}
+						System.Diagnostics.Process.Start(Config.ConfigDirectory);
 					}
 					catch (Exception ex) {
 						System.Diagnostics.Debug.WriteLine(ex);
