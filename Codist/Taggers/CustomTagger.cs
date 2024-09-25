@@ -330,19 +330,20 @@ namespace Codist.Taggers
 			}
 
 			public TextTaggerBase[] GetTaggers(string path) {
-				var taggers = _Items;
-				if (taggers == null) {
+				var definitions = _Items;
+				if (definitions == null) {
 					return null;
 				}
-				foreach (var item in taggers) {
+				var r = new List<TextTaggerBase>();
+				foreach (var item in definitions) {
 					if (item.MatchPath(path)) {
-						var r = item.GetTaggers();
-						return r?.Length != 0
-							? r
-							: null;
+						var taggers = item.GetTaggers();
+						if (taggers != null) {
+							r.AddRange(taggers);
+						}
 					}
 				}
-				return null;
+				return r.Count != 0 ? r.ToArray() : null;
 			}
 
 			void OnConfigFileChanged(object sender, FileSystemEventArgs e) {
