@@ -223,7 +223,7 @@ namespace Codist.Taggers
 				for (int i = Math.Min(GroupTags.Length, m.Groups.Count) - 1; i >= 0; i--) {
 					var t = GroupTags[i];
 					if (t != null) {
-						var g = m.Groups[i];
+						var g = m.Groups[i + 1];
 						if (g.Success) {
 							ctx.AddTag(t, g.Index, g.Length);
 						}
