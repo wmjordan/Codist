@@ -5568,6 +5568,24 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to About custom syntax rules.
+        /// </summary>
+        internal static string T_AboutCustomSyntaxRules {
+            get {
+                return ResourceManager.GetString("T_AboutCustomSyntaxRules", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Open a web page which documents the syntax customization rules.
+        /// </summary>
+        internal static string T_AboutCustomSyntaxRulesTip {
+            get {
+                return ResourceManager.GetString("T_AboutCustomSyntaxRulesTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Accessors and methods.
         /// </summary>
         internal static string T_AccessorsAndMethods {
@@ -7154,6 +7172,15 @@ namespace Codist.Properties {
         internal static string T_NoCommentTagDefined {
             get {
                 return ResourceManager.GetString("T_NoCommentTagDefined", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No custom syntax highlight is defined. To define custom tags, place a ClassificationTypes.json file into the config folder of Codist. For more information, see:.
+        /// </summary>
+        internal static string T_NoCustomizedTagDefined {
+            get {
+                return ResourceManager.GetString("T_NoCustomizedTagDefined", resourceCulture);
             }
         }
         

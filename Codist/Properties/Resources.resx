@@ -2815,4 +2815,13 @@ Discard its changes?</value>
   <data name="CMD_TrimTrailingSpaces" xml:space="preserve">
     <value>Trim Trailing Spaces</value>
   </data>
+  <data name="T_NoCustomizedTagDefined" xml:space="preserve">
+    <value>No custom syntax highlight is defined. To define custom tags, place a ClassificationTypes.json file into the config folder of Codist. For more information, see:</value>
+  </data>
+  <data name="T_AboutCustomSyntaxRules" xml:space="preserve">
+    <value>About custom syntax rules</value>
+  </data>
+  <data name="T_AboutCustomSyntaxRulesTip" xml:space="preserve">
+    <value>Open a web page which documents the syntax customization rules</value>
+  </data>
 </root>

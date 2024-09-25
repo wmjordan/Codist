@@ -21,8 +21,6 @@ namespace Codist.Options
 {
 	sealed class SyntaxHighlightCustomizationWindow : Window
 	{
-		static readonly Thickness __SubOptionMargin = new Thickness(24, 0, 0, 0);
-		static readonly IClassificationType __BraceMatchingClassificationType = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(Constants.CodeBraceMatching);
 		const int SMALL_LABEL_WIDTH = 60, MIDDLE_LABEL_WIDTH = 120;
 
 		readonly StackPanel _SettingsList;
@@ -603,10 +601,15 @@ namespace Codist.Options
 						? R.T_NoSyntaxHighlightSelected
 						: source == SyntaxStyleSource.CommentLabels
 						? R.T_NoCommentTagDefined
+						: source == SyntaxStyleSource.Custom
+						? R.T_NoCustomizedTagDefined
 						: R.T_NoSyntaxHighlightDefined,
 					FontSize = 20,
 					TextWrapping = TextWrapping.Wrap
 				});
+				if (source == SyntaxStyleSource.Custom) {
+					l.Add(new TextBlock().AppendLink(R.T_AboutCustomSyntaxRules, "https://github.com/wmjordan/Codist/wiki/ClassificationTypes.json-and-Codist.ct.json", R.T_AboutCustomSyntaxRulesTip));
+				}
 				_SettingsGroup.Visibility = _StyleNameHolder.Visibility = _RightPaneTitle.Visibility = Visibility.Collapsed;
 			}
 			else {

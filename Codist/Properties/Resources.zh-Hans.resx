@@ -2795,4 +2795,13 @@ Ctrl: 将下划线分隔的单词转换为首字母大写的单词</value>
   <data name="CMD_TrimTrailingSpaces" xml:space="preserve">
     <value>删除尾随空格</value>
   </data>
+  <data name="T_NoCustomizedTagDefined" xml:space="preserve">
+    <value>当前未有定义语法标签。要定义自己的语法标签，在 Codist 的配置文件夹中放置一个 ClassificationTypes.json 文件，详情请见：</value>
+  </data>
+  <data name="T_AboutCustomSyntaxRules" xml:space="preserve">
+    <value>关于自定义语法规则</value>
+  </data>
+  <data name="T_AboutCustomSyntaxRulesTip" xml:space="preserve">
+    <value>打开关于自定义语法规则的文档页面</value>
+  </data>
 </root>
