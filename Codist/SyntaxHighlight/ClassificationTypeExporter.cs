@@ -351,7 +351,7 @@ namespace Codist.SyntaxHighlight
 						f = f.SetBackground(s.BackColor).SetBackgroundBrush(new SolidColorBrush(s.BackColor));
 					}
 					if (s.Size != 0) {
-						f = f.SetFontHintingEmSize(s.Size);
+						f = f.SetFontRenderingEmSize(s.Size);
 					}
 				}
 				return f;
