@@ -147,7 +147,7 @@ namespace Codist.Taggers
 
 			public bool SkipLeadingWhitespace { get; set; }
 			public string Prefix {
-				get { return _Prefix; }
+				get => _Prefix;
 				set { _Prefix = value; _PrefixLength = value.Length; }
 			}
 
@@ -274,21 +274,21 @@ namespace Codist.Taggers
 					}
 					_TaggerConfigs.Remove(configPath);
 				}
+				var s = LoadDefinitionSets(configPath);
+				return s != null ? _TaggerConfigs[configPath] = new TaggerConfig(dir, s) : null;
+			}
+
+			static List<CustomTagDefinitionSet> LoadDefinitionSets(string configPath) {
 				if (File.Exists(configPath) == false) {
 					return null;
 				}
-				List<CustomTagDefinitionSet> s;
 				try {
-					s = JsonConvert.DeserializeObject<List<CustomTagDefinitionSet>>(File.ReadAllText(configPath));
-					if (s == null) {
-						return null;
-					}
+					return JsonConvert.DeserializeObject<List<CustomTagDefinitionSet>>(File.ReadAllText(configPath));
 				}
 				catch (Exception ex) {
 					ex.Log();
-					return null;
 				}
-				return _TaggerConfigs[configPath] = new TaggerConfig(dir, s);
+				return null;
 			}
 		}
 
@@ -385,10 +385,13 @@ namespace Codist.Taggers
 			Regex _Pattern;
 			TextTaggerBase[] _Taggers;
 
-			[JsonProperty("filePattern")]
+			[JsonProperty("file")]
 			public string FilePattern {
 				get => _Pattern?.ToString();
-				set => _Pattern = new Regex(value, RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+				set {
+					_Pattern = new Regex(value, RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+					_Taggers = null;
+				}
 			}
 
 			[JsonProperty("items")]
