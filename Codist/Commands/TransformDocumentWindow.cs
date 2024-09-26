@@ -353,8 +353,8 @@ namespace Codist.Commands
 					return null;
 				}
 				catch (Exception ex) {
-					Debug.Write("Error loading " + nameof(TransformSettings) + " from " + configPath);
-					Debug.WriteLine(ex.ToString());
+					$"Error loading {nameof(TransformSettings)} from {configPath}".Log();
+					ex.Log();
 					return null;
 				}
 			}
