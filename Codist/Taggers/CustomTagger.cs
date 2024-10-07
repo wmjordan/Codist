@@ -264,18 +264,26 @@ namespace Codist.Taggers
 					return null;
 				}
 				var dir = Path.GetDirectoryName(path);
-				if (dir.Length == 0) {
-					return null;
-				}
-				var configPath = Path.Combine(dir, ConfigFileName);
-				if (_TaggerConfigs.TryGetValue(configPath, out var config)) {
-					if (config.Items != null) {
-						return config;
+				int level = 0;
+				do {
+					if (dir.Length == 0) {
+						return null;
 					}
-					_TaggerConfigs.Remove(configPath);
+					var configPath = Path.Combine(dir, ConfigFileName);
+					if (_TaggerConfigs.TryGetValue(configPath, out var config)) {
+						if (config.Items != null) {
+							return config;
+						}
+						_TaggerConfigs.Remove(configPath);
+					}
+					var s = LoadDefinitionSets(configPath);
+					if (s != null) {
+						return _TaggerConfigs[configPath] = new TaggerConfig(dir, s);
+					}
+					dir = Path.GetDirectoryName(dir);
 				}
-				var s = LoadDefinitionSets(configPath);
-				return s != null ? _TaggerConfigs[configPath] = new TaggerConfig(dir, s) : null;
+				while (++level < 5 && dir != null);
+				return null;
 			}
 
 			static List<CustomTagDefinitionSet> LoadDefinitionSets(string configPath) {
