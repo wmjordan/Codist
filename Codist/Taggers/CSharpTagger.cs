@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -758,6 +757,9 @@ namespace Codist.Taggers
 
 					case SymbolKind.Parameter:
 						tags.Add(itemSpan, __Classifications.Parameter);
+						if ((symbol.ContainingSymbol as IMethodSymbol).IsPrimaryConstructor()) {
+							tags.Add(itemSpan, __Classifications.PrimaryConstructorParameter);
+						}
 						break;
 
 					case SymbolKind.Method:

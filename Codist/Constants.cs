@@ -137,6 +137,7 @@ namespace Codist
 
 		public const string CSharpLocalVariableName = "C#: Local variable";
 		public const string CSharpParameterName = "C#: Parameter";
+		public const string CSharpPrimaryConstructorParameterName = "C#: Primary Constructor Parameter";
 		public const string CSharpNamespaceName = "C#: Namespace";
 		public const string CSharpExtensionMethodName = "C#: Extension method";
 		public const string CSharpExternMethodName = "C#: Extern method";

@@ -366,6 +366,25 @@ namespace Codist
 			}
 		}
 
+		public static bool IsPrimaryConstructor(this IMethodSymbol method) {
+			if (method is null || method.MethodKind != MethodKind.Constructor || method.ContainingType is null) {
+				return false;
+			}
+			var rm = method.DeclaringSyntaxReferences;
+			if (rm.Length == 0) {
+				return false;
+			}
+			var rt = method.ContainingType.DeclaringSyntaxReferences;
+			foreach (var m in rm) {
+				foreach (var t in rt) {
+					if (m.SyntaxTree == t.SyntaxTree && m.Span == t.Span) {
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
 		public static IReadOnlyList<ISymbol> GetExplicitInterfaceImplementations(this ISymbol symbol) {
 			switch (symbol.Kind) {
 				case SymbolKind.Method:

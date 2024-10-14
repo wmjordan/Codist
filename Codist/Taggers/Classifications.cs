@@ -67,6 +67,7 @@ namespace Codist.Taggers
 			NestedType = registry.GetClassificationTag(Constants.CSharpNestedTypeName);
 			OverrideMember = registry.GetClassificationTag(Constants.CSharpOverrideMemberName);
 			Parameter = registry.GetClassificationTag(Constants.CSharpParameterName);
+			PrimaryConstructorParameter = registry.GetClassificationTag(Constants.CSharpPrimaryConstructorParameterName);
 			Property = registry.GetClassificationTag(Constants.CSharpPropertyName);
 			ReadOnlyField = registry.GetClassificationTag(Constants.CSharpReadOnlyFieldName);
 			ReadOnlyStruct = registry.GetClassificationTag(Constants.CSharpReadOnlyStructName);
@@ -85,87 +86,47 @@ namespace Codist.Taggers
 		}
 
 		public ClassificationTag AbstractMember { get; }
-
 		public ClassificationTag AliasNamespace { get; }
-
 		public ClassificationTag AttributeName { get; }
-
 		public ClassificationTag AttributeNotation { get; }
-
 		public ClassificationTag ClassName { get; }
-
 		public ClassificationTag ConstField { get; }
-
 		public ClassificationTag ConstructorMethod { get; }
-
 		public ClassificationTag Declaration { get; }
-
 		public ClassificationTag DeclarationBrace { get; }
-
 		public ClassificationTag DelegateName { get; }
-
 		public ClassificationTag EnumName { get; }
-
 		public ClassificationTag EnumField { get; }
-
 		public ClassificationTag Event { get; }
-
 		public ClassificationTag ExtensionMethod { get; }
-
 		public ClassificationTag ExternMethod { get; }
-
 		public ClassificationTag Field { get; }
-
 		public ClassificationTag InterfaceName { get; }
-
 		public ClassificationTag Label { get; }
-
 		public ClassificationTag LocalVariable { get; }
-
 		public ClassificationTag LocalDeclaration { get; }
-
 		public ClassificationTag LocalFunctionDeclaration { get; }
-
 		public ClassificationTag Method { get; }
-
 		public ClassificationTag MetadataSymbol { get; }
-
 		public ClassificationTag Namespace { get; }
-
 		public ClassificationTag NestedDeclaration { get; }
-
 		public ClassificationTag NestedType { get; }
-
 		public ClassificationTag OverrideMember { get; }
-
 		public ClassificationTag Parameter { get; }
-
+		public ClassificationTag PrimaryConstructorParameter { get; }
 		public ClassificationTag PrivateMember { get; }
-
 		public ClassificationTag Property { get; }
-
 		public ClassificationTag ReadOnlyField { get; }
-
 		public ClassificationTag ReadOnlyStruct { get; }
-
 		public ClassificationTag RefStruct { get; }
-
 		public ClassificationTag SealedMember { get; }
-
 		public ClassificationTag StaticMember { get; }
-
 		public ClassificationTag StructName { get; }
-
 		public ClassificationTag TypeParameter { get; }
-
 		public ClassificationTag UserSymbol { get; }
-
 		public ClassificationTag VariableCapturedExpression { get; }
-
 		public ClassificationTag VirtualMember { get; }
-
 		public ClassificationTag VolatileField { get; }
-
 		public ClassificationTag XmlDoc { get; }
 	}
 

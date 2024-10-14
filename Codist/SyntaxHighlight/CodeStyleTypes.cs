@@ -479,6 +479,12 @@ namespace Codist.SyntaxHighlight
 		[BaseDefinition(Constants.CodeParameterName)]
 		[Description("Name of parameter, inheriting from Identifier")]
 		ParameterName,
+		[Category(Constants.SyntaxCategory.Member)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpPrimaryConstructorParameterName)]
+		[BaseDefinition(Constants.CodeIdentifier)]
+		[BaseDefinition(Constants.CSharpParameterName)]
+		[Description("Name of primary constructor parameter, inheriting from C# Parameter")]
+		PrimaryConstructorParameterName,
 
 		[Category(Constants.SyntaxCategory.Comment)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpXmlDoc)]
