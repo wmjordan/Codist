@@ -2603,8 +2603,8 @@ Ctrl: Match current symbol only, excluding base or derived symbols</value>
   <data name="T_StandardColors" xml:space="preserve">
     <value>Standard colors:</value>
   </data>
-  <data name="T_Customized" xml:space="preserve">
-    <value>Customized</value>
+  <data name="T_Custom" xml:space="preserve">
+    <value>Custom</value>
   </data>
   <data name="OT_FilterStyleNamesTip" xml:space="preserve">
     <value>Filter syntax style names</value>
@@ -2823,5 +2823,14 @@ Discard its changes?</value>
   </data>
   <data name="T_AboutCustomSyntaxRulesTip" xml:space="preserve">
     <value>Open a web page which documents the syntax customization rules</value>
+  </data>
+  <data name="T_ClassificationTypesJsonTip" xml:space="preserve">
+    <value>Open or create the ClassificationTypes.json file to define your own syntax style names</value>
+  </data>
+  <data name="T_CreateClassificationTypesJson" xml:space="preserve">
+    <value>Create ClassificationTypes.json</value>
+  </data>
+  <data name="T_OpenClassificationTypesJson" xml:space="preserve">
+    <value>Open ClassificationTypes.json</value>
   </data>
 </root>

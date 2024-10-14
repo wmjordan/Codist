@@ -5964,6 +5964,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Open or create the ClassificationTypes.json file to define your own syntax style names.
+        /// </summary>
+        internal static string T_ClassificationTypesJsonTip {
+            get {
+                return ResourceManager.GetString("T_ClassificationTypesJsonTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Click to open folder in Windows Explorer.
         /// </summary>
         internal static string T_ClickToOpenInExplorer {
@@ -6109,20 +6118,29 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Create ClassificationTypes.json.
+        /// </summary>
+        internal static string T_CreateClassificationTypesJson {
+            get {
+                return ResourceManager.GetString("T_CreateClassificationTypesJson", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Custom.
+        /// </summary>
+        internal static string T_Custom {
+            get {
+                return ResourceManager.GetString("T_Custom", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Custom colors:.
         /// </summary>
         internal static string T_CustomColors {
             get {
                 return ResourceManager.GetString("T_CustomColors", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Customized.
-        /// </summary>
-        internal static string T_Customized {
-            get {
-                return ResourceManager.GetString("T_Customized", resourceCulture);
             }
         }
         
@@ -7262,6 +7280,15 @@ namespace Codist.Properties {
         internal static string T_OpacityNotSet {
             get {
                 return ResourceManager.GetString("T_OpacityNotSet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Open ClassificationTypes.json.
+        /// </summary>
+        internal static string T_OpenClassificationTypesJson {
+            get {
+                return ResourceManager.GetString("T_OpenClassificationTypesJson", resourceCulture);
             }
         }
         

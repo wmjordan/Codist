@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
@@ -30,6 +31,8 @@ namespace Codist.SyntaxHighlight
 			_FormatMaps = formatMaps;
 			_EditorFormatMaps = editorFormatMaps;
 		}
+
+		public static bool HasCustomTypes => File.Exists(Config.CustomizedClassificationTypePath);
 
 		public void RegisterClassificationTypes<TStyle>() where TStyle : Enum {
 			var t = typeof(TStyle);
@@ -76,49 +79,67 @@ namespace Codist.SyntaxHighlight
 			}
 		}
 
+		public static void CreateSampleCustomClassificationTypes() {
+			if (HasCustomTypes) {
+				return;
+			}
+			var o = new CustomizedClassificationTypes {
+				Types = {
+						new CustomizedClassificationType { Name = "Bold", IsBold = true },
+						new CustomizedClassificationType { Name = "Italic", IsItalic = true },
+						new CustomizedClassificationType { Name = "Underline", IsUnderline = true },
+						new CustomizedClassificationType { Name = "Bold Italic", IsBold = true, IsItalic = true },
+						new CustomizedClassificationType { Name = "Bold Underline", IsBold = true, IsUnderline = true },
+						new CustomizedClassificationType { Name = "Large Text", FontSize = 22 },
+					}
+			};
+			File.WriteAllText(Config.CustomizedClassificationTypePath, JsonConvert.SerializeObject(o));
+		}
+
 		static readonly char[] __ClassificationTypeDelimiters = [';', ','];
 		public void RegisterCustomizedClassificationTypes() {
-			if (System.IO.File.Exists(Config.CustomizedClassificationTypePath)) {
-				CustomizedClassificationTypes customTypes;
-				try {
-					customTypes = JsonConvert.DeserializeObject<CustomizedClassificationTypes>(System.IO.File.ReadAllText(Config.CustomizedClassificationTypePath));
-					(Config.CustomizedClassificationTypePath + " loaded").Log();
+			if (HasCustomTypes == false) {
+				return;
+			}
+			CustomizedClassificationTypes customTypes;
+			try {
+				customTypes = JsonConvert.DeserializeObject<CustomizedClassificationTypes>(File.ReadAllText(Config.CustomizedClassificationTypePath));
+				(Config.CustomizedClassificationTypePath + " loaded").Log();
+			}
+			catch (Exception ex) {
+				ex.Log();
+				return;
+			}
+			if (!(customTypes?.Types?.Count > 0)) {
+				return;
+			}
+			var r = _Classifications;
+			foreach (var type in customTypes.Types) {
+				var name = type.Name;
+				if (String.IsNullOrEmpty(name) || r.GetClassificationType(name) != null) {
+					continue;
 				}
-				catch (Exception ex) {
-					ex.Log();
-					return;
-				}
-				if (!(customTypes?.Types?.Count > 0)) {
-					return;
-				}
-				var r = _Classifications;
-				foreach (var type in customTypes.Types) {
-					var name = type.Name;
-					if (String.IsNullOrEmpty(name) || r.GetClassificationType(name) != null) {
-						continue;
+				var baseNames = type.BaseOn?.Split(__ClassificationTypeDelimiters);
+				var before = type.Before?.Split(__ClassificationTypeDelimiters) ?? [];
+				var after = type.After?.Split(__ClassificationTypeDelimiters) ?? [];
+				var orders = (before.Length > 0 && after.Length > 0) ? new List<(string, bool)>() : null;
+				if (orders != null) {
+					foreach (var order in before) {
+						orders.Add((order, true));
 					}
-					var baseNames = type.BaseOn?.Split(__ClassificationTypeDelimiters);
-					var before = type.Before?.Split(__ClassificationTypeDelimiters) ?? [];
-					var after = type.After?.Split(__ClassificationTypeDelimiters) ?? [];
-					var orders = (before.Length > 0 && after.Length > 0) ? new List<(string, bool)>() : null;
-					if (orders != null) {
-						foreach (var order in before) {
-							orders.Add((order, true));
-						}
-						foreach (var order in after) {
-							orders.Add((order, false));
-						}
+					foreach (var order in after) {
+						orders.Add((order, false));
 					}
-					var style = type.HasStyle ? new StyleAttribute(type.Foreground, type.Background) : null;
-					if (style != null) {
-						style.Bold = type.IsBold;
-						style.Italic = type.IsItalic;
-						style.Underline = type.IsUnderline;
-						style.Size = type.FontSize;
-					}
-					_Entries.Add(new Entry(name, baseNames?.ToList(), orders, style));
-					_CustomizedNames.Add(name);
 				}
+				var style = type.HasStyle ? new StyleAttribute(type.Foreground, type.Background) : null;
+				if (style != null) {
+					style.Bold = type.IsBold;
+					style.Italic = type.IsItalic;
+					style.Underline = type.IsUnderline;
+					style.Size = type.FontSize;
+				}
+				_Entries.Add(new Entry(name, baseNames?.ToList(), orders, style));
+				_CustomizedNames.Add(name);
 			}
 		}
 

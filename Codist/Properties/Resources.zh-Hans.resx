@@ -2583,8 +2583,8 @@ Ctrl: 仅匹配当前类，不匹配其它派生类或继承类</value>
   <data name="T_StandardColors" xml:space="preserve">
     <value>标准颜色:</value>
   </data>
-  <data name="T_Customized" xml:space="preserve">
-    <value>已自定义</value>
+  <data name="T_Custom" xml:space="preserve">
+    <value>自定义</value>
   </data>
   <data name="OT_FilterStyleNamesTip" xml:space="preserve">
     <value>按名称筛选语法样式</value>
@@ -2803,5 +2803,14 @@ Ctrl: 将下划线分隔的单词转换为首字母大写的单词</value>
   </data>
   <data name="T_AboutCustomSyntaxRulesTip" xml:space="preserve">
     <value>打开关于自定义语法规则的文档页面</value>
+  </data>
+  <data name="T_ClassificationTypesJsonTip" xml:space="preserve">
+    <value>打开或创建 ClassificationTypes.json 配置文件以定义您自己使用的自定义语法样式类型</value>
+  </data>
+  <data name="T_CreateClassificationTypesJson" xml:space="preserve">
+    <value>创建 ClassificationTypes.json</value>
+  </data>
+  <data name="T_OpenClassificationTypesJson" xml:space="preserve">
+    <value>打开 ClassificationTypes.json</value>
   </data>
 </root>

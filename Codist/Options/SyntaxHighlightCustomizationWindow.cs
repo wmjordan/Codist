@@ -108,7 +108,7 @@ namespace Codist.Options
 										new ClassificationCategoryItem(SyntaxStyleSource.Xml, "XML/HTML"),
 										new ClassificationCategoryItem(SyntaxStyleSource.CommentTagger, R.T_TaggedComments),
 										new ClassificationCategoryItem(SyntaxStyleSource.CommentLabels, "   "+R.T_Tags),
-										new ClassificationCategoryItem(SyntaxStyleSource.Custom, R.T_Customized),
+										new ClassificationCategoryItem(SyntaxStyleSource.Custom, R.T_Custom),
 										new ClassificationCategoryItem(SyntaxStyleSource.PriorityOrder, R.T_AllLanguages)
 									}
 								}.Set(ref _SyntaxSourceBox).ReferenceStyle(VsResourceKeys.ThemedDialogListBoxStyleKey),
@@ -607,14 +607,23 @@ namespace Codist.Options
 					FontSize = 20,
 					TextWrapping = TextWrapping.Wrap
 				});
-				if (source == SyntaxStyleSource.Custom) {
-					l.Add(new TextBlock().AppendLink(R.T_AboutCustomSyntaxRules, "https://github.com/wmjordan/Codist/wiki/ClassificationTypes.json-and-Codist.ct.json", R.T_AboutCustomSyntaxRulesTip));
-				}
 				_SettingsGroup.Visibility = _StyleNameHolder.Visibility = _RightPaneTitle.Visibility = Visibility.Collapsed;
 			}
 			else {
 				FilterSettingsList(null, EventArgs.Empty);
 				_RightPaneTitle.Visibility = Visibility.Visible;
+			}
+			if (source == SyntaxStyleSource.Custom) {
+				l.Add(new TextBlock { Margin = WpfHelper.SmallMargin }.AppendLink(ClassificationTypeExporter.HasCustomTypes ? R.T_OpenClassificationTypesJson : R.T_CreateClassificationTypesJson, _ => {
+					try {
+						ClassificationTypeExporter.CreateSampleCustomClassificationTypes();
+						TextEditorHelper.OpenFile(Config.CustomizedClassificationTypePath);
+					}
+					catch (Exception ex) {
+						MessageWindow.Error(ex);
+					}
+				}, R.T_ClassificationTypesJsonTip));
+				l.Add(new TextBlock { Margin = WpfHelper.SmallMargin }.AppendLink(R.T_AboutCustomSyntaxRules, "https://github.com/wmjordan/Codist/wiki/ClassificationTypes.json-and-Codist.ct.json", R.T_AboutCustomSyntaxRulesTip));
 			}
 		}
 
