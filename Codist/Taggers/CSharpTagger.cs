@@ -631,6 +631,7 @@ namespace Codist.Taggers
 
 			static void ClassifyIdentifier(SnapshotSpan itemSpan, in TagHolder tags, SyntaxNode node, SemanticModel semanticModel, CancellationToken cancellationToken) {
 				var symbol = semanticModel.GetSymbolOrFirstCandidate(node, cancellationToken);
+				IMethodSymbol method;
 				if (symbol is null) {
 					symbol = semanticModel.GetDeclaredSymbol(node, cancellationToken);
 					if (symbol is null) {
@@ -757,40 +758,44 @@ namespace Codist.Taggers
 
 					case SymbolKind.Parameter:
 						tags.Add(itemSpan, __Classifications.Parameter);
-						if ((symbol.ContainingSymbol as IMethodSymbol).IsPrimaryConstructor()) {
+						method = (IMethodSymbol)symbol.ContainingSymbol;
+						if (method.IsPrimaryConstructor()) {
 							tags.Add(itemSpan, __Classifications.PrimaryConstructorParameter);
+						}
+						else if (method.MethodKind.CeqAny(MethodKind.LambdaMethod, MethodKind.LocalFunction)) {
+							tags.Add(itemSpan, __Classifications.LocalFunctionParameter);
 						}
 						break;
 
 					case SymbolKind.Method:
-						var methodSymbol = symbol as IMethodSymbol;
-						switch (methodSymbol.MethodKind) {
+						method = (IMethodSymbol)symbol;
+						switch (method.MethodKind) {
 							case MethodKind.Constructor:
 								tags.Add(itemSpan,
 									node is AttributeSyntax || node.Parent is AttributeSyntax || node.Parent?.Parent is AttributeSyntax
 										? __Classifications.AttributeName
 										: HighlightOptions.StyleConstructorAsType
-										? (methodSymbol.ContainingType.TypeKind == TypeKind.Struct ? __Classifications.StructName : __Classifications.ClassName)
+										? (method.ContainingType.TypeKind == TypeKind.Struct ? __Classifications.StructName : __Classifications.ClassName)
 										: __Classifications.ConstructorMethod);
 								break;
 							case MethodKind.Destructor:
 							case MethodKind.StaticConstructor:
 								tags.Add(itemSpan, HighlightOptions.StyleConstructorAsType
-										? (methodSymbol.ContainingType.TypeKind == TypeKind.Struct
+										? (method.ContainingType.TypeKind == TypeKind.Struct
 											? __Classifications.StructName
 											: __Classifications.ClassName)
 										: __Classifications.ConstructorMethod);
 								break;
 							default:
-								tags.Add(itemSpan, methodSymbol.IsExtensionMethod ? __Classifications.ExtensionMethod
-									: methodSymbol.IsExtern ? __Classifications.ExternMethod
+								tags.Add(itemSpan, method.IsExtensionMethod ? __Classifications.ExtensionMethod
+									: method.IsExtern ? __Classifications.ExternMethod
 									: __Classifications.Method);
 								break;
 						}
 						break;
 
 					case SymbolKind.NamedType:
-						if (symbol.ContainingType != null && symbol.Kind == SymbolKind.NamedType) {
+						if (symbol.ContainingType?.Kind == SymbolKind.NamedType) {
 							tags.Add(itemSpan, __Classifications.NestedType);
 						}
 						break;

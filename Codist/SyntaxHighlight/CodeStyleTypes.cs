@@ -485,6 +485,12 @@ namespace Codist.SyntaxHighlight
 		[BaseDefinition(Constants.CSharpParameterName)]
 		[Description("Name of primary constructor parameter, inheriting from C# Parameter")]
 		PrimaryConstructorParameterName,
+		[Category(Constants.SyntaxCategory.Member)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpLocalFunctionParameterName)]
+		[BaseDefinition(Constants.CodeIdentifier)]
+		[BaseDefinition(Constants.CSharpParameterName)]
+		[Description("Parameter of local function or anonymous function, inheriting from C# Parameter")]
+		LocalFunctionParameterName,
 
 		[Category(Constants.SyntaxCategory.Comment)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpXmlDoc)]

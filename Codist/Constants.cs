@@ -142,6 +142,7 @@ namespace Codist
 		public const string CSharpExtensionMethodName = "C#: Extension method";
 		public const string CSharpExternMethodName = "C#: Extern method";
 		public const string CSharpLocalFunctionDeclarationName = "C#: Local function declaration";
+		public const string CSharpLocalFunctionParameterName = "C#: Local/anonymous function parameter";
 		public const string CSharpMethodName = "C#: Method";
 		public const string CSharpEventName = "C#: Event";
 		public const string CSharpPropertyName = "C#: Property";

@@ -61,6 +61,7 @@ namespace Codist.Taggers
 			LocalVariable = registry.GetClassificationTag(Constants.CSharpLocalVariableName);
 			LocalDeclaration = registry.GetClassificationTag(Constants.CSharpLocalDeclarationName);
 			LocalFunctionDeclaration = registry.GetClassificationTag(Constants.CSharpLocalFunctionDeclarationName);
+			LocalFunctionParameter = registry.GetClassificationTag(Constants.CSharpLocalFunctionParameterName);
 			Method = registry.GetClassificationTag(Constants.CSharpMethodName);
 			Namespace = registry.GetClassificationTag(Constants.CSharpNamespaceName);
 			NestedDeclaration = registry.GetClassificationTag(Constants.CSharpMemberDeclarationName);
@@ -106,6 +107,7 @@ namespace Codist.Taggers
 		public ClassificationTag LocalVariable { get; }
 		public ClassificationTag LocalDeclaration { get; }
 		public ClassificationTag LocalFunctionDeclaration { get; }
+		public ClassificationTag LocalFunctionParameter { get; }
 		public ClassificationTag Method { get; }
 		public ClassificationTag MetadataSymbol { get; }
 		public ClassificationTag Namespace { get; }
