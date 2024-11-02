@@ -208,6 +208,12 @@ namespace Codist.QuickInfo
 						symbol = semanticModel.GetSymbolInfo((ElementAccessExpressionSyntax)node.Parent, cancellationToken).Symbol;
 					}
 					else if (node.IsAnyKind(CodeAnalysisHelper.CollectionExpression, CodeAnalysisHelper.ListPatternExpression)) {
+						if (node.IsKind(CodeAnalysisHelper.CollectionExpression)) {
+							container.Add(new ThemedTipText(R.T_ElementCount + ((ExpressionSyntax)node).GetCollectionExpressionElementsCount().ToText()).SetGlyph(IconIds.InstanceMember));
+						}
+						else {
+							container.Add(new ThemedTipText(R.T_PatternCount + ((ExpressionSyntax)node).GetListPatternsCount().ToText()).SetGlyph(IconIds.InstanceMember));
+						}
 						symbol = semanticModel.GetTypeInfo(node, cancellationToken).ConvertedType;
 					}
 					if (symbol == null) {
@@ -693,19 +699,19 @@ namespace Codist.QuickInfo
 					foreach (var section in ((SwitchStatementSyntax)node).Sections) {
 						cases += section.Labels.Count;
 					}
-					qiContent.Add(new ThemedTipText(R.T_SectionsCases.Replace("<C>", c.ToText()).Replace("<S>", cases.ToText())).SetGlyph(VsImageHelper.GetImage(IconIds.Switch)));
+					qiContent.Add(new ThemedTipText(R.T_SectionsCases.Replace("<C>", c.ToText()).Replace("<S>", cases.ToText())).SetGlyph(IconIds.Switch));
 				}
 				else if (c == 1) {
 					c = ((SwitchStatementSyntax)node).Sections[0].Labels.Count;
 					if (c > 1) {
-						qiContent.Add(new ThemedTipText(R.T_1SectionCases.Replace("<C>", c.ToText())).SetGlyph(VsImageHelper.GetImage(IconIds.Switch)));
+						qiContent.Add(new ThemedTipText(R.T_1SectionCases.Replace("<C>", c.ToText())).SetGlyph(IconIds.Switch));
 					}
 				}
 			}
 			else if (nodeKind == CodeAnalysisHelper.SwitchExpression) {
 				c = ((ExpressionSyntax)node).GetSwitchExpressionArmsCount();
 				if (c > 1) {
-					qiContent.Add(new ThemedTipText(R.T_SwitchCases.Replace("<C>", c.ToText())).SetGlyph(VsImageHelper.GetImage(IconIds.Switch)));
+					qiContent.Add(new ThemedTipText(R.T_SwitchCases.Replace("<C>", c.ToText())).SetGlyph(IconIds.Switch));
 				}
 			}
 			else if (nodeKind == SyntaxKind.StringLiteralExpression) {

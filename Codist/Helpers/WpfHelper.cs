@@ -43,6 +43,9 @@ namespace Codist
 		internal static readonly Thickness MenuItemMargin = new Thickness(6, 0, 6, 0);
 
 		#region TextBlock and Run
+		public static TextBlock SetGlyph(this TextBlock block, int iconId) {
+			return block.SetGlyph(VsImageHelper.GetImage(iconId));
+		}
 		public static TextBlock SetGlyph(this TextBlock block, ImageSource image) {
 			var first = block.Inlines.FirstInline;
 			var glyph = new InlineUIContainer(new Image { Source = image, Width = image.Width, Margin = GlyphMargin }) { BaselineAlignment = BaselineAlignment.TextTop };

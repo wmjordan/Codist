@@ -6381,6 +6381,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Element count: .
+        /// </summary>
+        internal static string T_ElementCount {
+            get {
+                return ResourceManager.GetString("T_ElementCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to End of if .
         /// </summary>
         internal static string T_EndOfIf {
@@ -7334,6 +7343,15 @@ namespace Codist.Properties {
         internal static string T_Overrides {
             get {
                 return ResourceManager.GetString("T_Overrides", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Pattern count: .
+        /// </summary>
+        internal static string T_PatternCount {
+            get {
+                return ResourceManager.GetString("T_PatternCount", resourceCulture);
             }
         }
         

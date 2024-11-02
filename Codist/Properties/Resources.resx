@@ -2845,4 +2845,10 @@ Discard its changes?</value>
   <data name="T_SwitchCases" xml:space="preserve">
     <value>&lt;C&gt; switch cases</value>
   </data>
+  <data name="T_ElementCount" xml:space="preserve">
+    <value>Element count: </value>
+  </data>
+  <data name="T_PatternCount" xml:space="preserve">
+    <value>Pattern count: </value>
+  </data>
 </root>
