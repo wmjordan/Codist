@@ -5568,6 +5568,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 1 switch section, &lt;C&gt;cases.
+        /// </summary>
+        internal static string T_1SectionCases {
+            get {
+                return ResourceManager.GetString("T_1SectionCases", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to About custom syntax rules.
         /// </summary>
         internal static string T_AboutCustomSyntaxRules {
@@ -7648,6 +7657,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &lt;C&gt; switch sections, &lt;S&gt; cases.
+        /// </summary>
+        internal static string T_SectionsCases {
+            get {
+                return ResourceManager.GetString("T_SectionsCases", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to See also.
         /// </summary>
         internal static string T_SeeAlso {
@@ -7873,11 +7891,29 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Sub-pattern count: .
+        /// </summary>
+        internal static string T_SubPatternCount {
+            get {
+                return ResourceManager.GetString("T_SubPatternCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Super Quick Info.
         /// </summary>
         internal static string T_SuperQuickInfo {
             get {
                 return ResourceManager.GetString("T_SuperQuickInfo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;C&gt; switch cases.
+        /// </summary>
+        internal static string T_SwitchCases {
+            get {
+                return ResourceManager.GetString("T_SwitchCases", resourceCulture);
             }
         }
         

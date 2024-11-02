@@ -1043,6 +1043,12 @@ namespace Codist
 				? AssemblySource.Metadata
 				: (AssemblySource)NonPublicOrFutureAccessors.GetAssemblySourceType(assembly);
 		}
+		public static int GetSwitchExpressionArmsCount(this ExpressionSyntax switchExpression) {
+			return switchExpression.IsKind(SwitchExpression) ? NonPublicOrFutureAccessors.GetSwitchExpressionArmsCount(switchExpression) : 0;
+		}
+		public static int GetPropertyPatternSubPatternsCount(this CSharpSyntaxNode propertyPatternClauseExpression) {
+			return propertyPatternClauseExpression.IsKind(PropertyPatternClause) ? NonPublicOrFutureAccessors.GetPropertyPatternSubPatternsCount(propertyPatternClauseExpression) : 0;
+		}
 		#endregion
 
 		public static Task<Project> GetProjectAsync(this ISymbol symbol, Solution solution, CancellationToken cancellationToken = default) {
@@ -1624,6 +1630,48 @@ namespace Codist
 					il.Emit(OpCodes.Ret);
 				}
 				return m.CreateDelegate<Func<IAssemblySymbol, int>>();
+			}
+
+			public static readonly Func<ExpressionSyntax, int> GetSwitchExpressionArmsCount = CreateSyntaxListCountFunc<ExpressionSyntax>("GetSwitchExpressionArmsCount", "Microsoft.CodeAnalysis.CSharp.Syntax.SwitchExpressionSyntax", "Arms");
+			public static readonly Func<CSharpSyntaxNode, int> GetPropertyPatternSubPatternsCount = CreateSyntaxListCountFunc<CSharpSyntaxNode>("GetPropertyPatternClauseSubPatternsCount", "Microsoft.CodeAnalysis.CSharp.Syntax.PropertyPatternClauseSyntax", "Subpatterns");
+
+			static Func<TNode, int> CreateSyntaxListCountFunc<TNode>(string methodName, string type, string listPropertyName) where TNode : SyntaxNode {
+				var m = new DynamicMethod(methodName, typeof(int), new Type[] { typeof(TNode) }, true);
+				var il = m.GetILGenerator();
+				var asm = typeof(TNode).Assembly;
+				var t = asm.GetType(type);
+				if (t is null) {
+					goto RETURN_0;
+				}
+				var list = t.GetProperty(listPropertyName);
+				if (list is null) {
+					goto RETURN_0;
+				}
+				var count = list.PropertyType.GetProperty("Count");
+				if (count is null) {
+					goto RETURN_0;
+				}
+				var isNotExpression = il.DefineLabel();
+				var temp = il.DeclareLocal(list.PropertyType);
+
+				il.Emit(OpCodes.Ldarg_0);
+				il.Emit(OpCodes.Isinst, t);
+				il.Emit(OpCodes.Dup);
+				il.Emit(OpCodes.Brfalse_S, isNotExpression);
+
+				il.Emit(OpCodes.Callvirt, list.GetGetMethod());
+				il.Emit(OpCodes.Stloc_S, temp);
+				il.Emit(OpCodes.Ldloca_S, temp);
+				il.Emit(OpCodes.Call, count.GetGetMethod());
+				il.Emit(OpCodes.Ret);
+
+				il.MarkLabel(isNotExpression);
+				il.Emit(OpCodes.Pop);
+			RETURN_0:
+				il.Emit(OpCodes.Ldc_I4_0);
+				il.Emit(OpCodes.Ret);
+
+				return m.CreateDelegate<Func<TNode, int>>();
 			}
 		}
 

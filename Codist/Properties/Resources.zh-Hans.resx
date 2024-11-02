@@ -2813,4 +2813,16 @@ Ctrl: 将下划线分隔的单词转换为首字母大写的单词</value>
   <data name="T_OpenClassificationTypesJson" xml:space="preserve">
     <value>打开 ClassificationTypes.json</value>
   </data>
+  <data name="T_SubPatternCount" xml:space="preserve">
+    <value>子模式数量: </value>
+  </data>
+  <data name="T_1SectionCases" xml:space="preserve">
+    <value>1 个条件块，&lt;C&gt; 个条件</value>
+  </data>
+  <data name="T_SectionsCases" xml:space="preserve">
+    <value>&lt;C&gt; 个条件块，&lt;S&gt; 个条件</value>
+  </data>
+  <data name="T_SwitchCases" xml:space="preserve">
+    <value>&lt;C&gt; 个条件</value>
+  </data>
 </root>

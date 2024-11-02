@@ -83,7 +83,13 @@ namespace Codist.QuickInfo
 						container.Add(new ThemedTipText()
 							.SetGlyph(VsImageHelper.GetImage(IconIds.InstanceMember))
 							.Append(R.T_ExpressionCount)
-							.Append((node as InitializerExpressionSyntax).Expressions.Count.ToText(), true, false, __SymbolFormatter.Number));
+							.Append(((InitializerExpressionSyntax)node).Expressions.Count.ToText(), true, false, __SymbolFormatter.Number));
+					}
+					else if (node.IsKind(CodeAnalysisHelper.PropertyPatternClause)) {
+						container.Add(new ThemedTipText().SetGlyph(VsImageHelper.GetImage(IconIds.InstanceMember))
+							.Append(R.T_SubPatternCount)
+							.Append(((CSharpSyntaxNode)node).GetPropertyPatternSubPatternsCount().ToText())
+							);
 					}
 					else if (node.IsKind(SyntaxKind.Interpolation)) {
 						symbol = semanticModel.Compilation.GetSpecialType(SpecialType.System_String);
@@ -128,9 +134,23 @@ namespace Codist.QuickInfo
 					symbol = semanticModel.GetTypeInfo(unitCompilation.FindNode(token.Span, false, true), cancellationToken).ConvertedType;
 					isConvertedType = symbol != null;
 					break;
+				case SyntaxKind.SwitchKeyword:
+					node = unitCompilation.FindNode(token.Span, false, true);
+					if (node.IsKind(CodeAnalysisHelper.SwitchExpression)) {
+						symbol = semanticModel.GetTypeInfo(node.ChildNodes().First()).Type;
+						if (symbol != null) {
+							container.Add(new ThemedTipText().SetGlyph(VsImageHelper.GetImage(IconIds.ReadVariables)).AddSymbol(symbol, false, __SymbolFormatter));
+						}
+						ShowMiscInfo(container, node);
+						symbol = semanticModel.GetTypeInfo(node, cancellationToken).ConvertedType;
+						if (symbol == null) {
+							return null;
+						}
+						isConvertedType = true;
+					}
+					break;
 				case SyntaxKind.NullKeyword:
 				case SyntaxKind.DefaultKeyword:
-				case SyntaxKind.SwitchKeyword:
 				case SyntaxKind.QuestionToken:
 				case SyntaxKind.ColonToken:
 				case SyntaxKind.QuestionQuestionToken:
@@ -661,24 +681,31 @@ namespace Codist.QuickInfo
 		static void ShowMiscInfo(InfoContainer qiContent, SyntaxNode node) {
 			Grid infoBox = null;
 			var nodeKind = node.Kind();
+			int c;
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.NumericValues)
 				&& nodeKind.CeqAny(SyntaxKind.NumericLiteralExpression, SyntaxKind.CharacterLiteralExpression)) {
 				infoBox = ToolTipHelper.ShowNumericRepresentations(node);
 			}
 			else if (nodeKind == SyntaxKind.SwitchStatement) {
-				var s = ((SwitchStatementSyntax)node).Sections.Count;
-				if (s > 1) {
+				c = ((SwitchStatementSyntax)node).Sections.Count;
+				if (c > 1) {
 					var cases = 0;
 					foreach (var section in ((SwitchStatementSyntax)node).Sections) {
 						cases += section.Labels.Count;
 					}
-					qiContent.Add(new ThemedTipText($"{s} switch sections, {cases} cases").SetGlyph(VsImageHelper.GetImage(IconIds.Switch)));
+					qiContent.Add(new ThemedTipText(R.T_SectionsCases.Replace("<C>", c.ToText()).Replace("<S>", cases.ToText())).SetGlyph(VsImageHelper.GetImage(IconIds.Switch)));
 				}
-				else if (s == 1) {
-					s = ((SwitchStatementSyntax)node).Sections[0].Labels.Count;
-					if (s > 1) {
-						qiContent.Add(new ThemedTipText($"1 switch section, {s} cases").SetGlyph(VsImageHelper.GetImage(IconIds.Switch)));
+				else if (c == 1) {
+					c = ((SwitchStatementSyntax)node).Sections[0].Labels.Count;
+					if (c > 1) {
+						qiContent.Add(new ThemedTipText(R.T_1SectionCases.Replace("<C>", c.ToText())).SetGlyph(VsImageHelper.GetImage(IconIds.Switch)));
 					}
+				}
+			}
+			else if (nodeKind == CodeAnalysisHelper.SwitchExpression) {
+				c = ((ExpressionSyntax)node).GetSwitchExpressionArmsCount();
+				if (c > 1) {
+					qiContent.Add(new ThemedTipText(R.T_SwitchCases.Replace("<C>", c.ToText())).SetGlyph(VsImageHelper.GetImage(IconIds.Switch)));
 				}
 			}
 			else if (nodeKind == SyntaxKind.StringLiteralExpression) {

@@ -2833,4 +2833,16 @@ Discard its changes?</value>
   <data name="T_OpenClassificationTypesJson" xml:space="preserve">
     <value>Open ClassificationTypes.json</value>
   </data>
+  <data name="T_SubPatternCount" xml:space="preserve">
+    <value>Sub-pattern count: </value>
+  </data>
+  <data name="T_1SectionCases" xml:space="preserve">
+    <value>1 switch section, &lt;C&gt;cases</value>
+  </data>
+  <data name="T_SectionsCases" xml:space="preserve">
+    <value>&lt;C&gt; switch sections, &lt;S&gt; cases</value>
+  </data>
+  <data name="T_SwitchCases" xml:space="preserve">
+    <value>&lt;C&gt; switch cases</value>
+  </data>
 </root>

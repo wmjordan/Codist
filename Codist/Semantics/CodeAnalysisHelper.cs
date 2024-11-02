@@ -49,6 +49,7 @@ namespace Codist
 		internal const SyntaxKind CollectionExpression = (SyntaxKind)9076;
 		internal const SyntaxKind FileScopedNamespaceDeclaration = (SyntaxKind)8845;
 		internal const SyntaxKind RecursivePattern = (SyntaxKind)9020;
+		internal const SyntaxKind PropertyPatternClause = (SyntaxKind)9021;
 		internal const SyntaxKind PositionalPatternClause = (SyntaxKind)9023;
 		internal const SyntaxKind SwitchExpression = (SyntaxKind)9025;
 		internal const SyntaxKind SwitchExpressionArm = (SyntaxKind)9026;
