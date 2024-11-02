@@ -81,7 +81,7 @@ namespace Codist.QuickInfo
 				}
 			}
 		RETURN:
-			return new QuickInfoItem(activeSpan.ToTrackingSpan(), info.SetGlyph(VsImageHelper.GetImage(IconIds.SelectCode)).Tag());
+			return new QuickInfoItem(activeSpan.ToTrackingSpan(), info.SetGlyph(IconIds.SelectCode).Tag());
 		}
 
 		static QuickInfoItem ShowCharacterInfo(SnapshotSpan activeSpan, string ch) {
@@ -103,7 +103,7 @@ namespace Codist.QuickInfo
 			return new QuickInfoItem(activeSpan.ToTrackingSpan(), new StackPanel {
 				Name = Name,
 				Children = {
-					new ThemedTipText(R.T_SelectedCharacter).SetGlyph(VsImageHelper.GetImage(IconIds.SelectCode)),
+					new ThemedTipText(R.T_SelectedCharacter).SetGlyph(IconIds.SelectCode),
 					new StackPanel {
 						Orientation = Orientation.Horizontal,
 						Children = {

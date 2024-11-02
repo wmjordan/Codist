@@ -468,7 +468,7 @@ namespace Codist.QuickInfo
 							items[i] = new ThemedTipText {
 								Text = vi.TextSnapshot.GetText(),
 								Margin = WpfHelper.MiddleBottomMargin
-							}.SetGlyph(VsImageHelper.GetImage(IconIds.Info));
+							}.SetGlyph(IconIds.Info);
 							continue;
 						}
 						if (qi is ItemsControl ic) {
@@ -483,7 +483,7 @@ namespace Codist.QuickInfo
 								item.Content = new ThemedTipText {
 									Text = v.TextSnapshot.GetText(),
 									Margin = WpfHelper.MiddleBottomMargin
-								}.SetGlyph(VsImageHelper.GetImage(IconIds.Info));
+								}.SetGlyph(IconIds.Info);
 							}
 						}
 					}

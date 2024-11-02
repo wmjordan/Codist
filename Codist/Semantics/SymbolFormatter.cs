@@ -593,7 +593,7 @@ namespace Codist
 			var tpl = tp.Length;
 			for (int i = 0; i < tpl; i++) {
 				var b = new TextBlock { TextWrapping = TextWrapping.Wrap, Foreground = ThemeHelper.ToolTipTextBrush, FontFamily = ThemeHelper.ToolTipFont, FontSize = ThemeHelper.ToolTipFontSize }
-					.SetGlyph(VsImageHelper.GetImage(IconIds.GenericDefinition));
+					.SetGlyph(IconIds.GenericDefinition);
 				ShowTypeArgumentInfo(tp[i], ta[i], b);
 				panel.Add(b);
 			}
@@ -609,7 +609,7 @@ namespace Codist
 
 		TextBlock ShowTypeParameterConstraints(ITypeParameterSymbol item) {
 			var b = new TextBlock { TextWrapping = TextWrapping.Wrap, Foreground = ThemeHelper.ToolTipTextBrush, FontFamily = ThemeHelper.ToolTipFont, FontSize = ThemeHelper.ToolTipFontSize }
-				.SetGlyph(VsImageHelper.GetImage(IconIds.GenericDefinition))
+				.SetGlyph(IconIds.GenericDefinition)
 				.AddSymbol(item, false, TypeParameter)
 				.Append(": ");
 			ShowTypeConstraints(item, b);

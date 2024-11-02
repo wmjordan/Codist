@@ -81,12 +81,12 @@ namespace Codist.QuickInfo
 							SyntaxKind.ObjectInitializerExpression,
 							CodeAnalysisHelper.WithInitializerExpression)) {
 						container.Add(new ThemedTipText()
-							.SetGlyph(VsImageHelper.GetImage(IconIds.InstanceMember))
+							.SetGlyph(IconIds.InstanceMember)
 							.Append(R.T_ExpressionCount)
 							.Append(((InitializerExpressionSyntax)node).Expressions.Count.ToText(), true, false, __SymbolFormatter.Number));
 					}
 					else if (node.IsKind(CodeAnalysisHelper.PropertyPatternClause)) {
-						container.Add(new ThemedTipText().SetGlyph(VsImageHelper.GetImage(IconIds.InstanceMember))
+						container.Add(new ThemedTipText().SetGlyph(IconIds.InstanceMember)
 							.Append(R.T_SubPatternCount)
 							.Append(((CSharpSyntaxNode)node).GetPropertyPatternSubPatternsCount().ToText())
 							);
@@ -139,7 +139,7 @@ namespace Codist.QuickInfo
 					if (node.IsKind(CodeAnalysisHelper.SwitchExpression)) {
 						symbol = semanticModel.GetTypeInfo(node.ChildNodes().First()).Type;
 						if (symbol != null) {
-							container.Add(new ThemedTipText().SetGlyph(VsImageHelper.GetImage(IconIds.ReadVariables)).AddSymbol(symbol, false, __SymbolFormatter));
+							container.Add(new ThemedTipText().SetGlyph(IconIds.ReadVariables).AddSymbol(symbol, false, __SymbolFormatter));
 						}
 						ShowMiscInfo(container, node);
 						symbol = semanticModel.GetTypeInfo(node, cancellationToken).ConvertedType;
@@ -257,13 +257,13 @@ namespace Codist.QuickInfo
 					return null;
 				case SyntaxKind.EndRegionKeyword:
 					container.Add(new ThemedTipText(R.T_EndOfRegion)
-						.SetGlyph(VsImageHelper.GetImage(IconIds.Region))
+						.SetGlyph(IconIds.Region)
 						.Append((unitCompilation.FindNode(token.Span, true) as EndRegionDirectiveTriviaSyntax).GetRegion()?.GetDeclarationSignature(), true)
 						);
 					return CreateQuickInfoItem(session, token, container.ToUI());
 				case SyntaxKind.EndIfKeyword:
 					container.Add(new ThemedTipText(R.T_EndOfIf)
-						.SetGlyph(VsImageHelper.GetImage(IconIds.Region))
+						.SetGlyph(IconIds.Region)
 						.Append((unitCompilation.FindNode(token.Span, true) as EndIfDirectiveTriviaSyntax).GetIf()?.GetDeclarationSignature(), true)
 						);
 					return CreateQuickInfoItem(session, token, container.ToUI());
@@ -745,7 +745,7 @@ namespace Codist.QuickInfo
 				}
 				var symbol = semanticModel.GetSymbolInfo(node, cancellationToken).Symbol ?? semanticModel.GetDeclaredSymbol(node, cancellationToken);
 				var t = new ThemedTipText();
-				t.SetGlyph(VsImageHelper.GetImage(IconIds.ReturnValue));
+				t.SetGlyph(IconIds.ReturnValue);
 				if (method != null) {
 					if (method.MethodKind == MethodKind.AnonymousFunction) {
 						t.Append(R.T_ReturnAnonymousFunction);
@@ -921,7 +921,7 @@ namespace Codist.QuickInfo
 			if (members.Length > 0) {
 				var info = new StackPanel().Add(new ThemedTipText(R.T_Type, true));
 				foreach (var type in members) {
-					var t = new ThemedTipText().SetGlyph(VsImageHelper.GetImage(type.GetImageId()));
+					var t = new ThemedTipText().SetGlyph(type.GetImageId());
 					__SymbolFormatter.ShowSymbolDeclaration(type, t, true, true);
 					t.AddSymbol(type, false, __SymbolFormatter);
 					info.Add(t);

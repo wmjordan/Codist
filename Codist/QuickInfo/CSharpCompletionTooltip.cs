@@ -173,11 +173,11 @@ namespace Codist.QuickInfo
 				}
 				if (symbols.Length > 1) {
 					var op = new StackPanel { Margin = WpfHelper.MiddleMargin };
-					op.Add(new TextBlock().SetGlyph(VsImageHelper.GetImage(IconIds.MethodOverloads)).Append(R.T_MethodOverload, true));
+					op.Add(new TextBlock().SetGlyph(IconIds.MethodOverloads).Append(R.T_MethodOverload, true));
 					for (int i = 1; i < symbols.Length; i++) {
 						ISymbol s = symbols[i];
 						if (s is IMethodSymbol m) {
-							op.Add(SymbolFormatter.Instance.ShowParameters(new TextBlock().SetGlyph(VsImageHelper.GetImage(m.GetImageId())).AddSymbol(m, false, SymbolFormatter.SemiTransparent), m.Parameters, true, true));
+							op.Add(SymbolFormatter.Instance.ShowParameters(new TextBlock().SetGlyph(m.GetImageId()).AddSymbol(m, false, SymbolFormatter.SemiTransparent), m.Parameters, true, true));
 						}
 					}
 					content.Add(op);

@@ -17,7 +17,7 @@ namespace Codist.QuickInfo
 			if (lines > 1) {
 				qiContent.Add(
 					(lines > 100 ? new ThemedTipText(lines + R.T_Lines, true) : new ThemedTipText(lines + R.T_Lines))
-						.SetGlyph(VsImageHelper.GetImage(IconIds.LineOfCode))
+						.SetGlyph(IconIds.LineOfCode)
 					);
 			}
 			if ((node is StatementSyntax || node is ExpressionSyntax || node is ConstructorInitializerSyntax) == false) {

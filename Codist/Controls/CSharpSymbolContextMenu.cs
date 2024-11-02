@@ -694,7 +694,7 @@ namespace Codist.Controls
 					++c;
 				}
 				var symbol = _Symbol;
-				m.Title.SetGlyph(VsImageHelper.GetImage(symbol.GetImageId()))
+				m.Title.SetGlyph(symbol.GetImageId())
 					.AddSymbol(symbol, null, true, SymbolFormatter.Instance)
 					.Append(R.T_ReferencedSymbols)
 					.Append(c.ToString());
