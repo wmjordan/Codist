@@ -282,10 +282,11 @@ namespace Codist
 
 		public static string GetValueAccessModifier(this ISymbol symbol) {
 			switch (symbol.Kind) {
-				case SymbolKind.NamedType: return ShowTypeValueAccessModifier(symbol as ITypeSymbol);
-				case SymbolKind.Method: return (symbol as IMethodSymbol).GetSpecialMethodModifier();
-				case SymbolKind.Property: return ShowPropertyValueAccessModifier(symbol as IPropertySymbol);
-				case SymbolKind.Field: return ShowFieldValueAccessModifier(symbol as IFieldSymbol);
+				case SymbolKind.NamedType: return ShowTypeValueAccessModifier((ITypeSymbol)symbol);
+				case SymbolKind.Method: return ((IMethodSymbol)symbol).GetSpecialMethodModifier();
+				case SymbolKind.Property: return ShowPropertyValueAccessModifier((IPropertySymbol)symbol);
+				case SymbolKind.Field: return ShowFieldValueAccessModifier((IFieldSymbol)symbol);
+				case SymbolKind.Parameter: return ShowParameterAccessModifier((IParameterSymbol)symbol);
 				default: return String.Empty;
 			}
 
@@ -307,6 +308,10 @@ namespace Codist
 				return f.IsReadOnly ? "readonly "
 					: f.IsVolatile ? "volatile "
 					: String.Empty;
+			}
+
+			string ShowParameterAccessModifier(IParameterSymbol p) {
+				return p.GetScopedKind() != 0 ? "scoped " : String.Empty;
 			}
 		}
 
@@ -456,6 +461,7 @@ namespace Codist
 				|| symbol.HasValueTypeConstraint
 				|| symbol.HasConstructorConstraint
 				|| symbol.HasUnmanagedTypeConstraint
+				|| symbol.HasNotNullConstraint()
 				|| symbol.ConstraintTypes.Length > 0;
 		}
 
@@ -597,6 +603,9 @@ namespace Codist
 					}
 					if (item.IsOptional) {
 						sb.Append('[');
+					}
+					if (item.GetScopedKind() != 0) {
+						sb.Append("scoped ");
 					}
 					switch (item.RefKind) {
 						case RefKind.Ref: sb.Append("ref "); break;
@@ -1008,6 +1017,24 @@ namespace Codist
 		}
 
 		#region Protected/Future property accessors
+		public static int GetNullableAnnotation(this ILocalSymbol local) {
+			return local != null ? NonPublicOrFutureAccessors.GetLocalNullableAnnotation(local) : 0;
+		}
+		public static int GetScopedKind(this ILocalSymbol local) {
+			return local != null ? NonPublicOrFutureAccessors.GetLocalScopedKind(local) : 0;
+		}
+		public static bool IsForEach(this ILocalSymbol local) {
+			return local != null && NonPublicOrFutureAccessors.GetLocalIsForEach(local);
+		}
+		public static bool IsUsing(this ILocalSymbol local) {
+			return local != null && NonPublicOrFutureAccessors.GetLocalIsUsing(local);
+		}
+		public static bool IsFileLocal(this INamedTypeSymbol type) {
+			return type != null && NonPublicOrFutureAccessors.GetNamedTypeIsFileLocal(type);
+		}
+		public static bool IsNativeIntegerType(this ITypeSymbol type) {
+			return type != null && NonPublicOrFutureAccessors.GetTypeIsNativeIntegerType(type);
+		}
 		public static bool IsReadOnly(this ITypeSymbol type) {
 			return type != null && NonPublicOrFutureAccessors.GetNamedTypeIsReadOnly(type);
 		}
@@ -1017,8 +1044,8 @@ namespace Codist
 		public static bool IsRefLike(this ITypeSymbol type) {
 			return type != null && NonPublicOrFutureAccessors.GetNamedTypeIsRefLikeType(type);
 		}
-		public static byte GetNullableAnnotation(this ITypeSymbol type) {
-			return type != null ? NonPublicOrFutureAccessors.GetNullableAnnotation(type) : (byte)0;
+		public static int GetNullableAnnotation(this ITypeSymbol type) {
+			return type != null ? NonPublicOrFutureAccessors.GetTypeNullableAnnotation(type) : 0;
 		}
 		public static bool IsInitOnly(this IMethodSymbol method) {
 			return method != null && NonPublicOrFutureAccessors.GetMethodIsInitOnly(method);
@@ -1026,8 +1053,14 @@ namespace Codist
 		public static bool IsReadOnly(this IMethodSymbol method) {
 			return method != null && NonPublicOrFutureAccessors.GetMethodIsReadOnly(method);
 		}
-		public static byte GetCallingConvention(this IMethodSymbol method) {
-			return method != null ? NonPublicOrFutureAccessors.GetMethodCallingConvention(method) : (byte)0;
+		public static int GetCallingConvention(this IMethodSymbol method) {
+			return method != null ? NonPublicOrFutureAccessors.GetMethodCallingConvention(method) : 0;
+		}
+		public static int GetScopedKind(this IParameterSymbol parameter) {
+			return parameter != null ? NonPublicOrFutureAccessors.GetParameterScopedKind(parameter) : 0;
+		}
+		public static INamedTypeSymbol GetNativeIntegerUnderlyingType(this INamedTypeSymbol type) {
+			return type != null ? NonPublicOrFutureAccessors.GetNamedTypeNativeIntegerUnderlyingType(type) : null;
 		}
 		public static IMethodSymbol GetFunctionPointerTypeSignature(this ITypeSymbol symbol) {
 			return symbol?.TypeKind == FunctionPointer ? NonPublicOrFutureAccessors.GetFunctionPointerTypeSignature(symbol) : null;
@@ -1037,6 +1070,9 @@ namespace Codist
 		}
 		public static bool IsRequired(this IPropertySymbol property) {
 			return property != null && NonPublicOrFutureAccessors.GetPropertyIsRequired(property);
+		}
+		public static bool HasNotNullConstraint(this ITypeParameterSymbol typeParameter) {
+			return typeParameter != null && NonPublicOrFutureAccessors.GetTypeParameterHasNotNullConstraint(typeParameter);
 		}
 		public static AssemblySource GetSourceType(this IAssemblySymbol assembly) {
 			return assembly is null
@@ -1404,7 +1440,8 @@ namespace Codist
 				|| a.HasReferenceTypeConstraint != b.HasReferenceTypeConstraint
 				|| a.HasValueTypeConstraint != b.HasValueTypeConstraint
 				|| a.HasConstructorConstraint != b.HasConstructorConstraint
-				|| a.HasUnmanagedTypeConstraint != b.HasUnmanagedTypeConstraint) {
+				|| a.HasUnmanagedTypeConstraint != b.HasUnmanagedTypeConstraint
+				|| a.HasNotNullConstraint() != b.HasNotNullConstraint()) {
 				return false;
 			}
 			var ac = a.ConstraintTypes;
@@ -1560,15 +1597,33 @@ namespace Codist
 				? ReflectionHelper.CreateGetPropertyMethod<ITypeSymbol, bool>("IsRefLikeType")
 				: ReflectionHelper.CreateGetPropertyMethod<ITypeSymbol, bool>("IsRefLikeType", typeof(CSharpCompilation).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Symbols.NamedTypeSymbol", false));
 
+			public static readonly Func<INamedTypeSymbol, bool> GetNamedTypeIsFileLocal = ReflectionHelper.CreateGetPropertyMethod<INamedTypeSymbol, bool>("IsFileLocal");
+
 			public static readonly Func<ITypeSymbol, bool> GetTypeIsRecord = ReflectionHelper.CreateGetPropertyMethod<ITypeSymbol, bool>("IsRecord");
 
-			public static readonly Func<ITypeSymbol, byte> GetNullableAnnotation = ReflectionHelper.CreateGetPropertyMethod<ITypeSymbol, byte>("NullableAnnotation");
+			public static readonly Func<ITypeSymbol, bool> GetTypeIsNativeIntegerType = ReflectionHelper.CreateGetPropertyMethod<ITypeSymbol, bool>("IsNativeIntegerType");
+
+			public static readonly Func<ITypeSymbol, int> GetTypeNullableAnnotation = ReflectionHelper.CreateGetPropertyMethod<ITypeSymbol, int>("NullableAnnotation");
+
+			public static readonly Func<INamedTypeSymbol, INamedTypeSymbol> GetNamedTypeNativeIntegerUnderlyingType = ReflectionHelper.CreateGetPropertyMethod<INamedTypeSymbol, INamedTypeSymbol>("NativeIntegerUnderlyingType");
+
+			public static readonly Func<ILocalSymbol, bool> GetLocalIsForEach = ReflectionHelper.CreateGetPropertyMethod<ILocalSymbol, bool>("IsForEach");
+
+			public static readonly Func<ILocalSymbol, bool> GetLocalIsUsing = ReflectionHelper.CreateGetPropertyMethod<ILocalSymbol, bool>("IsUsing");
+
+			public static readonly Func<ILocalSymbol, int> GetLocalNullableAnnotation = ReflectionHelper.CreateGetPropertyMethod<ILocalSymbol, int>("NullableAnnotation");
+
+			public static readonly Func<ILocalSymbol, int> GetLocalScopedKind = ReflectionHelper.CreateGetPropertyMethod<ILocalSymbol, int>("ScopedKind");
 
 			public static readonly Func<IMethodSymbol, bool> GetMethodIsInitOnly = ReflectionHelper.CreateGetPropertyMethod<IMethodSymbol, bool>("IsInitOnly");
 
 			public static readonly Func<IMethodSymbol, bool> GetMethodIsReadOnly = ReflectionHelper.CreateGetPropertyMethod<IMethodSymbol, bool>("IsReadOnly");
 
-			public static readonly Func<IMethodSymbol, byte> GetMethodCallingConvention = ReflectionHelper.CreateGetPropertyMethod<IMethodSymbol, byte>("CallingConvention");
+			public static readonly Func<IMethodSymbol, int> GetMethodCallingConvention = ReflectionHelper.CreateGetPropertyMethod<IMethodSymbol, int>("CallingConvention");
+
+			public static readonly Func<IParameterSymbol, int> GetParameterScopedKind = ReflectionHelper.CreateGetPropertyMethod<IParameterSymbol, int>("ScopedKind");
+
+			public static readonly Func<ITypeParameterSymbol, bool> GetTypeParameterHasNotNullConstraint = ReflectionHelper.CreateGetPropertyMethod<ITypeParameterSymbol, bool>("HasNotNullConstraint");
 
 			public static readonly Func<ITypeSymbol, IMethodSymbol> GetFunctionPointerTypeSignature = ReflectionHelper.CreateGetPropertyMethod<ITypeSymbol, IMethodSymbol>("Signature", typeof(ITypeSymbol).Assembly.GetType("Microsoft.CodeAnalysis.IFunctionPointerTypeSymbol"));
 

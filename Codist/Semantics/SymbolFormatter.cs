@@ -368,27 +368,22 @@ namespace Codist
 		}
 
 		void AddParameterModifier(InlineCollection inlines, IParameterSymbol p) {
+			if (p.GetScopedKind() != 0) {
+				inlines.Add(new Run("scoped ") { Foreground = Keyword });
+			}
 			switch (p.RefKind) {
 				case RefKind.Ref:
-					inlines.Add(new Run("ref ") {
-						Foreground = Keyword
-					});
+					inlines.Add(new Run("ref ") { Foreground = Keyword });
 					return;
 				case RefKind.Out:
-					inlines.Add(new Run("out ") {
-						Foreground = Keyword
-					});
+					inlines.Add(new Run("out ") { Foreground = Keyword });
 					return;
 				case RefKind.In:
-					inlines.Add(new Run("in ") {
-						Foreground = Keyword
-					});
+					inlines.Add(new Run("in ") { Foreground = Keyword });
 					return;
 			}
 			if (p.IsParams) {
-				inlines.Add(new Run("params ") {
-					Foreground = Keyword
-				});
+				inlines.Add(new Run("params ") { Foreground = Keyword });
 			}
 		}
 
@@ -660,6 +655,10 @@ namespace Codist
 			}
 			if (typeParameter.HasUnmanagedTypeConstraint) {
 				AppendSeparatorIfHasConstraint(text, hasConstraint).Append("unmanaged", Keyword);
+				hasConstraint = true;
+			}
+			if (typeParameter.HasNotNullConstraint()) {
+				AppendSeparatorIfHasConstraint(text, hasConstraint).Append("notnull", Keyword);
 				hasConstraint = true;
 			}
 			if (typeParameter.HasConstructorConstraint) {
@@ -1188,6 +1187,9 @@ namespace Codist
 				if (local.IsStatic) {
 					info.Append("static ", Keyword);
 				}
+				if (local.GetScopedKind() != 0) {
+					info.Append("scoped ");
+				}
 				if (local.IsRef) {
 					info.Append(local.RefKind == RefKind.RefReadOnly ? "ref readonly " : "ref ", Keyword);
 				}
@@ -1198,6 +1200,9 @@ namespace Codist
 		}
 
 		static void ShowParameterDeclaration(IParameterSymbol parameter, TextBlock info) {
+			if (parameter.GetScopedKind() != 0) {
+				info.Append("scoped ");
+			}
 			switch (parameter.RefKind) {
 				case RefKind.Ref: info.Append("ref "); break;
 				case RefKind.Out: info.Append("out "); break;
