@@ -1413,7 +1413,7 @@ namespace Codist
 				return false;
 			}
 			for (int i = ac.Length - 1; i >= 0; i--) {
-				if (ac[i].Equals(bc[i]) == false) {
+				if (AreEqual(ac[i], bc[i], true) == false) {
 					return false;
 				}
 			}
