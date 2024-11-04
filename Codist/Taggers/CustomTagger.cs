@@ -372,6 +372,7 @@ namespace Codist.Taggers
 					lock (_Sync) {
 						foreach (var item in _CustomTaggers) {
 							item._Taggers = GetTaggers(item._Path);
+							item.OnTagsChanged(null);
 						}
 					}
 				}

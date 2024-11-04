@@ -60,6 +60,13 @@ namespace Codist.Taggers
 			}
 		}
 
+		protected void OnTagsChanged(SnapshotSpanEventArgs args) {
+			if (args == null) {
+				args = new SnapshotSpanEventArgs(_TextView.VisualSnapshot.ToSnapshotSpan());
+			}
+			TagsChanged?.Invoke(this, args);
+		}
+
 		protected abstract void Parse(SnapshotSpan span, ICollection<TaggedContentSpan> results);
 
 		void TextView_TextBufferChanged(object sender, TextContentChangedEventArgs args) {
