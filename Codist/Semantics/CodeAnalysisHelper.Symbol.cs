@@ -954,7 +954,8 @@ namespace Codist
 						}
 						continue;
 					case SymbolKind.Property:
-						if (item.Name == "IsCompleted" && item.GetReturnType()?.SpecialType == SpecialType.System_Boolean) {
+						if (item.GetReturnType()?.SpecialType == SpecialType.System_Boolean
+							&& item.Name == "IsCompleted") {
 							f |= HAS_IS_COMPLETED;
 						}
 						continue;
