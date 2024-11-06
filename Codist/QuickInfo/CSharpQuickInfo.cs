@@ -472,6 +472,7 @@ namespace Codist.QuickInfo
 			return symbolInfo.Symbol
 				?? (kind.IsDeclaration()
 						|| kind == SyntaxKind.VariableDeclarator
+						|| kind == SyntaxKind.CatchDeclaration
 						|| kind == SyntaxKind.SingleVariableDesignation
 							&& node.Parent.IsAnyKind(SyntaxKind.DeclarationExpression, SyntaxKind.DeclarationPattern, SyntaxKind.ParenthesizedVariableDesignation)
 					? semanticModel.GetDeclaredSymbol(node, cancellationToken)

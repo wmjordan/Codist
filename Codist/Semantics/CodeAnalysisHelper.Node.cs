@@ -63,7 +63,8 @@ namespace Codist
 				case SyntaxKind.VariableDeclaration:
 				case SyntaxKind.LocalFunctionStatement:
 				case SyntaxKind.SingleVariableDesignation:
-					//case SyntaxKind.VariableDeclarator:
+				//case SyntaxKind.CatchDeclaration:
+				//case SyntaxKind.VariableDeclarator:
 					return true;
 			}
 			return false;
