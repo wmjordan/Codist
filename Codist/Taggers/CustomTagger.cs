@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -9,6 +10,7 @@ using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
 using Newtonsoft.Json;
+using R = Codist.Properties.Resources;
 
 namespace Codist.Taggers
 {
@@ -82,13 +84,24 @@ namespace Codist.Taggers
 				: null;
 			return ct == null && ts == null
 				? null
-				: new RegexTagger { Pattern = item.Match, IgnoreCase = item.IgnoreCase, Tag = ct, GroupTags = ts };
+				: new RegexTagger {
+					Pattern = item.Match,
+					IgnoreCase = item.IgnoreCase,
+					Tag = ct,
+					GroupTags = ts,
+					WholeLine = item.TagLine
+				};
 		}
 
 		static ContainsTextTagger MakeContainsTagger(IClassificationTypeRegistryService cts, DefinitionItem item) {
 			return item.Tag != null
 				&& cts.TryGetClassificationTag(item.Tag, out ClassificationTag ct)
-				? new ContainsTextTagger { Content = item.Contains, IgnoreCase = item.IgnoreCase, Tag = ct }
+				? new ContainsTextTagger {
+					Content = item.Contains,
+					IgnoreCase = item.IgnoreCase,
+					Tag = ct,
+					WholeLine = item.TagLine
+				}
 				: null;
 		}
 
@@ -123,6 +136,10 @@ namespace Codist.Taggers
 			public ICollection<TaggedContentSpan> Results { get; }
 			public string Text => _SpanText != null ? _SpanText : (_SpanText = Span.GetText());
 
+			public void AddTag(IClassificationTag tag) {
+				Results.Add(new TaggedContentSpan(tag, Span, 0, 0));
+			}
+
 			public void AddTag(IClassificationTag tag, int startOffset, int length) {
 				Results.Add(new TaggedContentSpan(tag, _Snapshot, Span.Start.Position + startOffset, length, 0, 0));
 			}
@@ -136,6 +153,7 @@ namespace Codist.Taggers
 		{
 			public IClassificationTag Tag { get; set; }
 			public bool IgnoreCase { get; set; }
+			public bool WholeLine { get; set; }
 
 			public abstract void GetTags(TaggerContext ctx);
 		}
@@ -158,6 +176,10 @@ namespace Codist.Taggers
 					for (int i = 0; i < l; i++) {
 						if (Char.IsWhiteSpace(span.CharAt(i)) == false) {
 							if (span.HasTextAtOffset(_Prefix, IgnoreCase, i)) {
+								if (WholeLine) {
+									ctx.AddTag(Tag);
+									return;
+								}
 								ctx.AddTagAndContentOffset(Tag, i += _PrefixLength, l - i);
 							}
 							return;
@@ -165,6 +187,10 @@ namespace Codist.Taggers
 					}
 				}
 				else if (span.StartsWith(_Prefix, IgnoreCase)) {
+					if (WholeLine) {
+						ctx.AddTag(Tag);
+						return;
+					}
 					ctx.AddTagAndContentOffset(Tag, _PrefixLength, span.Length - _PrefixLength);
 				}
 			}
@@ -181,10 +207,18 @@ namespace Codist.Taggers
 			}
 
 			public override void GetTags(TaggerContext ctx) {
-				int i = 0, p;
-				while ((p = ctx.Span.IndexOf(_Content, i, IgnoreCase)) >= 0) {
-					ctx.AddTag(Tag, p, _ContentLength);
-					i += p + _ContentLength;
+				int i, p;
+				if (WholeLine) {
+					if (ctx.Span.IndexOf(_Content, 0, IgnoreCase) >= 0) {
+						ctx.AddTag(Tag);
+					}
+				}
+				else {
+					i = 0;
+					while ((p = ctx.Span.IndexOf(_Content, i, IgnoreCase)) >= 0) {
+						ctx.AddTag(Tag, p, _ContentLength);
+						i += p + _ContentLength;
+					}
 				}
 			}
 		}
@@ -212,10 +246,13 @@ namespace Codist.Taggers
 					if (GroupTags?.Length > 0) {
 						TagMatchedGroups(ctx, m);
 					}
-					else {
+					if (!WholeLine && Tag != null) {
 						ctx.AddTag(Tag, m.Index, m.Length);
 					}
 					i = m.Index + m.Length;
+				}
+				if (WholeLine && i != 0 && Tag != null) {
+					ctx.AddTag(Tag);
 				}
 			}
 
@@ -241,18 +278,27 @@ namespace Codist.Taggers
 		static class TagDefinitionProvider
 		{
 			static readonly Dictionary<string, TaggerConfig> _TaggerConfigs = new Dictionary<string, TaggerConfig>(StringComparer.OrdinalIgnoreCase);
+			const string OutputWindowIdentifier = "<output>";
 
 			static TagDefinitionProvider() {
 				Microsoft.VisualStudio.Shell.Events.SolutionEvents.OnAfterCloseSolution += (object sender, EventArgs e) => {
+					var removes = new Chain<string>();
 					foreach (var item in _TaggerConfigs) {
-						item.Value.Dispose();
+						var c = item.Value;
+						c.CleanUp();
+						if (c.AssociatedTaggerCount == 0) {
+							removes.Add(item.Key);
+							c.Dispose();
+						}
 					}
-					_TaggerConfigs.Clear();
+					foreach (var item in removes) {
+						_TaggerConfigs.Remove(item);
+					}
 				};
 			}
 
 			public static CustomTagger CreateCustomTagger(ITextView view, ITextDocument doc) {
-				var path = doc.FilePath;
+				var path = view.Roles.Contains("OUTPUTWINDOW") ? OutputWindowIdentifier : doc.FilePath;
 				var config = GetTaggerConfig(path);
 				return config == null
 					? null
@@ -260,11 +306,23 @@ namespace Codist.Taggers
 			}
 
 			internal static TaggerConfig GetTaggerConfig(string path) {
-				if (String.IsNullOrEmpty(path)) {
+				string dir;
+				int level;
+				bool isOutputWindow;
+				if (String.IsNullOrEmpty(path)
+					|| path.EndsWith(".ct.json", StringComparison.OrdinalIgnoreCase)) {
 					return null;
 				}
-				var dir = Path.GetDirectoryName(path);
-				int level = 0;
+				if (path == OutputWindowIdentifier) { // special for Output window
+					dir = Config.ConfigDirectory;
+					level = 10; // disable up-dir lookup
+					isOutputWindow = true;
+				}
+				else {
+					dir = Path.GetDirectoryName(path);
+					level = 0;
+					isOutputWindow = false;
+				}
 				do {
 					if (dir.Length == 0) {
 						return null;
@@ -278,6 +336,11 @@ namespace Codist.Taggers
 					}
 					var s = LoadDefinitionSets(configPath);
 					if (s != null) {
+						if (isOutputWindow) {
+							foreach (var item in s) {
+								item.FilePattern = OutputWindowIdentifier;
+							}
+						}
 						return _TaggerConfigs[configPath] = new TaggerConfig(dir, s);
 					}
 					dir = Path.GetDirectoryName(dir);
@@ -295,8 +358,9 @@ namespace Codist.Taggers
 				}
 				catch (Exception ex) {
 					ex.Log();
+					CodistPackage.ShowError(ex, R.T_FailedToLoadSyntaxCustomizationFile + "\n" + configPath);
 				}
-				return null;
+				return new List<CustomTagDefinitionSet>();
 			}
 		}
 
@@ -315,18 +379,19 @@ namespace Codist.Taggers
 				watcher.Renamed += OnConfigFileChanged;
 				watcher.EnableRaisingEvents = true;
 				_Watcher = watcher;
-				_Items = taggers;
+				_Items = taggers?.Count != 0 ? taggers : null;
 				_Path = Path.Combine(dir, ConfigFileName);
 			}
 
 			public List<CustomTagDefinitionSet> Items => _Items;
 
-			public void AddTagger(CustomTagger tagger) {
-				if (_CustomTaggers == null) {
-					_CustomTaggers = new List<CustomTagger>();
-				}
+			public int AssociatedTaggerCount => _CustomTaggers?.Count ?? 0;
 
+			public void AddTagger(CustomTagger tagger) {
 				lock (_Sync) {
+					if (_CustomTaggers == null) {
+						_CustomTaggers = new List<CustomTagger>();
+					}
 					_CustomTaggers.Add(tagger);
 				}
 			}
@@ -334,6 +399,12 @@ namespace Codist.Taggers
 			public void RemoveTagger(CustomTagger tagger) {
 				lock (_Sync) {
 					_CustomTaggers?.Remove(tagger);
+				}
+			}
+
+			public void CleanUp() {
+				lock (_Sync) {
+					_CustomTaggers.RemoveAll(i => i.TextView.IsClosed);
 				}
 			}
 
@@ -379,12 +450,14 @@ namespace Codist.Taggers
 				catch (Exception ex) {
 					_Items = null;
 					ex.Log();
+					CodistPackage.ShowError(ex, R.T_FailedToLoadSyntaxCustomizationFile + "\n" + filePath);
 				}
 			}
 
 			public void Dispose() {
 				_Watcher.Dispose();
 				_Timer?.Dispose();
+				Debug.Assert(_CustomTaggers == null || _CustomTaggers.Count == 0);
 				_CustomTaggers = null;
 				$"Unload tagger config: {_Path}".Log();
 			}
@@ -428,6 +501,8 @@ namespace Codist.Taggers
 			public string Tag { get; set; }
 			[JsonProperty("groupTags")]
 			public string[] GroupTags { get; set; }
+			[JsonProperty("tagLine")]
+			public bool TagLine { get; set; }
 		}
 	}
 }

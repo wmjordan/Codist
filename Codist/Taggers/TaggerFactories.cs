@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Threading.Tasks;
 using CLR;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
@@ -12,8 +13,10 @@ namespace Codist.Taggers
 {
 	[Export(typeof(IViewTaggerProvider))]
 	[ContentType(Constants.CodeTypes.Text)]
+	[ContentType(Constants.CodeTypes.Output)]
 	[TagType(typeof(IClassificationTag))]
 	[TextViewRole(PredefinedTextViewRoles.Document)]
+	[TextViewRole(PredefinedTextViewRoles.Interactive)]
 	sealed class CustomTaggerProvider : IViewTaggerProvider
 	{
 		readonly Dictionary<ITextView, CustomTagger> _Taggers = new Dictionary<ITextView, CustomTagger>();
@@ -55,9 +58,7 @@ namespace Codist.Taggers
 				t = CustomTagger.Get(textView, d);
 			}
 			catch (Exception ex) {
-				if (Microsoft.VisualStudio.Shell.ThreadHelper.CheckAccess()) {
-					Controls.MessageWindow.Error(ex, "Error while loading external customization file");
-				}
+				ex.Log();
 				return null;
 			}
 			if (t != null) {

@@ -6634,6 +6634,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Failed to load syntax customization file.
+        /// </summary>
+        internal static string T_FailedToLoadSyntaxCustomizationFile {
+            get {
+                return ResourceManager.GetString("T_FailedToLoadSyntaxCustomizationFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Failed to open output folder.
         /// </summary>
         internal static string T_FailedToOpenOutputFolder {

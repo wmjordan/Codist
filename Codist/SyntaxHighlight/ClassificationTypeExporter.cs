@@ -10,6 +10,7 @@ using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Formatting;
 using Microsoft.VisualStudio.Utilities;
 using Newtonsoft.Json;
+using R = Codist.Properties.Resources;
 
 namespace Codist.SyntaxHighlight
 {
@@ -85,11 +86,14 @@ namespace Codist.SyntaxHighlight
 			}
 			var o = new CustomizedClassificationTypes {
 				Types = {
+						new CustomizedClassificationType { Name = "Error" },
+						new CustomizedClassificationType { Name = "Warning" },
+						new CustomizedClassificationType { Name = "Information" },
 						new CustomizedClassificationType { Name = "Bold", IsBold = true },
 						new CustomizedClassificationType { Name = "Italic", IsItalic = true },
 						new CustomizedClassificationType { Name = "Underline", IsUnderline = true },
-						new CustomizedClassificationType { Name = "Bold Italic", IsBold = true, IsItalic = true },
-						new CustomizedClassificationType { Name = "Bold Underline", IsBold = true, IsUnderline = true },
+						new CustomizedClassificationType { Name = "Bold Italic", BaseOn = "Bold, Italic" },
+						new CustomizedClassificationType { Name = "Bold Underline", BaseOn = "Bold, Underline" },
 						new CustomizedClassificationType { Name = "Large Text", FontSize = 22 },
 					}
 			};
@@ -108,6 +112,7 @@ namespace Codist.SyntaxHighlight
 			}
 			catch (Exception ex) {
 				ex.Log();
+				CodistPackage.ShowError(ex, R.T_FailedToLoadSyntaxCustomizationFile + "\n" + Config.CustomizedClassificationTypePath);
 				return;
 			}
 			if (!(customTypes?.Types?.Count > 0)) {
@@ -347,6 +352,11 @@ namespace Codist.SyntaxHighlight
 
 			public Entry(string name, List<string> baseNames, List<(string, bool)> orders, StyleAttribute style) {
 				Name = name;
+				if (baseNames != null) {
+					for (int i = 0; i < baseNames.Count; i++) {
+						baseNames[i] = baseNames[i].Trim();
+					}
+				}
 				BaseNames = baseNames;
 				Orders = orders;
 				Style = style;

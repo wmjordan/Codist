@@ -2851,4 +2851,7 @@ Discard its changes?</value>
   <data name="T_PatternCount" xml:space="preserve">
     <value>Pattern count: </value>
   </data>
+  <data name="T_FailedToLoadSyntaxCustomizationFile" xml:space="preserve">
+    <value>Failed to load syntax customization file</value>
+  </data>
 </root>
