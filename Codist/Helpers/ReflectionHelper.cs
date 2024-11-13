@@ -36,18 +36,21 @@ namespace Codist
 				var m = new DynamicMethod("Get" + name, typeof(TProperty), new[] { typeof(TInstance) }, true);
 				var il = m.GetILGenerator();
 				il.Emit(OpCodes.Ldarg_0);
-				var notInst = il.DefineLabel();
+				Label notInst = default;
 				if (castType != null) {
+					notInst = il.DefineLabel();
 					il.Emit(OpCodes.Isinst, type);
 					il.Emit(OpCodes.Dup);
 					il.Emit(OpCodes.Brfalse_S, notInst);
 				}
 				il.Emit(OpCodes.Callvirt, propInfo.GetGetMethod(true));
 				il.Emit(OpCodes.Ret);
-				il.MarkLabel(notInst);
-				il.Emit(OpCodes.Pop);
-				il.LoadDefault(typeof(TProperty));
-				il.Emit(OpCodes.Ret);
+				if (castType != null) {
+					il.MarkLabel(notInst);
+					il.Emit(OpCodes.Pop);
+					il.LoadDefault(typeof(TProperty));
+					il.Emit(OpCodes.Ret);
+				}
 				return m.CreateDelegate<Func<TInstance, TProperty>>();
 			}
 			return (_) => default;
