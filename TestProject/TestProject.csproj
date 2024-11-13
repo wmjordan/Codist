@@ -76,6 +76,7 @@
     <Compile Include="CS9_0.cs" />
     <Compile Include="ExtensionClass.cs" />
     <Compile Include="Generics.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="GlobalTypes.cs" />
     <Compile Include="IInterface.cs" />
     <Compile Include="InheritDoc.cs" />

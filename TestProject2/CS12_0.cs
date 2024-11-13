@@ -20,5 +20,6 @@ class InlineArray
 			buffer[i] = i;
 		}
 	}
+
 }
 
