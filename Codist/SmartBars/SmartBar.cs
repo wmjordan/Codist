@@ -474,7 +474,12 @@ namespace Codist.SmartBars
 				Action<CommandContext> clickHandler = _ClickHandler;
 				Func<CommandContext, Task> asyncClickHandler;
 				if (clickHandler != null) {
-					clickHandler(ctx);
+					try {
+						clickHandler(ctx);
+					}
+					catch (Exception ex) {
+						MessageWindow.Error(ex, null, null, this);
+					}
 				}
 				else if ((asyncClickHandler = _AsyncClickHandler) != null) {
 					try {
@@ -511,7 +516,12 @@ namespace Codist.SmartBars
 					m.SetIsRightClicked();
 				}
 				else if ((clickHandler = _ClickHandler) != null) {
-					clickHandler(ctx);
+					try {
+						clickHandler(ctx);
+					}
+					catch (Exception ex) {
+						MessageWindow.Error(ex, null, null, this);
+					}
 				}
 				else if ((asyncClickHandler = _AsyncClickHandler) != null) {
 					try {
@@ -634,7 +644,12 @@ namespace Codist.SmartBars
 					return;
 				}
 				var ctx = new CommandContext(bar, sender as Control);
-				await CommandItem.AsyncAction.Invoke(ctx);
+				try {
+					await CommandItem.AsyncAction.Invoke(ctx);
+				}
+				catch (Exception ex) {
+					MessageWindow.Error(ex, null, null, this);
+				}
 				AllowQuickAccessCommandWithCondition(bar);
 				if (ctx.KeepToolBarOnClick == false) {
 					bar.HideToolBar();
@@ -647,7 +662,12 @@ namespace Codist.SmartBars
 					return;
 				}
 				var ctx = new CommandContext(bar, s as Control);
-				CommandItem.Action(ctx);
+				try {
+					CommandItem.Action(ctx);
+				}
+				catch (Exception ex) {
+					MessageWindow.Error(ex, null, null, this);
+				}
 				AllowQuickAccessCommandWithCondition(bar);
 				if (ctx.KeepToolBarOnClick == false) {
 					bar.HideToolBar();
