@@ -2854,4 +2854,10 @@ Discard its changes?</value>
   <data name="T_FailedToLoadSyntaxCustomizationFile" xml:space="preserve">
     <value>Failed to load syntax customization file</value>
   </data>
+  <data name="CMDT_DecodeNumericEntity" xml:space="preserve">
+    <value>Decode markup entities in selection like &amp;#1234; or &amp;#xA123; to their actual Unicode characters</value>
+  </data>
+  <data name="CMD_DecodeNumericEntity" xml:space="preserve">
+    <value>Decode Numeric Entity</value>
+  </data>
 </root>

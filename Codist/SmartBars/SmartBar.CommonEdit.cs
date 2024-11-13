@@ -68,6 +68,24 @@ namespace Codist.SmartBars
 			return edited;
 		}
 
+		protected static IEnumerable<SnapshotSpan> Replace(CommandContext ctx, Func<CommandContext, ITextEdit, SnapshotSpan, IEnumerable<Span>> replaceHandler, bool selectModified) {
+			ctx.KeepToolBar(false);
+			string t = ctx.View.GetFirstSelectionText();
+			if (t.Length == 0) {
+				return null;
+			}
+			var edited = ctx.View.EditSelection((view, edit, item) => replaceHandler(ctx, edit, item));
+			if (edited != null) {
+				if (t != null && ctx.ModifierKeys.HasAnyFlag(ModifierKeys.Control | ModifierKeys.Shift) && FindNext(ctx, t) == false) {
+					ctx.HideToolBar();
+				}
+				else if (selectModified) {
+					ctx.View.SelectSpans(edited);
+				}
+			}
+			return edited;
+		}
+
 		/// <summary>When selection is not surrounded with <paramref name="prefix"/> and <paramref name="suffix"/>, surround each span of the current selection with <paramref name="prefix"/> and <paramref name="suffix"/>, and optionally select the first modified span if <paramref name="selectModified"/> is <see langword="true"/>; when surrounded, remove them.</summary>
 		/// <returns>The spans after modification. If modification is unsuccessful, <see langword="null"/> is returned.</returns>
 		protected static IEnumerable<SnapshotSpan> WrapWith(CommandContext ctx, string prefix, string suffix, bool selectModified) {
@@ -477,8 +495,103 @@ namespace Codist.SmartBars
 					ctx.KeepToolBarOnClick = true;
 					Replace(ctx, System.Net.WebUtility.HtmlDecode, true);
 				}) { QuickAccessCondition = CommandItem.HasEditableSelection },
+				new CommandItem(IconIds.EntityDecode, R.CMD_DecodeNumericEntity, ctx => {
+					ctx.KeepToolBarOnClick = true;
+					Replace(ctx, DecodeEntity, true);
+				}) { QuickAccessCondition = CommandItem.HasEditableSelection, ToolTip = R.CMDT_DecodeNumericEntity },
 			};
 		}
+
+		static IEnumerable<Span> DecodeEntity(CommandContext ctx, ITextEdit edit, SnapshotSpan span) {
+			var ts = ctx.TextSearchService;
+			var start = span.Start;
+			var s = edit.Snapshot;
+			var l = span.End;
+			SnapshotSpan? f;
+			char c;
+			int en = 0;
+			int hex;
+			const int VALID_UNICODE = 0x1FFFFF;
+			while ((f = ts.Find(span, start, "&#", FindOptions.MatchCase)).HasValue) {
+				start = f.Value.Start;
+				var p = start.Position + 2;
+				en = 0;
+				START:
+				if (p == l) {
+					yield break;
+				}
+				hex = s[p].CeqAny('x', 'X') ? 16 : 10;
+				if (hex == 16) {
+					++p;
+				}
+				do {
+					if ((c = s[p]).IsBetween('0', '9')) {
+						en = en * hex + c - '0';
+						if (en > VALID_UNICODE) {
+							goto NEXT;
+						}
+						continue;
+					}
+					else if (hex == 16) {
+						if (c.IsBetween('A', 'F')) {
+							en = en * hex + c + 10 - 'A';
+							continue;
+						}
+						else if (c.IsBetween('a', 'f')) {
+							en = en * hex + c + 10 - 'a';
+							continue;
+						}
+					}
+					if (c == ';') {
+						++p;
+						break;
+					}
+					else if (c == '&') {
+						if (++p < l) {
+							if (s[p] == '#') {
+								start = new SnapshotPoint(s, p - 2);
+								en = 0;
+								goto START;
+							}
+						}
+						else {
+							yield break;
+						}
+					}
+					else {
+						goto NEXT;
+					}
+				} while (++p < l);
+				if (c == ';') {
+					if (en > 65535) {
+						if (en <= VALID_UNICODE) {
+							edit.Replace(new Span(start, p - start.Position), Char.ConvertFromUtf32(en));
+							yield return new Span(start, 2);
+						}
+					}
+					else {
+						edit.Replace(new Span(start, p - start.Position), ((char)en).ToString());
+						if (en.IsBetween(0xD800, 0xDBFF)) {
+							yield return new Span(start, 2);
+						}
+						else if (en.IsBetween(0xDC00, 0xDFFF)) {
+							// do nothing
+						}
+						else {
+							yield return new Span(start, 1);
+						}
+					}
+				}
+			NEXT:
+				if (p < l) {
+					start = new SnapshotPoint(s, p);
+				}
+				else {
+					break;
+				}
+			}
+		}
+
 		static CommandItem[] GetDebugCommands() {
 			return new CommandItem[] {
 				new CommandItem(IconIds.Watch, R.CMD_AddWatch, c => TextEditorHelper.ExecuteEditorCommand("Debug.AddWatch")),

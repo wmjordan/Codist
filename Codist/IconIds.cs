@@ -252,6 +252,7 @@ namespace Codist
 		public const int Lowercase = KnownImageIds.DecreaseFontSize;
 		public const int HtmlEncode = KnownImageIds.ReloadXML;
 		public const int UrlEncode = KnownImageIds.DynamicWebSite;
+		public const int EntityDecode = KnownImageIds.HanCharacter;
 		public const int EditMatches = KnownImageIds.EditAssociation;
 		public const int ShowClassificationInfo = KnownImageIds.HighlightText;
 		public const int TogglePinning = KnownImageIds.Unpin;

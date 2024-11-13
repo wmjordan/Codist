@@ -2834,4 +2834,10 @@ Ctrl: 将下划线分隔的单词转换为首字母大写的单词</value>
   <data name="T_FailedToLoadSyntaxCustomizationFile" xml:space="preserve">
     <value>加载自定义语法样式文件时出错</value>
   </data>
+  <data name="CMDT_DecodeNumericEntity" xml:space="preserve">
+    <value>将选中内容中形如 &amp;#1234; 或 &amp;#xA123; 的置标语言字符实体解码为实际的字符</value>
+  </data>
+  <data name="CMD_DecodeNumericEntity" xml:space="preserve">
+    <value>解码数字实体</value>
+  </data>
 </root>

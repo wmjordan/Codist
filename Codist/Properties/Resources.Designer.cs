@@ -360,6 +360,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Decode Numeric Entity.
+        /// </summary>
+        internal static string CMD_DecodeNumericEntity {
+            get {
+                return ResourceManager.GetString("CMD_DecodeNumericEntity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Delete All Breakpoints.
         /// </summary>
         internal static string CMD_DeleteAllBreakpoints {
@@ -2350,6 +2359,15 @@ namespace Codist.Properties {
         internal static string CMDT_DarkTheme {
             get {
                 return ResourceManager.GetString("CMDT_DarkTheme", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Decode markup entities in selection like &amp;#1234; or &amp;#xA123; to their actual Unicode characters.
+        /// </summary>
+        internal static string CMDT_DecodeNumericEntity {
+            get {
+                return ResourceManager.GetString("CMDT_DecodeNumericEntity", resourceCulture);
             }
         }
         
