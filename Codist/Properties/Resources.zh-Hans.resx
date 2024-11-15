@@ -1464,6 +1464,9 @@ Shift: 导出主题包含开发环境主题的样式</value>
   <data name="CMDT_SimpleTheme" xml:space="preserve">
     <value>加载预定义的简单主题</value>
   </data>
+  <data name="CMDT_UndoChanges" xml:space="preserve">
+    <value>撤销更改</value>
+  </data>
   <data name="CMD_Bold" xml:space="preserve">
     <value>粗体</value>
   </data>
