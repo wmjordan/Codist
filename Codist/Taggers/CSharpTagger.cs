@@ -758,12 +758,13 @@ namespace Codist.Taggers
 
 					case SymbolKind.Parameter:
 						tags.Add(itemSpan, __Classifications.Parameter);
-						method = (IMethodSymbol)symbol.ContainingSymbol;
-						if (method.IsPrimaryConstructor()) {
-							tags.Add(itemSpan, __Classifications.PrimaryConstructorParameter);
-						}
-						else if (method.MethodKind.CeqAny(MethodKind.LambdaMethod, MethodKind.LocalFunction)) {
-							tags.Add(itemSpan, __Classifications.LocalFunctionParameter);
+						if ((method = symbol.ContainingSymbol as IMethodSymbol) != null) {
+							if (method.IsPrimaryConstructor()) {
+								tags.Add(itemSpan, __Classifications.PrimaryConstructorParameter);
+							}
+							else if (method.MethodKind.CeqAny(MethodKind.LambdaMethod, MethodKind.LocalFunction)) {
+								tags.Add(itemSpan, __Classifications.LocalFunctionParameter);
+							}
 						}
 						break;
 
