@@ -764,6 +764,33 @@ namespace Codist
 			return null;
 		}
 
+		/// <summary>
+		/// Performs edit operation to each selected spans in the <paramref name="view"/>.
+		/// </summary>
+		/// <typeparam name="TView">The type of the view.</typeparam>
+		/// <param name="view">The <see cref="ITextView"/> to be edited.</param>
+		/// <param name="action">The edit operation against each selected span, returns a collection of spans for select.</param>
+		/// <returns>Returns a collections of new <see cref="SnapshotSpan"/>s if <see cref="ITextEdit.HasEffectiveChanges"/> returns <see langword="true"/> and any <paramref name="action"/> returns a <see cref="Span"/>, otherwise, returns <see langword="null"/>.</returns>
+		public static IEnumerable<SnapshotSpan> EditSelection<TView>(this TView view, Func<TView, ITextEdit, SnapshotSpan, IEnumerable<Span>> action)
+			where TView : ITextView {
+			var changedSpans = new Chain<Span>();
+			using (var edit = view.TextSnapshot.TextBuffer.CreateEdit()) {
+				foreach (var item in view.Selection.SelectedSpans) {
+					foreach (var span in action(view, edit, item)) {
+						changedSpans.Add(span);
+					}
+				}
+				if (edit.HasEffectiveChanges) {
+					var oldSnapshot = view.TextSnapshot;
+					var newSnapshot = edit.Apply();
+					if (changedSpans.IsEmpty == false) {
+						return changedSpans.Select(i => oldSnapshot.MapTo(i, newSnapshot));
+					}
+				}
+			}
+			return null;
+		}
+
 		public static FindOptions GetFindOptionsFromKeyboardModifiers() {
 			return Keyboard.Modifiers.Case(
 				ModifierKeys.Control, FindOptions.MatchCase | FindOptions.Wrap,
