@@ -2843,4 +2843,7 @@ Ctrl: 将下划线分隔的单词转换为首字母大写的单词</value>
   <data name="CMD_DecodeNumericEntity" xml:space="preserve">
     <value>解码数字实体</value>
   </data>
+  <data name="CMD_CommentToRegion" xml:space="preserve">
+    <value>将注释转为 #region</value>
+  </data>
 </root>

@@ -197,6 +197,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Comment to #region.
+        /// </summary>
+        internal static string CMD_CommentToRegion {
+            get {
+                return ResourceManager.GetString("CMD_CommentToRegion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Concat to Interpolated String.
         /// </summary>
         internal static string CMD_ConcatToInterpolatedString {

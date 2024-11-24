@@ -12,8 +12,8 @@ namespace Codist.Refactorings
 {
 	abstract class ReplaceText : IRefactoring
 	{
-		public static readonly ReplaceText WrapInRegion = new WrapInTextRefactoring(R.CMD_SurroundWithRegion, "#region RegionName", "#endregion", 8/*lengthof("#region ")*/, 10/*lengthof(RegionName)*/);
-		public static readonly ReplaceText WrapInIf = new WrapInTextRefactoring(R.CMD_SurroundWithIf, "#if DEBUG", "#endif", 4/*lengthof("#if ")*/, 5/*lengthof(DEBUG)*/);
+		public static readonly ReplaceText WrapInRegionDirective = new WrapInTextRefactoring(R.CMD_SurroundWithRegion, "#region RegionName", "#endregion", 8/*lengthof("#region ")*/, 10/*lengthof(RegionName)*/);
+		public static readonly ReplaceText WrapInIfDirective = new WrapInTextRefactoring(R.CMD_SurroundWithIf, "#if DEBUG", "#endif", 4/*lengthof("#if ")*/, 5/*lengthof(DEBUG)*/);
 		public static readonly ReplaceText CommentToRegion = new CommentToRegionRefactoring();
 		public static readonly ReplaceText SealType = new SealTypeRefactoring();
 		public static readonly ReplaceText MakeStatic = new StaticRefactoring();
@@ -28,6 +28,11 @@ namespace Codist.Refactorings
 		public abstract bool Accept(RefactoringContext context);
 
 		public abstract void Refactor(SemanticContext context);
+
+		static string GetLineBreakText(ITextSnapshotLine line, ITextView view) {
+			return line.GetLineBreakText()
+				?? view.Options.GetOptionValue(DefaultOptions.NewLineCharacterOptionId);
+		}
 
 		sealed class WrapInTextRefactoring : ReplaceText
 		{
@@ -74,8 +79,7 @@ namespace Codist.Refactorings
 					var s = v.Selection;
 					int se = s.End.Position.Position;
 					var le = v.TextSnapshot.GetLineFromPosition(se - 1);
-					var newLine = sl.GetLineBreakText()
-						?? v.Options.GetOptionValue(DefaultOptions.NewLineCharacterOptionId);
+					var newLine = GetLineBreakText(sl, v);
 					edit.Insert(sl.Start.Position, indent + _Start + newLine);
 					edit.Insert(le.EndIncludingLineBreak.Position, indent + _End + newLine);
 				});
@@ -91,7 +95,7 @@ namespace Codist.Refactorings
 		{
 			static readonly char[] __LeadingCommentChars = new[] { '/', ' ', '\t' };
 			public override int IconId => IconIds.Region;
-			public override string Title => "Comment to Region";
+			public override string Title => R.CMD_CommentToRegion;
 
 			public override bool Accept(RefactoringContext ctx) {
 				var statements = ctx.SelectedStatementInfo.Items;
@@ -110,8 +114,7 @@ namespace Codist.Refactorings
 					var s = v.Selection;
 					var sl = v.TextSnapshot.GetLineFromPosition(v.Selection.Start.Position);
 					var indent = sl.GetLinePrecedingWhitespace();
-					var newLine = sl.GetLineBreakText()
-						?? v.Options.GetOptionValue(DefaultOptions.NewLineCharacterOptionId);
+					var newLine = GetLineBreakText(sl, v);
 					int se = s.End.Position.Position;
 					var le = v.TextSnapshot.GetLineFromPosition(se - 1); 
 					edit.Replace(p.comment.FullSpan.ToSpan(), "#region " + p.commentText);

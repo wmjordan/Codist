@@ -39,8 +39,8 @@ namespace Codist.Refactorings
 			ReplaceNode.RemoveContainingStatement,
 			ReplaceNode.DeleteStatement,
 			ReplaceText.CommentToRegion,
-			ReplaceText.WrapInRegion,
-			ReplaceText.WrapInIf,
+			ReplaceText.WrapInRegionDirective,
+			ReplaceText.WrapInIfDirective,
 		};
 	}
 }

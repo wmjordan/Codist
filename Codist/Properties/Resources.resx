@@ -2860,4 +2860,7 @@ Discard its changes?</value>
   <data name="CMD_DecodeNumericEntity" xml:space="preserve">
     <value>Decode Numeric Entity</value>
   </data>
+  <data name="CMD_CommentToRegion" xml:space="preserve">
+    <value>Comment to #region</value>
+  </data>
 </root>
