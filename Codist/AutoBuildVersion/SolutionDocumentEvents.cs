@@ -82,7 +82,8 @@ namespace Codist
 			if (vsHierarchy != null) {
 				Project p = vsHierarchy.GetExtObjectAs<Project>();
 				if (p != null) {
-					WriteText($"Configuration of {p.UniqueName} changed to {p.ConfigurationManager.ActiveConfiguration.ConfigurationName}|{p.ConfigurationManager.ActiveConfiguration.PlatformName}.");
+					var c = p.ConfigurationManager.ActiveConfiguration;
+					WriteText($"Configuration of {p.UniqueName} changed to {c.ConfigurationName}|{c.PlatformName}.");
 				}
 			}
 #endif

@@ -459,26 +459,23 @@ namespace Codist.QuickInfo
 				return semanticModel.GetDeclaredSymbol(node, cancellationToken);
 			}
 			if (node is QueryClauseSyntax q) {
-				if (node is OrderByClauseSyntax o && o.Orderings.Count != 0) {
-					return semanticModel.GetSymbolInfo(o.Orderings[0], cancellationToken).Symbol;
-				}
-				return semanticModel.GetQueryClauseInfo(q, cancellationToken).OperationInfo.Symbol;
+				return node is OrderByClauseSyntax o && o.Orderings.Count != 0
+					? semanticModel.GetSymbolInfo(o.Orderings[0], cancellationToken).Symbol
+					: semanticModel.GetQueryClauseInfo(q, cancellationToken).OperationInfo.Symbol;
 			}
 			var symbolInfo = semanticModel.GetSymbolInfo(node, cancellationToken);
 			if (symbolInfo.CandidateReason != CandidateReason.None) {
-				candidates = symbolInfo.CandidateSymbols;
-				return symbolInfo.CandidateSymbols.FirstOrDefault();
+				return (candidates = symbolInfo.CandidateSymbols).FirstOrDefault();
 			}
 			return symbolInfo.Symbol
 				?? (kind.IsDeclaration()
-						|| kind == SyntaxKind.VariableDeclarator
-						|| kind == SyntaxKind.CatchDeclaration
+						|| kind.CeqAny(SyntaxKind.VariableDeclarator, SyntaxKind.CatchDeclaration)
 						|| kind == SyntaxKind.SingleVariableDesignation
 							&& node.Parent.IsAnyKind(SyntaxKind.DeclarationExpression, SyntaxKind.DeclarationPattern, SyntaxKind.ParenthesizedVariableDesignation)
 					? semanticModel.GetDeclaredSymbol(node, cancellationToken)
 					// : kind == SyntaxKind.ArrowExpressionClause
 					// ? semanticModel.GetDeclaredSymbol(node.Parent, cancellationToken)
-					: kind == SyntaxKind.IdentifierName && node.Parent.IsKind(SyntaxKind.NameEquals) && (node = node.Parent.Parent) != null && node.IsKind(SyntaxKind.UsingDirective)
+					: kind == SyntaxKind.IdentifierName && node.Parent.IsKind(SyntaxKind.NameEquals) && (node = node.Parent.Parent).IsKind(SyntaxKind.UsingDirective)
 					? semanticModel.GetDeclaredSymbol(node, cancellationToken)?.GetAliasTarget()
 					: semanticModel.GetSymbolExt(node, cancellationToken));
 		}
@@ -486,21 +483,22 @@ namespace Codist.QuickInfo
 		static void LocateNodeInParameterList(ref SyntaxNode node, ref SyntaxToken token) {
 			if (node.IsKind(SyntaxKind.Argument)) {
 				node = ((ArgumentSyntax)node).Expression;
+				return;
 			}
-			else if (node.IsKind(SyntaxKind.ArgumentList)) {
+			if (node.IsKind(SyntaxKind.ArgumentList)) {
 				var al = node as ArgumentListSyntax;
 				if (al.OpenParenToken == token) {
 					node = al.Arguments.FirstOrDefault() ?? node;
+					return;
 				}
-				else if (al.CloseParenToken == token) {
+				if (al.CloseParenToken == token) {
 					node = al.Arguments.LastOrDefault() ?? node;
+					return;
 				}
-				else {
-					foreach (var item in al.Arguments) {
-						if (item.FullSpan.Contains(token.SpanStart, true)) {
-							node = item;
-							break;
-						}
+				foreach (var item in al.Arguments) {
+					if (item.FullSpan.Contains(token.SpanStart, true)) {
+						node = item;
+						return;
 					}
 				}
 			}
@@ -943,7 +941,7 @@ namespace Codist.QuickInfo
 				&& typeSymbol.TypeParameters[0] != typeSymbol.TypeArguments[0]) {
 				ShowTypeArguments(qiContent, typeSymbol.TypeArguments, typeSymbol.TypeParameters);
 			}
-			if (typeSymbol.TypeKind.CeqAny(TypeKind.Class, TypeKind.Struct)
+			if (typeSymbol.IsAnyKind(TypeKind.Class, TypeKind.Struct)
 				&& options.MatchFlags(QuickInfoOptions.MethodOverload)) {
 				if (node.IsAnyKind(SyntaxKind.ClassDeclaration, SyntaxKind.StructDeclaration)
 					&& ((TypeDeclarationSyntax)node).GetParameterList() != null) {

@@ -439,11 +439,11 @@ namespace Codist.Margins
 			}
 
 			static bool IsType(CodeMemberType type) {
-				return type > CodeMemberType.Root && type < CodeMemberType.Member;
+				return type.IsInside(CodeMemberType.Root, CodeMemberType.Member);
 			}
 
 			static bool IsMember(CodeMemberType type) {
-				return type > CodeMemberType.Member && type < CodeMemberType.Other;
+				return type.IsInside(CodeMemberType.Member, CodeMemberType.Other);
 			}
 
 			[DebuggerDisplay("{GetDebuggerString()}")]
@@ -651,13 +651,11 @@ namespace Codist.Margins
 					return false;
 				}
 				if (symbol == null) {
-					if (_References != null) {
-						_References = null;
-						return true;
-					}
-					else {
+					if (_References == null) {
 						return false;
 					}
+					_References = null;
+					return true;
 				}
 				_References = GetReferenceItems(
 					await SymbolFinder.FindReferencesAsync(symbol.GetAliasTarget(), state.Document.Project.Solution, ImmutableSortedSet.Create(state.Document), cancellationToken).ConfigureAwait(false),

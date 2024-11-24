@@ -62,7 +62,7 @@ namespace Codist.Refactorings
 				if (token.IsAnyKind(SyntaxKind.NullKeyword, SyntaxKind.DefaultKeyword)
 					&& ctx.Node.FirstAncestorOrSelf<SyntaxNode>(n => n.IsKind(SyntaxKind.ParameterList)) == null
 					&& ctx.SemanticContext.SemanticModel.GetTypeInfo(ctx.Node).ConvertedType is ITypeSymbol type) {
-					if (type.TypeKind.CeqAny(TypeKind.Class, TypeKind.Struct)) {
+					if (type.IsAnyKind(TypeKind.Class, TypeKind.Struct)) {
 						switch (type.SpecialType) {
 							case SpecialType.System_Boolean:
 								_Title = R.CMD_UseDefault.Replace("default", "false");
@@ -115,7 +115,7 @@ namespace Codist.Refactorings
 				if (!(ctx.SemanticModel.GetTypeInfo(ctx.Node).ConvertedType is ITypeSymbol type)) {
 					return String.Empty;
 				}
-				if (type.TypeKind.CeqAny(TypeKind.Class, TypeKind.Struct)) {
+				if (type.IsAnyKind(TypeKind.Class, TypeKind.Struct)) {
 					switch (type.SpecialType) {
 						case SpecialType.System_Boolean:
 							return "false";

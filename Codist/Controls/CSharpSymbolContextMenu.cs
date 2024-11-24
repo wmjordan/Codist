@@ -208,7 +208,7 @@ namespace Codist.Controls
 		}
 
 		void CreateCommandForNamedType(INamedTypeSymbol t) {
-			if (t.TypeKind.CeqAny(TypeKind.Class, TypeKind.Struct)) {
+			if (t.IsAnyKind(TypeKind.Class, TypeKind.Struct)) {
 				var ctor = _Host.Node?.GetObjectCreationNode();
 				if (ctor != null) {
 					var symbol = _Host.Context.SemanticModel.GetSymbolOrFirstCandidate(ctor);
@@ -246,7 +246,7 @@ namespace Codist.Controls
 		void CreateCommandsForReturnTypeCommand() {
 			var rt = _Host.Symbol.GetReturnType();
 			if (rt.SpecialType.CeqAny(SpecialType.System_Void, SpecialType.System_Object)
-				|| rt.TypeKind.CeqAny(TypeKind.TypeParameter, TypeKind.Error, TypeKind.Dynamic)
+				|| rt.IsAnyKind(TypeKind.TypeParameter, TypeKind.Error, TypeKind.Dynamic)
 				|| rt.IsTupleType) {
 				return;
 			}

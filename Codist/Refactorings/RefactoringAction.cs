@@ -20,14 +20,13 @@ namespace Codist.Refactorings
 			ActionType = action;
 			Original = delete;
 			Insert = insert;
-			if (insert != null) {
-				Annotation = new SyntaxAnnotation();
-				for (int i = 0; i < insert.Count; i++) {
-					insert[i] = insert[i].WithAdditionalAnnotations(Annotation);
-				}
-			}
-			else {
+			if (insert == null) {
 				Annotation = null;
+				return;
+			}
+			Annotation = new SyntaxAnnotation();
+			for (int i = 0; i < insert.Count; i++) {
+				insert[i] = insert[i].WithAdditionalAnnotations(Annotation);
 			}
 		}
 

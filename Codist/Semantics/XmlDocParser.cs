@@ -226,7 +226,7 @@ namespace Codist
 					}
 				}
 			}
-			if (t.BaseType != null && t.TypeKind.CeqAny(TypeKind.Class, TypeKind.Struct)) {
+			if (t.BaseType != null && t.IsAnyKind(TypeKind.Class, TypeKind.Struct)) {
 				InheritDocumentation(t.BaseType, querySymbol);
 			}
 			// inherit from implemented interfaces

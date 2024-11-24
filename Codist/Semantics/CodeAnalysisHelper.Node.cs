@@ -17,25 +17,31 @@ namespace Codist
 	{
 		#region Node info
 		public static bool IsAnyKind(this SyntaxNode node, SyntaxKind kind1, SyntaxKind kind2) {
-			return Op.Cast<int, SyntaxKind>(node.RawKind).CeqAny(kind1, kind2);
+			return node.RawKind.CeqAny(kind1, kind2);
 		}
 		public static bool IsAnyKind(this SyntaxNode node, SyntaxKind kind1, SyntaxKind kind2, SyntaxKind kind3) {
-			return Op.Cast<int, SyntaxKind>(node.RawKind).CeqAny(kind1, kind2, kind3);
+			return node.RawKind.CeqAny(kind1, kind2, kind3);
 		}
 		public static bool IsAnyKind(this SyntaxNode node, SyntaxKind kind1, SyntaxKind kind2, SyntaxKind kind3, SyntaxKind kind4) {
-			return Op.Cast<int, SyntaxKind>(node.RawKind).CeqAny(kind1, kind2, kind3, kind4);
+			return node.RawKind.CeqAny(kind1, kind2, kind3, kind4);
 		}
 		public static bool IsAnyKind(this SyntaxToken token, SyntaxKind kind1, SyntaxKind kind2) {
-			return Op.Cast<int, SyntaxKind>(token.RawKind).CeqAny(kind1, kind2);
+			return token.RawKind.CeqAny(kind1, kind2);
 		}
 		public static bool IsAnyKind(this SyntaxToken token, SyntaxKind kind1, SyntaxKind kind2, SyntaxKind kind3) {
-			return Op.Cast<int, SyntaxKind>(token.RawKind).CeqAny(kind1, kind2, kind3);
+			return token.RawKind.CeqAny(kind1, kind2, kind3);
 		}
 		public static bool IsAnyKind(this SyntaxToken token, SyntaxKind kind1, SyntaxKind kind2, SyntaxKind kind3, SyntaxKind kind4) {
-			return Op.Cast<int, SyntaxKind>(token.RawKind).CeqAny(kind1, kind2, kind3, kind4);
+			return token.RawKind.CeqAny(kind1, kind2, kind3, kind4);
+		}
+		public static bool IsAnyKind(this ITypeSymbol type, TypeKind kind1, TypeKind kind2) {
+			return type.TypeKind.CeqAny(kind1, kind2);
+		}
+		public static bool IsAnyKind(this ITypeSymbol type, TypeKind kind1, TypeKind kind2, TypeKind kind3) {
+			return type.TypeKind.CeqAny(kind1, kind2, kind3);
 		}
 		public static bool IsPredefinedSystemType(this SyntaxKind kind) {
-			return kind >= SyntaxKind.BoolKeyword && kind <= SyntaxKind.ObjectKeyword;
+			return kind.IsBetween(SyntaxKind.BoolKeyword, SyntaxKind.ObjectKeyword);
 		}
 		public static bool IsDeclaration(this SyntaxKind kind) {
 			switch (kind) {
@@ -148,12 +154,7 @@ namespace Codist
 			return false;
 		}
 		public static bool IsNamespaceDeclaration(this SyntaxKind kind) {
-			switch (kind) {
-				case SyntaxKind.NamespaceDeclaration:
-				case FileScopedNamespaceDeclaration:
-					return true;
-			}
-			return false;
+			return kind.CeqAny(SyntaxKind.NamespaceDeclaration, FileScopedNamespaceDeclaration);
 		}
 		public static bool IsMemberDeclaration(this SyntaxKind kind) {
 			switch (kind) {
