@@ -80,7 +80,6 @@ namespace Codist.QuickInfo
 					info.Append($", {(lines + 1).ToText()}{R.T_Lines}");
 				}
 			}
-		RETURN:
 			return new QuickInfoItem(activeSpan.ToTrackingSpan(), info.SetGlyph(IconIds.SelectCode).Tag());
 		}
 
@@ -89,7 +88,7 @@ namespace Codist.QuickInfo
 			var codes = new StackPanel {
 				Margin = WpfHelper.SmallMargin,
 				Children = {
-					new ThemedTipText($"Unicode: {unicode}")
+					new ThemedTipText($"Unicode: {unicode} / 0x{unicode:X4}")
 				}
 			};
 			if (unicode > 127) {
