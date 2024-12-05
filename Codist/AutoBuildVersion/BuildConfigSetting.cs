@@ -62,7 +62,7 @@ namespace Codist.AutoBuildVersion
 			}
 			f = f.SetFlags(rf, false);
 			var r = rf != RewriteFlags.None;
-			if (r && project.Saved == false) {
+			if (r) {
 				project.Save();
 			}
 			return r;
