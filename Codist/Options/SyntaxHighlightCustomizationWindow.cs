@@ -31,7 +31,7 @@ namespace Codist.Options
 		readonly TextBlock _Notice;
 		readonly ListBox _SyntaxSourceBox;
 		readonly Grid _RightPaneTitle;
-		readonly TextBlock _StyleNameHolder;
+		readonly TextBox _StyleNameHolder;
 		readonly Button _ResetButton;
 		readonly Border _SettingsGroup, _TagSettingsGroup;
 		readonly FontButton _FontButton;
@@ -202,7 +202,7 @@ namespace Codist.Options
 											new WrapPanel {
 												Children = {
 													new TextBlock { Text = R.T_StyleSettings, FontWeight = FontWeights.Bold },
-													new TextBlock { FontWeight = FontWeights.Bold, TextDecorations = { TextDecorations.Underline }, Margin = WpfHelper.MiddleHorizontalMargin }.Set(ref _StyleNameHolder),
+													new TextBox { FontWeight = FontWeights.Bold, IsReadOnly = true, Margin = WpfHelper.MiddleHorizontalMargin, MaxWidth = 400 }.ReferenceStyle(VsResourceKeys.TextBoxStyleKey).Set(ref _StyleNameHolder),
 													new Button { Content = R.CMD_Reset }.ReferenceStyle(VsResourceKeys.ButtonStyleKey).Set(ref _ResetButton)
 												}
 											},
