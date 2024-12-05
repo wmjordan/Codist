@@ -560,9 +560,9 @@ namespace Codist.SyntaxHighlight
 			}
 
 			public void SwapPriority(string classificationX, string classificationY) {
-				var x = __GetClassificationType(classificationX);
-				var y = __GetClassificationType(classificationY);
-				if (x != null && y != null) {
+				IClassificationType x, y;
+				if ((x = __GetClassificationType(classificationX)) != null
+					&& (y = __GetClassificationType(classificationY)) != null) {
 					_ClassificationFormatMap.SwapPriorities(x, y);
 				}
 			}

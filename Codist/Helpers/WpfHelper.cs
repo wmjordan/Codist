@@ -151,12 +151,12 @@ namespace Codist
 		}
 		public static TTextBlock AppendLink<TTextBlock>(this TTextBlock block, string text, string uri, string toolTip)
 			where TTextBlock : TextBlock {
-			block.Inlines.Add(new Hyperlink { Inlines = { text }, NavigateUri = new Uri(uri), ToolTip = toolTip }.ClickToNavigate());
+			block.Inlines.Add(new Hyperlink(new Run(text)) { NavigateUri = new Uri(uri), ToolTip = toolTip }.ClickToNavigate());
 			return block;
 		}
 		public static TTextBlock AppendLink<TTextBlock>(this TTextBlock block, string text, Action<Hyperlink> clickHandler, string toolTip)
 			where TTextBlock : TextBlock {
-			block.Inlines.Add(new Hyperlink { Inlines = { text }, ToolTip = toolTip }.ClickToNavigate(clickHandler));
+			block.Inlines.Add(new Hyperlink(new Run(text)) { ToolTip = toolTip }.ClickToNavigate(clickHandler));
 			return block;
 		}
 		public static TTextBlock AppendFileLink<TTextBlock>(this TTextBlock block, string file, string folder)
