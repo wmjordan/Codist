@@ -806,11 +806,6 @@ namespace Codist.SyntaxHighlight
 					}
 				}
 
-				var qi = Config.Instance.QuickInfo;
-				if (qi.BackColor.A != 0) {
-					qi.BackColor = qi.BackColor.InvertBrightness();
-					Config.Instance.FireConfigChangedEvent(Features.SuperQuickInfo);
-				}
 				var sm = Config.Instance.SymbolReferenceMarkerSettings;
 				if (sm.ReferenceMarker.A != 0 || sm.WriteMarker.A != 0 || sm.SymbolDefinition.A != 0) {
 					if (sm.ReferenceMarker.A != 0) {
