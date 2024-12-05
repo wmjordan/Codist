@@ -883,6 +883,11 @@ namespace Codist
 				&& type.GetBaseTypes().Any(t => t.MatchTypeName(nameof(Attribute), "System"));
 		}
 
+		public static bool IsExceptionType(this INamedTypeSymbol type) {
+			return type?.TypeKind == TypeKind.Class
+				&& type.GetBaseTypes().Any(t => t.MatchTypeName(nameof(Exception), "System"));
+		}
+
 		public static bool IsCommonBaseType(this ISymbol symbol) {
 			if (symbol is ITypeSymbol type) {
 				switch (type.SpecialType) {

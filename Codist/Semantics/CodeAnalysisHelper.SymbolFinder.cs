@@ -770,14 +770,9 @@ namespace Codist
 				case SymbolKind.Property:
 					return SymbolUsageKind.Write;
 				case SymbolKind.NamedType:
-					var t = (INamedTypeSymbol)symbol;
-					switch (t.TypeKind) {
-						case TypeKind.Class:
-							return t.Name?.EndsWith("Exception", StringComparison.Ordinal) == true
-								? SymbolUsageKind.Catch | SymbolUsageKind.TypeCast | SymbolUsageKind.TypeParameter
-								: SymbolUsageKind.TypeCast | SymbolUsageKind.TypeParameter;
-					}
-					return SymbolUsageKind.TypeCast | SymbolUsageKind.TypeParameter;
+					return ((INamedTypeSymbol)symbol).IsExceptionType()
+						? SymbolUsageKind.Catch | SymbolUsageKind.TypeCast | SymbolUsageKind.TypeParameter
+						: SymbolUsageKind.TypeCast | SymbolUsageKind.TypeParameter;
 				case SymbolKind.Method:
 					return SymbolUsageKind.Delegate;
 				default:
