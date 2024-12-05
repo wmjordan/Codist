@@ -551,6 +551,7 @@ namespace Codist.SyntaxHighlight
 						$"[{_Category}] apply format {item.Key}".Log();
 						_EditorFormatMap.SetProperties(item.Key, item.Value);
 					}
+					WorkaroundUnnecessaryCodeDiagnostic(_EditorFormatMap);
 				}
 				finally {
 					_EditorFormatMap.EndBatchUpdate();
@@ -662,6 +663,7 @@ namespace Codist.SyntaxHighlight
 							_EditorFormatMap.SetProperties(item.Key, p);
 						}
 					}
+					WorkaroundUnnecessaryCodeDiagnostic(_EditorFormatMap);
 				}
 				finally {
 					_Context = FormatContext.None;
@@ -735,6 +737,7 @@ namespace Codist.SyntaxHighlight
 						foreach (var item in newStyles) {
 							_EditorFormatMap.SetProperties(item.Key, item.Value);
 						}
+						WorkaroundUnnecessaryCodeDiagnostic(_EditorFormatMap);
 						if (needRefresh == false) {
 							needRefresh = dedup.Contains(__GetClassificationType(Constants.CodeClassName));
 						}
@@ -893,6 +896,7 @@ namespace Codist.SyntaxHighlight
 							ResetTextProperties(map, item);
 						}
 					}
+					WorkaroundUnnecessaryCodeDiagnostic(map);
 				}
 				finally {
 					map.EndBatchUpdate();
@@ -973,6 +977,10 @@ namespace Codist.SyntaxHighlight
 						yield return t;
 					}
 				}
+			}
+
+			static void WorkaroundUnnecessaryCodeDiagnostic(IEditorFormatMap map) {
+				map.SetProperties("UnnecessaryCodeDiagnostic", map.GetProperties("UnnecessaryCodeDiagnostic").SetBrush(null));
 			}
 
 			static bool AreBrushesEqual(Brush x, Brush y) {
