@@ -195,15 +195,14 @@ namespace Codist.SmartBars
 
 		void AddEditAllMatchingCommand() {
 			AddCommand(ToolBar, IconIds.EditMatches, R.CMD_EditMatches, ctx => {
-				var spans = ctx.View.Selection.SelectedSpans;
-				if (spans.Count < 1) {
+				var b = ctx.View.GetMultiSelectionBroker();
+				if (b.HasMultipleSelections || b.PrimarySelection.IsEmpty) {
 					return;
 				}
-				var s = spans[0];
+				var s = b.PrimarySelection.Extent.SnapshotSpan;
 				if (s.Length == 0) {
 					return;
 				}
-				var b = ctx.View.GetMultiSelectionBroker();
 				var option = FindOptions.Wrap | FindOptions.OrdinalComparison;
 				var m = ctx.ModifierKeys;
 				if (m.MatchFlags(ModifierKeys.Control)) {
