@@ -390,6 +390,23 @@ namespace Codist
 			return false;
 		}
 
+		public static IMethodSymbol GetPrimaryConstructor(this INamedTypeSymbol type) {
+			if (type is null || type.IsAnyKind(TypeKind.Class, TypeKind.Struct) == false) {
+				return null;
+			}
+			var rt = type.DeclaringSyntaxReferences;
+			foreach (var ctor in type.InstanceConstructors) {
+				foreach (var m in ctor.DeclaringSyntaxReferences) {
+					foreach (var t in rt) {
+						if (m.SyntaxTree == t.SyntaxTree && m.Span == t.Span) {
+							return ctor;
+						}
+					}
+				}
+			}
+			return null;
+		}
+
 		public static IReadOnlyList<ISymbol> GetExplicitInterfaceImplementations(this ISymbol symbol) {
 			switch (symbol.Kind) {
 				case SymbolKind.Method:
