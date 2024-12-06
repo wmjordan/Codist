@@ -411,6 +411,7 @@ namespace Codist.SyntaxHighlight
 
 		sealed class Highlighter : IEquatable<Highlighter>, IFormatCache
 		{
+			const string UnnecessaryCodeDiagnostic = "UnnecessaryCodeDiagnostic";
 			readonly string _Category;
 			readonly IEditorFormatMap _EditorFormatMap;
 			readonly IClassificationFormatMap _ClassificationFormatMap;
@@ -502,13 +503,18 @@ namespace Codist.SyntaxHighlight
 				_ClassificationFormatMap.BeginBatchUpdate();
 				try {
 					var formats = _ClassificationFormatMap.CurrentPriorityOrder;
+					KeyValuePair<string, ResourceDictionary> newStyle;
 					$"Refresh priority {formats.Count}".Log();
 					_PropertiesCache.Clear();
 					foreach (var item in formats) {
-						if (item.IsFormattableClassificationType()) {
+						if (item.IsFormattableClassificationType()
+							// hack: UnnecessaryCodeDiagnostic behaves weirdly, if we let it run the following code,
+							//   foreground color will be applied.
+							//   thus, we skip it heres
+							&& item.Classification != UnnecessaryCodeDiagnostic) {
 							var p = _ClassificationFormatMap.GetTextProperties(item);
-							// C/C++ styles can somehow get reverted, here we forcefully reinforce our highlights 
-							if (Highlight(item, out var newStyle) != FormatChanges.None) {
+							// C/C++ styles can somehow get reverted, here we forcefully reinforce our highlights
+							if (Highlight(item, out newStyle) != FormatChanges.None) {
 								p = newStyle.Value.MergeFormatProperties(p);
 							}
 							$"[{_Category}] refresh classification {item.Classification} ({p.Print()})".Log();
@@ -980,7 +986,7 @@ namespace Codist.SyntaxHighlight
 			}
 
 			static void WorkaroundUnnecessaryCodeDiagnostic(IEditorFormatMap map) {
-				map.SetProperties("UnnecessaryCodeDiagnostic", map.GetProperties("UnnecessaryCodeDiagnostic").SetBrush(null));
+				map.SetProperties(UnnecessaryCodeDiagnostic, map.GetProperties(UnnecessaryCodeDiagnostic).SetBrush(null));
 			}
 
 			static bool AreBrushesEqual(Brush x, Brush y) {
