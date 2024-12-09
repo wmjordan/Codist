@@ -31,7 +31,7 @@ namespace Codist.Taggers
 			if (Disabled || spans.Count == 0) {
 				return Array.Empty<ITagSpan<IClassificationTag>>();
 			}
-			if (_Tags.LastParsed == 0 && DoFullParseAtFirstLoad) {
+			if (_Tags.LastParsed == 0 && DoFullParseAtFirstLoad && _Tags.Version == 0) {
 				return ParseSnapshot();
 			}
 			var parseSpans = spans;
