@@ -21,6 +21,7 @@ namespace Codist.QuickInfo
 			}
 			var implementedIntfs = ImmutableArray.CreateBuilder<ITypeSymbol>(3);
 			ThemedTipDocument info = null;
+			var refKind = symbol.GetRefKind();
 			var returnType = symbol.GetReturnType();
 			var parameters = symbol.GetParameters();
 			var typeParams = symbol.GetTypeParameters();
@@ -28,6 +29,7 @@ namespace Codist.QuickInfo
 				foreach (var member in intf.GetMembers(symbol.Name)) {
 					if (member.Kind == symbol.Kind
 						&& member.DeclaredAccessibility == Accessibility.Public
+						&& member.GetRefKind() == refKind
 						&& member.MatchSignature(symbol.Kind, returnType, parameters, typeParams)) {
 						implementedIntfs.Add(intf);
 					}

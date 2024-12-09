@@ -512,6 +512,16 @@ namespace Codist
 			return null;
 		}
 
+		public static RefKind GetRefKind(this ISymbol symbol) {
+			switch (symbol.Kind) {
+				case SymbolKind.Method: return ((IMethodSymbol)symbol).RefKind;
+				case SymbolKind.Property: return ((IPropertySymbol)symbol).RefKind;
+				case SymbolKind.Local: return ((ILocalSymbol)symbol).RefKind;
+				case SymbolKind.Parameter: return ((IParameterSymbol)symbol).RefKind;
+				default: return RefKind.None;
+			}
+		}
+
 		public static ITypeSymbol GetNullableValueType(this ITypeSymbol type) {
 			if (type.IsValueType
 				&& type is INamedTypeSymbol nt
@@ -1417,7 +1427,7 @@ namespace Codist
 			if (ReferenceEquals(a, b)) {
 				return true;
 			}
-			if (a == null || b == null) {
+			if (a == null || b == null || a.IsRefLike() != b.IsRefLike()) {
 				return false;
 			}
 			if (a.Equals(b)) {

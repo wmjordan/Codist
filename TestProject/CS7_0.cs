@@ -178,6 +178,24 @@ namespace TestProject.CS7_0
 				Console.WriteLine();
 			}
 		}
+
+		public interface IRefReturn
+		{
+			ref int Value { get; }
+			ref int GetValue(int index);
+			int GetValue(int index, int defaultValue);
+		}
+
+		public class Return : IRefReturn
+		{
+			readonly int[] fields = new int[] { 1, 2, 3 };
+			public ref int Value => ref fields[0];
+			public ref int GetValue(int index) => ref fields[index];
+
+			public int GetValue(int index, int defaultValue) {
+				return index >=0 && index < fields.Length ? fields[index] : defaultValue;
+			}
+		}
 	}
 
 	public class ToDoItem
