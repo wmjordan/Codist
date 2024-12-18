@@ -277,6 +277,9 @@ namespace Codist.SmartBars
 			if (TextEditorHelper.ActiveViewFocused() == false) {
 				return;
 			}
+			if (e.Key == Key.Escape) {
+				HideToolBar();
+			}
 			if (e.Key != Key.LeftShift && e.Key != Key.RightShift) {
 				_LastShiftHit = DateTime.MinValue;
 				return;
@@ -288,7 +291,7 @@ namespace Codist.SmartBars
 			}
 			e.Handled = true;
 			if (_ToolBarTray.Visibility == Visibility.Visible) {
-				HideToolBar(this, null);
+				HideToolBar();
 				return;
 			}
 			if ((now - _LastShiftHit).Ticks < TimeSpan.TicksPerSecond) {
@@ -310,7 +313,7 @@ namespace Codist.SmartBars
 		}
 
 		void ViewLayoutChanged(object sender, EventArgs e) {
-			HideToolBar(sender, null);
+			HideToolBar();
 		}
 
 		void ViewMouseMove(object sender, MouseEventArgs e) {
@@ -335,7 +338,7 @@ namespace Codist.SmartBars
 			}
 			var op = Math.Abs(x) + Math.Abs(y);
 			if (op > SensibleRange) {
-				HideToolBar(this, null);
+				HideToolBar();
 				return;
 			}
 			_ToolBarTray.Opacity = (SensibleRange - op) / SensibleRange;
