@@ -115,12 +115,13 @@ namespace Codist.Options
 		public LabeledControl(string text, double labelWidth, FrameworkElement control) {
 			Orientation = Orientation.Horizontal;
 			this.Add(new TextBlock {
-				Text = text,
-				Width = labelWidth,
-				VerticalAlignment = VerticalAlignment.Center,
-				Margin = WpfHelper.SmallMargin
-			},
-				control.WrapMargin(WpfHelper.SmallMargin));
+					Text = text,
+					Width = labelWidth,
+					VerticalAlignment = VerticalAlignment.Center,
+					Margin = WpfHelper.SmallMargin
+				},
+				control.WrapMargin(WpfHelper.SmallMargin)
+			);
 		}
 	}
 
