@@ -770,9 +770,6 @@ namespace Codist.SyntaxHighlight
 			/// </summary>
 			/// <remarks>Since syntax highlight colors are used majorly in primary document editor window, thus this method only works for the primary editor.</remarks>
 			internal void DetectThemeColorCompatibilityWithBackground() {
-				if (_Category != Constants.CodeText) {
-					return;
-				}
 				var isBackgroundDark = _ViewBackground.IsDark();
 				// color counter
 				int brightness = 0;
@@ -803,18 +800,15 @@ namespace Codist.SyntaxHighlight
 			void InvertColorBrightness() {
 				$"[{_Category}] invert color brightness".Log();
 				foreach (var item in GetStyles()) {
-					var style = item.Value;
-					if (style.ForeColor.A != 0) {
-						style.ForeColor = style.ForeColor.InvertBrightness();
-					}
-					if (style.BackColor.A != 0) {
-						style.BackColor = style.BackColor.InvertBrightness();
-					}
-					if (style.HasLineColor) {
-						style.LineColor = style.LineColor.InvertBrightness();
-					}
+					item.Value.InvertBrightness = true;
+				}
+				if (_Category != Constants.CodeText) {
+					return;
 				}
 
+				foreach (var item in GetStyles()) {
+					item.Value.ConsolidateBrightness();
+				}
 				var sm = Config.Instance.SymbolReferenceMarkerSettings;
 				if (sm.ReferenceMarker.A != 0 || sm.WriteMarker.A != 0 || sm.SymbolDefinition.A != 0) {
 					if (sm.ReferenceMarker.A != 0) {
