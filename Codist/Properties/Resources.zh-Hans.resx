@@ -1457,6 +1457,9 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   <data name="CMDT_ResetTheme" xml:space="preserve">
     <value>重置语法样式主题为默认样式...</value>
   </data>
+  <data name="CMDT_SaveChanges" xml:space="preserve">
+    <value>确定更改</value>
+  </data>
   <data name="CMDT_SaveTheme" xml:space="preserve">
     <value>保存语法样式主题...
 Shift: 导出主题包含开发环境主题的样式</value>
