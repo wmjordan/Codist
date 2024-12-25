@@ -74,6 +74,25 @@ namespace Codist.Taggers
 				return;
 			}
 			_Tags.PurgeOutdatedTags(args);
+			if (DoFullParseAtFirstLoad) {
+				ReparseChangedLines(args);
+			}
+		}
+
+		void ReparseChangedLines(TextContentChangedEventArgs args) {
+			var changedLines = new NormalizedSnapshotSpanCollection(GetLinesOfChanges(args));
+			if (changedLines.Count > Math.Max(1000, _TextView.TextSnapshot.LineCount / 3)) {
+				// if too many lines are changed, we reparse the whole document,
+				// when full parse is required to cache parse results
+				_Tags.Reset();
+				_Tags.Version = 0;
+				_TaggedContents.Clear();
+				ParseSnapshot();
+			}
+			else {
+				foreach (var dummy in GetTags(changedLines)) {
+				}
+			}
 		}
 
 		void TextView_Closed(object sender, EventArgs e) {
@@ -84,6 +103,25 @@ namespace Codist.Taggers
 				_TextView.Closed -= TextView_Closed;
 				_TextView = null;
 				_Tags = null;
+			}
+		}
+
+		static IEnumerable<SnapshotSpan> GetLinesOfChanges(TextContentChangedEventArgs args) {
+			var ss = args.After;
+			int lastEnd = 0;
+			foreach (var item in args.Changes) {
+				var line = ss.GetLineFromPosition(item.NewPosition);
+				if (line.Start.Position < lastEnd) {
+					continue;
+				}
+				yield return line.Extent;
+				int lineEnd = line.EndIncludingLineBreak.Position;
+				while (lineEnd < item.NewEnd) {
+					line = ss.GetLineFromPosition(lineEnd);
+					yield return line.Extent;
+					lineEnd = line.EndIncludingLineBreak.Position;
+				}
+				lastEnd = lineEnd;
 			}
 		}
 	}
