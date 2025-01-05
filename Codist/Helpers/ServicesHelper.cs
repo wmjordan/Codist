@@ -78,7 +78,6 @@ namespace Codist
 		internal SyntaxHighlight.ClassificationTypeExporter ClassificationTypeExporter { get; }
 
 		public static TInterface Get<TInterface, VSInterface>() where TInterface : class {
-			ThreadHelper.ThrowIfNotOnUIThread();
 			return ServiceProvider.GlobalProvider.GetService(typeof(VSInterface)) as TInterface;
 		}
 

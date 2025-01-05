@@ -127,7 +127,18 @@ namespace Codist.QuickInfo
 		protected abstract Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken);
 
 		async Task<QuickInfoItem> InternalGetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
-			var item = await GetQuickInfoItemAsync(session, cancellationToken).ConfigureAwait(false);
+			QuickInfoItem item;
+			await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
+			try {
+				item = await GetQuickInfoItemAsync(session, cancellationToken);
+			}
+			catch (OperationCanceledException) {
+				throw;
+			}
+			catch (Exception ex) {
+				Controls.MessageWindow.Error(ex, null, Properties.Resources.T_SuperQuickInfo, this);
+				return null;
+			}
 			if (item != null) {
 				session.Properties.AddProperty(GetType(), this);
 			}
