@@ -1332,11 +1332,16 @@ namespace Codist
 				int i = 2, // skip leading "/*"
 					l = t.Length - 2; // drop trailing "*/"
 				while (true) {
+					Next:
 					var p = t.IndexOfAny(__SplitLineChars, i);
 					if (i > 2) {
 						sb.AppendLine();
 					}
 					while (i < l) {
+						if (p == i) {
+							++i;
+							goto Next;
+						}
 						if (Char.IsWhiteSpace(t[i])) {
 							++i;
 						}
@@ -1348,6 +1353,7 @@ namespace Codist
 						sb.Append(t, i, l - i);
 						break;
 					}
+					System.Diagnostics.Debug.Assert(p > i);
 					sb.Append(t, i, p - i);
 					i = (t[p] == '\r' && p + 1 < l && t[p + 1] == '\n' ? 2 : 1)
 						+ p;
