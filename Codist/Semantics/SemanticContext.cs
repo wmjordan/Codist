@@ -447,7 +447,9 @@ namespace Codist
 			public SnapshotPointSyntax(SyntaxModel model, SnapshotPoint visualPosition, ITextView view) {
 				_Model = model;
 				VisualPosition = visualPosition;
-				SourcePosition = visualPosition.Snapshot.TextBuffer != model.SourceBuffer && view?.BufferGraph != null
+				SourcePosition = model.SourceBuffer == null
+					? default
+					: visualPosition.Snapshot.TextBuffer != model.SourceBuffer && view?.BufferGraph != null
 					? view.BufferGraph.MapDownToSnapshot(visualPosition, PointTrackingMode.Positive, model.SourceBuffer.CurrentSnapshot, PositionAffinity.Successor).GetValueOrDefault(visualPosition)
 					: visualPosition;
 			}
