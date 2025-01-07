@@ -10,9 +10,11 @@ namespace Codist.QuickInfo
 {
 	partial class CSharpQuickInfo
 	{
-		static void ShowInterfaceImplementation<TSymbol>(InfoContainer qiContent, TSymbol symbol, IEnumerable<TSymbol> explicitImplementations)
+		static void ShowInterfaceImplementation<TSymbol>(InfoContainer qiContent, TSymbol symbol, IReadOnlyList<TSymbol> explicitImplementations)
 			where TSymbol : class, ISymbol {
-			if (symbol.DeclaredAccessibility != Accessibility.Public && explicitImplementations.Any() == false) {
+			if (symbol.DeclaredAccessibility != Accessibility.Public
+				&& explicitImplementations.Count == 0
+				|| symbol.ContainingType is null) {
 				return;
 			}
 			var interfaces = symbol.ContainingType.AllInterfaces;

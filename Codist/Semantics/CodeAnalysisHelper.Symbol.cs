@@ -349,7 +349,7 @@ namespace Codist
 				case SymbolKind.Discard:
 					return ((IDiscardSymbol)symbol).Type.GetUnderlyingSymbol();
 				case SymbolKind.Method:
-					return ((IMethodSymbol)symbol).MethodKind == MethodKind.BuiltinOperator
+					return ((IMethodSymbol)symbol).MethodKind == MethodKind.BuiltinOperator && symbol.ContainingType != null
 						? symbol.ContainingType.GetMembers(symbol.Name).FirstOrDefault()
 						: symbol;
 			}
