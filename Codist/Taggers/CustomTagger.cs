@@ -377,6 +377,8 @@ namespace Codist.Taggers
 				var watcher = new FileSystemWatcher(dir, ConfigFileName);
 				watcher.Changed += OnConfigFileChanged;
 				watcher.Renamed += OnConfigFileChanged;
+				watcher.Created += OnConfigFileChanged;
+				watcher.Deleted += OnConfigFileChanged;
 				watcher.EnableRaisingEvents = true;
 				_Watcher = watcher;
 				_Items = taggers?.Count != 0 ? taggers : null;
@@ -439,7 +441,9 @@ namespace Codist.Taggers
 
 			void UpdateConfigFile(object filePath) {
 				try {
-					_Items = JsonConvert.DeserializeObject<List<CustomTagDefinitionSet>>(File.ReadAllText(_Path));
+					_Items = File.Exists(_Path)
+						? JsonConvert.DeserializeObject<List<CustomTagDefinitionSet>>(File.ReadAllText(_Path))
+						: null;
 					lock (_Sync) {
 						foreach (var item in _CustomTaggers) {
 							item._Taggers = GetTaggers(item._Path);
