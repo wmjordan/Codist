@@ -2739,9 +2739,6 @@ Ctrl: toggle and select next.</value>
   <data name="T_Headings" xml:space="preserve">
     <value>Headings</value>
   </data>
-  <data name="OT_HideCopilotButton" xml:space="preserve">
-    <value>Hide Github Copilot button</value>
-  </data>
   <data name="CMD_MarkSubscript" xml:space="preserve">
     <value>Toggle Subscript Mark
 Ctrl: toggle and select next</value>
