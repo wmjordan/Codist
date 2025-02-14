@@ -428,7 +428,8 @@ namespace Codist
 			}
 
 			public SnapshotSpan MapSourceSpan(TextSpan span, ITextView view) {
-				return view.BufferGraph.MapUpToBuffer(new SnapshotSpan(SourceBuffer.CurrentSnapshot, span.ToSpan()), SpanTrackingMode.EdgeInclusive, view.TextBuffer)[0];
+				var c = view.BufferGraph.MapUpToBuffer(new SnapshotSpan(SourceBuffer.CurrentSnapshot, span.ToSpan()), SpanTrackingMode.EdgeInclusive, view.TextBuffer);
+				return c.Count != 0 ? c[0] : default;
 			}
 
 			public NormalizedSnapshotSpanCollection MapDownToSourceSpan(SnapshotSpan span, ITextView view) {
