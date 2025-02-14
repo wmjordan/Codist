@@ -118,11 +118,8 @@ namespace Codist.QuickInfo
 		}
 
 		unsafe static string InternalToHexBinString(byte[] source) {
-			if (source == null) {
-				return String.Empty;
-			}
-			var length = source.Length;
-			if (length == 0) {
+			int length;
+			if (source == null || (length = source.Length) == 0) {
 				return String.Empty;
 			}
 			var result = new string(' ', length << 1);
@@ -142,7 +139,7 @@ namespace Codist.QuickInfo
 		static class HexBinByteValues
 		{
 			static readonly int[] __HexBins = InitHexBin();
-			internal static readonly ulong QuadupleZero = ((ulong)__HexBins[0]) << 32 | (uint)__HexBins[0];
+			internal static readonly ulong QuadrupleZero = ((ulong)__HexBins[0]) << 32 | (uint)__HexBins[0];
 
 			unsafe static int[] InitHexBin() {
 				var v = new int[Byte.MaxValue + 1];
