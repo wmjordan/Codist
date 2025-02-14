@@ -94,6 +94,7 @@ namespace Codist.QuickInfo
 			if (unicode > 127) {
 				codes.Add(new ThemedTipText($"UTF-8: 0x{InternalToHexBinString(Encoding.UTF8.GetBytes(ch))}"));
 				codes.Add(new ThemedTipText($"UTF-16: 0x{InternalToHexBinString(Encoding.Unicode.GetBytes(ch))}"));
+				codes.Add(new ThemedTipText($"UTF-16BE: 0x{InternalToHexBinString(Encoding.BigEndianUnicode.GetBytes(ch))}"));
 				var gb18030 = Encoding.GetEncoding("GB18030");
 				if (gb18030 != null) {
 					codes.Add(new ThemedTipText($"GB18030: 0x{InternalToHexBinString(gb18030.GetBytes(ch))}"));
