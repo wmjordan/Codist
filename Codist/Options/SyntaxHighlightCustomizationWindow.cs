@@ -619,8 +619,8 @@ namespace Codist.Options
 					catch (Exception ex) {
 						MessageWindow.Error(ex);
 					}
-				}, R.T_ClassificationTypesJsonTip));
-				l.Add(new TextBlock { Margin = WpfHelper.SmallMargin }.AppendLink(R.T_AboutCustomSyntaxRules, "https://github.com/wmjordan/Codist/wiki/ClassificationTypes.json-and-Codist.ct.json", R.T_AboutCustomSyntaxRulesTip));
+				}, R.T_ClassificationTypesJsonTip, ThemeHelper.HyperlinkBrush));
+				l.Add(new TextBlock { Margin = WpfHelper.SmallMargin }.AppendLink(R.T_AboutCustomSyntaxRules, "https://github.com/wmjordan/Codist/wiki/ClassificationTypes.json-and-Codist.ct.json", R.T_AboutCustomSyntaxRulesTip, ThemeHelper.HyperlinkBrush));
 			}
 		}
 

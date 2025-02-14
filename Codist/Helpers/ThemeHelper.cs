@@ -38,6 +38,7 @@ namespace Codist
 		public static WpfBrush DocumentPageBrush { get; private set; }
 		public static GdiColor DocumentTextColor { get; private set; }
 		public static WpfBrush DocumentTextBrush { get; private set; }
+		public static WpfBrush HyperlinkBrush { get; private set; }
 		public static WpfBrush FileTabProvisionalSelectionBrush { get; private set; }
 		public static WpfColor ToolWindowBackgroundColor { get; private set; }
 		public static WpfColor TitleBackgroundColor { get; private set; }
@@ -152,6 +153,7 @@ namespace Codist
 			DocumentPageBrush = new WpfBrush(DocumentPageColor.ToWpfColor());
 			DocumentTextColor = CommonDocumentColors.PageTextColorKey.GetGdiColor();
 			DocumentTextBrush = new WpfBrush(DocumentTextColor.ToWpfColor());
+			HyperlinkBrush = CommonDocumentColors.HyperlinkBrushKey.GetWpfBrush();
 			FileTabProvisionalSelectionBrush = EnvironmentColors.FileTabProvisionalSelectedActiveBrushKey.GetWpfBrush();
 			ToolWindowBackgroundColor = EnvironmentColors.ToolWindowBackgroundColorKey.GetWpfColor();
 			TitleBackgroundColor = EnvironmentColors.MainWindowActiveCaptionColorKey.GetWpfColor();
