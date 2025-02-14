@@ -91,6 +91,7 @@
     <Compile Include="Commands\ShowSupportedFileTypesCommand.cs" />
     <Compile Include="Commands\TransformDocumentWindow.cs" />
     <Compile Include="Controls\ThemedRichTextBox.cs" />
+    <Compile Include="Controls\ThemedHyperlink.cs" />
     <Compile Include="Commands\CancelRepeatingActionCommand.cs" />
     <Compile Include="Helpers\VsImageHelper.cs" />
     <Compile Include="Semantics\ArgumentAssignment.cs" />

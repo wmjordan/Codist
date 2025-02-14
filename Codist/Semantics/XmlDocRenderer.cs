@@ -479,10 +479,9 @@ namespace Codist
 		}
 
 		void CreateLink(InlineCollection inlines, XElement e, string url) {
-			var link = new Hyperlink {
+			var link = new ThemedHyperlink {
 				NavigateUri = new Uri(url),
 				ToolTip = e.Attribute("title") != null ? $"{e.Attribute("title").Value}{Environment.NewLine}{url}" : url,
-				Foreground = ThemeHelper.HyperlinkBrush
 			}.ClickToNavigate();
 			if (e.IsEmpty) {
 				link.Inlines.Add(url);
