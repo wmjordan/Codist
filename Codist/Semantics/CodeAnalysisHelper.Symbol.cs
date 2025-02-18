@@ -1101,6 +1101,12 @@ namespace Codist
 		public static IFieldSymbol GetPropertyBackingField(this IPropertySymbol property) {
 			return property != null && property.ContainingAssembly.GetSourceType() != AssemblySource.Metadata ? NonPublicOrFutureAccessors.GetPropertyBackingField(property) : null;
 		}
+		public static IPropertySymbol GetPropertyPartialDefinitionPart(this IPropertySymbol property) {
+			return property != null ? NonPublicOrFutureAccessors.GetPropertyPartialDefinitionPart(property) : null;
+		}
+		public static IPropertySymbol GetPropertyPartialImplementationPart(this IPropertySymbol property) {
+			return property != null ? NonPublicOrFutureAccessors.GetPropertyPartialImplementationPart(property) : null;
+		}
 		public static bool IsRequired(this IPropertySymbol property) {
 			return property != null && NonPublicOrFutureAccessors.GetPropertyIsRequired(property);
 		}
@@ -1210,6 +1216,14 @@ namespace Codist
 					&& source.Length == 0
 					&& (symbol = m.ContainingType) != null) {
 					source = source.AddRange(symbol.DeclaringSyntaxReferences);
+				}
+			}
+			else if (symbol is IPropertySymbol p) {
+				if (p.GetPropertyPartialDefinitionPart() != null) {
+					source = source.AddRange(p.GetPropertyPartialDefinitionPart().DeclaringSyntaxReferences);
+				}
+				if (p.GetPropertyPartialImplementationPart() != null) {
+					source = source.AddRange(p.GetPropertyPartialImplementationPart().DeclaringSyntaxReferences);
 				}
 			}
 			return source;
@@ -1653,6 +1667,10 @@ namespace Codist
 			public static readonly Func<IMethodSymbol, bool> GetMethodIsReadOnly = ReflectionHelper.CreateGetPropertyMethod<IMethodSymbol, bool>("IsReadOnly");
 
 			public static readonly Func<IMethodSymbol, int> GetMethodCallingConvention = ReflectionHelper.CreateGetPropertyMethod<IMethodSymbol, int>("CallingConvention");
+
+			public static readonly Func<IPropertySymbol, IPropertySymbol> GetPropertyPartialDefinitionPart = ReflectionHelper.CreateGetPropertyMethod<IPropertySymbol, IPropertySymbol>("PartialDefinitionPart");
+
+			public static readonly Func<IPropertySymbol, IPropertySymbol> GetPropertyPartialImplementationPart = ReflectionHelper.CreateGetPropertyMethod<IPropertySymbol, IPropertySymbol>("PartialImplementationPart");
 
 			public static readonly Func<IParameterSymbol, int> GetParameterScopedKind = ReflectionHelper.CreateGetPropertyMethod<IParameterSymbol, int>("ScopedKind");
 
