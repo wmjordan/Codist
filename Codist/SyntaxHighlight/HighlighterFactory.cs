@@ -12,6 +12,7 @@ namespace Codist.SyntaxHighlight
 	/// </summary>
 	[Export(typeof(IWpfTextViewCreationListener))]
 	[ContentType(Constants.CodeTypes.Code)]
+	[ContentType(Constants.CodeTypes.PlainText)]
 	[ContentType(Constants.CodeTypes.FindResults)]
 	[ContentType(Constants.CodeTypes.Output)]
 	[ContentType(Constants.CodeTypes.InteractiveContent)]
@@ -36,8 +37,8 @@ namespace Codist.SyntaxHighlight
 			var m = formatMap.GetProperties(propertyId);
 			if (m != null) {
 				changer(m);
+				formatMap.SetProperties(propertyId, m);
 			}
-			formatMap.SetProperties(propertyId, m);
 		}
 	}
 }
