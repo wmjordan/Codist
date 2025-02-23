@@ -23,8 +23,6 @@ namespace Codist
 	sealed class SymbolFormatter
 	{
 		internal const double TransparentLevel = 0.6;
-
-		static readonly IEditorFormatMap __CodeFormatMap = ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(Constants.CodeText);
 		static readonly Dictionary<string, Action<string, SymbolFormatter>> __BrushSetter = CreatePropertySetter();
 		internal static readonly SymbolFormatter Instance = new SymbolFormatter(b => { b?.Freeze(); return b; });
 		internal static readonly SymbolFormatter SemiTransparent = new SymbolFormatter(b => {
