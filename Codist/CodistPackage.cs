@@ -89,6 +89,20 @@ namespace Codist
 			}
 		}
 
+		public static void ShowError(Exception ex, string title) {
+			if (ThreadHelper.CheckAccess()) {
+				Controls.MessageWindow.Error(ex, title);
+			}
+			else {
+				ShowErrorAsync(ex, title).FireAndForget();
+			}
+		}
+
+		static async Task ShowErrorAsync(Exception error, string title) {
+			await SyncHelper.SwitchToMainThreadAsync();
+			Controls.MessageWindow.Error(error, title);
+		}
+
 		#region Package Members
 		/// <summary>
 		/// Initialization of the package; this method is called right after the package is sited, so this is the place
