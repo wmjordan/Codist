@@ -2768,8 +2768,8 @@ Ctrl: toggle and select next</value>
   <data name="T_DefaultValue" xml:space="preserve">
     <value>(default)</value>
   </data>
-  <data name="T_ErrorWhenExecutingCommand" xml:space="preserve">
-    <value>Error when executing command:</value>
+  <data name="T_ErrorExecutingCommand" xml:space="preserve">
+    <value>Error occurred when executing command:</value>
   </data>
   <data name="CMDT_FindAssignmentsForOption" xml:space="preserve">
     <value>Ctrl: Explicit assignment only
@@ -2859,5 +2859,8 @@ Discard its changes?</value>
   </data>
   <data name="CMD_CommentToRegion" xml:space="preserve">
     <value>Comment to #region</value>
+  </data>
+  <data name="T_ErrorNavigatingToSource" xml:space="preserve">
+    <value>Error occurred when navigating to source code:</value>
   </data>
 </root>

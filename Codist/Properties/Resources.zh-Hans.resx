@@ -2754,7 +2754,7 @@ Ctrl: 切换标记并选择下一处</value>
   <data name="T_DefaultValue" xml:space="preserve">
     <value>(默认值)</value>
   </data>
-  <data name="T_ErrorWhenExecutingCommand" xml:space="preserve">
+  <data name="T_ErrorExecutingCommand" xml:space="preserve">
     <value>在执行命令时出错:</value>
   </data>
   <data name="CMDT_FindAssignmentsForOption" xml:space="preserve">
@@ -2845,5 +2845,8 @@ Ctrl: 将下划线分隔的单词转换为首字母大写的单词</value>
   </data>
   <data name="CMD_CommentToRegion" xml:space="preserve">
     <value>将注释转为 #region</value>
+  </data>
+  <data name="T_ErrorNavigatingToSource" xml:space="preserve">
+    <value>在转到源代码时出错：</value>
   </data>
 </root>

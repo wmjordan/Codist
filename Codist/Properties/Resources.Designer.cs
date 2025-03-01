@@ -6489,11 +6489,29 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error occurred when executing command:.
+        /// </summary>
+        internal static string T_ErrorExecutingCommand {
+            get {
+                return ResourceManager.GetString("T_ErrorExecutingCommand", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Error occured while loading config file: .
         /// </summary>
         internal static string T_ErrorLoadingConfig {
             get {
                 return ResourceManager.GetString("T_ErrorLoadingConfig", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error occurred when navigating to source code:.
+        /// </summary>
+        internal static string T_ErrorNavigatingToSource {
+            get {
+                return ResourceManager.GetString("T_ErrorNavigatingToSource", resourceCulture);
             }
         }
         
@@ -6512,15 +6530,6 @@ namespace Codist.Properties {
         internal static string T_ErrorSavingConfig {
             get {
                 return ResourceManager.GetString("T_ErrorSavingConfig", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Error when executing command:.
-        /// </summary>
-        internal static string T_ErrorWhenExecutingCommand {
-            get {
-                return ResourceManager.GetString("T_ErrorWhenExecutingCommand", resourceCulture);
             }
         }
         
