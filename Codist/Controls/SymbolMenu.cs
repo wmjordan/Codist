@@ -103,6 +103,10 @@ namespace Codist.Controls
 				}
 				catch (OperationCanceledException) {
 				}
+				catch (Exception ex) {
+					await SyncHelper.SwitchToMainThreadAsync();
+					MessageWindow.Error(ex, R.T_ErrorNavigatingToSource, null, typeof(SymbolItem));
+				}
 			}
 		}
 

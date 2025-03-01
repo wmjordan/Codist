@@ -16,6 +16,7 @@ using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
+using R = Codist.Properties.Resources;
 using Task = System.Threading.Tasks.Task;
 
 namespace Codist.NaviBar
@@ -382,6 +383,10 @@ namespace Codist.NaviBar
 				}
 				catch (OperationCanceledException) {
 					// ignore
+				}
+				catch (Exception ex) {
+					await SyncHelper.SwitchToMainThreadAsync();
+					MessageWindow.Error(ex, R.T_ErrorNavigatingToSource, null, typeof(SymbolItem));
 				}
 			}
 		}
