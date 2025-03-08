@@ -23,7 +23,20 @@ namespace Codist.QuickInfo
 					ShowArgumentInfo(qiContent, n, semanticModel, cancellationToken);
 					return;
 				}
+				n = argument.Parent;
+				if (n?.IsAnyKind(SyntaxKind.ArrayInitializerExpression,
+					SyntaxKind.CollectionInitializerExpression,
+					SyntaxKind.ObjectInitializerExpression,
+					SyntaxKind.ComplexElementInitializerExpression) == true) {
+					ShowLocationOfInitializerExpression(qiContent, argument, n);
+					return;
+				}
 			} while ((argument = argument.Parent) != null && ++depth < 4);
+		}
+
+		static void ShowLocationOfInitializerExpression(InfoContainer qiContent, SyntaxNode argument, SyntaxNode n) {
+			var argIndex = (n as InitializerExpressionSyntax).Expressions.IndexOf(argument as ExpressionSyntax);
+			qiContent.Add(new ThemedTipText(R.T_ArgumentNOf.Replace("<N>", (++argIndex).ToString()) + " initializer").SetGlyph(IconIds.Argument));
 		}
 
 		static void ShowArgumentInfo(InfoContainer qiContent, SyntaxNode argument, SemanticModel semanticModel, CancellationToken cancellationToken) {
@@ -37,6 +50,12 @@ namespace Codist.QuickInfo
 					argIndex = arguments.IndexOf(argument as ArgumentSyntax);
 					argCount = arguments.Count;
 					argName = ((ArgumentSyntax)argument).NameColon?.Name.ToString();
+					break;
+				case SyntaxKind.TupleExpression:
+					arguments = ((TupleExpressionSyntax)argList).Arguments;
+					argIndex = arguments.IndexOf(argument as ArgumentSyntax);
+					argCount = arguments.Count;
+					argName = null;
 					break;
 				//case SyntaxKind.BracketedArgumentList: arguments = (argList as BracketedArgumentListSyntax).Arguments; break;
 				case SyntaxKind.AttributeArgumentList:
@@ -162,7 +181,7 @@ namespace Codist.QuickInfo
 				qiContent.Add(new ThemedTipText(R.T_ArgumentNOf.Replace("<N>", (++argIndex).ToString())).Append(methodName, true));
 			}
 			else {
-				qiContent.Add(R.T_ArgumentN.Replace("<N>", (++argIndex).ToString()));
+				qiContent.Add(new ThemedTipText(R.T_ArgumentN.Replace("<N>", (++argIndex).ToString())).SetGlyph(IconIds.Argument));
 			}
 		}
 	}
