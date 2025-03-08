@@ -40,6 +40,9 @@ namespace Codist
 					await task.ConfigureAwait(false);
 #pragma warning restore VSTHRD003
 				}
+				catch (OperationCanceledException) {
+					// ignore cancelled
+				}
 				catch (Exception ex) {
 					// ignore error
 					ex.Log();
