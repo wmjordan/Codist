@@ -212,7 +212,7 @@ namespace Codist.QuickInfo
 							container.Add(new ThemedTipText(R.T_ElementCount + ((ExpressionSyntax)node).GetCollectionExpressionElementsCount().ToText()).SetGlyph(IconIds.InstanceMember));
 						}
 						else {
-							container.Add(new ThemedTipText(R.T_PatternCount + ((ExpressionSyntax)node).GetListPatternsCount().ToText()).SetGlyph(IconIds.InstanceMember));
+							container.Add(new ThemedTipText(R.T_PatternCount + ((PatternSyntax)node).GetListPatternsCount().ToText()).SetGlyph(IconIds.InstanceMember));
 						}
 						symbol = semanticModel.GetTypeInfo(node, cancellationToken).ConvertedType;
 					}

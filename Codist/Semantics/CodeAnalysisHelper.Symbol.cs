@@ -1127,7 +1127,7 @@ namespace Codist
 		public static int GetCollectionExpressionElementsCount(this ExpressionSyntax collectionExpression) {
 			return collectionExpression.IsKind(CollectionExpression) ? NonPublicOrFutureAccessors.GetCollectionExpressionElementsCount(collectionExpression) : 0;
 		}
-		public static int GetListPatternsCount(this ExpressionSyntax listPattern) {
+		public static int GetListPatternsCount(this PatternSyntax listPattern) {
 			return listPattern.IsKind(ListPatternExpression) ? NonPublicOrFutureAccessors.GetListPatternsCount(listPattern) : 0;
 		}
 		#endregion
@@ -1747,7 +1747,7 @@ namespace Codist
 			public static readonly Func<ExpressionSyntax, int> GetSwitchExpressionArmsCount = CreateSyntaxListCountFunc<ExpressionSyntax>("GetSwitchExpressionArmsCount", "Microsoft.CodeAnalysis.CSharp.Syntax.SwitchExpressionSyntax", "Arms");
 			public static readonly Func<CSharpSyntaxNode, int> GetPropertyPatternSubPatternsCount = CreateSyntaxListCountFunc<CSharpSyntaxNode>("GetPropertyPatternClauseSubPatternsCount", "Microsoft.CodeAnalysis.CSharp.Syntax.PropertyPatternClauseSyntax", "Subpatterns");
 			public static readonly Func<ExpressionSyntax, int> GetCollectionExpressionElementsCount = CreateSyntaxListCountFunc<CSharpSyntaxNode>("GetCollectionExpressionElementsCount", "Microsoft.CodeAnalysis.CSharp.Syntax.CollectionExpressionSyntax", "Elements");
-			public static readonly Func<ExpressionSyntax, int> GetListPatternsCount = CreateSyntaxListCountFunc<CSharpSyntaxNode>("GetListPatternsCount", "Microsoft.CodeAnalysis.CSharp.Syntax.ListPatternSyntax", "Patterns");
+			public static readonly Func<PatternSyntax, int> GetListPatternsCount = CreateSyntaxListCountFunc<CSharpSyntaxNode>("GetListPatternsCount", "Microsoft.CodeAnalysis.CSharp.Syntax.ListPatternSyntax", "Patterns");
 
 			static Func<TNode, int> CreateSyntaxListCountFunc<TNode>(string methodName, string type, string listPropertyName) where TNode : SyntaxNode {
 				var m = new DynamicMethod(methodName, typeof(int), new Type[] { typeof(TNode) }, true);
