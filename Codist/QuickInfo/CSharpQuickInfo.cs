@@ -386,6 +386,7 @@ namespace Codist.QuickInfo
 					cancellationToken);
 			}
 			if (isConvertedType == false) {
+				await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Attributes)) {
 					ShowAttributesInfo(container, symbol);
 				}
