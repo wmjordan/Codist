@@ -436,7 +436,7 @@ namespace Codist.Controls
 						h.Invoke(this, e);
 					}
 					catch (Exception ex) {
-						MessageWindow.Error(ex, R.T_ErrorWhenExecutingCommand + ((ThemedMenuText)Header).GetText(), null, this);
+						MessageWindow.Error(ex, R.T_ErrorExecutingCommand + ((ThemedMenuText)Header).GetText(), null, this);
 					}
 					_Handled = true;
 				}
