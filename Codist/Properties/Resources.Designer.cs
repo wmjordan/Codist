@@ -6597,6 +6597,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Expression &lt;N&gt; of initializer.
+        /// </summary>
+        internal static string T_ExpressionNOfInitializer {
+            get {
+                return ResourceManager.GetString("T_ExpressionNOfInitializer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to ...
         ///Expression too long.
         /// </summary>

@@ -2863,4 +2863,7 @@ Discard its changes?</value>
   <data name="T_ErrorNavigatingToSource" xml:space="preserve">
     <value>Error occurred when navigating to source code:</value>
   </data>
+  <data name="T_ExpressionNOfInitializer" xml:space="preserve">
+    <value>Expression &lt;N&gt; of initializer</value>
+  </data>
 </root>

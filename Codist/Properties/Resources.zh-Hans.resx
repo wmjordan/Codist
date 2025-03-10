@@ -2849,4 +2849,7 @@ Ctrl: 将下划线分隔的单词转换为首字母大写的单词</value>
   <data name="T_ErrorNavigatingToSource" xml:space="preserve">
     <value>在转到源代码时出错：</value>
   </data>
+  <data name="T_ExpressionNOfInitializer" xml:space="preserve">
+    <value>第 &lt;N&gt; 项初始化表达式</value>
+  </data>
 </root>

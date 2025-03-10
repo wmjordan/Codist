@@ -36,7 +36,7 @@ namespace Codist.QuickInfo
 
 		static void ShowLocationOfInitializerExpression(InfoContainer qiContent, SyntaxNode argument, SyntaxNode n) {
 			var argIndex = (n as InitializerExpressionSyntax).Expressions.IndexOf(argument as ExpressionSyntax);
-			qiContent.Add(new ThemedTipText(R.T_ArgumentNOf.Replace("<N>", (++argIndex).ToString()) + " initializer").SetGlyph(IconIds.Argument));
+			qiContent.Add(new ThemedTipText(R.T_ExpressionNOfInitializer.Replace("<N>", (++argIndex).ToString())).SetGlyph(IconIds.Argument));
 		}
 
 		static void ShowArgumentInfo(InfoContainer qiContent, SyntaxNode argument, SemanticModel semanticModel, CancellationToken cancellationToken) {
