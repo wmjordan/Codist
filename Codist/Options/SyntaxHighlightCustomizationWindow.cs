@@ -1304,7 +1304,7 @@ namespace Codist.Options
 			try {
 				var fullExport = WpfHelper.IsShiftDown;
 				if (d.ShowDialog() == true) {
-					Config.Instance.SaveConfig(d.FileName, true, fullExport);
+					Config.Instance.SaveConfig(d.FileName, true, fullExport || WpfHelper.IsShiftDown);
 					_ThemeFolder = System.IO.Path.GetDirectoryName(d.FileName);
 				}
 			}
