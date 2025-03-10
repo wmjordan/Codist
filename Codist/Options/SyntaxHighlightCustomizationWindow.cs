@@ -222,13 +222,12 @@ namespace Codist.Options
 											Child = new StackPanel {
 												Orientation = Orientation.Horizontal,
 												Children = {
+													new ThemedControlGroup(_AddTagButton, _RemoveTagButton) { Margin = WpfHelper.SmallVerticalMargin },
 													VsImageHelper.GetImage(IconIds.Filter)
 														.ReferenceCrispImageBackground(EnvironmentColors.ToolWindowBackgroundColorKey)
 														.WrapMargin(WpfHelper.GlyphMargin),
 													_SettingsFilterBox,
 													new ThemedControlGroup(_OverriddenStyleFilterButton,
-														_AddTagButton,
-														_RemoveTagButton,
 														_ClearFilterButton) { Margin = WpfHelper.SmallVerticalMargin },
 												}
 											}
