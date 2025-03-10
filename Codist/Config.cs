@@ -379,10 +379,11 @@ namespace Codist
 			}
 		}
 
-		internal void BeginUpdate() {
+		internal IConfigManager BeginUpdate() {
 			if (_ConfigManager == null) {
 				_ConfigManager = new ConfigManager();
 			}
+			return _ConfigManager;
 		}
 		internal void EndUpdate(bool apply) {
 			Interlocked.Exchange(ref _ConfigManager, null)?.Quit(apply);
@@ -570,7 +571,7 @@ namespace Codist
 			}
 		}
 
-		sealed class ConfigManager
+		sealed class ConfigManager : IConfigManager
 		{
 			int _Version, _OldVersion;
 			public ConfigManager() {
@@ -580,10 +581,7 @@ namespace Codist
 			void MarkUpdated(ConfigUpdatedEventArgs e) {
 				++_Version;
 			}
-			internal void MarkVersioned() {
-				_OldVersion = _Version;
-			}
-			internal void Quit(bool apply) {
+			public void Quit(bool apply) {
 				__Updated -= MarkUpdated;
 				if (apply) {
 					if (_Version != _OldVersion) {
@@ -605,6 +603,11 @@ namespace Codist
 				}
 			}
 		}
+	}
+
+	interface IConfigManager
+	{
+		void Quit(bool apply);
 	}
 
 	public sealed class QuickInfoConfig
