@@ -74,24 +74,7 @@ namespace Codist.QuickInfo
 				case SyntaxKind.MultiLineCommentTrivia:
 					return null;
 				case SyntaxKind.OpenBraceToken:
-					if ((node = unitCompilation.FindNode(token.Span))
-						.Kind().CeqAny(SyntaxKind.ArrayInitializerExpression,
-							SyntaxKind.CollectionInitializerExpression,
-							SyntaxKind.ComplexElementInitializerExpression,
-							SyntaxKind.ObjectInitializerExpression,
-							CodeAnalysisHelper.WithInitializerExpression)) {
-						container.Add(new ThemedTipText()
-							.SetGlyph(IconIds.InstanceMember)
-							.Append(R.T_ExpressionCount)
-							.Append(((InitializerExpressionSyntax)node).Expressions.Count.ToText(), true, false, __SymbolFormatter.Number));
-					}
-					else if (node.IsKind(CodeAnalysisHelper.PropertyPatternClause)) {
-						container.Add(new ThemedTipText().SetGlyph(IconIds.InstanceMember)
-							.Append(R.T_SubPatternCount)
-							.Append(((CSharpSyntaxNode)node).GetPropertyPatternSubPatternsCount().ToText())
-							);
-					}
-					else if (node.IsKind(SyntaxKind.Interpolation)) {
+					if ((node = unitCompilation.FindNode(token.Span)).IsKind(SyntaxKind.Interpolation)) {
 						symbol = semanticModel.Compilation.GetSpecialType(SpecialType.System_String);
 						isConvertedType = symbol != null;
 						goto PROCESS;
