@@ -375,6 +375,7 @@ namespace Codist.QuickInfo
 					container.Add(await ShowAvailabilityAsync(ctx.Document, token, cancellationToken).ConfigureAwait(false));
 				}
 				ctor = node.Parent.UnqualifyExceptNamespace() as ObjectCreationExpressionSyntax;
+				await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
 				OverrideDocumentation(node,
 					o,
 					ctor != null
