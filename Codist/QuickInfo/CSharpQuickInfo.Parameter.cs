@@ -76,7 +76,7 @@ namespace Codist.QuickInfo
 				switch (symbol.Symbol.Kind) {
 					case SymbolKind.Method: m = symbol.Symbol as IMethodSymbol; break;
 					case CodeAnalysisHelper.FunctionPointerType: m = (symbol.Symbol as ITypeSymbol).GetFunctionPointerTypeSignature(); break;
-					default: m = null; break;
+					default: return;
 				}
 				if (m == null) { // in a very rare case m can be null
 					return;

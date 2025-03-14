@@ -15,7 +15,7 @@ namespace Codist.Controls
 
 		public ThemedMenuItem() {
 			SubMenuMaxHeight = 300;
-this.ReferenceCrispImageBackground(Microsoft.VisualStudio.PlatformUI.EnvironmentColors.SystemMenuColorKey);
+			this.ReferenceCrispImageBackground(Microsoft.VisualStudio.PlatformUI.EnvironmentColors.SystemMenuColorKey);
 		}
 		public ThemedMenuItem(int imageId, string text, RoutedEventHandler clickHandler) : this() {
 			if (imageId >= 0) {
