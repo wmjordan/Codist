@@ -3032,7 +3032,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to This page changes the behavior of the auto surround feature, which automatically insert paired punctuations around selections when typing the leading punctuation.
+        ///   Looks up a localized string similar to This page changes the behavior of the auto surround feature, which automatically inserts paired punctuations around selections when typing the leading punctuation.
         /// </summary>
         internal static string OT_AutoSurroundSelectionNote {
             get {

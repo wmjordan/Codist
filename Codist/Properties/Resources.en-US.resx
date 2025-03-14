@@ -2690,7 +2690,7 @@ Ctrl: Directly inherited interfaces only</value>
     <value>Make Static</value>
   </data>
   <data name="OT_AutoSurroundSelectionNote" xml:space="preserve">
-    <value>This page changes the behavior of the auto surround feature, which automatically insert paired punctuations around selections when typing the leading punctuation</value>
+    <value>This page changes the behavior of the auto surround feature, which automatically inserts paired punctuations around selections when typing the leading punctuation</value>
   </data>
   <data name="OT_TrimBeforeSurround" xml:space="preserve">
     <value>Trim whitespace before surrounding punctuations</value>
