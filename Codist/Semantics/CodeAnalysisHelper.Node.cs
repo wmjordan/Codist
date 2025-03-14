@@ -34,6 +34,9 @@ namespace Codist
 		public static bool IsAnyKind(this SyntaxToken token, SyntaxKind kind1, SyntaxKind kind2, SyntaxKind kind3, SyntaxKind kind4) {
 			return token.RawKind.CeqAny(kind1, kind2, kind3, kind4);
 		}
+		public static bool IsAnyKind(this SyntaxToken token, SyntaxKind kind1, SyntaxKind kind2, SyntaxKind kind3, SyntaxKind kind4, SyntaxKind kind5) {
+			return token.RawKind.CeqAny(kind1, kind2, kind3, kind4, kind5);
+		}
 		public static bool IsAnyKind(this ITypeSymbol type, TypeKind kind1, TypeKind kind2) {
 			return type.TypeKind.CeqAny(kind1, kind2);
 		}

@@ -22,6 +22,7 @@ namespace Codist.Refactorings
 			ReplaceText.SealType,
 			ReplaceNode.DuplicateMethodDeclaration,
 			ReplaceText.MakeStatic,
+			ReplaceText.MakeReadonly,
 			ReplaceText.MakePublic,
 			ReplaceText.MakeProtected,
 			ReplaceText.MakeInternal,

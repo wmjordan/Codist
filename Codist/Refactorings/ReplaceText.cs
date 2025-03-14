@@ -17,6 +17,7 @@ namespace Codist.Refactorings
 		public static readonly ReplaceText CommentToRegion = new CommentToRegionRefactoring();
 		public static readonly ReplaceText SealType = new SealTypeRefactoring();
 		public static readonly ReplaceText MakeStatic = new StaticRefactoring();
+		public static readonly ReplaceText MakeReadonly = new ReadonlyFieldRefactoring();
 		public static readonly ReplaceText MakePublic = new ChangeAccessibilityRefactoring(SyntaxKind.PublicKeyword);
 		public static readonly ReplaceText MakeProtected = new ChangeAccessibilityRefactoring(SyntaxKind.ProtectedKeyword);
 		public static readonly ReplaceText MakeInternal = new ChangeAccessibilityRefactoring(SyntaxKind.InternalKeyword);
@@ -220,6 +221,55 @@ namespace Codist.Refactorings
 					edit.Insert(param, "sealed ");
 				});
 				ctx.View.SelectSpan(insertAt, LENGTH_OF_SEALED, 1);
+			}
+		}
+
+
+		sealed class ReadonlyFieldRefactoring : DeclarationModifierRefactoring
+		{
+			public override int IconId => IconIds.ReadonlyField;
+			public override string Title => R.CMD_MakeReadonly;
+
+			public override bool Accept(RefactoringContext ctx) {
+				var node = ctx.Node;
+				if (node.IsKind(SyntaxKind.VariableDeclarator) == false) {
+					return false;
+				}
+				node = node.Parent.Parent;
+				return node.IsAnyKind(SyntaxKind.FieldDeclaration, SyntaxKind.EventFieldDeclaration)
+					&& CanBeReadonly(((BaseFieldDeclarationSyntax)node).Modifiers);
+			}
+
+			static bool CanBeReadonly(SyntaxTokenList modifiers) {
+				foreach (var item in modifiers) {
+					switch (item.Kind()) {
+						case SyntaxKind.ReadOnlyKeyword:
+						case SyntaxKind.ConstKeyword:
+						case SyntaxKind.VolatileKeyword:
+							return false;
+					}
+				}
+				return true;
+			}
+
+			public override void Refactor(SemanticContext ctx) {
+				const int LENGTH_OF_READONLY = 8;
+				var node = ctx.Node;
+				if (node.IsKind(SyntaxKind.VariableDeclarator) == false) {
+					return;
+				}
+				var d = node.Parent.Parent as BaseFieldDeclarationSyntax;
+				if (d == null) {
+					return;
+				}
+				var m = d.Modifiers;
+				var insertAt = m.FullSpan.Length == 0 ? d.SpanStart
+					: m[0].IsAnyKind(SyntaxKind.PublicKeyword, SyntaxKind.InternalKeyword, SyntaxKind.PrivateKeyword, SyntaxKind.ProtectedKeyword, SyntaxKind.StaticKeyword) ? m[0].FullSpan.End
+					: GetModifierInsertionPoint(d);
+				ctx.View.Edit(insertAt, (view, param, edit) => {
+					edit.Insert(param, "readonly ");
+				});
+				ctx.View.SelectSpan(insertAt, LENGTH_OF_READONLY, 1);
 			}
 		}
 

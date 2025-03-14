@@ -2866,4 +2866,7 @@ Discard its changes?</value>
   <data name="T_ExpressionNOfInitializer" xml:space="preserve">
     <value>Expression &lt;N&gt; of initializer</value>
   </data>
+  <data name="CMD_MakeReadonly" xml:space="preserve">
+    <value>Make Readonly</value>
+  </data>
 </root>

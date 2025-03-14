@@ -1219,6 +1219,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Make Readonly.
+        /// </summary>
+        internal static string CMD_MakeReadonly {
+            get {
+                return ResourceManager.GetString("CMD_MakeReadonly", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Make Static.
         /// </summary>
         internal static string CMD_MakeStatic {
