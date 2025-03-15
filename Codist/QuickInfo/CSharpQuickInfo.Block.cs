@@ -43,7 +43,13 @@ namespace Codist.QuickInfo
 			var df = semanticModel.AnalyzeDataFlow(node);
 			if (df.Succeeded) {
 				ListVariables(container, df.VariablesDeclared, R.T_DeclaredVariable, IconIds.DeclaredVariables);
-				ListVariables(container, df.DataFlowsIn, R.T_ReadVariable, IconIds.ReadVariables);
+				if (node.Parent.Kind().IsMethodDeclaration()) {
+					var p = (semanticModel.GetDeclaredSymbol(node.Parent) as IMethodSymbol).Parameters;
+					ListVariables(container, df.DataFlowsIn.RemoveRange(p), R.T_ReadVariable, IconIds.ReadVariables);
+				}
+				else {
+					ListVariables(container, df.DataFlowsIn, R.T_ReadVariable, IconIds.ReadVariables);
+				}
 				ListVariables(container, df.DataFlowsOut, R.T_WrittenVariable, IconIds.WrittenVariables);
 				ListVariables(container, df.UnsafeAddressTaken, R.T_TakenAddress, IconIds.RefVariables);
 			}
