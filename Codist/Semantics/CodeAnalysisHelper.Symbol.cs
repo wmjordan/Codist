@@ -478,6 +478,7 @@ namespace Codist
 				|| symbol.HasValueTypeConstraint
 				|| symbol.HasConstructorConstraint
 				|| symbol.HasUnmanagedTypeConstraint
+				|| symbol.AllowRefLikeType()
 				|| symbol.HasNotNullConstraint()
 				|| symbol.ConstraintTypes.Length > 0;
 		}
@@ -1110,6 +1111,9 @@ namespace Codist
 		public static bool IsRequired(this IPropertySymbol property) {
 			return property != null && NonPublicOrFutureAccessors.GetPropertyIsRequired(property);
 		}
+		public static bool AllowRefLikeType(this ITypeParameterSymbol typeParameter) {
+			return typeParameter != null && NonPublicOrFutureAccessors.GetTypeParameterAllowRefLikeType(typeParameter);
+		}
 		public static bool HasNotNullConstraint(this ITypeParameterSymbol typeParameter) {
 			return typeParameter != null && NonPublicOrFutureAccessors.GetTypeParameterHasNotNullConstraint(typeParameter);
 		}
@@ -1673,6 +1677,8 @@ namespace Codist
 			public static readonly Func<IPropertySymbol, IPropertySymbol> GetPropertyPartialImplementationPart = ReflectionHelper.CreateGetPropertyMethod<IPropertySymbol, IPropertySymbol>("PartialImplementationPart");
 
 			public static readonly Func<IParameterSymbol, int> GetParameterScopedKind = ReflectionHelper.CreateGetPropertyMethod<IParameterSymbol, int>("ScopedKind");
+
+			public static readonly Func<ITypeParameterSymbol, bool> GetTypeParameterAllowRefLikeType = ReflectionHelper.CreateGetPropertyMethod<ITypeParameterSymbol, bool>("AllowsRefLikeType");
 
 			public static readonly Func<ITypeParameterSymbol, bool> GetTypeParameterHasNotNullConstraint = ReflectionHelper.CreateGetPropertyMethod<ITypeParameterSymbol, bool>("HasNotNullConstraint");
 

@@ -659,6 +659,10 @@ namespace Codist
 				AppendSeparatorIfHasConstraint(text, hasConstraint).Append("notnull", Keyword);
 				hasConstraint = true;
 			}
+			if (typeParameter.AllowRefLikeType()) {
+				AppendSeparatorIfHasConstraint(text, hasConstraint).Append("allows ref struct", Keyword);
+				hasConstraint = true;
+			}
 			if (typeParameter.HasConstructorConstraint) {
 				AppendSeparatorIfHasConstraint(text, hasConstraint).Append("new", Keyword).Append("()", PlainText);
 				hasConstraint = true;
