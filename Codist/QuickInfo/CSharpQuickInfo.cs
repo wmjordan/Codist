@@ -120,11 +120,8 @@ namespace Codist.QuickInfo
 				case SyntaxKind.SwitchKeyword:
 					node = unitCompilation.FindNode(token.Span, false, true);
 					if (node.IsKind(CodeAnalysisHelper.SwitchExpression)) {
-						symbol = semanticModel.GetTypeInfo(node.ChildNodes().First()).Type;
-						if (symbol != null) {
-							container.Add(new ThemedTipText().SetGlyph(IconIds.ReadVariables).AddSymbol(symbol, false, __SymbolFormatter));
-						}
-						ShowMiscInfo(container, node);
+						symbol = semanticModel.GetTypeInfo(node.ChildNodes().First(), cancellationToken).Type;
+						ShowSwitchExpression(container, symbol, node);
 						symbol = semanticModel.GetTypeInfo(node, cancellationToken).ConvertedType;
 						if (symbol == null) {
 							return null;
@@ -690,12 +687,6 @@ namespace Codist.QuickInfo
 					if (c > 1) {
 						qiContent.Add(new ThemedTipText(R.T_1SectionCases.Replace("<C>", c.ToText())).SetGlyph(IconIds.Switch));
 					}
-				}
-			}
-			else if (nodeKind == CodeAnalysisHelper.SwitchExpression) {
-				c = ((ExpressionSyntax)node).GetSwitchExpressionArmsCount();
-				if (c > 1) {
-					qiContent.Add(new ThemedTipText(R.T_SwitchCases.Replace("<C>", c.ToText())).SetGlyph(IconIds.Switch));
 				}
 			}
 			else if (nodeKind == SyntaxKind.StringLiteralExpression) {

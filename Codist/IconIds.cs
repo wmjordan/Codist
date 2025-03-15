@@ -60,6 +60,7 @@ namespace Codist
 		public const int LambdaExpression = KnownImageIds.PartitionFunction;
 		public const int ParenthesizedExpression = KnownImageIds.NamedSet;
 		public const int Argument = KnownImageIds.Parameter;
+		public const int Input = KnownImageIds.Input;
 		public const int Attribute = KnownImageIds.FormPostBodyParameterNode;
 		public const int Return = KnownImageIds.Return;
 		public const int Value = KnownImageIds.Field;

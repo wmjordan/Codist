@@ -95,5 +95,15 @@ namespace Codist.QuickInfo
 				}
 			}
 		}
+
+		static void ShowSwitchExpression(InfoContainer container, ISymbol symbol, SyntaxNode node) {
+			if (symbol != null) {
+				container.Add(new ThemedTipText().SetGlyph(IconIds.Input).AddSymbol(symbol, false, __SymbolFormatter));
+			}
+			var c = ((ExpressionSyntax)node).GetSwitchExpressionArmsCount();
+			if (c > 1) {
+				container.Add(new ThemedTipText(R.T_SwitchCases.Replace("<C>", c.ToText())).SetGlyph(IconIds.Switch));
+			}
+		}
 	}
 }
