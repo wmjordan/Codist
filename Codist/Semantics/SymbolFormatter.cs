@@ -458,15 +458,20 @@ namespace Codist
 
 		void ShowExpression(InlineCollection text, ExpressionSyntax exp) {
 			if (exp.FullSpan.Length > 300) {
-				text.AddRange(new object[] {
-					new Run(exp.ToString().Substring(0, 300)),
-					new Run(R.T_ExpressionTooLong)
-				});
+				ShowTruncatedExpression(text, exp);
 				return;
 			}
 			if (ShowCommonExpression(text, exp) == false) {
 				ShowExpressionRecursive(text, exp, " ", false);
 			}
+		}
+
+		static void ShowTruncatedExpression(InlineCollection text, ExpressionSyntax exp) {
+			var t = exp.ToString();
+			text.AddRange(new object[] {
+					new Run(t.Substring(0, Math.Min(t.Length, 300))),
+					new Run(R.T_ExpressionTooLong)
+				});
 		}
 
 		bool ShowCommonExpression(InlineCollection text, SyntaxNode node) {
