@@ -583,7 +583,7 @@ namespace Codist
 			control.Items.Clear();
 		}
 		/// <summary>
-		/// Calls <see cref="IDisposable.Dispose"/> on each item in <paramref name="control"/> and empties the <see cref="ItemsControl"/>.
+		/// Calls <see cref="IDisposable.Dispose"/> on each item in <paramref name="items"/> and empties the <see cref="ItemsControl"/>.
 		/// </summary>
 		public static void DisposeCollection(this UIElementCollection items) {
 			foreach (var item in items) {
