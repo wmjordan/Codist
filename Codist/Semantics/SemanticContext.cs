@@ -221,7 +221,7 @@ namespace Codist
 		}
 
 		public Task<bool> UpdateAsync(ITextBuffer textBuffer, CancellationToken cancellationToken) {
-			if (UpdateDocumentAndWorkspace(ref __DummyPosition, ref textBuffer, out Document doc, out Workspace workspace) == false) {
+			if (UpdateDocumentAndWorkspace(ref __DummyPosition, ref textBuffer, out Document doc, out Workspace workspace) == false || doc == null) {
 				return Task.FromResult(false);
 			}
 			return UpdateAsync(textBuffer, doc, workspace, cancellationToken);
