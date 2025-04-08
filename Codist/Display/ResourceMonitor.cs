@@ -65,6 +65,7 @@ namespace Codist.Display
 				__RamMeter?.Stop();
 				__DriveMeter?.Stop();
 				__NetworkMeter?.Stop();
+				SyncHelper.CancelAndDispose(ref __CancellationTokenSource, false);
 			}
 		}
 
