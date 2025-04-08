@@ -379,6 +379,9 @@ namespace Codist
 				case RefKind.In:
 					inlines.Add(new Run("in ") { Foreground = Keyword });
 					return;
+				case CodeAnalysisHelper.RefReadonly:
+					inlines.Add(new Run("ref readonly ") { Foreground = Keyword });
+					return;
 			}
 			if (p.IsParams) {
 				inlines.Add(new Run("params ") { Foreground = Keyword });
@@ -1214,6 +1217,7 @@ namespace Codist
 				case RefKind.Ref: info.Append("ref "); break;
 				case RefKind.Out: info.Append("out "); break;
 				case RefKind.In: info.Append("in "); break;
+				case CodeAnalysisHelper.RefReadonly: info.Append("ref readonly "); break;
 			}
 		}
 

@@ -66,6 +66,7 @@ namespace Codist
 		internal const SymbolKind FunctionPointerType = (SymbolKind)20;
 		internal const TypeKind FunctionPointer = (TypeKind)13;
 		internal const MethodKind FunctionPointerMethod = (MethodKind)18;
+		internal const RefKind RefReadonly = (RefKind)4;
 		#endregion
 
 		public static Span GetLineSpan(this SyntaxNode node) {

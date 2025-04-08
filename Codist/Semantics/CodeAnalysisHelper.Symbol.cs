@@ -639,6 +639,7 @@ namespace Codist
 						case RefKind.Ref: sb.Append("ref "); break;
 						case RefKind.Out: sb.Append("out "); break;
 						case RefKind.In: sb.Append("in "); break;
+						case RefReadonly: sb.Append("ref readonly "); break;
 					}
 					GetTypeName(item.Type, sb);
 					if (pn) {
