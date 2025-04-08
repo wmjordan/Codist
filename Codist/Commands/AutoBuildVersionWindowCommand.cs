@@ -26,7 +26,7 @@ namespace Codist.Commands
 		static Project GetSelectedProjectItem() {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			var p = VsShellHelper.GetActiveProjectInSolutionExplorer();
-			return p.Kind == VsShellHelper.CSharpProjectKind ? p : null;
+			return p?.Kind == VsShellHelper.CSharpProjectKind ? p : null;
 		}
 	}
 }
