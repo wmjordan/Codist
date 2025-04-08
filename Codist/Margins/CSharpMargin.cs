@@ -17,7 +17,6 @@ using Microsoft.CodeAnalysis.FindSymbols;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
-using ThreadHelper = Microsoft.VisualStudio.Shell.ThreadHelper;
 
 namespace Codist.Margins
 {
@@ -629,7 +628,7 @@ namespace Codist.Margins
 				var ct = SyncHelper.CancelAndRetainToken(ref _Cancellation);
 				try {
 					if (await Task.Run(() => UpdateAsync(null, ct))) {
-						await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(default);
+						await SyncHelper.SwitchToMainThreadAsync(ct);
 						_Margin?.InvalidateVisual();
 					}
 				}
@@ -638,6 +637,14 @@ namespace Codist.Margins
 				}
 				catch (OperationCanceledException) {
 					// ignore canceled
+				}
+				catch (Exception ex) {
+					try {
+						await SyncHelper.SwitchToMainThreadAsync(ct);
+						Controls.MessageWindow.Error(ex, null, null, this);
+					}
+					catch (OperationCanceledException) {
+					}
 				}
 			}
 
