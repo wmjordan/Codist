@@ -552,8 +552,8 @@ namespace Codist.Options
 					classifications = GetClassificationsForSelection();
 					break;
 			}
-			_WpfTextView.Selection.SelectionChanged -= HandleViewSelectionChangedEvent;
 			string activeClassification;
+			_WpfTextView.Selection.SelectionChanged -= HandleViewSelectionChangedEvent;
 			if (source == SyntaxStyleSource.Selection) {
 				_WpfTextView.Selection.SelectionChanged += HandleViewSelectionChangedEvent;
 				activeClassification = GetHeuristicActiveClassification(classifications);
@@ -561,34 +561,8 @@ namespace Codist.Options
 			else {
 				activeClassification = ActiveStyle?.ClassificationType;
 			}
-			var cts = new HashSet<IClassificationType>();
 			_SelectedStyleButton = null;
-			foreach (var c in classifications) {
-				if (c.IsClassificationCategory()) {
-					l.Add(new Label {
-						Content = c.Classification,
-						Padding = WpfHelper.SmallMargin,
-						Margin = WpfHelper.TopItemMargin,
-						FontWeight = FontWeights.Bold,
-					}.ReferenceProperty(ForegroundProperty, VsBrushes.EditorExpansionTextKey)
-					.ReferenceProperty(BackgroundProperty, CommonDocumentColors.PageBrushKey));
-					continue;
-				}
-				if (c == null || cts.Add(c) == false) {
-					continue;
-				}
-				var t = _FormatCache.GetCachedProperty(c);
-				if (t == null) {
-					continue;
-				}
-				var button = new StyleSettingsButton(c, _FormatCache, t, OnSelectStyle).SetLazyToolTip(ShowStyleSettingsButtonToolTip);
-				if (activeClassification != null && c.Classification == activeClassification) {
-					OnSelectStyle(button, null);
-					_SettingsGroup.Visibility = _StyleNameHolder.Visibility = Visibility.Visible;
-					activeClassification = null;
-				}
-				l.Add(button);
-			}
+			CreateStyleButtons(l, classifications, activeClassification);
 			if (_SelectedStyleButton == null) {
 				_SettingsGroup.Visibility = _StyleNameHolder.Visibility = Visibility.Collapsed;
 			}
@@ -621,6 +595,36 @@ namespace Codist.Options
 					}
 				}, R.T_ClassificationTypesJsonTip, ThemeHelper.HyperlinkBrush));
 				l.Add(new TextBlock { Margin = WpfHelper.SmallMargin }.AppendLink(R.T_AboutCustomSyntaxRules, "https://github.com/wmjordan/Codist/wiki/ClassificationTypes.json-and-Codist.ct.json", R.T_AboutCustomSyntaxRulesTip, ThemeHelper.HyperlinkBrush));
+			}
+		}
+
+		void CreateStyleButtons(UIElementCollection list, IEnumerable<IClassificationType> classifications, string activeClassification) {
+			var cts = new HashSet<IClassificationType>();
+			foreach (var c in classifications) {
+				if (c.IsClassificationCategory()) {
+					list.Add(new Label {
+						Content = c.Classification,
+						Padding = WpfHelper.SmallMargin,
+						Margin = WpfHelper.TopItemMargin,
+						FontWeight = FontWeights.Bold,
+					}.ReferenceProperty(ForegroundProperty, VsBrushes.EditorExpansionTextKey)
+					.ReferenceProperty(BackgroundProperty, CommonDocumentColors.PageBrushKey));
+					continue;
+				}
+				if (c == null || cts.Add(c) == false) {
+					continue;
+				}
+				var t = _FormatCache.GetCachedProperty(c);
+				if (t == null) {
+					continue;
+				}
+				var button = new StyleSettingsButton(c, _FormatCache, t, OnSelectStyle).SetLazyToolTip(ShowStyleSettingsButtonToolTip);
+				if (activeClassification != null && c.Classification == activeClassification) {
+					OnSelectStyle(button, null);
+					_SettingsGroup.Visibility = _StyleNameHolder.Visibility = Visibility.Visible;
+					activeClassification = null;
+				}
+				list.Add(button);
 			}
 		}
 
@@ -741,7 +745,7 @@ namespace Codist.Options
 			return (t ?? classifications.FirstOrDefault())?.Classification;
 		}
 
-		static List<IClassificationType> ToClassificationTypes<TStyle>(List<TStyle> styles)
+		static List<IClassificationType> ToClassificationTypes<TStyle>(IReadOnlyList<TStyle> styles)
 			where TStyle : StyleBase {
 			var r = new List<IClassificationType>(styles.Count + 4);
 			string category = null;
@@ -751,7 +755,7 @@ namespace Codist.Options
 					continue;
 				}
 				var id = item.Id;
-				var style = styles.Find(i => i.Id == id) ?? item;
+				var style = styles.FirstOrDefault(i => i.Id == id) ?? item;
 				if (item.Category != category) {
 					r.Add(TextEditorHelper.CreateClassificationCategory(category = item.Category));
 				}
