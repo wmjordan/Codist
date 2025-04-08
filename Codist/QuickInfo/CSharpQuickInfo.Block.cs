@@ -44,7 +44,7 @@ namespace Codist.QuickInfo
 			if (df.Succeeded) {
 				ListVariables(container, df.VariablesDeclared, R.T_DeclaredVariable, IconIds.DeclaredVariables);
 				if (node.Parent.Kind().IsMethodDeclaration()) {
-					var p = (semanticModel.GetDeclaredSymbol(node.Parent) as IMethodSymbol).Parameters;
+					var p = (semanticModel.GetSymbol(node.Parent) as IMethodSymbol).Parameters;
 					ListVariables(container, df.DataFlowsIn.RemoveRange(p), R.T_ReadVariable, IconIds.ReadVariables);
 				}
 				else {
