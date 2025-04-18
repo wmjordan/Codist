@@ -26,7 +26,7 @@ namespace Codist
 				tip.Title.Append(VsImageHelper.GetImage(symbol.GetImageId()).WrapMargin(WpfHelper.GlyphMargin));
 			}
 			tip.Title
-				.Append($"{symbol.GetAccessibility()}{symbol.GetAbstractionModifier()}{symbol.GetValueAccessModifier()}{symbol.GetSymbolKindName()} ")
+				.Append(symbol.GetAccessibility() + symbol.GetAbstractionModifier() + symbol.GetValueAccessModifier() + symbol.GetSymbolKindName() + " ")
 				.Append(symbol.GetOriginalName(), true)
 				.Append(symbol.GetParameterString(true));
 			var content = tip.Content;
@@ -111,7 +111,7 @@ namespace Codist
 			content.AppendLineBreak()
 				.Append(type.GetSymbolKindName(), SymbolFormatter.Instance.Keyword)
 				.Append(": ")
-				.Append(type.ToDisplayString(CodeAnalysisHelper.MemberNameFormat), true);
+				.Append((type.TypeKind != CodeAnalysisHelper.Extension ? type : type.GetExtensionParameter().Type).ToDisplayString(CodeAnalysisHelper.MemberNameFormat), true);
 		}
 
 		static void ShowNamespaceSource(TextBlock content, INamespaceSymbol symbol, SemanticContext context) {
@@ -160,14 +160,19 @@ namespace Codist
 		}
 
 		static void ShowAttributes(ISymbol symbol, TextBlock content) {
-			if (Config.Instance.SymbolToolTipOptions.MatchFlags(SymbolToolTipOptions.Attributes)) {
-				foreach (var attr in symbol.GetAttributes()) {
-					SymbolFormatter.Instance.Format(content.AppendLine().Inlines, attr, 0);
-				}
-				if (symbol.Kind == SymbolKind.Method) {
-					foreach (var attr in ((IMethodSymbol)symbol).GetReturnTypeAttributes()) {
-						SymbolFormatter.Instance.Format(content.AppendLine().Inlines, attr, 1);
-					}
+			IParameterSymbol parameter;
+			if (!Config.Instance.SymbolToolTipOptions.MatchFlags(SymbolToolTipOptions.Attributes)) {
+				return;
+			}
+			if (symbol.Kind == SymbolKind.NamedType && (parameter = ((ITypeSymbol)symbol).GetExtensionParameter()) != null) {
+				symbol = parameter;
+			}
+			foreach (var attr in symbol.GetAttributes()) {
+				SymbolFormatter.Instance.Format(content.AppendLine().Inlines, attr, 0);
+			}
+			if (symbol.Kind == SymbolKind.Method) {
+				foreach (var attr in ((IMethodSymbol)symbol).GetReturnTypeAttributes()) {
+					SymbolFormatter.Instance.Format(content.AppendLine().Inlines, attr, 1);
 				}
 			}
 		}

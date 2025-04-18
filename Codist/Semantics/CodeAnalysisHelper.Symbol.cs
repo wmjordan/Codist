@@ -662,6 +662,16 @@ namespace Codist
 						return sb.ToString();
 					}
 				}
+				else if (t.TypeKind == Extension) {
+					using (var sbr = ReusableStringBuilder.AcquireDefault(100)) {
+						var sb = sbr.Resource;
+						if (t.IsGenericType) {
+							BuildTypeParametersString(sb, t.TypeParameters);
+						}
+						BuildParametersString(sb, ImmutableArray.Create(t.GetExtensionParameter()), pn);
+						return sb.ToString();
+					}
+				}
 				return t.Arity > 0 ? $"<{new string (',', t.Arity - 1)}>" : String.Empty;
 			}
 		}
@@ -868,6 +878,7 @@ namespace Codist
 				case TypeKind.Interface: return "interface";
 				case TypeKind.Struct: return type.IsRecord() ? "record struct" : "struct";
 				case TypeKind.TypeParameter: return "type parameter";
+				case Extension: return "extension";
 			}
 			return "type";
 		}
@@ -1082,6 +1093,12 @@ namespace Codist
 		public static int GetNullableAnnotation(this ITypeSymbol type) {
 			return type != null ? NonPublicOrFutureAccessors.GetTypeNullableAnnotation(type) : 0;
 		}
+		public static IParameterSymbol GetExtensionParameter(this ITypeSymbol type) {
+			return type != null ? NonPublicOrFutureAccessors.GetTypeExtensionParameter(type) : null;
+		}
+		public static bool IsExtensionMember(this ISymbol symbol) {
+			return symbol.ContainingType?.GetExtensionParameter() != null;
+		}
 		public static bool IsInitOnly(this IMethodSymbol method) {
 			return method != null && NonPublicOrFutureAccessors.GetMethodIsInitOnly(method);
 		}
@@ -1108,6 +1125,12 @@ namespace Codist
 		}
 		public static IPropertySymbol GetPropertyPartialImplementationPart(this IPropertySymbol property) {
 			return property != null ? NonPublicOrFutureAccessors.GetPropertyPartialImplementationPart(property) : null;
+		}
+		public static IEventSymbol GetEventPartialDefinitionPart(this IEventSymbol ev) {
+			return ev != null ? NonPublicOrFutureAccessors.GetEventPartialDefinitionPart(ev) : null;
+		}
+		public static IEventSymbol GetEventPartialImplementationPart(this IEventSymbol ev) {
+			return ev != null ? NonPublicOrFutureAccessors.GetEventPartialImplementationPart(ev) : null;
 		}
 		public static bool IsRequired(this IPropertySymbol property) {
 			return property != null && NonPublicOrFutureAccessors.GetPropertyIsRequired(property);
@@ -1211,12 +1234,8 @@ namespace Codist
 		public static ImmutableArray<SyntaxReference> GetSourceReferences(this ISymbol symbol) {
 			var source = symbol.DeclaringSyntaxReferences;
 			if (symbol is IMethodSymbol m) {
-				if (m.PartialDefinitionPart != null) {
-					source = source.AddRange(m.PartialDefinitionPart.DeclaringSyntaxReferences);
-				}
-				if (m.PartialImplementationPart != null) {
-					source = source.AddRange(m.PartialImplementationPart.DeclaringSyntaxReferences);
-				}
+				AddDefinitionsForPartial(m, i => i.PartialDefinitionPart, ref source);
+				AddDefinitionsForPartial(m, i => i.PartialImplementationPart, ref source);
 				if (m.MethodKind == MethodKind.Constructor
 					&& source.Length == 0
 					&& (symbol = m.ContainingType) != null) {
@@ -1224,14 +1243,21 @@ namespace Codist
 				}
 			}
 			else if (symbol is IPropertySymbol p) {
-				if (p.GetPropertyPartialDefinitionPart() != null) {
-					source = source.AddRange(p.GetPropertyPartialDefinitionPart().DeclaringSyntaxReferences);
-				}
-				if (p.GetPropertyPartialImplementationPart() != null) {
-					source = source.AddRange(p.GetPropertyPartialImplementationPart().DeclaringSyntaxReferences);
-				}
+				AddDefinitionsForPartial(p, GetPropertyPartialDefinitionPart, ref source);
+				AddDefinitionsForPartial(p, GetPropertyPartialImplementationPart, ref source);
+			}
+			else if (symbol is IEventSymbol e) {
+                AddDefinitionsForPartial(e, GetEventPartialDefinitionPart, ref source);
+                AddDefinitionsForPartial(e, GetEventPartialImplementationPart, ref source);
 			}
 			return source;
+		}
+
+		static void AddDefinitionsForPartial<TSymbol>(TSymbol symbol, Func<TSymbol, TSymbol> partialGetter, ref ImmutableArray<SyntaxReference> locations) where TSymbol : ISymbol {
+			var s = partialGetter(symbol);
+			if (s != null) {
+				locations = locations.AddRange(s.DeclaringSyntaxReferences);
+			}
 		}
 
 		public static Location ToLocation(this SyntaxReference syntaxReference) {
@@ -1657,6 +1683,8 @@ namespace Codist
 
 			public static readonly Func<ITypeSymbol, int> GetTypeNullableAnnotation = ReflectionHelper.CreateGetPropertyMethod<ITypeSymbol, int>("NullableAnnotation");
 
+			public static readonly Func<ITypeSymbol, IParameterSymbol> GetTypeExtensionParameter = ReflectionHelper.CreateGetPropertyMethod<ITypeSymbol, IParameterSymbol>("ExtensionParameter");
+
 			public static readonly Func<INamedTypeSymbol, INamedTypeSymbol> GetNamedTypeNativeIntegerUnderlyingType = ReflectionHelper.CreateGetPropertyMethod<INamedTypeSymbol, INamedTypeSymbol>("NativeIntegerUnderlyingType");
 
 			public static readonly Func<ILocalSymbol, bool> GetLocalIsForEach = ReflectionHelper.CreateGetPropertyMethod<ILocalSymbol, bool>("IsForEach");
@@ -1672,6 +1700,10 @@ namespace Codist
 			public static readonly Func<IMethodSymbol, bool> GetMethodIsReadOnly = ReflectionHelper.CreateGetPropertyMethod<IMethodSymbol, bool>("IsReadOnly");
 
 			public static readonly Func<IMethodSymbol, int> GetMethodCallingConvention = ReflectionHelper.CreateGetPropertyMethod<IMethodSymbol, int>("CallingConvention");
+
+			public static readonly Func<IEventSymbol, IEventSymbol> GetEventPartialDefinitionPart = ReflectionHelper.CreateGetPropertyMethod<IEventSymbol, IEventSymbol>("PartialDefinitionPart");
+
+			public static readonly Func<IEventSymbol, IEventSymbol> GetEventPartialImplementationPart = ReflectionHelper.CreateGetPropertyMethod<IEventSymbol, IEventSymbol>("PartialImplementationPart");
 
 			public static readonly Func<IPropertySymbol, IPropertySymbol> GetPropertyPartialDefinitionPart = ReflectionHelper.CreateGetPropertyMethod<IPropertySymbol, IPropertySymbol>("PartialDefinitionPart");
 

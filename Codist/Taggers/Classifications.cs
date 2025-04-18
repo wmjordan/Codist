@@ -53,6 +53,7 @@ namespace Codist.Taggers
 			EnumName = registry.GetClassificationTag(Constants.CodeEnumName);
 			EnumField = registry.GetClassificationTag(Constants.CSharpEnumFieldName);
 			Event = registry.GetClassificationTag(Constants.CSharpEventName);
+			ExtensionMember = registry.GetClassificationTag(Constants.CSharpExtensionMemberName);
 			ExtensionMethod = registry.GetClassificationTag(Constants.CSharpExtensionMethodName);
 			ExternMethod = registry.GetClassificationTag(Constants.CSharpExternMethodName);
 			Field = registry.GetClassificationTag(Constants.CSharpFieldName);
@@ -99,6 +100,7 @@ namespace Codist.Taggers
 		public ClassificationTag EnumName { get; }
 		public ClassificationTag EnumField { get; }
 		public ClassificationTag Event { get; }
+		public ClassificationTag ExtensionMember { get; }
 		public ClassificationTag ExtensionMethod { get; }
 		public ClassificationTag ExternMethod { get; }
 		public ClassificationTag Field { get; }

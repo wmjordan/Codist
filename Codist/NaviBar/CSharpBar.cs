@@ -447,7 +447,11 @@ namespace Codist.NaviBar
 			else if (node is IndexerDeclarationSyntax id) {
 				p = id.ParameterList;
 			}
-			else {
+			else if (node is TypeDeclarationSyntax t && (p = t.GetParameterList()) != null) {
+                text.Append(p.GetParameterListSignature(false), ThemeHelper.SystemGrayTextBrush);
+				return;
+            }
+            else {
 				return;
 			}
 			if (p != null) {

@@ -166,6 +166,7 @@ namespace Codist
 		public const string CSharpAbstractMemberName = "C#: Abstract member";
 		public const string CSharpSealedMemberName = "C#: Sealed class or member";
 		public const string CSharpPrivateMemberName = "C#: Private member";
+		public const string CSharpExtensionMemberName = "C#: Extension member";
 		public const string CSharpNestedTypeName = "C#: Nested type member";
 		public const string CSharpVariableCapturedExpression = "C#: Variable captured expression";
 		public const string CSharpAttributeName = "C#: Attribute name";

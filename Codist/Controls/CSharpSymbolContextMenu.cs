@@ -208,6 +208,11 @@ namespace Codist.Controls
 		}
 
 		void CreateCommandForNamedType(INamedTypeSymbol t) {
+			var isExtensionType = t.GetExtensionParameter() != null;
+			if (isExtensionType) {
+				AddCommand(CommandId.ListSymbolMembers);
+				return;
+			}
 			if (t.IsAnyKind(TypeKind.Class, TypeKind.Struct)) {
 				var ctor = _Host.Node?.GetObjectCreationNode();
 				if (ctor != null) {
@@ -753,7 +758,12 @@ namespace Codist.Controls
 			}
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindObjectInitializers(object sender, RoutedEventArgs e) {
-				await _SemanticContext.FindReferrersAsync(_Symbol, WpfHelper.IsControlDown, s => s.Kind == SymbolKind.Method);
+				if (_Symbol is INamedTypeSymbol t && t.GetPrimaryConstructor() != null) {
+					await _SemanticContext.FindReferrersAsync(_Symbol, WpfHelper.IsControlDown, null, n => IsTypeReference(n) == false);
+				}
+				else {
+					await _SemanticContext.FindReferrersAsync(_Symbol, WpfHelper.IsControlDown, s => s.Kind == SymbolKind.Method);
+				}
 			}
 
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]

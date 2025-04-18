@@ -45,6 +45,7 @@ namespace Codist
 		internal const SyntaxKind InitKeyword = (SyntaxKind)8443;
 		internal const SyntaxKind RecordKeyword = (SyntaxKind)8444;
 		internal const SyntaxKind RequiredKeyword = (SyntaxKind)8447;
+		internal const SyntaxKind ExtensionKeyword = (SyntaxKind)8451;
 		internal const SyntaxKind ImplicitObjectCreationExpression = (SyntaxKind)8659;
 		internal const SyntaxKind CollectionExpression = (SyntaxKind)9076;
 		internal const SyntaxKind FileScopedNamespaceDeclaration = (SyntaxKind)8845;
@@ -61,10 +62,12 @@ namespace Codist
 		internal const SyntaxKind RecordDeclaration = (SyntaxKind)9063;
 		internal const SyntaxKind RecordStructDeclaration = (SyntaxKind)9068;
 		internal const SyntaxKind PrimaryConstructorBaseType = (SyntaxKind)9065;
+		internal const SyntaxKind ExtensionDeclaration = (SyntaxKind)9079;
 		internal const SyntaxKind SingleLineRawStringLiteralToken = (SyntaxKind)8518;
 		internal const SyntaxKind MultiLineRawStringLiteralToken = (SyntaxKind)8519;
 		internal const SymbolKind FunctionPointerType = (SymbolKind)20;
 		internal const TypeKind FunctionPointer = (TypeKind)13;
+		internal const TypeKind Extension = (TypeKind)14;
 		internal const MethodKind FunctionPointerMethod = (MethodKind)18;
 		internal const RefKind RefReadonly = (RefKind)4;
 		#endregion

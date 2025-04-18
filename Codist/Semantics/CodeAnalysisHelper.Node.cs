@@ -171,6 +171,7 @@ namespace Codist
 				case SyntaxKind.OperatorDeclaration:
 				case SyntaxKind.ConversionOperatorDeclaration:
 				case SyntaxKind.EnumMemberDeclaration:
+				case CodeAnalysisHelper.ExtensionDeclaration:
 					return true;
 			}
 			return false;

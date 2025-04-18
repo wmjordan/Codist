@@ -313,6 +313,10 @@ namespace Codist.NaviBar
 						if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.RegionInMember) == false) {
 							lastNodeSpan = child.Span;
 						}
+						if (childKind == CodeAnalysisHelper.ExtensionDeclaration) {
+							i.Hint = "extension";
+							AddExtensionDeclaration(child, isExternal, includeDirectives);
+						}
 					}
 					// a member is added between #region and #endregion
 					regionJustStart = FALSE;
@@ -368,6 +372,15 @@ namespace Codist.NaviBar
 				if (isExternal) {
 					item.Usage = SymbolUsageKind.External;
 				}
+			}
+
+			void AddExtensionDeclaration(SyntaxNode extension, bool isExternal, bool includeDirectives) {
+				AddMemberDeclarations(extension, extension.ChildNodes(), isExternal, includeDirectives);
+
+				var item = new SymbolItem(_Menu);
+				_Menu.Add(item);
+				item.Content.Append("end extension")
+					.Foreground = ThemeHelper.SystemGrayTextBrush;
 			}
 
 			void AddVariables(SeparatedSyntaxList<VariableDeclaratorSyntax> fields, bool isExternal, int pos) {

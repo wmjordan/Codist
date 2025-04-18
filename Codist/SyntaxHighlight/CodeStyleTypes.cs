@@ -337,6 +337,15 @@ namespace Codist.SyntaxHighlight
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpPrivateMemberName)]
 		[Description("Name of private member, inheriting from formal language")]
 		PrivateMemberName,
+		[Category(Constants.SyntaxCategory.Member)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpExtensionMemberName)]
+		[BaseDefinition(Constants.CodeIdentifier)]
+		[Order(After = Constants.CodeMethodName)]
+		[Order(After = Constants.CodePropertyName)]
+		[Order(After = Constants.CSharpMethodName)]
+		[Order(After = Constants.CSharpPropertyName)]
+        [Description("Name of extension methods or properties")]
+		ExtensionMemberName,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpLocalDeclarationName)]
 		[BaseDefinition(Constants.CSharpLocalVariableName)]
@@ -466,6 +475,7 @@ namespace Codist.SyntaxHighlight
 		[BaseDefinition(Constants.CSharpMethodName)]
 		[BaseDefinition(Constants.CSharpStaticMemberName)]
 		[BaseDefinition(Constants.CodeExtensionMethodName)]
+		[BaseDefinition(Constants.CSharpExtensionMemberName)]
 		[Description("Name of extension method, inheriting from Method Name and Static Member Name")]
 		ExtensionMethodName,
 		[Category(Constants.SyntaxCategory.Member)]

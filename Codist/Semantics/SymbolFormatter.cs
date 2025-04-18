@@ -98,13 +98,7 @@ namespace Codist
 			var signature = ShowSymbolSignature(Keyboard.Modifiers == ModifierKeys.Shift ? symbol : s);
 			p.Add(signature);
 			if (s.IsObsolete()) {
-				p.Opacity = TransparentLevel;
-				signature.Inlines.AddRange(new object[] {
-					new LineBreak(),
-					new InlineUIContainer (new TextBlock { Margin = WpfHelper.SmallHorizontalMargin, FontSize = ThemeHelper.ToolTipFontSize, FontFamily = ThemeHelper.ToolTipFont }
-						.Append(VsImageHelper.GetImage(IconIds.Obsoleted).WrapMargin(WpfHelper.GlyphMargin))
-						.Append(R.T_Deprecated))
-				});
+				MarkSignatureObsolete(p, signature);
 			}
 			#endregion
 
@@ -116,11 +110,9 @@ namespace Codist
 				var showContainer = showNs == false && s.Kind != SymbolKind.Namespace && cs.Kind != SymbolKind.Namespace;
 				b = new ThemedTipText { FontSize = ThemeHelper.ToolTipFontSize, FontFamily = ThemeHelper.ToolTipFont };
 				if (showContainer) {
-					b.Append(VsImageHelper.GetImage(cs.GetImageId()).WrapMargin(WpfHelper.GlyphMargin));
-				}
-
-				if (showContainer) {
-					b.AddSymbol(cs, false, this).Append(" ");
+					b.Append(VsImageHelper.GetImage(cs.GetImageId()).WrapMargin(WpfHelper.GlyphMargin))
+						.AddSymbol(cs, false, this)
+						.Append(" ");
 				}
 
 				p.Add(ShowSymbolDeclaration(s, b, true, false));
@@ -130,11 +122,20 @@ namespace Codist
 					ShowContainingNamespace(symbol, b);
 					p.Add(b);
 				}
-				else if (s.Kind == SymbolKind.Method
-					&& (m = (IMethodSymbol)s).MethodKind == MethodKind.ReducedExtension) {
-					b.AddImage(IconIds.ExtensionMethod)
-						.Append(" ")
-						.AddSymbol(m.ReducedFrom.Parameters[0].Type, false, this);
+				else if (s.Kind == SymbolKind.Method) {
+					if ((m = (IMethodSymbol)s).MethodKind == MethodKind.ReducedExtension) {
+						b.AddImage(IconIds.ExtensionMethod)
+							.Append(" ")
+							.AddSymbol(m.ReducedFrom.Parameters[0].Type, false, this);
+					}
+				}
+
+				if (s.Kind.CeqAny(SymbolKind.Method, SymbolKind.Property, SymbolKind.NamedType)) {
+					var ep = (cs as INamedTypeSymbol).GetExtensionParameter()
+						?? (s as INamedTypeSymbol).GetExtensionParameter();
+					if (ep != null) {
+						ShowExtensionParameter(p, ep);
+					}
 				}
 			}
 			#endregion
@@ -248,8 +249,10 @@ namespace Codist
 					}
 					break;
 				case SymbolKind.Local:
-					if (symbol is ILocalSymbol l && l.HasConstantValue) {
-						AppendValue(signature.Inlines, symbol, l.ConstantValue);
+					if (symbol is ILocalSymbol l) {
+						if (l.HasConstantValue) {
+							AppendValue(signature.Inlines, symbol, l.ConstantValue);
+						}
 					}
 					break;
 				case SymbolKind.TypeParameter:
@@ -269,6 +272,16 @@ namespace Codist
 			return signature;
 		}
 
+		static void MarkSignatureObsolete(StackPanel panel, TextBlock signature) {
+			panel.Opacity = TransparentLevel;
+			signature.Inlines.AddRange(new object[] {
+					new LineBreak(),
+					new InlineUIContainer (new TextBlock { Margin = WpfHelper.SmallHorizontalMargin, FontSize = ThemeHelper.ToolTipFontSize, FontFamily = ThemeHelper.ToolTipFont }
+						.Append(VsImageHelper.GetImage(IconIds.Obsoleted).WrapMargin(WpfHelper.GlyphMargin))
+						.Append(R.T_Deprecated))
+				});
+		}
+
 		void ShowContainingTypes(INamedTypeSymbol type, InlineCollection text) {
 			var n = new Stack<INamedTypeSymbol>();
 			do {
@@ -281,6 +294,20 @@ namespace Codist
 			while (n.Count != 0) {
 				FormatTypeName(text, n.Pop(), null, false);
 				text.Add(".");
+			}
+		}
+
+		void ShowExtensionParameter(StackPanel panel, IParameterSymbol ep) {
+			var epa = ep.GetAttributes();
+			if (epa.Length != 0) {
+				var b = new ThemedTipText();
+				b.SetGlyph(IconIds.ExtensionParameter).Append("(".Render(PlainText));
+				foreach (var item in epa) {
+					Format(b.Inlines, item, 0);
+					b.Append(" ");
+				}
+				b.AddSymbol(ep, false, Instance.Parameter).Append(")".Render(PlainText));
+				panel.Add(b);
 			}
 		}
 
@@ -865,6 +892,15 @@ namespace Codist
 				case TypeKind.TypeParameter:
 					text.Add(symbol.Render(alias ?? symbol.Name, bold, TypeParameter));
 					return;
+				case CodeAnalysisHelper.Extension:
+					text.Add(symbol.Render(symbol.MetadataName, bold, Class));
+					if (type.IsGenericType && type.IsTupleType == false) {
+						AddTypeArguments(text, type.TypeArguments);
+					}
+					text.Add("(".Render(PlainText));
+					Format(text, type.GetExtensionParameter().Type, null, true, true);
+					text.Add(")".Render(PlainText));
+					return;
 				default:
 					text.Add(symbol.MetadataName.Render(bold, false, Class));
 					return;
@@ -1284,11 +1320,17 @@ namespace Codist
 					if (m.IsReadOnly()) {
 						info.Append("readonly ", Keyword);
 					}
+					if (m.IsExtensionMember()) {
+						info.Append("extension ", Keyword);
+					}
 				}
 			}
 			else if (symbol.Kind == SymbolKind.Property && symbol is IPropertySymbol p) {
 				if (p.IsRequired()) {
 					info.Append("required ", Keyword);
+				}
+				else if (p.IsExtensionMember()) {
+					info.Append("extension ", Keyword);
 				}
 			}
 		}

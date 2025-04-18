@@ -214,6 +214,9 @@ namespace Codist.Taggers
 							node.IsKind(CodeAnalysisHelper.RecordDeclaration) ? __Classifications.ClassName : __Classifications.StructName,
 							__Classifications.Declaration);
 						return;
+					case CodeAnalysisHelper.ExtensionKeyword:
+						tags.Add(itemSpan, __Classifications.ClassName, __Classifications.NestedDeclaration);
+						return;
 					default:
 						return;
 				}
@@ -582,6 +585,7 @@ namespace Codist.Taggers
 						return __Classifications.Property;
 					case SyntaxKind.ClassDeclaration:
 					case CodeAnalysisHelper.RecordDeclaration:
+					case CodeAnalysisHelper.ExtensionDeclaration:
 						return __Classifications.ClassName;
 					case SyntaxKind.InterfaceDeclaration:
 						return __Classifications.InterfaceName;
@@ -740,6 +744,9 @@ namespace Codist.Taggers
 
 					case SymbolKind.Property:
 						tags.Add(itemSpan, __Classifications.Property);
+						if (symbol.IsExtensionMember()) {
+							tags.Add(itemSpan, __Classifications.ExtensionMember);
+						}
 						break;
 
 					case SymbolKind.Event:
@@ -791,6 +798,9 @@ namespace Codist.Taggers
 								tags.Add(itemSpan, method.IsExtensionMethod ? __Classifications.ExtensionMethod
 									: method.IsExtern ? __Classifications.ExternMethod
 									: __Classifications.Method);
+								if (method.MethodKind == MethodKind.Ordinary && method.IsExtensionMember()) {
+									tags.Add(itemSpan, __Classifications.ExtensionMember);
+								}
 								break;
 						}
 						break;

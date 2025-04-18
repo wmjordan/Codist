@@ -178,6 +178,8 @@ namespace Codist
 							case Accessibility.Internal: return KnownImageIds.StructureInternal;
 							default: return IconIds.Structure;
 						}
+					case Extension:
+						return IconIds.ExtensionDeclaration;
 					case TypeKind.TypeParameter:
 					default: return KnownImageIds.Type;
 				}
@@ -267,6 +269,7 @@ namespace Codist
 				case SyntaxKind.LocalFunctionStatement: return IconIds.LocalFunction;
 				case SyntaxKind.RegionDirectiveTrivia: return IconIds.Region;
 				case SyntaxKind.EndRegionDirectiveTrivia: return KnownImageIds.ToolstripPanelBottom;
+				case CodeAnalysisHelper.ExtensionDeclaration: return IconIds.ExtensionDeclaration;
 			}
 			return KnownImageIds.UnknownMember;
 

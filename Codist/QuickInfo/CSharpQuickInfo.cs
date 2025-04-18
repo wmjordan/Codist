@@ -260,6 +260,9 @@ namespace Codist.QuickInfo
 					symbol = semanticModel.Compilation.GetSpecialType(SpecialType.System_Int32);
 					isConvertedType = true;
 					break;
+				case CodeAnalysisHelper.ExtensionKeyword:
+					symbol = semanticModel.GetDeclaredSymbol(node = unitCompilation.FindNode(token.Span, false, true));
+					break;
 				default:
 					if (token.Kind().IsPredefinedSystemType()) {
 						symbol = semanticModel.GetSystemTypeSymbol(token.Kind());
