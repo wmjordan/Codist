@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading;
 using CLR;
 using Codist.Controls;
 using Microsoft.CodeAnalysis;
@@ -11,16 +10,16 @@ namespace Codist.QuickInfo
 {
 	partial class CSharpQuickInfo
 	{
-		static void ShowParameterInfo(InfoContainer qiContent, SyntaxNode node, SemanticModel semanticModel, CancellationToken cancellationToken) {
-			var argument = node;
-			if (node.IsKind(SyntaxKind.NullLiteralExpression)) {
-				argument = node.Parent;
+		static void ShowArgumentInfo(Context ctx) {
+			var argument = ctx.node;
+			if (argument.IsKind(SyntaxKind.NullLiteralExpression)) {
+				argument = argument.Parent;
 			}
 			int depth = 0;
 			do {
 				var n = argument as ArgumentSyntax ?? (SyntaxNode)(argument as AttributeArgumentSyntax);
 				if (n != null) {
-					ShowArgumentInfo(qiContent, n, semanticModel, cancellationToken);
+					ShowArgumentInfo(ctx, n);
 					return;
 				}
 				n = argument.Parent;
@@ -28,7 +27,7 @@ namespace Codist.QuickInfo
 					SyntaxKind.CollectionInitializerExpression,
 					SyntaxKind.ObjectInitializerExpression,
 					SyntaxKind.ComplexElementInitializerExpression) == true) {
-					ShowLocationOfInitializerExpression(qiContent, argument, n);
+					ShowLocationOfInitializerExpression(ctx.Container, argument, n);
 					return;
 				}
 			} while ((argument = argument.Parent) != null && ++depth < 4);
@@ -39,7 +38,9 @@ namespace Codist.QuickInfo
 			qiContent.Add(new ThemedTipText(R.T_ExpressionNOfInitializer.Replace("<N>", (++argIndex).ToString())).SetGlyph(IconIds.Argument));
 		}
 
-		static void ShowArgumentInfo(InfoContainer qiContent, SyntaxNode argument, SemanticModel semanticModel, CancellationToken cancellationToken) {
+		static void ShowArgumentInfo(Context ctx, SyntaxNode argument) {
+			var qiContent = ctx.Container;
+			var semanticModel = ctx.semanticModel;
 			var argList = argument.Parent;
 			SeparatedSyntaxList<ArgumentSyntax> arguments;
 			int argIndex, argCount;
@@ -70,7 +71,7 @@ namespace Codist.QuickInfo
 			if (argIndex == -1) {
 				return;
 			}
-			var symbol = semanticModel.GetSymbolInfo(argList.Parent, cancellationToken);
+			var symbol = ctx.semanticModel.GetSymbolInfo(argList.Parent, ctx.cancellationToken);
 			if (symbol.Symbol != null) {
 				IMethodSymbol m;
 				switch (symbol.Symbol.Kind) {
@@ -179,6 +180,13 @@ namespace Codist.QuickInfo
 					return;
 				}
 				qiContent.Add(new ThemedTipText(R.T_ArgumentNOf.Replace("<N>", (++argIndex).ToString())).Append(methodName, true));
+			}
+			else if (argList.IsKind(SyntaxKind.TupleExpression) && argIndex >= 0) {
+				var type = semanticModel.GetTypeInfo(argList).ConvertedType as INamedTypeSymbol;
+				if (type != null) {
+					ctx.symbol = type.TupleElements[argIndex];
+				}
+				qiContent.Add(new ThemedTipText(R.T_TupleElementN.Replace("<N>", (argIndex + 1).ToString())).SetGlyph(IconIds.Field));
 			}
 			else {
 				qiContent.Add(new ThemedTipText(R.T_ArgumentN.Replace("<N>", (++argIndex).ToString())).SetGlyph(IconIds.Argument));

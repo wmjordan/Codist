@@ -2869,4 +2869,7 @@ Discard its changes?</value>
   <data name="CMD_MakeReadonly" xml:space="preserve">
     <value>Make Readonly</value>
   </data>
+  <data name="T_TupleElementN" xml:space="preserve">
+    <value>Tuple element &lt;N&gt;</value>
+  </data>
 </root>

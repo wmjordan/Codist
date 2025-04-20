@@ -65,6 +65,7 @@ namespace Codist
 		internal const SyntaxKind ExtensionDeclaration = (SyntaxKind)9079;
 		internal const SyntaxKind SingleLineRawStringLiteralToken = (SyntaxKind)8518;
 		internal const SyntaxKind MultiLineRawStringLiteralToken = (SyntaxKind)8519;
+		internal const SyntaxKind Utf8StringLiteralToken = (SyntaxKind)8520;
 		internal const SymbolKind FunctionPointerType = (SymbolKind)20;
 		internal const TypeKind FunctionPointer = (TypeKind)13;
 		internal const TypeKind Extension = (TypeKind)14;

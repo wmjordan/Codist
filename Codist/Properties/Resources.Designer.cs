@@ -8179,6 +8179,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Tuple element &lt;N&gt;.
+        /// </summary>
+        internal static string T_TupleElementN {
+            get {
+                return ResourceManager.GetString("T_TupleElementN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Type: .
         /// </summary>
         internal static string T_Type {

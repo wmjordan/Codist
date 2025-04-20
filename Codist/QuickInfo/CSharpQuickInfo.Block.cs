@@ -1,19 +1,22 @@
-﻿using System.Collections.Immutable;
-using System.Linq;
-using System.Threading;
-using CLR;
+﻿using CLR;
 using Codist.Controls;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.VisualStudio.Text;
+using System.Collections.Immutable;
+using System.Linq;
+using System.Threading;
 using R = Codist.Properties.Resources;
 
 namespace Codist.QuickInfo
 {
 	partial class CSharpQuickInfo
 	{
-		static void ShowBlockInfo(InfoContainer container, ITextSnapshot textSnapshot, SyntaxNode node, SemanticModel semanticModel) {
+		static void ShowBlockInfo(Context ctx) {
+			var node = ctx.node;
+			var container = ctx.Container;
+			var textSnapshot = ctx.CurrentSnapshot;
+			var semanticModel = ctx.semanticModel;
 			if (node.Kind().CeqAny(SyntaxKind.ArrayInitializerExpression,
 						SyntaxKind.CollectionInitializerExpression,
 						SyntaxKind.ComplexElementInitializerExpression,

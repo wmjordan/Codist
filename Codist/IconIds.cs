@@ -12,6 +12,7 @@ namespace Codist
 		public const int Generic = KnownImageIds.MarkupXML;
 		public const int ExtensionMethod = KnownImageIds.ExtensionMethod;
 		public const int ExtensionDeclaration = KnownImageIds.InstallerClass;
+		public const int ExtensionParameter = KnownImageIds.InputParameter;
 		public const int StaticMember = KnownImageIds.Link;
 		public const int InstanceMember = KnownImageIds.BuildQueue;
 		public const int DefaultInterfaceImplementation = KnownImageIds.AddInterface;

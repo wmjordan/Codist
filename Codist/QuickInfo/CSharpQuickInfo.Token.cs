@@ -1,0 +1,369 @@
+﻿using CLR;
+using Codist.Controls;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using R = Codist.Properties.Resources;
+
+namespace Codist.QuickInfo
+{
+	partial class CSharpQuickInfo
+	{
+		static readonly Dictionary<SyntaxKind, Action<Context>> __TokenProcessors = new Dictionary<SyntaxKind, Action<Context>> {
+			{ SyntaxKind.WhitespaceTrivia, TokenUnavailable },
+			{ SyntaxKind.SingleLineCommentTrivia, TokenUnavailable },
+			{ SyntaxKind.MultiLineCommentTrivia, TokenUnavailable },
+			{ SyntaxKind.OpenBraceToken, ProcessOpenBraceToken },
+			{ SyntaxKind.CloseBraceToken, ProcessCloseBraceToken },
+			{ SyntaxKind.TrueKeyword, ProcessAsBoolean },
+			{ SyntaxKind.FalseKeyword, ProcessAsBoolean },
+			{ SyntaxKind.IsKeyword, ProcessAsBoolean },
+			{ SyntaxKind.AmpersandAmpersandToken, ProcessAsBoolean },
+			{ SyntaxKind.BarBarToken, ProcessAsBoolean },
+			{ SyntaxKind.ThisKeyword, ProcessTypeToken },
+			{ SyntaxKind.BaseKeyword, ProcessTypeToken },
+			{ SyntaxKind.OverrideKeyword, ProcessTypeToken },
+			{ SyntaxKind.EqualsGreaterThanToken, ProcessEqualsGreaterThanToken },
+			{ SyntaxKind.ExclamationEqualsToken, ProcessAsConvertedType },
+			{ SyntaxKind.EqualsEqualsToken, ProcessAsConvertedType },
+			{ SyntaxKind.EqualsToken, ProcessAsConvertedType },
+			{ SyntaxKind.SwitchKeyword, ProcessSwitchToken },
+			{ SyntaxKind.NullKeyword, ProcessValueToken },
+			{ SyntaxKind.DefaultKeyword, ProcessValueToken },
+			{ SyntaxKind.QuestionToken, ProcessValueToken },
+			{ SyntaxKind.ColonToken, ProcessValueToken },
+			{ SyntaxKind.QuestionQuestionToken, ProcessValueToken },
+			{ CodeAnalysisHelper.QuestionQuestionEqualsToken, ProcessValueToken },
+			{ SyntaxKind.UnderscoreToken, ProcessValueToken },
+			{ SyntaxKind.WhereKeyword, ProcessValueToken },
+			{ SyntaxKind.OrderByKeyword, ProcessValueToken },
+			{ CodeAnalysisHelper.WithKeyword, ProcessValueToken },
+			{ SyntaxKind.AsKeyword, ProcessAsType },
+			{ SyntaxKind.ReturnKeyword, ProcessReturnToken },
+			{ SyntaxKind.AwaitKeyword, ProcessAwaitToken },
+			{ SyntaxKind.DotToken, ProcessDotToken },
+			{ SyntaxKind.OpenParenToken, ProcessParenToken },
+			{ SyntaxKind.CloseParenToken, ProcessParenToken },
+			{ SyntaxKind.CommaToken, UsePreviousToken },
+			{ SyntaxKind.SemicolonToken, UsePreviousToken },
+			{ SyntaxKind.OpenBracketToken, ProcessBracketToken },
+			{ SyntaxKind.CloseBracketToken, ProcessBracketToken },
+			{ SyntaxKind.UsingKeyword, ProcessUsingToken },
+			{ SyntaxKind.InKeyword, ProcessInToken },
+			{ SyntaxKind.LessThanToken, ProcessCompareToken },
+			{ SyntaxKind.GreaterThanToken, ProcessCompareToken },
+			{ SyntaxKind.EndRegionKeyword, ProcessEndRegion },
+			{ SyntaxKind.EndIfKeyword, ProcessEndIf },
+			{ SyntaxKind.HashToken, ProcessHashToken },
+			{ SyntaxKind.VoidKeyword, TokenUnavailable },
+			{ SyntaxKind.TypeOfKeyword, c => c.symbol = c.semanticModel.GetSystemTypeSymbol(nameof(Type)) },
+			{ SyntaxKind.ThrowKeyword, ProcessThrowKeyword },
+			{ SyntaxKind.StackAllocKeyword, ProcessNewToken },
+			{ CodeAnalysisHelper.DotDotToken, ProcessDotDotToken },
+			{ CodeAnalysisHelper.ExtensionKeyword, ProcessExtension },
+			{ SyntaxKind.StringLiteralToken, ProcessStringToken },
+			{ SyntaxKind.InterpolatedStringStartToken, ProcessStringToken },
+			{ SyntaxKind.InterpolatedStringEndToken, ProcessStringToken },
+			{ SyntaxKind.InterpolatedVerbatimStringStartToken, ProcessStringToken },
+			{ SyntaxKind.InterpolatedStringToken, ProcessStringToken },
+			{ SyntaxKind.InterpolatedStringTextToken, ProcessStringToken },
+			{ SyntaxKind.NameOfKeyword, ProcessStringToken },
+			{ CodeAnalysisHelper.Utf8StringLiteralToken, ProcessNewToken },
+			{ CodeAnalysisHelper.SingleLineRawStringLiteralToken, ProcessStringToken },
+			{ CodeAnalysisHelper.MultiLineRawStringLiteralToken, ProcessStringToken },
+			{ SyntaxKind.CharacterLiteralToken, ProcessCharToken },
+			{ SyntaxKind.NumericLiteralToken, ProcessNumericToken },
+		};
+
+		static void ProcessToken(Context ctx) {
+			if (ctx.token.Kind().IsPredefinedSystemType()) {
+				ctx.symbol = ctx.semanticModel.GetSystemTypeSymbol(ctx.token.Kind());
+				return;
+			}
+			if (ctx.token.Span.Contains(ctx.TriggerPoint, true) == false
+				|| ctx.token.IsReservedKeyword()) {
+				if (ctx.node is StatementSyntax) {
+					ShowBlockInfo(ctx);
+				}
+
+				if (ctx.Container.ItemCount > 0) {
+					ctx.Result = CreateQuickInfoItem(ctx.session, ctx.token, ctx.Container.ToUI());
+				}
+				else {
+					ctx.State = State.Undefined;
+				}
+				return;
+			}
+			ctx.State = State.Undefined;
+		}
+
+		static void ProcessCharToken(Context ctx) {
+			ctx.UseTokenNode(true);
+			ctx.symbol = ctx.semanticModel.Compilation.GetSpecialType(SpecialType.System_Char);
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.NumericValues)) {
+				if (ctx.token.Span.Length >= 8) { // tooltip for '\u0000' presentation
+					ctx.Container.Add(new ThemedTipText(ctx.token.ValueText) { FontSize = ThemeHelper.ToolTipFontSize * 2 });
+				}
+				ctx.Container.Add(ToolTipHelper.ShowNumericRepresentations(ctx.node));
+			}
+			ctx.isConvertedType = true;
+			ctx.State = State.Process;
+		}
+
+		static void ProcessNumericToken(Context ctx) {
+			ctx.UseTokenNode(true);
+			ctx.symbol = ctx.semanticModel.GetSystemTypeSymbol(ctx.token.Value.GetType().Name);
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.NumericValues)) {
+				ctx.Container.Add(ToolTipHelper.ShowNumericRepresentations(ctx.node));
+			}
+			ctx.isConvertedType = true;
+			ctx.State = State.Process;
+		}
+
+		static void ProcessStringToken(Context ctx) {
+			ctx.UseTokenNode(true);
+			ctx.symbol = ctx.semanticModel.Compilation.GetSpecialType(SpecialType.System_String);
+			ctx.isConvertedType = true;
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.String)
+				&& ctx.node.IsAnyKind(SyntaxKind.StringLiteralExpression, SyntaxKind.InterpolatedStringText)) {
+				ctx.Container.Add(ShowStringInfo(ctx.node.GetFirstToken().ValueText, false));
+			}
+			ctx.State = State.PredefinedSymbol;
+		}
+
+		static void ProcessExtension(Context ctx) {
+			ctx.symbol = ctx.semanticModel.GetDeclaredSymbol(ctx.node = ctx.CompilationUnit.FindNode(ctx.token.Span));
+			ctx.State = State.Process;
+		}
+
+		static void ProcessDotDotToken(Context ctx) {
+			ctx.symbol = ctx.semanticModel.Compilation.GetSpecialType(SpecialType.System_Int32);
+			ctx.isConvertedType = true;
+			ctx.State = State.PredefinedSymbol;
+		}
+
+		static void ProcessNewToken(Context ctx) {
+			ctx.SetSymbol(ctx.semanticModel.GetTypeInfo(ctx.node = ctx.CompilationUnit.FindNode(ctx.token.Span, false, true), ctx.cancellationToken));
+			if (ctx.symbol != null) {
+				ctx.State = State.Process;
+			}
+		}
+
+		static void ProcessThrowKeyword(Context ctx) {
+			if ((ctx.node = ctx.CompilationUnit.FindNode(ctx.token.Span)) is ThrowExpressionSyntax t) {
+				ctx.SetSymbol(ctx.semanticModel.GetTypeInfo(ctx.node));
+			}
+			if (ctx.symbol != null) {
+				ctx.State = State.Return;
+			}
+		}
+
+		static void ProcessHashToken(Context ctx) {
+			ctx.token = ctx.token.GetNextToken();
+			if (ctx.token.IsKind(SyntaxKind.EndRegionKeyword)) {
+				ProcessEndRegion(ctx);
+				return;
+			}
+			if (ctx.token.IsKind(SyntaxKind.EndIfKeyword)) {
+				ProcessEndIf(ctx);
+				return;
+			}
+			ctx.State = State.Unavailable;
+		}
+
+		static void ProcessEndIf(Context ctx) {
+			ctx.Container.Add(new ThemedTipText(R.T_EndOfIf)
+				.SetGlyph(IconIds.Region)
+				.Append((ctx.CompilationUnit.FindNode(ctx.token.Span, true) as EndIfDirectiveTriviaSyntax).GetIf()?.GetDeclarationSignature(), true)
+				);
+			ctx.Result = CreateQuickInfoItem(ctx.session, ctx.token, ctx.Container.ToUI());
+		}
+
+		static void ProcessEndRegion(Context ctx) {
+			ctx.Container.Add(new ThemedTipText(R.T_EndOfRegion)
+				.SetGlyph(IconIds.Region)
+				.Append((ctx.CompilationUnit.FindNode(ctx.token.Span, true) as EndRegionDirectiveTriviaSyntax).GetRegion()?.GetDeclarationSignature(), true)
+				);
+			ctx.Result = CreateQuickInfoItem(ctx.session, ctx.token, ctx.Container.ToUI());
+		}
+
+		static void ProcessCompareToken(Context ctx) {
+			var node = ctx.node = ctx.CompilationUnit.FindNode(ctx.token.Span);
+			if (node is BinaryExpressionSyntax) {
+				ctx.State = State.Process;
+			}
+			if (node.IsKind(SyntaxKind.TypeArgumentList)) {
+				ctx.SetSymbol(ctx.semanticModel.GetSymbolInfo(ctx.node = node.Parent, ctx.cancellationToken));
+				ctx.State = State.Process;
+			}
+			else {
+				ProcessParenToken(ctx);
+			}
+		}
+
+		static void ProcessInToken(Context ctx) {
+			if ((ctx.node = ctx.CompilationUnit.FindNode(ctx.token.Span)).IsKind(SyntaxKind.ForEachStatement)
+						&& (ctx.symbol = ctx.semanticModel.GetForEachStatementInfo((CommonForEachStatementSyntax)ctx.node).GetEnumeratorMethod) != null) {
+				ctx.State = State.Return;
+			}
+		}
+
+		static void ProcessUsingToken(Context ctx) {
+			ctx.node = ctx.CompilationUnit.FindNode(ctx.token.Span);
+			ctx.symbol = ctx.semanticModel.GetDisposeMethodForUsingStatement(ctx.node, ctx.cancellationToken);
+			ctx.State = State.Process;
+		}
+
+		static void ProcessBracketToken(Context ctx) {
+			SyntaxNode node = ctx.node = ctx.CompilationUnit.FindNode(ctx.token.Span, false, true);
+			if (node.IsKind(SyntaxKind.BracketedArgumentList)
+						&& node.Parent.IsKind(SyntaxKind.ElementAccessExpression)) {
+				ctx.SetSymbol(ctx.semanticModel.GetSymbolInfo((ElementAccessExpressionSyntax)node.Parent, ctx.cancellationToken));
+			}
+			else if (node.IsAnyKind(CodeAnalysisHelper.CollectionExpression, CodeAnalysisHelper.ListPatternExpression)) {
+				if (node.IsKind(CodeAnalysisHelper.CollectionExpression)) {
+					ctx.Container.Add(new ThemedTipText(R.T_ElementCount + ((ExpressionSyntax)node).GetCollectionExpressionElementsCount().ToText()).SetGlyph(IconIds.InstanceMember));
+				}
+				else {
+					ctx.Container.Add(new ThemedTipText(R.T_PatternCount + ((PatternSyntax)node).GetListPatternsCount().ToText()).SetGlyph(IconIds.InstanceMember));
+				}
+				ctx.SetSymbol(ctx.semanticModel.GetTypeInfo(node, ctx.cancellationToken));
+			}
+			if (ctx.symbol == null) {
+				ProcessParenToken(ctx);
+			}
+			else {
+				ctx.isConvertedType = true;
+			}
+		}
+
+		static void ProcessParenToken(Context ctx) {
+			var node = ctx.node = ctx.CompilationUnit.FindNode(ctx.token.Span, false, true);
+			if (node.IsKind(SyntaxKind.ArgumentList)) {
+				ctx.node = node.Parent;
+				ctx.State = State.Process;
+				return;
+			}
+			UsePreviousToken(ctx);
+		}
+
+		static void ProcessDotToken(Context ctx) {
+			ctx.token = ctx.token.GetNextToken();
+			ctx.skipTriggerPointCheck = true;
+		}
+
+		static void ProcessAwaitToken(Context ctx) {
+			var node = ctx.node = ctx.CompilationUnit.FindNode(ctx.token.Span, false, true) as AwaitExpressionSyntax;
+			if (node != null) {
+				ctx.SetSymbol(ctx.semanticModel.GetTypeInfo(node, ctx.cancellationToken));
+			}
+			ctx.State = State.Process;
+		}
+
+		static void ProcessReturnToken(Context ctx) {
+			var tb = ShowReturnInfo(ctx.CompilationUnit.FindNode(ctx.token.Span) as ReturnStatementSyntax, ctx.semanticModel, ctx.cancellationToken);
+			if (tb == null) {
+				ctx.State = State.Unavailable;
+				return;
+			}
+			ctx.Result = CreateQuickInfoItem(ctx.session, ctx.token, tb);
+		}
+
+		static void ProcessTypeToken(Context ctx) {
+			ctx.State = State.AsType;
+		}
+
+		static void ProcessValueToken(Context ctx) {
+			ctx.SetSymbol(ctx.semanticModel.GetTypeInfo(ctx.node = ctx.CompilationUnit.FindNode(ctx.token.Span, false, true), ctx.cancellationToken));
+			if (ctx.symbol == null) {
+				if (!Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter)) {
+					ctx.State = State.Unavailable;
+				}
+				return;
+			}
+			ctx.isConvertedType = true;
+			ctx.State = State.Process;
+		}
+
+		static void ProcessSwitchToken(Context ctx) {
+			var node = ctx.node = ctx.CompilationUnit.FindNode(ctx.token.Span, false, true);
+			if (node.IsKind(CodeAnalysisHelper.SwitchExpression)) {
+				ctx.SetSymbol(ctx.semanticModel.GetTypeInfo(node.ChildNodes().First(), ctx.cancellationToken));
+				ShowSwitchExpression(ctx.Container, ctx.symbol, node);
+				ctx.SetSymbol(ctx.semanticModel.GetTypeInfo(node, ctx.cancellationToken));
+				if (ctx.symbol == null) {
+					ctx.State = State.Unavailable;
+					return;
+				}
+				ctx.isConvertedType = true;
+			}
+			ctx.State = State.AsType;
+		}
+
+		static void ProcessAsConvertedType(Context ctx) {
+			ctx.SetSymbol(ctx.semanticModel.GetTypeInfo(ctx.CompilationUnit.FindNode(ctx.token.Span, false, true), ctx.cancellationToken));
+			ctx.isConvertedType = ctx.symbol != null;
+			ctx.State = State.AsType;
+		}
+
+		static void ProcessEqualsGreaterThanToken(Context ctx) {
+			SyntaxNode node;
+			ctx.node = node = ctx.CompilationUnit.FindNode(ctx.token.Span);
+			if (node.IsKind(CodeAnalysisHelper.SwitchExpressionArm) && node.Parent.IsKind(CodeAnalysisHelper.SwitchExpression)) {
+				ctx.SetSymbol(ctx.semanticModel.GetTypeInfo(node.Parent, ctx.cancellationToken));
+				ctx.isConvertedType = ctx.symbol != null;
+				ctx.State = State.AsType;
+			}
+		}
+
+		static void ProcessAsBoolean(Context ctx) {
+			ctx.symbol = ctx.semanticModel.Compilation.GetSpecialType(SpecialType.System_Boolean);
+			ctx.isConvertedType = ctx.symbol != null;
+			ctx.State = State.AsType;
+		}
+
+		static void ProcessAsType(Context ctx) {
+			var asType = (ctx.CompilationUnit.FindNode(ctx.token.Span, false, true) as BinaryExpressionSyntax)?.GetLastIdentifier();
+			if (asType != null) {
+				ctx.token = asType.Identifier;
+				ctx.skipTriggerPointCheck = true;
+			}
+			ctx.State = State.AsType;
+		}
+
+		static void ProcessCloseBraceToken(Context ctx) {
+			ctx.keepBuiltInXmlDoc = true;
+			if ((ctx.node = ctx.CompilationUnit.FindNode(ctx.token.Span)).IsKind(SyntaxKind.Interpolation)) {
+				UsePreviousToken(ctx);
+				return;
+			}
+			ShowBlockInfo(ctx);
+			ctx.State = State.Return;
+		}
+
+		static void UsePreviousToken(Context ctx) {
+			ctx.token = ctx.token.GetPreviousToken();
+			ctx.skipTriggerPointCheck = true;
+			ctx.State = State.ReparseToken;
+		}
+
+		static void ProcessOpenBraceToken(Context ctx) {
+			if ((ctx.node = ctx.CompilationUnit.FindNode(ctx.token.Span)).IsKind(SyntaxKind.Interpolation)) {
+				ctx.symbol = ctx.semanticModel.Compilation.GetSpecialType(SpecialType.System_String);
+				ctx.isConvertedType = ctx.symbol != null;
+				ctx.State = State.Process;
+				return;
+			}
+			ctx.keepBuiltInXmlDoc = true;
+			ShowBlockInfo(ctx);
+			ctx.State = State.Return;
+		}
+
+		static void TokenUnavailable(Context context) {
+			context.State = State.Unavailable;
+		}
+	}
+}

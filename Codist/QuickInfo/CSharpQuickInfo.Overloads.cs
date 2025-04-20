@@ -1,24 +1,20 @@
 ﻿using System;
-using System.Linq;
-using System.Threading;
-using CLR;
 using Codist.Controls;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
+using System.Linq;
 using R = Codist.Properties.Resources;
 
 namespace Codist.QuickInfo
 {
 	partial class CSharpQuickInfo
 	{
-		static void ShowOverloadsInfo(InfoContainer qiContent, SyntaxNode node, IMethodSymbol method, SemanticModel semanticModel, CancellationToken cancellationToken) {
-			var overloads = node.Kind().CeqAny(SyntaxKind.MethodDeclaration, SyntaxKind.ConstructorDeclaration)
-				? method.ContainingType.GetMembers(method.Name)
-				: semanticModel.GetMemberGroup(node, cancellationToken);
+		static void ShowOverloadsInfo(Context context, IMethodSymbol method) {
+			var node = context.node;
+			var overloads = method.ContainingType.GetMembers(method.Name);
 			if (overloads.Length < 2) {
 				return;
 			}
-			ShowOverloadsInfo(qiContent, method, overloads);
+			ShowOverloadsInfo(context.Container, method, overloads);
 		}
 
 		static void ShowOverloadsInfo(InfoContainer qiContent, IMethodSymbol method, System.Collections.Immutable.ImmutableArray<ISymbol> overloads) {
