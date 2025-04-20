@@ -241,6 +241,7 @@ namespace Codist.NaviBar
 
 			async Task AddExternalNodesAsync(SyntaxReference item, string textOverride, bool includeDirectives, CancellationToken cancellationToken) {
 				var externalNode = await item.GetSyntaxAsync(cancellationToken);
+				await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
 				var i = _Menu.Add(externalNode);
 				i.Location = item.SyntaxTree.GetLocation(item.Span);
 				i.Content.Text = textOverride ?? System.IO.Path.GetFileName(item.SyntaxTree.FilePath);
