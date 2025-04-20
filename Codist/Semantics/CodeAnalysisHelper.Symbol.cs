@@ -272,10 +272,10 @@ namespace Codist
 				case Accessibility.Public: return symbol.Kind != SymbolKind.Namespace ? "public " : String.Empty;
 				case Accessibility.Private:
 					return symbol.GetExplicitInterfaceImplementations().Count != 0 ? String.Empty : "private ";
-				case Accessibility.ProtectedAndInternal: return "internal protected ";
+				case Accessibility.ProtectedAndInternal: return "private protected ";
 				case Accessibility.Protected: return "protected ";
 				case Accessibility.Internal: return "internal ";
-				case Accessibility.ProtectedOrInternal: return "protected internal ";
+				case Accessibility.ProtectedOrInternal: return "internal protected ";
 				default: return String.Empty;
 			}
 		}
