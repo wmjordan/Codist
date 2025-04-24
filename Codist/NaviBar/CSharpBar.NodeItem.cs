@@ -196,6 +196,8 @@ namespace Codist.NaviBar
 					case SyntaxKind.DestructorDeclaration:
 						AddLocalFunctions(node);
 						return Task.CompletedTask;
+					case SyntaxKind.EventDeclaration:
+						return Task.CompletedTask;
 				}
 				AddMemberDeclarations(node, node.ChildNodes(), false, true);
 				var externals = (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.PartialClassMember)
