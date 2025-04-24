@@ -54,7 +54,9 @@ namespace Codist.QuickInfo
 			{ SyntaxKind.UsingKeyword, ProcessUsingToken },
 			{ SyntaxKind.InKeyword, ProcessInToken },
 			{ SyntaxKind.LessThanToken, ProcessCompareToken },
+			{ SyntaxKind.LessThanEqualsToken, ProcessCompareToken },
 			{ SyntaxKind.GreaterThanToken, ProcessCompareToken },
+			{ SyntaxKind.GreaterThanEqualsToken, ProcessCompareToken },
 			{ SyntaxKind.EndRegionKeyword, ProcessEndRegion },
 			{ SyntaxKind.EndIfKeyword, ProcessEndIf },
 			{ SyntaxKind.HashToken, ProcessHashToken },
@@ -198,6 +200,10 @@ namespace Codist.QuickInfo
 			if (node.IsKind(SyntaxKind.TypeArgumentList)) {
 				ctx.SetSymbol(ctx.semanticModel.GetSymbolInfo(ctx.node = node.Parent, ctx.cancellationToken));
 				ctx.State = State.Process;
+			}
+			else if (node.IsKind(CodeAnalysisHelper.RelationPattern)) {
+				ctx.SetSymbol(ctx.semanticModel.GetTypeInfo(ctx.node, ctx.cancellationToken));
+				ctx.State = State.Return;
 			}
 			else {
 				ProcessParenToken(ctx);

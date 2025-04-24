@@ -54,6 +54,7 @@ namespace Codist
 		internal const SyntaxKind PositionalPatternClause = (SyntaxKind)9023;
 		internal const SyntaxKind SwitchExpression = (SyntaxKind)9025;
 		internal const SyntaxKind SwitchExpressionArm = (SyntaxKind)9026;
+		internal const SyntaxKind RelationPattern = (SyntaxKind)9029;
 		internal const SyntaxKind ListPatternExpression = (SyntaxKind)9035;
 		internal const SyntaxKind VarPattern = (SyntaxKind)9027;
 		internal const SyntaxKind FunctionPointerCallingConvention = (SyntaxKind)9059;
