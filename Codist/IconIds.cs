@@ -56,6 +56,7 @@ namespace Codist
 		public const int Constructor = KnownImageIds.Type;
 		public const int Destructor = KnownImageIds.Type | KnownImageIds.OverlayOffline << OverlayShift | FullOverlayMask;
 		public const int EnumField = KnownImageIds.EnumerationItemPublic;
+		public const int ValueType = KnownImageIds.ValueType;
 		public const int GenericDefinition = KnownImageIds.Template;
 		public const int Region = KnownImageIds.Numeric;
 		public const int Unsafe = KnownImageIds.HotSpot;

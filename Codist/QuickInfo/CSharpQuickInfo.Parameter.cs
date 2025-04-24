@@ -191,11 +191,13 @@ namespace Codist.QuickInfo
 				qiContent.Add(new ThemedTipText(R.T_ArgumentNOf.Replace("<N>", (++argIndex).ToString())).Append(methodName, true));
 			}
 			else if (argList.IsKind(SyntaxKind.TupleExpression) && argIndex >= 0) {
-				var type = semanticModel.GetTypeInfo(argList).ConvertedType as INamedTypeSymbol;
-				if (type != null) {
-					ctx.symbol = type.TupleElements[argIndex];
+				if (semanticModel.GetTypeInfo(argList).Type is INamedTypeSymbol type) {
+					var tuples = type.TupleElements;
+					if (tuples.Length != 0) {
+						ctx.symbol = tuples[argIndex];
+					}
 				}
-				qiContent.Add(new ThemedTipText(R.T_TupleElementN.Replace("<N>", (argIndex + 1).ToString())).SetGlyph(IconIds.Field));
+				qiContent.Add(new ThemedTipText(R.T_TupleElementN.Replace("<N>", (argIndex + 1).ToString())).SetGlyph(IconIds.ValueType));
 			}
 			else {
 				qiContent.Add(new ThemedTipText(R.T_ArgumentN.Replace("<N>", (++argIndex).ToString())).SetGlyph(IconIds.Argument));
