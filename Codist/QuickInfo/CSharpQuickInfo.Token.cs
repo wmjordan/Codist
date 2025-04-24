@@ -314,6 +314,16 @@ namespace Codist.QuickInfo
 			ctx.node = node = ctx.CompilationUnit.FindNode(ctx.token.Span);
 			if (node.IsKind(CodeAnalysisHelper.SwitchExpressionArm) && node.Parent.IsKind(CodeAnalysisHelper.SwitchExpression)) {
 				ctx.SetSymbol(ctx.semanticModel.GetTypeInfo(node.Parent, ctx.cancellationToken));
+				var patternType = ctx.semanticModel.GetTypeInfo(node.GetSwitchExpressionArmPattern());
+				if (patternType.ConvertedType != null) {
+					var typeInfo = new ThemedTipText().SetGlyph(IconIds.Input).AddSymbol(patternType.ConvertedType, null, SymbolFormatter.Instance);
+					if (patternType.ConvertedType.Equals(patternType.Type) == false) {
+						typeInfo.Append(" (".Render(SymbolFormatter.Instance.PlainText))
+							.AddSymbol(patternType.Type, null, SymbolFormatter.Instance)
+							.Append(")".Render(SymbolFormatter.Instance.PlainText));
+					}
+					ctx.Container.Add(typeInfo);
+				}
 				ctx.isConvertedType = ctx.symbol != null;
 				ctx.State = State.AsType;
 			}

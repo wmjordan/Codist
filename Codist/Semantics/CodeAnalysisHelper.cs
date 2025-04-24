@@ -91,6 +91,14 @@ namespace Codist
 			return NonPublicOrFutureAccessors.GetParameterList(typeDeclaration);
 		}
 
+		public static ExpressionSyntax GetSwitchExpressionArmExpression(this SyntaxNode switchExpressionArm) {
+			return NonPublicOrFutureAccessors.GetSwitchExpressionArmExpression(switchExpressionArm);
+		}
+
+		public static PatternSyntax GetSwitchExpressionArmPattern(this SyntaxNode switchExpressionArm) {
+			return NonPublicOrFutureAccessors.GetSwitchExpressionArmPattern(switchExpressionArm);
+		}
+
 		static partial class NonPublicOrFutureAccessors
 		{
 			public static readonly Func<SyntaxNode, NameSyntax> GetFileScopedNamespaceName = ReflectionHelper.CreateGetPropertyMethod<SyntaxNode, NameSyntax>("Name", typeof(NamespaceDeclarationSyntax).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Syntax.FileScopedNamespaceDeclarationSyntax"));
@@ -100,6 +108,10 @@ namespace Codist
 			public static readonly Func<int, int> GetWarningLevel = ReflectionHelper.CallStaticFunc<int, int>(typeof(LanguageVersionFacts).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.ErrorFacts")?.GetMethod("GetWarningLevel", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)) ?? (Func<int, int>)((int _) => 3);
 
 			public static readonly Func<TypeDeclarationSyntax, ParameterListSyntax> GetParameterList = ReflectionHelper.CreateGetPropertyMethod<TypeDeclarationSyntax, ParameterListSyntax>("ParameterList", typeof(TypeDeclarationSyntax));
+
+			public static readonly Func<SyntaxNode, ExpressionSyntax> GetSwitchExpressionArmExpression = ReflectionHelper.CreateGetPropertyMethod<SyntaxNode, ExpressionSyntax>("Expression", typeof(ExpressionSyntax).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Syntax.SwitchExpressionArmSyntax"));
+
+			public static readonly Func<SyntaxNode, PatternSyntax> GetSwitchExpressionArmPattern = ReflectionHelper.CreateGetPropertyMethod<SyntaxNode, PatternSyntax>("Pattern", typeof(ExpressionSyntax).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Syntax.SwitchExpressionArmSyntax"));
 		}
 
 		[Flags]
