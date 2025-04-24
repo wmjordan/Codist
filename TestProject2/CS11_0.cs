@@ -77,7 +77,7 @@ public struct RepeatSequence : IGetNext<RepeatSequence>
 	public static RepeatSequence operator ++(RepeatSequence other)
 		=> other with { Text = other.Text + Ch };
 
-	public override string ToString() => Text;
+	public override readonly string ToString() => Text;
 }
 
 #nullable enable

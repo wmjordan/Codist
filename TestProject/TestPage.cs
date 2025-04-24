@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq; // unnecessary code
 using System.Runtime.InteropServices;
+using A = System.EventArgs;
 
 namespace TestProject
 {
@@ -58,7 +59,7 @@ text".Log(); // multiline string (string verbatim)
 			Method<ConcreteClass>();
 		}
 
-		private void TestPage_MyEvent(object sender, EventArgs e) {
+		private void TestPage_MyEvent(object sender, A e) {
 			var anonymous = new { // anonymous type
 				sender, // property of anonymous type
 				@event = e,
