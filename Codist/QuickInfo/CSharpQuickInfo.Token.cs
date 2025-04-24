@@ -361,15 +361,26 @@ namespace Codist.QuickInfo
 		}
 
 		static void ProcessOpenBraceToken(Context ctx) {
-			if ((ctx.node = ctx.CompilationUnit.FindNode(ctx.token.Span)).IsKind(SyntaxKind.Interpolation)) {
-				ctx.symbol = ctx.semanticModel.Compilation.GetSpecialType(SpecialType.System_String);
-				ctx.isConvertedType = ctx.symbol != null;
-				ctx.State = State.Process;
-				return;
+			switch ((ctx.node = ctx.CompilationUnit.FindNode(ctx.token.Span)).Kind()) {
+				case SyntaxKind.Interpolation:
+					ctx.symbol = ctx.semanticModel.Compilation.GetSpecialType(SpecialType.System_String);
+					ctx.isConvertedType = ctx.symbol != null;
+					ctx.State = State.Process;
+					return;
+				case CodeAnalysisHelper.RecursivePattern:
+					ctx.SetSymbol(ctx.semanticModel.GetTypeInfo(ctx.node, ctx.cancellationToken));
+					ctx.State = State.Process;
+					return;
+				case SyntaxKind.CollectionInitializerExpression:
+				case SyntaxKind.ComplexElementInitializerExpression:
+					ctx.State = State.Process;
+					break;
+				default:
+					ctx.State = State.Return;
+					break;
 			}
 			ctx.keepBuiltInXmlDoc = true;
 			ShowBlockInfo(ctx);
-			ctx.State = State.Return;
 		}
 
 		static void TokenUnavailable(Context context) {

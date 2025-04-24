@@ -276,6 +276,7 @@ namespace TestProject.CS9_0
 		}
 
 		static void Run() {
+			// hover on "in" to see Quick Info for BitEnumerable.GetEnumerator
 			foreach (var bit in 17) {
 				Console.WriteLine(bit);
 			}

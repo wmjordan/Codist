@@ -28,6 +28,15 @@ namespace Codist.QuickInfo
 					SyntaxKind.ObjectInitializerExpression,
 					SyntaxKind.ComplexElementInitializerExpression) == true) {
 					ShowLocationOfInitializerExpression(ctx.Container, argument, n);
+					var initSymbol = ctx.semanticModel.GetCollectionInitializerSymbolInfo(argument as ExpressionSyntax).Symbol;
+					if (initSymbol != null) {
+						ctx.Container.Add(new ThemedTipText()
+							.SetGlyph(initSymbol.GetImageId())
+							.AddSymbol(initSymbol.ContainingType, false, __SymbolFormatter)
+							.Append(".".Render(__SymbolFormatter.PlainText))
+							.AddSymbol(initSymbol, true, __SymbolFormatter)
+							.AddParameters(initSymbol.GetParameters(), __SymbolFormatter));
+					}
 					return;
 				}
 			} while ((argument = argument.Parent) != null && ++depth < 4);
