@@ -72,6 +72,7 @@ namespace Codist
 				case SyntaxKind.VariableDeclaration:
 				case SyntaxKind.LocalFunctionStatement:
 				case SyntaxKind.SingleVariableDesignation:
+				case ExtensionDeclaration:
 				//case SyntaxKind.CatchDeclaration:
 				//case SyntaxKind.VariableDeclarator:
 					return true;
@@ -139,6 +140,7 @@ namespace Codist
 				case SyntaxKind.StructDeclaration:
 				case RecordDeclaration:
 				case RecordStructDeclaration:
+				case ExtensionDeclaration:
 					return true;
 			}
 			return false;
@@ -152,6 +154,7 @@ namespace Codist
 				case SyntaxKind.StructDeclaration:
 				case RecordDeclaration:
 				case RecordStructDeclaration:
+				case ExtensionDeclaration:
 					return true;
 			}
 			return false;
@@ -614,6 +617,8 @@ namespace Codist
 				case RecordDeclaration:
 				case RecordStructDeclaration:
 					return GetTypeSignature((TypeDeclarationSyntax)node);
+				case ExtensionDeclaration:
+					return "(" + ((TypeDeclarationSyntax)node).GetParameterList().Parameters.FirstOrDefault()?.Type?.ToString() + ")";
 				case SyntaxKind.EnumDeclaration: return ((EnumDeclarationSyntax)node).Identifier.Text;
 				case SyntaxKind.MethodDeclaration: return GetMethodSignature((MethodDeclarationSyntax)node);
 				case SyntaxKind.ArgumentList: return GetArgumentListSignature((ArgumentListSyntax)node);
