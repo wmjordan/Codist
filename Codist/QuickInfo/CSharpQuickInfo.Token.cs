@@ -253,6 +253,10 @@ namespace Codist.QuickInfo
 				ctx.State = State.Process;
 				return;
 			}
+			else if (node.IsKind(SyntaxKind.TupleExpression)) {
+				ctx.State = State.Process;
+				return;
+			}
 			UsePreviousToken(ctx);
 		}
 
