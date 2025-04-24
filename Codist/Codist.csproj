@@ -154,7 +154,7 @@
     <Compile Include="QuickInfo\CSharpQuickInfo.Interface.cs" />
     <Compile Include="QuickInfo\CSharpQuickInfo.Block.cs" />
     <Compile Include="QuickInfo\CSharpQuickInfo.Overloads.cs" />
-    <Compile Include="QuickInfo\CSharpQuickInfo.Parameter.cs" />
+    <Compile Include="QuickInfo\CSharpQuickInfo.Argument.cs" />
     <Compile Include="Semantics\AssemblySource.cs" />
     <Compile Include="Helpers\Chain.cs" />
     <Compile Include="Helpers\FileHelper.cs" />
