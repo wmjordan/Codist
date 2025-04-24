@@ -431,6 +431,9 @@ namespace Codist.QuickInfo
 					if (loc.HasConstantValue) {
 						ShowConstInfo(container, symbol, loc.ConstantValue);
 					}
+					else if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.SymbolReassignment)) {
+						ShowLocalAssignmentInfo(context, loc);
+					}
 					break;
 				case SymbolKind.Method:
 					var m = symbol as IMethodSymbol;
@@ -447,6 +450,12 @@ namespace Codist.QuickInfo
 					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Color)
 						&& context.session.Mark(nameof(ColorQuickInfoUI))) {
 						container.Add(ColorQuickInfoUI.PreviewColorProperty(symbol as IPropertySymbol, _SpecialProject.MayBeVsProject));
+					}
+					break;
+				case SymbolKind.Parameter:
+					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.SymbolReassignment)
+						&& symbol.HasSource()) {
+						ShowParameterInfo(context, symbol as IParameterSymbol);
 					}
 					break;
 				case SymbolKind.Namespace:
@@ -809,6 +818,52 @@ namespace Codist.QuickInfo
 					}
 					qiContent.Add(s);
 				}
+			}
+		}
+
+		static void ShowLocalAssignmentInfo(Context ctx, ILocalSymbol loc) {
+			var locSpan = loc.DeclaringSyntaxReferences[0].Span;
+			var node = ctx.CompilationUnit.FindNode(locSpan);
+			if (IsVariableAssignedAfterDeclaration(loc, node, ctx.semanticModel)) {
+				ctx.Container.Add(new ThemedTipText(R.T_Reassigned).SetGlyph(IconIds.WrittenVariables));
+			}
+			else {
+				ctx.Container.Add(new ThemedTipText(R.T_NoReassignment).SetGlyph(IconIds.ReadonlyVariable));
+			}
+		}
+
+		void ShowParameterInfo(Context context, IParameterSymbol parameter) {
+			var declaration = context.CompilationUnit.FindNode(parameter.ContainingSymbol.DeclaringSyntaxReferences[0].Span, false, true);
+			if (declaration == null) {
+				return;
+			}
+			DataFlowAnalysis analysis;
+			BlockSyntax body = null;
+			SyntaxNode expression = null;
+			if (declaration is BaseMethodDeclarationSyntax m) {
+				body = m.Body;
+				expression = m.ExpressionBody;
+			}
+			else if (declaration is AccessorDeclarationSyntax a) {
+				body = a.Body;
+				expression = a.ExpressionBody;
+			}
+			else if (declaration is AnonymousFunctionExpressionSyntax af) {
+				expression = af.Body;
+			}
+			else if (declaration is LocalFunctionStatementSyntax lf) {
+				body = lf.Body;
+				expression = lf.ExpressionBody;
+			}
+
+			analysis = body != null ? context.semanticModel.AnalyzeDataFlow(body)
+				: expression != null ? context.semanticModel.AnalyzeDataFlow(expression is ArrowExpressionClauseSyntax ae ? ae.Expression : expression)
+				: null;
+			if (analysis?.WrittenInside.Contains(parameter) == true) {
+				context.Container.Add(new ThemedTipText(R.T_Reassigned.Replace("<S>", parameter.Name)).SetGlyph(IconIds.WrittenVariables));
+			}
+			else {
+				context.Container.Add(new ThemedTipText(R.T_NoReassignment.Replace("<S>", parameter.Name)).SetGlyph(IconIds.ReadonlyParameter));
 			}
 		}
 

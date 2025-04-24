@@ -3448,6 +3448,24 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Denotes variable reassignment.
+        /// </summary>
+        internal static string OT_DenoteVariableReassignment {
+            get {
+                return ResourceManager.GetString("OT_DenoteVariableReassignment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Displays information whether a variable or a parameter is not being reassigned after it is declared.
+        /// </summary>
+        internal static string OT_DenoteVariableReassignmentTip {
+            get {
+                return ResourceManager.GetString("OT_DenoteVariableReassignmentTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Displays declaration information of a symbol if it is not a public instance one, as well as event or delegate signatures.
         /// </summary>
         internal static string OT_DesclarationTip {
@@ -7293,6 +7311,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Not reassigned.
+        /// </summary>
+        internal static string T_NoReassignment {
+            get {
+                return ResourceManager.GetString("T_NoReassignment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Normal.
         /// </summary>
         internal static string T_Normal {
@@ -7523,6 +7550,15 @@ namespace Codist.Properties {
         internal static string T_ReadVariable {
             get {
                 return ResourceManager.GetString("T_ReadVariable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reassigned.
+        /// </summary>
+        internal static string T_Reassigned {
+            get {
+                return ResourceManager.GetString("T_Reassigned", resourceCulture);
             }
         }
         

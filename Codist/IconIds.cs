@@ -17,6 +17,8 @@ namespace Codist
 		public const int InstanceMember = KnownImageIds.BuildQueue;
 		public const int DefaultInterfaceImplementation = KnownImageIds.AddInterface;
 		public const int ReadonlyField = KnownImageIds.Field | KnownImageIds.OverlayLock << OverlayShift | FullOverlayMask;
+		public const int ReadonlyVariable = KnownImageIds.LocalVariable | KnownImageIds.OverlayLock << OverlayShift | FullOverlayMask;
+		public const int ReadonlyParameter = KnownImageIds.Parameter | KnownImageIds.OverlayLock << OverlayShift | FullOverlayMask;
 		public const int ReadonlyProperty = KnownImageIds.Property | KnownImageIds.OverlayLock << OverlayShift | FullOverlayMask;
 		public const int ReadonlyMethod = KnownImageIds.Method | KnownImageIds.OverlayLock << OverlayShift | FullOverlayMask;
 		public const int ReadonlyType = KnownImageIds.Type | KnownImageIds.OverlayLock << OverlayShift | FullOverlayMask;

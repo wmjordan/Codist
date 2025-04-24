@@ -2872,4 +2872,16 @@ Discard its changes?</value>
   <data name="T_TupleElementN" xml:space="preserve">
     <value>Tuple element &lt;N&gt;</value>
   </data>
+  <data name="OT_DenoteVariableReassignment" xml:space="preserve">
+    <value>Denotes variable reassignment</value>
+  </data>
+  <data name="OT_DenoteVariableReassignmentTip" xml:space="preserve">
+    <value>Displays information whether a variable or a parameter is not being reassigned after it is declared</value>
+  </data>
+  <data name="T_NoReassignment" xml:space="preserve">
+    <value>Not reassigned</value>
+  </data>
+  <data name="T_Reassigned" xml:space="preserve">
+    <value>Reassigned</value>
+  </data>
 </root>

@@ -2858,4 +2858,16 @@ Ctrl: 将下划线分隔的单词转换为首字母大写的单词</value>
   <data name="T_TupleElementN" xml:space="preserve">
     <value>元组元素 &lt;N&gt;</value>
   </data>
+  <data name="OT_DenoteVariableReassignment" xml:space="preserve">
+    <value>注明变量是否被重复赋值</value>
+  </data>
+  <data name="OT_DenoteVariableReassignmentTip" xml:space="preserve">
+    <value>显示参数和变量在声明初始化后是否被再赋值</value>
+  </data>
+  <data name="T_NoReassignment" xml:space="preserve">
+    <value>未再赋值</value>
+  </data>
+  <data name="T_Reassigned" xml:space="preserve">
+    <value>再赋值</value>
+  </data>
 </root>
