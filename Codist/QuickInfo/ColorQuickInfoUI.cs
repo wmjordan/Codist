@@ -22,30 +22,42 @@ namespace Codist.QuickInfo
 		}
 
 		public static StackPanel PreviewColorMethodInvocation(SemanticModel semanticModel, SyntaxNode node, IMethodSymbol methodSymbol) {
+			byte[] values;
+			SeparatedSyntaxList<ArgumentSyntax> args;
 			switch (methodSymbol.Name) {
-				case nameof(WpfColor.FromArgb):
-					if (methodSymbol.ContainingType.Name == nameof(Color)) {
-						var args = GetColorMethodArguments(semanticModel, node, 4);
-						if (args != null) {
-							return PreviewColor(new SolidColorBrush(WpfColor.FromArgb(args[0], args[1], args[2], args[3])));
-						}
-						args = GetColorMethodArguments(semanticModel, node, 3);
-						if (args != null) {
-							return PreviewColor(new SolidColorBrush(GdiColor.FromArgb(args[0], args[1], args[2]).ToWpfColor()));
-						}
-						var c = GetColorMethodArgument(semanticModel, node);
-						if (c.HasValue) {
-							return PreviewColor(new SolidColorBrush(GdiColor.FromArgb(c.Value).ToWpfColor()));
-						}
+				case nameof(GdiColor.FromArgb):
+					if (methodSymbol.ContainingType.Name != nameof(Color)) {
+						break;
+					}
+					args = GetMethodArguments(semanticModel, node);
+					switch (args.Count) {
+						case 1:
+							var c = GetColorMethodArgument(semanticModel, args);
+							return c.HasValue
+								? PreviewColor(new SolidColorBrush(GdiColor.FromArgb(c.Value).ToWpfColor()))
+								: null;
+						case 3:
+							values = GetColorMethodArguments(semanticModel, args, 3);
+							return values != null
+								? PreviewColor(new SolidColorBrush(WpfColor.FromRgb(values[0], values[1], values[2])))
+								: null;
+						case 4:
+							values = GetColorMethodArguments(semanticModel, args, 4);
+							return values != null
+								? PreviewColor(new SolidColorBrush(WpfColor.FromArgb(values[0], values[1], values[2], values[3])))
+								: null;
 					}
 					break;
 				case nameof(WpfColor.FromRgb): {
-						var args = GetColorMethodArguments(semanticModel, node, 3);
-						if (args != null) {
-							return PreviewColor(new SolidColorBrush(WpfColor.FromRgb(args[0], args[1], args[2])));
+						if (methodSymbol.ContainingType.Name != nameof(Color)) {
+							break;
 						}
+						args = GetMethodArguments(semanticModel, node);
+						values = GetColorMethodArguments(semanticModel, args, 3);
+						return values != null
+							? PreviewColor(new SolidColorBrush(WpfColor.FromRgb(values[0], values[1], values[2])))
+							: null;
 					}
-					break;
 			}
 			return null;
 		}
@@ -107,73 +119,85 @@ namespace Codist.QuickInfo
 				}
 			};
 			TextBlock CreateSampleBlock(Brush foreground, Brush background) {
-				return new TextBlock { Text = SAMPLE, Margin = WpfHelper.TinyMargin, Padding = WpfHelper.TinyMargin, Background = background, Foreground = foreground };
+				return new TextBlock {
+					Text = SAMPLE,
+					Margin = WpfHelper.TinyMargin,
+					Padding = WpfHelper.TinyMargin,
+					Background = background,
+					Foreground = foreground
+				};
 			}
 		}
 
-		static int? GetColorMethodArgument(SemanticModel semanticModel, SyntaxNode node) {
-			var invoke = node?.Parent?.Parent as InvocationExpressionSyntax;
-			if (invoke == null) {
-				return null;
-			}
-			var args = invoke.ArgumentList.Arguments;
-			if (args.Count != 1) {
-				return null;
-			}
+		static SeparatedSyntaxList<ArgumentSyntax> GetMethodArguments(SemanticModel semanticModel, SyntaxNode node) {
+			return ((node?.Parent?.Parent as InvocationExpressionSyntax)?.ArgumentList.Arguments) ?? default;
+		}
+
+		static int? GetColorMethodArgument(SemanticModel semanticModel, SeparatedSyntaxList<ArgumentSyntax> args) {
 			var a1 = args[0].Expression;
-			if (a1.Kind() == SyntaxKind.NumericLiteralExpression) {
-				return Convert.ToInt32((a1 as LiteralExpressionSyntax).Token.Value);
-			}
-			if (a1.Kind() == SyntaxKind.SimpleMemberAccessExpression || a1.Kind() == SyntaxKind.IdentifierName) {
-				var s = semanticModel.GetSymbolInfo(a1).Symbol;
-				if (s == null) {
-					return null;
-				}
-				if (s.Kind == SymbolKind.Field) {
-					var f = s as IFieldSymbol;
-					if (f.HasConstantValue && f.Type.SpecialType == SpecialType.System_Int32) {
-						return (int)f.ConstantValue;
+			switch (a1.Kind()) {
+				case SyntaxKind.NumericLiteralExpression:
+					try {
+						return Convert.ToInt32(((LiteralExpressionSyntax)a1).Token.Value);
 					}
-				}
-				else if (s.Kind == SymbolKind.Local) {
-					var f = s as ILocalSymbol;
-					if (f.HasConstantValue && f.Type.SpecialType == SpecialType.System_Int32) {
-						return (int)f.ConstantValue;
+					catch (Exception) {
+						return null;
 					}
-				}
-
-			}
-			return null;
-		}
-
-		static byte[] GetColorMethodArguments(SemanticModel semanticModel, SyntaxNode node, int length) {
-			var invoke = node?.Parent?.Parent as InvocationExpressionSyntax;
-			if (invoke == null) {
-				return null;
-			}
-			var args = invoke.ArgumentList.Arguments;
-			if (args.Count != length) {
-				return null;
-			}
-			var r = new byte[length];
-			for (int i = 0; i < length; i++) {
-				var a1 = args[i].Expression;
-				if (a1.Kind() == SyntaxKind.NumericLiteralExpression) {
-					r[i] = Convert.ToByte((a1 as LiteralExpressionSyntax).Token.Value);
-					continue;
-				}
-				if (a1.Kind() == SyntaxKind.SimpleMemberAccessExpression) {
+				case SyntaxKind.SimpleMemberAccessExpression:
+				case SyntaxKind.IdentifierName:
 					var s = semanticModel.GetSymbolInfo(a1).Symbol;
 					if (s == null) {
 						return null;
 					}
 					if (s.Kind == SymbolKind.Field) {
-						var f = s as IFieldSymbol;
-						if (f.HasConstantValue) {
-							r[i] = Convert.ToByte(f.ConstantValue);
-							continue;
+						var f = (IFieldSymbol)s;
+						if (f.HasConstantValue && f.Type.SpecialType == SpecialType.System_Int32) {
+							return (int)f.ConstantValue;
 						}
 					}
+					else if (s.Kind == SymbolKind.Local) {
+						var l = (ILocalSymbol)s;
+						if (l.HasConstantValue && l.Type.SpecialType == SpecialType.System_Int32) {
+							return (int)l.ConstantValue;
+						}
+					}
+					break;
+			}
+			return null;
+		}
+
+		static byte[] GetColorMethodArguments(SemanticModel semanticModel, SeparatedSyntaxList<ArgumentSyntax> args, int length) {
+			var r = new byte[length];
+			for (int i = 0; i < length; i++) {
+				var a1 = args[i].Expression;
+				switch (a1.Kind()) {
+					case SyntaxKind.NumericLiteralExpression:
+						try {
+							r[i] = Convert.ToByte((a1 as LiteralExpressionSyntax).Token.Value);
+						}
+						catch (Exception) {
+							return null;
+						}
+						continue;
+					case SyntaxKind.SimpleMemberAccessExpression: {
+							var s = semanticModel.GetSymbolInfo(a1).Symbol;
+							if (s == null) {
+								return null;
+							}
+							if (s.Kind == SymbolKind.Field) {
+								var f = s as IFieldSymbol;
+								if (f.HasConstantValue) {
+									try {
+										r[i] = Convert.ToByte(f.ConstantValue);
+									}
+									catch (Exception) {
+										return null;
+									}
+									continue;
+								}
+							}
+							break;
+						}
 				}
 				return null;
 			}
