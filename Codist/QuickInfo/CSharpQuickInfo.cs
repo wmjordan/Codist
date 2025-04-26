@@ -112,10 +112,11 @@ namespace Codist.QuickInfo
 		async Task<QuickInfoItem> InternalGetQuickInfoItemAsync(IAsyncQuickInfoSession session, ITextBuffer textBuffer, SnapshotPoint triggerPoint, CancellationToken cancellationToken) {
 			Action<Context> syntaxProcessor;
 			await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
-			if (QuickInfoOverride.CheckCtrlSuppression()) {
+			if (QuickInfoOverride.CheckCtrlSuppression()
+				|| session.TextView is Microsoft.VisualStudio.Text.Editor.IWpfTextView v == false) {
 				return null;
 			}
-			var ctx = SemanticContext.GetHovered();
+			var ctx = SemanticContext.GetOrCreateSingletonInstance(v);
 			await ctx.UpdateAsync(textBuffer, cancellationToken);
 			var semanticModel = ctx.SemanticModel;
 			if (semanticModel == null) {
