@@ -844,10 +844,7 @@ namespace Codist
 			var type = (INamedTypeSymbol)symbol;
 			var specialType = type.GetSpecialTypeAlias();
 			if (specialType != null) {
-				text.Add((alias ?? specialType).Render(Keyword));
-				if (type.GetNullableAnnotation() == 2) {
-					text.Add("?".Render(PlainText));
-				}
+				FormatSpecialType(text, alias, type, specialType);
 				return;
 			}
 			switch (type.TypeKind) {
@@ -867,39 +864,15 @@ namespace Codist
 					text.Add(symbol.Render(alias, bold, Interface));
 					break;
 				case TypeKind.Struct:
-					ITypeSymbol nullable;
-					if (type.IsTupleType) {
-						text.Add("(".Render(PlainText));
-						for (int i = 0; i < type.TupleElements.Length; i++) {
-							if (i > 0) {
-								text.Add(", ".Render(PlainText));
-							}
-							Format(text, type.TupleElements[i].Type, null, false);
-							text.Add(" ");
-							text.Add(type.TupleElements[i].Render(null, Field));
-						}
-						text.Add(")".Render(PlainText));
-					}
-					else if ((nullable = type.GetNullableValueType()) != null) {
-						Format(text, nullable, null, false);
-						text.Add("?".Render(PlainText));
+					if (!FormatStructName(text, symbol, alias, bold, type)) {
 						return;
-					}
-					else {
-						text.Add(symbol.Render(alias, bold, Struct));
 					}
 					break;
 				case TypeKind.TypeParameter:
 					text.Add(symbol.Render(alias ?? symbol.Name, bold, TypeParameter));
 					return;
 				case CodeAnalysisHelper.Extension:
-					text.Add(symbol.Render(symbol.MetadataName, bold, Class));
-					if (type.IsGenericType && type.IsTupleType == false) {
-						AddTypeArguments(text, type.TypeArguments);
-					}
-					text.Add("(".Render(PlainText));
-					Format(text, type.GetExtensionParameter().Type, null, true, true);
-					text.Add(")".Render(PlainText));
+					FormatExtensionType(text, symbol, bold, type);
 					return;
 				default:
 					text.Add(symbol.MetadataName.Render(bold, false, Class));
@@ -911,6 +884,50 @@ namespace Codist
 			if (type.IsGenericType && type.IsTupleType == false) {
 				AddTypeArguments(text, type.TypeArguments);
 			}
+		}
+
+		void FormatSpecialType(InlineCollection text, string alias, INamedTypeSymbol type, string specialType) {
+			text.Add((alias ?? specialType).Render(Keyword));
+			if (type.GetNullableAnnotation() == 2) {
+				text.Add("?".Render(PlainText));
+			}
+		}
+
+		bool FormatStructName(InlineCollection text, ISymbol symbol, string alias, bool bold, INamedTypeSymbol type) {
+			ITypeSymbol nullable;
+			if (type.IsTupleType) {
+				text.Add("(".Render(PlainText));
+				var tupleElements = type.TupleElements;
+				for (int i = 0; i < tupleElements.Length; i++) {
+					if (i > 0) {
+						text.Add(", ".Render(PlainText));
+					}
+					Format(text, tupleElements[i].Type, null, false);
+					text.Add(" ");
+					text.Add(tupleElements[i].Render(null, Field));
+				}
+				text.Add(")".Render(PlainText));
+			}
+			else if ((nullable = type.GetNullableValueType()) != null) {
+				Format(text, nullable, null, false);
+				text.Add("?".Render(PlainText));
+				return false;
+			}
+			else {
+				text.Add(symbol.Render(alias, bold, Struct));
+			}
+
+			return true;
+		}
+
+		void FormatExtensionType(InlineCollection text, ISymbol symbol, bool bold, INamedTypeSymbol type) {
+			text.Add(symbol.Render(symbol.MetadataName, bold, Class));
+			if (type.IsGenericType && type.IsTupleType == false) {
+				AddTypeArguments(text, type.TypeArguments);
+			}
+			text.Add("(".Render(PlainText));
+			Format(text, type.GetExtensionParameter().Type, null, true, true);
+			text.Add(")".Render(PlainText));
 		}
 
 		Brush GetBrushForMethod(IMethodSymbol m) {

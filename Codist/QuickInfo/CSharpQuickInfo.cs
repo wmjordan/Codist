@@ -422,13 +422,13 @@ namespace Codist.QuickInfo
 			}
 			switch (symbol.Kind) {
 				case SymbolKind.Event:
-					ShowEventInfo(container, symbol as IEventSymbol);
+					ShowEventInfo(container, (IEventSymbol)symbol);
 					break;
 				case SymbolKind.Field:
-					ShowFieldInfo(container, symbol as IFieldSymbol);
+					ShowFieldInfo(container, (IFieldSymbol)symbol);
 					break;
 				case SymbolKind.Local:
-					var loc = symbol as ILocalSymbol;
+					var loc = (ILocalSymbol)symbol;
 					if (loc.HasConstantValue) {
 						ShowConstInfo(container, symbol, loc.ConstantValue);
 					}
@@ -437,34 +437,36 @@ namespace Codist.QuickInfo
 					}
 					break;
 				case SymbolKind.Method:
-					var m = symbol as IMethodSymbol;
+					var m = (IMethodSymbol)symbol;
 					if (m.MethodKind == MethodKind.AnonymousFunction) {
 						return;
 					}
 					ShowMethodInfo(context, m);
 					break;
 				case SymbolKind.NamedType:
-					ShowTypeInfo(context, context.node, symbol as INamedTypeSymbol);
+					ShowTypeInfo(context, context.node, (INamedTypeSymbol)symbol);
 					break;
 				case SymbolKind.Property:
-					ShowPropertyInfo(container, symbol as IPropertySymbol);
+					ShowPropertyInfo(container, (IPropertySymbol)symbol);
 					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Color)
 						&& context.session.Mark(nameof(ColorQuickInfoUI))) {
-						container.Add(ColorQuickInfoUI.PreviewColorProperty(symbol as IPropertySymbol, _SpecialProject.MayBeVsProject));
+						container.Add(ColorQuickInfoUI.PreviewColorProperty((IPropertySymbol)symbol, _SpecialProject.MayBeVsProject));
 					}
 					break;
 				case SymbolKind.Parameter:
 					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.SymbolReassignment)
 						&& symbol.HasSource()) {
-						ShowParameterInfo(context, symbol as IParameterSymbol);
+						ShowParameterInfo(context, (IParameterSymbol)symbol);
 					}
 					break;
 				case SymbolKind.Namespace:
-					ShowNamespaceInfo(container, symbol as INamespaceSymbol);
+					ShowNamespaceInfo(container, (INamespaceSymbol)symbol);
 					break;
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
-				&& (context.node.Parent.IsKind(SyntaxKind.Argument) == false || Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter) == false) /*the signature has already been displayed there*/) {
+				&& (context.node.Parent.IsKind(SyntaxKind.Argument) == false
+					|| Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter) == false)
+					/*the signature has already been displayed there*/) {
 				var st = symbol.GetReturnType();
 				if (st?.TypeKind == TypeKind.Delegate) {
 					var invoke = ((INamedTypeSymbol)st).DelegateInvokeMethod;
