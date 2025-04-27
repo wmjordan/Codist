@@ -1710,7 +1710,7 @@ namespace Codist.Options
 		sealed class CSharpAdditionalHighlightConfigPage : ContentControl
 		{
 			readonly OptionBox<SpecialHighlightOptions> _BoldSemanticPunctuationBox, _SemanticPunctuationBox,
-				_HighlightLocalFunctionDeclarationBox, _HighlightNonPrivateFieldDeclarationBox, _HighlightConstructorAsTypeBox, _HighlightCapturingLambdaBox;
+				_HighlightLocalFunctionDeclarationBox, _HighlightNonPrivateFieldDeclarationBox, _HighlightConstructorAsTypeBox, _HighlightCapturingLambdaBox, _HighlightVarTypeBox;
 
 			public CSharpAdditionalHighlightConfigPage() {
 				var o = Config.Instance.SpecialHighlightOptions;
@@ -1725,6 +1725,7 @@ namespace Codist.Options
 						(_HighlightLocalFunctionDeclarationBox = o.CreateOptionBox(SpecialHighlightOptions.LocalFunctionDeclaration, UpdateConfig, R.OT_ApplyToLocalFunction)),
 						(_HighlightNonPrivateFieldDeclarationBox = o.CreateOptionBox(SpecialHighlightOptions.NonPrivateField, UpdateConfig, R.OT_ApplyToNonPrivateField)),
 						(_HighlightConstructorAsTypeBox = o.CreateOptionBox(SpecialHighlightOptions.UseTypeStyleOnConstructor, UpdateConfig, R.OT_StyleConstructorAsType)),
+						(_HighlightVarTypeBox = o.CreateOptionBox(SpecialHighlightOptions.UseTypeStyleOnVarKeyword, UpdateConfig, R.OT_StyleVarAsType)),
 						(_HighlightCapturingLambdaBox = o.CreateOptionBox(SpecialHighlightOptions.CapturingLambdaExpression, UpdateConfig, R.OT_CapturingLambda)),
 					});
 				foreach (var item in new[] {
@@ -1733,7 +1734,8 @@ namespace Codist.Options
 					_HighlightLocalFunctionDeclarationBox,
 					_HighlightNonPrivateFieldDeclarationBox,
 					_HighlightConstructorAsTypeBox,
-					_HighlightCapturingLambdaBox
+					_HighlightCapturingLambdaBox,
+					_HighlightVarTypeBox
 				}) {
 					item.ReferenceStyle(VsResourceKeys.CheckBoxStyleKey);
 				}

@@ -41,9 +41,12 @@ namespace Codist
 		#region Compatibility constants (for older VS versions)
 		internal const SyntaxKind DotDotToken = (SyntaxKind)8222;
 		internal const SyntaxKind QuestionQuestionEqualsToken = (SyntaxKind)8284;
+		internal const SyntaxKind GreaterThanGreaterThanGreaterThanToken = (SyntaxKind)8286;
 		internal const SyntaxKind WithKeyword = (SyntaxKind)8442;
 		internal const SyntaxKind InitKeyword = (SyntaxKind)8443;
 		internal const SyntaxKind RecordKeyword = (SyntaxKind)8444;
+		internal const SyntaxKind ManagedKeyword = (SyntaxKind)8445;
+		internal const SyntaxKind UnmanagedKeyword = (SyntaxKind)8446;
 		internal const SyntaxKind RequiredKeyword = (SyntaxKind)8447;
 		internal const SyntaxKind ExtensionKeyword = (SyntaxKind)8451;
 		internal const SyntaxKind ImplicitObjectCreationExpression = (SyntaxKind)8659;

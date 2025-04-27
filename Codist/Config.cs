@@ -861,6 +861,7 @@ namespace Codist
 		NonPrivateField = 1 << 11,
 		UseTypeStyleOnConstructor = 1 << 12,
 		CapturingLambdaExpression = 1 << 13,
+		UseTypeStyleOnVarKeyword = 1 << 14,
 		SearchResult = 1 << 20,
 		Default = SpecialComment,
 		AllParentheses = ParameterBrace | CastBrace | BranchBrace | LoopBrace | ResourceBrace,

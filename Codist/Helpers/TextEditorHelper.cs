@@ -248,6 +248,34 @@ namespace Codist
 			}
 			return -1;
 		}
+		public static SnapshotSpan TrimWhitespace(this SnapshotSpan span) {
+			if (span.Length == 0) {
+				return span;
+			}
+			var snapshot = span.Snapshot;
+			var start = span.Start.Position;
+			var end = span.End.Position;
+			bool trim = false;
+			int i;
+			for (i = start; i < end; i++) {
+				if (snapshot[i].IsCodeWhitespaceChar() == false) {
+					start = i;
+					trim = true;
+					break;
+				}
+			}
+			if (i == end) {
+				return new SnapshotSpan(snapshot, start, 0);
+			}
+			for (i = end - 1; i > start; i++) {
+				if (snapshot[i].IsCodeWhitespaceChar() == false) {
+					end = i;
+					trim = true;
+					break;
+				}
+			}
+			return trim ? new SnapshotSpan(snapshot, start, end - start) : span;
+		}
 		#endregion
 
 		#region Classification

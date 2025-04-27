@@ -2884,4 +2884,7 @@ Discard its changes?</value>
   <data name="T_Reassigned" xml:space="preserve">
     <value>Reassigned</value>
   </data>
+  <data name="OT_StyleVarAsType" xml:space="preserve">
+    <value>Highlight var keyword with actual type style</value>
+  </data>
 </root>

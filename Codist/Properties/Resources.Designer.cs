@@ -5000,6 +5000,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Highlight var keyword with actual type style.
+        /// </summary>
+        internal static string OT_StyleVarAsType {
+            get {
+                return ResourceManager.GetString("OT_StyleVarAsType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Support Codist!.
         /// </summary>
         internal static string OT_SupportCodst {
