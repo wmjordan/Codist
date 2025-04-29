@@ -275,6 +275,7 @@ namespace Codist.Taggers
 				{ SyntaxKind.ExclamationEqualsToken, TagOperatorToken },
 				{ SyntaxKind.PlusPlusToken, TagOperatorToken },
 				{ SyntaxKind.MinusMinusToken, TagOperatorToken },
+				{ SyntaxKind.StringLiteralToken, TagStringToken },
 				{ SyntaxKind.IdentifierToken, TagIdentifier },
 			};
 
@@ -647,6 +648,139 @@ namespace Codist.Taggers
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			static void TagResourceKeyword(in SyntaxToken token, Context ctx) {
 				ctx.Tags.Add(token, __GeneralClassifications.ResourceKeyword);
+			}
+
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			static void TagStringToken(in SyntaxToken token, Context ctx) {
+				var url = token.Text;
+				if (url.Length < 5) {
+					return;
+				}
+
+				var s = token.SpanStart;
+				foreach (var (type, start, length) in ParseUrl(url)) {
+					ClassificationTag tag;
+					switch (type) {
+						case 'd': tag = __Classifications.ClassName; break;
+						case '?':
+						case '#':
+						case '=': tag = __Classifications.Property; break;
+						case '&': tag = __Classifications.Field; break;
+						case '%': tag = __GeneralClassifications.Keyword; break;
+						default:
+							continue;
+					}
+					ctx.Tags.Add(new TextSpan(s + start, length), tag);
+				}
+			}
+
+			static IEnumerable<(char type, int start, int length)> ParseUrl(string url) {
+				const int MAX_PARSE_LENGTH = 4096;
+
+				if (url.Length > MAX_PARSE_LENGTH) {
+					url = url.Substring(0, MAX_PARSE_LENGTH);
+				}
+
+				// 解析域名部分
+				int hostStart = FindHostStart(url);
+				if (hostStart == 0) {
+					yield break;
+				}
+				int hostEnd = FindHostEnd(url, hostStart);
+				if (hostEnd > hostStart) {
+					yield return ('d', hostStart, hostEnd - hostStart);
+				}
+				else {
+					yield break;
+				}
+
+				// 确定各部分边界
+				int queryStart = url.IndexOf('?', hostEnd);
+				int hashStart = url.IndexOf('#', hostEnd);
+
+				// 处理路径部分（域名后到查询/哈希前）
+				foreach (var item in ScanSection(url, hostEnd,
+					queryStart != -1 ? queryStart : hashStart != -1 ? hashStart : url.Length)) {
+					yield return item;
+				}
+
+				// 处理查询部分
+				if (queryStart != -1) {
+					yield return ('?', queryStart, 1); // 问号
+
+					int queryEnd = hashStart != -1 ? hashStart : url.Length;
+					foreach (var item in ProcessQuery(url, queryStart + 1, queryEnd)) {
+						yield return item;
+					}
+				}
+
+				// 处理片段部分
+				if (hashStart != -1) {
+					yield return ('#', hashStart, 1); // 井号
+					foreach (var item in ScanSection(url, hashStart + 1, url.Length)) {
+						yield return item;
+					}
+				}
+			}
+
+			static IEnumerable<(char type, int start, int length)> ProcessQuery(string url, int start, int end) {
+				int paramStart = start;
+				while (paramStart < end) {
+					int paramEnd = url.IndexOf('&', paramStart);
+					if (paramEnd == -1 || paramEnd > end) paramEnd = end;
+
+					int equalPos = url.IndexOf('=', paramStart, paramEnd - paramStart);
+
+					// 输出字段名
+					if (equalPos != -1) {
+						yield return ('&', paramStart, equalPos - paramStart); // 字段名
+						yield return ('=', equalPos, 1);                      // 等号
+					}
+					else if (paramEnd > paramStart) {
+						yield return ('&', paramStart, paramEnd - paramStart); // 无等号字段名
+					}
+
+					// 扫描参数中的百分号编码
+					foreach (var item in ScanSection(url, paramStart, paramEnd)) {
+						yield return item;
+					}
+
+					paramStart = paramEnd + 1; // 移动到下一个参数
+				}
+			}
+
+			static IEnumerable<(char type, int start, int length)> ScanSection(
+				string url, int start, int end) {
+				for (int i = start; i < end;) {
+					if (url[i] == '%'
+						&& i + 2 < end
+						&& IsHex(url[i + 1])
+						&& IsHex(url[i + 2])) {
+						yield return ('%', i, 3);
+						i += 3;
+						continue;
+					}
+					i++;
+				}
+			}
+
+			static bool IsHex(char c) {
+				return c.IsBetween('0', '9') || c.IsBetween('A', 'F') || c.IsBetween('a', 'f');
+			}
+
+			static int FindHostStart(string url) {
+				int protoEnd = url.IndexOf("://", 0, Math.Min(12, url.Length), StringComparison.Ordinal);
+				if (protoEnd != -1) return protoEnd + 3;
+				return url.StartsWith("//", StringComparison.Ordinal) ? 2 : 0;
+			}
+
+			static int FindHostEnd(string url, int start) {
+				for (int i = start; i < url.Length; i++) {
+					if (url[i].CeqAny('/', '?', '#')) {
+						return i;
+					}
+				}
+				return url.Length;
 			}
 			#endregion
 
