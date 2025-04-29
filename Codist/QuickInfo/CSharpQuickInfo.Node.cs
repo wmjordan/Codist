@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Codist.Controls;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -13,6 +14,18 @@ namespace Codist.QuickInfo
 		static readonly Dictionary<SyntaxKind, Action<Context>> __NodeProcessors = new Dictionary<SyntaxKind, Action<Context>> {
 			{ SyntaxKind.Block, ShowBlockInfo },
 			{ SyntaxKind.SwitchStatement, ProcessSwitchStatementNode },
+			{ SyntaxKind.MethodDeclaration, ProcessMethodBody },
+			{ SyntaxKind.OperatorDeclaration, ProcessMethodBody },
+			{ SyntaxKind.ConversionOperatorDeclaration, ProcessMethodBody },
+			{ SyntaxKind.ConstructorDeclaration, ProcessMethodBody },
+			{ SyntaxKind.DestructorDeclaration, ProcessMethodBody },
+			{ SyntaxKind.GetAccessorDeclaration, ProcessMethodBody },
+			{ SyntaxKind.SetAccessorDeclaration, ProcessMethodBody },
+			{ SyntaxKind.AddAccessorDeclaration, ProcessMethodBody },
+			{ SyntaxKind.RemoveAccessorDeclaration, ProcessMethodBody },
+			{ SyntaxKind.LocalFunctionStatement, ProcessMethodBody },
+			{ SyntaxKind.SimpleLambdaExpression, ProcessMethodBody },
+			{ SyntaxKind.ParenthesizedLambdaExpression, ProcessMethodBody },
 			{ SyntaxKind.Argument, ProcessArgumentNode },
 			{ SyntaxKind.ArgumentList, ProcessArgumentNode },
 			{ SyntaxKind.LetClause, ProcessLinqNode },
@@ -77,6 +90,69 @@ namespace Codist.QuickInfo
 					break;
 			}
 			ctx.Container.Add(new ThemedTipText(tip).SetGlyph(IconIds.Switch));
+		}
+
+		static void ProcessMethodBody(Context ctx) {
+			BlockSyntax block;
+			var node = ctx.node;
+			if (node is BaseMethodDeclarationSyntax m) {
+				block = m.Body;
+			}
+			else if (node is AccessorDeclarationSyntax a) {
+				block = a.Body;
+			}
+			else if (node is LocalFunctionStatementSyntax l) {
+				block = l.Body;
+			}
+			else if (node is ParenthesizedLambdaExpressionSyntax pl) {
+				block = pl.Body as BlockSyntax;
+			}
+			else if (node is SimpleLambdaExpressionSyntax sl) {
+				block = sl.Body as BlockSyntax;
+			}
+			else {
+				return;
+			}
+			if (block == null) {
+				return;
+			}
+
+			int returns = 0, throws = 0, yieldReturns = 0, yieldBreaks = 0;
+			foreach (var item in block.DescendantNodes(n => n.IsAnyKind(SyntaxKind.ParenthesizedLambdaExpression, SyntaxKind.SimpleLambdaExpression, SyntaxKind.LocalFunctionStatement, SyntaxKind.AnonymousMethodExpression) == false)) {
+				switch (item.Kind()) {
+					case SyntaxKind.ReturnStatement:
+						returns++;
+						break;
+					case SyntaxKind.ThrowStatement:
+					case SyntaxKind.ThrowExpression:
+						throws++;
+						break;
+					case SyntaxKind.YieldBreakStatement:
+						yieldBreaks++;
+						break;
+					case SyntaxKind.YieldReturnStatement:
+						yieldReturns++;
+						break;
+				}
+			}
+			if (returns == 0 && throws == 0 && yieldBreaks == 0 && yieldReturns == 0) {
+				return;
+			}
+
+			var t = new GeneralInfoBlock(IconIds.ReturnValue, "Exit points");
+			if (returns != 0) {
+				t.AddBlock(new BlockItem(IconIds.Return, "Return: ").Append(returns.ToText(), __SymbolFormatter.Number));
+			}
+			if (throws != 0) {
+				t.AddBlock(new BlockItem(IconIds.Warning, "Throw: ").Append(throws.ToText(), __SymbolFormatter.Number));
+			}
+			if (yieldReturns != 0) {
+				t.AddBlock(new BlockItem(IconIds.Return, "Yield return: ").Append(yieldReturns.ToText(), __SymbolFormatter.Number));
+			}
+			if (yieldBreaks != 0) {
+				t.AddBlock(new BlockItem(IconIds.YieldBreak, "Yield break: ").Append(yieldBreaks.ToText(), __SymbolFormatter.Number));
+			}
+			ctx.Container.Add(t);
 		}
 	}
 }
