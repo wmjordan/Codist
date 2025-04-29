@@ -911,7 +911,8 @@ namespace Codist
 		}
 
 		public static bool IsBoundedGenericMethod(this IMethodSymbol method) {
-			return method?.IsGenericMethod == true && method != method.OriginalDefinition;
+			return method?.IsGenericMethod == true
+				&& method.Equals(method.OriginalDefinition) == false;
 		}
 
 		public static bool IsObjectOrValueType(this INamedTypeSymbol type) {
@@ -1169,7 +1170,7 @@ namespace Codist
 			async Task<Project> GetProjectAsync(IAssemblySymbol a, Solution s, CancellationToken ct) {
 				foreach (var item in s.Projects) {
 					if (item.SupportsCompilation
-						&& (await item.GetCompilationAsync(ct).ConfigureAwait(false)).Assembly == a) {
+						&& (await item.GetCompilationAsync(ct).ConfigureAwait(false)).Assembly.OriginallyEquals(a)) {
 						return item;
 					}
 				}
@@ -1422,6 +1423,10 @@ namespace Codist
 				^ (symbol.Arity * 2081236337)
 				^ (symbol.ContainingType?.GetHashCodeForMatch() ?? 192901013)
 				^ (symbol.ContainingNamespace.Name.GetHashCode() * 500069));
+		}
+
+		public static bool OriginallyEquals(this ISymbol a, ISymbol b) {
+			return a is null ? b is null ? true : false : a.OriginalDefinition.Equals(b.OriginalDefinition);
 		}
 
 		public static int CompareSymbol<TSymbol>(TSymbol a, TSymbol b) where TSymbol : ISymbol {

@@ -196,8 +196,7 @@ namespace Codist.Taggers
 			}
 		}
 
-		static class TokenTaggers
-		{
+		static class TokenTaggers {
 			static readonly Dictionary<SyntaxKind, TaggerDelegate> __TokenTaggers = new Dictionary<SyntaxKind, TaggerDelegate> {
 				{ SyntaxKind.AbstractKeyword, TagAbstractionKeyword },
 				{ SyntaxKind.SealedKeyword, TagAbstractionKeyword },
@@ -255,6 +254,7 @@ namespace Codist.Taggers
 				{ SyntaxKind.OpenBracketToken, TagSemanticBracket },
 				{ SyntaxKind.CloseBracketToken, TagSemanticBracket },
 				{ SyntaxKind.EqualsGreaterThanToken, TagEqualsGreaterThenToken },
+				{ SyntaxKind.EqualsToken, TagEqualsToken },
 				{ SyntaxKind.PlusToken, TagOperatorToken },
 				{ SyntaxKind.MinusToken, TagOperatorToken },
 				{ SyntaxKind.AsteriskToken, TagOperatorToken },
@@ -287,14 +287,54 @@ namespace Codist.Taggers
 
 			#region Punctuation and operator
 			static void TagOperatorToken(in SyntaxToken token, Context ctx) {
-				var node = token.Parent;
-				if (node.IsKind(SyntaxKind.OperatorDeclaration)) {
+				if (token.Parent.IsKind(SyntaxKind.OperatorDeclaration)) {
 					ctx.Tags.Add(token.Span, __Classifications.Method, __Classifications.NestedDeclaration);
+				}
+			}
+
+			static void TagEqualsToken(in SyntaxToken token, Context ctx) {
+				if (!HighlightOptions.SemanticPunctuation) {
 					return;
 				}
-				var symbol = ctx.semanticModel.GetSymbolInfo(node, ctx.cancellationToken).Symbol;
-				if (symbol != null && symbol.Kind == SymbolKind.Method && ((IMethodSymbol)symbol).MethodKind == MethodKind.UserDefinedOperator) {
-					ctx.Tags.Add(token.Span, __Classifications.Method, __Classifications.OverrideMember);
+				// note: DON'T use GetConversion, which gives nothing useful
+				var node = token.Parent;
+				bool hasConversion;
+				if (node.IsKind(SyntaxKind.SimpleAssignmentExpression)) {
+					var a = (AssignmentExpressionSyntax)node;
+					hasConversion = ctx.semanticModel.GetTypeInfo(a.Left, ctx.cancellationToken).Type.OriginallyEquals(ctx.semanticModel.GetTypeInfo(a.Right, ctx.cancellationToken).Type) == false;
+				}
+				else if (node.IsKind(SyntaxKind.EqualsValueClause)) {
+					if (node.Parent.IsKind(SyntaxKind.Parameter)) {
+						return;
+					}
+					var expressionType = ctx.semanticModel.GetTypeInfo(((EqualsValueClauseSyntax)node).Value, ctx.cancellationToken).Type;
+					if (expressionType == null) {
+						return;
+					}
+					var declaredSymbol = GetDeclaredSymbol(ctx.semanticModel, node.Parent);
+					hasConversion = declaredSymbol == null
+						|| expressionType.OriginallyEquals(declaredSymbol.GetReturnType()) == false;
+				}
+				else {
+					return;
+				}
+				if (hasConversion) {
+					ctx.Tags.Add(token.Span,
+						HighlightOptions.StyleSemanticPunctuation ? __GeneralClassifications.TypeCastKeyword : null,
+						HighlightOptions.BoldSemanticPunctuationTag);
+				}
+			}
+
+			static ISymbol GetDeclaredSymbol(SemanticModel semanticModel, SyntaxNode node) {
+				switch (node.Kind()) {
+					case SyntaxKind.VariableDeclarator:
+						return semanticModel.GetDeclaredSymbol((VariableDeclaratorSyntax)node);
+					case SyntaxKind.PropertyDeclaration:
+					case SyntaxKind.EventDeclaration:
+					case SyntaxKind.EventFieldDeclaration:
+					case SyntaxKind.FieldDeclaration:
+						return semanticModel.GetDeclaredSymbol((MemberDeclarationSyntax)node);
+					default: return null;
 				}
 			}
 
@@ -324,38 +364,39 @@ namespace Codist.Taggers
 				}
 				if (tag != null) {
 					ctx.Tags.Add(token.Span,
-						HighlightOptions.SemanticPunctuation ? tag : null,
+						HighlightOptions.StyleSemanticPunctuation ? tag : null,
 						HighlightOptions.BoldSemanticPunctuationTag);
 				}
 			}
 
 			static void TagSemanticBrace(in SyntaxToken token, Context ctx) {
-				if (HighlightOptions.SemanticPunctuation || HighlightOptions.BoldSemanticPunctuation) {
-					var node = token.Parent;
-					while (node.IsAnyKind(SyntaxKind.Block, SyntaxKind.AccessorList)) {
-						node = node.Parent;
+				if (!HighlightOptions.SemanticPunctuation) {
+					return;
+				}
+				var node = token.Parent;
+				if (node.IsAnyKind(SyntaxKind.Block, SyntaxKind.AccessorList)) {
+					node = node.Parent;
+				}
+				var tag = ClassifySemanticPunctuation(node);
+				if (tag == null) {
+					if (node.IsKind(SyntaxKind.Interpolation)) {
+						TagTypeCastedInterpolationExpression(token, ctx, node);
 					}
-					var tag = ClassifySemanticPunctuation(node);
-					if (tag == null) {
-						if (node.IsKind(SyntaxKind.Interpolation)) {
-							TagTypeCastedInterpolationExpression(token, ctx, node);
-						}
-						else if (node.IsKind(CodeAnalysisHelper.PropertyPatternClause)) {
-							ctx.Tags.Add(token, __GeneralClassifications.BranchingKeyword);
-						}
-						return;
+					else if (node.IsKind(CodeAnalysisHelper.PropertyPatternClause)) {
+						ctx.Tags.Add(token, __GeneralClassifications.BranchingKeyword);
 					}
-					if (HighlightOptions.SemanticPunctuation) {
-						ctx.Tags.Add(token.Span,
-							tag,
-							node is MemberDeclarationSyntax || node.IsKind(SyntaxKind.NamespaceDeclaration)
-								? __Classifications.DeclarationBrace
-								: null,
-							HighlightOptions.BoldSemanticPunctuationTag);
-					}
-					else if (HighlightOptions.BoldSemanticPunctuationTag != null) {
-						ctx.Tags.Add(token, __GeneralClassifications.Bold);
-					}
+					return;
+				}
+				if (HighlightOptions.StyleSemanticPunctuation) {
+					ctx.Tags.Add(token.Span,
+						tag,
+						node is MemberDeclarationSyntax || node.IsKind(SyntaxKind.NamespaceDeclaration)
+							? __Classifications.DeclarationBrace
+							: null,
+						HighlightOptions.BoldSemanticPunctuationTag);
+				}
+				else if (HighlightOptions.BoldSemanticPunctuation) {
+					ctx.Tags.Add(token, HighlightOptions.BoldSemanticPunctuationTag);
 				}
 			}
 
@@ -367,25 +408,28 @@ namespace Codist.Taggers
 			}
 
 			static void TagSemanticParenthesis(in SyntaxToken token, Context ctx) {
-				if (HighlightOptions.SemanticPunctuation || HighlightOptions.BoldSemanticPunctuation) {
+				if (HighlightOptions.SemanticPunctuation) {
 					var tag = ClassifyParenthesis(ctx.semanticModel, token.Parent, ctx.cancellationToken);
 					if (tag != null) {
 						ctx.Tags.Add(token.Span,
-							HighlightOptions.SemanticPunctuation ? tag : null,
+							HighlightOptions.StyleSemanticPunctuation ? tag : null,
 							HighlightOptions.BoldSemanticPunctuationTag);
 					}
 				}
 			}
 
 			static void TagSemanticBracket(in SyntaxToken token, Context ctx) {
-				if (HighlightOptions.SemanticPunctuation || HighlightOptions.BoldSemanticPunctuation || HighlightOptions.AttributeAnnotation) {
-					var itemSpan = token.Span;
-					var tag = ClassifyBracket(ctx.semanticModel, token.Parent, ref itemSpan, ctx.cancellationToken);
+				if (HighlightOptions.SemanticPunctuation) {
+					var tag = ClassifyBracket(ctx.semanticModel, token.Parent, ctx.cancellationToken);
 					if (tag != null) {
-						ctx.Tags.Add(itemSpan,
-							HighlightOptions.SemanticPunctuation ? tag : null,
+						ctx.Tags.Add(token.Span,
+							HighlightOptions.StyleSemanticPunctuation ? tag : null,
 							HighlightOptions.BoldSemanticPunctuationTag);
+						return;
 					}
+				}
+				if (HighlightOptions.AttributeAnnotation && token.Parent.IsKind(SyntaxKind.AttributeList)) {
+					ctx.Tags.Add(token.Parent.Span, __Classifications.AttributeNotation);
 				}
 			}
 
@@ -523,7 +567,7 @@ namespace Codist.Taggers
 					: null;
 			}
 
-			static ClassificationTag ClassifyBracket(SemanticModel semanticModel, SyntaxNode node, ref TextSpan itemSpan, CancellationToken cancellationToken) {
+			static ClassificationTag ClassifyBracket(SemanticModel semanticModel, SyntaxNode node, CancellationToken cancellationToken) {
 				if (node.IsKind(SyntaxKind.Argument)) {
 					node = ((ArgumentSyntax)node).Expression;
 				}
@@ -537,7 +581,9 @@ namespace Codist.Taggers
 							}
 							var type = semanticModel.GetTypeInfo(node, cancellationToken).Type;
 							if (type != null) {
-								return type.TypeKind.CeqAny(TypeKind.Struct, TypeKind.Pointer) ? __Classifications.StructName : __Classifications.ClassName;
+								return type.TypeKind.CeqAny(TypeKind.Struct, TypeKind.Pointer)
+									? __Classifications.StructName
+									: __Classifications.ClassName;
 							}
 							return null;
 						}
@@ -546,8 +592,6 @@ namespace Codist.Taggers
 						return node.Parent.IsKind(SyntaxKind.IndexerDeclaration)
 							? __Classifications.Property
 							: null;
-					case SyntaxKind.AttributeList:
-						return __Classifications.AttributeNotation;
 					case SyntaxKind.ArrayRankSpecifier:
 						return node.Parent.Parent.IsAnyKind(SyntaxKind.ArrayCreationExpression, SyntaxKind.StackAllocArrayCreationExpression, SyntaxKind.ImplicitStackAllocArrayCreationExpression)
 							? __Classifications.ConstructorMethod
@@ -568,7 +612,14 @@ namespace Codist.Taggers
 			#region Others
 			static void TagInKeyword(in SyntaxToken token, Context ctx) {
 				if (token.Parent.IsAnyKind(SyntaxKind.ForEachStatement, SyntaxKind.ForEachVariableStatement)) {
-					TagLoopKeyword(in token, ctx);
+					var f = (CommonForEachStatementSyntax)token.Parent;
+					var info = ctx.semanticModel.GetForEachStatementInfo(f);
+					if (info.ElementConversion.Exists && info.ElementConversion.IsIdentity == false) {
+						ctx.Tags.Add(token, __GeneralClassifications.TypeCastKeyword);
+					}
+					else {
+						TagLoopKeyword(in token, ctx);
+					}
 				}
 				else {
 					TagInTypeCastKeyword(in token, ctx);
@@ -681,6 +732,10 @@ namespace Codist.Taggers
 					if (symbol is null) {
 						symbol = FindSymbolOrSymbolCandidateForNode(node, semanticModel, cancellationToken);
 						if (symbol is null) {
+							if (node.Parent.IsKind(SyntaxKind.TypeConstraint) && token.Text == "unmanaged") {
+								// the "unmanaged" constraint is not classified as a keyword by Roslyn
+								tags.Add(itemSpan, __GeneralClassifications.ResourceKeyword);
+							}
 							return;
 						}
 					}
@@ -689,10 +744,14 @@ namespace Codist.Taggers
 					}
 				}
 				switch (symbol.Kind) {
-					case SymbolKind.Alias:
 					case SymbolKind.ArrayType:
-					case SymbolKind.Assembly:
 					case SymbolKind.DynamicType:
+						if (HighlightOptions.StyleVarAsType && token.IsVarKeyword()) {
+							tags.Add(itemSpan, __Classifications.ClassName);
+						}
+						return;
+					case SymbolKind.Alias:
+					case SymbolKind.Assembly:
 					case SymbolKind.ErrorType:
 					case SymbolKind.NetModule:
 					case SymbolKind.PointerType:
@@ -790,9 +849,7 @@ namespace Codist.Taggers
 						if (symbol.ContainingType?.Kind == SymbolKind.NamedType) {
 							tags.Add(itemSpan, __Classifications.NestedType);
 						}
-						if (HighlightOptions.StyleVarAsType
-							&& node.Parent.IsAnyKind(SyntaxKind.VariableDeclaration, SyntaxKind.DeclarationExpression, SyntaxKind.ForEachStatement, SyntaxKind.ForEachVariableStatement)
-							&& token.Text == "var") {
+						if (HighlightOptions.StyleVarAsType && token.IsVarKeyword()) {
 							tags.Add(itemSpan, GetTypeKindClassificationTag(((ITypeSymbol)symbol).TypeKind));
 						}
 						break;
@@ -944,7 +1001,7 @@ namespace Codist.Taggers
 					: node.IsKind(SyntaxKind.SimpleBaseType) ? semanticModel.GetTypeInfo(((SimpleBaseTypeSyntax)node).Type, cancellationToken).Type
 					: node.IsKind(SyntaxKind.TypeConstraint) ? semanticModel.GetTypeInfo(((TypeConstraintSyntax)node).Type, cancellationToken).Type
 					: node.IsKind(SyntaxKind.ExpressionStatement) ? semanticModel.GetSymbolInfo(((ExpressionStatementSyntax)node).Expression, cancellationToken).CandidateSymbols.FirstOrDefault()
-					: node.IsKind(SyntaxKind.IdentifierName) && parent.Parent.IsKind(SyntaxKind.UsingDirective) ? semanticModel.GetDeclaredSymbol(parent.Parent).GetAliasTarget()
+					: node.IsKind(SyntaxKind.IdentifierName) && parent.Parent.IsKind(SyntaxKind.UsingDirective) ? semanticModel.GetDeclaredSymbol(parent.Parent)?.GetAliasTarget()
 					: semanticModel.GetSymbolInfo(node, cancellationToken).CandidateSymbols.FirstOrDefault();
 			}
 			#endregion
@@ -1014,6 +1071,7 @@ namespace Codist.Taggers
 		{
 			// use fields to cache option flags
 			public static bool SemanticPunctuation,
+				StyleSemanticPunctuation,
 				BoldSemanticPunctuation,
 				LocalFunctionDeclaration,
 				NonPrivateField,
@@ -1033,7 +1091,8 @@ namespace Codist.Taggers
 					return;
 				}
 				var o = e.Config.SpecialHighlightOptions;
-				SemanticPunctuation = o.HasAnyFlag(SpecialHighlightOptions.SemanticPunctuation);
+				SemanticPunctuation = o.HasAnyFlag(SpecialHighlightOptions.SemanticPunctuation | SpecialHighlightOptions.BoldSemanticPunctuation);
+				StyleSemanticPunctuation = o.MatchFlags(SpecialHighlightOptions.SemanticPunctuation);
 				CapturingLambda = o.MatchFlags(SpecialHighlightOptions.CapturingLambdaExpression);
 				var bold = BoldSemanticPunctuation = o.MatchFlags(SpecialHighlightOptions.BoldSemanticPunctuation);
 				BoldSemanticPunctuationTag = bold ? __GeneralClassifications.Bold : null;

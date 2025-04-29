@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using CLR;
 using Microsoft.CodeAnalysis;
@@ -16,33 +17,43 @@ namespace Codist
 	partial class CodeAnalysisHelper
 	{
 		#region Node info
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool IsAnyKind(this SyntaxNode node, SyntaxKind kind1, SyntaxKind kind2) {
 			return node.RawKind.CeqAny(kind1, kind2);
 		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool IsAnyKind(this SyntaxNode node, SyntaxKind kind1, SyntaxKind kind2, SyntaxKind kind3) {
 			return node.RawKind.CeqAny(kind1, kind2, kind3);
 		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool IsAnyKind(this SyntaxNode node, SyntaxKind kind1, SyntaxKind kind2, SyntaxKind kind3, SyntaxKind kind4) {
 			return node.RawKind.CeqAny(kind1, kind2, kind3, kind4);
 		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool IsAnyKind(this SyntaxToken token, SyntaxKind kind1, SyntaxKind kind2) {
 			return token.RawKind.CeqAny(kind1, kind2);
 		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool IsAnyKind(this SyntaxToken token, SyntaxKind kind1, SyntaxKind kind2, SyntaxKind kind3) {
 			return token.RawKind.CeqAny(kind1, kind2, kind3);
 		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool IsAnyKind(this SyntaxToken token, SyntaxKind kind1, SyntaxKind kind2, SyntaxKind kind3, SyntaxKind kind4) {
 			return token.RawKind.CeqAny(kind1, kind2, kind3, kind4);
 		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool IsAnyKind(this SyntaxToken token, SyntaxKind kind1, SyntaxKind kind2, SyntaxKind kind3, SyntaxKind kind4, SyntaxKind kind5) {
 			return token.RawKind.CeqAny(kind1, kind2, kind3, kind4, kind5);
 		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool IsAnyKind(this ITypeSymbol type, TypeKind kind1, TypeKind kind2) {
 			return type.TypeKind.CeqAny(kind1, kind2);
 		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool IsAnyKind(this ITypeSymbol type, TypeKind kind1, TypeKind kind2, TypeKind kind3) {
 			return type.TypeKind.CeqAny(kind1, kind2, kind3);
 		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool IsPredefinedSystemType(this SyntaxKind kind) {
 			return kind.IsBetween(SyntaxKind.BoolKeyword, SyntaxKind.ObjectKeyword);
 		}
@@ -159,6 +170,7 @@ namespace Codist
 			}
 			return false;
 		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool IsNamespaceDeclaration(this SyntaxKind kind) {
 			return kind.CeqAny(SyntaxKind.NamespaceDeclaration, FileScopedNamespaceDeclaration);
 		}
@@ -232,6 +244,11 @@ namespace Codist
 			return false;
 		}
 
+		public static bool IsVarKeyword(this SyntaxToken token) {
+			return token.Parent.Parent.RawKind.CeqAny(SyntaxKind.VariableDeclaration, SyntaxKind.DeclarationExpression, SyntaxKind.ForEachStatement, SyntaxKind.ForEachVariableStatement, SyntaxKind.RefType) && token.Text == "var";
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool HasCapturedVariable(this SyntaxNode node, SemanticModel semanticModel) {
 			return semanticModel.GetCapturedVariables(node).Length != 0;
 		}
@@ -281,9 +298,11 @@ namespace Codist
 				: null;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static IdentifierNameSyntax GetFirstIdentifier(this SyntaxNode node) {
 			return node.DescendantNodes().FirstOrDefault(i => i.IsKind(SyntaxKind.IdentifierName)) as IdentifierNameSyntax;
 		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static IdentifierNameSyntax GetLastIdentifier(this SyntaxNode node) {
 			return node.DescendantNodes().LastOrDefault(i => i.IsKind(SyntaxKind.IdentifierName)) as IdentifierNameSyntax;
 		}
@@ -386,10 +405,12 @@ namespace Codist
 			return null;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static NameSyntax GetFileScopedNamespaceDeclarationName(this SyntaxNode node) {
 			return node.IsKind(FileScopedNamespaceDeclaration) ? NonPublicOrFutureAccessors.GetFileScopedNamespaceName(node) : null;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool IsTopmostIf(this IfStatementSyntax ifs) {
 			return ifs?.Parent.IsKind(SyntaxKind.ElseClause) != true;
 		}
