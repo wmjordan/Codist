@@ -32,7 +32,6 @@ namespace Codist.QuickInfo
 			{ SyntaxKind.EqualsToken, ProcessAsConvertedType },
 			{ SyntaxKind.SwitchKeyword, ProcessSwitchToken },
 			{ SyntaxKind.NullKeyword, ProcessValueToken },
-			{ SyntaxKind.DefaultKeyword, ProcessValueToken },
 			{ SyntaxKind.QuestionToken, ProcessValueToken },
 			{ SyntaxKind.ColonToken, ProcessValueToken },
 			{ SyntaxKind.QuestionQuestionToken, ProcessValueToken },
@@ -42,6 +41,9 @@ namespace Codist.QuickInfo
 			{ SyntaxKind.OrderByKeyword, ProcessValueToken },
 			{ CodeAnalysisHelper.WithKeyword, ProcessValueToken },
 			{ SyntaxKind.AsKeyword, ProcessAsType },
+			{ SyntaxKind.ForEachKeyword, ProcessForEachToken },
+			{ SyntaxKind.CaseKeyword, ProcessCaseToken },
+			{ SyntaxKind.DefaultKeyword, ProcessDefaultToken },
 			{ SyntaxKind.ReturnKeyword, ProcessReturnToken },
 			{ SyntaxKind.AwaitKeyword, ProcessAwaitToken },
 			{ SyntaxKind.DotToken, ProcessDotToken },
@@ -137,7 +139,7 @@ namespace Codist.QuickInfo
 		}
 
 		static void ProcessExtension(Context ctx) {
-			ctx.symbol = ctx.semanticModel.GetDeclaredSymbol(ctx.node = ctx.CompilationUnit.FindNode(ctx.token.Span));
+			ctx.symbol = ctx.semanticModel.GetDeclaredSymbol(ctx.node = ctx.token.Parent);
 			ctx.State = State.Process;
 		}
 
@@ -148,14 +150,14 @@ namespace Codist.QuickInfo
 		}
 
 		static void ProcessNewToken(Context ctx) {
-			ctx.SetSymbol(ctx.semanticModel.GetTypeInfo(ctx.node = ctx.CompilationUnit.FindNode(ctx.token.Span, false, true), ctx.cancellationToken));
+			ctx.SetSymbol(ctx.semanticModel.GetTypeInfo(ctx.node = ctx.token.Parent, ctx.cancellationToken));
 			if (ctx.symbol != null) {
 				ctx.State = State.Process;
 			}
 		}
 
 		static void ProcessThrowKeyword(Context ctx) {
-			if ((ctx.node = ctx.CompilationUnit.FindNode(ctx.token.Span)) is ThrowExpressionSyntax t) {
+			if ((ctx.node = ctx.token.Parent) is ThrowExpressionSyntax t) {
 				ctx.SetSymbol(ctx.semanticModel.GetTypeInfo(ctx.node));
 			}
 			if (ctx.symbol != null) {
@@ -179,7 +181,7 @@ namespace Codist.QuickInfo
 		static void ProcessEndIf(Context ctx) {
 			ctx.Container.Add(new ThemedTipText(R.T_EndOfIf)
 				.SetGlyph(IconIds.Region)
-				.Append((ctx.CompilationUnit.FindNode(ctx.token.Span, true) as EndIfDirectiveTriviaSyntax).GetIf()?.GetDeclarationSignature(), true)
+				.Append((ctx.token.Parent as EndIfDirectiveTriviaSyntax).GetIf()?.GetDeclarationSignature(), true)
 				);
 			ctx.Result = CreateQuickInfoItem(ctx.session, ctx.token, ctx.Container.ToUI());
 		}
@@ -187,17 +189,17 @@ namespace Codist.QuickInfo
 		static void ProcessEndRegion(Context ctx) {
 			ctx.Container.Add(new ThemedTipText(R.T_EndOfRegion)
 				.SetGlyph(IconIds.Region)
-				.Append((ctx.CompilationUnit.FindNode(ctx.token.Span, true) as EndRegionDirectiveTriviaSyntax).GetRegion()?.GetDeclarationSignature(), true)
+				.Append((ctx.token.Parent as EndRegionDirectiveTriviaSyntax).GetRegion()?.GetDeclarationSignature(), true)
 				);
 			ctx.Result = CreateQuickInfoItem(ctx.session, ctx.token, ctx.Container.ToUI());
 		}
 
 		static void ProcessCompareToken(Context ctx) {
-			var node = ctx.node = ctx.CompilationUnit.FindNode(ctx.token.Span);
+			var node = ctx.node = ctx.token.Parent;
 			if (node is BinaryExpressionSyntax) {
 				ctx.State = State.Process;
 			}
-			if (node.IsKind(SyntaxKind.TypeArgumentList)) {
+			else if (node.IsKind(SyntaxKind.TypeArgumentList)) {
 				ctx.SetSymbol(ctx.semanticModel.GetSymbolInfo(ctx.node = node.Parent, ctx.cancellationToken));
 				ctx.State = State.Process;
 			}
@@ -211,20 +213,24 @@ namespace Codist.QuickInfo
 		}
 
 		static void ProcessInToken(Context ctx) {
-			if ((ctx.node = ctx.CompilationUnit.FindNode(ctx.token.Span)).IsKind(SyntaxKind.ForEachStatement)
-						&& (ctx.symbol = ctx.semanticModel.GetForEachStatementInfo((CommonForEachStatementSyntax)ctx.node).GetEnumeratorMethod) != null) {
+			ForEachStatementInfo info;
+			if ((ctx.node = ctx.token.Parent).IsKind(SyntaxKind.ForEachStatement)
+						&& (ctx.symbol = (info = ctx.semanticModel.GetForEachStatementInfo((CommonForEachStatementSyntax)ctx.node)).GetEnumeratorMethod) != null) {
+				if (info.ElementConversion.Exists && info.ElementConversion.IsIdentity == false) {
+					ctx.Container.Add(new ThemedTipText().SetGlyph(IconIds.ExplicitConversion).AddSymbol(info.ElementType, false, __SymbolFormatter));
+				}
 				ctx.State = State.Return;
 			}
 		}
 
 		static void ProcessUsingToken(Context ctx) {
-			ctx.node = ctx.CompilationUnit.FindNode(ctx.token.Span);
+			ctx.node = ctx.token.Parent;
 			ctx.symbol = ctx.semanticModel.GetDisposeMethodForUsingStatement(ctx.node, ctx.cancellationToken);
-			ctx.State = State.Process;
+			ctx.State = State.Return;
 		}
 
 		static void ProcessBracketToken(Context ctx) {
-			SyntaxNode node = ctx.node = ctx.CompilationUnit.FindNode(ctx.token.Span, false, true);
+			SyntaxNode node = ctx.node = ctx.token.Parent;
 			if (node.IsKind(SyntaxKind.BracketedArgumentList)
 						&& node.Parent.IsKind(SyntaxKind.ElementAccessExpression)) {
 				ctx.SetSymbol(ctx.semanticModel.GetSymbolInfo((ElementAccessExpressionSyntax)node.Parent, ctx.cancellationToken));
@@ -247,7 +253,7 @@ namespace Codist.QuickInfo
 		}
 
 		static void ProcessParenToken(Context ctx) {
-			var node = ctx.node = ctx.CompilationUnit.FindNode(ctx.token.Span, false, true);
+			var node = ctx.node = ctx.token.Parent;
 			if (node.IsKind(SyntaxKind.ArgumentList)) {
 				ctx.node = node.Parent;
 				ctx.State = State.Process;
@@ -266,7 +272,7 @@ namespace Codist.QuickInfo
 		}
 
 		static void ProcessAwaitToken(Context ctx) {
-			var node = ctx.node = ctx.CompilationUnit.FindNode(ctx.token.Span, false, true) as AwaitExpressionSyntax;
+			var node = ctx.node = ctx.token.Parent as AwaitExpressionSyntax;
 			if (node != null) {
 				ctx.SetSymbol(ctx.semanticModel.GetTypeInfo(node, ctx.cancellationToken));
 			}
@@ -274,7 +280,7 @@ namespace Codist.QuickInfo
 		}
 
 		static void ProcessReturnToken(Context ctx) {
-			var tb = ShowReturnInfo(ctx.CompilationUnit.FindNode(ctx.token.Span) as ReturnStatementSyntax, ctx.semanticModel, ctx.cancellationToken);
+			var tb = ShowReturnInfo(ctx.token.Parent as ReturnStatementSyntax, ctx.semanticModel, ctx.cancellationToken);
 			if (tb == null) {
 				ctx.State = State.Unavailable;
 				return;
@@ -282,12 +288,61 @@ namespace Codist.QuickInfo
 			ctx.Result = CreateQuickInfoItem(ctx.session, ctx.token, tb);
 		}
 
+		static void ProcessForEachToken(Context ctx) {
+			var node = (CommonForEachStatementSyntax)ctx.token.Parent;
+			var info = ctx.semanticModel.GetForEachStatementInfo(node);
+			ctx.node = node;
+			ctx.symbol = info.GetEnumeratorMethod;
+			var collectionType = ctx.semanticModel.GetTypeInfo(node.Expression, ctx.cancellationToken).Type;
+			if (collectionType != null) {
+				var tip = new ThemedTipDocument();
+				tip.AppendParagraph(IconIds.ForEach, new ThemedTipText()
+						.Append("foreach".Render(__SymbolFormatter.Keyword))
+						.Append(" ")
+						.AddSymbol(info.ElementType, false, __SymbolFormatter)
+						.Append(" in ", __SymbolFormatter.PlainText)
+						.AddSymbol(collectionType, false, __SymbolFormatter));
+				if (collectionType.TypeKind == TypeKind.Array) {
+					tip.AppendParagraph(IconIds.None, new ThemedTipText(R.T_ForEachOnArrayWillBeOptimized));
+				}
+				else {
+					tip.AppendParagraph(IconIds.None, new ThemedTipText().SetGlyph(IconIds.Method).AddSymbol(info.MoveNextMethod, false, __SymbolFormatter));
+					tip.AppendParagraph(IconIds.None, new ThemedTipText().SetGlyph(IconIds.ReadonlyProperty).AddSymbol(info.CurrentProperty, false, __SymbolFormatter));
+					if (info.DisposeMethod != null) {
+						tip.AppendParagraph(IconIds.None, new ThemedTipText().SetGlyph(IconIds.Delete).AddSymbol(info.DisposeMethod, false, __SymbolFormatter));
+					}
+				}
+				ctx.Container.Add(tip);
+			}
+			ctx.State = State.Return;
+		}
+
+		static void ProcessCaseToken(Context ctx) {
+			if ((ctx.node = ctx.token.Parent).Parent is SwitchSectionSyntax section) {
+				var statements = section.Statements;
+				var df = ctx.semanticModel.AnalyzeDataFlow(statements.First(), statements.Last());
+				if (df.Succeeded) {
+					ShowDataFlowAnalysis(ctx, df);
+				}
+				ctx.State = State.Return;
+			}
+		}
+
+		static void ProcessDefaultToken(Context ctx) {
+			if (ctx.token.Parent.IsKind(SyntaxKind.DefaultSwitchLabel)) {
+				ProcessCaseToken(ctx);
+			}
+			else {
+				ProcessValueToken(ctx);
+			}
+		}
+
 		static void ProcessTypeToken(Context ctx) {
 			ctx.State = State.AsType;
 		}
 
 		static void ProcessValueToken(Context ctx) {
-			ctx.SetSymbol(ctx.semanticModel.GetTypeInfo(ctx.node = ctx.CompilationUnit.FindNode(ctx.token.Span, false, true), ctx.cancellationToken));
+			ctx.SetSymbol(ctx.semanticModel.GetTypeInfo(ctx.node = ctx.token.Parent, ctx.cancellationToken));
 			if (ctx.symbol == null) {
 				if (!Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter)) {
 					ctx.State = State.Unavailable;
@@ -299,7 +354,7 @@ namespace Codist.QuickInfo
 		}
 
 		static void ProcessSwitchToken(Context ctx) {
-			var node = ctx.node = ctx.CompilationUnit.FindNode(ctx.token.Span, false, true);
+			var node = ctx.node = ctx.token.Parent;
 			if (node.IsKind(CodeAnalysisHelper.SwitchExpression)) {
 				ctx.SetSymbol(ctx.semanticModel.GetTypeInfo(node.ChildNodes().First(), ctx.cancellationToken));
 				ShowSwitchExpression(ctx.Container, ctx.symbol, node);
@@ -314,23 +369,23 @@ namespace Codist.QuickInfo
 		}
 
 		static void ProcessAsConvertedType(Context ctx) {
-			ctx.SetSymbol(ctx.semanticModel.GetTypeInfo(ctx.CompilationUnit.FindNode(ctx.token.Span, false, true), ctx.cancellationToken));
+			ctx.SetSymbol(ctx.semanticModel.GetTypeInfo(ctx.token.Parent, ctx.cancellationToken));
 			ctx.isConvertedType = ctx.symbol != null;
 			ctx.State = State.AsType;
 		}
 
 		static void ProcessEqualsGreaterThanToken(Context ctx) {
 			SyntaxNode node;
-			ctx.node = node = ctx.CompilationUnit.FindNode(ctx.token.Span);
+			ctx.node = node = ctx.token.Parent;
 			if (node.IsKind(CodeAnalysisHelper.SwitchExpressionArm) && node.Parent.IsKind(CodeAnalysisHelper.SwitchExpression)) {
 				ctx.SetSymbol(ctx.semanticModel.GetTypeInfo(node.Parent, ctx.cancellationToken));
 				var patternType = ctx.semanticModel.GetTypeInfo(node.GetSwitchExpressionArmPattern());
 				if (patternType.ConvertedType != null) {
-					var typeInfo = new ThemedTipText().SetGlyph(IconIds.Input).AddSymbol(patternType.ConvertedType, null, SymbolFormatter.Instance);
+					var typeInfo = new ThemedTipText().SetGlyph(IconIds.Input).AddSymbol(patternType.ConvertedType, null, __SymbolFormatter);
 					if (patternType.ConvertedType.Equals(patternType.Type) == false) {
-						typeInfo.Append(" (".Render(SymbolFormatter.Instance.PlainText))
-							.AddSymbol(patternType.Type, null, SymbolFormatter.Instance)
-							.Append(")".Render(SymbolFormatter.Instance.PlainText));
+						typeInfo.Append(" (".Render(__SymbolFormatter.PlainText))
+							.AddSymbol(patternType.Type, null, __SymbolFormatter)
+							.Append(")".Render(__SymbolFormatter.PlainText));
 					}
 					ctx.Container.Add(typeInfo);
 				}
@@ -346,7 +401,7 @@ namespace Codist.QuickInfo
 		}
 
 		static void ProcessAsType(Context ctx) {
-			var asType = (ctx.CompilationUnit.FindNode(ctx.token.Span, false, true) as BinaryExpressionSyntax)?.GetLastIdentifier();
+			var asType = (ctx.token.Parent as BinaryExpressionSyntax)?.GetLastIdentifier();
 			if (asType != null) {
 				ctx.token = asType.Identifier;
 				ctx.skipTriggerPointCheck = true;
@@ -356,7 +411,7 @@ namespace Codist.QuickInfo
 
 		static void ProcessCloseBraceToken(Context ctx) {
 			ctx.keepBuiltInXmlDoc = true;
-			if ((ctx.node = ctx.CompilationUnit.FindNode(ctx.token.Span)).IsKind(SyntaxKind.Interpolation)) {
+			if ((ctx.node = ctx.token.Parent).IsKind(SyntaxKind.Interpolation)) {
 				UsePreviousToken(ctx);
 				return;
 			}
@@ -371,7 +426,7 @@ namespace Codist.QuickInfo
 		}
 
 		static void ProcessOpenBraceToken(Context ctx) {
-			switch ((ctx.node = ctx.CompilationUnit.FindNode(ctx.token.Span)).Kind()) {
+			switch ((ctx.node = ctx.token.Parent).Kind()) {
 				case SyntaxKind.Interpolation:
 					ctx.symbol = ctx.semanticModel.Compilation.GetSpecialType(SpecialType.System_String);
 					ctx.isConvertedType = ctx.symbol != null;

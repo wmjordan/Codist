@@ -18,7 +18,30 @@ namespace Codist.QuickInfo
 			{ SyntaxKind.LetClause, ProcessLinqNode },
 			{ SyntaxKind.JoinClause, ProcessLinqNode },
 			{ SyntaxKind.JoinIntoClause, ProcessLinqNode },
+			{ SyntaxKind.EqualsExpression, ProcessOperatorExpression },
+			{ SyntaxKind.NotEqualsExpression, ProcessOperatorExpression },
+			{ SyntaxKind.LeftShiftExpression, ProcessOperatorExpression },
+			{ SyntaxKind.RightShiftExpression, ProcessOperatorExpression },
+			{ SyntaxKind.ExclusiveOrExpression, ProcessOperatorExpression },
+			{ SyntaxKind.AddExpression, ProcessOperatorExpression },
+			{ SyntaxKind.SubtractExpression, ProcessOperatorExpression },
+			{ SyntaxKind.MultiplyExpression, ProcessOperatorExpression },
+			{ SyntaxKind.DivideExpression, ProcessOperatorExpression },
+			{ SyntaxKind.ModuloExpression, ProcessOperatorExpression },
+			{ SyntaxKind.BitwiseNotExpression, ProcessOperatorExpression },
+			{ SyntaxKind.BitwiseAndExpression, ProcessOperatorExpression },
+			{ SyntaxKind.BitwiseOrExpression, ProcessOperatorExpression },
+			{ SyntaxKind.GreaterThanExpression, ProcessOperatorExpression },
+			{ SyntaxKind.GreaterThanOrEqualExpression, ProcessOperatorExpression },
+			{ SyntaxKind.LessThanExpression, ProcessOperatorExpression },
+			{ SyntaxKind.LessThanOrEqualExpression, ProcessOperatorExpression },
 		};
+
+		static void ProcessOperatorExpression(Context ctx) {
+			if (ctx.node is BinaryExpressionSyntax) {
+				ctx.symbol = ctx.semanticModel.GetSymbolInfo(ctx.node, ctx.cancellationToken).Symbol;
+			}
+		}
 
 		static void ProcessArgumentNode(Context ctx) {
 			LocateNodeInParameterList(ctx);

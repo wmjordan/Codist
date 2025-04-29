@@ -2887,4 +2887,7 @@ Discard its changes?</value>
   <data name="OT_StyleVarAsType" xml:space="preserve">
     <value>Highlight var keyword with actual type style</value>
   </data>
+  <data name="T_ForEachOnArrayWillBeOptimized" xml:space="preserve">
+    <value>Array enumeration will be optimized at runtime</value>
+  </data>
 </root>

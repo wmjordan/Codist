@@ -1577,13 +1577,6 @@ namespace Codist
 			}
 		}
 
-		public static int CompareByFieldIntegerConst(ISymbol a, ISymbol b) {
-			IFieldSymbol fa = a as IFieldSymbol, fb = b as IFieldSymbol;
-			return fa == null ? -1
-				: fb == null ? 1
-				: Convert.ToInt64(fa.ConstantValue).CompareTo(Convert.ToInt64(fb.ConstantValue));
-		}
-
 		public static bool IsBoundedGenericType(this INamedTypeSymbol type) {
 			return type?.IsGenericType == true
 				&& type.IsUnboundGenericType == false

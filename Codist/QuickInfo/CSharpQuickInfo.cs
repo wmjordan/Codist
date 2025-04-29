@@ -30,8 +30,8 @@ namespace Codist.QuickInfo
 		protected override Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
 			// Map the trigger point down to our buffer.
 			var buffer = session.GetSourceBuffer(out var triggerPoint);
-			return buffer != null ? InternalGetQuickInfoItemAsync(session, buffer, triggerPoint, cancellationToken)
-				: Task.FromResult<QuickInfoItem>(null);
+			return buffer == null ? Task.FromResult<QuickInfoItem>(null)
+				: InternalGetQuickInfoItemAsync(session, buffer, triggerPoint, cancellationToken);
 		}
 
 		sealed class Context
@@ -87,7 +87,7 @@ namespace Codist.QuickInfo
 			}
 
 			public void SetSymbol(TypeInfo typeInfo) {
-				if (typeInfo.ConvertedType != typeInfo.Type) {
+				if (typeInfo.ConvertedType.OriginallyEquals(typeInfo.Type)) {
 					symbol = typeInfo.ConvertedType;
 					isConvertedType = true;
 				}
@@ -159,8 +159,8 @@ namespace Codist.QuickInfo
 			}
 
 		PROCESS:
-			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter)) {
-				ShowArgumentInfo(context);
+			if (context.node == null) {
+				return null;
 			}
 
 			if (context.symbol == null) {
@@ -201,6 +201,9 @@ namespace Codist.QuickInfo
 				}
 			}
 		RETURN:
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter)) {
+				ShowArgumentInfo(context);
+			}
 			if (ctor == null) {
 				ctor = context.node.Parent.UnqualifyExceptNamespace() as ObjectCreationExpressionSyntax;
 			}
@@ -237,8 +240,7 @@ namespace Codist.QuickInfo
 		}
 
 		static void ResolveSymbol(Context context) {
-			context.symbol = context.token.IsKind(SyntaxKind.CloseBraceToken) ? null
-				: GetSymbol(context.semanticModel, context.node, ref context.SymbolCandidates, context.cancellationToken);
+			context.symbol = GetSymbol(context.semanticModel, context.node, ref context.SymbolCandidates, context.cancellationToken);
 			if (context.SymbolCandidates.IsDefaultOrEmpty == false) {
 				context.IsCandidate = true;
 				ShowCandidateInfo(context.Container, context.SymbolCandidates);
@@ -253,7 +255,7 @@ namespace Codist.QuickInfo
 		static Task<Chain<string>> SearchUnavailableProjectsAsync(Document doc, SyntaxToken token, CancellationToken cancellationToken) {
 			var solution = doc.Project.Solution;
 			ImmutableArray<DocumentId> linkedDocuments;
-			return solution.ProjectIds.Count == 0 || (linkedDocuments = doc.GetLinkedDocumentIds()).Length == 0
+			return solution.ProjectIds.Count < 2 || (linkedDocuments = doc.GetLinkedDocumentIds()).Length == 0
 				? Task.FromResult<Chain<string>>(null)
 				: SearchUnavailableProjectsAsync(token, solution, linkedDocuments, cancellationToken);
 		}
@@ -673,7 +675,7 @@ namespace Codist.QuickInfo
 				&& options.MatchFlags(QuickInfoOptions.AlternativeStyle) == false
 				&& method.IsGenericMethod
 				&& method.TypeArguments.Length > 0
-				&& method.TypeParameters[0] != method.TypeArguments[0]) {
+				&& method.TypeParameters[0].OriginallyEquals(method.TypeArguments[0])) {
 				ShowTypeArguments(container, method.TypeArguments, method.TypeParameters);
 			}
 			if (options.MatchFlags(QuickInfoOptions.InterfaceImplementations)) {
@@ -755,7 +757,7 @@ namespace Codist.QuickInfo
 				&& options.MatchFlags(QuickInfoOptions.AlternativeStyle) == false
 				&& typeSymbol.IsGenericType
 				&& typeSymbol.TypeArguments.Length > 0
-				&& typeSymbol.TypeParameters[0] != typeSymbol.TypeArguments[0]) {
+				&& typeSymbol.TypeParameters[0].OriginallyEquals(typeSymbol.TypeArguments[0])) {
 				ShowTypeArguments(qiContent, typeSymbol.TypeArguments, typeSymbol.TypeParameters);
 			}
 			if (typeSymbol.IsAnyKind(TypeKind.Class, TypeKind.Struct)

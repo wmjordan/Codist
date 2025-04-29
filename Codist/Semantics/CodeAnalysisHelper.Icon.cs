@@ -231,8 +231,8 @@ namespace Codist
 				case SyntaxKind.AttributeArgumentList: return IconIds.Argument;
 				case SyntaxKind.DoStatement: return IconIds.DoWhile;
 				case SyntaxKind.FixedStatement: return IconIds.Pin;
-				case SyntaxKind.ForEachStatement: return KnownImageIds.ForEach;
-				case SyntaxKind.ForStatement: return KnownImageIds.ForEachLoop;
+				case SyntaxKind.ForEachStatement: return IconIds.ForEach;
+				case SyntaxKind.ForStatement: return IconIds.For;
 				case SyntaxKind.IfStatement: return IconIds.If;
 				case SyntaxKind.LockStatement: return KnownImageIds.Lock;
 				case SyntaxKind.SwitchStatement:

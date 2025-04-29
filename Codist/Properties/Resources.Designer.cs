@@ -6805,6 +6805,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Array enumeration will be optimized at runtime.
+        /// </summary>
+        internal static string T_ForEachOnArrayWillBeOptimized {
+            get {
+                return ResourceManager.GetString("T_ForEachOnArrayWillBeOptimized", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Foreground.
         /// </summary>
         internal static string T_Foreground {

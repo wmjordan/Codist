@@ -1,11 +1,11 @@
-﻿using CLR;
+﻿using System.Collections.Immutable;
+using System.Linq;
+using System.Threading;
+using CLR;
 using Codist.Controls;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Immutable;
-using System.Linq;
-using System.Threading;
 using R = Codist.Properties.Resources;
 
 namespace Codist.QuickInfo
@@ -16,7 +16,6 @@ namespace Codist.QuickInfo
 			var node = ctx.node;
 			var container = ctx.Container;
 			var textSnapshot = ctx.CurrentSnapshot;
-			var semanticModel = ctx.semanticModel;
 			if (node.Kind().CeqAny(SyntaxKind.ArrayInitializerExpression,
 						SyntaxKind.CollectionInitializerExpression,
 						SyntaxKind.ComplexElementInitializerExpression,
@@ -43,19 +42,25 @@ namespace Codist.QuickInfo
 			if ((node is StatementSyntax || node is ExpressionSyntax || node is ConstructorInitializerSyntax) == false) {
 				return;
 			}
-			var df = semanticModel.AnalyzeDataFlow(node);
+			var df = ctx.semanticModel.AnalyzeDataFlow(node);
 			if (df.Succeeded) {
-				ListVariables(container, df.VariablesDeclared, R.T_DeclaredVariable, IconIds.DeclaredVariables);
-				if (node.Parent.Kind().IsMethodDeclaration()) {
-					var p = (semanticModel.GetSymbol(node.Parent) as IMethodSymbol).Parameters;
-					ListVariables(container, df.DataFlowsIn.RemoveRange(p), R.T_ReadVariable, IconIds.ReadVariables);
-				}
-				else {
-					ListVariables(container, df.DataFlowsIn, R.T_ReadVariable, IconIds.ReadVariables);
-				}
-				ListVariables(container, df.DataFlowsOut, R.T_WrittenVariable, IconIds.WrittenVariables);
-				ListVariables(container, df.UnsafeAddressTaken, R.T_TakenAddress, IconIds.RefVariables);
+				ShowDataFlowAnalysis(ctx, df);
 			}
+		}
+
+		static void ShowDataFlowAnalysis(Context ctx, DataFlowAnalysis df) {
+			var node = ctx.node;
+			var container = ctx.Container;
+			ListVariables(container, df.VariablesDeclared, R.T_DeclaredVariable, IconIds.DeclaredVariables);
+			if (node.Parent.Kind().IsMethodDeclaration()) {
+				var p = (ctx.semanticModel.GetSymbol(node.Parent) as IMethodSymbol).Parameters;
+				ListVariables(container, df.DataFlowsIn.RemoveRange(p), R.T_ReadVariable, IconIds.ReadVariables);
+			}
+			else {
+				ListVariables(container, df.DataFlowsIn, R.T_ReadVariable, IconIds.ReadVariables);
+			}
+			ListVariables(container, df.DataFlowsOut, R.T_WrittenVariable, IconIds.WrittenVariables);
+			ListVariables(container, df.UnsafeAddressTaken, R.T_TakenAddress, IconIds.RefVariables);
 		}
 
 		static void ListVariables(InfoContainer container, ImmutableArray<ISymbol> variables, string title, int icon) {

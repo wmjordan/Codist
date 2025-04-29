@@ -36,13 +36,39 @@ namespace Codist
 			IImmutableList<ISymbol> ListMembersByOrder(ISymbol source) {
 				var nsOrType = source as INamespaceOrTypeSymbol;
 				var members = nsOrType.FindMembers().ToImmutableArray();
-				if (source.Kind == SymbolKind.NamedType && ((INamedTypeSymbol)source).TypeKind == TypeKind.Enum) {
+				INamedTypeSymbol type;
+				if (source.Kind == SymbolKind.NamedType && (type = (INamedTypeSymbol)source).TypeKind == TypeKind.Enum) {
 					// sort enum members by value
+					switch (type.EnumUnderlyingType.SpecialType) {
+						case SpecialType.System_Boolean:
+						case SpecialType.System_Byte:
+						case SpecialType.System_Char:
+						case SpecialType.System_UInt16:
+						case SpecialType.System_UInt32:
+						case SpecialType.System_UInt64:
+							return members.Sort(CompareByFieldUnsignedIntegerConst);
+					}
 					return members.Sort(CompareByFieldIntegerConst);
 				}
 				else {
 					return members.Sort(CompareByAccessibilityKindName);
 				}
+			}
+
+			int CompareByFieldIntegerConst(ISymbol a, ISymbol b) {
+				return a is IFieldSymbol fa
+					? b is IFieldSymbol fb
+						? Convert.ToInt64(fa.ConstantValue).CompareTo(Convert.ToInt64(fb.ConstantValue))
+						: 1
+					: -1;
+			}
+
+			int CompareByFieldUnsignedIntegerConst(ISymbol a, ISymbol b) {
+				return a is IFieldSymbol fa
+					? b is IFieldSymbol fb
+						? Convert.ToInt64(fa.ConstantValue).CompareTo(Convert.ToInt64(fb.ConstantValue))
+						: 1
+					: -1;
 			}
 		}
 
