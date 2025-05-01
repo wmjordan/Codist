@@ -229,7 +229,7 @@ namespace Codist.QuickInfo
 				if (s.ContextMenu == null) {
 					var v = _quickInfoSession.TextView;
 					var ctx = SemanticContext.GetOrCreateSingletonInstance(v as IWpfTextView);
-					await ctx.UpdateAsync(_textBuffer, default);
+					await ctx.UpdateAsync(_textBuffer, default, default);
 					await SyncHelper.SwitchToMainThreadAsync(default);
 					var m = new CSharpSymbolContextMenu(_symbol,
 						v.TextBuffer.ContentType.TypeName == Constants.CodeTypes.InteractiveContent

@@ -217,11 +217,11 @@ namespace Codist
 		}
 
 		public Task<bool> UpdateAsync(CancellationToken cancellationToken) {
-			return UpdateAsync(View.TextBuffer, cancellationToken);
+			return UpdateAsync(View.TextBuffer, __DummyPosition, cancellationToken);
 		}
 
-		public Task<bool> UpdateAsync(ITextBuffer textBuffer, CancellationToken cancellationToken) {
-			if (UpdateDocumentAndWorkspace(ref __DummyPosition, ref textBuffer, out Document doc, out Workspace workspace) == false || doc == null) {
+		public Task<bool> UpdateAsync(ITextBuffer textBuffer, SnapshotPoint snapshotPoint, CancellationToken cancellationToken) {
+			if (UpdateDocumentAndWorkspace(ref snapshotPoint, ref textBuffer, out Document doc, out Workspace workspace) == false || doc == null) {
 				return Task.FromResult(false);
 			}
 			return UpdateAsync(textBuffer, doc, workspace, cancellationToken);
@@ -288,7 +288,7 @@ namespace Codist
 			return true;
 		}
 
-		bool UpdateDocumentAndWorkspace(ref SnapshotPoint position, ref ITextBuffer textBuffer, out Document document, out Workspace workspace) {
+		bool UpdateDocumentAndWorkspace(ref SnapshotPoint bufferGraphPosition, ref ITextBuffer textBuffer, out Document document, out Workspace workspace) {
 			SnapshotPoint? p;
 			var textContainer = textBuffer.AsTextContainer();
 			document = null;
@@ -296,21 +296,19 @@ namespace Codist
 				GetDocumentFromTextContainer(textContainer, workspace, ref document);
 				return true;
 			}
-			else {
-				foreach (var item in View.BufferGraph.GetTextBuffers(_ => true)) {
-					textContainer = item.AsTextContainer();
-					if (Workspace.TryGetWorkspace(textContainer, out workspace)) {
-						GetDocumentFromTextContainer(textContainer, workspace, ref document);
-						if (position.Snapshot != null
-							&& (p = View.BufferGraph.MapDownToBuffer(position, PointTrackingMode.Positive, item, PositionAffinity.Predecessor)).HasValue) {
-							position = p.Value;
-							textBuffer = item;
-							return true;
-						}
+			foreach (var item in View.BufferGraph.GetTextBuffers(_ => true)) {
+				textContainer = item.AsTextContainer();
+				if (Workspace.TryGetWorkspace(textContainer, out workspace)) {
+					GetDocumentFromTextContainer(textContainer, workspace, ref document);
+					if (bufferGraphPosition.Snapshot != null
+						&& (p = View.BufferGraph.MapDownToBuffer(bufferGraphPosition, PointTrackingMode.Positive, item, PositionAffinity.Predecessor)).HasValue) {
+						bufferGraphPosition = p.Value;
+						textBuffer = item;
+						return true;
 					}
 				}
-				return false;
 			}
+			return false;
 		}
 
 		static void GetDocumentFromTextContainer(SourceTextContainer textContainer, Workspace workspace, ref Document document) {

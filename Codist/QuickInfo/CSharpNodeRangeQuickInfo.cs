@@ -20,8 +20,9 @@ namespace Codist.QuickInfo
 		}
 
 		async Task<QuickInfoItem> InternalGetQuickInfoItemAsync(IAsyncQuickInfoSession session, SemanticContext sc, CancellationToken cancellationToken) {
-			await sc.UpdateAsync(session.GetSourceBuffer(out var triggerPoint), cancellationToken).ConfigureAwait(false);
-			var node = sc.GetNode(triggerPoint, true, false);
+			await sc.UpdateAsync(session.GetSourceBuffer(out var triggerPoint), triggerPoint, cancellationToken).ConfigureAwait(false);
+			var token = sc.Compilation.FindToken(triggerPoint, true);
+			var node = token.Parent;
 			if (node != null) {
 				node = node.GetNodePurpose();
 				session.Properties.AddProperty(typeof(CSharpNodeRangeQuickInfo), sc.MapSourceSpan(node.Span));

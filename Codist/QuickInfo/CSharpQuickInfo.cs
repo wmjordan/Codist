@@ -117,7 +117,7 @@ namespace Codist.QuickInfo
 				return null;
 			}
 			var ctx = SemanticContext.GetOrCreateSingletonInstance(v);
-			await ctx.UpdateAsync(textBuffer, cancellationToken);
+			await ctx.UpdateAsync(textBuffer, triggerPoint, cancellationToken);
 			var semanticModel = ctx.SemanticModel;
 			if (semanticModel == null) {
 				return null;
