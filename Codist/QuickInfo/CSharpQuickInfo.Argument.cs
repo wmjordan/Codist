@@ -17,33 +17,44 @@ namespace Codist.QuickInfo
 				argument = argument.Parent;
 			}
 			int depth = 0;
+			SyntaxNode parent;
 			do {
-				var n = argument as ArgumentSyntax ?? (SyntaxNode)(argument as AttributeArgumentSyntax);
-				if (n != null) {
-					ShowArgumentInfo(ctx, n);
+				if (argument.IsAnyKind(SyntaxKind.Argument, SyntaxKind.AttributeArgument)) {
+					ShowArgumentInfo(ctx, argument);
 					return;
 				}
-				n = argument.Parent;
-				if (n?.RawKind.CeqAny(SyntaxKind.ArrayInitializerExpression,
-						SyntaxKind.CollectionInitializerExpression,
-						CodeAnalysisHelper.CollectionExpression,
-						SyntaxKind.ObjectInitializerExpression,
-						SyntaxKind.ComplexElementInitializerExpression) == true) {
-					ShowLocationOfInitializerExpression(ctx.Container, argument, n);
-					if (n.IsKind(CodeAnalysisHelper.CollectionExpression) == false) {
-						var initSymbol = ctx.semanticModel.GetCollectionInitializerSymbolInfo((ExpressionSyntax)argument, ctx.cancellationToken).Symbol;
-						if (initSymbol != null) {
-							ctx.Container.Add(new ThemedTipText()
-								.SetGlyph(initSymbol.GetImageId())
-								.AddSymbol(initSymbol.ContainingType, false, __SymbolFormatter)
-								.Append(".".Render(__SymbolFormatter.PlainText))
-								.AddSymbol(initSymbol, true, __SymbolFormatter)
-								.AddParameters(initSymbol.GetParameters(), __SymbolFormatter));
+				parent = argument.Parent;
+				var parentKind = parent.Kind();
+				switch (parentKind) {
+					case SyntaxKind.SimpleLambdaExpression:
+					case SyntaxKind.ParenthesizedLambdaExpression:
+					case SyntaxKind.CompilationUnit:
+						return;
+					case SyntaxKind.ArrayInitializerExpression:
+					case SyntaxKind.CollectionInitializerExpression:
+					case SyntaxKind.ObjectInitializerExpression:
+					case SyntaxKind.ComplexElementInitializerExpression:
+					case CodeAnalysisHelper.CollectionExpression:
+						ShowLocationOfInitializerExpression(ctx.Container, argument, parent);
+						if (parent.IsKind(CodeAnalysisHelper.CollectionExpression) == false) {
+							var initSymbol = ctx.semanticModel.GetCollectionInitializerSymbolInfo((ExpressionSyntax)argument, ctx.cancellationToken).Symbol;
+							if (initSymbol != null) {
+								ctx.Container.Add(new ThemedTipText()
+									.SetGlyph(initSymbol.GetImageId())
+									.AddSymbol(initSymbol.ContainingType, false, __SymbolFormatter)
+									.Append(".".Render(__SymbolFormatter.PlainText))
+									.AddSymbol(initSymbol, true, __SymbolFormatter)
+									.AddParameters(initSymbol.GetParameters(), __SymbolFormatter));
+							}
 						}
-					}
-					return;
+						return;
+					default:
+						if (parentKind.IsDeclaration()) {
+							return;
+						}
+						break;
 				}
-			} while ((argument = argument.Parent) != null && ++depth < 4);
+			} while ((argument = parent) != null && ++depth < 4);
 		}
 
 		static void ShowLocationOfInitializerExpression(InfoContainer qiContent, SyntaxNode argument, SyntaxNode n) {
