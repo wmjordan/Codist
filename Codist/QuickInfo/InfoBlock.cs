@@ -47,7 +47,9 @@ namespace Codist.QuickInfo
 			Items = new Chain<BlockItem>(item);
 		}
 
-		public void AddBlock(BlockItem item) {
+		public bool IsEmpty => Title == null && Items.IsEmpty;
+
+		public void Add(BlockItem item) {
 			if (Items == null) {
 				Items = new Chain<BlockItem>(item);
 			}

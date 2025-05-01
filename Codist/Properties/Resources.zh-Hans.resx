@@ -2891,4 +2891,13 @@ Ctrl: 将下划线分隔的单词转换为首字母大写的单词</value>
   <data name="OT_DataFlowTip" xml:space="preserve">
     <value>显示语法结构中读写的变量</value>
   </data>
+  <data name="T_DataFlow" xml:space="preserve">
+    <value>数据流：</value>
+  </data>
+  <data name="T_ControlFlow" xml:space="preserve">
+    <value>控制流：</value>
+  </data>
+  <data name="T_ConditionalBranch" xml:space="preserve">
+    <value>条件分支：</value>
+  </data>
 </root>

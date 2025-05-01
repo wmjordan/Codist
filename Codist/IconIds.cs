@@ -146,6 +146,8 @@ namespace Codist
 		public const int XmlDocComment = KnownImageIds.Comment;
 		public const int TypeParameters = KnownImageIds.TypeDefinition;
 		public const int SyntaxNode = KnownImageIds.DecisionTree;
+		public const int DataFlow = KnownImageIds.Recursion;
+		public const int ControlFlow = KnownImageIds.Exit;
 		public const int OpCodes = KnownImageIds.Binary;
 		public const int Comment = KnownImageIds.CommentCode;
 		public const int Uncomment = KnownImageIds.UncommentCode;

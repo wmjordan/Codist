@@ -132,21 +132,21 @@ namespace Codist.QuickInfo
 				return;
 			}
 
-			var t = new GeneralInfoBlock(IconIds.ReturnValue, "Flow control:");
+			var t = new GeneralInfoBlock(IconIds.ControlFlow, R.T_ControlFlow);
 			if (returns != 0) {
-				t.AddBlock(new BlockItem(IconIds.Return, "Return: ").Append(returns.ToText(), __SymbolFormatter.Number));
+				t.Add(new BlockItem(IconIds.Return, "Return: ").Append(returns.ToText(), __SymbolFormatter.Number));
 			}
 			if (throws != 0) {
-				t.AddBlock(new BlockItem(IconIds.Warning, "Throw: ").Append(throws.ToText(), __SymbolFormatter.Number));
+				t.Add(new BlockItem(IconIds.Warning, "Throw: ").Append(throws.ToText(), __SymbolFormatter.Number));
 			}
 			if (jump != 0) {
-				t.AddBlock(new BlockItem(IconIds.GoTo, "Jump: ").Append(jump.ToText(), __SymbolFormatter.Number));
+				t.Add(new BlockItem(IconIds.GoTo, "Jump: ").Append(jump.ToText(), __SymbolFormatter.Number));
 			}
 			if (yieldReturns != 0) {
-				t.AddBlock(new BlockItem(IconIds.Return, "Yield return: ").Append(yieldReturns.ToText(), __SymbolFormatter.Number));
+				t.Add(new BlockItem(IconIds.Return, "Yield return: ").Append(yieldReturns.ToText(), __SymbolFormatter.Number));
 			}
 			if (yieldBreaks != 0) {
-				t.AddBlock(new BlockItem(IconIds.YieldBreak, "Yield break: ").Append(yieldBreaks.ToText(), __SymbolFormatter.Number));
+				t.Add(new BlockItem(IconIds.YieldBreak, "Yield break: ").Append(yieldBreaks.ToText(), __SymbolFormatter.Number));
 			}
 			ctx.Container.Add(t);
 		}

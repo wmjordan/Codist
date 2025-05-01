@@ -2891,7 +2891,7 @@ Discard its changes?</value>
     <value>Array enumeration will be optimized at runtime</value>
   </data>
   <data name="T_CapturedVariable" xml:space="preserve">
-    <value>Captured variable:</value>
+    <value>Captured variable: </value>
   </data>
   <data name="OT_ControlFlow" xml:space="preserve">
     <value>Control flow statistics</value>
@@ -2904,5 +2904,14 @@ Discard its changes?</value>
   </data>
   <data name="OT_DataFlowTip" xml:space="preserve">
     <value>Displays read and written of variables in code statements</value>
+  </data>
+  <data name="T_DataFlow" xml:space="preserve">
+    <value>Data flow:</value>
+  </data>
+  <data name="T_ControlFlow" xml:space="preserve">
+    <value>Control flow:</value>
+  </data>
+  <data name="T_ConditionalBranch" xml:space="preserve">
+    <value>Conditional branch: </value>
   </data>
 </root>

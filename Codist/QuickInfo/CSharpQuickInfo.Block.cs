@@ -51,37 +51,42 @@ namespace Codist.QuickInfo
 
 		static void ShowDataFlowAnalysis(Context ctx, DataFlowAnalysis df) {
 			var node = ctx.node;
-			var container = ctx.Container;
-			ListVariables(container, df.VariablesDeclared, R.T_DeclaredVariable, IconIds.DeclaredVariables);
+			var infoBlock = new GeneralInfoBlock(IconIds.DataFlow, R.T_DataFlow);
+			ListVariables(infoBlock, df.VariablesDeclared, R.T_DeclaredVariable, IconIds.DeclaredVariables);
 			var readVars = df.ReadInside;
 			if (node.Parent.Kind().IsMethodDeclaration()) {
 				readVars = readVars.RemoveRange(((IMethodSymbol)ctx.semanticModel.GetSymbol(node.Parent)).Parameters);
 			}
-			ListVariables(container, readVars, R.T_ReadVariable, IconIds.ReadVariables);
-			ListVariables(container, df.WrittenInside, R.T_WrittenVariable, IconIds.WrittenVariables);
-			ListVariables(container, df.UnsafeAddressTaken, R.T_TakenAddress, IconIds.RefVariables);
-			ListVariables(container, df.CapturedInside, R.T_CapturedVariable, IconIds.CapturedVariables);
+			ListVariables(infoBlock, readVars, R.T_ReadVariable, IconIds.ReadVariables);
+			ListVariables(infoBlock, df.WrittenInside, R.T_WrittenVariable, IconIds.WrittenVariables);
+			ListVariables(infoBlock, df.UnsafeAddressTaken, R.T_TakenAddress, IconIds.RefVariables);
+			ListVariables(infoBlock, df.CapturedInside, R.T_CapturedVariable, IconIds.CapturedVariables);
+			if (infoBlock.IsEmpty == false) {
+				ctx.Container.Add(infoBlock);
+			}
 		}
 
-		static void ListVariables(InfoContainer container, ImmutableArray<ISymbol> variables, string title, int icon) {
+		static void ListVariables(GeneralInfoBlock container, ImmutableArray<ISymbol> variables, string title, int icon) {
 			if (variables.IsEmpty) {
 				return;
 			}
-			var p = new ThemedTipText(title, true).Append(variables.Length).AppendLine();
+			var p = new BlockItem(icon, title, true)
+				.Append(variables.Length.ToText(), true, __SymbolFormatter.Number)
+				.AppendLine();
 			bool s = false;
 			foreach (var item in variables) {
 				if (s) {
 					p.Append(", ");
 				}
 				if (item.IsImplicitlyDeclared) {
-					p.AddSymbol(item.GetReturnType(), item.Name, __SymbolFormatter);
+					p.AddSymbol(item.GetReturnType(), item.Name);
 				}
 				else {
-					p.AddSymbol(item, false, __SymbolFormatter);
+					p.AddSymbol(item, false);
 				}
 				s = true;
 			}
-			container.Add(new ThemedTipDocument().Append(new ThemedTipParagraph(icon, p)));
+			container.Add(p);
 		}
 
 		static void ShowCapturedVariables(SyntaxNode node, ISymbol symbol, SemanticModel semanticModel, ThemedTipDocument tip, CancellationToken cancellationToken) {
