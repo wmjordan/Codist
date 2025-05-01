@@ -148,15 +148,15 @@ namespace Codist.Taggers
 					}
 					var textSpan = new TextSpan(span.Start.Position, span.Length);
 					foreach (var token in compilationUnit.DescendantTokens(textSpan)) {
+						if (hasFirstToken == false) {
+							firstToken = token;
+							hasFirstToken = true;
+						}
 						if (textSpan.Contains(token.SpanStart) == false) {
 							if (token.HasLeadingTrivia) {
 								TagXmlDocTokens(token.LeadingTrivia, textSpan, ctx);
 							}
 							continue;
-						}
-						if (hasFirstToken == false) {
-							firstToken = token;
-							hasFirstToken = true;
 						}
 						TokenTaggers.Tag(in token, ctx);
 					}
