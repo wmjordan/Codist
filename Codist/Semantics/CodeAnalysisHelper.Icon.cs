@@ -265,7 +265,7 @@ namespace Codist
 				case SyntaxKind.YieldReturnStatement: return KnownImageIds.Yield;
 				case SyntaxKind.GotoStatement:
 				case SyntaxKind.GotoCaseStatement:
-				case SyntaxKind.GotoDefaultStatement: return KnownImageIds.GoToSourceCode;
+				case SyntaxKind.GotoDefaultStatement: return IconIds.GoTo;
 				case SyntaxKind.LocalFunctionStatement: return IconIds.LocalFunction;
 				case SyntaxKind.RegionDirectiveTrivia: return IconIds.Region;
 				case SyntaxKind.EndRegionDirectiveTrivia: return KnownImageIds.ToolstripPanelBottom;

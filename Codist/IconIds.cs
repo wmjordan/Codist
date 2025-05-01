@@ -68,6 +68,7 @@ namespace Codist
 		public const int Input = KnownImageIds.Input;
 		public const int Attribute = KnownImageIds.FormPostBodyParameterNode;
 		public const int Return = KnownImageIds.Return;
+		public const int GoTo = KnownImageIds.GoToSourceCode;
 		public const int Value = KnownImageIds.Field;
 		public const int If = KnownImageIds.If;
 		public const int Else = KnownImageIds.GoToNextUncovered;
@@ -130,6 +131,7 @@ namespace Codist
 		public const int DeclaredVariables = KnownImageIds.AddVariable;
 		public const int ReadVariables = KnownImageIds.ExternalVariableValue;
 		public const int WrittenVariables = KnownImageIds.PromoteVariable;
+		public const int CapturedVariables = KnownImageIds.InsertClause;
 		public const int RefVariables = KnownImageIds.GlobalVariable;
 		public const int TypeAndDelegate = KnownImageIds.EntityContainer;
 		public const int ReturnValue = KnownImageIds.ReturnValue;
@@ -143,6 +145,7 @@ namespace Codist
 		public const int MethodOverloads = KnownImageIds.MethodSet;
 		public const int XmlDocComment = KnownImageIds.Comment;
 		public const int TypeParameters = KnownImageIds.TypeDefinition;
+		public const int SyntaxNode = KnownImageIds.DecisionTree;
 		public const int OpCodes = KnownImageIds.Binary;
 		public const int Comment = KnownImageIds.CommentCode;
 		public const int Uncomment = KnownImageIds.UncommentCode;
@@ -206,6 +209,7 @@ namespace Codist
 		public const int SelectText = KnownImageIds.RectangleSelection;
 		public const int SelectAll = KnownImageIds.SelectAll;
 		public const int Open = KnownImageIds.Open;
+		public const int Folder = KnownImageIds.FolderClosed;
 		public const int OpenFolder = KnownImageIds.OpenFolder;
 		public const int OpenWithVisualStudio = KnownImageIds.VisualStudio;
 		public const int OpenWithCmd = KnownImageIds.Console;
@@ -288,6 +292,7 @@ namespace Codist
 		public const int Warning = KnownImageIds.StatusWarningOutline;
 		public const int Error = KnownImageIds.StatusInvalid;
 		public const int Stop = KnownImageIds.StatusNo;
+		public const int AddFolder = KnownImageIds.AddFolder;
 		#endregion
 		#region symbol usage icons
 		public const int UseToWrite = KnownImageIds.Writeable;
