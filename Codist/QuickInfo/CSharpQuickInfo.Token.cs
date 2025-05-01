@@ -162,8 +162,13 @@ namespace Codist.QuickInfo
 		}
 
 		static void ProcessThrowKeyword(Context ctx) {
-			if ((ctx.node = ctx.token.Parent) is ThrowExpressionSyntax t) {
-				ctx.SetSymbol(ctx.semanticModel.GetTypeInfo(ctx.node));
+			if ((ctx.node = ctx.token.Parent) is ThrowStatementSyntax t) {
+				// do not use SetSymbol which prefers ConvertedType,
+				// which will be Exception instead of concrete exception
+				ctx.symbol = ctx.semanticModel.GetTypeInfo(t.Expression).Type;
+			}
+			else if (ctx.node is ThrowExpressionSyntax te) {
+				ctx.symbol = ctx.semanticModel.GetTypeInfo(te.Expression).Type;
 			}
 			if (ctx.symbol != null) {
 				ctx.State = State.Return;
