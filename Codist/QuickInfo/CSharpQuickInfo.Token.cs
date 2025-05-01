@@ -310,7 +310,7 @@ namespace Codist.QuickInfo
 			ctx.node = node;
 			ctx.symbol = info.GetEnumeratorMethod;
 			var collectionType = ctx.semanticModel.GetTypeInfo(node.Expression, ctx.cancellationToken).Type;
-			if (collectionType != null) {
+			if (collectionType != null && collectionType.TypeKind != TypeKind.Error) {
 				var tip = new ThemedTipDocument();
 				tip.AppendParagraph(IconIds.ForEach, new ThemedTipText()
 						.Append("foreach".Render(__SymbolFormatter.Keyword))
