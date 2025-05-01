@@ -255,6 +255,10 @@ namespace Codist.QuickInfo
 					ctx.Container.Add(new ThemedTipText(R.T_PatternCount + ((PatternSyntax)node).GetListPatternsCount().ToText()).SetGlyph(IconIds.InstanceMember));
 				}
 				ctx.SetSymbol(ctx.semanticModel.GetTypeInfo(node, ctx.cancellationToken));
+				if (ctx.symbol != null) {
+					ctx.State = State.Process;
+					return;
+				}
 			}
 			if (ctx.symbol == null) {
 				ProcessParenToken(ctx);
