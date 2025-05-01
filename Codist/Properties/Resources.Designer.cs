@@ -3448,7 +3448,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Denotes variable reassignment.
+        ///   Looks up a localized string similar to Variable reassignment.
         /// </summary>
         internal static string OT_DenoteVariableReassignment {
             get {
@@ -5622,7 +5622,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 1 switch section, &lt;C&gt;cases.
+        ///   Looks up a localized string similar to 1 switch section, &lt;C&gt; cases.
         /// </summary>
         internal static string T_1SectionCases {
             get {

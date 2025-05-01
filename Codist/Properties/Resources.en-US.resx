@@ -2834,7 +2834,7 @@ Discard its changes?</value>
     <value>Sub-pattern count: </value>
   </data>
   <data name="T_1SectionCases" xml:space="preserve">
-    <value>1 switch section, &lt;C&gt;cases</value>
+    <value>1 switch section, &lt;C&gt; cases</value>
   </data>
   <data name="T_SectionsCases" xml:space="preserve">
     <value>&lt;C&gt; switch sections, &lt;S&gt; cases</value>
@@ -2873,7 +2873,7 @@ Discard its changes?</value>
     <value>Tuple element &lt;N&gt;</value>
   </data>
   <data name="OT_DenoteVariableReassignment" xml:space="preserve">
-    <value>Denotes variable reassignment</value>
+    <value>Variable reassignment</value>
   </data>
   <data name="OT_DenoteVariableReassignmentTip" xml:space="preserve">
     <value>Displays information whether a variable or a parameter is being reassigned after it is declared</value>
