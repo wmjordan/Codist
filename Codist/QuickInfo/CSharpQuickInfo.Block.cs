@@ -39,7 +39,8 @@ namespace Codist.QuickInfo
 						.SetGlyph(IconIds.LineOfCode)
 					);
 			}
-			if ((node is StatementSyntax || node is ExpressionSyntax || node is ConstructorInitializerSyntax) == false) {
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.DataFlow) == false
+				|| (node is StatementSyntax || node is ExpressionSyntax || node is ConstructorInitializerSyntax) == false) {
 				return;
 			}
 			var df = ctx.semanticModel.AnalyzeDataFlow(node);
@@ -52,15 +53,14 @@ namespace Codist.QuickInfo
 			var node = ctx.node;
 			var container = ctx.Container;
 			ListVariables(container, df.VariablesDeclared, R.T_DeclaredVariable, IconIds.DeclaredVariables);
+			var readVars = df.ReadInside;
 			if (node.Parent.Kind().IsMethodDeclaration()) {
-				var p = (ctx.semanticModel.GetSymbol(node.Parent) as IMethodSymbol).Parameters;
-				ListVariables(container, df.DataFlowsIn.RemoveRange(p), R.T_ReadVariable, IconIds.ReadVariables);
+				readVars = readVars.RemoveRange(((IMethodSymbol)ctx.semanticModel.GetSymbol(node.Parent)).Parameters);
 			}
-			else {
-				ListVariables(container, df.DataFlowsIn, R.T_ReadVariable, IconIds.ReadVariables);
-			}
-			ListVariables(container, df.DataFlowsOut, R.T_WrittenVariable, IconIds.WrittenVariables);
+			ListVariables(container, readVars, R.T_ReadVariable, IconIds.ReadVariables);
+			ListVariables(container, df.WrittenInside, R.T_WrittenVariable, IconIds.WrittenVariables);
 			ListVariables(container, df.UnsafeAddressTaken, R.T_TakenAddress, IconIds.RefVariables);
+			ListVariables(container, df.CapturedInside, R.T_CapturedVariable, IconIds.CapturedVariables);
 		}
 
 		static void ListVariables(InfoContainer container, ImmutableArray<ISymbol> variables, string title, int icon) {
@@ -93,7 +93,7 @@ namespace Codist.QuickInfo
 				if (ss != null) {
 					var captured = semanticModel.GetCapturedVariables(ss);
 					if (captured.Length > 0) {
-						var p = new ThemedTipParagraph(IconIds.ReadVariables, new ThemedTipText().Append(R.T_CapturedVariables, true));
+						var p = new ThemedTipParagraph(IconIds.CapturedVariables, new ThemedTipText().Append(R.T_CapturedVariables, true));
 						int i = 0;
 						foreach (var item in captured) {
 							p.Content.Append(++i == 1 ? ": " : ", ").AddSymbol(item, false, __SymbolFormatter);

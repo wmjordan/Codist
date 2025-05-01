@@ -2890,4 +2890,19 @@ Discard its changes?</value>
   <data name="T_ForEachOnArrayWillBeOptimized" xml:space="preserve">
     <value>Array enumeration will be optimized at runtime</value>
   </data>
+  <data name="T_CapturedVariable" xml:space="preserve">
+    <value>Captured variable:</value>
+  </data>
+  <data name="OT_ControlFlow" xml:space="preserve">
+    <value>Control flow statistics</value>
+  </data>
+  <data name="OT_ControlFlowTip" xml:space="preserve">
+    <value>Counts numbers of return, throw, yield, etc. statements within statements</value>
+  </data>
+  <data name="OT_DataFlow" xml:space="preserve">
+    <value>Data flow statistics</value>
+  </data>
+  <data name="OT_DataFlowTip" xml:space="preserve">
+    <value>Displays read and written of variables in code statements</value>
+  </data>
 </root>

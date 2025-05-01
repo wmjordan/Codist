@@ -74,8 +74,8 @@ namespace Codist.QuickInfo
 
 			public ITextSnapshot CurrentSnapshot => TextBuffer.CurrentSnapshot;
 
-			public void UseTokenNode(bool getInnerMostForTie = false) {
-				node = CompilationUnit.FindNode(token.Span, false, getInnerMostForTie);
+			public void UseTokenNode() {
+				node = token.Parent;
 			}
 
 			public void SetSymbol(SymbolInfo symbolInfo) {

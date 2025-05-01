@@ -2876,4 +2876,19 @@ Ctrl: 将下划线分隔的单词转换为首字母大写的单词</value>
   <data name="T_ForEachOnArrayWillBeOptimized" xml:space="preserve">
     <value>数组遍历将在运行时被优化</value>
   </data>
+  <data name="T_CapturedVariable" xml:space="preserve">
+    <value>捕获的变量：</value>
+  </data>
+  <data name="OT_ControlFlow" xml:space="preserve">
+    <value>控制流统计信息</value>
+  </data>
+  <data name="OT_ControlFlowTip" xml:space="preserve">
+    <value>统计语法结构中出现的return、throw、yield等语句的数量</value>
+  </data>
+  <data name="OT_DataFlow" xml:space="preserve">
+    <value>数据流统计信息</value>
+  </data>
+  <data name="OT_DataFlowTip" xml:space="preserve">
+    <value>显示语法结构中读写的变量</value>
+  </data>
 </root>

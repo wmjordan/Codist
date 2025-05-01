@@ -31,6 +31,13 @@ namespace Codist.QuickInfo
 			{ SyntaxKind.EqualsEqualsToken, ProcessAsConvertedType },
 			{ SyntaxKind.EqualsToken, ProcessAsConvertedType },
 			{ SyntaxKind.SwitchKeyword, ProcessSwitchToken },
+			{ SyntaxKind.IfKeyword, ProcessIfToken },
+			{ SyntaxKind.DoKeyword, ProcessStatementKeyword },
+			{ SyntaxKind.WhileKeyword, ProcessWhileToken },
+			{ SyntaxKind.ForKeyword, ProcessStatementKeyword },
+			{ SyntaxKind.ForEachVariableStatement, ProcessStatementKeyword },
+			{ SyntaxKind.InKeyword, ProcessInToken },
+			{ SyntaxKind.UsingKeyword, ProcessUsingToken },
 			{ SyntaxKind.NullKeyword, ProcessValueToken },
 			{ SyntaxKind.QuestionToken, ProcessValueToken },
 			{ SyntaxKind.ColonToken, ProcessValueToken },
@@ -53,8 +60,6 @@ namespace Codist.QuickInfo
 			{ SyntaxKind.SemicolonToken, UsePreviousToken },
 			{ SyntaxKind.OpenBracketToken, ProcessBracketToken },
 			{ SyntaxKind.CloseBracketToken, ProcessBracketToken },
-			{ SyntaxKind.UsingKeyword, ProcessUsingToken },
-			{ SyntaxKind.InKeyword, ProcessInToken },
 			{ SyntaxKind.LessThanToken, ProcessCompareToken },
 			{ SyntaxKind.LessThanEqualsToken, ProcessCompareToken },
 			{ SyntaxKind.GreaterThanToken, ProcessCompareToken },
@@ -105,7 +110,7 @@ namespace Codist.QuickInfo
 		}
 
 		static void ProcessCharToken(Context ctx) {
-			ctx.UseTokenNode(true);
+			ctx.UseTokenNode();
 			ctx.symbol = ctx.semanticModel.Compilation.GetSpecialType(SpecialType.System_Char);
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.NumericValues)) {
 				if (ctx.token.Span.Length >= 8) { // tooltip for '\u0000' presentation
@@ -118,7 +123,7 @@ namespace Codist.QuickInfo
 		}
 
 		static void ProcessNumericToken(Context ctx) {
-			ctx.UseTokenNode(true);
+			ctx.UseTokenNode();
 			ctx.symbol = ctx.semanticModel.GetSystemTypeSymbol(ctx.token.Value.GetType().Name);
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.NumericValues)) {
 				ctx.Container.Add(ToolTipHelper.ShowNumericRepresentations(ctx.node));
@@ -226,6 +231,8 @@ namespace Codist.QuickInfo
 		static void ProcessUsingToken(Context ctx) {
 			ctx.node = ctx.token.Parent;
 			ctx.symbol = ctx.semanticModel.GetDisposeMethodForUsingStatement(ctx.node, ctx.cancellationToken);
+			ShowBlockInfo(ctx);
+			ShowControlFlowInfo(ctx);
 			ctx.State = State.Return;
 		}
 
@@ -314,15 +321,22 @@ namespace Codist.QuickInfo
 				}
 				ctx.Container.Add(tip);
 			}
+			ShowControlFlowInfo(ctx);
 			ctx.State = State.Return;
 		}
 
 		static void ProcessCaseToken(Context ctx) {
 			if ((ctx.node = ctx.token.Parent).Parent is SwitchSectionSyntax section) {
-				var statements = section.Statements;
-				var df = ctx.semanticModel.AnalyzeDataFlow(statements.First(), statements.Last());
-				if (df.Succeeded) {
-					ShowDataFlowAnalysis(ctx, df);
+				ctx.node = section;
+				if (Config.Instance.QuickInfoOptions.HasAnyFlag(QuickInfoOptions.CodeFlow)) {
+					ShowControlFlowInfo(ctx);
+					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.DataFlow)) {
+						var statements = section.Statements;
+						var df = ctx.semanticModel.AnalyzeDataFlow(statements.First(), statements.Last());
+						if (df.Succeeded) {
+							ShowDataFlowAnalysis(ctx, df);
+						}
+					}
 				}
 				ctx.State = State.Return;
 			}
@@ -353,6 +367,26 @@ namespace Codist.QuickInfo
 			ctx.State = State.Process;
 		}
 
+		static void ProcessStatementKeyword(Context ctx) {
+			ctx.UseTokenNode();
+			ShowBlockInfo(ctx);
+			ShowControlFlowInfo(ctx);
+			ctx.State = State.Return;
+		}
+
+		static void ProcessIfToken(Context ctx) {
+			ctx.UseTokenNode();
+			var node = ctx.node as IfStatementSyntax;
+			var conditions = 1;
+			while ((node = node.Else?.Statement as IfStatementSyntax) != null) {
+				conditions++;
+			}
+			if (conditions > 1) {
+				ctx.Container.Add(new GeneralInfoBlock(new BlockItem(IconIds.If, "Condition: ").Append(conditions.ToText(), __SymbolFormatter.Number)));
+			}
+			ProcessStatementKeyword(ctx);
+		}
+
 		static void ProcessSwitchToken(Context ctx) {
 			var node = ctx.node = ctx.token.Parent;
 			if (node.IsKind(CodeAnalysisHelper.SwitchExpression)) {
@@ -365,7 +399,18 @@ namespace Codist.QuickInfo
 				}
 				ctx.isConvertedType = true;
 			}
+			else if (node.IsKind(SyntaxKind.SwitchStatement)) {
+				ProcessSwitchStatementNode(ctx);
+				ctx.State = State.Return;
+				return;
+			}
 			ctx.State = State.AsType;
+		}
+
+		static void ProcessWhileToken(Context ctx) {
+			if (ctx.token.Parent.IsKind(SyntaxKind.WhileStatement)) {
+				ProcessStatementKeyword(ctx);
+			}
 		}
 
 		static void ProcessAsConvertedType(Context ctx) {

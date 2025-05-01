@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using Codist.Controls;
+using CLR;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -13,19 +12,18 @@ namespace Codist.QuickInfo
 	{
 		static readonly Dictionary<SyntaxKind, Action<Context>> __NodeProcessors = new Dictionary<SyntaxKind, Action<Context>> {
 			{ SyntaxKind.Block, ShowBlockInfo },
-			{ SyntaxKind.SwitchStatement, ProcessSwitchStatementNode },
-			{ SyntaxKind.MethodDeclaration, ProcessMethodBody },
-			{ SyntaxKind.OperatorDeclaration, ProcessMethodBody },
-			{ SyntaxKind.ConversionOperatorDeclaration, ProcessMethodBody },
-			{ SyntaxKind.ConstructorDeclaration, ProcessMethodBody },
-			{ SyntaxKind.DestructorDeclaration, ProcessMethodBody },
-			{ SyntaxKind.GetAccessorDeclaration, ProcessMethodBody },
-			{ SyntaxKind.SetAccessorDeclaration, ProcessMethodBody },
-			{ SyntaxKind.AddAccessorDeclaration, ProcessMethodBody },
-			{ SyntaxKind.RemoveAccessorDeclaration, ProcessMethodBody },
-			{ SyntaxKind.LocalFunctionStatement, ProcessMethodBody },
-			{ SyntaxKind.SimpleLambdaExpression, ProcessMethodBody },
-			{ SyntaxKind.ParenthesizedLambdaExpression, ProcessMethodBody },
+			{ SyntaxKind.MethodDeclaration, ShowControlFlowInfo },
+			{ SyntaxKind.OperatorDeclaration, ShowControlFlowInfo },
+			{ SyntaxKind.ConversionOperatorDeclaration, ShowControlFlowInfo },
+			{ SyntaxKind.ConstructorDeclaration, ShowControlFlowInfo },
+			{ SyntaxKind.DestructorDeclaration, ShowControlFlowInfo },
+			{ SyntaxKind.GetAccessorDeclaration, ShowControlFlowInfo },
+			{ SyntaxKind.SetAccessorDeclaration, ShowControlFlowInfo },
+			{ SyntaxKind.AddAccessorDeclaration, ShowControlFlowInfo },
+			{ SyntaxKind.RemoveAccessorDeclaration, ShowControlFlowInfo },
+			{ SyntaxKind.LocalFunctionStatement, ShowControlFlowInfo },
+			{ SyntaxKind.SimpleLambdaExpression, ShowControlFlowInfo },
+			{ SyntaxKind.ParenthesizedLambdaExpression, ShowControlFlowInfo },
 			{ SyntaxKind.Argument, ProcessArgumentNode },
 			{ SyntaxKind.ArgumentList, ProcessArgumentNode },
 			{ SyntaxKind.LetClause, ProcessLinqNode },
@@ -67,7 +65,6 @@ namespace Codist.QuickInfo
 		}
 
 		static void ProcessSwitchStatementNode(Context ctx) {
-			ShowBlockInfo(ctx);
 			var node = ctx.node;
 			var sections = ((SwitchStatementSyntax)node).Sections;
 			var c = sections.Count;
@@ -89,36 +86,23 @@ namespace Codist.QuickInfo
 					tip = R.T_SectionsCases.Replace("<C>", c.ToText()).Replace("<S>", cases.ToText());
 					break;
 			}
-			ctx.Container.Add(new ThemedTipText(tip).SetGlyph(IconIds.Switch));
+			ctx.Container.Add(new GeneralInfoBlock(new BlockItem(IconIds.Switch, tip)));
+			ShowBlockInfo(ctx);
+			ShowControlFlowInfo(ctx);
+			ctx.State = State.Return;
 		}
 
-		static void ProcessMethodBody(Context ctx) {
-			BlockSyntax block;
-			var node = ctx.node;
-			if (node is BaseMethodDeclarationSyntax m) {
-				block = m.Body;
-			}
-			else if (node is AccessorDeclarationSyntax a) {
-				block = a.Body;
-			}
-			else if (node is LocalFunctionStatementSyntax l) {
-				block = l.Body;
-			}
-			else if (node is ParenthesizedLambdaExpressionSyntax pl) {
-				block = pl.Body as BlockSyntax;
-			}
-			else if (node is SimpleLambdaExpressionSyntax sl) {
-				block = sl.Body as BlockSyntax;
-			}
-			else {
+		static void ShowControlFlowInfo(Context ctx) {
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ControlFlow) == false) {
 				return;
 			}
-			if (block == null) {
-				return;
+			var node = ctx.node ?? (ctx.node = ctx.token.Parent);
+			int returns = 0, throws = 0, yieldReturns = 0, yieldBreaks = 0, jump = 0;
+			if (node.RawKind.CeqAny(SyntaxKind.ParenthesizedLambdaExpression, SyntaxKind.SimpleLambdaExpression, SyntaxKind.LocalFunctionStatement, SyntaxKind.AnonymousMethodExpression)) {
+				GetAnalysisRange(ref node);
 			}
-
-			int returns = 0, throws = 0, yieldReturns = 0, yieldBreaks = 0;
-			foreach (var item in block.DescendantNodes(n => n.IsAnyKind(SyntaxKind.ParenthesizedLambdaExpression, SyntaxKind.SimpleLambdaExpression, SyntaxKind.LocalFunctionStatement, SyntaxKind.AnonymousMethodExpression) == false)) {
+			var k = node.RawKind;
+			foreach (var item in node.DescendantNodes(n => n.RawKind.CeqAny(SyntaxKind.ParenthesizedLambdaExpression, SyntaxKind.SimpleLambdaExpression, SyntaxKind.LocalFunctionStatement, SyntaxKind.AnonymousMethodExpression, SyntaxKind.AttributeList) == false)) {
 				switch (item.Kind()) {
 					case SyntaxKind.ReturnStatement:
 						returns++;
@@ -133,18 +117,30 @@ namespace Codist.QuickInfo
 					case SyntaxKind.YieldReturnStatement:
 						yieldReturns++;
 						break;
+					case SyntaxKind.GotoStatement:
+						jump++;
+						break;
+					case SyntaxKind.ContinueStatement:
+					case SyntaxKind.BreakStatement:
+						if (item.Parent.FirstAncestorOrSelf<SyntaxNode>(n => n.RawKind == k) == ctx.node) {
+							jump++;
+						}
+						break;
 				}
 			}
-			if (returns == 0 && throws == 0 && yieldBreaks == 0 && yieldReturns == 0) {
+			if (returns == 0 && throws == 0 && yieldBreaks == 0 && yieldReturns == 0 && jump == 0) {
 				return;
 			}
 
-			var t = new GeneralInfoBlock(IconIds.ReturnValue, "Exit points");
+			var t = new GeneralInfoBlock(IconIds.ReturnValue, "Flow control:");
 			if (returns != 0) {
 				t.AddBlock(new BlockItem(IconIds.Return, "Return: ").Append(returns.ToText(), __SymbolFormatter.Number));
 			}
 			if (throws != 0) {
 				t.AddBlock(new BlockItem(IconIds.Warning, "Throw: ").Append(throws.ToText(), __SymbolFormatter.Number));
+			}
+			if (jump != 0) {
+				t.AddBlock(new BlockItem(IconIds.GoTo, "Jump: ").Append(jump.ToText(), __SymbolFormatter.Number));
 			}
 			if (yieldReturns != 0) {
 				t.AddBlock(new BlockItem(IconIds.Return, "Yield return: ").Append(yieldReturns.ToText(), __SymbolFormatter.Number));
@@ -153,6 +149,33 @@ namespace Codist.QuickInfo
 				t.AddBlock(new BlockItem(IconIds.YieldBreak, "Yield break: ").Append(yieldBreaks.ToText(), __SymbolFormatter.Number));
 			}
 			ctx.Container.Add(t);
+		}
+
+		static void GetAnalysisRange(ref SyntaxNode node) {
+			switch (node.Kind()) {
+				case SyntaxKind.LocalFunctionStatement:
+					var f = (LocalFunctionStatementSyntax)node;
+					if (f.Body != null) {
+						node = f.Body;
+					}
+					else if (f.ExpressionBody != null) {
+						node = f.ExpressionBody;
+					}
+					return;
+				case SyntaxKind.SimpleLambdaExpression:
+				case SyntaxKind.ParenthesizedLambdaExpression:
+					var l = (LambdaExpressionSyntax)node;
+					if (l.Body != null) {
+						node = l.Body;
+					}
+					return;
+				case SyntaxKind.AnonymousMethodExpression:
+					var a = (AnonymousMethodExpressionSyntax)node;
+					if (a.Body != null) {
+						node = a.Body;
+					}
+					return;
+			}
 		}
 	}
 }

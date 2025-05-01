@@ -3313,6 +3313,24 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Control flow statistics.
+        /// </summary>
+        internal static string OT_ControlFlow {
+            get {
+                return ResourceManager.GetString("OT_ControlFlow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Counts numbers of return, throw, yield, etc. statements within statements.
+        /// </summary>
+        internal static string OT_ControlFlowTip {
+            get {
+                return ResourceManager.GetString("OT_ControlFlowTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Monitor CPU.
         /// </summary>
         internal static string OT_CpuUsage {
@@ -3399,6 +3417,24 @@ namespace Codist.Properties {
         internal static string OT_CtrlSuppressQuickInfoTip {
             get {
                 return ResourceManager.GetString("OT_CtrlSuppressQuickInfoTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Data flow statistics.
+        /// </summary>
+        internal static string OT_DataFlow {
+            get {
+                return ResourceManager.GetString("OT_DataFlow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Displays read and written of variables in code statements.
+        /// </summary>
+        internal static string OT_DataFlowTip {
+            get {
+                return ResourceManager.GetString("OT_DataFlowTip", resourceCulture);
             }
         }
         
@@ -5933,6 +5969,15 @@ namespace Codist.Properties {
         internal static string T_BuildVersion {
             get {
                 return ResourceManager.GetString("T_BuildVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Captured variable:.
+        /// </summary>
+        internal static string T_CapturedVariable {
+            get {
+                return ResourceManager.GetString("T_CapturedVariable", resourceCulture);
             }
         }
         
