@@ -1428,7 +1428,9 @@ namespace Codist
 		}
 
 		public static bool OriginallyEquals(this ISymbol a, ISymbol b) {
-			return a is null ? b is null ? true : false : a.OriginalDefinition.Equals(b.OriginalDefinition);
+			return a is null
+				? b is null
+				: b != null && a.OriginalDefinition.Equals(b.OriginalDefinition);
 		}
 
 		public static int CompareSymbol<TSymbol>(TSymbol a, TSymbol b) where TSymbol : ISymbol {
