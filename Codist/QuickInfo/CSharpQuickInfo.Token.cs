@@ -133,7 +133,7 @@ namespace Codist.QuickInfo
 		}
 
 		static void ProcessStringToken(Context ctx) {
-			ctx.UseTokenNode(true);
+			ctx.UseTokenNode();
 			ctx.symbol = ctx.semanticModel.Compilation.GetSpecialType(SpecialType.System_String);
 			ctx.isConvertedType = true;
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.String)
