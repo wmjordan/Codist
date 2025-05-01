@@ -752,6 +752,8 @@ namespace Codist
 						output.Append('>');
 					}
 					return;
+				case TypeKind.Error:
+					output.Append(type.Name.Length != 0 ? type.Name : "!"); return;
 			}
 			output.Append(type.GetSpecialTypeAlias() ?? type.Name);
 			var nt = type as INamedTypeSymbol;
