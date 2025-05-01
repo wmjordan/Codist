@@ -87,7 +87,7 @@ namespace Codist.QuickInfo
 			}
 
 			public void SetSymbol(TypeInfo typeInfo) {
-				if (typeInfo.ConvertedType.OriginallyEquals(typeInfo.Type)) {
+				if (typeInfo.ConvertedType.OriginallyEquals(typeInfo.Type) == false) {
 					symbol = typeInfo.ConvertedType;
 					isConvertedType = true;
 				}
