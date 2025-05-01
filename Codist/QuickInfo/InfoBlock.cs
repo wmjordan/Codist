@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.Composition;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -6,12 +7,29 @@ using System.Windows.Media;
 using CLR;
 using Codist.Controls;
 using Microsoft.CodeAnalysis;
+using Microsoft.VisualStudio.Text.Adornments;
+using Microsoft.VisualStudio.Text.Editor;
+using Microsoft.VisualStudio.Utilities;
 
 namespace Codist.QuickInfo
 {
 	abstract class InfoBlock
 	{
 		public abstract UIElement ToUI();
+	}
+
+	[Export(typeof(IViewElementFactory))]
+	[Name("InfoBlock Quick Info Factory")]
+	[TypeConversion(from: typeof(InfoBlock), to: typeof(UIElement))]
+	[Order(Before = "Default object converter")]
+	public class InfoBlockQuickInfoFactory : IViewElementFactory
+	{
+		public TView CreateViewElement<TView>(ITextView textView, object model)
+			where TView : class {
+			return model is InfoBlock data
+				? data.ToUI().Tag() as TView
+				: null;
+		}
 	}
 
 	sealed class GeneralInfoBlock : InfoBlock
@@ -48,7 +66,7 @@ namespace Codist.QuickInfo
 			}
 			if (Items != null) {
 				foreach (var item in Items) {
-					doc.AppendParagraph(item.IconId, item.ToUI());
+					doc.AppendParagraph(item.IconId, item.ToTextBlock());
 				}
 			}
 			return doc;
@@ -66,8 +84,11 @@ namespace Codist.QuickInfo
 		public string Text { get; }
 	}
 
-	sealed class BlockItem
+	sealed class BlockItem : InfoBlock
 	{
+		public BlockItem() {
+			Segments = new Chain<Segment>();
+		}
 		public BlockItem(int iconId, string text) {
 			IconId = iconId;
 			Segments = new Chain<Segment>(new TextSegment(text));
@@ -79,6 +100,11 @@ namespace Codist.QuickInfo
 
 		public int IconId { get; set; }
 		public Chain<Segment> Segments { get; }
+
+		public BlockItem SetGlyph(int iconId) {
+			IconId = iconId;
+			return this;
+		}
 
 		public BlockItem Append(string text) {
 			Segments.Add(new TextSegment(text));
@@ -120,13 +146,21 @@ namespace Codist.QuickInfo
 			return this;
 		}
 
-		public TextBlock ToUI() {
+		public GeneralInfoBlock MakeBlock() {
+			return new GeneralInfoBlock(this);
+		}
+
+		public TextBlock ToTextBlock() {
 			var text = new ThemedTipText();
 			var inlines = text.Inlines;
 			foreach (var item in Segments) {
 				item.ToUI(inlines);
 			}
 			return text;
+		}
+
+		public override UIElement ToUI() {
+			return ToTextBlock();
 		}
 	}
 

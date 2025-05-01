@@ -221,11 +221,11 @@ namespace Codist.QuickInfo
 				if (context.symbol != null) {
 					// place holder
 					context.Container.Add(new ContentPresenter() { Name = "SymbolPlaceHolder" });
-					return CreateQuickInfoItem(session, context.token, context.Container.ToUI().Tag());
+					return CreateQuickInfoItem(session, context.token, context.Container);
 				}
 				return null;
 			}
-			return CreateQuickInfoItem(session, context.token, context.Container.ToUI().Tag());
+			return CreateQuickInfoItem(session, context.token, context.Container);
 		}
 
 		static bool ResolveNode(Context context) {

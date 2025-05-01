@@ -99,7 +99,7 @@ namespace Codist.QuickInfo
 				}
 
 				if (ctx.Container.ItemCount > 0) {
-					ctx.Result = CreateQuickInfoItem(ctx.session, ctx.token, ctx.Container.ToUI());
+					ctx.Result = CreateQuickInfoItem(ctx.session, ctx.token, ctx.Container);
 				}
 				else {
 					ctx.State = State.Undefined;
@@ -193,7 +193,7 @@ namespace Codist.QuickInfo
 				.SetGlyph(IconIds.Region)
 				.Append((ctx.token.Parent as EndIfDirectiveTriviaSyntax).GetIf()?.GetDeclarationSignature(), true)
 				);
-			ctx.Result = CreateQuickInfoItem(ctx.session, ctx.token, ctx.Container.ToUI());
+			ctx.Result = CreateQuickInfoItem(ctx.session, ctx.token, ctx.Container);
 		}
 
 		static void ProcessEndRegion(Context ctx) {
@@ -201,7 +201,7 @@ namespace Codist.QuickInfo
 				.SetGlyph(IconIds.Region)
 				.Append((ctx.token.Parent as EndRegionDirectiveTriviaSyntax).GetRegion()?.GetDeclarationSignature(), true)
 				);
-			ctx.Result = CreateQuickInfoItem(ctx.session, ctx.token, ctx.Container.ToUI());
+			ctx.Result = CreateQuickInfoItem(ctx.session, ctx.token, ctx.Container);
 		}
 
 		static void ProcessCompareToken(Context ctx) {

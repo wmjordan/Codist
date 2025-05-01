@@ -32,7 +32,7 @@ namespace Codist.QuickInfo
 
 	static class QuickInfoOverride
 	{
-		static readonly ExtensionProperty<FrameworkElement, bool> __CodistQuickInfo = ExtensionProperty<FrameworkElement, bool>.Register("IsCodistQuickInfoItem");
+		static readonly ExtensionProperty<UIElement, bool> __CodistQuickInfo = ExtensionProperty<UIElement, bool>.Register("IsCodistQuickInfoItem");
 		static readonly ExtensionProperty<FrameworkElement, FrameworkElement> __QuickInfoContainer = ExtensionProperty<FrameworkElement, FrameworkElement>.Register("QuickInfoContainer");
 
 		public static IQuickInfoOverride CreateOverride(IAsyncQuickInfoSession session) {
@@ -40,16 +40,16 @@ namespace Codist.QuickInfo
 		}
 
 		public static TObj Tag<TObj>(this TObj obj)
-			where TObj : FrameworkElement {
+			where TObj : UIElement {
 			__CodistQuickInfo.Set(obj, true);
 			return obj;
 		}
 
-		public static FrameworkElement GetContainer(FrameworkElement popupRoot) {
+		public static UIElement GetContainer(FrameworkElement popupRoot) {
 			return __QuickInfoContainer.Get(popupRoot);
 		}
 
-		static bool IsCodistQuickInfoItem(this FrameworkElement quickInfoItem) {
+		static bool IsCodistQuickInfoItem(this UIElement quickInfoItem) {
 			return __CodistQuickInfo.Get(quickInfoItem);
 		}
 
@@ -458,7 +458,7 @@ namespace Codist.QuickInfo
 			void MakeTextualContentSelectableWithIcon(IList items) {
 				for (int i = 0; i < items.Count; i++) {
 					if (items[i] is DependencyObject qi
-						&& (qi as FrameworkElement)?.IsCodistQuickInfoItem() != true) {
+						&& (qi as UIElement)?.IsCodistQuickInfoItem() != true) {
 						if (qi is TextBlock t) {
 							OverrideTextBlock(t);
 							continue;
