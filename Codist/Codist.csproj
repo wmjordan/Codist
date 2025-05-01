@@ -97,6 +97,7 @@
     <Compile Include="QuickInfo\CSharpQuickInfo.AssignmentWalker.cs" />
     <Compile Include="QuickInfo\CSharpQuickInfo.Node.cs" />
     <Compile Include="QuickInfo\CSharpQuickInfo.Token.cs" />
+    <Compile Include="QuickInfo\InfoBlock.cs" />
     <Compile Include="Semantics\ArgumentAssignment.cs" />
     <Compile Include="Semantics\MarkdownHelper.cs" />
     <Compile Include="SmartBars\MarkupSmartBar.cs" />
