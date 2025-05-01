@@ -818,6 +818,7 @@ namespace Codist
 		SymbolReassignment = 1L << 33,
 		ControlFlow = 1L << 34,
 		DataFlow = 1L << 35,
+		SyntaxNodePath = 1L << 36,
 		CodeFlow = ControlFlow | DataFlow,
 		DocumentationOverride = OverrideDefaultDocumentation | DocumentationFromBaseType | DocumentationFromInheritDoc,
 		QuickInfoOverride = DocumentationOverride | AlternativeStyle,

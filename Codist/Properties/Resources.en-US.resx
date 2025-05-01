@@ -2899,6 +2899,12 @@ Discard its changes?</value>
   <data name="OT_ControlFlowTip" xml:space="preserve">
     <value>Counts numbers of return, throw, yield, etc. statements within statements</value>
   </data>
+  <data name="OT_SyntaxNodePath" xml:space="preserve">
+    <value>Syntax node structure</value>
+  </data>
+  <data name="OT_SyntaxNodePathTip" xml:space="preserve">
+    <value>Displays types of containing syntax nodes, from innermost to outermost</value>
+  </data>
   <data name="OT_DataFlow" xml:space="preserve">
     <value>Data flow statistics</value>
   </data>
@@ -2913,5 +2919,8 @@ Discard its changes?</value>
   </data>
   <data name="T_ConditionalBranch" xml:space="preserve">
     <value>Conditional branch: </value>
+  </data>
+  <data name="T_SyntaxPath" xml:space="preserve">
+    <value>Syntax path:</value>
   </data>
 </root>

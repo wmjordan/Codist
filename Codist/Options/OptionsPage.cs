@@ -293,7 +293,7 @@ namespace Codist.Options
 		{
 			readonly OptionBox<QuickInfoOptions> _DisableUntilShift, _CtrlSuppress, _Selection, _Color;
 			readonly OptionBox<QuickInfoOptions> _OverrideDefaultDocumentation, _DocumentationFromBaseType, _DocumentationFromInheritDoc, _TextOnlyDoc, _OrdinaryDoc, _ReturnsDoc, _RemarksDoc, _ExceptionDoc, _SeeAlsoDoc, _ExampleDoc, _AlternativeStyle, _ContainingType, _CodeFontForXmlDocSymbol;
-			readonly OptionBox<QuickInfoOptions> _NodeRange, _Attributes, _BaseType, _Declaration, _SymbolLocation, _Interfaces, _NumericValues, _String, _Parameter, _InterfaceImplementations, _TypeParameters, _NamespaceTypes, _MethodOverload, _InterfaceMembers, _EnumMembers, _SymbolReassignment, _ControlFlow, _DataFlow;
+			readonly OptionBox<QuickInfoOptions> _NodeRange, _Attributes, _BaseType, _Declaration, _SymbolLocation, _Interfaces, _NumericValues, _String, _Parameter, _InterfaceImplementations, _TypeParameters, _NamespaceTypes, _MethodOverload, _InterfaceMembers, _EnumMembers, _SymbolReassignment, _ControlFlow, _DataFlow, _SyntaxNodePath;
 			readonly OptionBox<QuickInfoOptions>[] _Options;
 			readonly IntegerBox _MaxWidth, _MaxHeight, _DisplayDelay;
 			readonly ColorButton _BackgroundButton;
@@ -408,13 +408,15 @@ namespace Codist.Options
 					_ControlFlow = o.CreateOptionBox(QuickInfoOptions.ControlFlow, UpdateConfig, R.OT_ControlFlow)
 						.SetLazyToolTip(() => R.OT_ControlFlowTip),
 					_DataFlow = o.CreateOptionBox(QuickInfoOptions.DataFlow, UpdateConfig, R.OT_DataFlow)
-						.SetLazyToolTip(() => R.OT_DataFlowTip)
+						.SetLazyToolTip(() => R.OT_DataFlowTip),
+					_SyntaxNodePath = o.CreateOptionBox(QuickInfoOptions.SyntaxNodePath, UpdateConfig, R.OT_SyntaxNodePath)
+						.SetLazyToolTip(() => R.OT_SyntaxNodePathTip)
 					);
 
 				_MaxHeight.ValueChanged += UpdateQuickInfoValue;
 				_MaxWidth.ValueChanged += UpdateQuickInfoValue;
 				_DisplayDelay.ValueChanged += UpdateQuickInfoValue;
-				_Options = new[] { _DisableUntilShift, _CtrlSuppress, _Selection, _Color, _OverrideDefaultDocumentation, _DocumentationFromBaseType, _DocumentationFromInheritDoc, _TextOnlyDoc, _ReturnsDoc, _RemarksDoc, _ExceptionDoc, _SeeAlsoDoc, _ExampleDoc, _AlternativeStyle, _ContainingType, _CodeFontForXmlDocSymbol, _Attributes, _BaseType, _Declaration, _EnumMembers, _SymbolLocation, _Interfaces, _NumericValues, _String, _Parameter, _InterfaceImplementations, _TypeParameters, /*_NamespaceTypes, */_MethodOverload, _InterfaceMembers, _SymbolReassignment, _ControlFlow, _DataFlow };
+				_Options = new[] { _DisableUntilShift, _CtrlSuppress, _Selection, _Color, _OverrideDefaultDocumentation, _DocumentationFromBaseType, _DocumentationFromInheritDoc, _TextOnlyDoc, _ReturnsDoc, _RemarksDoc, _ExceptionDoc, _SeeAlsoDoc, _ExampleDoc, _AlternativeStyle, _ContainingType, _CodeFontForXmlDocSymbol, _Attributes, _BaseType, _Declaration, _EnumMembers, _SymbolLocation, _Interfaces, _NumericValues, _String, _Parameter, _InterfaceImplementations, _TypeParameters, /*_NamespaceTypes, */_MethodOverload, _InterfaceMembers, _SymbolReassignment, _ControlFlow, _DataFlow, _SyntaxNodePath };
 				foreach (var item in new[] { _DocumentationFromBaseType, _DocumentationFromInheritDoc, _TextOnlyDoc, _OrdinaryDoc, _ReturnsDoc, _RemarksDoc, _ExceptionDoc, _SeeAlsoDoc, _ExampleDoc, _ContainingType, _CodeFontForXmlDocSymbol }) {
 					item.WrapMargin(SubOptionMargin);
 				}

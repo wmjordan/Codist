@@ -2885,6 +2885,12 @@ Ctrl: 将下划线分隔的单词转换为首字母大写的单词</value>
   <data name="OT_ControlFlowTip" xml:space="preserve">
     <value>统计语法结构中出现的return、throw、yield等语句的数量</value>
   </data>
+  <data name="OT_SyntaxNodePath" xml:space="preserve">
+    <value>语法节点结构</value>
+  </data>
+  <data name="OT_SyntaxNodePathTip" xml:space="preserve">
+    <value>显示包含当前位置的语法节点类型（从小到大）</value>
+  </data>
   <data name="OT_DataFlow" xml:space="preserve">
     <value>数据流统计信息</value>
   </data>
@@ -2899,5 +2905,8 @@ Ctrl: 将下划线分隔的单词转换为首字母大写的单词</value>
   </data>
   <data name="T_ConditionalBranch" xml:space="preserve">
     <value>条件分支：</value>
+  </data>
+  <data name="T_SyntaxPath" xml:space="preserve">
+    <value>语法结构路径：</value>
   </data>
 </root>

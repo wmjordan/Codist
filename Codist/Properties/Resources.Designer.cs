@@ -5144,6 +5144,24 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Syntax node structure.
+        /// </summary>
+        internal static string OT_SyntaxNodePath {
+            get {
+                return ResourceManager.GetString("OT_SyntaxNodePath", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Displays types of containing syntax nodes, from innermost to outermost.
+        /// </summary>
+        internal static string OT_SyntaxNodePathTip {
+            get {
+                return ResourceManager.GetString("OT_SyntaxNodePathTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Tag.
         /// </summary>
         internal static string OT_Tag {
@@ -5973,7 +5991,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Captured variable:.
+        ///   Looks up a localized string similar to Captured variable: .
         /// </summary>
         internal static string T_CapturedVariable {
             get {
@@ -6162,6 +6180,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Conditional branch: .
+        /// </summary>
+        internal static string T_ConditionalBranch {
+            get {
+                return ResourceManager.GetString("T_ConditionalBranch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Configuration:.
         /// </summary>
         internal static string T_Configuration {
@@ -6194,6 +6221,15 @@ namespace Codist.Properties {
         internal static string T_ContainingAssembly {
             get {
                 return ResourceManager.GetString("T_ContainingAssembly", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Control flow:.
+        /// </summary>
+        internal static string T_ControlFlow {
+            get {
+                return ResourceManager.GetString("T_ControlFlow", resourceCulture);
             }
         }
         
@@ -6276,6 +6312,15 @@ namespace Codist.Properties {
         internal static string T_DashDot {
             get {
                 return ResourceManager.GetString("T_DashDot", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Data flow:.
+        /// </summary>
+        internal static string T_DataFlow {
+            get {
+                return ResourceManager.GetString("T_DataFlow", resourceCulture);
             }
         }
         
@@ -8166,6 +8211,15 @@ namespace Codist.Properties {
         internal static string T_SyntaxHighlightDisabled {
             get {
                 return ResourceManager.GetString("T_SyntaxHighlightDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Syntax path:.
+        /// </summary>
+        internal static string T_SyntaxPath {
+            get {
+                return ResourceManager.GetString("T_SyntaxPath", resourceCulture);
             }
         }
         
