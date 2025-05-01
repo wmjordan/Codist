@@ -438,6 +438,7 @@ namespace Codist.QuickInfo
 					return;
 				case SyntaxKind.CollectionInitializerExpression:
 				case SyntaxKind.ComplexElementInitializerExpression:
+					ctx.SetSymbol(ctx.semanticModel.GetCollectionInitializerSymbolInfo((ExpressionSyntax)ctx.node, ctx.cancellationToken));
 					ctx.State = State.Process;
 					break;
 				default:

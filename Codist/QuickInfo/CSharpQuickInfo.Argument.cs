@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using CLR;
 using Codist.Controls;
 using Microsoft.CodeAnalysis;
@@ -23,19 +24,22 @@ namespace Codist.QuickInfo
 					return;
 				}
 				n = argument.Parent;
-				if (n?.IsAnyKind(SyntaxKind.ArrayInitializerExpression,
-					SyntaxKind.CollectionInitializerExpression,
-					SyntaxKind.ObjectInitializerExpression,
-					SyntaxKind.ComplexElementInitializerExpression) == true) {
+				if (n?.RawKind.CeqAny(SyntaxKind.ArrayInitializerExpression,
+						SyntaxKind.CollectionInitializerExpression,
+						CodeAnalysisHelper.CollectionExpression,
+						SyntaxKind.ObjectInitializerExpression,
+						SyntaxKind.ComplexElementInitializerExpression) == true) {
 					ShowLocationOfInitializerExpression(ctx.Container, argument, n);
-					var initSymbol = ctx.semanticModel.GetCollectionInitializerSymbolInfo(argument as ExpressionSyntax).Symbol;
-					if (initSymbol != null) {
-						ctx.Container.Add(new ThemedTipText()
-							.SetGlyph(initSymbol.GetImageId())
-							.AddSymbol(initSymbol.ContainingType, false, __SymbolFormatter)
-							.Append(".".Render(__SymbolFormatter.PlainText))
-							.AddSymbol(initSymbol, true, __SymbolFormatter)
-							.AddParameters(initSymbol.GetParameters(), __SymbolFormatter));
+					if (n.IsKind(CodeAnalysisHelper.CollectionExpression) == false) {
+						var initSymbol = ctx.semanticModel.GetCollectionInitializerSymbolInfo((ExpressionSyntax)argument, ctx.cancellationToken).Symbol;
+						if (initSymbol != null) {
+							ctx.Container.Add(new ThemedTipText()
+								.SetGlyph(initSymbol.GetImageId())
+								.AddSymbol(initSymbol.ContainingType, false, __SymbolFormatter)
+								.Append(".".Render(__SymbolFormatter.PlainText))
+								.AddSymbol(initSymbol, true, __SymbolFormatter)
+								.AddParameters(initSymbol.GetParameters(), __SymbolFormatter));
+						}
 					}
 					return;
 				}
@@ -43,7 +47,26 @@ namespace Codist.QuickInfo
 		}
 
 		static void ShowLocationOfInitializerExpression(InfoContainer qiContent, SyntaxNode argument, SyntaxNode n) {
-			var argIndex = (n as InitializerExpressionSyntax).Expressions.IndexOf(argument as ExpressionSyntax);
+			int argIndex;
+			if (n is InitializerExpressionSyntax ie) {
+				argIndex = ie.Expressions.IndexOf((ExpressionSyntax)argument);
+			}
+			else if (n.IsKind(CodeAnalysisHelper.CollectionExpression)) {
+				var elements = ((ExpressionSyntax)n).GetCollectionExpressionElements();
+				argIndex = 0;
+				var argSpan = argument.Span;
+				foreach (var item in elements) {
+					if (item.FullSpan.Contains(argSpan)) {
+						goto RETURN;
+					}
+					++argIndex;
+				}
+				return;
+			}
+			else {
+				return;
+			}
+		RETURN:
 			qiContent.Add(new ThemedTipText(R.T_ExpressionNOfInitializer.Replace("<N>", (++argIndex).ToString())).SetGlyph(IconIds.Argument));
 		}
 

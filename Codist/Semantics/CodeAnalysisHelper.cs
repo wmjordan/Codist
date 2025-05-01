@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -103,6 +104,10 @@ namespace Codist
 			return NonPublicOrFutureAccessors.GetSwitchExpressionArmPattern(switchExpressionArm);
 		}
 
+		public static IReadOnlyList<SyntaxNode> GetCollectionExpressionElements(this ExpressionSyntax collectionExpression) {
+			return NonPublicOrFutureAccessors.GetCollectionExpressionElements(collectionExpression);
+		}
+
 		static partial class NonPublicOrFutureAccessors
 		{
 			public static readonly Func<SyntaxNode, NameSyntax> GetFileScopedNamespaceName = ReflectionHelper.CreateGetPropertyMethod<SyntaxNode, NameSyntax>("Name", typeof(NamespaceDeclarationSyntax).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Syntax.FileScopedNamespaceDeclarationSyntax"));
@@ -116,6 +121,8 @@ namespace Codist
 			public static readonly Func<SyntaxNode, ExpressionSyntax> GetSwitchExpressionArmExpression = ReflectionHelper.CreateGetPropertyMethod<SyntaxNode, ExpressionSyntax>("Expression", typeof(ExpressionSyntax).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Syntax.SwitchExpressionArmSyntax"));
 
 			public static readonly Func<SyntaxNode, PatternSyntax> GetSwitchExpressionArmPattern = ReflectionHelper.CreateGetPropertyMethod<SyntaxNode, PatternSyntax>("Pattern", typeof(ExpressionSyntax).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Syntax.SwitchExpressionArmSyntax"));
+
+			public static readonly Func<ExpressionSyntax, IReadOnlyList<SyntaxNode>> GetCollectionExpressionElements = ReflectionHelper.CreateGetPropertyMethod<ExpressionSyntax, IReadOnlyList<SyntaxNode>>("Elements", typeof(ExpressionSyntax).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Syntax.CollectionExpressionSyntax"));
 		}
 
 		[Flags]

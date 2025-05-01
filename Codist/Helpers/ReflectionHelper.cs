@@ -44,6 +44,9 @@ namespace Codist
 					il.Emit(OpCodes.Brfalse_S, notInst);
 				}
 				il.Emit(OpCodes.Callvirt, propInfo.GetGetMethod(true));
+				if (typeof(TProperty).IsValueType == false && propInfo.PropertyType.IsValueType) {
+					il.Emit(OpCodes.Box, propInfo.PropertyType);
+				}
 				il.Emit(OpCodes.Ret);
 				if (castType != null) {
 					il.MarkLabel(notInst);
