@@ -61,7 +61,7 @@ namespace Codist.QuickInfo
 			ListVariables(infoBlock, df.WrittenInside, R.T_WrittenVariable, IconIds.WrittenVariables);
 			ListVariables(infoBlock, df.UnsafeAddressTaken, R.T_TakenAddress, IconIds.RefVariables);
 			ListVariables(infoBlock, df.CapturedInside, R.T_CapturedVariable, IconIds.CapturedVariables);
-			if (infoBlock.IsEmpty == false) {
+			if (infoBlock.HasItem) {
 				ctx.Container.Add(infoBlock);
 			}
 		}

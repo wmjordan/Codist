@@ -34,8 +34,9 @@ namespace Codist.QuickInfo
 
 	sealed class GeneralInfoBlock : InfoBlock
 	{
+		Chain<BlockItem> _Items;
+
 		public BlockTitle Title { get; set; }
-		public Chain<BlockItem> Items { get; private set; }
 
 		public GeneralInfoBlock() { }
 
@@ -44,30 +45,31 @@ namespace Codist.QuickInfo
 		}
 
 		public GeneralInfoBlock(BlockItem item) {
-			Items = new Chain<BlockItem>(item);
+			_Items = new Chain<BlockItem>(item);
 		}
 
-		public bool IsEmpty => Title == null && Items.IsEmpty;
+		public bool HasItem => _Items?.IsEmpty == false;
+		public Chain<BlockItem> Items => _Items ?? (_Items = new Chain<BlockItem>());
 
 		public void Add(BlockItem item) {
-			if (Items == null) {
-				Items = new Chain<BlockItem>(item);
+			if (_Items == null) {
+				_Items = new Chain<BlockItem>(item);
 			}
 			else {
-				Items.Add(item);
+				_Items.Add(item);
 			}
 		}
 
 		public override UIElement ToUI() {
-			if (Title == null && Items == null) {
+			if (Title == null && _Items == null) {
 				return null;
 			}
 			var doc = new ThemedTipDocument();
 			if (Title != null) {
 				doc.AppendTitle(Title.IconId, Title.Text);
 			}
-			if (Items != null) {
-				foreach (var item in Items) {
+			if (_Items != null) {
+				foreach (var item in _Items) {
 					doc.AppendParagraph(item.IconId, item.ToTextBlock());
 				}
 			}
