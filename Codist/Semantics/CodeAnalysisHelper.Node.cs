@@ -101,6 +101,7 @@ namespace Codist
 				case SyntaxKind.InterfaceDeclaration:
 				case SyntaxKind.StructDeclaration:
 				case RecordStructDeclaration:
+				case ExtensionDeclaration:
 					return DeclarationCategory.Type;
 				case SyntaxKind.FieldDeclaration:
 				case SyntaxKind.MethodDeclaration:
