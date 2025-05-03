@@ -410,15 +410,21 @@ namespace Codist.QuickInfo
 
 		static void ProcessIfToken(Context ctx) {
 			ctx.UseTokenNode();
-			var node = ctx.node as IfStatementSyntax;
-			var conditions = 1;
-			while ((node = node.Else?.Statement as IfStatementSyntax) != null) {
-				conditions++;
-			}
-			if (conditions > 1) {
-				ctx.Container.Add(new GeneralInfoBlock(new BlockItem(IconIds.If, "Condition: ").Append(conditions.ToText(), __SymbolFormatter.Number)));
-			}
 			ProcessStatementKeyword(ctx);
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ControlFlow)) {
+				var ifStatement = ctx.node as IfStatementSyntax;
+				var conditions = 1;
+				StatementSyntax elseStatement;
+				while ((elseStatement = ifStatement.Else?.Statement) != null) {
+					conditions++;
+					if ((ifStatement = elseStatement as IfStatementSyntax) == null) {
+						break;
+					}
+				}
+				if (conditions > 1) {
+					ctx.Container.Add(new GeneralInfoBlock(new BlockItem(IconIds.If, R.T_ConditionalBranch).Append(conditions.ToText(), true, __SymbolFormatter.Number)));
+				}
+			}
 		}
 
 		static void ProcessSwitchToken(Context ctx) {
