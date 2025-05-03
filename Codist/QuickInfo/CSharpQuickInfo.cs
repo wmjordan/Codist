@@ -179,7 +179,7 @@ namespace Codist.QuickInfo
 			Chain<string> unavailableProjects = null;
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation)) {
 				if (context.isConvertedType == false) {
-					unavailableProjects = await SearchUnavailableProjectsAsync(ctx.Document, context.token, cancellationToken).ConfigureAwait(false);
+					unavailableProjects = await SearchUnavailableProjectsAsync(ctx.Document, context).ConfigureAwait(false);
 				}
 				ctor = context.node.Parent.UnqualifyExceptNamespace() as ObjectCreationExpressionSyntax;
 				await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
@@ -256,29 +256,29 @@ namespace Codist.QuickInfo
 			return new QuickInfoItem(token?.Span.CreateSnapshotSpan(session.TextView.TextSnapshot).ToTrackingSpan(), item);
 		}
 
-		static Task<Chain<string>> SearchUnavailableProjectsAsync(Document doc, SyntaxToken token, CancellationToken cancellationToken) {
+		static Task<Chain<string>> SearchUnavailableProjectsAsync(Document doc, Context ctx) {
 			var solution = doc.Project.Solution;
 			ImmutableArray<DocumentId> linkedDocuments;
-			return solution.ProjectIds.Count < 2 || (linkedDocuments = doc.GetLinkedDocumentIds()).Length == 0
+			string docId;
+			return solution.ProjectIds.Count < 2
+				|| (docId = DocumentationCommentId.CreateDeclarationId(ctx.symbol)) is null
+				|| (linkedDocuments = doc.GetLinkedDocumentIds()).Length == 0
 				? Task.FromResult<Chain<string>>(null)
-				: SearchUnavailableProjectsAsync(token, solution, linkedDocuments, cancellationToken);
+				: SearchUnavailableProjectsAsync(docId, solution, linkedDocuments, ctx.cancellationToken);
 		}
 
-		static async Task<Chain<string>> SearchUnavailableProjectsAsync(SyntaxToken token, Solution solution, ImmutableArray<DocumentId> linkedDocuments, CancellationToken cancellationToken) {
+		static async Task<Chain<string>> SearchUnavailableProjectsAsync(string docId, Solution solution, ImmutableArray<DocumentId> linkedDocuments, CancellationToken cancellationToken) {
 			Chain<string> r = null;
-			ImmutableArray<ISymbol> candidates;
 			foreach (var id in linkedDocuments) {
 				var d = solution.GetDocument(id);
-				var sm = await d.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
-				if (sm.IsCSharp() == false) {
+				var compilation = await d.Project.GetCompilationAsync(cancellationToken).ConfigureAwait(false);
+				if (compilation != null && DocumentationCommentId.GetFirstSymbolForDeclarationId(docId, compilation) != null) {
 					continue;
 				}
-				if (GetSymbol(sm, sm.SyntaxTree.GetCompilationUnitRoot(cancellationToken).FindNode(token.Span, true, true), ref candidates, cancellationToken) == null) {
-					if (r == null) {
-						r = new Chain<string>();
-					}
-					r.Add(d.Project.Name);
+				if (r == null) {
+					r = new Chain<string>();
 				}
+				r.Add(d.Project.Name);
 			}
 			return r;
 		}
