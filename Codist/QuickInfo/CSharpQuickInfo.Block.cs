@@ -70,7 +70,7 @@ namespace Codist.QuickInfo
 			if (variables.IsEmpty) {
 				return;
 			}
-			var p = new BlockItem(icon, title, true)
+			var p = new BlockItem(icon, title)
 				.Append(variables.Length.ToText(), true, __SymbolFormatter.Number)
 				.AppendLine();
 			bool s = false;
