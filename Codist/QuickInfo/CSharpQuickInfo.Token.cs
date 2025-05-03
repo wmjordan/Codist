@@ -430,9 +430,7 @@ namespace Codist.QuickInfo
 		static void ProcessSwitchToken(Context ctx) {
 			var node = ctx.node = ctx.token.Parent;
 			if (node.IsKind(CodeAnalysisHelper.SwitchExpression)) {
-				ctx.SetSymbol(ctx.semanticModel.GetTypeInfo(node.ChildNodes().First(), ctx.cancellationToken));
-				ShowSwitchExpression(ctx.Container, ctx.symbol, node);
-				ctx.SetSymbol(ctx.semanticModel.GetTypeInfo(node, ctx.cancellationToken));
+				ProcessSwitchExpression(ctx, node);
 				if (ctx.symbol == null) {
 					ctx.State = State.Unavailable;
 					return;
@@ -445,6 +443,18 @@ namespace Codist.QuickInfo
 				return;
 			}
 			ctx.State = State.AsType;
+		}
+
+		static void ProcessSwitchExpression(Context ctx, SyntaxNode node) {
+			ctx.SetSymbol(ctx.semanticModel.GetTypeInfo(node.ChildNodes().First(), ctx.cancellationToken));
+			if (ctx.symbol != null) {
+				ctx.Container.Add(new ThemedTipText().SetGlyph(IconIds.Input).AddSymbol(ctx.symbol, false, __SymbolFormatter));
+			}
+			var c = ((ExpressionSyntax)node).GetSwitchExpressionArmsCount();
+			if (c > 1) {
+				ctx.Container.Add(new ThemedTipText(R.T_SwitchCases.Replace("<C>", c.ToText())).SetGlyph(IconIds.Switch));
+			}
+			ctx.SetSymbol(ctx.semanticModel.GetTypeInfo(node, ctx.cancellationToken));
 		}
 
 		static void ProcessWhileToken(Context ctx) {
