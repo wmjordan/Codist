@@ -132,6 +132,10 @@ namespace Codist.QuickInfo
 				: null;
 			ObjectCreationExpressionSyntax ctor = null;
 			var context = new Context(session, textBuffer, semanticModel, triggerPoint, cancellationToken);
+			if (context.token.Span.Contains(triggerPoint.Position) == false) {
+				// skip when trigger point is on trivia
+				return null;
+			}
 			#region Classify token
 			do {
 				context.State = State.Undefined;
