@@ -118,11 +118,14 @@ namespace Codist.QuickInfo
 						yieldReturns++;
 						break;
 					case SyntaxKind.GotoStatement:
+					case SyntaxKind.GotoCaseStatement:
+					case SyntaxKind.GotoDefaultStatement:
+					case SyntaxKind.ContinueStatement:
 						jump++;
 						break;
-					case SyntaxKind.ContinueStatement:
 					case SyntaxKind.BreakStatement:
-						if (item.Parent.FirstAncestorOrSelf<SyntaxNode>(n => n.RawKind == k) == ctx.node) {
+						// do not count if breaking from switch section
+						if (item.Parent.FirstAncestorOrSelf<SyntaxNode>(n => n.RawKind.CeqAny(SyntaxKind.SwitchSection, SyntaxKind.ForEachStatement, SyntaxKind.ForEachVariableStatement, SyntaxKind.ForStatement, SyntaxKind.WhileStatement, SyntaxKind.DoStatement)).IsKind(SyntaxKind.SwitchSection) == false) {
 							jump++;
 						}
 						break;
