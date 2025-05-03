@@ -35,6 +35,10 @@ namespace Codist.QuickInfo
 			{ SyntaxKind.DoKeyword, ProcessStatementKeyword },
 			{ SyntaxKind.WhileKeyword, ProcessWhileToken },
 			{ SyntaxKind.ForKeyword, ProcessStatementKeyword },
+			{ SyntaxKind.LockKeyword, ProcessStatementKeyword },
+			{ SyntaxKind.TryKeyword, ProcessStatementKeyword },
+			{ SyntaxKind.UnsafeKeyword, ProcessUnsafeKeyword },
+			{ SyntaxKind.ForEachKeyword, ProcessForEachToken },
 			{ SyntaxKind.ForEachVariableStatement, ProcessStatementKeyword },
 			{ SyntaxKind.InKeyword, ProcessInToken },
 			{ SyntaxKind.UsingKeyword, ProcessUsingToken },
@@ -48,7 +52,6 @@ namespace Codist.QuickInfo
 			{ SyntaxKind.OrderByKeyword, ProcessValueToken },
 			{ CodeAnalysisHelper.WithKeyword, ProcessValueToken },
 			{ SyntaxKind.AsKeyword, ProcessAsType },
-			{ SyntaxKind.ForEachKeyword, ProcessForEachToken },
 			{ SyntaxKind.CaseKeyword, ProcessCaseToken },
 			{ SyntaxKind.DefaultKeyword, ProcessDefaultToken },
 			{ SyntaxKind.ReturnKeyword, ProcessReturnToken },
@@ -440,6 +443,12 @@ namespace Codist.QuickInfo
 
 		static void ProcessWhileToken(Context ctx) {
 			if (ctx.token.Parent.IsKind(SyntaxKind.WhileStatement)) {
+				ProcessStatementKeyword(ctx);
+			}
+		}
+
+		static void ProcessUnsafeKeyword(Context ctx) {
+			if (ctx.token.Parent.IsKind(SyntaxKind.UnsafeStatement)) {
 				ProcessStatementKeyword(ctx);
 			}
 		}
