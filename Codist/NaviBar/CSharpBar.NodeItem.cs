@@ -194,6 +194,8 @@ namespace Codist.NaviBar
 					case SyntaxKind.SimpleLambdaExpression:
 					case SyntaxKind.ParenthesizedLambdaExpression:
 					case SyntaxKind.DestructorDeclaration:
+					case SyntaxKind.OperatorDeclaration:
+					case SyntaxKind.ConversionOperatorDeclaration:
 						AddLocalFunctions(node);
 						return Task.CompletedTask;
 					case SyntaxKind.EventDeclaration:
@@ -201,7 +203,8 @@ namespace Codist.NaviBar
 				}
 				AddMemberDeclarations(node, node.ChildNodes(), false, true);
 				var externals = (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.PartialClassMember)
-					&& ((BaseTypeDeclarationSyntax)node).Modifiers.Any(SyntaxKind.PartialKeyword) ? MemberListOptions.ShowPartial : 0)
+					&& node is BaseTypeDeclarationSyntax t
+					&& t.Modifiers.Any(SyntaxKind.PartialKeyword) ? MemberListOptions.ShowPartial : 0)
 					| (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.BaseClassMember) && (node.IsKind(SyntaxKind.ClassDeclaration) || node.IsKind(CodeAnalysisHelper.RecordDeclaration)) ? MemberListOptions.ShowBase : 0);
 				return externals == 0 ? Task.CompletedTask : AddExternalItemsAsync(node, externals, cancellationToken);
 			}
