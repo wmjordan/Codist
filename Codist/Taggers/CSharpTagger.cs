@@ -162,7 +162,7 @@ namespace Codist.Taggers
 					}
 					if (hasFirstToken) {
 						var attrs = firstToken.Parent.FirstAncestorOrSelf<AttributeListSyntax>();
-						if (attrs?.FullSpan.Contains(textSpan) == true) {
+						if (attrs?.Span.Contains(textSpan) == true) {
 							tags.Add(span.TrimWhitespace(), __Classifications.AttributeNotation);
 						}
 					}
