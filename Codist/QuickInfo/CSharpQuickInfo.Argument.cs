@@ -13,6 +13,9 @@ namespace Codist.QuickInfo
 	{
 		static void ShowArgumentInfo(Context ctx) {
 			var argument = ctx.node;
+			if (argument is null) {
+				return;
+			}
 			if (argument.IsKind(SyntaxKind.NullLiteralExpression)) {
 				argument = argument.Parent;
 			}
@@ -24,6 +27,9 @@ namespace Codist.QuickInfo
 					return;
 				}
 				parent = argument.Parent;
+				if (parent is null) {
+					return;
+				}
 				var parentKind = parent.Kind();
 				switch (parentKind) {
 					case SyntaxKind.SimpleLambdaExpression:
