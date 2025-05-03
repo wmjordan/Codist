@@ -261,7 +261,7 @@ namespace Codist.QuickInfo
 			ImmutableArray<DocumentId> linkedDocuments;
 			string docId;
 			return solution.ProjectIds.Count < 2
-				|| (docId = DocumentationCommentId.CreateDeclarationId(ctx.symbol)) is null
+				|| (docId = ctx.symbol.GetDeclarationId()) is null
 				|| (linkedDocuments = doc.GetLinkedDocumentIds()).Length == 0
 				? Task.FromResult<Chain<string>>(null)
 				: SearchUnavailableProjectsAsync(docId, solution, linkedDocuments, ctx.cancellationToken);

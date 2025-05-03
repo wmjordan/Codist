@@ -197,6 +197,13 @@ namespace Codist
 		#endregion
 
 		#region Symbol information
+		public static string GetDeclarationId(this ISymbol symbol) {
+			return DocumentationCommentId.CreateDeclarationId(symbol is IMethodSymbol m
+				&& m.MethodKind == MethodKind.ReducedExtension
+					? m.OriginalDefinition.ReducedFrom
+					: symbol.OriginalDefinition);
+		}
+
 		public static string GetOriginalName(this ISymbol symbol) {
 			switch (symbol.Kind) {
 				case SymbolKind.Method:
