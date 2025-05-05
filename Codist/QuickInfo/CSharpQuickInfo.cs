@@ -30,7 +30,8 @@ namespace Codist.QuickInfo
 		protected override Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
 			// Map the trigger point down to our buffer.
 			var buffer = session.GetSourceBuffer(out var triggerPoint);
-			return buffer == null ? Task.FromResult<QuickInfoItem>(null)
+			return buffer == null || triggerPoint >= buffer.CurrentSnapshot.Length
+				? Task.FromResult<QuickInfoItem>(null)
 				: InternalGetQuickInfoItemAsync(session, buffer, triggerPoint, cancellationToken);
 		}
 
@@ -95,6 +96,11 @@ namespace Codist.QuickInfo
 					symbol = typeInfo.Type;
 				}
 			}
+
+			public QuickInfoItem CreateQuickInfoItem(object item) {
+				session.KeepViewPosition();
+				return new QuickInfoItem(token.Span.CreateSnapshotSpan(TextBuffer.CurrentSnapshot).ToTrackingSpan(), item);
+			}
 		}
 
 		enum State
@@ -116,9 +122,11 @@ namespace Codist.QuickInfo
 				|| session.TextView is Microsoft.VisualStudio.Text.Editor.IWpfTextView v == false) {
 				return null;
 			}
-			var ctx = SemanticContext.GetOrCreateSingletonInstance(v);
-			await ctx.UpdateAsync(textBuffer, triggerPoint, cancellationToken);
-			var semanticModel = ctx.SemanticModel;
+			var sc = SemanticContext.GetOrCreateSingletonInstance(v);
+			if (await sc.UpdateAsync(textBuffer, triggerPoint, cancellationToken) == false) {
+				return null;
+			}
+			var semanticModel = sc.SemanticModel;
 			if (semanticModel == null) {
 				return null;
 			}
@@ -131,105 +139,105 @@ namespace Codist.QuickInfo
 				? QuickInfoOverride.CreateOverride(session)
 				: null;
 			ObjectCreationExpressionSyntax ctor = null;
-			var context = new Context(session, textBuffer, semanticModel, triggerPoint, cancellationToken);
-			if (context.token.Span.Contains(triggerPoint.Position) == false) {
+			var ctx = new Context(session, textBuffer, semanticModel, triggerPoint, cancellationToken);
+			if (ctx.token.Span.Contains(triggerPoint.Position) == false) {
 				// skip when trigger point is on trivia
 				return null;
 			}
 			#region Classify token
 			do {
-				context.State = State.Undefined;
-				if (__TokenProcessors.TryGetValue((SyntaxKind)context.token.RawKind, out syntaxProcessor)) {
-					syntaxProcessor(context);
+				ctx.State = State.Undefined;
+				if (__TokenProcessors.TryGetValue((SyntaxKind)ctx.token.RawKind, out syntaxProcessor)) {
+					syntaxProcessor(ctx);
 				}
 				else {
-					ProcessToken(context);
+					ProcessToken(ctx);
 				}
-			} while (context.State >= State.ReparseToken);
-			if (context.keepBuiltInXmlDoc && o != null) {
+			} while (ctx.State >= State.ReparseToken);
+			if (ctx.keepBuiltInXmlDoc && o != null) {
 				o.OverrideBuiltInXmlDoc = false;
 			}
-			switch (context.State) {
+			switch (ctx.State) {
 				case State.Process: goto PROCESS;
-				case State.PredefinedSymbol: context.UseTokenNode(); goto PROCESS;
+				case State.PredefinedSymbol: ctx.UseTokenNode(); goto PROCESS;
 				case State.Return: goto RETURN;
 				case State.Unavailable: return null;
-				case State.DirectReturn: return context.Result;
+				case State.DirectReturn: return ctx.Result;
 			}
 			#endregion
 
-			if (ResolveNode(context) == false) {
+			if (ResolveNode(ctx) == false) {
 				return null;
 			}
 
 		PROCESS:
-			if (context.node == null) {
+			if (ctx.node == null) {
 				return null;
 			}
 
-			if (context.symbol == null) {
-				ResolveSymbol(context);
+			if (ctx.symbol == null) {
+				ResolveSymbol(ctx);
 			}
-			if (__NodeProcessors.TryGetValue((SyntaxKind)context.node.RawKind, out syntaxProcessor)) {
-				syntaxProcessor(context);
+			if (__NodeProcessors.TryGetValue((SyntaxKind)ctx.node.RawKind, out syntaxProcessor)) {
+				syntaxProcessor(ctx);
 			}
-			if (context.symbol == null) {
+			if (ctx.symbol == null) {
 				goto RETURN;
 			}
 			Chain<string> unavailableProjects = null;
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation)) {
-				if (context.isConvertedType == false) {
-					unavailableProjects = await SearchUnavailableProjectsAsync(ctx.Document, context).ConfigureAwait(false);
+				if (ctx.isConvertedType == false) {
+					unavailableProjects = await SearchUnavailableProjectsAsync(sc.Document, ctx).ConfigureAwait(false);
 				}
-				ctor = context.node.Parent.UnqualifyExceptNamespace() as ObjectCreationExpressionSyntax;
+				ctor = ctx.node.Parent.UnqualifyExceptNamespace() as ObjectCreationExpressionSyntax;
 				await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
-				OverrideDocumentation(context.node,
+				OverrideDocumentation(ctx.node,
 					o,
 					ctor != null
-						? semanticModel.GetSymbolInfo(ctor, cancellationToken).Symbol ?? context.symbol
-						: context.node.Parent.IsKind(CodeAnalysisHelper.PrimaryConstructorBaseType)
-						? (context.symbol = semanticModel.GetSymbolInfo(context.node.Parent, cancellationToken).Symbol ?? context.symbol)
-						: context.symbol,
+						? semanticModel.GetSymbolInfo(ctor, cancellationToken).Symbol ?? ctx.symbol
+						: ctx.node.Parent.IsKind(CodeAnalysisHelper.PrimaryConstructorBaseType)
+						? (ctx.symbol = semanticModel.GetSymbolInfo(ctx.node.Parent, cancellationToken).Symbol ?? ctx.symbol)
+						: ctx.symbol,
 					semanticModel,
 					cancellationToken);
-				if (context.symbol?.Kind == SymbolKind.RangeVariable) {
-					context.Container.Add(new ThemedTipText("Range Variable: ").SetGlyph(IconIds.LocalVariable).Append(context.symbol.Name, true));
-					semanticModel.GetTypeInfo(context.node, cancellationToken).Type.SetNotDefault(ref context.symbol);
+				if (ctx.symbol?.Kind == SymbolKind.RangeVariable) {
+					ctx.Container.Add(new ThemedTipText("Range Variable: ").SetGlyph(IconIds.LocalVariable).Append(ctx.symbol.Name, true));
+					semanticModel.GetTypeInfo(ctx.node, cancellationToken).Type.SetNotDefault(ref ctx.symbol);
 				}
 			}
-			if (context.isConvertedType == false) {
+			if (ctx.isConvertedType == false) {
 				await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
-				ShowSymbolInfo(context);
+				ShowSymbolInfo(ctx);
 				if (unavailableProjects != null) {
-					ShowUnavailableProjects(context, unavailableProjects);
+					ShowUnavailableProjects(ctx, unavailableProjects);
 				}
 			}
 		RETURN:
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter)) {
-				ShowArgumentInfo(context);
+				ShowArgumentInfo(ctx);
 			}
 			if (ctor == null) {
-				ctor = context.node.Parent.UnqualifyExceptNamespace() as ObjectCreationExpressionSyntax;
+				ctor = ctx.node.Parent.UnqualifyExceptNamespace() as ObjectCreationExpressionSyntax;
 			}
 			if (ctor != null) {
-				semanticModel.GetSymbolOrFirstCandidate(ctor, cancellationToken).SetNotDefault(ref context.symbol);
-				if (context.symbol == null) {
+				semanticModel.GetSymbolOrFirstCandidate(ctor, cancellationToken).SetNotDefault(ref ctx.symbol);
+				if (ctx.symbol == null) {
 					return null;
 				}
-				if (context.symbol.IsImplicitlyDeclared) {
-					context.symbol = context.symbol.ContainingType;
+				if (ctx.symbol.IsImplicitlyDeclared) {
+					ctx.symbol = ctx.symbol.ContainingType;
 				}
 			}
-			o?.ApplyClickAndGo(context.symbol);
-			if (context.Container.ItemCount == 0 && context.isConvertedType == false) {
-				if (context.symbol != null) {
+			o?.ApplyClickAndGo(ctx.symbol);
+			if (ctx.Container.ItemCount == 0 && ctx.isConvertedType == false) {
+				if (ctx.symbol != null) {
 					// place holder
-					context.Container.Add(new ContentPresenter() { Name = "SymbolPlaceHolder" });
-					return CreateQuickInfoItem(session, context.token, context.Container);
+					ctx.Container.Add(new ContentPresenter() { Name = "SymbolPlaceHolder" });
+					return ctx.CreateQuickInfoItem(ctx.Container);
 				}
 				return null;
 			}
-			return CreateQuickInfoItem(session, context.token, context.Container);
+			return ctx.CreateQuickInfoItem(ctx.Container);
 		}
 
 		static bool ResolveNode(Context context) {
@@ -249,11 +257,6 @@ namespace Codist.QuickInfo
 				context.IsCandidate = true;
 				ShowCandidateInfo(context.Container, context.SymbolCandidates);
 			}
-		}
-
-		static QuickInfoItem CreateQuickInfoItem(IAsyncQuickInfoSession session, SyntaxToken? token, object item) {
-			session.KeepViewPosition();
-			return new QuickInfoItem(token?.Span.CreateSnapshotSpan(session.TextView.TextSnapshot).ToTrackingSpan(), item);
 		}
 
 		static Task<Chain<string>> SearchUnavailableProjectsAsync(Document doc, Context ctx) {

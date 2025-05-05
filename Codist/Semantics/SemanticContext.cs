@@ -221,10 +221,10 @@ namespace Codist
 		}
 
 		public Task<bool> UpdateAsync(ITextBuffer textBuffer, SnapshotPoint snapshotPoint, CancellationToken cancellationToken) {
-			if (UpdateDocumentAndWorkspace(ref snapshotPoint, ref textBuffer, out Document doc, out Workspace workspace) == false || doc == null) {
-				return Task.FromResult(false);
-			}
-			return UpdateAsync(textBuffer, doc, workspace, cancellationToken);
+			return UpdateDocumentAndWorkspace(ref snapshotPoint, ref textBuffer, out var doc, out var workspace)
+				&& doc != null
+				? UpdateAsync(textBuffer, doc, workspace, cancellationToken)
+				: Task.FromResult(false);
 		}
 
 		async Task<bool> UpdateAsync(ITextBuffer textBuffer, Document doc, Workspace workspace, CancellationToken cancellationToken) {
@@ -263,10 +263,9 @@ namespace Codist
 		}
 
 		async Task<bool> UpdateAsync(SnapshotPoint position, ITextBuffer textBuffer, Document document, Workspace workspace, CancellationToken cancellationToken) {
-			bool versionChanged;
 			try {
 				var ver = await document.GetSyntaxVersionAsync(cancellationToken).ConfigureAwait(false);
-				if (versionChanged = ver != _Model.Version) {
+				if (ver != _Model.Version) {
 					var model = await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
 					if (model == null) {
 						return Reset();
@@ -397,7 +396,7 @@ namespace Codist
 
 		readonly struct SyntaxModel
 		{
-			internal static readonly SyntaxModel Empty = new SyntaxModel(null, null, null, null, null, VersionStamp.Default);
+			internal static readonly SyntaxModel Empty = default;
 
 			public readonly Workspace Workspace;
 			public readonly ITextBuffer SourceBuffer;

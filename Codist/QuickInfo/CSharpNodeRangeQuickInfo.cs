@@ -6,6 +6,7 @@ using CLR;
 using Codist.Controls;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.VisualStudio.Language.Intellisense;
+using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using R = Codist.Properties.Resources;
 
@@ -15,15 +16,21 @@ namespace Codist.QuickInfo
 	{
 		protected override Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
 			SemanticContext context;
+			ITextBuffer textBuffer;
 			return Config.Instance.QuickInfoOptions.HasAnyFlag(QuickInfoOptions.NodeRange | QuickInfoOptions.SyntaxNodePath)
 				&& session.TextView is IWpfTextView view
+				&& (textBuffer = session.GetSourceBuffer(out var triggerPoint)) != null
+				&& triggerPoint.Position < textBuffer.CurrentSnapshot.Length
 				&& (context = SemanticContext.GetOrCreateSingletonInstance(view)) != null
-				? InternalGetQuickInfoItemAsync(session, context, cancellationToken)
+				? InternalGetQuickInfoItemAsync(session, context, textBuffer, triggerPoint, cancellationToken)
 				: Task.FromResult<QuickInfoItem>(null);
 		}
 
-		async Task<QuickInfoItem> InternalGetQuickInfoItemAsync(IAsyncQuickInfoSession session, SemanticContext sc, CancellationToken cancellationToken) {
-			await sc.UpdateAsync(session.GetSourceBuffer(out var triggerPoint), triggerPoint, cancellationToken).ConfigureAwait(false);
+		async Task<QuickInfoItem> InternalGetQuickInfoItemAsync(IAsyncQuickInfoSession session, SemanticContext sc, ITextBuffer textBuffer, SnapshotPoint triggerPoint, CancellationToken cancellationToken) {
+			if (await sc.UpdateAsync(textBuffer, triggerPoint, cancellationToken).ConfigureAwait(false) == false
+				|| sc.Compilation is null) {
+				return null;
+			}
 			var token = sc.Compilation.FindToken(triggerPoint, true);
 			var node = token.Parent;
 			if (node == null) {
