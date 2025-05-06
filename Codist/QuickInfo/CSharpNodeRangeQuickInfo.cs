@@ -45,9 +45,9 @@ namespace Codist.QuickInfo
 			if (option.MatchFlags(QuickInfoOptions.SyntaxNodePath)) {
 				var block = new BlockItem(IconIds.SyntaxNode, R.T_SyntaxPath, true)
 					.AppendLine()
-					.Append(token.Span.CreateSnapshotSpan(triggerPoint.Snapshot), SyntaxKindCache.Cache[token.Kind()]);
+					.Append(token, triggerPoint.Snapshot, SyntaxKindCache.Cache[token.Kind()]);
 				do {
-					block.Append(" < ").Append(node.Span.CreateSnapshotSpan(triggerPoint.Snapshot), SyntaxKindCache.Cache[node.Kind()]);
+					block.Append(" < ").Append(node, triggerPoint.Snapshot, SyntaxKindCache.Cache[node.Kind()]);
 				}
 				while (node.Kind().IsDeclaration() == false && (node = node.Parent) != null);
 				await SyncHelper.SwitchToMainThreadAsync(cancellationToken);

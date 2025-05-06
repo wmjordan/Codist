@@ -9,6 +9,7 @@ using System.Windows.Media;
 using System.Xml.Linq;
 using Codist.Controls;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Utilities;
@@ -101,6 +102,10 @@ namespace Codist
 		}
 		public static Inline Render(this SnapshotSpan span, string text) {
 			return new SpanLink(span, text);
+		}
+
+		public static Inline Render(this SyntaxNodeOrToken syntax, ITextSnapshot textSnapshot, string text) {
+			return new SyntaxNodeLink(syntax, textSnapshot, text);
 		}
 
 		public static ScrollViewer Scrollable<TElement>(this TElement element)
@@ -330,9 +335,9 @@ namespace Codist
 			}
 		}
 
-		sealed class SpanLink : InteractiveRun
+		class SpanLink : InteractiveRun
 		{
-			readonly SnapshotSpan _Span;
+			SnapshotSpan _Span;
 
 			public SpanLink(SnapshotSpan span, string text) {
 				Text = text ?? span.GetText();
@@ -340,6 +345,13 @@ namespace Codist
 			}
 
 			protected override object CreateToolTip() {
+				string t = CreateTipText();
+				return t != Text
+					? new ThemedToolTip(Text, t)
+					: base.CreateToolTip();
+			}
+
+			protected string CreateTipText() {
 				var truncated = _Span.Length > 512;
 				var t = (truncated ? new SnapshotSpan(_Span.Snapshot, _Span.Start, 512) : _Span).GetText();
 				if (t.IndexOf('\n') != -1) {
@@ -352,9 +364,7 @@ namespace Codist
 				if (truncated) {
 					t += Properties.Resources.T_ExpressionTooLong;
 				}
-				return t != Text
-					? new ThemedToolTip(Text, t)
-					: base.CreateToolTip();
+				return t;
 			}
 
 			static string UnindentText(string t, string leadingWhitespace, int wsLength) {
@@ -380,12 +390,37 @@ namespace Codist
 				MouseLeftButtonDown += GoToSnapshotPoint;
 			}
 
+			protected override void OnUnload() {
+				_Span = default;
+			}
+
 			void GoToSnapshotPoint(object sender, MouseButtonEventArgs e) {
 				var view = TextEditorHelper.GetMouseOverDocumentView();
 				if (view != null) {
 					view.SelectSpan(_Span);
 					view.VisualElement.Focus();
 				}
+			}
+		}
+
+		sealed class SyntaxNodeLink : SpanLink
+		{
+			SyntaxNodeOrToken _NodeOrToken;
+
+			public SyntaxNodeLink(SyntaxNodeOrToken syntax, ITextSnapshot textSnapshot, string text) : base(syntax.Span.CreateSnapshotSpan(textSnapshot), text) {
+				_NodeOrToken = syntax;
+			}
+
+			protected override object CreateToolTip() {
+				var t = CreateTipText();
+				var tip = new ThemedToolTip(Text + " = " + _NodeOrToken.RawKind.ToText(), "Span.Length: " + _NodeOrToken.Span.Length);
+				tip.AddTextBlock().Text = t;
+				return tip;
+			}
+
+			protected override void OnUnload() {
+				_NodeOrToken = default;
+				base.OnUnload();
 			}
 		}
 	}

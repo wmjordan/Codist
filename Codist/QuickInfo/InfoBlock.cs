@@ -156,6 +156,11 @@ namespace Codist.QuickInfo
 			return this;
 		}
 
+		public BlockItem Append(SyntaxNodeOrToken syntax, ITextSnapshot textSnapshot, string text) {
+			Segments.Add(new SyntaxSegment(syntax, textSnapshot, text));
+			return this;
+		}
+
 		public GeneralInfoBlock MakeBlock() {
 			return new GeneralInfoBlock(this);
 		}
@@ -232,6 +237,26 @@ namespace Codist.QuickInfo
 
 		public override void ToUI(InlineCollection inlines) {
 			var inline = Span.Render(Text);
+			ApplySegmentStyle(inline);
+			inlines.Add(inline);
+		}
+	}
+
+	sealed class SyntaxSegment : TextSegment
+	{
+		public SyntaxSegment(SyntaxNodeOrToken syntax, ITextSnapshot snapshot, string text) {
+			Syntax = syntax;
+			Snapshot = snapshot;
+			Text = text;
+		}
+
+		public SyntaxNodeOrToken Syntax { get; }
+		public ITextSnapshot Snapshot { get; }
+
+		public override SegmentType Type => SegmentType.SnapshotSpan;
+
+		public override void ToUI(InlineCollection inlines) {
+			var inline = Syntax.Render(Snapshot, Text);
 			ApplySegmentStyle(inline);
 			inlines.Add(inline);
 		}
