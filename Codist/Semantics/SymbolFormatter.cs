@@ -126,7 +126,7 @@ namespace Codist
 					if ((m = (IMethodSymbol)s).MethodKind == MethodKind.ReducedExtension) {
 						b.AddImage(IconIds.ExtensionMethod)
 							.Append(" ")
-							.AddSymbol(m.ReducedFrom.Parameters[0].Type, false, this);
+							.AddSymbol(m.ReceiverType, false, this);
 					}
 				}
 
