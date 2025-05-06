@@ -45,15 +45,15 @@ namespace Codist.QuickInfo
 			if (option.MatchFlags(QuickInfoOptions.SyntaxNodePath)) {
 				var block = new BlockItem(IconIds.SyntaxNode, R.T_SyntaxPath, true)
 					.AppendLine()
-					.Append(SyntaxKindCache.Cache[token.Kind()]);
+					.Append(token.Span.CreateSnapshotSpan(triggerPoint.Snapshot), SyntaxKindCache.Cache[token.Kind()]);
 				do {
-					block.Append(" < ").Append(SyntaxKindCache.Cache[node.Kind()]);
+					block.Append(" < ").Append(node.Span.CreateSnapshotSpan(triggerPoint.Snapshot), SyntaxKindCache.Cache[node.Kind()]);
 				}
 				while (node.Kind().IsDeclaration() == false && (node = node.Parent) != null);
 				await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
 				return QuickInfoOverride.CheckCtrlSuppression()
 					? null
-					: new QuickInfoItem(session.ApplicableToSpan, new GeneralInfoBlock(block));
+					: new QuickInfoItem(token.Span.CreateSnapshotSpan(triggerPoint.Snapshot).ToTrackingSpan(), new GeneralInfoBlock(block));
 			}
 			return null;
 		}

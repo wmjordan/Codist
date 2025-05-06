@@ -10,6 +10,8 @@ using System.Xml.Linq;
 using Codist.Controls;
 using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Text;
+using Microsoft.VisualStudio.Utilities;
 using WpfBrush = System.Windows.Media.Brush;
 using WpfBrushes = System.Windows.Media.Brushes;
 
@@ -97,6 +99,10 @@ namespace Codist
 			}
 			return run;
 		}
+		public static Inline Render(this SnapshotSpan span, string text) {
+			return new SpanLink(span, text);
+		}
+
 		public static ScrollViewer Scrollable<TElement>(this TElement element)
 			where TElement : DependencyObject {
 			if (element is TextBlock t && t.TextWrapping == TextWrapping.NoWrap) {
@@ -226,7 +232,7 @@ namespace Codist
 
 		sealed class SymbolLink : InteractiveRun
 		{
-			ISymbol _Symbol;
+			readonly ISymbol _Symbol;
 
 			public SymbolLink(ISymbol symbol, string alias) {
 				Text = alias ?? symbol.GetOriginalName();
@@ -320,6 +326,65 @@ namespace Codist
 
 				async void FindMembersForNamespace(ISymbol symbol) {
 					await SemanticContext.GetHovered().FindMembersAsync(symbol);
+				}
+			}
+		}
+
+		sealed class SpanLink : InteractiveRun
+		{
+			readonly SnapshotSpan _Span;
+
+			public SpanLink(SnapshotSpan span, string text) {
+				Text = text ?? span.GetText();
+				_Span = span;
+			}
+
+			protected override object CreateToolTip() {
+				var truncated = _Span.Length > 512;
+				var t = (truncated ? new SnapshotSpan(_Span.Snapshot, _Span.Start, 512) : _Span).GetText();
+				if (t.IndexOf('\n') != -1) {
+					var ws = _Span.Snapshot.GetLineFromPosition(_Span.Start).GetLinePrecedingWhitespace();
+					var wsLength = ws.Length;
+					if (wsLength != 0) {
+						t = UnindentText(t, ws, wsLength);
+					}
+				}
+				if (truncated) {
+					t += Properties.Resources.T_ExpressionTooLong;
+				}
+				return t != Text
+					? new ThemedToolTip(Text, t)
+					: base.CreateToolTip();
+			}
+
+			static string UnindentText(string t, string leadingWhitespace, int wsLength) {
+				using (var sbr = ReusableStringBuilder.AcquireDefault(t.Length)) {
+					var sb = sbr.Resource;
+					var sr = new System.IO.StringReader(t);
+					string l = sr.ReadLine();
+					sb.Append(l);
+					while ((l = sr.ReadLine()) != null) {
+						sb.AppendLine();
+						if (l.StartsWith(leadingWhitespace, StringComparison.Ordinal)) {
+							sb.Append(l, wsLength, l.Length - wsLength);
+						}
+						else {
+							sb.Append(l);
+						}
+					}
+					return sb.ToString();
+				}
+			}
+
+			protected override void OnInitInteraction() {
+				MouseLeftButtonDown += GoToSnapshotPoint;
+			}
+
+			void GoToSnapshotPoint(object sender, MouseButtonEventArgs e) {
+				var view = TextEditorHelper.GetMouseOverDocumentView();
+				if (view != null) {
+					view.SelectSpan(_Span);
+					view.VisualElement.Focus();
 				}
 			}
 		}

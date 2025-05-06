@@ -7,6 +7,7 @@ using System.Windows.Media;
 using CLR;
 using Codist.Controls;
 using Microsoft.CodeAnalysis;
+using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Adornments;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Utilities;
@@ -150,6 +151,11 @@ namespace Codist.QuickInfo
 			return this;
 		}
 
+		public BlockItem Append(SnapshotSpan snapshotSpan, string text) {
+			Segments.Add(new SnapshotSpanSegment(snapshotSpan, text));
+			return this;
+		}
+
 		public GeneralInfoBlock MakeBlock() {
 			return new GeneralInfoBlock(this);
 		}
@@ -175,6 +181,7 @@ namespace Codist.QuickInfo
 		Icon,
 		LineBreak,
 		AttributeData,
+		SnapshotSpan,
 		Custom
 	}
 
@@ -209,6 +216,24 @@ namespace Codist.QuickInfo
 
 		public override void ToUI(InlineCollection inlines) {
 			SymbolFormatter.Instance.Format(inlines, Symbol, Text, Style.MatchFlags(SegmentStyle.Bold));
+		}
+	}
+
+	sealed class SnapshotSpanSegment : TextSegment
+	{
+		public SnapshotSpanSegment(SnapshotSpan span, string text) {
+			Span = span;
+			Text = text;
+		}
+
+		public SnapshotSpan Span { get; }
+
+		public override SegmentType Type => SegmentType.SnapshotSpan;
+
+		public override void ToUI(InlineCollection inlines) {
+			var inline = Span.Render(Text);
+			ApplySegmentStyle(inline);
+			inlines.Add(inline);
 		}
 	}
 
@@ -270,17 +295,21 @@ namespace Codist.QuickInfo
 
 		public override void ToUI(InlineCollection inlines) {
 			var run = new Run(Text);
+			ApplySegmentStyle(run);
+			inlines.Add(run);
+		}
+
+		protected void ApplySegmentStyle(Inline inline) {
 			if (Style.MatchFlags(SegmentStyle.Bold)) {
-				run.FontWeight = FontWeights.Bold;
+				inline.FontWeight = FontWeights.Bold;
 			}
 			if (Style.MatchFlags(SegmentStyle.Italic)) {
-				run.FontStyle = FontStyles.Italic;
+				inline.FontStyle = FontStyles.Italic;
 			}
 			if (Style.MatchFlags(SegmentStyle.Underline)) {
-				run.TextDecorations.Add(TextDecorations.Underline);
+				inline.TextDecorations.Add(TextDecorations.Underline);
 			}
-			run.Foreground = Foreground ?? SymbolFormatter.Instance.PlainText;
-			inlines.Add(run);
+			inline.Foreground = Foreground ?? SymbolFormatter.Instance.PlainText;
 		}
 	}
 }
