@@ -191,6 +191,9 @@ namespace Codist.Taggers
 							&& token.Parent.IsKind(SyntaxKind.IdentifierName)) {
 							TokenTaggers.TagIdentifier(in token, ctx);
 						}
+						else if (token.IsKind(SyntaxKind.XmlTextLiteralToken)) {
+							TokenTaggers.Tag(in token, ctx);
+						}
 					}
 				}
 			}
@@ -276,6 +279,11 @@ namespace Codist.Taggers
 				{ SyntaxKind.PlusPlusToken, TagOperatorToken },
 				{ SyntaxKind.MinusMinusToken, TagOperatorToken },
 				{ SyntaxKind.StringLiteralToken, TagStringToken },
+				{ SyntaxKind.InterpolatedStringStartToken, TagInterpolatedStringStartToken },
+				{ SyntaxKind.InterpolatedVerbatimStringStartToken, TagInterpolatedStringStartToken },
+				{ CodeAnalysisHelper.SingleLineRawStringLiteralToken, TagStringToken },
+				{ CodeAnalysisHelper.Utf8StringLiteralToken, TagStringToken },
+				{ SyntaxKind.XmlTextLiteralToken, TagStringToken },
 				{ SyntaxKind.IdentifierToken, TagIdentifier },
 			};
 
@@ -650,76 +658,169 @@ namespace Codist.Taggers
 				ctx.Tags.Add(token, __GeneralClassifications.ResourceKeyword);
 			}
 
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			static void TagStringToken(in SyntaxToken token, Context ctx) {
-				var url = token.Text;
-				if (url.Length < 5) {
+			static void TagInterpolatedStringStartToken(in SyntaxToken token, Context ctx) {
+				var node = token.Parent as InterpolatedStringExpressionSyntax;
+				if (node.Span.Length < 3) {
 					return;
 				}
+				//var contents = node.Contents;
+				//TagUrlParts(ctx, contents.ToString(), 0, 0, contents.Span.Start);
+				var leading = node.StringStartToken.Span.Length;
+				var trailing = node.StringEndToken.Span.Length;
+				TagUrlParts(ctx, node.ToString(), leading, trailing, token.SpanStart);
+			}
 
-				var s = token.SpanStart;
-				foreach (var (type, start, length) in ParseUrl(url)) {
+			static void TagStringToken(in SyntaxToken token, Context ctx) {
+				var url = token.Text;
+				if (url.Length < 8) {
+					return;
+				}
+				int leading, trailing;
+				switch (token.Kind()) {
+					case SyntaxKind.StringLiteralToken:
+						leading = url[0] == '@' ? 2 : 1; // @" or "
+						trailing = 1;
+						break;
+					case CodeAnalysisHelper.SingleLineRawStringLiteralToken:
+						GetRawStringQuoteLength(url, out leading);
+						trailing = leading;
+						break;
+					case CodeAnalysisHelper.Utf8StringLiteralToken:
+						leading = url[0] == '@' ? 2 : 1; // @" or "
+						trailing = 3; // "u8
+						break;
+					default:
+						leading = trailing = 0;
+						break;
+				}
+				TagUrlParts(ctx, url, leading, trailing, token.SpanStart);
+			}
+
+			static void TagUrlParts(Context ctx, string url, int leading, int trailing, int offset) {
+				foreach (var (type, start, length) in ParseUrl(url, leading, trailing)) {
 					ClassificationTag tag;
 					switch (type) {
 						case 'd': tag = __Classifications.ClassName; break;
-						case '?':
-						case '#':
-						case '=': tag = __Classifications.Property; break;
+						case '?': tag = __GeneralClassifications.Operator; break;
+						case '#': tag = __Classifications.Property; break;
+						case '=': tag = __Classifications.Parameter; break;
 						case '&': tag = __Classifications.Field; break;
+						case 'f': tag = __Classifications.Method; break;
 						case '%': tag = __GeneralClassifications.Keyword; break;
+						case 's': tag = __Classifications.Namespace; break;
 						default:
 							continue;
 					}
-					ctx.Tags.Add(new TextSpan(s + start, length), tag);
+					ctx.Tags.Add(new TextSpan(offset + start, length), tag);
 				}
 			}
 
-			static IEnumerable<(char type, int start, int length)> ParseUrl(string url) {
+			static void GetRawStringQuoteLength(string text, out int quoteLength) {
+				int l;
+				if ((l = text.Length) < 7 || text[l - 1] != '"') {
+					quoteLength = -1;
+					return;
+				}
+				var s = text.AsSpan(3, text.Length - 6);
+				var end = s.Length - 1;
+				int i = 0;
+				while (s[i] == '"' && s[end - i] == '"') {
+					++i;
+				}
+				quoteLength = 3 + i;
+			}
+
+			static IEnumerable<(char type, int start, int length)> ParseUrl(string url, int leading, int trailing) {
 				const int MAX_PARSE_LENGTH = 4096;
 
 				if (url.Length > MAX_PARSE_LENGTH) {
-					url = url.Substring(0, MAX_PARSE_LENGTH);
+					// skip too long URL
+					trailing += url.Length - MAX_PARSE_LENGTH;
 				}
 
-				// 解析域名部分
-				int hostStart = FindHostStart(url);
+				#region authority
+				int hostStart = FindHostStart(url, leading, trailing);
 				if (hostStart == 0) {
 					yield break;
 				}
 				int hostEnd = FindHostEnd(url, hostStart);
 				if (hostEnd > hostStart) {
+					yield return ('s', leading, hostStart - leading);
 					yield return ('d', hostStart, hostEnd - hostStart);
 				}
 				else {
 					yield break;
 				}
+				#endregion
 
-				// 确定各部分边界
-				int queryStart = url.IndexOf('?', hostEnd);
-				int hashStart = url.IndexOf('#', hostEnd);
+				var endOfUrl = url.Length - trailing;
+				CheckPathBoundaries(url, hostEnd, out var fileStart, out var queryStart, out var hashStart, ref endOfUrl);
 
-				// 处理路径部分（域名后到查询/哈希前）
-				foreach (var item in ScanSection(url, hostEnd,
-					queryStart != -1 ? queryStart : hashStart != -1 ? hashStart : url.Length)) {
+				var endOfFile = queryStart >= 0 ? queryStart : hashStart != -1 ? hashStart : endOfUrl;
+
+				// between query to hash
+				foreach (var item in ScanSection(url, hostEnd, endOfFile)) {
 					yield return item;
 				}
 
-				// 处理查询部分
-				if (queryStart != -1) {
-					yield return ('?', queryStart, 1); // 问号
+				if (fileStart != -1) {
+					yield return ('f', fileStart, endOfFile - fileStart); // file
+				}
 
-					int queryEnd = hashStart != -1 ? hashStart : url.Length;
+				// query
+				if (queryStart >= 0) {
+					yield return ('?', queryStart, 1); // query string
+
+					int queryEnd = hashStart != -1 ? hashStart : endOfUrl;
 					foreach (var item in ProcessQuery(url, queryStart + 1, queryEnd)) {
 						yield return item;
 					}
 				}
 
-				// 处理片段部分
+				// section
 				if (hashStart != -1) {
-					yield return ('#', hashStart, 1); // 井号
-					foreach (var item in ScanSection(url, hashStart + 1, url.Length)) {
+					yield return ('?', hashStart, 1); // hash
+					yield return ('#', hashStart + 1, endOfUrl - hashStart - 1); // hash value
+					foreach (var item in ScanSection(url, hashStart + 1, endOfUrl)) {
 						yield return item;
 					}
+				}
+			}
+
+			static void CheckPathBoundaries(string url, int hostEnd, out int indexOfFile, out int indexOfQuery, out int indexOfHash, ref int endOfUrl) {
+				int i = hostEnd;
+				indexOfFile = indexOfQuery = indexOfHash = -1;
+				foreach (var c in url.AsSpan(hostEnd, endOfUrl - hostEnd)) {
+					switch (c) {
+						case '?':
+							if (indexOfQuery == -1) {
+								indexOfQuery = i;
+							}
+							break;
+						case '#':
+							if (indexOfHash == -1) {
+								indexOfHash = i;
+								if (indexOfQuery == -1) {
+									indexOfQuery = -2;
+								}
+							}
+							break;
+						case '/':
+							if (indexOfQuery == -1 && indexOfHash == -1) {
+								indexOfFile = i + 1;
+							}
+							break;
+						case '"':
+						case '\u007F':
+							endOfUrl = i;
+							return;
+						default:
+							if (c <= ' ') {
+								goto case '"';
+							}
+							break;
+					}
+					++i;
 				}
 			}
 
@@ -730,22 +831,20 @@ namespace Codist.Taggers
 					if (paramEnd == -1 || paramEnd > end) paramEnd = end;
 
 					int equalPos = url.IndexOf('=', paramStart, paramEnd - paramStart);
-
-					// 输出字段名
 					if (equalPos != -1) {
-						yield return ('&', paramStart, equalPos - paramStart); // 字段名
-						yield return ('=', equalPos, 1);                      // 等号
+						yield return ('&', paramStart, equalPos - paramStart); // field name
+						yield return ('=', equalPos + 1, paramEnd - equalPos - 1); // field value
 					}
 					else if (paramEnd > paramStart) {
-						yield return ('&', paramStart, paramEnd - paramStart); // 无等号字段名
+						yield return ('&', paramStart, paramEnd - paramStart); // field name
 					}
 
-					// 扫描参数中的百分号编码
+					// scan for encoded
 					foreach (var item in ScanSection(url, paramStart, paramEnd)) {
 						yield return item;
 					}
 
-					paramStart = paramEnd + 1; // 移动到下一个参数
+					paramStart = paramEnd + 1;
 				}
 			}
 
@@ -768,10 +867,14 @@ namespace Codist.Taggers
 				return c.IsBetween('0', '9') || c.IsBetween('A', 'F') || c.IsBetween('a', 'f');
 			}
 
-			static int FindHostStart(string url) {
-				int protoEnd = url.IndexOf("://", 0, Math.Min(12, url.Length), StringComparison.Ordinal);
-				if (protoEnd != -1) return protoEnd + 3;
-				return url.StartsWith("//", StringComparison.Ordinal) ? 2 : 0;
+			static int FindHostStart(string url, int leading, int trailing) {
+				var length = Math.Min(12, url.Length - leading - trailing);
+				int protoEnd = url.IndexOf("://", leading, length, StringComparison.Ordinal);
+				return protoEnd != -1
+					? protoEnd + 3
+					: url.IndexOf("//", leading, 2, StringComparison.Ordinal) == leading
+						? 2
+						: 0;
 			}
 
 			static int FindHostEnd(string url, int start) {
