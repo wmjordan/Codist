@@ -16,6 +16,7 @@ namespace Codist.Taggers
 			Identifier = registry.GetClassificationTag(Constants.CodeIdentifier);
 			Keyword = registry.GetClassificationTag(Constants.CodeKeyword);
 			LoopKeyword = registry.GetClassificationTag(Constants.CSharpLoopKeyword);
+			Number = registry.GetClassificationTag(Constants.CodeNumber);
 			Operator = registry.GetClassificationTag(Constants.CodeOperator);
 			Punctuation = registry.GetClassificationTag(Constants.CodePunctuation);
 			ResourceKeyword = registry.GetClassificationTag(Constants.CSharpResourceKeyword);
@@ -29,6 +30,7 @@ namespace Codist.Taggers
 		public ClassificationTag Identifier { get; }
 		public ClassificationTag Keyword { get; }
 		public ClassificationTag LoopKeyword { get; }
+		public ClassificationTag Number { get; }
 		public ClassificationTag Operator { get; }
 		public ClassificationTag Punctuation { get; }
 		public ClassificationTag ResourceKeyword { get; }

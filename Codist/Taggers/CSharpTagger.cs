@@ -17,7 +17,7 @@ using Microsoft.VisualStudio.Text.Tagging;
 
 namespace Codist.Taggers
 {
-	sealed class CSharpTagger : ITagger<IClassificationTag>, IDisposable
+	sealed partial class CSharpTagger : ITagger<IClassificationTag>, IDisposable
 	{
 		delegate void TaggerDelegate(in SyntaxToken token, Context ctx);
 		static readonly CSharpClassifications __Classifications = CSharpClassifications.Instance;
@@ -279,11 +279,12 @@ namespace Codist.Taggers
 				{ SyntaxKind.PlusPlusToken, TagOperatorToken },
 				{ SyntaxKind.MinusMinusToken, TagOperatorToken },
 				{ SyntaxKind.StringLiteralToken, TagStringToken },
-				{ SyntaxKind.InterpolatedStringStartToken, TagInterpolatedStringStartToken },
-				{ SyntaxKind.InterpolatedVerbatimStringStartToken, TagInterpolatedStringStartToken },
 				{ CodeAnalysisHelper.SingleLineRawStringLiteralToken, TagStringToken },
 				{ CodeAnalysisHelper.Utf8StringLiteralToken, TagStringToken },
 				{ SyntaxKind.XmlTextLiteralToken, TagStringToken },
+				{ SyntaxKind.InterpolatedStringStartToken, TagInterpolatedStringStartToken },
+				{ SyntaxKind.InterpolatedVerbatimStringStartToken, TagInterpolatedStringStartToken },
+				{ CodeAnalysisHelper.InterpolatedSingleLineRawStringStartToken, TagInterpolatedStringStartToken },
 				{ SyntaxKind.IdentifierToken, TagIdentifier },
 			};
 
@@ -672,7 +673,7 @@ namespace Codist.Taggers
 
 			static void TagStringToken(in SyntaxToken token, Context ctx) {
 				var url = token.Text;
-				if (url.Length < 8) {
+				if (url.Length < 5) {
 					return;
 				}
 				int leading, trailing;
@@ -697,21 +698,30 @@ namespace Codist.Taggers
 			}
 
 			static void TagUrlParts(Context ctx, string url, int leading, int trailing, int offset) {
-				foreach (var (type, start, length) in ParseUrl(url, leading, trailing)) {
+				int length = url.Length - leading - trailing;
+				if (length < 5) {
+					return;
+				}
+				while ((leading = TryParseUrl(url, leading, length, (p, s, l) => {
 					ClassificationTag tag;
-					switch (type) {
-						case 'd': tag = __Classifications.ClassName; break;
-						case '?': tag = __GeneralClassifications.Operator; break;
-						case '#': tag = __Classifications.Property; break;
-						case '=': tag = __Classifications.Parameter; break;
-						case '&': tag = __Classifications.Field; break;
-						case 'f': tag = __Classifications.Method; break;
-						case '%': tag = __GeneralClassifications.Keyword; break;
-						case 's': tag = __Classifications.Namespace; break;
-						default:
-							continue;
+					switch (p) {
+						case UrlPart.FullUrl: tag = __Classifications.StaticMember; break;
+						case UrlPart.Scheme: tag = __Classifications.Namespace; break;
+						case UrlPart.Credential: tag = __Classifications.NestedType; break;
+						case UrlPart.Host: tag = __Classifications.ClassName; break;
+						case UrlPart.Port: tag = __GeneralClassifications.Number; break;
+						case UrlPart.FileName: tag = __Classifications.Method; break;
+						case UrlPart.QueryQuestionMark: tag = __GeneralClassifications.Operator; break;
+						case UrlPart.QueryName: tag = __Classifications.Field; break;
+						case UrlPart.QueryValue: tag = __Classifications.Parameter; break;
+						case UrlPart.Fragment: tag = __Classifications.Property; break;
+						default: return;
 					}
-					ctx.Tags.Add(new TextSpan(offset + start, length), tag);
+					ctx.Tags.Add(new TextSpan(offset + s, l), tag);
+				})) != -1) {
+					if ((length = url.Length - leading - trailing) < 4) {
+						return;
+					}
 				}
 			}
 
@@ -730,160 +740,8 @@ namespace Codist.Taggers
 				quoteLength = 3 + i;
 			}
 
-			static IEnumerable<(char type, int start, int length)> ParseUrl(string url, int leading, int trailing) {
-				const int MAX_PARSE_LENGTH = 4096;
-
-				if (url.Length > MAX_PARSE_LENGTH) {
-					// skip too long URL
-					trailing += url.Length - MAX_PARSE_LENGTH;
-				}
-
-				#region authority
-				int hostStart = FindHostStart(url, leading, trailing);
-				if (hostStart == 0) {
-					yield break;
-				}
-				int hostEnd = FindHostEnd(url, hostStart);
-				if (hostEnd > hostStart) {
-					yield return ('s', leading, hostStart - leading);
-					yield return ('d', hostStart, hostEnd - hostStart);
-				}
-				else {
-					yield break;
-				}
-				#endregion
-
-				var endOfUrl = url.Length - trailing;
-				CheckPathBoundaries(url, hostEnd, out var fileStart, out var queryStart, out var hashStart, ref endOfUrl);
-
-				var endOfFile = queryStart >= 0 ? queryStart : hashStart != -1 ? hashStart : endOfUrl;
-
-				// between query to hash
-				foreach (var item in ScanSection(url, hostEnd, endOfFile)) {
-					yield return item;
-				}
-
-				if (fileStart != -1) {
-					yield return ('f', fileStart, endOfFile - fileStart); // file
-				}
-
-				// query
-				if (queryStart >= 0) {
-					yield return ('?', queryStart, 1); // query string
-
-					int queryEnd = hashStart != -1 ? hashStart : endOfUrl;
-					foreach (var item in ProcessQuery(url, queryStart + 1, queryEnd)) {
-						yield return item;
-					}
-				}
-
-				// section
-				if (hashStart != -1) {
-					yield return ('?', hashStart, 1); // hash
-					yield return ('#', hashStart + 1, endOfUrl - hashStart - 1); // hash value
-					foreach (var item in ScanSection(url, hashStart + 1, endOfUrl)) {
-						yield return item;
-					}
-				}
-			}
-
-			static void CheckPathBoundaries(string url, int hostEnd, out int indexOfFile, out int indexOfQuery, out int indexOfHash, ref int endOfUrl) {
-				int i = hostEnd;
-				indexOfFile = indexOfQuery = indexOfHash = -1;
-				foreach (var c in url.AsSpan(hostEnd, endOfUrl - hostEnd)) {
-					switch (c) {
-						case '?':
-							if (indexOfQuery == -1) {
-								indexOfQuery = i;
-							}
-							break;
-						case '#':
-							if (indexOfHash == -1) {
-								indexOfHash = i;
-								if (indexOfQuery == -1) {
-									indexOfQuery = -2;
-								}
-							}
-							break;
-						case '/':
-							if (indexOfQuery == -1 && indexOfHash == -1) {
-								indexOfFile = i + 1;
-							}
-							break;
-						case '"':
-						case '\u007F':
-							endOfUrl = i;
-							return;
-						default:
-							if (c <= ' ') {
-								goto case '"';
-							}
-							break;
-					}
-					++i;
-				}
-			}
-
-			static IEnumerable<(char type, int start, int length)> ProcessQuery(string url, int start, int end) {
-				int paramStart = start;
-				while (paramStart < end) {
-					int paramEnd = url.IndexOf('&', paramStart);
-					if (paramEnd == -1 || paramEnd > end) paramEnd = end;
-
-					int equalPos = url.IndexOf('=', paramStart, paramEnd - paramStart);
-					if (equalPos != -1) {
-						yield return ('&', paramStart, equalPos - paramStart); // field name
-						yield return ('=', equalPos + 1, paramEnd - equalPos - 1); // field value
-					}
-					else if (paramEnd > paramStart) {
-						yield return ('&', paramStart, paramEnd - paramStart); // field name
-					}
-
-					// scan for encoded
-					foreach (var item in ScanSection(url, paramStart, paramEnd)) {
-						yield return item;
-					}
-
-					paramStart = paramEnd + 1;
-				}
-			}
-
-			static IEnumerable<(char type, int start, int length)> ScanSection(
-				string url, int start, int end) {
-				for (int i = start; i < end;) {
-					if (url[i] == '%'
-						&& i + 2 < end
-						&& IsHex(url[i + 1])
-						&& IsHex(url[i + 2])) {
-						yield return ('%', i, 3);
-						i += 3;
-						continue;
-					}
-					i++;
-				}
-			}
-
 			static bool IsHex(char c) {
 				return c.IsBetween('0', '9') || c.IsBetween('A', 'F') || c.IsBetween('a', 'f');
-			}
-
-			static int FindHostStart(string url, int leading, int trailing) {
-				var length = Math.Min(12, url.Length - leading - trailing);
-				int protoEnd = url.IndexOf("://", leading, length, StringComparison.Ordinal);
-				return protoEnd != -1
-					? protoEnd + 3
-					: url.IndexOf("//", leading, 2, StringComparison.Ordinal) == leading
-						? 2
-						: 0;
-			}
-
-			static int FindHostEnd(string url, int start) {
-				for (int i = start; i < url.Length; i++) {
-					if (url[i].CeqAny('/', '?', '#')) {
-						return i;
-					}
-				}
-				return url.Length;
 			}
 			#endregion
 
