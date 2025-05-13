@@ -192,7 +192,7 @@ namespace Codist
 						continue;
 					}
 					var p = m.Parameters[0];
-					if (type.CanConvertTo(p.Type) && d.TryAdd(m)) {
+					if ((strict ? type.Equals(p.Type) : type.CanConvertTo(p.Type)) && d.TryAdd(m)) {
 						members.Add(m);
 						continue;
 					}
@@ -206,12 +206,8 @@ namespace Codist
 							continue;
 						}
 						var constraintTypes = item.ConstraintTypes;
-						if (constraintTypes.Length == 0) {
-							if (strict) {
-								continue;
-							}
-						}
-						else if (constraintTypes.Any(i => i == type || type.CanConvertTo(i)) == false) {
+						if (constraintTypes.Length != 0
+							&& constraintTypes.Any(i => i == type || type.CanConvertTo(i)) == false) {
 							continue;
 						}
 
