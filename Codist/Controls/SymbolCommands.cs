@@ -48,13 +48,12 @@ namespace Codist.Controls
 			var typeName = type.GetTypeName();
 #endif
 			var classes = await SymbolFinder.FindDerivedClassesAsync(type, context.Document.Project.Solution).ConfigureAwait(false);
-			await SyncHelper.SwitchToMainThreadAsync(default);
 			if (directDerive) {
-				ShowSymbolMenuForResult(symbol, context, classes.Where(c => c.BaseType.OriginalDefinition.MatchWith(type)).ToList(), R.T_DirectlyDerivedClasses, false);
+				await ShowSymbolMenuForResultAsync(symbol, context, classes.Where(c => c.BaseType.OriginalDefinition.MatchWith(type)).ToList(), R.T_DirectlyDerivedClasses, false).ConfigureAwait(false);
 				return;
 			}
 			if (orderByHierarchy == false) {
-				ShowSymbolMenuForResult(symbol, context, classes.ToList(), R.T_DerivedClasses, false);
+				await ShowSymbolMenuForResultAsync(symbol, context, classes.ToList(), R.T_DerivedClasses, false).ConfigureAwait(false);
 				return;
 			}
 			var hierarchies = new Dictionary<INamedTypeSymbol, List<INamedTypeSymbol>>(7, CodeAnalysisHelper.GetNamedTypeComparer()) {
@@ -83,13 +82,14 @@ namespace Codist.Controls
 					hierarchies.Add(bt, new List<INamedTypeSymbol> { t });
 				}
 			}
-			ShowHierarchicalSymbolMenuForResult(symbol, context, type, hierarchies, R.T_DerivedClasses);
+			if (hierarchies.TryGetValue(type, out var members)) {
+				await ShowHierarchicalSymbolMenuForResultAsync(symbol, context, hierarchies, members, R.T_DerivedClasses).ConfigureAwait(false);
+			}
 		}
 
 		internal static async Task FindSubInterfacesAsync(this SemanticContext context, ISymbol symbol, bool directDerive) {
 			var interfaces = await (symbol as INamedTypeSymbol).FindDerivedInterfacesAsync(context.Document.Project, directDerive, default).ConfigureAwait(false);
-			await SyncHelper.SwitchToMainThreadAsync(default);
-			ShowSymbolMenuForResult(symbol, context, interfaces, directDerive ? R.T_DirectlyDerivedInterfaces : R.T_DerivedInterfaces, false);
+			await ShowSymbolMenuForResultAsync(symbol, context, interfaces, directDerive ? R.T_DirectlyDerivedInterfaces : R.T_DerivedInterfaces, false).ConfigureAwait(false);
 		}
 
 		internal static async Task FindOverridesAsync(this SemanticContext context, ISymbol symbol) {
@@ -225,32 +225,27 @@ namespace Codist.Controls
 
 		internal static async Task FindInstanceAsParameterAsync(this SemanticContext context, ISymbol symbol, bool strict) {
 			var members = await(symbol as ITypeSymbol).FindInstanceAsParameterAsync(context.Document.Project, strict, default);
-			await SyncHelper.SwitchToMainThreadAsync(default);
-			ShowSymbolMenuForResult(symbol, context, members, R.T_AsParameter, true);
+			await ShowSymbolMenuForResultAsync(symbol, context, members, R.T_AsParameter, true);
 		}
 
 		internal static async Task FindInstanceProducerAsync(this SemanticContext context, ISymbol symbol, bool strict) {
 			var members = await(symbol as ITypeSymbol).FindSymbolInstanceProducerAsync(context.Document.Project, strict, default);
-			await SyncHelper.SwitchToMainThreadAsync(default);
-			ShowSymbolMenuForResult(symbol, context, members, R.T_Producers, true);
+			await ShowSymbolMenuForResultAsync(symbol, context, members, R.T_Producers, true);
 		}
 
 		internal static async Task FindExtensionMethodsAsync(this SemanticContext context, ISymbol symbol, bool strict) {
 			var members = await(symbol as ITypeSymbol).FindExtensionMethodsAsync(context.Document.Project, strict, default);
-			await SyncHelper.SwitchToMainThreadAsync(default);
-			ShowSymbolMenuForResult(symbol, context, members, R.T_Extensions, true);
+			await ShowSymbolMenuForResultAsync(symbol, context, members, R.T_Extensions, true);
 		}
 
 		internal static async Task FindSymbolWithNameAsync(this SemanticContext context, ISymbol symbol, bool fullMatch) {
 			var results = await Task.Run(() => new List<ISymbol>(context.SemanticModel.Compilation.FindDeclarationMatchName(symbol.Name, fullMatch, true, default)));
-			await SyncHelper.SwitchToMainThreadAsync(default);
-			ShowSymbolMenuForResult(symbol, context, results, R.T_NameAlike, true);
+			await ShowSymbolMenuForResultAsync(symbol, context, results, R.T_NameAlike, true);
 		}
 
 		internal static async Task FindMethodsBySignatureAsync(this SemanticContext context, ISymbol symbol, bool myCodeOnly) {
 			var methods = await Task.Run(() => new List<ISymbol>(context.SemanticModel.Compilation.FindMethodBySignature(symbol, myCodeOnly, default)));
-			await SyncHelper.SwitchToMainThreadAsync(default);
-			ShowSymbolMenuForResult(symbol, context, methods, R.T_SignatureMatch, true);
+			await ShowSymbolMenuForResultAsync(symbol, context, methods, R.T_SignatureMatch, true);
 		}
 
 		internal static async Task FindParameterAssignmentsAsync(this SemanticContext context, IParameterSymbol parameter, bool strict = false, ArgumentAssignmentFilter assignmentFilter = ArgumentAssignmentFilter.Undefined) {
@@ -315,8 +310,13 @@ namespace Codist.Controls
 			m.Show(positionElement);
 		}
 
-		static void ShowSymbolMenuForResult<TSymbol>(ISymbol symbol, SemanticContext context, List<TSymbol> members, string suffix, bool groupByType, string info = null) where TSymbol : ISymbol {
+		static async Task ShowSymbolMenuForResultAsync<TSymbol>(ISymbol symbol, SemanticContext context, List<TSymbol> members, string suffix, bool groupByType, string info = null) where TSymbol : ISymbol {
 			members.Sort(CodeAnalysisHelper.CompareSymbol);
+			List<(SymbolUsageKind usage, ISymbol memberOrContainer)> groupedMembers = null;
+			if (groupByType) {
+				groupedMembers = GroupSymbolsByContainingType(members);
+			}
+			await SyncHelper.SwitchToMainThreadAsync();
 			var m = new SymbolMenu(context);
 			m.Title.SetGlyph(symbol.GetImageId())
 				.AddSymbol(symbol, null, true, SymbolFormatter.Instance)
@@ -324,26 +324,39 @@ namespace Codist.Controls
 			if (info != null) {
 				m.Title.AppendInfo(info);
 			}
-			INamedTypeSymbol containingType = null;
-			foreach (var item in members) {
-				if (groupByType && item.ContainingType != containingType) {
-					m.Add((ISymbol)(containingType = item.ContainingType) ?? item.ContainingNamespace, false)
-						.Usage = SymbolUsageKind.Container;
-					if (containingType?.TypeKind == TypeKind.Delegate) {
-						continue; // skip Invoke method in Delegates, for results from FindMethodBySignature
-					}
+			if (groupByType) {
+				foreach (var item in groupedMembers) {
+					m.Add(item.memberOrContainer, false).Usage = item.usage;
 				}
-				m.Add(item, false);
+			}
+			else {
+				foreach (var item in members) {
+					m.Add(item, false);
+				}
 			}
 			m.ExtIconProvider = ExtIconProvider.Default.GetExtIcons;
 			m.Show();
 		}
 
-		static void ShowHierarchicalSymbolMenuForResult<TSymbol>(ISymbol symbol, SemanticContext context, TSymbol root, Dictionary<TSymbol, List<TSymbol>> hierarchies, string suffix) where TSymbol : ISymbol {
-			if (hierarchies.TryGetValue(root, out var members) == false) {
-				return;
+		static List<(SymbolUsageKind usage, ISymbol memberOrContainer)> GroupSymbolsByContainingType<TSymbol>(List<TSymbol> members) where TSymbol : ISymbol {
+			INamedTypeSymbol containingType = null;
+			var groupedMembers = new List<(SymbolUsageKind, ISymbol)>(members.Count * 5 / 4);
+			foreach (var member in members) {
+				if (member.ContainingType != containingType) {
+					groupedMembers.Add((SymbolUsageKind.Container, containingType = member.ContainingType));
+					if (containingType?.TypeKind == TypeKind.Delegate) {
+						continue; // skip Invoke method in Delegates, for results from FindMethodBySignature
+					}
+				}
+				groupedMembers.Add((SymbolUsageKind.Normal, member));
 			}
+
+			return groupedMembers;
+		}
+
+		static async Task ShowHierarchicalSymbolMenuForResultAsync<TSymbol>(ISymbol symbol, SemanticContext context, Dictionary<TSymbol, List<TSymbol>> hierarchies, List<TSymbol> members, string suffix) where TSymbol : ISymbol {
 			members.Sort(CodeAnalysisHelper.CompareSymbol);
+			await SyncHelper.SwitchToMainThreadAsync();
 			var m = new SymbolMenu(context);
 			m.Title.SetGlyph(symbol.GetImageId())
 				.AddSymbol(symbol, null, true, SymbolFormatter.Instance)
