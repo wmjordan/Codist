@@ -142,7 +142,7 @@ namespace Codist.QuickInfo
 				: null;
 			ObjectCreationExpressionSyntax ctor = null;
 			var ctx = new Context(session, textBuffer, sc, triggerPoint, cancellationToken);
-			if (ctx.token.Span.Contains(triggerPoint.Position) == false) {
+			if (ctx.token.Span.Contains(triggerPoint.Position, true) == false) {
 				// skip when trigger point is on trivia
 				return null;
 			}
