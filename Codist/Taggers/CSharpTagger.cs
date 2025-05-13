@@ -308,44 +308,48 @@ namespace Codist.Taggers
 				}
 				// note: DON'T use GetConversion, which gives nothing useful
 				var node = token.Parent;
-				bool hasConversion;
 				if (node.IsKind(SyntaxKind.SimpleAssignmentExpression)) {
 					var a = (AssignmentExpressionSyntax)node;
-					hasConversion = ctx.semanticModel.GetTypeInfo(a.Left, ctx.cancellationToken).Type.OriginallyEquals(ctx.semanticModel.GetTypeInfo(a.Right, ctx.cancellationToken).Type) == false;
+					if (ctx.semanticModel.GetTypeInfo(a.Left, ctx.cancellationToken).Type.OriginallyEquals(ctx.semanticModel.GetTypeInfo(a.Right, ctx.cancellationToken).Type)) {
+						return;
+					}
 				}
 				else if (node.IsKind(SyntaxKind.EqualsValueClause)) {
 					if (node.Parent.IsKind(SyntaxKind.Parameter)) {
 						return;
 					}
 					var expressionType = ctx.semanticModel.GetTypeInfo(((EqualsValueClauseSyntax)node).Value, ctx.cancellationToken).Type;
-					if (expressionType == null) {
+					if (expressionType == null || MatchDeclaredSymbolType(ctx.semanticModel, node.Parent, expressionType, ctx.cancellationToken)) {
 						return;
 					}
-					var declaredSymbol = GetDeclaredSymbol(ctx.semanticModel, node.Parent);
-					hasConversion = declaredSymbol == null
-						|| expressionType.OriginallyEquals(declaredSymbol.GetReturnType()) == false;
 				}
 				else {
 					return;
 				}
-				if (hasConversion) {
-					ctx.Tags.Add(token.Span,
-						HighlightOptions.StyleSemanticPunctuation ? __GeneralClassifications.TypeCastKeyword : null,
-						HighlightOptions.BoldSemanticPunctuationTag);
-				}
+				ctx.Tags.Add(token.Span,
+					HighlightOptions.StyleSemanticPunctuation ? __GeneralClassifications.TypeCastKeyword : null,
+					HighlightOptions.BoldSemanticPunctuationTag);
 			}
 
-			static ISymbol GetDeclaredSymbol(SemanticModel semanticModel, SyntaxNode node) {
+			static bool MatchDeclaredSymbolType(SemanticModel semanticModel, SyntaxNode node, ITypeSymbol expressionType, CancellationToken cancellationToken) {
 				switch (node.Kind()) {
 					case SyntaxKind.VariableDeclarator:
-						return semanticModel.GetDeclaredSymbol((VariableDeclaratorSyntax)node);
+						return expressionType.OriginallyEquals(semanticModel.GetDeclaredSymbol((VariableDeclaratorSyntax)node, cancellationToken).GetReturnType());
 					case SyntaxKind.PropertyDeclaration:
 					case SyntaxKind.EventDeclaration:
 					case SyntaxKind.EventFieldDeclaration:
 					case SyntaxKind.FieldDeclaration:
-						return semanticModel.GetDeclaredSymbol((MemberDeclarationSyntax)node);
-					default: return null;
+						return expressionType.OriginallyEquals(semanticModel.GetDeclaredSymbol((MemberDeclarationSyntax)node, cancellationToken).GetReturnType());
+					case SyntaxKind.EnumMemberDeclaration:
+						return GetEnumUnderlyingType(expressionType).OriginallyEquals(GetEnumUnderlyingType(semanticModel.GetDeclaredSymbol((MemberDeclarationSyntax)node, cancellationToken).GetReturnType()));
+					default: return false;
 				}
+			}
+
+			static ITypeSymbol GetEnumUnderlyingType(ITypeSymbol type) {
+				return type is INamedTypeSymbol nt && nt.TypeKind == TypeKind.Enum
+					? nt.EnumUnderlyingType
+					: type;
 			}
 
 			static void TagEqualsGreaterThenToken(in SyntaxToken token, Context ctx) {
