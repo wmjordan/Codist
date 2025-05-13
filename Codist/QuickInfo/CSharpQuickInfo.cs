@@ -39,6 +39,7 @@ namespace Codist.QuickInfo
 		{
 			public readonly IAsyncQuickInfoSession session;
 			public readonly ITextBuffer TextBuffer;
+			public readonly SemanticContext semanticContext;
 			public readonly SemanticModel semanticModel;
 			public readonly CompilationUnitSyntax CompilationUnit;
 			public readonly SnapshotPoint TriggerPoint;
@@ -62,10 +63,11 @@ namespace Codist.QuickInfo
 			}
 			public InfoContainer Container => _Container ?? (_Container = new InfoContainer());
 
-			public Context(IAsyncQuickInfoSession session, ITextBuffer textBuffer, SemanticModel semanticModel, SnapshotPoint triggerPoint, CancellationToken cancellationToken) {
+			public Context(IAsyncQuickInfoSession session, ITextBuffer textBuffer, SemanticContext semanticContext, SnapshotPoint triggerPoint, CancellationToken cancellationToken) {
 				this.session = session;
 				TextBuffer = textBuffer;
-				this.semanticModel = semanticModel;
+				this.semanticContext = semanticContext;
+				this.semanticModel = semanticContext.SemanticModel;
 				CompilationUnit = semanticModel.SyntaxTree.GetCompilationUnitRoot(cancellationToken);
 				TriggerPoint = triggerPoint;
 				this.cancellationToken = cancellationToken;
@@ -139,7 +141,7 @@ namespace Codist.QuickInfo
 				? QuickInfoOverride.CreateOverride(session)
 				: null;
 			ObjectCreationExpressionSyntax ctor = null;
-			var ctx = new Context(session, textBuffer, semanticModel, triggerPoint, cancellationToken);
+			var ctx = new Context(session, textBuffer, sc, triggerPoint, cancellationToken);
 			if (ctx.token.Span.Contains(triggerPoint.Position) == false) {
 				// skip when trigger point is on trivia
 				return null;
@@ -505,7 +507,7 @@ namespace Codist.QuickInfo
 				asmText.AppendFileLink(f, p);
 			}
 			else {
-				var proj = symbol.GetSourceReferences().Select(r => SemanticContext.GetHovered().GetProject(r.SyntaxTree)).FirstOrDefault(i => i != null);
+				var proj = symbol.GetSourceReferences().Select(r => context.semanticContext.GetProject(r.SyntaxTree)).FirstOrDefault(i => i != null);
 				if (proj?.OutputFilePath != null) {
 					(p, f) = FileHelper.DeconstructPath(proj.OutputFilePath);
 				}
