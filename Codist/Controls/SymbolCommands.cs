@@ -108,31 +108,35 @@ namespace Codist.Controls
 			m.Show();
 		}
 
-		internal static async Task FindImplementationsAsync(this SemanticContext context, ISymbol symbol, CancellationToken cancellationToken = default) {
+		internal static async Task FindImplementationsAsync(this SemanticContext context, ISymbol symbol, bool directImplementationOnly, CancellationToken cancellationToken = default) {
 			var s = symbol;
-			INamedTypeSymbol st;
+			INamedTypeSymbol st = null;
 			// workaround for a bug in Roslyn which keeps generic types from returning any result
 			if (symbol.Kind == SymbolKind.NamedType && (st = (INamedTypeSymbol)symbol).IsGenericType) {
 				s = st.OriginalDefinition;
 			}
 			var implementations = new List<ISymbol>(await SymbolFinder.FindImplementationsAsync(s, context.Document.Project.Solution, null, cancellationToken).ConfigureAwait(false));
 			implementations.Sort(CodeAnalysisHelper.CompareSymbol);
-			await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
-			var m = new SymbolMenu(context);
+			var impWithContainer = new List<(ISymbol implementation, bool withContainer)>(implementations.Count);
 			var d = new SourceSymbolDeduper();
 			if (symbol.Kind == SymbolKind.NamedType) {
-				st = (INamedTypeSymbol)symbol;
 				if (st.ConstructedFrom == st) {
-					foreach (var impl in implementations) {
+					foreach (var impl in implementations.OfType<INamedTypeSymbol>()) {
+						if (directImplementationOnly && impl.HasDirectImplementationFor(st) == false) {
+							continue;
+						}
 						if (d.TryAdd(impl)) {
-							m.Add(impl, false);
+							impWithContainer.Add((impl, false));
 						}
 					}
 				}
 				else {
-					foreach (INamedTypeSymbol impl in implementations) {
+					foreach (var impl in implementations.OfType<INamedTypeSymbol>()) {
+						if (directImplementationOnly && impl.HasDirectImplementationFor(st) == false) {
+							continue;
+						}
 						if ((impl.IsGenericType || impl.CanConvertTo(st)) && d.TryAdd(impl)) {
-							m.Add(impl, false);
+							impWithContainer.Add((impl, false));
 						}
 					}
 				}
@@ -140,14 +144,38 @@ namespace Codist.Controls
 			else {
 				foreach (var impl in implementations) {
 					if (d.TryAdd(impl)) {
-						m.Add(impl, impl.ContainingSymbol);
+						impWithContainer.Add((impl, true));
 					}
 				}
+			}
+			await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
+			var m = new SymbolMenu(context);
+			SymbolItem si;
+			foreach (var item in impWithContainer) {
+				if (item.withContainer) {
+					si = m.Add(item.implementation, item.implementation.ContainingType);
+				}
+				else {
+					si = m.Add(item.implementation, false);
+				}
+			}
+
+			if (st != null) {
+				m.ExtIconProvider = i => {
+					var p = ExtIconProvider.Default.GetExtIcons(i);
+					if (i.Symbol.IsDirectImplementationOf(symbol)) {
+						if (p == null) {
+							p = new System.Windows.Controls.StackPanel().MakeHorizontal();
+						}
+						p.Children.Add(VsImageHelper.GetImage(IconIds.InterfaceImplementation));
+					}
+					return p;
+				};
 			}
 			m.Title.SetGlyph(symbol.GetImageId())
 				.AddSymbol(symbol, null, true, SymbolFormatter.Instance)
 				.Append(R.T_Implementations)
-				.Append(implementations.Count.ToString());
+				.Append(impWithContainer.Count.ToString());
 			m.Show();
 		}
 

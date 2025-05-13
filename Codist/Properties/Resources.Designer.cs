@@ -2470,6 +2470,16 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Search for implementations of current interface type or member
+        ///Ctrl: Direct implementation types only.
+        /// </summary>
+        internal static string CMDT_FindImplementations {
+            get {
+                return ResourceManager.GetString("CMDT_FindImplementations", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Search interfaces that inherit from current interface
         ///Ctrl: Directly inherited interfaces only.
         /// </summary>

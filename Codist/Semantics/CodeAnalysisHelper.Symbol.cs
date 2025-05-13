@@ -414,6 +414,50 @@ namespace Codist
 			return null;
 		}
 
+		public static bool IsDefinedInGenericType(this ISymbol symbol) {
+			INamedTypeSymbol type;
+			while ((type = symbol.ContainingType) != null) {
+				if (type.IsUnboundGenericType) {
+					return true;
+				}
+				symbol = type;
+			}
+			return false;
+		}
+
+		public static bool HasDirectImplementationFor(this INamedTypeSymbol symbol, INamedTypeSymbol interfaceType) {
+			Func<INamedTypeSymbol, INamedTypeSymbol, bool> comparer = interfaceType.IsGenericType && interfaceType.ConstructedFrom == interfaceType
+				? (t, infSym) => t.ConstructedFrom == infSym
+				: (t, infSym) => t.MatchWith(infSym);
+			return CompareInterface(symbol, interfaceType, comparer);
+		}
+
+		public static bool IsDirectImplementationOf(this ISymbol symbol, ISymbol interfaceMember) {
+			if (interfaceMember.Kind == SymbolKind.NamedType) {
+				return symbol.Kind == SymbolKind.NamedType
+					&& ((INamedTypeSymbol)symbol).HasDirectImplementationFor((INamedTypeSymbol)interfaceMember);
+			}
+
+			Func<INamedTypeSymbol, INamedTypeSymbol, bool> comparer = interfaceMember.IsDefinedInGenericType()
+				? (t, infSym) => t.ConstructedFrom == infSym
+				: (t, infSym) => t.MatchWith(infSym);
+			return CompareInterface(symbol.ContainingType, interfaceMember.ContainingType, comparer);
+		}
+
+		static bool CompareInterface(INamedTypeSymbol symbol, INamedTypeSymbol interfaceType, Func<INamedTypeSymbol, INamedTypeSymbol, bool> comparer) {
+			foreach (var item in symbol.Interfaces) {
+				if (comparer(item, interfaceType)) {
+					return true;
+				}
+				foreach (var baseInterfaces in item.AllInterfaces) {
+					if (comparer(baseInterfaces, interfaceType)) {
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
 		public static IReadOnlyList<ISymbol> GetExplicitInterfaceImplementations(this ISymbol symbol) {
 			switch (symbol.Kind) {
 				case SymbolKind.Method:
@@ -1404,25 +1448,45 @@ namespace Codist
 		}
 
 		/// <summary>
-		/// <para>Matches two types with a simple rule. The following aspects must be equal.</para>
+		/// <para>Matches two types when the following aspects being equal.</para>
 		/// <list type="number">
 		/// <item>TypeKind</item>
 		/// <item>DeclaredAccessibility</item>
 		/// <item>Name</item>
 		/// <item>Arity</item>
 		/// <item>ContainingType</item>
+		/// <item>IsGenericType and if true: TypeArguments also</item>
 		/// <item>ContainingNamespace</item>
 		/// </list>
 		/// </summary>
 		public static bool MatchWith(this INamedTypeSymbol a, INamedTypeSymbol b) {
 			// todo unwrap alias
 			return ReferenceEquals(a, b) ||
-				a != null && b != null
-				&& a.TypeKind == b.TypeKind
-				&& a.Name == b.Name
-				&& a.Arity == b.Arity
-				&& a.ContainingType.MatchWith(b.ContainingType)
-				&& HasSameName(a.ContainingNamespace, b.ContainingNamespace);
+				(a != null && b != null
+					&& a.TypeKind == b.TypeKind
+					&& a.Name == b.Name
+					&& a.Arity == b.Arity
+					&& a.ContainingType.MatchWith(b.ContainingType)
+					&& (a.IsGenericType == b.IsGenericType || HasSameTypeArguments(a, b))
+					&& HasSameName(a.ContainingNamespace, b.ContainingNamespace)
+				);
+		}
+
+		public static bool HasSameTypeArguments(this INamedTypeSymbol typeA, INamedTypeSymbol typeB) {
+			var ta = typeA.TypeArguments;
+			var tb = typeB.TypeArguments;
+			int length;
+			ITypeSymbol aa, ab;
+			if ((length = ta.Length) != tb.Length) {
+				return false;
+			}
+			for (int i = 0; i < length; i++) {
+				if ((aa = ta[i]).TypeKind != (ab = tb[i]).TypeKind
+					|| (aa is INamedTypeSymbol na && ab is INamedTypeSymbol nb && na.MatchWith(nb) == false)) {
+					return false;
+				}
+			}
+			return true;
 		}
 
 		public static int GetHashCodeForMatch(this INamedTypeSymbol symbol) {

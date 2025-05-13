@@ -487,7 +487,7 @@ namespace Codist.Controls
 					case CommandId.FindSubInterfaces:
 						return CreateItem(IconIds.FindDerivedTypes, R.CMD_FindInheritedInterfaces, FindSubInterfaces, R.CMDT_FindInheritedInterfaces);
 					case CommandId.FindImplementations:
-						return CreateItem(IconIds.FindImplementations, R.CMD_FindImplementations, FindImplementations);
+						return CreateItem(IconIds.FindImplementations, R.CMD_FindImplementations, FindImplementations, R.CMDT_FindImplementations);
 					case CommandId.FindDerivedClasses:
 						return CreateItem(IconIds.FindDerivedTypes, R.CMD_FindDerivedClasses, FindDerivedClasses, R.CMDT_FindDerivedClasses);
 					case CommandId.FindOverrides:
@@ -725,7 +725,7 @@ namespace Codist.Controls
 			}
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindImplementations(object sender, RoutedEventArgs e) {
-				await _SemanticContext.FindImplementationsAsync(_Symbol);
+				await _SemanticContext.FindImplementationsAsync(_Symbol, WpfHelper.IsControlDown);
 			}
 
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]

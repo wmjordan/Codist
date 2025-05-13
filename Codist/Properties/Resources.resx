@@ -2923,4 +2923,8 @@ Discard its changes?</value>
   <data name="T_SyntaxPath" xml:space="preserve">
     <value>Syntax path:</value>
   </data>
+  <data name="CMDT_FindImplementations" xml:space="preserve">
+    <value>Search for implementations of current interface type or member
+Ctrl: Direct implementation types only</value>
+  </data>
 </root>
