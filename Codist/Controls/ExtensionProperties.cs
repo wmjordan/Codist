@@ -18,16 +18,23 @@ namespace Codist.Controls
 		#region Browser Search
 		static readonly ExtensionProperty<FrameworkElement, string> __SearchUrl = ExtensionProperty<FrameworkElement, string>.Register("SearchUrl");
 		static readonly ExtensionProperty<FrameworkElement, string> __SearchParameter = ExtensionProperty<FrameworkElement, string>.Register("SearchParameter");
+		static readonly ExtensionProperty<FrameworkElement, string> __AlternativeSearchParameter = ExtensionProperty<FrameworkElement, string>.Register("AlternativeSearchParameter");
 
-		public static void SetSearchUrlPattern(this FrameworkElement element, string url, string parameter) {
+		public static void SetSearchUrlPattern(this FrameworkElement element, string url, string parameter, string alternativeParameter = null) {
 			__SearchUrl.Set(element, url);
 			__SearchParameter.Set(element, parameter);
+			if (alternativeParameter != null) {
+				__AlternativeSearchParameter.Set(element, alternativeParameter);
+			}
 		}
 		public static string GetSearchUrl(this FrameworkElement element) {
 			return __SearchUrl.Get(element);
 		}
 		public static string GetSearchParameter(this FrameworkElement element) {
 			return __SearchParameter.Get(element);
+		}
+		public static string GetAlternativeSearchParameter(this FrameworkElement element) {
+			return __AlternativeSearchParameter.Get(element);
 		}
 		#endregion
 

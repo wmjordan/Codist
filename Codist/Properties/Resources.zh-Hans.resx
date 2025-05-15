@@ -2913,4 +2913,10 @@ Ctrl: 将下划线分隔的单词转换为首字母大写的单词</value>
     <value>搜索当前接口类或成员的实现
 Ctrl: 仅列出直接实现接口的类</value>
   </data>
+  <data name="CMD_WebSearchWithSymbolName" xml:space="preserve">
+    <value>联网搜索符号名称</value>
+  </data>
+  <data name="CMDT_WebSearchWithSymbolName" xml:space="preserve">
+    <value>Shift: 以符号的完全限定名称搜索</value>
+  </data>
 </root>

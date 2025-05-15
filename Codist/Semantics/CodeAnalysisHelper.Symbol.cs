@@ -204,6 +204,34 @@ namespace Codist
 					: symbol.OriginalDefinition);
 		}
 
+		public static string GetQualifiedName(this ISymbol symbol) {
+			if (symbol.Name.Contains('.')) {
+				// explicit interface implementation name
+				return symbol.Name;
+			}
+			var chain = new Chain<string>(symbol.Name);
+			if (symbol is IMethodSymbol m) {
+				switch (m.MethodKind) {
+					case MethodKind.Constructor:
+					case MethodKind.StaticConstructor:
+					case MethodKind.Destructor:
+					case MethodKind.AnonymousFunction:
+						chain.Clear();
+						break;
+					case MethodKind.ReducedExtension:
+						symbol = m.ReducedFrom;
+						break;
+				}
+			}
+			while ((symbol = symbol.ContainingSymbol) != null) {
+				if (String.IsNullOrEmpty(symbol.Name)) {
+					break;
+				}
+				chain.Insert(symbol.Name);
+			}
+			return String.Join(".", chain);
+		}
+
 		public static string GetOriginalName(this ISymbol symbol) {
 			switch (symbol.Kind) {
 				case SymbolKind.Method:

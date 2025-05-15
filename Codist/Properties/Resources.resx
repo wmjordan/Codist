@@ -2927,4 +2927,10 @@ Discard its changes?</value>
     <value>Search for implementations of current interface type or member
 Ctrl: Direct implementation types only</value>
   </data>
+  <data name="CMD_WebSearchWithSymbolName" xml:space="preserve">
+    <value>Web Search with Symbol Name...</value>
+  </data>
+  <data name="CMDT_WebSearchWithSymbolName" xml:space="preserve">
+    <value>Shift: Search with fully qualified symbol name</value>
+  </data>
 </root>

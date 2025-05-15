@@ -791,8 +791,12 @@ namespace Codist.Controls
 			}
 
 			CustomMenuItem CreateWebSearchCommand() {
-				var search = new CustomMenuItem(IconIds.SearchWebSite, R.OT_WebSearch);
 				var symbolName = _Symbol.GetOriginalName();
+				if (String.IsNullOrEmpty(symbolName)) {
+					return null;
+				}
+				var symbolFullName = _Symbol.GetQualifiedName();
+				var search = new CustomMenuItem(IconIds.SearchWebSite, R.OT_WebSearch);
 				search.Items.AddRange(
 					Config.Instance.SearchEngines.ConvertAll(s => {
 						var item = CreateItem(
@@ -800,9 +804,11 @@ namespace Codist.Controls
 							R.CMD_SearchWith.Replace("<NAME>", s.Name),
 							(sender, args) => {
 								var m = (MenuItem)sender;
-								ExternalCommand.OpenWithWebBrowser(m.GetSearchUrl(), m.GetSearchParameter());
+								var keyword = Keyboard.Modifiers.MatchFlags(ModifierKeys.Shift) ? m.GetAlternativeSearchParameter() : m.GetSearchParameter();
+								ExternalCommand.OpenWithWebBrowser(m.GetSearchUrl(), keyword);
 							});
-						item.SetSearchUrlPattern(s.Pattern, symbolName);
+						item.SetLazyToolTip(() => new CommandToolTip(IconIds.SearchWebSite, R.CMD_WebSearchWithSymbolName + "\n" + R.CMDT_WebSearchWithSymbolName)).SetTipOptions();
+						item.SetSearchUrlPattern(s.Pattern, symbolName, symbolFullName);
 						return item;
 					})
 				);

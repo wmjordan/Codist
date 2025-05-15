@@ -2243,6 +2243,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Web Search with Symbol Name....
+        /// </summary>
+        internal static string CMD_WebSearchWithSymbolName {
+            get {
+                return ResourceManager.GetString("CMD_WebSearchWithSymbolName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Donate via Wechat.
         /// </summary>
         internal static string CMD_WechatDonateLink {
@@ -2745,6 +2754,15 @@ namespace Codist.Properties {
         internal static string CMDT_UndoChanges {
             get {
                 return ResourceManager.GetString("CMDT_UndoChanges", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Shift: Search with fully qualified symbol name.
+        /// </summary>
+        internal static string CMDT_WebSearchWithSymbolName {
+            get {
+                return ResourceManager.GetString("CMDT_WebSearchWithSymbolName", resourceCulture);
             }
         }
         
