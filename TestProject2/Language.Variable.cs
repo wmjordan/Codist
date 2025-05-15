@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace TestProject
+namespace TestProject.Language.Variable
 {
-	class VariableCaptures
+	static class VariableCapture
 	{
 		public static async void Test(Exception exception) {
 			DateTime now = DateTime.Now;

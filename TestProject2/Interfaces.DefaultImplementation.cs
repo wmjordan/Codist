@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Threading.Tasks;
 
-namespace TestProject2.CS8_0
+namespace TestProject.Interfaces.DefaultImplementation
 {
 	public interface INoImplementation
 	{
 		string Name { get; set; }
 		void Action();
 	}
+	[ApiVersion(8)]
 	public interface IDefaultImplementation
 	{
 		void Action() {
@@ -15,6 +15,7 @@ namespace TestProject2.CS8_0
 		}
 	}
 
+	[ApiVersion(8)]
 	public interface IAdvancedImplementation
 	{
 		protected event EventHandler Default;
@@ -23,6 +24,7 @@ namespace TestProject2.CS8_0
 		}
 	}
 
+	[ApiVersion(8)]
 	public interface IStaticImplementation
 	{
 		static readonly DateTime DefaultTime = DateTime.Now;
@@ -74,25 +76,4 @@ namespace TestProject2.CS8_0
 			IStaticImplementation.PrintName();
 		}
 	}
-
-
-	public class AsyncForEach
-	{
-		public async Task ProcessGroupsAsync() {
-			await foreach (var i in this) { }
-		}
-
-		public AsyncEnumerator GetAsyncEnumerator(System.Threading.CancellationToken token = default) {
-			throw null;
-		}
-
-		public sealed class AsyncEnumerator : System.IAsyncDisposable
-		{
-			public int Current { get => throw null; }
-			public Task<bool> MoveNextAsync() => throw null;
-
-			public ValueTask DisposeAsync() => throw null;
-		}
-	}
-
 }

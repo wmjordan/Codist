@@ -4,8 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TestProject.CS12_0;
+namespace TestProject.Arrays;
 
+[ApiVersion(12)]
 class InlineArray
 {
 	[System.Runtime.CompilerServices.InlineArray(10)]
@@ -20,6 +21,4 @@ class InlineArray
 			buffer[i] = i;
 		}
 	}
-
 }
-
