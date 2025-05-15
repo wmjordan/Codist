@@ -618,6 +618,10 @@ namespace Codist.Controls
 								s = m.ContainingType;
 								goto case SymbolKind.NamedType;
 							}
+							else if (m.MethodKind == MethodKind.ExplicitInterfaceImplementation) {
+								t = m.Name;
+								break;
+							}
 							goto default;
 						default:
 							t = s.ToDisplayString(args.RoutedEvent == PreviewMouseRightButtonUpEvent ? CodeAnalysisHelper.QualifiedTypeNameFormat : CodeAnalysisHelper.TypeMemberNameFormat);
