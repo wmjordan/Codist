@@ -466,7 +466,7 @@ namespace Codist.QuickInfo
 					break;
 				case SymbolKind.Parameter:
 					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.SymbolReassignment)
-						&& symbol.HasSource()) {
+						&& symbol.ContainingSymbol.HasSource()) {
 						ShowParameterInfo(context, (IParameterSymbol)symbol);
 					}
 					break;
@@ -847,37 +847,44 @@ namespace Codist.QuickInfo
 		}
 
 		void ShowParameterInfo(Context context, IParameterSymbol parameter) {
-			var declaration = context.CompilationUnit.FindNode(parameter.ContainingSymbol.DeclaringSyntaxReferences[0].Span, false, true);
-			if (declaration == null) {
+			SyntaxNode declaration;
+			BlockSyntax body = null;
+			CSharpSyntaxNode expression = null;
+			DataFlowAnalysis analysis = null;
+			foreach (var item in parameter.ContainingSymbol.DeclaringSyntaxReferences) {
+				declaration = context.CompilationUnit.FindNode(item.Span);
+				if (declaration is BaseMethodDeclarationSyntax m) {
+					body = m.Body;
+					expression = m.ExpressionBody?.Expression;
+				}
+				else if (declaration is AccessorDeclarationSyntax a) {
+					body = a.Body;
+					expression = a.ExpressionBody?.Expression;
+				}
+				else if (declaration is AnonymousFunctionExpressionSyntax af) {
+					expression = af.Body;
+				}
+				else if (declaration is LocalFunctionStatementSyntax lf) {
+					body = lf.Body;
+					expression = lf.ExpressionBody?.Expression;
+				}
+				if (body != null) {
+					analysis = context.semanticModel.AnalyzeDataFlow(body);
+					break;
+				}
+				if (expression != null) {
+					analysis = context.semanticModel.AnalyzeDataFlow(expression);
+					break;
+				}
+			}
+			if (analysis == null) {
 				return;
 			}
-			DataFlowAnalysis analysis;
-			BlockSyntax body = null;
-			SyntaxNode expression = null;
-			if (declaration is BaseMethodDeclarationSyntax m) {
-				body = m.Body;
-				expression = m.ExpressionBody;
-			}
-			else if (declaration is AccessorDeclarationSyntax a) {
-				body = a.Body;
-				expression = a.ExpressionBody;
-			}
-			else if (declaration is AnonymousFunctionExpressionSyntax af) {
-				expression = af.Body;
-			}
-			else if (declaration is LocalFunctionStatementSyntax lf) {
-				body = lf.Body;
-				expression = lf.ExpressionBody;
-			}
-
-			analysis = body != null ? context.semanticModel.AnalyzeDataFlow(body)
-				: expression != null ? context.semanticModel.AnalyzeDataFlow(expression is ArrowExpressionClauseSyntax ae ? ae.Expression : expression)
-				: null;
-			if (analysis?.WrittenInside.Contains(parameter) == true) {
-				context.Container.Add(new ThemedTipText(R.T_Reassigned.Replace("<S>", parameter.Name)).SetGlyph(IconIds.WrittenVariables));
+			if (analysis.WrittenInside.Contains(parameter)) {
+				context.Container.Add(new ThemedTipText(IconIds.WrittenVariables, R.T_Reassigned.Replace("<S>", parameter.Name)));
 			}
 			else {
-				context.Container.Add(new ThemedTipText(R.T_NoReassignment.Replace("<S>", parameter.Name)).SetGlyph(IconIds.ReadonlyParameter));
+				context.Container.Add(new ThemedTipText(IconIds.ReadonlyParameter, R.T_NoReassignment.Replace("<S>", parameter.Name)));
 			}
 		}
 
