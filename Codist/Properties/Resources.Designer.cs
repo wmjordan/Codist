@@ -2898,6 +2898,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Add &quot;Open ActivityLog.xml&quot; command to the File Menu.
+        /// </summary>
+        internal static string OT_AddOpenActivityLog {
+            get {
+                return ResourceManager.GetString("OT_AddOpenActivityLog", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Add &quot;Show Active Window Properties&quot; command to File menu.
         /// </summary>
         internal static string OT_AddShowActiveWindowProperties {
@@ -5465,6 +5474,15 @@ namespace Codist.Properties {
         internal static string OT_ValueOfFieldsTip {
             get {
                 return ResourceManager.GetString("OT_ValueOfFieldsTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Visual Studio.
+        /// </summary>
+        internal static string OT_VisualStudio {
+            get {
+                return ResourceManager.GetString("OT_VisualStudio", resourceCulture);
             }
         }
         

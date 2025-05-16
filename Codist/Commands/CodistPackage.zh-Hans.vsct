@@ -25,6 +25,16 @@
 					<ToolTipText>显示当前窗口的属性和文档属性</ToolTipText>
 				</Strings>
 			</Button>
+			<Button guid="guidCodistPackageCmdSet" id="ShowActivityLogId" priority="4134" type="Button">
+				<Parent guid="guidCodistPackageCmdSet" id="CodistMenuGroup" />
+				<Icon guid="ImageCatalogGuid" id="ActionLog" />
+				<CommandFlag>DefaultInvisible</CommandFlag>
+				<CommandFlag>DynamicVisibility</CommandFlag>
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<Strings>
+					<ButtonText>打开 ActivityLog.xml 文件...</ButtonText>
+				</Strings>
+			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="ShowSupportedFileTypesId" priority="4134" type="Button">
 				<Parent guid="guidCodistPackageCmdSet" id="CodistMenuGroup" />
 				<Icon guid="ImageCatalogGuid" id="SourceFileGroup" />

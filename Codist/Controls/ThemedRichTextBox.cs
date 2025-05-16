@@ -18,6 +18,7 @@ namespace Codist.Controls
 			AcceptsReturn = !readOnly;
 			ApplyTemplate();
 			this.GetFirstVisualChild<ScrollViewer>().ReferenceStyle(VsResourceKeys.ScrollViewerStyleKey);
+			Document.Blocks.Clear();
 		}
 	}
 }

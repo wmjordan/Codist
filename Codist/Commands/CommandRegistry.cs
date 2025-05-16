@@ -24,6 +24,7 @@ namespace Codist.Commands
 			ShowSupportedFileTypesCommand.Initialize();
 			WindowInformerCommand.Initialize();
 			TransformDocumentCommand.Initialize();
+			OpenActivityLogCommand.Initialize();
 			nameof(CommandRegistry).LogInitialized();
 		}
 
@@ -49,6 +50,7 @@ namespace Codist.Commands
 		OpenDebugOutputFolder,
 		OpenReleaseOutputFolder,
 		ShowSupportedFileTypes,
-		TransformDocument
+		TransformDocument,
+		OpenActivityLog
 	}
 }

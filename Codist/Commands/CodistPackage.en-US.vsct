@@ -32,6 +32,16 @@
 					<ToolTipText>Display properties of the active window</ToolTipText>
 				</Strings>
 			</Button>
+			<Button guid="guidCodistPackageCmdSet" id="ShowActivityLogId" priority="4134" type="Button">
+				<Parent guid="guidCodistPackageCmdSet" id="CodistMenuGroup" />
+				<Icon guid="ImageCatalogGuid" id="ActionLog" />
+				<CommandFlag>DefaultInvisible</CommandFlag>
+				<CommandFlag>DynamicVisibility</CommandFlag>
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<Strings>
+					<ButtonText>Open ActivityLog.xml...</ButtonText>
+				</Strings>
+			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="ShowSupportedFileTypesId" priority="4134" type="Button">
 				<Parent guid="guidCodistPackageCmdSet" id="CodistMenuGroup" />
 				<Icon guid="ImageCatalogGuid" id="SourceFileGroup" />

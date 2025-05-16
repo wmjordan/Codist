@@ -47,7 +47,6 @@ namespace Codist.Commands
 		static void DisplayWindowInfo(Window window) {
 			var tb = new ThemedRichTextBox(true);
 			var blocks = tb.Document.Blocks;
-			blocks.Clear();
 			Section s;
 
 			var view = TextEditorHelper.GetActiveWpfInteractiveView();

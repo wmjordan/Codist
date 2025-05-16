@@ -777,7 +777,7 @@ namespace Codist.Options
 		sealed class PageControl : OptionsPageContainer
 		{
 			readonly OptionBox<BuildOptions> _BuildVsixAutoIncrement;
-			readonly OptionBox<DeveloperOptions> _ShowDocumentContentType, _ShowSyntaxClassificationInfo;
+			readonly OptionBox<DeveloperOptions> _ShowDocumentContentType, _ShowSyntaxClassificationInfo, _OpenActivityLog;
 
 			public PageControl(OptionsPage page) : base(page) {
 				AddPage(R.OT_General,
@@ -792,7 +792,10 @@ namespace Codist.Options
 
 					new TitleBox(R.OT_Build),
 					_BuildVsixAutoIncrement = Config.Instance.BuildOptions.CreateOptionBox(BuildOptions.VsixAutoIncrement, UpdateConfig, R.OT_AutoIncrementVsixVersion)
-						.SetLazyToolTip(() => R.OT_AutoIncrementVsixVersionTip)
+						.SetLazyToolTip(() => R.OT_AutoIncrementVsixVersionTip),
+
+					new TitleBox(R.OT_VisualStudio),
+					_OpenActivityLog = Config.Instance.DeveloperOptions.CreateOptionBox(DeveloperOptions.ShowActivityLog, UpdateConfig, R.OT_AddOpenActivityLog)
 					);
 			}
 

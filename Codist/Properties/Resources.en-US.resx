@@ -2933,4 +2933,10 @@ Ctrl: Direct implementation types only</value>
   <data name="CMDT_WebSearchWithSymbolName" xml:space="preserve">
     <value>Shift: Search with fully qualified symbol name</value>
   </data>
+  <data name="OT_AddOpenActivityLog" xml:space="preserve">
+    <value>Add "Open ActivityLog.xml" command to the File Menu</value>
+  </data>
+  <data name="OT_VisualStudio" xml:space="preserve">
+    <value>Visual Studio</value>
+  </data>
 </root>

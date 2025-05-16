@@ -2919,4 +2919,10 @@ Ctrl: 仅列出直接实现接口的类</value>
   <data name="CMDT_WebSearchWithSymbolName" xml:space="preserve">
     <value>Shift: 以符号的完全限定名称搜索</value>
   </data>
+  <data name="OT_AddOpenActivityLog" xml:space="preserve">
+    <value>添加“打开 ActivityLog.xml 文件”命令到文件菜单</value>
+  </data>
+  <data name="OT_VisualStudio" xml:space="preserve">
+    <value>Visual Studio</value>
+  </data>
 </root>

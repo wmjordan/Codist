@@ -81,6 +81,7 @@
 			<IDSymbol name="CodistMenuGroup" value="0x1020" />
 			<IDSymbol name="ScreenshotCommandId" value="0x4001" />
 			<IDSymbol name="ShowActiveWindowPropertiesId" value="0x4002" />
+			<IDSymbol name="ShowActivityLogId" value="0x4011" />
 			<IDSymbol name="ShowSupportedFileTypesId" value="0x400F" />
 			<IDSymbol name="TransformDocumentId" value="0x4010" />
 			<IDSymbol name="EDIT_PROJECT_GROUP_ID" value="0x1000" />

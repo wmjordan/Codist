@@ -959,6 +959,7 @@ namespace Codist
 		ShowDocumentContentType = 1,
 		ShowSyntaxClassificationInfo = 1 << 1,
 		ShowSupportedFileTypes = 1 << 2,
+		ShowActivityLog = 1　<< 3,
 		Default = None
 	}
 
