@@ -103,7 +103,7 @@ namespace Codist.QuickInfo
 			return new QuickInfoItem(activeSpan.ToTrackingSpan(), new StackPanel {
 				Name = Name,
 				Children = {
-					new ThemedTipText(R.T_SelectedCharacter).SetGlyph(IconIds.SelectCode),
+					new ThemedTipText(IconIds.SelectCode, R.T_SelectedCharacter),
 					new StackPanel {
 						Orientation = Orientation.Horizontal,
 						Children = {

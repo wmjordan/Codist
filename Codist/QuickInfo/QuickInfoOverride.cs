@@ -465,10 +465,10 @@ namespace Codist.QuickInfo
 						}
 						if (qi is IWpfTextView vi) {
 							items[i] = null;
-							items[i] = new ThemedTipText {
+							items[i] = new ThemedTipText(IconIds.Info) {
 								Text = vi.TextSnapshot.GetText(),
 								Margin = WpfHelper.MiddleBottomMargin
-							}.SetGlyph(IconIds.Info);
+							};
 							continue;
 						}
 						if (qi is ItemsControl ic) {
@@ -480,10 +480,10 @@ namespace Codist.QuickInfo
 						}
 						foreach (var item in qi.GetDescendantChildren<ContentPresenter>()) {
 							if (item.Content is IWpfTextView v) {
-								item.Content = new ThemedTipText {
+								item.Content = new ThemedTipText(IconIds.Info) {
 									Text = v.TextSnapshot.GetText(),
 									Margin = WpfHelper.MiddleBottomMargin
-								}.SetGlyph(IconIds.Info);
+								};
 							}
 						}
 					}

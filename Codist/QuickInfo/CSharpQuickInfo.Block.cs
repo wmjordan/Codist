@@ -21,13 +21,12 @@ namespace Codist.QuickInfo
 						SyntaxKind.ComplexElementInitializerExpression,
 						SyntaxKind.ObjectInitializerExpression,
 						CodeAnalysisHelper.WithInitializerExpression)) {
-				container.Add(new ThemedTipText()
-					.SetGlyph(IconIds.InstanceMember)
+				container.Add(new ThemedTipText(IconIds.InstanceMember)
 					.Append(R.T_ExpressionCount)
 					.Append(((InitializerExpressionSyntax)node).Expressions.Count.ToText(), true, false, __SymbolFormatter.Number));
 			}
 			else if (node.IsKind(CodeAnalysisHelper.PropertyPatternClause)) {
-				container.Add(new ThemedTipText().SetGlyph(IconIds.InstanceMember)
+				container.Add(new ThemedTipText(IconIds.InstanceMember)
 					.Append(R.T_SubPatternCount)
 					.Append(((CSharpSyntaxNode)node).GetPropertyPatternSubPatternsCount().ToText())
 					);

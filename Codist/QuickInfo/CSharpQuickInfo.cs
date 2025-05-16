@@ -203,7 +203,7 @@ namespace Codist.QuickInfo
 					semanticModel,
 					cancellationToken);
 				if (ctx.symbol?.Kind == SymbolKind.RangeVariable) {
-					ctx.Container.Add(new ThemedTipText("Range Variable: ").SetGlyph(IconIds.LocalVariable).Append(ctx.symbol.Name, true));
+					ctx.Container.Add(new ThemedTipText(IconIds.LocalVariable, "Range Variable: ").Append(ctx.symbol.Name, true));
 					semanticModel.GetTypeInfo(ctx.node, cancellationToken).Type.SetNotDefault(ref ctx.symbol);
 				}
 			}
@@ -549,8 +549,7 @@ namespace Codist.QuickInfo
 					continue;
 				}
 				var symbol = semanticModel.GetSymbolInfo(node, cancellationToken).Symbol ?? semanticModel.GetDeclaredSymbol(node, cancellationToken);
-				var t = new ThemedTipText();
-				t.SetGlyph(IconIds.ReturnValue);
+				var t = new ThemedTipText(IconIds.ReturnValue);
 				if (method != null) {
 					if (method.MethodKind == MethodKind.AnonymousFunction) {
 						t.Append(R.T_ReturnAnonymousFunction);
@@ -747,7 +746,7 @@ namespace Codist.QuickInfo
 			if (members.Length > 0) {
 				var info = new StackPanel().Add(new ThemedTipText(R.T_Type, true));
 				foreach (var type in members) {
-					var t = new ThemedTipText().SetGlyph(type.GetImageId());
+					var t = new ThemedTipText(type.GetImageId());
 					__SymbolFormatter.ShowSymbolDeclaration(type, t, true, true);
 					t.AddSymbol(type, false, __SymbolFormatter);
 					info.Add(t);
@@ -839,10 +838,10 @@ namespace Codist.QuickInfo
 			var locSpan = loc.DeclaringSyntaxReferences[0].Span;
 			var node = ctx.CompilationUnit.FindNode(locSpan);
 			if (IsVariableAssignedAfterDeclaration(loc, node, ctx.semanticModel)) {
-				ctx.Container.Add(new ThemedTipText(R.T_Reassigned).SetGlyph(IconIds.WrittenVariables));
+				ctx.Container.Add(new ThemedTipText(IconIds.WrittenVariables, R.T_Reassigned));
 			}
 			else {
-				ctx.Container.Add(new ThemedTipText(R.T_NoReassignment).SetGlyph(IconIds.ReadonlyVariable));
+				ctx.Container.Add(new ThemedTipText(IconIds.ReadonlyVariable, R.T_NoReassignment));
 			}
 		}
 

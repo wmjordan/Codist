@@ -45,8 +45,7 @@ namespace Codist.QuickInfo
 						if (parent.IsKind(CodeAnalysisHelper.CollectionExpression) == false) {
 							var initSymbol = ctx.semanticModel.GetCollectionInitializerSymbolInfo((ExpressionSyntax)argument, ctx.cancellationToken).Symbol;
 							if (initSymbol != null) {
-								ctx.Container.Add(new ThemedTipText()
-									.SetGlyph(initSymbol.GetImageId())
+								ctx.Container.Add(new ThemedTipText(initSymbol.GetImageId())
 									.AddSymbol(initSymbol.ContainingType, false, __SymbolFormatter)
 									.Append(".".Render(__SymbolFormatter.PlainText))
 									.AddSymbol(initSymbol, true, __SymbolFormatter)
@@ -84,7 +83,7 @@ namespace Codist.QuickInfo
 				return;
 			}
 		RETURN:
-			qiContent.Add(new ThemedTipText(R.T_ExpressionNOfInitializer.Replace("<N>", (++argIndex).ToString())).SetGlyph(IconIds.Argument));
+			qiContent.Add(new ThemedTipText(IconIds.Argument, R.T_ExpressionNOfInitializer.Replace("<N>", (++argIndex).ToString())));
 		}
 
 		static void ShowArgumentInfo(Context ctx, SyntaxNode argument) {
@@ -237,10 +236,10 @@ namespace Codist.QuickInfo
 						ctx.symbol = tuples[argIndex];
 					}
 				}
-				qiContent.Add(new ThemedTipText(R.T_TupleElementN.Replace("<N>", (argIndex + 1).ToString())).SetGlyph(IconIds.ValueType));
+				qiContent.Add(new ThemedTipText(IconIds.ValueType, R.T_TupleElementN.Replace("<N>", (argIndex + 1).ToString())));
 			}
 			else {
-				qiContent.Add(new ThemedTipText(R.T_ArgumentN.Replace("<N>", (++argIndex).ToString())).SetGlyph(IconIds.Argument));
+				qiContent.Add(new ThemedTipText(IconIds.Argument, R.T_ArgumentN.Replace("<N>", (++argIndex).ToString())));
 			}
 		}
 	}

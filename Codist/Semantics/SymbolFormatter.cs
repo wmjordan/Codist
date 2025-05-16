@@ -300,8 +300,7 @@ namespace Codist
 		void ShowExtensionParameter(StackPanel panel, IParameterSymbol ep) {
 			var epa = ep.GetAttributes();
 			if (epa.Length != 0) {
-				var b = new ThemedTipText();
-				b.SetGlyph(IconIds.ExtensionParameter).Append("(".Render(PlainText));
+				var b = new ThemedTipText(IconIds.ExtensionParameter).Append("(".Render(PlainText));
 				foreach (var item in epa) {
 					Format(b.Inlines, item, 0);
 					b.Append(" ");
