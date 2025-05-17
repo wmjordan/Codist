@@ -27,12 +27,12 @@ namespace Codist.Commands
 			if (String.IsNullOrEmpty(root)
 				|| (i = root.LastIndexOf(Path.DirectorySeparatorChar)) == -1
 				|| String.IsNullOrEmpty(verDir = root.Substring(i + 1))) {
-				MessageWindow.Error("Could not determine VS version directory.", "ActivityLog");
+				MessageWindow.Error(R.T_CouldNotDetermineVSDataDir, "ActivityLog");
 				return;
 			}
 			var activityLogPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), @"Microsoft\VisualStudio", verDir, "ActivityLog.xml");
 			if (File.Exists(activityLogPath) == false) {
-				MessageWindow.Error("ActivityLog.xml does not exists.", "ActivityLog");
+				MessageWindow.Error(R.T_ActivityLogNotExists, "ActivityLog");
 				return;
 			}
 
@@ -87,6 +87,9 @@ namespace Codist.Commands
 				if (p.Inlines.Count != 0) {
 					d.Blocks.Add(p);
 				}
+			}
+			if (d.Blocks.Count == 0) {
+				d.Blocks.Add(new Paragraph().Append(R.T_NothingInterestingInActivityLog));
 			}
 			MessageWindow.Show(box, activityLogPath);
 		}

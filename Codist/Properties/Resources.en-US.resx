@@ -2939,4 +2939,13 @@ Ctrl: Direct implementation types only</value>
   <data name="OT_VisualStudio" xml:space="preserve">
     <value>Visual Studio</value>
   </data>
+  <data name="T_NothingInterestingInActivityLog" xml:space="preserve">
+    <value>Nothing interesting in the ActivityLog.xml file</value>
+  </data>
+  <data name="T_ActivityLogNotExists" xml:space="preserve">
+    <value>ActivityLog.xml does not exist.</value>
+  </data>
+  <data name="T_CouldNotDetermineVSDataDir" xml:space="preserve">
+    <value>Could not determine version directory of Visual Studio.</value>
+  </data>
 </root>

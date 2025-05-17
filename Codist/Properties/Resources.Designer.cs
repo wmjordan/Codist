@@ -5767,6 +5767,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ActivityLog.xml does not exist..
+        /// </summary>
+        internal static string T_ActivityLogNotExists {
+            get {
+                return ResourceManager.GetString("T_ActivityLogNotExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to All languages.
         /// </summary>
         internal static string T_AllLanguages {
@@ -6294,6 +6303,15 @@ namespace Codist.Properties {
         internal static string T_CopyBefore {
             get {
                 return ResourceManager.GetString("T_CopyBefore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not determine version directory of Visual Studio..
+        /// </summary>
+        internal static string T_CouldNotDetermineVSDataDir {
+            get {
+                return ResourceManager.GetString("T_CouldNotDetermineVSDataDir", resourceCulture);
             }
         }
         
@@ -7497,6 +7515,15 @@ namespace Codist.Properties {
         internal static string T_NoSyntaxHighlightSelected {
             get {
                 return ResourceManager.GetString("T_NoSyntaxHighlightSelected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Nothing interesting in the ActivityLog.xml file.
+        /// </summary>
+        internal static string T_NothingInterestingInActivityLog {
+            get {
+                return ResourceManager.GetString("T_NothingInterestingInActivityLog", resourceCulture);
             }
         }
         
