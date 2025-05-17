@@ -10,6 +10,11 @@ namespace Codist.QuickInfo
 	sealed class QuickInfoVisibilityController : SingletonQuickInfoSource
 	{
 		protected override Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
+			// If quick info is not triggered by mouse (usually by keyboard instead),
+			//   do not control the visibility and display delay
+			if (session.Options.MatchFlags(QuickInfoSessionOptions.TrackMouse) == false) {
+				return Task.FromResult<QuickInfoItem>(null);
+			}
 			// do not show Quick Info when user is hovering on the SmartBar or the SymbolList
 			if (session.TextView.Properties.ContainsProperty(SmartBars.SmartBar.QuickInfoSuppressionId)
 				|| session.TextView.Properties.ContainsProperty(Controls.TextViewOverlay.QuickInfoSuppressionId)) {
