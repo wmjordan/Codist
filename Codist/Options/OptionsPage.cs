@@ -777,7 +777,7 @@ namespace Codist.Options
 		sealed class PageControl : OptionsPageContainer
 		{
 			readonly OptionBox<BuildOptions> _BuildVsixAutoIncrement;
-			readonly OptionBox<DeveloperOptions> _ShowDocumentContentType, _ShowSyntaxClassificationInfo, _OpenActivityLog;
+			readonly OptionBox<DeveloperOptions> _ShowActiveWindowProperties, _ShowSyntaxClassificationInfo, _OpenActivityLog;
 
 			public PageControl(OptionsPage page) : base(page) {
 				AddPage(R.OT_General,
@@ -785,8 +785,6 @@ namespace Codist.Options
 
 					new TitleBox(R.OT_SyntaxDiagnostics),
 					new DescriptionBox(R.OT_SyntaxDiagnosticsNote),
-					_ShowDocumentContentType = Config.Instance.DeveloperOptions.CreateOptionBox(DeveloperOptions.ShowWindowInformer, UpdateConfig, R.OT_AddShowActiveWindowProperties)
-						.SetLazyToolTip(() => R.OT_AddShowActiveWindowPropertiesTip),
 					_ShowSyntaxClassificationInfo = Config.Instance.DeveloperOptions.CreateOptionBox(DeveloperOptions.ShowSyntaxClassificationInfo, UpdateConfig, R.OT_AddShowSyntaxClassifcationInfo)
 						.SetLazyToolTip(() => R.OT_AddShowSyntaxClassifcationInfoTip),
 
@@ -795,6 +793,8 @@ namespace Codist.Options
 						.SetLazyToolTip(() => R.OT_AutoIncrementVsixVersionTip),
 
 					new TitleBox(R.OT_VisualStudio),
+					_ShowActiveWindowProperties = Config.Instance.DeveloperOptions.CreateOptionBox(DeveloperOptions.ShowWindowInformer, UpdateConfig, R.OT_AddShowActiveWindowProperties)
+						.SetLazyToolTip(() => R.OT_AddShowActiveWindowPropertiesTip),
 					_OpenActivityLog = Config.Instance.DeveloperOptions.CreateOptionBox(DeveloperOptions.ShowActivityLog, UpdateConfig, R.OT_AddOpenActivityLog)
 					);
 			}
