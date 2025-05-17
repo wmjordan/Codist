@@ -2934,4 +2934,7 @@ Ctrl: 仅列出直接实现接口的类</value>
   <data name="T_CouldNotDetermineVSDataDir" xml:space="preserve">
     <value>无法确定 Visual Studio 的版本目录。</value>
   </data>
+  <data name="CMD_QuickInfo" xml:space="preserve">
+    <value>显示代码提示...</value>
+  </data>
 </root>

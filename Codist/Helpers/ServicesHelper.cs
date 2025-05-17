@@ -61,6 +61,12 @@ namespace Codist
 		public Microsoft.VisualStudio.Text.Outlining.IOutliningManagerService OutliningManager { get; private set; }
 
 		[Import]
+		public IAsyncQuickInfoBroker QuickInfoBroker { get; private set; }
+
+		[Import]
+		public Microsoft.VisualStudio.Text.Adornments.IToolTipService ToolTipService { get; private set; }
+
+		[Import]
 		public ITextStructureNavigatorSelectorService TextStructureNavigator { get; private set; }
 
 		[Import]

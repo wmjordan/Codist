@@ -2948,4 +2948,7 @@ Ctrl: Direct implementation types only</value>
   <data name="T_CouldNotDetermineVSDataDir" xml:space="preserve">
     <value>Could not determine version directory of Visual Studio.</value>
   </data>
+  <data name="CMD_QuickInfo" xml:space="preserve">
+    <value>Show Quick Info...</value>
+  </data>
 </root>

@@ -1627,6 +1627,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Show Quick Info....
+        /// </summary>
+        internal static string CMD_QuickInfo {
+            get {
+                return ResourceManager.GetString("CMD_QuickInfo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Refactor selection.
         /// </summary>
         internal static string CMD_RefactorSelection {

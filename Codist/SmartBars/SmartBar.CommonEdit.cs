@@ -448,6 +448,7 @@ namespace Codist.SmartBars
 				});
 				AddEditorCommand(ToolBar2, IconIds.SetNextStatement, "Debug.SetNextStatement", R.CMD_SetNextStatement);
 				AddCommands(ToolBar2, IconIds.ToggleBreakpoint, R.CMD_Debugger, ctx => TextEditorHelper.ExecuteEditorCommand("Debug.ToggleBreakpoint"), ctx => __DebugCommands);
+				AddCommand(ToolBar2, IconIds.QuickInfo, R.CMD_QuickInfo, async ctx => await ServicesHelper.Instance.QuickInfoBroker.TriggerQuickInfoAsync(ctx.View, null, default, ctx.CancellationToken));
 			}
 		}
 
