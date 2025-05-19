@@ -206,6 +206,7 @@ namespace Codist
 		public const int InstanceProducer = KnownImageIds.NewItem;
 		public const int GoToDefinition = KnownImageIds.GoToDefinition;
 		public const int QuickAction = KnownImageIds.IntellisenseLightBulb;
+		public const int QuickInfo = KnownImageIds.ToolTip;
 		public const int SelectCode = KnownImageIds.BlockSelection;
 		public const int SelectBlock = KnownImageIds.MatchBrace;
 		public const int SelectText = KnownImageIds.RectangleSelection;
