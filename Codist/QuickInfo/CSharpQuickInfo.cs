@@ -183,38 +183,38 @@ namespace Codist.QuickInfo
 			if (__NodeProcessors.TryGetValue((SyntaxKind)ctx.node.RawKind, out syntaxProcessor)) {
 				syntaxProcessor(ctx);
 			}
-			if (ctx.symbol == null) {
-				goto RETURN;
-			}
-			Chain<string> unavailableProjects = null;
-			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation)) {
-				if (ctx.isConvertedType == false) {
-					unavailableProjects = await SearchUnavailableProjectsAsync(sc.Document, ctx).ConfigureAwait(false);
-				}
-				ctor = ctx.node.Parent.UnqualifyExceptNamespace() as ObjectCreationExpressionSyntax;
-				await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
-				OverrideDocumentation(ctx.node,
-					o,
-					ctor != null
-						? semanticModel.GetSymbolInfo(ctor, cancellationToken).Symbol ?? ctx.symbol
-						: ctx.node.Parent.IsKind(CodeAnalysisHelper.PrimaryConstructorBaseType)
-						? (ctx.symbol = semanticModel.GetSymbolInfo(ctx.node.Parent, cancellationToken).Symbol ?? ctx.symbol)
-						: ctx.symbol,
-					semanticModel,
-					cancellationToken);
-				if (ctx.symbol?.Kind == SymbolKind.RangeVariable) {
-					ctx.Container.Add(new ThemedTipText(IconIds.LocalVariable, "Range Variable: ").Append(ctx.symbol.Name, true));
-					semanticModel.GetTypeInfo(ctx.node, cancellationToken).Type.SetNotDefault(ref ctx.symbol);
-				}
-			}
-			if (ctx.isConvertedType == false) {
-				await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
-				ShowSymbolInfo(ctx);
-				if (unavailableProjects != null) {
-					ShowUnavailableProjects(ctx, unavailableProjects);
-				}
-			}
+
 		RETURN:
+			if (ctx.symbol != null) {
+				Chain<string> unavailableProjects = null;
+				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation)) {
+					if (ctx.isConvertedType == false) {
+						unavailableProjects = await SearchUnavailableProjectsAsync(sc.Document, ctx).ConfigureAwait(false);
+					}
+					ctor = ctx.node.Parent.UnqualifyExceptNamespace() as ObjectCreationExpressionSyntax;
+					await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
+					OverrideDocumentation(ctx.node,
+						o,
+						ctor != null
+							? semanticModel.GetSymbolInfo(ctor, cancellationToken).Symbol ?? ctx.symbol
+							: ctx.node.Parent.IsKind(CodeAnalysisHelper.PrimaryConstructorBaseType)
+							? (ctx.symbol = semanticModel.GetSymbolInfo(ctx.node.Parent, cancellationToken).Symbol ?? ctx.symbol)
+							: ctx.symbol,
+						semanticModel,
+						cancellationToken);
+					if (ctx.symbol?.Kind == SymbolKind.RangeVariable) {
+						ctx.Container.Add(new ThemedTipText(IconIds.LocalVariable, "Range Variable: ").Append(ctx.symbol.Name, true));
+						semanticModel.GetTypeInfo(ctx.node, cancellationToken).Type.SetNotDefault(ref ctx.symbol);
+					}
+				}
+				if (ctx.isConvertedType == false) {
+					await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
+					ShowSymbolInfo(ctx);
+					if (unavailableProjects != null) {
+						ShowUnavailableProjects(ctx, unavailableProjects);
+					}
+				}
+			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter)) {
 				ShowArgumentInfo(ctx);
 			}
