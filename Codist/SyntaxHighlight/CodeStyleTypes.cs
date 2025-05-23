@@ -531,6 +531,39 @@ namespace Codist.SyntaxHighlight
 		[ClassificationType(ClassificationTypeNames = Constants.XmlDocCData)]
 		[Description("CData content of XML Documentation")]
 		XmlDocCData,
+
+		[Category(Constants.SyntaxCategory.Url)]
+		[ClassificationType(ClassificationTypeNames = Constants.UrlScheme)]
+		[BaseDefinition(Constants.CodeUrl)]
+		UrlScheme,
+		[Category(Constants.SyntaxCategory.Url)]
+		[ClassificationType(ClassificationTypeNames = Constants.UrlHost)]
+		[BaseDefinition(Constants.CodeUrl)]
+		UrlHost,
+		[Category(Constants.SyntaxCategory.Url)]
+		[ClassificationType(ClassificationTypeNames = Constants.UrlCredential)]
+		[BaseDefinition(Constants.CodeUrl)]
+		UrlCredential,
+		[Category(Constants.SyntaxCategory.Url)]
+		[ClassificationType(ClassificationTypeNames = Constants.UrlFile)]
+		[BaseDefinition(Constants.CodeUrl)]
+		UrlFile,
+		[Category(Constants.SyntaxCategory.Url)]
+		[ClassificationType(ClassificationTypeNames = Constants.UrlQueryName)]
+		[BaseDefinition(Constants.CodeUrl)]
+		UrlQueryName,
+		[Category(Constants.SyntaxCategory.Url)]
+		[ClassificationType(ClassificationTypeNames = Constants.UrlQueryValue)]
+		[BaseDefinition(Constants.CodeUrl)]
+		UrlQueryValue,
+		[Category(Constants.SyntaxCategory.Url)]
+		[ClassificationType(ClassificationTypeNames = Constants.UrlPunctuation)]
+		[BaseDefinition(Constants.CodeUrl)]
+		UrlPunctuation,
+		[Category(Constants.SyntaxCategory.Url)]
+		[ClassificationType(ClassificationTypeNames = Constants.UrlFragment)]
+		[BaseDefinition(Constants.CodeUrl)]
+		UrlFragment,
 	}
 
 	enum XmlStyleTypes

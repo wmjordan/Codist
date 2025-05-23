@@ -40,6 +40,10 @@ namespace Codist.SyntaxHighlight
 		/// </summary>
 		internal static bool IdentifySymbolSource { get; private set; }
 
+		internal static bool TagUrl { get; private set; }
+
+		internal static bool TagAttributeAnnotation { get; private set; }
+
 		internal static IClassificationFormatMap DefaultClassificationFormatMap => __DefaultClassificationFormatMap;
 
 		internal static TextFormattingRunProperties EditorDefaultTextProperties => __DefaultClassificationFormatMap.DefaultTextProperties;
@@ -242,7 +246,7 @@ namespace Codist.SyntaxHighlight
 				item.Reset();
 			}
 			__SyntaxStyleCache.Clear();
-			IdentifySymbolSource = false;
+			IdentifySymbolSource = TagUrl = TagAttributeAnnotation = false;
 		}
 
 		public static void Reset(string classificationType) {
@@ -252,6 +256,7 @@ namespace Codist.SyntaxHighlight
 		}
 
 		static Dictionary<string, StyleBase> InitSyntaxStyleCache() {
+			"Initializing syntax style cache".Log();
 			var cache = new Dictionary<string, StyleBase>(100, StringComparer.OrdinalIgnoreCase);
 			__HighlightEnabled = Config.Instance.Features.MatchFlags(Features.SyntaxHighlight);
 			LoadSyntaxStyleCache(cache, Config.Instance);
@@ -350,9 +355,21 @@ namespace Codist.SyntaxHighlight
 		}
 
 		static void UpdateHighlightOptions(Dictionary<string, StyleBase> cache) {
-			StyleBase style;
-			IdentifySymbolSource = cache.TryGetValue(Constants.CSharpMetadataSymbol, out style) && style.IsSet
-				|| cache.TryGetValue(Constants.CSharpUserSymbol, out style) && style.IsSet;
+			IdentifySymbolSource = cache.IsStyleSet(Constants.CSharpMetadataSymbol) || cache.IsStyleSet(Constants.CSharpUserSymbol);
+			TagUrl = cache.IsAnyStyleSet(Constants.UrlHost, Constants.UrlFile, Constants.UrlQueryName, Constants.UrlQueryValue, Constants.UrlScheme, Constants.UrlFragment, Constants.UrlPunctuation, Constants.UrlCredential);
+			TagAttributeAnnotation = cache.IsAnyStyleSet(Constants.CSharpAttributeNotation);
+		}
+
+		static bool IsStyleSet(this Dictionary<string, StyleBase> cache, string styleName) {
+			return cache.TryGetValue(styleName, out var style) && style.IsSet;
+		}
+		static bool IsAnyStyleSet(this Dictionary<string, StyleBase> cache, params string[] styleNames) {
+			foreach (var styleName in styleNames) {
+				if (cache.TryGetValue(styleName, out var style) && style.IsSet) {
+					return true;
+				}
+			}
+			return false;
 		}
 
 		static void InitStyleClassificationCache<TStyleEnum, TCodeStyle>(Dictionary<string, StyleBase> styleCache, List<TCodeStyle> styles)

@@ -68,6 +68,7 @@ namespace Codist
 		internal const SyntaxKind RecordStructDeclaration = (SyntaxKind)9068;
 		internal const SyntaxKind PrimaryConstructorBaseType = (SyntaxKind)9065;
 		internal const SyntaxKind InterpolatedSingleLineRawStringStartToken = (SyntaxKind)9072;
+		internal const SyntaxKind InterpolatedMultiLineRawStringStartToken = (SyntaxKind)9073;
 		internal const SyntaxKind ExtensionDeclaration = (SyntaxKind)9079;
 		internal const SyntaxKind SingleLineRawStringLiteralToken = (SyntaxKind)8518;
 		internal const SyntaxKind MultiLineRawStringLiteralToken = (SyntaxKind)8519;

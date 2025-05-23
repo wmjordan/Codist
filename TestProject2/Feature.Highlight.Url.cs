@@ -5,6 +5,7 @@ namespace TestProject.Feature
 	static class UrlHighlighter
 	{
 		static readonly string[] Valid = [
+				"http://example.com/path",
 				"http://example.com/path/to/file",
 				"https://user:pass@site.com:8080/path?name=value#frag",
 				"https://user@site.com:8080",
@@ -41,6 +42,7 @@ namespace TestProject.Feature
 				"http://example.com more",
 				"http://example.com: more",
 				"http://example.com/ more",
+				"http://example.com/url more",
 				"http://example.com? more",
 				"http://example.com# more",
 				"http://example.com:65535 more",
@@ -53,8 +55,8 @@ namespace TestProject.Feature
 				"s:site.com",
 				"this is not a url",
 				"example.com/path",
-				"http://example.com:xb/",
-				"http://example.com:65536/",
+				"http://example.com:xb/url",
+				"http://example.com:65536/url",
 				"invalid *tp://example.com and valid ftp://h, invalid x://, and valid ftp://a",
 				"http:example.com",
 				"://",
@@ -64,11 +66,24 @@ namespace TestProject.Feature
 
 		static readonly string[] Interpolated = [
 				$"http://{new Random().Next()}.host/{DateTime.Today:yy-mm-dd}/{"action"}/id",
+				@$"http://{new Random().Next()}.host/{DateTime.Today:yy-mm-dd}/{"action"}/id",
 			];
 
 		static readonly string[] Raw = [
 				"""http://host""",
 				$$"""http://host/{{DateTime.Now.Year}}""",
+				"""
+					URL List:
+					http://url1
+					ws://url/2
+				"""
 			];
+
+		static void Url() {
+			var jh = (firstName: "Jupiter", lastName: "Hammon", born: 1711, published: 1761);
+
+			var u = $"http://search.engine.com/search?born={jh.born}";
+			u = $"http://search.engine.com/search?firstName={jh.firstName}&lastName={jh.lastName}&born={jh.born}\nhttp://another.site/search?name={jh.firstName + " " + jh.lastName}";
+		}
 	}
 }

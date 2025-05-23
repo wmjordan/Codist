@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Windows.Controls.Primitives;
 using CLR;
 
 namespace Codist.Taggers
@@ -21,7 +22,15 @@ namespace Codist.Taggers
 			Fragment
 		}
 
-		delegate void ProcessUrlPart(UrlPart part, int position, int length);
+		enum StringKind
+		{
+			Default,
+			Interpolated,
+			Verbatim,
+			InterpolatedVerbatim,
+			Raw,
+			InterpolatedRaw
+		}
 
 		enum UrlParserState
 		{
@@ -39,13 +48,16 @@ namespace Codist.Taggers
 			EndOfHostAndPort
 		}
 
+		delegate void ProcessUrlPart(UrlPart part, int position, int length);
+
 		/// <summary>
 		/// Returns the position of ":" in URL, -1 if no valid scheme is detected.
 		/// </summary>
 		/// <param name="input">The string to parse.</param>
+		/// <param name="kind">Kind of the string.</param>
 		/// <param name="leading">The characters to be skipped at the beginning of <paramref name="input"/>. If colon is found, this value will be changed to the beginning position of the URL.</param>
 		/// <param name="length">The number of characters to be checked.</param>
-		static int FindUrlScheme(string input, ref int leading, ref int length) {
+		static int FindUrlScheme(string input, StringKind kind, ref int leading, ref int length) {
 		FIND_COLON:
 			var i = input.IndexOf(':', leading, length); // head for the ":" in "://"
 			if (i < 0) {
@@ -63,7 +75,17 @@ namespace Codist.Taggers
 					if (IsValidSchemeChar(c = input[i])) {
 						continue;
 					}
-					if (c <= ' ' && IsValidSchemeStart(input[++i])) {
+					if (c == '\\' && kind < StringKind.Verbatim && IsCurrentBackslashEscaped(input, i, leading)) {
+						// handle escaped sequence
+						var end = leading + length;
+						ParseEscape(input, ref i, ref end, ref c);
+						if (c <= ' ') {
+							length -= i + 1 - leading;
+							leading = i + 1;
+							goto FIND_COLON;
+						}
+					}
+					else if (c <= ' ' && IsValidSchemeStart(input[++i])) {
 						length -= i - leading;
 						leading = i;
 						return p;
@@ -88,22 +110,23 @@ namespace Codist.Taggers
 			string input,
 			int start,
 			int length,
+			StringKind kind,
 			ProcessUrlPart processPart,
 			int interpolationLevel = 1) {
-			var s = FindUrlScheme(input, ref start, ref length);
+			var s = FindUrlScheme(input, kind, ref start, ref length);
 			if (s < 0) {
 				return -1;
 			}
 			processPart(UrlPart.Scheme, start, s - start);
 			length -= (s + 3) - start; // skip "://", start from AfterScheme
-			var end = TryParseUrlAfterScheme(input, s + 3, length, processPart, interpolationLevel);
+			var end = TryParseUrlAfterScheme(input, s + 3, length, kind, processPart, interpolationLevel);
 			if (end != -1) {
 				processPart(UrlPart.FullUrl, start, end - start);
 			}
 			return end;
 		}
 
-		private static int TryParseUrlAfterScheme(string input, int start, int length, ProcessUrlPart processPart, int interpolationLevel) {
+		static int TryParseUrlAfterScheme(string input, int start, int length, StringKind kind, ProcessUrlPart processPart, int interpolationLevel) {
 			int end = start + length;
 			int urlStart = -1, partStart = 0, subPartStart = 0;
 			var state = UrlParserState.AfterScheme;
@@ -115,16 +138,7 @@ namespace Codist.Taggers
 
 				// Handle interpolation
 				if (state == UrlParserState.Interpolation) {
-					if (c == '}') {
-						interpolationDepth--;
-						if (interpolationDepth == 0) {
-							// Return to previous state
-							state = interpolationStack.Pop();
-						}
-					}
-					else if (c == '{') {
-						interpolationDepth++;
-					}
+					HandleInterpolation(ref state, ref interpolationDepth, interpolationStack, c);
 					continue;
 				}
 
@@ -137,8 +151,18 @@ namespace Codist.Taggers
 					continue;
 				}
 
+				if (c == '\\' && kind < StringKind.Verbatim && i + 1 < end) {
+					ParseEscape(input, ref i, ref end, ref c);
+					if (c <= 0x0020 && state != UrlParserState.Start) {
+						if (state > UrlParserState.AfterScheme) {
+							goto FINAL;
+						}
+						state = UrlParserState.Start;
+						continue;
+					}
+				}
 				// Handle URL end
-				if (c <= 0x0020 && state != UrlParserState.Start) {
+				else if (c <= 0x0020 && state != UrlParserState.Start) {
 					// Finalize current part if any
 					if (state > UrlParserState.AfterScheme) {
 						end = i;
@@ -305,7 +329,7 @@ namespace Codist.Taggers
 					case UrlParserState.Authority:
 					case UrlParserState.Host:
 						processPart(UrlPart.Host, partStart, end - partStart);
-						break; ;
+						break;
 					case UrlParserState.UserInfo:
 						if (subPartStart != 0) {
 							processPart(UrlPart.Host, partStart, subPartStart - partStart);
@@ -338,6 +362,95 @@ namespace Codist.Taggers
 				}
 			}
 			return end;
+		}
+
+		static bool IsCurrentBackslashEscaped(string input, int index, int leading) {
+			bool e = true;
+			while (--index >= leading && input[index] == '\\') {
+				e = !e;
+			}
+			return e;
+		}
+
+		static void ParseEscape(string input, ref int i, ref int end, ref char c) {
+			int v;
+			switch (input[++i]) {
+				case 't':
+				case 'n':
+				case 'r':
+				case 'b':
+				case 'f':
+				case 'a':
+				case 'v':
+					c = '\0'; // mark end of url
+					end = i - 1;
+					return;
+				case 'u':
+					if ((v = TryDecodeHex(input, ref i, ref end, 4, 4)) > -1) {
+						c = (char)v;
+					}
+					break;
+				case 'x':
+					if ((v = TryDecodeHex(input, ref i, ref end, 1, Math.Min(4, end - i))) > -1) {
+						c = (char)v;
+					}
+					break;
+				case 'U':
+					if ((v = TryDecodeHex(input, ref i, ref end, 8, 8)) > -1) {
+						c = v > Char.MaxValue ? Char.MaxValue : (char)v;
+					}
+					break;
+				default:
+					c = input[i];
+					return;
+			}
+		}
+
+		static int TryDecodeHex(string input, ref int index, ref int end, int minLength, int maxLength) {
+			if (index + minLength >= end) {
+				return -1;
+			}
+			var v = 0;
+			var i = index;
+			int n;
+			for (n = 0; n < maxLength; n++) {
+				int c = input[++i];
+				if (c.IsBetween('0', '9')) {
+					c -= '0';
+				}
+				else if (c.IsBetween('A', 'F')) {
+					c -= 'A' - 10;
+				}
+				else if (c.IsBetween('a', 'f')) {
+					c -= 'a' - 10;
+				}
+				else {
+					if (n < minLength) {
+						return -1;
+					}
+					break;
+				}
+				v <<= 4;
+				v += c;
+			}
+			if (v <= 0x20) {
+				end = index - 1;
+			}
+			index = n == maxLength ? i : i - 1;
+			return v;
+		}
+
+		static void HandleInterpolation(ref UrlParserState state, ref int interpolationDepth, Stack<UrlParserState> interpolationStack, char c) {
+			if (c == '}') {
+				interpolationDepth--;
+				if (interpolationDepth == 0) {
+					// Return to previous state
+					state = interpolationStack.Pop();
+				}
+			}
+			else if (c == '{') {
+				interpolationDepth++;
+			}
 		}
 
 		private static void ReportLastSegment(string input, int pathStart, int pathEnd, ProcessUrlPart processPart) {

@@ -136,6 +136,33 @@ namespace Codist.Taggers
 		public ClassificationTag XmlDoc { get; }
 	}
 
+	sealed class UrlClassifications
+	{
+		public static readonly UrlClassifications Instance = new UrlClassifications(ServicesHelper.Instance.ClassificationTypeRegistry);
+
+		UrlClassifications(IClassificationTypeRegistryService registry) {
+			Url = registry.GetClassificationTag(Constants.CodeUrl);
+			Scheme = registry.GetClassificationTag(Constants.UrlScheme);
+			Credential = registry.GetClassificationTag(Constants.UrlCredential);
+			Host = registry.GetClassificationTag(Constants.UrlHost);
+			File = registry.GetClassificationTag(Constants.UrlFile);
+			QueryName = registry.GetClassificationTag(Constants.UrlQueryName);
+			QueryValue = registry.GetClassificationTag(Constants.UrlQueryValue);
+			Punctuation = registry.GetClassificationTag(Constants.UrlPunctuation);
+			Fragment = registry.GetClassificationTag(Constants.UrlFragment);
+		}
+
+		public ClassificationTag Url { get; }
+		public ClassificationTag Scheme { get; }
+		public ClassificationTag Credential { get; }
+		public ClassificationTag Host { get; }
+		public ClassificationTag File { get; }
+		public ClassificationTag QueryName { get; }
+		public ClassificationTag QueryValue { get; }
+		public ClassificationTag Punctuation { get; }
+		public ClassificationTag Fragment { get; }
+	}
+
 	sealed class HighlightClassifications
 	{
 		public static readonly HighlightClassifications Instance = new HighlightClassifications(ServicesHelper.Instance.ClassificationTypeRegistry);

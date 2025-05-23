@@ -38,6 +38,7 @@ namespace Codist
 			public const string Preprocessor = nameof(Preprocessor);
 			public const string General = nameof(General);
 			public const string Comment = nameof(Comment);
+			public const string Url = nameof(Url);
 			public const string CompilerMarked = "Compiler Marked";
 			public const string Declaration = nameof(Declaration);
 			public const string TypeDefinition = "Type Definition";
@@ -254,6 +255,15 @@ namespace Codist
 		public const string MarkdownVsSubscript = "vsMarkdown_subscript";
 		public const string MarkdownVsSuperscript = "vsMarkdown_superscript";
 		public const string MarkdownVsUrl = "vsMarkdown_url";
+
+		public const string UrlScheme = "URL: Scheme";
+		public const string UrlHost = "URL: Host";
+		public const string UrlCredential = "URL: Credential";
+		public const string UrlFile = "URL: File";
+		public const string UrlQueryName = "URL: Query Name";
+		public const string UrlQueryValue = "URL: QueryValue";
+		public const string UrlPunctuation = "URL: Punctuation";
+		public const string UrlFragment = "URL: Fragment";
 
 		internal const string CodistPrefix = "Codist: ";
 		public const string CodistComment = CodistPrefix + "Comment";

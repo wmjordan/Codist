@@ -22,6 +22,7 @@ namespace Codist.Taggers
 		delegate void TaggerDelegate(in SyntaxToken token, Context ctx);
 		static readonly CSharpClassifications __Classifications = CSharpClassifications.Instance;
 		static readonly GeneralClassifications __GeneralClassifications = GeneralClassifications.Instance;
+		static readonly UrlClassifications __UrlClassifications = UrlClassifications.Instance;
 
 		ConcurrentQueue<SnapshotSpan> _PendingSpans = new ConcurrentQueue<SnapshotSpan>();
 		CancellationTokenSource _RenderBreaker;
@@ -134,37 +135,40 @@ namespace Codist.Taggers
 					return Enumerable.Empty<ITagSpan<IClassificationTag>>();
 				}
 			}
+
 			static TagHolder GetTagsInternal(IEnumerable<SnapshotSpan> spans, SemanticState semantic, CancellationToken cancellationToken) {
 				var semanticModel = semantic.Model;
 				var compilationUnit = semantic.GetCompilationUnit(cancellationToken);
 				var l = semanticModel.SyntaxTree.Length;
 				var tags = new TagHolder(semantic.Snapshot);
 				var ctx = new Context(semanticModel, compilationUnit, tags, cancellationToken);
-				SyntaxToken firstToken = default;
-				bool hasFirstToken = false;
+				var prober = AttributeListProber.Instance;
+				SyntaxNode attrs;
 				foreach (var span in spans) {
 					if (span.End > l || cancellationToken.IsCancellationRequested) {
 						return tags;
 					}
 					var textSpan = new TextSpan(span.Start.Position, span.Length);
-					foreach (var token in compilationUnit.DescendantTokens(textSpan)) {
-						if (hasFirstToken == false) {
-							firstToken = token;
-							hasFirstToken = true;
-						}
+					foreach (var token in compilationUnit.DescendantTokens(textSpan, FormatStore.TagAttributeAnnotation ? prober.Probe : null)) {
 						if (textSpan.Contains(token.SpanStart) == false) {
 							if (token.HasLeadingTrivia) {
 								TagXmlDocTokens(token.LeadingTrivia, textSpan, ctx);
+							}
+							if (FormatStore.TagUrl
+								&& token.IsAnyKind(CodeAnalysisHelper.MultiLineRawStringLiteralToken, CodeAnalysisHelper.InterpolatedMultiLineRawStringStartToken)) {
+								var s = span.Intersection(token.Span.ToSpan());
+								if (s.HasValue) {
+									TokenTaggers.TagUrlParts(ctx, s.Value.GetText(), 0, 0, s.Value.Start, StringKind.Raw);
+								}
 							}
 							continue;
 						}
 						TokenTaggers.Tag(in token, ctx);
 					}
-					if (hasFirstToken) {
-						var attrs = firstToken.Parent.FirstAncestorOrSelf<AttributeListSyntax>();
-						if (attrs?.Span.Contains(textSpan) == true) {
-							tags.Add(span.TrimWhitespace(), __Classifications.AttributeNotation);
-						}
+					if (FormatStore.TagAttributeAnnotation
+						&& (attrs = prober.FetchTarget()) != null
+						&& attrs.Span.Contains(textSpan)) {
+						tags.Add(span.TrimWhitespace(), __Classifications.AttributeNotation);
 					}
 				}
 				return tags;
@@ -280,11 +284,13 @@ namespace Codist.Taggers
 				{ SyntaxKind.MinusMinusToken, TagOperatorToken },
 				{ SyntaxKind.StringLiteralToken, TagStringToken },
 				{ CodeAnalysisHelper.SingleLineRawStringLiteralToken, TagStringToken },
+				{ CodeAnalysisHelper.MultiLineRawStringLiteralToken, TagStringToken },
 				{ CodeAnalysisHelper.Utf8StringLiteralToken, TagStringToken },
 				{ SyntaxKind.XmlTextLiteralToken, TagStringToken },
 				{ SyntaxKind.InterpolatedStringStartToken, TagInterpolatedStringStartToken },
 				{ SyntaxKind.InterpolatedVerbatimStringStartToken, TagInterpolatedStringStartToken },
 				{ CodeAnalysisHelper.InterpolatedSingleLineRawStringStartToken, TagInterpolatedStringStartToken },
+				{ CodeAnalysisHelper.InterpolatedMultiLineRawStringStartToken, TagInterpolatedStringStartToken },
 				{ SyntaxKind.IdentifierToken, TagIdentifier },
 			};
 
@@ -442,7 +448,7 @@ namespace Codist.Taggers
 						return;
 					}
 				}
-				if (HighlightOptions.AttributeAnnotation && token.Parent.IsKind(SyntaxKind.AttributeList)) {
+				if (FormatStore.TagAttributeAnnotation && token.Parent.IsKind(SyntaxKind.AttributeList)) {
 					ctx.Tags.Add(token.Parent.Span, __Classifications.AttributeNotation);
 				}
 			}
@@ -664,61 +670,76 @@ namespace Codist.Taggers
 			}
 
 			static void TagInterpolatedStringStartToken(in SyntaxToken token, Context ctx) {
+				if (FormatStore.TagUrl == false) {
+					return;
+				}
 				var node = token.Parent as InterpolatedStringExpressionSyntax;
 				if (node.Span.Length < 3) {
 					return;
 				}
-				//var contents = node.Contents;
-				//TagUrlParts(ctx, contents.ToString(), 0, 0, contents.Span.Start);
 				var leading = node.StringStartToken.Span.Length;
 				var trailing = node.StringEndToken.Span.Length;
-				TagUrlParts(ctx, node.ToString(), leading, trailing, token.SpanStart);
+				var kind = trailing > 2
+					? StringKind.InterpolatedRaw
+					: node.StringStartToken.Text.Contains('@')
+						? StringKind.InterpolatedVerbatim
+						: StringKind.Interpolated;
+				TagUrlParts(ctx, node.ToString(), leading, trailing, token.SpanStart, kind);
 			}
 
 			static void TagStringToken(in SyntaxToken token, Context ctx) {
+				if (FormatStore.TagUrl == false) {
+					return;
+				}
 				var url = token.Text;
 				if (url.Length < 5) {
 					return;
 				}
 				int leading, trailing;
+				StringKind kind;
 				switch (token.Kind()) {
 					case SyntaxKind.StringLiteralToken:
 						leading = url[0] == '@' ? 2 : 1; // @" or "
 						trailing = 1;
+						kind = leading == 2 ? StringKind.Verbatim : StringKind.Default;
 						break;
 					case CodeAnalysisHelper.SingleLineRawStringLiteralToken:
+					case CodeAnalysisHelper.MultiLineRawStringLiteralToken:
 						GetRawStringQuoteLength(url, out leading);
 						trailing = leading;
+						kind = StringKind.Raw;
 						break;
 					case CodeAnalysisHelper.Utf8StringLiteralToken:
 						leading = url[0] == '@' ? 2 : 1; // @" or "
 						trailing = 3; // "u8
+						kind = leading == 2 ? StringKind.Verbatim : StringKind.Default;
 						break;
 					default:
 						leading = trailing = 0;
+						kind = StringKind.Default;
 						break;
 				}
-				TagUrlParts(ctx, url, leading, trailing, token.SpanStart);
+				TagUrlParts(ctx, url, leading, trailing, token.SpanStart, kind);
 			}
 
-			static void TagUrlParts(Context ctx, string url, int leading, int trailing, int offset) {
+			internal static void TagUrlParts(Context ctx, string url, int leading, int trailing, int offset, StringKind kind) {
 				int length = url.Length - leading - trailing;
 				if (length < 5) {
 					return;
 				}
-				while ((leading = TryParseUrl(url, leading, length, (p, s, l) => {
+				while ((leading = TryParseUrl(url, leading, length, kind, (p, s, l) => {
 					ClassificationTag tag;
 					switch (p) {
-						case UrlPart.FullUrl: tag = __Classifications.StaticMember; break;
-						case UrlPart.Scheme: tag = __Classifications.Namespace; break;
-						case UrlPart.Credential: tag = __Classifications.NestedType; break;
-						case UrlPart.Host: tag = __Classifications.ClassName; break;
+						case UrlPart.FullUrl: tag = __UrlClassifications.Url; break;
+						case UrlPart.Scheme: tag = __UrlClassifications.Scheme; break;
+						case UrlPart.Credential: tag = __UrlClassifications.Credential; break;
+						case UrlPart.Host: tag = __UrlClassifications.Host; break;
 						case UrlPart.Port: tag = __GeneralClassifications.Number; break;
-						case UrlPart.FileName: tag = __Classifications.Method; break;
-						case UrlPart.QueryQuestionMark: tag = __GeneralClassifications.Operator; break;
-						case UrlPart.QueryName: tag = __Classifications.Field; break;
-						case UrlPart.QueryValue: tag = __Classifications.Parameter; break;
-						case UrlPart.Fragment: tag = __Classifications.Property; break;
+						case UrlPart.FileName: tag = __UrlClassifications.File; break;
+						case UrlPart.QueryQuestionMark: tag = __UrlClassifications.Punctuation; break;
+						case UrlPart.QueryName: tag = __UrlClassifications.QueryName; break;
+						case UrlPart.QueryValue: tag = __UrlClassifications.QueryValue; break;
+						case UrlPart.Fragment: tag = __UrlClassifications.Fragment; break;
 						default: return;
 					}
 					ctx.Tags.Add(new TextSpan(offset + s, l), tag);
@@ -1039,7 +1060,9 @@ namespace Codist.Taggers
 					}
 				}
 
-				if (FormatStore.IdentifySymbolSource && symbol.IsMemberOrType() && symbol.ContainingAssembly != null) {
+				if (FormatStore.IdentifySymbolSource
+					&& symbol.IsMemberOrType()
+					&& symbol.ContainingAssembly != null) {
 					tags.Add(itemSpan, symbol.ContainingAssembly.GetSourceType() == AssemblySource.Metadata
 						? __Classifications.MetadataSymbol
 						: __Classifications.UserSymbol);
@@ -1166,6 +1189,31 @@ namespace Codist.Taggers
 			}
 		}
 
+		class AttributeListProber
+		{
+			[ThreadStatic]
+			static AttributeListProber __Instance;
+			public static AttributeListProber Instance => __Instance == null ? (__Instance = new AttributeListProber()) : __Instance;
+
+			private AttributeListProber() {}
+
+			SyntaxNode _Target;
+			public bool Probe(SyntaxNode node) {
+				if (node.RawKind == (int)SyntaxKind.AttributeList) {
+					_Target = node;
+				}
+				return true;
+			}
+			public SyntaxNode FetchTarget() {
+				if (_Target != null) {
+					var target = _Target;
+					_Target = null;
+					return target;
+				}
+				return null;
+			}
+		}
+
 		static class HighlightOptions
 		{
 			// use fields to cache option flags
@@ -1176,8 +1224,7 @@ namespace Codist.Taggers
 				NonPrivateField,
 				StyleConstructorAsType,
 				StyleVarAsType,
-				CapturingLambda,
-				AttributeAnnotation;
+				CapturingLambda;
 			public static ClassificationTag BoldSemanticPunctuationTag;
 
 			static HighlightOptions() {
@@ -1199,7 +1246,6 @@ namespace Codist.Taggers
 				NonPrivateField = o.MatchFlags(SpecialHighlightOptions.NonPrivateField);
 				StyleConstructorAsType = o.MatchFlags(SpecialHighlightOptions.UseTypeStyleOnConstructor);
 				StyleVarAsType = o.MatchFlags(SpecialHighlightOptions.UseTypeStyleOnVarKeyword);
-				AttributeAnnotation = FormatStore.GetStyles().TryGetValue(Constants.CSharpAttributeNotation, out var s) && s.IsSet;
 			}
 		}
 	}

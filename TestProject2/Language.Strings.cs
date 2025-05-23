@@ -19,6 +19,7 @@ public class StringTokens
 	void Escaping() {
 		string columns = "Column 1\tColumn 2\tColumn 3";
 		string rows = "Row 1\r\nRow 2\r\nRow 3";
+		string t = "\x20=\u0020=\U00000020";
 		const string title = "\"The \u00C6olean Harp\", by Samuel Taylor Coleridge";
 		string quote = @"Her name was ""Sara.""";
 	}
@@ -63,8 +64,6 @@ public class StringTokens
 
 		Console.WriteLine(@$"He was first published in {jh.published}
 at the age of {jh.published - jh.born}.");
-
-		var query = $"http://search.engine.com/search?firstName={jh.firstName}&lastName={jh.lastName}&born={jh.born}";
 
 		int X = 2;
 		int Y = 3;
