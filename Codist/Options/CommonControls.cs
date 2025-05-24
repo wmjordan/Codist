@@ -171,16 +171,17 @@ namespace Codist.Options
 		public Color Color {
 			get => (_Border.Background as SolidColorBrush).Color;
 			set {
-				if (Color != value) {
-					_Border.Background = new SolidColorBrush(value);
-					if (_IsColorChanging == false) {
-						_IsColorChanging = true;
-						try {
-							_ColorChangedHandler?.Invoke(value);
-						}
-						finally {
-							_IsColorChanging = false;
-						}
+				if (Color == value) {
+					return;
+				}
+				_Border.Background = new SolidColorBrush(value);
+				if (_IsColorChanging == false) {
+					_IsColorChanging = true;
+					try {
+						_ColorChangedHandler?.Invoke(value);
+					}
+					finally {
+						_IsColorChanging = false;
 					}
 				}
 			}
