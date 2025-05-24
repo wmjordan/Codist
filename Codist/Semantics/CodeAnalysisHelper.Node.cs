@@ -1064,6 +1064,7 @@ namespace Codist
 				switch (child.Kind()) {
 					case SyntaxKind.CompilationUnit:
 					case SyntaxKind.NamespaceDeclaration:
+					case CodeAnalysisHelper.FileScopedNamespaceDeclaration:
 						foreach (var item in child.GetDescendantDeclarations(cancellationToken)) {
 							yield return item;
 						}
