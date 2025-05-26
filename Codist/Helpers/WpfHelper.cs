@@ -172,6 +172,14 @@ namespace Codist
 			block.Inlines.Add(new FileLink(folder, file));
 			return block;
 		}
+		public static InlineCollection Append(this InlineCollection inlines, string text, Brush foreground) {
+			inlines.Add(text.Render(foreground));
+			return inlines;
+		}
+		public static InlineCollection AppendLine(this InlineCollection inlines) {
+			inlines.Add(new LineBreak());
+			return inlines;
+		}
 
 		/// <summary>
 		/// Gets the <see cref="TextBlock.Text"/> of a <see cref="TextBlock"/>, or the concatenated <see cref="Run.Text"/>s of <see cref="Run"/> instances in the <see cref="TextBlock.Inlines"/>.

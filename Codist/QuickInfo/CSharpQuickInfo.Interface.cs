@@ -12,8 +12,7 @@ namespace Codist.QuickInfo
 	{
 		static void ShowInterfaceImplementation<TSymbol>(InfoContainer qiContent, TSymbol symbol, IReadOnlyList<TSymbol> explicitImplementations)
 			where TSymbol : class, ISymbol {
-			if (symbol.DeclaredAccessibility != Accessibility.Public
-				&& explicitImplementations.Count == 0
+			if ((symbol.DeclaredAccessibility != Accessibility.Public && explicitImplementations.Count == 0)
 				|| symbol.ContainingType is null) {
 				return;
 			}
@@ -22,7 +21,7 @@ namespace Codist.QuickInfo
 				return;
 			}
 			var implementedIntfs = ImmutableArray.CreateBuilder<ITypeSymbol>(3);
-			ThemedTipDocument info = null;
+			GeneralInfoBlock info = null;
 			var refKind = symbol.GetRefKind();
 			var returnType = symbol.GetReturnType();
 			var parameters = symbol.GetParameters();
@@ -38,19 +37,19 @@ namespace Codist.QuickInfo
 				}
 			}
 			if (implementedIntfs.Count > 0) {
-				info = new ThemedTipDocument().AppendTitle(IconIds.InterfaceImplementation, R.T_Implements);
+				info = new GeneralInfoBlock(IconIds.InterfaceImplementation, R.T_Implements);
 				foreach (var item in implementedIntfs) {
-					info.Append(new ThemedTipParagraph(item.GetImageId(), ToUIText(item)));
+					info.Add(new BlockItem { IconId = item.GetImageId() }.AddSymbolDisplayParts(item.ToDisplayParts(CodeAnalysisHelper.QuickInfoSymbolDisplayFormat), __SymbolFormatter));
 				}
 			}
 			if (explicitImplementations != null) {
 				implementedIntfs.Clear();
 				implementedIntfs.AddRange(explicitImplementations.Select(i => i.ContainingType));
 				if (implementedIntfs.Count > 0) {
-					(info ?? (info = new ThemedTipDocument()))
-						.AppendTitle(IconIds.InterfaceImplementation, R.T_ExplicitImplements);
+					(info ?? (info = new GeneralInfoBlock()))
+						.Add(new BlockItem(IconIds.InterfaceImplementation, R.T_ExplicitImplements, true));
 					foreach (var item in implementedIntfs) {
-						info.Append(new ThemedTipParagraph(item.GetImageId(), ToUIText(item)));
+						info.Add(new BlockItem { IconId = item.GetImageId() }.AddSymbolDisplayParts(item.ToDisplayParts(CodeAnalysisHelper.QuickInfoSymbolDisplayFormat), __SymbolFormatter));
 					}
 				}
 			}
@@ -60,49 +59,48 @@ namespace Codist.QuickInfo
 		}
 
 		static void ShowInterfaceMembers(InfoContainer qiContent, INamedTypeSymbol type, INamedTypeSymbol declaredClass) {
-			var doc = new ThemedTipDocument();
-			doc.AppendTitle(IconIds.ListMembers, declaredClass != null ? R.T_MemberImplementation : R.T_Member);
+			var doc = new GeneralInfoBlock(IconIds.ListMembers, declaredClass != null ? R.T_MemberImplementation : R.T_Member);
 			ShowInterfaceMembers(type, declaredClass, doc, false);
 			foreach (var item in type.AllInterfaces) {
 				ShowInterfaceMembers(item, declaredClass, doc, true);
 			}
-			if (doc.ParagraphCount > 1) {
+			if (doc.HasItem) {
 				qiContent.Add(doc);
 			}
 		}
 
-		static void ShowInterfaceMembers(INamedTypeSymbol type, INamedTypeSymbol declaredClass, ThemedTipDocument doc, bool isInherit) {
+		static void ShowInterfaceMembers(INamedTypeSymbol type, INamedTypeSymbol declaredClass, GeneralInfoBlock doc, bool isInherit) {
 			var members = ImmutableArray.CreateBuilder<ISymbol>();
 			members.AddRange(type.FindMembers());
 			members.Sort(CodeAnalysisHelper.CompareByAccessibilityKindName);
 			var isInterface = type.TypeKind == TypeKind.Interface;
 			foreach (var member in members) {
-				var t = new ThemedTipText();
+				var t = new BlockItem(member.GetImageId());
 				if (isInherit) {
 					t.AddSymbol(type, false, SymbolFormatter.SemiTransparent).Append(".");
 				}
 				if (declaredClass != null && member.IsAbstract) {
 					var implementation = declaredClass.FindImplementationForInterfaceMember(member);
 					if (implementation != null) {
-						doc.Append(new ThemedTipParagraph(implementation.GetImageId(), t.AddSymbol(implementation, member.GetOriginalName(), false, SymbolFormatter.Instance)));
+						doc.Add(new BlockItem(implementation.GetImageId()).AddSymbol(implementation, member.GetOriginalName()));
 						continue;
 					}
-					t.AddSymbol(member, false, SymbolFormatter.Instance)
-						.Append(VsImageHelper.GetImage(IconIds.MissingImplementation).WrapMargin(WpfHelper.SmallHorizontalMargin).SetOpacity(WpfHelper.DimmedOpacity));
+					t.AddSymbol(member)
+						.Append(new IconSegment(IconIds.MissingImplementation) { Margin = WpfHelper.SmallHorizontalMargin, Opacity = WpfHelper.DimmedOpacity });
 				}
 				else {
-					t.AddSymbol(member, false, SymbolFormatter.Instance);
+					t.AddSymbol(member);
 				}
 				if (member.Kind == SymbolKind.Method) {
-					t.AddParameters(((IMethodSymbol)member).Parameters, SymbolFormatter.Instance);
+					t.AddParameters(((IMethodSymbol)member).Parameters);
 					if (isInterface && member.IsStatic == false && member.IsAbstract == false) {
-						t.Append(" ").AddImage(IconIds.DefaultInterfaceImplementation);
+						t.Append(" ").AppendIcon(IconIds.DefaultInterfaceImplementation);
 					}
 				}
 				if (member.IsStatic) {
-					t.Append(" ").AddImage(IconIds.StaticMember);
+					t.Append(" ").AppendIcon(IconIds.StaticMember);
 				}
-				doc.Append(new ThemedTipParagraph(member.GetImageId(), t));
+				doc.Add(t);
 			}
 		}
 
@@ -116,10 +114,9 @@ namespace Codist.QuickInfo
 					declaredInterfaces.Add(item);
 				}
 			}
-			HashSet<ITypeSymbol> all;
+			var all = new HashSet<ITypeSymbol>(interfaces);
 			switch (type.TypeKind) {
 				case TypeKind.Class:
-					all = new HashSet<ITypeSymbol>(interfaces);
 					while ((type = type.BaseType) != null) {
 						FindInterfacesForType(type, true, type.Interfaces, inheritedInterfaces, all);
 					}
@@ -128,14 +125,12 @@ namespace Codist.QuickInfo
 					}
 					break;
 				case TypeKind.Interface:
-					all = new HashSet<ITypeSymbol>(interfaces);
 					foreach (var item in interfaces) {
 						FindInterfacesForType(item, false, item.Interfaces, inheritedInterfaces, all);
 					}
 					FindInterfacesForType(type, false, type.Interfaces, inheritedInterfaces, all);
 					break;
 				case TypeKind.Struct:
-					all = new HashSet<ITypeSymbol>(interfaces);
 					foreach (var item in interfaces) {
 						FindInterfacesForType(item, true, item.Interfaces, inheritedInterfaces, all);
 					}
@@ -144,7 +139,7 @@ namespace Codist.QuickInfo
 			if (declaredInterfaces.Count == 0 && inheritedInterfaces.Count == 0) {
 				return;
 			}
-			var info = new ThemedTipDocument().AppendTitle(IconIds.Interface, R.T_Interface);
+			var info = new GeneralInfoBlock(IconIds.Interface, R.T_Interface);
 			//ListInterfacesSortedByNamespace(info, declaredInterfaces, inheritedInterfaces);
 			ListInterfacesInLogicalOrder(info, declaredInterfaces, inheritedInterfaces);
 			qiContent.Add(info);
@@ -168,17 +163,17 @@ namespace Codist.QuickInfo
 				}
 			}
 
-			void ListInterfacesInLogicalOrder(ThemedTipDocument d, ImmutableArray<INamedTypeSymbol>.Builder di, ImmutableArray<(INamedTypeSymbol intf, ITypeSymbol baseType)>.Builder ii) {
+			void ListInterfacesInLogicalOrder(GeneralInfoBlock d, ImmutableArray<INamedTypeSymbol>.Builder di, ImmutableArray<(INamedTypeSymbol intf, ITypeSymbol baseType)>.Builder ii) {
 				foreach (var item in di) {
-					d.Append(new ThemedTipParagraph(item.GetImageId(), ToUIText(item)));
+					d.Add(new BlockItem(item.GetImageId()).AddSymbolDisplayParts(item.ToDisplayParts(CodeAnalysisHelper.QuickInfoSymbolDisplayFormat), __SymbolFormatter));
 				}
 				foreach (var (intf, baseType) in ii) {
-					d.Append(new ThemedTipParagraph(
-						intf.IsDisposable() ? IconIds.Disposable : intf.GetImageId(),
-						ToUIText(intf)
-							.Append(" : ", SymbolFormatter.SemiTransparent.PlainText)
-							.Append(VsImageHelper.GetImage(baseType.GetImageId()).WrapMargin(WpfHelper.GlyphMargin).SetOpacity(SymbolFormatter.TransparentLevel))
-							.AddSymbol(baseType, false, SymbolFormatter.SemiTransparent)));
+					d.Add(new BlockItem(
+						intf.IsDisposable() ? IconIds.Disposable : intf.GetImageId())
+						.AddSymbolDisplayParts(intf.ToDisplayParts(CodeAnalysisHelper.QuickInfoSymbolDisplayFormat), __SymbolFormatter)
+						.Append(" : ", SymbolFormatter.SemiTransparent.PlainText)
+						.Append(new IconSegment(baseType.GetImageId()) { Margin = WpfHelper.GlyphMargin, Opacity = SymbolFormatter.TransparentLevel })
+						.AddSymbol(baseType, false, SymbolFormatter.SemiTransparent));
 				}
 			}
 		}

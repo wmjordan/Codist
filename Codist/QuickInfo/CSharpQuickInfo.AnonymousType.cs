@@ -1,6 +1,5 @@
 ﻿using System.Collections.Immutable;
 using CLR;
-using Codist.Controls;
 using Microsoft.CodeAnalysis;
 using R = Codist.Properties.Resources;
 
@@ -45,12 +44,13 @@ namespace Codist.QuickInfo
 
 			void ShowAnonymousTypes(InfoContainer c, ImmutableArray<ITypeSymbol>.Builder anonymousTypes, ISymbol currentSymbol) {
 				const string AnonymousNumbers = "abcdefghijklmnopqrstuvwxyz";
-				var d = new ThemedTipDocument().AppendTitle(IconIds.AnonymousType, R.T_AnonymousType);
+				var d = new GeneralInfoBlock(IconIds.AnonymousType, R.T_AnonymousType);
 				for (var i = 0; i < anonymousTypes.Count; i++) {
 					var type = anonymousTypes[i];
-					var content = new ThemedTipText()
-						.AddSymbol(type, "'" + AnonymousNumbers[i], __SymbolFormatter)
+					var content = new BlockItem()
+						.AddSymbol(type, "'" + AnonymousNumbers[i])
 						.Append(" is { ");
+					bool hasItem = false;
 					foreach (var m in type.GetMembers()) {
 						if (m.Kind != SymbolKind.Property) {
 							continue;
@@ -61,19 +61,18 @@ namespace Codist.QuickInfo
 							Add(ref anonymousTypes, pt);
 							alias = "'" + AnonymousNumbers[anonymousTypes.IndexOf(pt)];
 						}
-						content.AddSymbol(pt, alias, __SymbolFormatter)
+						if (hasItem == false) {
+							hasItem = true;
+						}
+						else {
+							content.Append(", ");
+						}
+						content.AddSymbol(pt, alias)
 							.Append(" ")
-							.AddSymbol(m, m == currentSymbol, __SymbolFormatter)
-							.Append(", ");
+							.AddSymbol(m, m == currentSymbol);
 					}
-					var run = content.Inlines.LastInline as System.Windows.Documents.Run;
-					if (run.Text == ", ") {
-						run.Text = " }";
-					}
-					else {
-						run.Text += "}";
-					}
-					d.Append(new ThemedTipParagraph(content));
+					content.Append("}");
+					d.Add(content);
 				}
 				c.Insert(0, d);
 			}

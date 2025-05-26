@@ -1,36 +1,20 @@
 ﻿using System;
-using System.ComponentModel.Composition;
+using System.Collections.Immutable;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
+using System.Xml.Linq;
 using CLR;
 using Codist.Controls;
 using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Text;
-using Microsoft.VisualStudio.Text.Adornments;
-using Microsoft.VisualStudio.Text.Editor;
-using Microsoft.VisualStudio.Utilities;
 
 namespace Codist.QuickInfo
 {
 	abstract class InfoBlock
 	{
 		public abstract UIElement ToUI();
-	}
-
-	[Export(typeof(IViewElementFactory))]
-	[Name("InfoBlock Quick Info Factory")]
-	[TypeConversion(from: typeof(InfoBlock), to: typeof(UIElement))]
-	[Order(Before = "Default object converter")]
-	public class InfoBlockQuickInfoFactory : IViewElementFactory
-	{
-		public TView CreateViewElement<TView>(ITextView textView, object model)
-			where TView : class {
-			return model is InfoBlock data
-				? data.ToUI().Tag() as TView
-				: null;
-		}
 	}
 
 	sealed class GeneralInfoBlock : InfoBlock
@@ -94,6 +78,9 @@ namespace Codist.QuickInfo
 		public BlockItem() {
 			Segments = new Chain<Segment>();
 		}
+		public BlockItem(int iconId) : this() {
+			IconId = iconId;
+		}
 		public BlockItem(int iconId, string text) {
 			IconId = iconId;
 			Segments = new Chain<Segment>(new TextSegment(text));
@@ -131,6 +118,16 @@ namespace Codist.QuickInfo
 			return this;
 		}
 
+		public BlockItem Append(Segment segment) {
+			Segments.Add(segment);
+			return this;
+		}
+
+		public BlockItem AppendIcon(int imageId) {
+			Segments.Add(new IconSegment(imageId));
+			return this;
+		}
+
 		public BlockItem AppendLine() {
 			Segments.Add(new LineBreakSegment());
 			return this;
@@ -146,8 +143,53 @@ namespace Codist.QuickInfo
 			return this;
 		}
 
+		public BlockItem AddSymbol(ISymbol symbol, bool bold, SymbolFormatter formatter) {
+			Segments.Add(new SymbolSegment(symbol, bold ? SegmentStyle.Bold : SegmentStyle.Default) { Formatter = formatter });
+			return this;
+		}
+
+		public BlockItem AddSymbol(ISymbol symbol, string alias, Brush foreground) {
+			Segments.Add(new SymbolSegment(symbol) { Text = alias, Foreground = foreground });
+			return this;
+		}
+
+		public BlockItem AddSymbol(ISymbol symbol, string alias, SymbolFormatter formatter) {
+			Segments.Add(new SymbolSegment(symbol) { Text = alias, Formatter = formatter });
+			return this;
+		}
+
 		public BlockItem AddSymbol(ISymbol symbol, string alias) {
 			Segments.Add(new SymbolSegment(symbol) { Text = alias });
+			return this;
+		}
+
+		public BlockItem AddSymbolDisplayParts(ImmutableArray<SymbolDisplayPart> parts, SymbolFormatter formatter) {
+			Segments.Add(new SymbolDisplayPartsSegment(parts, formatter));
+			return this;
+		}
+
+		public BlockItem AddSymbolDisplayParts(ImmutableArray<SymbolDisplayPart> parts, SymbolFormatter formatter, int argIndex) {
+			Segments.Add(new SymbolDisplayPartsSegment(parts, formatter) { ArgumentIndex = argIndex });
+			return this;
+		}
+
+		public BlockItem AddParameters(ImmutableArray<IParameterSymbol> parameters) {
+			Segments.Add(new ParameterListSegment(parameters));
+			return this;
+		}
+
+		public BlockItem AddParameters(ImmutableArray<IParameterSymbol> parameters, int argIndex) {
+			Segments.Add(new ParameterListSegment(parameters) { ArgumentIndex = argIndex });
+			return this;
+		}
+
+		public BlockItem AddTypeParameterInfo(ITypeParameterSymbol typeParameter, ITypeSymbol argumentType) {
+			Segments.Add(new TypeParameterInfoSegment(typeParameter, argumentType));
+			return this;
+		}
+
+		public BlockItem AddXmlDoc(XElement xmlDoc, Compilation compilation) {
+			Segments.Add(new XmlDocSegment(xmlDoc, compilation));
 			return this;
 		}
 
@@ -182,11 +224,15 @@ namespace Codist.QuickInfo
 	enum SegmentType
 	{
 		Text,
-		Symbol,
 		Icon,
 		LineBreak,
-		AttributeData,
 		SnapshotSpan,
+		Symbol,
+		SymbolDisplayParts,
+		ParameterList,
+		AttributeData,
+		TypeParameterInfo,
+		XmlDoc,
 		Custom
 	}
 
@@ -218,9 +264,47 @@ namespace Codist.QuickInfo
 
 		public override SegmentType Type => SegmentType.Symbol;
 		public ISymbol Symbol { get; }
+		public SymbolFormatter Formatter { get; set; }
 
 		public override void ToUI(InlineCollection inlines) {
-			SymbolFormatter.Instance.Format(inlines, Symbol, Text, Style.MatchFlags(SegmentStyle.Bold));
+			(Formatter ?? SymbolFormatter.Instance).Format(inlines, Symbol, Text, Style.MatchFlags(SegmentStyle.Bold));
+		}
+	}
+
+	sealed class SymbolDisplayPartsSegment : TextSegment
+	{
+		public SymbolDisplayPartsSegment(ImmutableArray<SymbolDisplayPart> displayParts, SymbolFormatter formatter) {
+			DisplayParts = displayParts;
+			Formatter = formatter;
+		}
+
+		public override SegmentType Type => SegmentType.SymbolDisplayParts;
+
+		public ImmutableArray<SymbolDisplayPart> DisplayParts { get; }
+		public SymbolFormatter Formatter { get; }
+		public int ArgumentIndex { get; set; } = -1;
+
+		public override void ToUI(InlineCollection inlines) {
+			Formatter.Format(inlines, DisplayParts, ArgumentIndex);
+		}
+	}
+
+	sealed class ParameterListSegment : TextSegment
+	{
+		public ParameterListSegment(ImmutableArray<IParameterSymbol> parameters) {
+			Parameters = parameters;
+		}
+
+		public override SegmentType Type => SegmentType.ParameterList;
+
+		public ImmutableArray<IParameterSymbol> Parameters { get; }
+		public bool ShowDefault { get; set; }
+		public bool ShowParameterName { get; set; }
+		public bool IsProperty { get; set; }
+		public int ArgumentIndex { get; set; } = -1;
+
+		public override void ToUI(InlineCollection inlines) {
+			SymbolFormatter.Instance.ShowParameters(inlines, Parameters, ShowParameterName, ShowDefault, ArgumentIndex, IsProperty);
 		}
 	}
 
@@ -278,6 +362,39 @@ namespace Codist.QuickInfo
 		}
 	}
 
+	sealed class XmlDocSegment : TextSegment
+	{
+		public XmlDocSegment(XElement xmlDoc, Compilation compilation) {
+			XmlDoc = xmlDoc;
+			Compilation = compilation;
+		}
+
+		public override SegmentType Type => SegmentType.XmlDoc;
+		public XElement XmlDoc { get; }
+		public Compilation Compilation { get; }
+
+		public override void ToUI(InlineCollection inlines) {
+			new XmlDocRenderer(Compilation, SymbolFormatter.Instance).Render(XmlDoc, inlines);
+		}
+	}
+
+	class TypeParameterInfoSegment : Segment
+	{
+		readonly ITypeParameterSymbol _TypeParameter;
+		readonly ITypeSymbol _ArgumentType;
+
+		public TypeParameterInfoSegment(ITypeParameterSymbol typeParameter, ITypeSymbol argumentType) {
+			_TypeParameter = typeParameter;
+			_ArgumentType = argumentType;
+		}
+
+		public override SegmentType Type => SegmentType.TypeParameterInfo;
+
+		public override void ToUI(InlineCollection inlines) {
+			SymbolFormatter.Instance.ShowTypeArgumentInfo(_TypeParameter, _ArgumentType, inlines);
+		}
+	}
+
 	sealed class IconSegment : Segment
 	{
 		public IconSegment(int iconId) {
@@ -287,9 +404,14 @@ namespace Codist.QuickInfo
 		public override SegmentType Type => SegmentType.Icon;
 		public int IconId { get; set; }
 		public Thickness Margin { get; set; } = WpfHelper.GlyphMargin;
+		public double Opacity { get; set; }
 
 		public override void ToUI(InlineCollection inlines) {
-			inlines.Add(new InlineUIContainer(VsImageHelper.GetImage(IconId).WrapMargin(Margin)) { BaselineAlignment = BaselineAlignment.TextTop });
+			var item = VsImageHelper.GetImage(IconId).WrapMargin(Margin);
+			if (Opacity != 0) {
+				item.Opacity = Opacity;
+			}
+			inlines.Add(new InlineUIContainer(item) { BaselineAlignment = BaselineAlignment.TextTop });
 		}
 	}
 

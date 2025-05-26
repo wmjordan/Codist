@@ -21,21 +21,20 @@ namespace Codist.QuickInfo
 						SyntaxKind.ComplexElementInitializerExpression,
 						SyntaxKind.ObjectInitializerExpression,
 						CodeAnalysisHelper.WithInitializerExpression)) {
-				container.Add(new ThemedTipText(IconIds.InstanceMember)
-					.Append(R.T_ExpressionCount)
-					.Append(((InitializerExpressionSyntax)node).Expressions.Count.ToText(), true, false, __SymbolFormatter.Number));
+				container.Add(new BlockItem(IconIds.InstanceMember, R.T_ExpressionCount)
+					.Append(((InitializerExpressionSyntax)node).Expressions.Count.ToText(), true, __SymbolFormatter.Number));
 			}
 			else if (node.IsKind(CodeAnalysisHelper.PropertyPatternClause)) {
-				container.Add(new ThemedTipText(IconIds.InstanceMember)
-					.Append(R.T_SubPatternCount)
-					.Append(((CSharpSyntaxNode)node).GetPropertyPatternSubPatternsCount().ToText())
+				container.Add(new BlockItem(IconIds.InstanceMember, R.T_SubPatternCount)
+					.Append(((CSharpSyntaxNode)node).GetPropertyPatternSubPatternsCount().ToText(), true, __SymbolFormatter.Number)
 					);
 			}
 			var lines = textSnapshot.GetLineSpan(node.Span).Length + 1;
 			if (lines > 1) {
 				container.Add(
-					(lines > 100 ? new ThemedTipText(lines + R.T_Lines, true) : new ThemedTipText(lines + R.T_Lines))
-						.SetGlyph(IconIds.LineOfCode)
+					lines > 100
+						? new BlockItem(IconIds.LineOfCode, lines + R.T_Lines, true)
+						: new BlockItem(IconIds.LineOfCode, lines + R.T_Lines)
 					);
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.DataFlow) == false

@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using CLR;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
+using Microsoft.VisualStudio.Text.Adornments;
+using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Utilities;
 
 namespace Codist.QuickInfo
@@ -146,5 +148,19 @@ namespace Codist.QuickInfo
 		}
 
 		public virtual void Dispose() { }
+	}
+
+	[Export(typeof(IViewElementFactory))]
+	[Name("InfoBlock Quick Info Factory")]
+	[TypeConversion(from: typeof(InfoBlock), to: typeof(System.Windows.UIElement))]
+	[Order(Before = "Default object converter")]
+	public class InfoBlockQuickInfoFactory : IViewElementFactory
+	{
+		public TView CreateViewElement<TView>(ITextView textView, object model)
+			where TView : class {
+			return model is InfoBlock data
+				? data.ToUI().Tag() as TView
+				: null;
+		}
 	}
 }

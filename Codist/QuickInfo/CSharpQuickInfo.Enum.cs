@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -12,34 +13,75 @@ namespace Codist.QuickInfo
 	partial class CSharpQuickInfo
 	{
 		static void ShowEnumQuickInfo(InfoContainer qiContent, INamedTypeSymbol type, bool showUnderlyingType, bool showMembers) {
-			var s = new ThemedTipDocument();
-			var underlyingType = type.EnumUnderlyingType;
-			TextBlock content;
-			if (showUnderlyingType) {
-				content = new ThemedTipText(R.T_EnumUnderlyingType, true).AddSymbol(underlyingType, true, SymbolFormatter.Instance);
-				s.Append(new ThemedTipParagraph(IconIds.Enum, content));
+			qiContent.Add(new EnumInfoBlock(type, showUnderlyingType, showMembers));
+		}
+
+		sealed class EnumInfoBlock : InfoBlock
+		{
+			readonly INamedTypeSymbol _UnderlyingType;
+			readonly bool _IsFlags;
+			readonly int _FieldCount;
+			readonly IFieldSymbol _MinField, _MaxField;
+			readonly IFieldSymbol[] _Fields;
+
+			public EnumInfoBlock(INamedTypeSymbol type, bool showUnderlyingType, bool showMembers) {
+				var agg = EnumAggregators.GetAggregator(_UnderlyingType = type.EnumUnderlyingType);
+				if (agg == null) {
+					return;
+				}
+				_IsFlags = type.GetAttributes().Any(a => a.AttributeClass.MatchTypeName(nameof(FlagsAttribute), "System"));
+				var members = type.GetMembers();
+				var fields = ImmutableArray.CreateBuilder<IFieldSymbol>(members.Length);
+				foreach (var member in members) {
+					var f = member as IFieldSymbol;
+					if (f is null || f.DeclaredAccessibility != Accessibility.Public) {
+						continue;
+					}
+					var v = f.ConstantValue;
+					if (v is null) {
+						continue;
+					}
+					if (agg.Count == 0) {
+						agg.Init(v);
+						_MaxField = _MinField = f;
+					}
+					switch (agg.Accept(v)) {
+						case 1: _MaxField = f; break;
+						case -1: _MinField = f; break;
+					}
+					if (agg.Count < 64) {
+						fields.Add(f);
+					}
+					++_FieldCount;
+				}
+				if (!showUnderlyingType) {
+					_UnderlyingType = null;
+				}
+				if (showMembers) {
+					if (fields.Count != 0) {
+						_Fields = fields.ToArray();
+					}
+				}
+				else {
+					_MinField = null;
+				}
 			}
-			else {
-				content = null;
-			}
-			if (showMembers == false) {
-				qiContent.Add(s);
-				return;
-			}
-			var agg = EnumAggregators.GetAggregator(underlyingType);
-			if (agg == null) {
-				return;
-			}
-			bool isFlags = type.GetAttributes().Any(a => a.AttributeClass.MatchTypeName(nameof(FlagsAttribute), "System"));
-			IFieldSymbol minField = null, maxField = null;
-			Grid g = null;
-			int rc = 0; // row count
-			foreach (var f in type.FindMembers().OfType<IFieldSymbol>().Where(i => i.ConstantValue != null)) {
-				var v = f.ConstantValue;
-				if (agg.Count == 0) {
-					agg.Init(v);
-					minField = maxField = f;
-					g = new Grid {
+
+			public override UIElement ToUI() {
+				var stackPanel = new StackPanel();
+				var doc = new ThemedTipDocument();
+				if (_UnderlyingType != null) {
+					var content = new ThemedTipText(R.T_EnumUnderlyingType, true).AddSymbol(_UnderlyingType, true, SymbolFormatter.Instance);
+					var p = new ThemedTipParagraph(IconIds.Enum, content);
+					if (_MinField != null) {
+						content.AppendLine().Append(R.T_EnumFieldCount, true).Append(_FieldCount.ToString())
+							.AppendLine().Append(R.T_EnumMin, true).AddSymbol(_MinField, false, SymbolFormatter.Instance)
+							.Append(", ").Append(R.T_EnumMax, true).AddSymbol(_MaxField, false, SymbolFormatter.Instance);
+					}
+					doc.Append(p);
+				}
+				if (_Fields != null) {
+					var g = new Grid {
 						HorizontalAlignment = HorizontalAlignment.Left,
 						ColumnDefinitions = {
 							new ColumnDefinition(),
@@ -47,56 +89,34 @@ namespace Codist.QuickInfo
 						},
 						Margin = WpfHelper.MiddleBottomMargin
 					};
-					goto NEXT;
+					int rc = 0;
+					for (; rc < _Fields.Length; rc++) {
+						IFieldSymbol f = _Fields[rc];
+						g.RowDefinitions.Add(new RowDefinition());
+						var ft = new ThemedTipText {
+							TextAlignment = TextAlignment.Right,
+							Foreground = ThemeHelper.SystemGrayTextBrush,
+							Margin = WpfHelper.SmallHorizontalMargin,
+							FontFamily = ThemeHelper.CodeTextFont
+						}.Append("= ", ThemeHelper.SystemGrayTextBrush);
+						SymbolFormatter.Instance.ShowFieldConstantText(ft.Inlines, f, _IsFlags);
+						g.Add(new TextBlock { Foreground = ThemeHelper.ToolTipTextBrush }
+								.AddSymbol(f, false, SymbolFormatter.Instance)
+								.SetGlyph(IconIds.EnumField)
+								.SetValue(Grid.SetRow, rc))
+							.Add(ft
+								.SetValue(Grid.SetRow, rc)
+								.SetValue(Grid.SetColumn, 1));
+					}
+					if (rc < _FieldCount) {
+						g.RowDefinitions.Add(new RowDefinition());
+						g.Add(new ThemedTipText(R.T_More).SetValue(Grid.SetRow, rc).SetValue(Grid.SetColumnSpan, 2));
+					}
+					stackPanel.Add(doc);
+					stackPanel.Add(g);
+					return stackPanel;
 				}
-				switch (agg.Accept(v)) {
-					case 1: maxField = f; break;
-					case -1: minField = f; break;
-				}
-			NEXT:
-				if (agg.Count < 64) {
-					g.RowDefinitions.Add(new RowDefinition());
-					var ft = new ThemedTipText {
-						TextAlignment = TextAlignment.Right,
-						Foreground = ThemeHelper.SystemGrayTextBrush,
-						Margin = WpfHelper.SmallHorizontalMargin,
-						FontFamily = ThemeHelper.CodeTextFont
-					}.Append("= ", ThemeHelper.SystemGrayTextBrush);
-					SymbolFormatter.Instance.ShowFieldConstantText(ft.Inlines, f, isFlags);
-					g.Add(new TextBlock { Foreground = ThemeHelper.ToolTipTextBrush }
-							.AddSymbol(f, false, SymbolFormatter.Instance)
-							.SetGlyph(IconIds.EnumField)
-							.SetValue(Grid.SetRow, rc))
-						.Add(ft
-							.SetValue(Grid.SetRow, rc)
-							.SetValue(Grid.SetColumn, 1));
-				}
-				else if (agg.Count == 64) {
-					g.RowDefinitions.Add(new RowDefinition());
-					g.Add(new ThemedTipText(R.T_More).SetValue(Grid.SetRow, rc).SetValue(Grid.SetColumnSpan, 2));
-				}
-				++rc;
-			}
-			if (agg.Count == 0) {
-				return;
-			}
-
-			if (showUnderlyingType) {
-				content.AppendLine().Append(R.T_EnumFieldCount, true).Append(agg.Count.ToString())
-							.AppendLine().Append(R.T_EnumMin, true).AddSymbol(minField, false, SymbolFormatter.Instance)
-							.Append(", ").Append(R.T_EnumMax, true).AddSymbol(maxField, false, SymbolFormatter.Instance);
-				if (isFlags) {
-					var d = Convert.ToString((long)agg.Bits, 2);
-					content.AppendLine().Append(R.T_BitCount, true)
-						.Append(d.Length.ToText())
-						.AppendLine()
-						.Append(R.T_EnumAllFlags, true)
-						.Append(d);
-				}
-			}
-			qiContent.Add(s);
-			if (g != null) {
-				qiContent.Add(g);
+				return doc;
 			}
 		}
 
@@ -155,13 +175,25 @@ namespace Codist.QuickInfo
 				if (x is T t) {
 					++_Count;
 					_Bits = Op.Or(_Bits, t);
-					if (_IsUnsigned ? Op.CgtUn(t, _Max) : Op.Cgt(t, _Max)) {
-						_Max = t;
-						return 1;
+					if (_IsUnsigned) {
+						if (Op.CgtUn(t, _Max)) {
+							_Max = t;
+							return 1;
+						}
+						if (Op.CltUn(t, _Min)) {
+							_Min = t;
+							return -1;
+						}
 					}
-					else if (_IsUnsigned ? Op.CltUn(t, _Min) : Op.Clt(t, _Min)) {
-						_Min = t;
-						return -1;
+					else {
+						if (Op.Cgt(t, _Max)) {
+							_Max = t;
+							return 1;
+						}
+						if (Op.Clt(t, _Min)) {
+							_Min = t;
+							return -1;
+						}
 					}
 				}
 				return 0;

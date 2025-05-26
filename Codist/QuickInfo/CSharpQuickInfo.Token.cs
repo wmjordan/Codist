@@ -1,11 +1,11 @@
-﻿using CLR;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using CLR;
 using Codist.Controls;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using R = Codist.Properties.Resources;
 
 namespace Codist.QuickInfo

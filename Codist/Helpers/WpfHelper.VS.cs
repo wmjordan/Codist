@@ -90,6 +90,9 @@ namespace Codist
 		public static Inline Render(this ISymbol symbol, string alias, WpfBrush brush) {
 			return symbol.Render(alias, brush == null, brush);
 		}
+		public static Inline Render(this ISymbol symbol, bool bold, WpfBrush brush) {
+			return symbol.Render(null, bold, brush);
+		}
 		public static Inline Render(this ISymbol symbol, string alias, bool bold, WpfBrush brush) {
 			var run = new SymbolLink(symbol, alias);
 			if (bold) {
