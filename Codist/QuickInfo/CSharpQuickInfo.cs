@@ -849,6 +849,9 @@ namespace Codist.QuickInfo
 			CSharpSyntaxNode expression = null;
 			DataFlowAnalysis analysis = null;
 			foreach (var item in parameter.ContainingSymbol.DeclaringSyntaxReferences) {
+				if (item.SyntaxTree != context.CompilationUnit.SyntaxTree) {
+					continue;
+				}
 				declaration = context.CompilationUnit.FindNode(item.Span);
 				if (declaration is BaseMethodDeclarationSyntax m) {
 					body = m.Body;
