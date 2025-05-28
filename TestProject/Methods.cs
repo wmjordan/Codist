@@ -48,7 +48,15 @@ namespace TestProject
 		public int M(DayOfWeek val = DayOfWeek.Monday) { return (int)val; }
 
 		public bool TestComplex() {
-			return new Complex(1, 2) + new Complex(2, 3) < new Complex(3, 4) << 1;
+			var a = new Complex(1, 2);
+			var b = new Complex(-1, -2);
+			var (x, y) = a;
+			Complex c = (x, y);
+			Complex d = c * 3, e = d / 3;
+			e *= 3;
+			var eq = a == b;
+			var ne = a != b;
+			return new Complex(1, 2) + new Complex(2, 3) < new Complex(3, 4) * 1;
 		}
 	}
 
@@ -83,6 +91,12 @@ namespace TestProject
 		public Complex Subtract(Complex other) {
 			return this - other;
 		}
+		public static bool operator ==(Complex a, Complex b) {
+			return a.X == b.X && a.Y == b.Y;
+		}
+		public static bool operator !=(Complex a, Complex b) {
+			return a.X != b.X || a.Y != b.Y;
+		}
 		/// <summary>
 		/// Is <see cref="X"/> of <paramref name="a"/> smaller than the one in <paramref name="b"/>.
 		/// </summary>
@@ -96,10 +110,23 @@ namespace TestProject
 			return a.X > b.X;
 		}
 		/// <summary>
-		/// Offsets a <see cref="Complex"/>.
+		/// Divides a <see cref="Complex"/>.
 		/// </summary>
-		public static Complex operator <<(Complex a, int x) {
-			return new Complex(a.X + x, a.Y + x);
+		public static Complex operator / (Complex a, float x) {
+			return new Complex(a.X / x, a.Y / x);
+		}
+		/// <summary>
+		/// Multiplies a <see cref="Complex"/>.
+		/// </summary>
+		public static Complex operator * (Complex a, float x) {
+			return new Complex(a.X * x, a.Y * x);
+		}
+		public static implicit operator Complex ((float x, float y) value) {
+			return new Complex(value.x, value.y);
+		}
+		public void Deconstruct(out float x, out float y) {
+			x = X;
+			y = Y;
 		}
 	}
 }

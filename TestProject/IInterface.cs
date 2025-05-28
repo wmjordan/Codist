@@ -2,7 +2,6 @@
 
 namespace TestProject
 {
-#if DEBUG
 	//todo: Hover on IInterface to see size-limited Quick Info
 	/// <summary>
 	/// <para>Without limiting the size of Quick Info items, this comment can take up quite substantial of space when displayed.</para>
@@ -24,7 +23,8 @@ namespace TestProject
 	interface IMultiInterface : IInterface, System.Collections.Generic.ICollection<int>
 	{
 	}
-#else
+
+#if EXCLUDED
 	// Excluded code here
 	class Unused
 	{

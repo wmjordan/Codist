@@ -31,7 +31,7 @@ namespace TestProject
 		internal void Brackets(int[] input) {
 			var a = new int[1];
 			a = new[] { 1 };
-			var a0 = a[0];
+			ref var a0 = ref a[0];
 			var b = new int[][] { new[] { 1 }, new int[] { 2 } };
 			var b0 = b[0];
 			var x = "x"[0];

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Linq.Expressions;
 
-namespace TestProject.CS11_0;
+namespace TestProject.Strings;
 
-class Strings
+class RawStrings
 {
 	const string Raw = """This\is\all "content"!""",
 		MultiLine = """
@@ -14,6 +14,10 @@ class Strings
     </element>
     """;
 
+    [Name("""
+        Bruce Lee
+        """)]
+    [Name("alias")]
 	void F() {
 		var u8 = "This is a UTF-8 string!"u8;
 	}

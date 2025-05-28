@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace TestProject
 {
@@ -12,7 +13,7 @@ namespace TestProject
 		} // static method
 
 		public static TType ExtensionWithConstraint<TType>(this TType type)
-			where TType : IInterface {
+			where TType : struct, IConvertible {
 			return type;
 		}
 

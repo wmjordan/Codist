@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace TestProject.Language.Assignment;
 
+[ApiVersion(14)]
 static class NullConditionalAssignment
 {
 	public sealed class O
