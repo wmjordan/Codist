@@ -2937,4 +2937,7 @@ Ctrl: 仅列出直接实现接口的类</value>
   <data name="CMD_QuickInfo" xml:space="preserve">
     <value>显示代码提示...</value>
   </data>
+  <data name="T_TooManyOverloads" xml:space="preserve">
+    <value>重载方法过多（&lt;N&gt;），剩余的不再显示</value>
+  </data>
 </root>

@@ -8387,6 +8387,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Too many overloads (&lt;N&gt;). The reset are hidden..
+        /// </summary>
+        internal static string T_TooManyOverloads {
+            get {
+                return ResourceManager.GetString("T_TooManyOverloads", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Top gradient.
         /// </summary>
         internal static string T_TopGradient {

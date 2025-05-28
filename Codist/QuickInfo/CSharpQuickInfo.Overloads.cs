@@ -1,6 +1,6 @@
 ﻿using System;
-using Microsoft.CodeAnalysis;
 using System.Linq;
+using Microsoft.CodeAnalysis;
 using R = Codist.Properties.Resources;
 
 namespace Codist.QuickInfo
@@ -8,7 +8,6 @@ namespace Codist.QuickInfo
 	partial class CSharpQuickInfo
 	{
 		static void ShowOverloadsInfo(Context context, IMethodSymbol method) {
-			var node = context.node;
 			var overloads = method.ContainingType.GetMembers(method.Name);
 			if (overloads.Length < 2) {
 				return;
@@ -17,6 +16,7 @@ namespace Codist.QuickInfo
 		}
 
 		static void ShowOverloadsInfo(InfoContainer container, IMethodSymbol method, System.Collections.Immutable.ImmutableArray<ISymbol> overloads) {
+			const int MaxOverloadCount = 64;
 			var re = method.MethodKind == MethodKind.ReducedExtension;
 			method = method.OriginalDefinition;
 			if (re) {
@@ -28,6 +28,7 @@ namespace Codist.QuickInfo
 			var mps = method.Parameters;
 			var ct = method.ContainingType;
 			var overloadInfo = new GeneralInfoBlock(IconIds.MethodOverloads, R.T_MethodOverload);
+			var count = 0;
 			foreach (var overload in overloads) {
 				var om = overload.OriginalDefinition as IMethodSymbol;
 				if (om == null) {
@@ -44,6 +45,10 @@ namespace Codist.QuickInfo
 				}
 				if (om.Equals(method)) {
 					continue;
+				}
+				if (++count > MaxOverloadCount) {
+					overloadInfo.Add(new BlockItem().Append(R.T_TooManyOverloads.Replace("<N>", overloads.Length.ToText())));
+					break;
 				}
 				var t = new BlockItem() { IconId = overload.GetImageId() };
 				var st = om.IsStatic;
