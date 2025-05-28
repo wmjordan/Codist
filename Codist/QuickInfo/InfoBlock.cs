@@ -139,27 +139,27 @@ namespace Codist.QuickInfo
 		}
 
 		public BlockItem AddSymbol(ISymbol symbol, bool bold) {
-			Segments.Add(new SymbolSegment(symbol, bold ? SegmentStyle.Bold : SegmentStyle.Default));
+			Segments.Add(new SymbolSegment(symbol, bold));
 			return this;
 		}
 
 		public BlockItem AddSymbol(ISymbol symbol, bool bold, SymbolFormatter formatter) {
-			Segments.Add(new SymbolSegment(symbol, bold ? SegmentStyle.Bold : SegmentStyle.Default) { Formatter = formatter });
+			Segments.Add(new SymbolSegment(symbol, bold) { Formatter = formatter });
 			return this;
 		}
 
 		public BlockItem AddSymbol(ISymbol symbol, string alias, Brush foreground) {
-			Segments.Add(new SymbolSegment(symbol) { Text = alias, Foreground = foreground });
+			Segments.Add(new SymbolSegment(symbol) { Alias = alias, Foreground = foreground });
 			return this;
 		}
 
 		public BlockItem AddSymbol(ISymbol symbol, string alias, SymbolFormatter formatter) {
-			Segments.Add(new SymbolSegment(symbol) { Text = alias, Formatter = formatter });
+			Segments.Add(new SymbolSegment(symbol) { Alias = alias, Formatter = formatter });
 			return this;
 		}
 
 		public BlockItem AddSymbol(ISymbol symbol, string alias) {
-			Segments.Add(new SymbolSegment(symbol) { Text = alias });
+			Segments.Add(new SymbolSegment(symbol) { Alias = alias });
 			return this;
 		}
 
@@ -221,21 +221,6 @@ namespace Codist.QuickInfo
 		}
 	}
 
-	enum SegmentType
-	{
-		Text,
-		Icon,
-		LineBreak,
-		SnapshotSpan,
-		Symbol,
-		SymbolDisplayParts,
-		ParameterList,
-		AttributeData,
-		TypeParameterInfo,
-		XmlDoc,
-		Custom
-	}
-
 	[Flags]
 	enum SegmentStyle
 	{
@@ -247,180 +232,7 @@ namespace Codist.QuickInfo
 
 	abstract class Segment
 	{
-		public abstract SegmentType Type { get; }
-
 		public abstract void ToUI(InlineCollection inlines);
-	}
-
-	sealed class SymbolSegment : TextSegment
-	{
-		public SymbolSegment(ISymbol symbol) {
-			Symbol = symbol;
-		}
-		public SymbolSegment(ISymbol symbol, SegmentStyle style) {
-			Symbol = symbol;
-			Style = style;
-		}
-
-		public override SegmentType Type => SegmentType.Symbol;
-		public ISymbol Symbol { get; }
-		public SymbolFormatter Formatter { get; set; }
-
-		public override void ToUI(InlineCollection inlines) {
-			(Formatter ?? SymbolFormatter.Instance).Format(inlines, Symbol, Text, Style.MatchFlags(SegmentStyle.Bold));
-		}
-	}
-
-	sealed class SymbolDisplayPartsSegment : TextSegment
-	{
-		public SymbolDisplayPartsSegment(ImmutableArray<SymbolDisplayPart> displayParts, SymbolFormatter formatter) {
-			DisplayParts = displayParts;
-			Formatter = formatter;
-		}
-
-		public override SegmentType Type => SegmentType.SymbolDisplayParts;
-
-		public ImmutableArray<SymbolDisplayPart> DisplayParts { get; }
-		public SymbolFormatter Formatter { get; }
-		public int ArgumentIndex { get; set; } = -1;
-
-		public override void ToUI(InlineCollection inlines) {
-			Formatter.Format(inlines, DisplayParts, ArgumentIndex);
-		}
-	}
-
-	sealed class ParameterListSegment : TextSegment
-	{
-		public ParameterListSegment(ImmutableArray<IParameterSymbol> parameters) {
-			Parameters = parameters;
-		}
-
-		public override SegmentType Type => SegmentType.ParameterList;
-
-		public ImmutableArray<IParameterSymbol> Parameters { get; }
-		public bool ShowDefault { get; set; }
-		public bool ShowParameterName { get; set; }
-		public bool IsProperty { get; set; }
-		public int ArgumentIndex { get; set; } = -1;
-
-		public override void ToUI(InlineCollection inlines) {
-			SymbolFormatter.Instance.ShowParameters(inlines, Parameters, ShowParameterName, ShowDefault, ArgumentIndex, IsProperty);
-		}
-	}
-
-	sealed class SnapshotSpanSegment : TextSegment
-	{
-		public SnapshotSpanSegment(SnapshotSpan span, string text) {
-			Span = span;
-			Text = text;
-		}
-
-		public SnapshotSpan Span { get; }
-
-		public override SegmentType Type => SegmentType.SnapshotSpan;
-
-		public override void ToUI(InlineCollection inlines) {
-			var inline = Span.Render(Text);
-			ApplySegmentStyle(inline);
-			inlines.Add(inline);
-		}
-	}
-
-	sealed class SyntaxSegment : TextSegment
-	{
-		public SyntaxSegment(SyntaxNodeOrToken syntax, ITextSnapshot snapshot, string text) {
-			Syntax = syntax;
-			Snapshot = snapshot;
-			Text = text;
-		}
-
-		public SyntaxNodeOrToken Syntax { get; }
-		public ITextSnapshot Snapshot { get; }
-
-		public override SegmentType Type => SegmentType.SnapshotSpan;
-
-		public override void ToUI(InlineCollection inlines) {
-			var inline = Syntax.Render(Snapshot, Text);
-			ApplySegmentStyle(inline);
-			inlines.Add(inline);
-		}
-	}
-
-	sealed class AttributeDataSegment : TextSegment
-	{
-		public AttributeDataSegment(AttributeData data, int dataType) {
-			Data = data;
-			DataType = dataType;
-		}
-
-		public override SegmentType Type => SegmentType.AttributeData;
-		public AttributeData Data { get; }
-		public int DataType { get; }
-
-		public override void ToUI(InlineCollection inlines) {
-			SymbolFormatter.Instance.Format(inlines, Data, DataType);
-		}
-	}
-
-	sealed class XmlDocSegment : TextSegment
-	{
-		public XmlDocSegment(XElement xmlDoc, Compilation compilation) {
-			XmlDoc = xmlDoc;
-			Compilation = compilation;
-		}
-
-		public override SegmentType Type => SegmentType.XmlDoc;
-		public XElement XmlDoc { get; }
-		public Compilation Compilation { get; }
-
-		public override void ToUI(InlineCollection inlines) {
-			new XmlDocRenderer(Compilation, SymbolFormatter.Instance).Render(XmlDoc, inlines);
-		}
-	}
-
-	class TypeParameterInfoSegment : Segment
-	{
-		readonly ITypeParameterSymbol _TypeParameter;
-		readonly ITypeSymbol _ArgumentType;
-
-		public TypeParameterInfoSegment(ITypeParameterSymbol typeParameter, ITypeSymbol argumentType) {
-			_TypeParameter = typeParameter;
-			_ArgumentType = argumentType;
-		}
-
-		public override SegmentType Type => SegmentType.TypeParameterInfo;
-
-		public override void ToUI(InlineCollection inlines) {
-			SymbolFormatter.Instance.ShowTypeArgumentInfo(_TypeParameter, _ArgumentType, inlines);
-		}
-	}
-
-	sealed class IconSegment : Segment
-	{
-		public IconSegment(int iconId) {
-			IconId = iconId;
-		}
-
-		public override SegmentType Type => SegmentType.Icon;
-		public int IconId { get; set; }
-		public Thickness Margin { get; set; } = WpfHelper.GlyphMargin;
-		public double Opacity { get; set; }
-
-		public override void ToUI(InlineCollection inlines) {
-			var item = VsImageHelper.GetImage(IconId).WrapMargin(Margin);
-			if (Opacity != 0) {
-				item.Opacity = Opacity;
-			}
-			inlines.Add(new InlineUIContainer(item) { BaselineAlignment = BaselineAlignment.TextTop });
-		}
-	}
-
-	sealed class LineBreakSegment : Segment
-	{
-		public override SegmentType Type => SegmentType.LineBreak;
-		public override void ToUI(InlineCollection inlines) {
-			inlines.Add(new LineBreak());
-		}
 	}
 
 	class TextSegment : Segment
@@ -435,7 +247,6 @@ namespace Codist.QuickInfo
 			Style = style;
 		}
 
-		public override SegmentType Type => SegmentType.Text;
 		public string Text { get; set; }
 		public SegmentStyle Style { get; set; }
 		public Brush Foreground { get; set; }
@@ -457,6 +268,170 @@ namespace Codist.QuickInfo
 				inline.TextDecorations.Add(TextDecorations.Underline);
 			}
 			inline.Foreground = Foreground ?? SymbolFormatter.Instance.PlainText;
+		}
+	}
+
+	sealed class SymbolSegment : Segment
+	{
+		public SymbolSegment(ISymbol symbol) {
+			Symbol = symbol;
+		}
+		public SymbolSegment(ISymbol symbol, bool bold) {
+			Symbol = symbol;
+			Bold = bold;
+		}
+
+		public ISymbol Symbol { get; }
+		public bool Bold { get; }
+		public string Alias { get; set; }
+		public SymbolFormatter Formatter { get; set; }
+		public Brush Foreground { get; set; }
+
+		public override void ToUI(InlineCollection inlines) {
+			if (Foreground != null) {
+				inlines.Add(Symbol.Render(Alias, Bold, Foreground));
+			}
+			else {
+				(Formatter ?? SymbolFormatter.Instance).Format(inlines, Symbol, Alias, Bold);
+			}
+		}
+	}
+
+	sealed class SymbolDisplayPartsSegment : Segment
+	{
+		public SymbolDisplayPartsSegment(ImmutableArray<SymbolDisplayPart> displayParts, SymbolFormatter formatter) {
+			DisplayParts = displayParts;
+			Formatter = formatter;
+		}
+
+		public ImmutableArray<SymbolDisplayPart> DisplayParts { get; }
+		public SymbolFormatter Formatter { get; }
+		public int ArgumentIndex { get; set; } = -1;
+
+		public override void ToUI(InlineCollection inlines) {
+			Formatter.Format(inlines, DisplayParts, ArgumentIndex);
+		}
+	}
+
+	sealed class ParameterListSegment : Segment
+	{
+		public ParameterListSegment(ImmutableArray<IParameterSymbol> parameters) {
+			Parameters = parameters;
+		}
+
+		public ImmutableArray<IParameterSymbol> Parameters { get; }
+		public bool ShowDefault { get; set; }
+		public bool ShowParameterName { get; set; }
+		public bool IsProperty { get; set; }
+		public int ArgumentIndex { get; set; } = -1;
+
+		public override void ToUI(InlineCollection inlines) {
+			SymbolFormatter.Instance.ShowParameters(inlines, Parameters, ShowParameterName, ShowDefault, ArgumentIndex, IsProperty);
+		}
+	}
+
+	sealed class SnapshotSpanSegment : TextSegment
+	{
+		public SnapshotSpanSegment(SnapshotSpan span, string text) {
+			Span = span;
+			Text = text;
+		}
+
+		public SnapshotSpan Span { get; }
+
+		public override void ToUI(InlineCollection inlines) {
+			var inline = Span.Render(Text);
+			ApplySegmentStyle(inline);
+			inlines.Add(inline);
+		}
+	}
+
+	sealed class SyntaxSegment : TextSegment
+	{
+		public SyntaxSegment(SyntaxNodeOrToken syntax, ITextSnapshot snapshot, string text) {
+			Syntax = syntax;
+			Snapshot = snapshot;
+			Text = text;
+		}
+
+		public SyntaxNodeOrToken Syntax { get; }
+		public ITextSnapshot Snapshot { get; }
+
+		public override void ToUI(InlineCollection inlines) {
+			var inline = Syntax.Render(Snapshot, Text);
+			ApplySegmentStyle(inline);
+			inlines.Add(inline);
+		}
+	}
+
+	sealed class AttributeDataSegment : Segment
+	{
+		public AttributeDataSegment(AttributeData data, int dataType) {
+			Data = data;
+			DataType = dataType;
+		}
+
+		public AttributeData Data { get; }
+		public int DataType { get; }
+
+		public override void ToUI(InlineCollection inlines) {
+			SymbolFormatter.Instance.Format(inlines, Data, DataType);
+		}
+	}
+
+	sealed class XmlDocSegment : Segment
+	{
+		public XmlDocSegment(XElement xmlDoc, Compilation compilation) {
+			XmlDoc = xmlDoc;
+			Compilation = compilation;
+		}
+
+		public XElement XmlDoc { get; }
+		public Compilation Compilation { get; }
+
+		public override void ToUI(InlineCollection inlines) {
+			new XmlDocRenderer(Compilation, SymbolFormatter.Instance).Render(XmlDoc, inlines);
+		}
+	}
+
+	class TypeParameterInfoSegment : Segment
+	{
+		readonly ITypeParameterSymbol _TypeParameter;
+		readonly ITypeSymbol _ArgumentType;
+
+		public TypeParameterInfoSegment(ITypeParameterSymbol typeParameter, ITypeSymbol argumentType) {
+			_TypeParameter = typeParameter;
+			_ArgumentType = argumentType;
+		}
+
+		public override void ToUI(InlineCollection inlines) {
+			SymbolFormatter.Instance.ShowTypeArgumentInfo(_TypeParameter, _ArgumentType, inlines);
+		}
+	}
+
+	sealed class IconSegment : Segment
+	{
+		public IconSegment(int iconId) {
+			IconId = iconId;
+		}
+
+		public int IconId { get; set; }
+		public Thickness Margin { get; set; } = WpfHelper.GlyphMargin;
+		public double Opacity { get; set; }
+
+		public override void ToUI(InlineCollection inlines) {
+			var item = VsImageHelper.GetImage(IconId).WrapMargin(Margin);
+			if (Opacity != 0) {
+				item.Opacity = Opacity;
+			}
+			inlines.Add(new InlineUIContainer(item) { BaselineAlignment = BaselineAlignment.TextTop });
+		}
+	}
+
+	sealed class LineBreakSegment : Segment
+	{
+		public override void ToUI(InlineCollection inlines) {
+			inlines.Add(new LineBreak());
 		}
 	}
 }
