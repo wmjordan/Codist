@@ -836,55 +836,20 @@ namespace Codist.QuickInfo
 			var locSpan = loc.DeclaringSyntaxReferences[0].Span;
 			var node = ctx.CompilationUnit.FindNode(locSpan);
 			if (IsVariableAssignedAfterDeclaration(loc, node, ctx.semanticModel)) {
-				ctx.Container.Add(new ThemedTipText(IconIds.WrittenVariables, R.T_Reassigned));
+				ctx.Container.Add(new BlockItem(IconIds.WrittenVariables, R.T_Reassigned));
 			}
 			else {
-				ctx.Container.Add(new ThemedTipText(IconIds.ReadonlyVariable, R.T_NoReassignment));
+				ctx.Container.Add(new BlockItem(IconIds.ReadonlyVariable, R.T_NoReassignment));
 			}
 		}
 
-		void ShowParameterInfo(Context context, IParameterSymbol parameter) {
-			SyntaxNode declaration;
-			BlockSyntax body = null;
-			CSharpSyntaxNode expression = null;
-			DataFlowAnalysis analysis = null;
-			foreach (var item in parameter.ContainingSymbol.DeclaringSyntaxReferences) {
-				if (item.SyntaxTree != context.CompilationUnit.SyntaxTree) {
-					continue;
-				}
-				declaration = context.CompilationUnit.FindNode(item.Span);
-				if (declaration is BaseMethodDeclarationSyntax m) {
-					body = m.Body;
-					expression = m.ExpressionBody?.Expression;
-				}
-				else if (declaration is AccessorDeclarationSyntax a) {
-					body = a.Body;
-					expression = a.ExpressionBody?.Expression;
-				}
-				else if (declaration is AnonymousFunctionExpressionSyntax af) {
-					expression = af.Body;
-				}
-				else if (declaration is LocalFunctionStatementSyntax lf) {
-					body = lf.Body;
-					expression = lf.ExpressionBody?.Expression;
-				}
-				if (body != null) {
-					analysis = context.semanticModel.AnalyzeDataFlow(body);
-					break;
-				}
-				if (expression != null) {
-					analysis = context.semanticModel.AnalyzeDataFlow(expression);
-					break;
-				}
+		void ShowParameterInfo(Context ctx, IParameterSymbol parameter) {
+			var reassigned = IsParameterAssignedAfterDeclaration(ctx, parameter);
+			if (reassigned == true) {
+				ctx.Container.Add(new BlockItem(IconIds.WrittenVariables, R.T_Reassigned.Replace("<S>", parameter.Name)));
 			}
-			if (analysis == null) {
-				return;
-			}
-			if (analysis.WrittenInside.Contains(parameter)) {
-				context.Container.Add(new ThemedTipText(IconIds.WrittenVariables, R.T_Reassigned.Replace("<S>", parameter.Name)));
-			}
-			else {
-				context.Container.Add(new ThemedTipText(IconIds.ReadonlyParameter, R.T_NoReassignment.Replace("<S>", parameter.Name)));
+			else if (reassigned == false) {
+				ctx.Container.Add(new BlockItem(IconIds.ReadonlyParameter, R.T_NoReassignment.Replace("<S>", parameter.Name)));
 			}
 		}
 

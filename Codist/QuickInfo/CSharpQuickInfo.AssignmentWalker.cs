@@ -9,6 +9,47 @@ namespace Codist.QuickInfo
 {
 	sealed partial class CSharpQuickInfo
 	{
+		static bool? IsParameterAssignedAfterDeclaration(Context ctx, IParameterSymbol parameter) {
+			if (ctx.node.Parent.IsKind(SyntaxKind.NameColon)) {
+				return null;
+			}
+
+			SyntaxNode declaration;
+			BlockSyntax body = null;
+			CSharpSyntaxNode expression = null;
+			DataFlowAnalysis analysis = null;
+			foreach (var item in parameter.ContainingSymbol.DeclaringSyntaxReferences) {
+				if (item.SyntaxTree != ctx.CompilationUnit.SyntaxTree) {
+					continue;
+				}
+				declaration = ctx.CompilationUnit.FindNode(item.Span);
+				if (declaration is BaseMethodDeclarationSyntax m) {
+					body = m.Body;
+					expression = m.ExpressionBody?.Expression;
+				}
+				else if (declaration is AccessorDeclarationSyntax a) {
+					body = a.Body;
+					expression = a.ExpressionBody?.Expression;
+				}
+				else if (declaration is AnonymousFunctionExpressionSyntax af) {
+					expression = af.Body;
+				}
+				else if (declaration is LocalFunctionStatementSyntax lf) {
+					body = lf.Body;
+					expression = lf.ExpressionBody?.Expression;
+				}
+				if (body != null) {
+					analysis = ctx.semanticModel.AnalyzeDataFlow(body);
+					break;
+				}
+				if (expression != null) {
+					analysis = ctx.semanticModel.AnalyzeDataFlow(expression);
+					break;
+				}
+			}
+			return analysis?.WrittenInside.Contains(parameter);
+		}
+
 		static bool IsVariableAssignedAfterDeclaration(ILocalSymbol localSymbol, SyntaxNode declarationNode, SemanticModel semanticModel) {
 			var scopeNode = GetVariableScope(declarationNode);
 			if (scopeNode == null) return false;
