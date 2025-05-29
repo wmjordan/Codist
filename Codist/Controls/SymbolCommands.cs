@@ -326,7 +326,7 @@ namespace Codist.Controls
 			}
 			if (groupByType) {
 				foreach (var item in groupedMembers) {
-					m.Add(item.memberOrContainer, false).Usage = item.usage;
+					m.Add(item.memberOrContainer, item.usage == SymbolUsageKind.Container).Usage = item.usage;
 				}
 			}
 			else {
