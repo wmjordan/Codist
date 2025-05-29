@@ -1539,12 +1539,24 @@ namespace Codist
 			}
 			INamedTypeSymbol ta = a.ContainingType, tb = b.ContainingType;
 			var ct = ta != null && tb != null;
-			return ct && (s = tb.DeclaredAccessibility.CompareTo(ta.DeclaredAccessibility)) != 0 ? s
-				: (s = b.DeclaredAccessibility.CompareTo(a.DeclaredAccessibility)) != 0 ? s
-				: ct && (s = ta.Name.CompareTo(tb.Name)) != 0 ? s
-				: ct && (s = ta.GetHashCode().CompareTo(tb.GetHashCode())) != 0 ? s
-				: (s = a.Name.CompareTo(b.Name)) != 0 ? s
-				: 0;
+			if (ct && !Op.Ceq(ta, tb)) {
+				if ((s = tb.DeclaredAccessibility.CompareTo(ta.DeclaredAccessibility)) != 0
+					|| (s = ta.Name.CompareTo(tb.Name)) != 0
+					|| (s = ta.GetHashCode().CompareTo(tb.GetHashCode())) != 0) {
+					return s;
+				}
+			}
+			if (ta is null) {
+				return -1;
+			}
+			if (tb is null) {
+				return 1;
+			}
+			if ((s = b.DeclaredAccessibility.CompareTo(a.DeclaredAccessibility)) != 0
+				|| (s = a.Name.CompareTo(b.Name)) != 0) {
+				return s;
+			}
+			return 0;
 		}
 
 		public static bool HasSameName(ISymbol a, ISymbol b) {
