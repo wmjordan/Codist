@@ -50,10 +50,7 @@ namespace Codist.QuickInfo
 					block.Append(" < ").Append(node, triggerPoint.Snapshot, SyntaxKindCache.Cache[node.Kind()]);
 				}
 				while (node.Kind().IsDeclaration() == false && (node = node.Parent) != null);
-				await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
-				return QuickInfoOverride.CheckCtrlSuppression()
-					? null
-					: new QuickInfoItem(token.Span.CreateSnapshotSpan(triggerPoint.Snapshot).ToTrackingSpan(), new GeneralInfoBlock(block));
+				return new QuickInfoItem(token.Span.CreateSnapshotSpan(triggerPoint.Snapshot).ToTrackingSpan(), new GeneralInfoBlock(block));
 			}
 			return null;
 		}

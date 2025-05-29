@@ -13,6 +13,19 @@ using WpfColor = System.Windows.Media.Color;
 
 namespace Codist.QuickInfo
 {
+	sealed class ColorInfoBlock : InfoBlock
+	{
+		public ColorInfoBlock(SolidColorBrush colorBrush) {
+			ColorBrush = colorBrush;
+		}
+
+		public SolidColorBrush ColorBrush { get; }
+
+		public override UIElement ToUI() {
+			return ColorQuickInfoUI.PreviewColor(ColorBrush).Tag();
+		}
+	}
+
 	static class ColorQuickInfoUI
 	{
 		const string PreviewPanelName = "ColorPreview";

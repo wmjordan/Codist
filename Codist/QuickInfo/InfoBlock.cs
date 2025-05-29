@@ -9,6 +9,7 @@ using CLR;
 using Codist.Controls;
 using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Text;
+using R = Codist.Properties.Resources;
 
 namespace Codist.QuickInfo
 {
@@ -22,6 +23,7 @@ namespace Codist.QuickInfo
 		Chain<BlockItem> _Items;
 
 		public BlockTitle Title { get; set; }
+		public string Name { get; set; }
 
 		public GeneralInfoBlock() { }
 
@@ -50,12 +52,15 @@ namespace Codist.QuickInfo
 				return null;
 			}
 			var doc = new ThemedTipDocument();
+			if (Op.IsTrue(Name)) {
+				doc.Name = Name;
+			}
 			if (Title != null) {
 				doc.AppendTitle(Title.IconId, Title.Text);
 			}
 			if (_Items != null) {
 				foreach (var item in _Items) {
-					doc.AppendParagraph(item.IconId, item.ToTextBlock());
+					doc.AppendParagraph(item.IconId, item.ToTextBlock(true));
 				}
 			}
 			return doc;
@@ -207,9 +212,12 @@ namespace Codist.QuickInfo
 			return new GeneralInfoBlock(this);
 		}
 
-		public TextBlock ToTextBlock() {
+		public TextBlock ToTextBlock(bool hideIcon) {
 			var text = new ThemedTipText();
 			var inlines = text.Inlines;
+			if (hideIcon == false) {
+				new IconSegment(IconId).ToUI(inlines);
+			}
 			foreach (var item in Segments) {
 				item.ToUI(inlines);
 			}
@@ -217,7 +225,7 @@ namespace Codist.QuickInfo
 		}
 
 		public override UIElement ToUI() {
-			return ToTextBlock();
+			return ToTextBlock(false);
 		}
 	}
 
@@ -294,6 +302,23 @@ namespace Codist.QuickInfo
 			else {
 				(Formatter ?? SymbolFormatter.Instance).Format(inlines, Symbol, Alias, Bold);
 			}
+		}
+	}
+
+	sealed class SymbolDeclarationSegment : Segment
+	{
+		public SymbolDeclarationSegment(ISymbol symbol, bool defaultPublic, bool hideTypeKind) {
+			Symbol = symbol;
+			DefaultPublic = defaultPublic;
+			HideTypeKind = hideTypeKind;
+		}
+
+		public ISymbol Symbol { get; }
+		public bool DefaultPublic { get; }
+		public bool HideTypeKind { get; }
+
+		public override void ToUI(InlineCollection inlines) {
+			SymbolFormatter.Instance.ShowSymbolDeclaration(inlines, Symbol, DefaultPublic, HideTypeKind);
 		}
 	}
 
@@ -428,10 +453,94 @@ namespace Codist.QuickInfo
 		}
 	}
 
+	sealed class FileLinkSegment : Segment
+	{
+		public FileLinkSegment(string folder, string file) {
+			Folder = folder;
+			File = file;
+		}
+
+		public string Folder { get; }
+		public string File { get; }
+
+		public override void ToUI(InlineCollection inlines) {
+			inlines.AppendFileLink(File, Folder);
+		}
+	}
+
 	sealed class LineBreakSegment : Segment
 	{
 		public override void ToUI(InlineCollection inlines) {
 			inlines.Add(new LineBreak());
+		}
+	}
+
+	sealed class BigTextInfoBlock : InfoBlock
+	{
+		public BigTextInfoBlock(string text) {
+			Text = text;
+		}
+
+		public string Text { get; }
+
+		public override UIElement ToUI() {
+			return new ThemedTipText(Text) { FontSize = ThemeHelper.ToolTipFontSize * 2 };
+		}
+	}
+
+	sealed class NumericInfoBlock : InfoBlock
+	{
+		public NumericInfoBlock(object value, bool isNegative) {
+			Value = value;
+			IsNegative = isNegative;
+		}
+
+		public object Value { get; }
+		public bool IsNegative { get; }
+
+		public override UIElement ToUI() {
+			return ToolTipHelper.ShowNumericRepresentations(Value, IsNegative);
+		}
+	}
+
+	sealed class StringInfoBlock : InfoBlock
+	{
+		public StringInfoBlock(string text, bool showText) {
+			Text = text;
+			ShowText = showText;
+		}
+
+		public string Text { get; }
+		public bool ShowText { get; }
+
+		public override UIElement ToUI() {
+			var g = new Grid {
+				HorizontalAlignment = HorizontalAlignment.Left,
+				RowDefinitions = {
+					new RowDefinition(), new RowDefinition()
+				},
+				ColumnDefinitions = {
+					new ColumnDefinition(), new ColumnDefinition { Width = new GridLength(3, GridUnitType.Star) }
+				},
+				Children = {
+					new ThemedTipText(R.T_Chars, true) { Margin = WpfHelper.GlyphMargin, TextAlignment = TextAlignment.Right },
+					new ThemedTipText(R.T_HashCode, true) { Margin = WpfHelper.GlyphMargin, TextAlignment = TextAlignment.Right }.SetValue(Grid.SetRow, 1),
+					new ThemedTipText(Text.Length.ToString()) { Background = ThemeHelper.TextBoxBackgroundBrush.Alpha(0.5), Foreground = ThemeHelper.TextBoxBrush, Padding = WpfHelper.SmallHorizontalMargin }.WrapBorder(ThemeHelper.TextBoxBorderBrush, WpfHelper.TinyMargin).SetValue(Grid.SetColumn, 1),
+					new ThemedTipText(Text.GetHashCode().ToString()) { Background = ThemeHelper.TextBoxBackgroundBrush.Alpha(0.5), Foreground = ThemeHelper.TextBoxBrush, Padding = WpfHelper.SmallHorizontalMargin }.WrapBorder(ThemeHelper.TextBoxBorderBrush, WpfHelper.TinyMargin).SetValue(Grid.SetRow, 1).SetValue(Grid.SetColumn, 1),
+				},
+				Margin = WpfHelper.MiddleBottomMargin
+			};
+			if (ShowText) {
+				g.RowDefinitions.Add(new RowDefinition());
+				g.Children.Add(new ThemedTipText(R.T_Text, true) { Margin = WpfHelper.GlyphMargin, TextAlignment = TextAlignment.Right }.SetValue(Grid.SetRow, 2));
+				g.Children.Add(new ThemedTipText(Text) {
+					Background = ThemeHelper.TextBoxBackgroundBrush.Alpha(0.5),
+					Foreground = ThemeHelper.TextBoxBrush,
+					Padding = WpfHelper.SmallHorizontalMargin,
+					FontFamily = ThemeHelper.CodeTextFont
+				}.WrapBorder(ThemeHelper.TextBoxBorderBrush, WpfHelper.TinyMargin).SetValue(Grid.SetRow, 2).SetValue(Grid.SetColumn, 1));
+			}
+			return g;
 		}
 	}
 }

@@ -251,15 +251,6 @@ namespace Codist
 			}
 			Render(content, text.Inlines);
 		}
-		public void Render(XElement content, FlowDocument document) {
-			if (content == null || IsEmptyElement(content)) {
-				return;
-			}
-			if (document.Blocks.FirstBlock is Paragraph p == false) {
-				document.Blocks.Add(p = new Paragraph());
-			}
-			Render(content, p.Inlines);
-		}
 		public void Render(XContainer content, InlineCollection inlines) {
 			InternalRender(content, inlines, null);
 		}
@@ -583,13 +574,13 @@ namespace Codist
 			}.BindWidthAsAncestor(typeof(ThemedTipText)));
 		}
 
-		static void PopulateListNumber(InlineCollection text, ListContext list) {
+		static void PopulateListNumber(InlineCollection inlines, ListContext list) {
 			string indent = list.Indent > 0 ? new string(' ', list.Indent) : String.Empty;
 			if (list.ListType > 0) {
-				text.Add(new Run(indent + ((int)list.ListType++).ToString() + ". ") { Foreground = ThemeHelper.SystemGrayTextBrush, FontWeight = FontWeights.Bold });
+				inlines.Add(new Run(indent + ((int)list.ListType++).ToString() + ". ") { Foreground = ThemeHelper.SystemGrayTextBrush, FontWeight = FontWeights.Bold });
 			}
 			else if (list.ListType == ListType.Bullet) {
-				text.Add(new Run(list.Indent > 0 ? indent + " \u00B7 " : " \u00B7 ") { Foreground = ThemeHelper.SystemGrayTextBrush, FontWeight = FontWeights.Bold });
+				inlines.Add(new Run(list.Indent > 0 ? indent + " \u00B7 " : " \u00B7 ") { Foreground = ThemeHelper.SystemGrayTextBrush, FontWeight = FontWeights.Bold });
 			}
 		}
 
@@ -669,8 +660,8 @@ namespace Codist
 			}
 		}
 
-		void StyleInner(XElement element, InlineCollection text, Span span) {
-			text.Add(span);
+		void StyleInner(XElement element, InlineCollection inlines, Span span) {
+			inlines.Add(span);
 			Render(element, span.Inlines);
 		}
 

@@ -47,6 +47,18 @@ namespace Codist
 			}
 			return block;
 		}
+		public static InlineCollection AddSymbol(this InlineCollection inlines, ISymbol symbol, SymbolFormatter formatter) {
+			if (symbol != null) {
+				formatter.Format(inlines, symbol, null, false);
+			}
+			return inlines;
+		}
+		public static InlineCollection AddSymbol(this InlineCollection inlines, ISymbol symbol, bool bold, SymbolFormatter formatter) {
+			if (symbol != null) {
+				formatter.Format(inlines, symbol, null, bold);
+			}
+			return inlines;
+		}
 		public static TextBlock AddSymbol(this TextBlock block, ISymbol symbol, string alias, SymbolFormatter formatter) {
 			if (symbol != null) {
 				formatter.Format(block.Inlines, symbol, alias, false);

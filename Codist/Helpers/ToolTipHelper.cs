@@ -180,7 +180,7 @@ namespace Codist
 		static void ShowNumericRepresentations(ISymbol symbol, ThemedToolTip tip) {
 			if (Config.Instance.SymbolToolTipOptions.MatchFlags(SymbolToolTipOptions.NumericValues)
 				&& symbol is IFieldSymbol f && f.IsConst) {
-				var p = ShowNumericRepresentations(f);
+				var p = ShowNumericRepresentations(f.ConstantValue, NumericForm.None);
 				if (p != null) {
 					tip.AddBorder().Child = p;
 				}
@@ -232,16 +232,8 @@ namespace Codist
 			return target;
 		}
 
-		internal static Grid ShowNumericRepresentations(SyntaxNode node) {
-			return ShowNumericRepresentations(node.GetFirstToken().Value, node.Parent.IsKind(SyntaxKind.UnaryMinusExpression) ? NumericForm.Negative : NumericForm.None);
-		}
-
-		internal static Grid ShowNumericRepresentations(object value) {
-			return ShowNumericRepresentations(value, NumericForm.None);
-		}
-
-		internal static Grid ShowNumericRepresentations(IFieldSymbol symbol) {
-			return ShowNumericRepresentations(symbol.ConstantValue, NumericForm.None);
+		internal static Grid ShowNumericRepresentations(object value, bool isNegative) {
+			return ShowNumericRepresentations(value, isNegative ? NumericForm.Negative : NumericForm.None);
 		}
 
 		static Grid ShowNumericRepresentations(object value, NumericForm form) {

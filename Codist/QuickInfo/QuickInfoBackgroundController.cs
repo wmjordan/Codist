@@ -69,15 +69,28 @@ namespace Codist.QuickInfo
 			}
 		}
 
-		protected override async Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
-			await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
-			return QuickInfoOverride.CheckCtrlSuppression() == false && _Background != null
-				? new QuickInfoItem(null, new BackgroundController(_Background).Tag())
+		protected override Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
+			var result = _Background != null
+				? new QuickInfoItem(null, new BackgroundControllerInfoBlock(_Background))
 				: null;
+			return Task.FromResult(result);
 		}
 
 		public override void Dispose() {
 			Config.UnregisterUpdateHandler(ConfigUpdated);
+		}
+
+		sealed class BackgroundControllerInfoBlock : InfoBlock
+		{
+			public BackgroundControllerInfoBlock(Brush background) {
+				Background = background;
+			}
+
+			public Brush Background { get; }
+
+			public override UIElement ToUI() {
+				return new BackgroundController(Background).Tag();
+			}
 		}
 
 		sealed class BackgroundController : UserControl

@@ -12,37 +12,52 @@ namespace Codist.QuickInfo
 	{
 		const string QuickInfoPropertyKey = "Codist.UIOverride";
 
-		protected override async Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
-			await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
-			if (QuickInfoOverride.CheckCtrlSuppression()) {
-				return null;
-			}
-
-			var ui = QuickInfoOverride.CreateOverride(session).CreateControl(session);
-			if (session.Options == QuickInfoSessionOptions.TrackMouse) {
-				session.Properties.AddProperty(QuickInfoPropertyKey, ui);
-				session.StateChanged += Session_StateChanged;
-			}
-			return new QuickInfoItem(null, ui);
+		protected override Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
+			return Task.FromResult(new QuickInfoItem(null, new OverrideControllerInfoBlock(session)));
 		}
 
-		void Session_StateChanged(object sender, QuickInfoSessionStateChangedEventArgs e) {
-			var s = (IAsyncQuickInfoSession)sender;
-			switch (e.NewState) {
-				case QuickInfoSessionState.Dismissed:
-					s.StateChanged -= Session_StateChanged;
-					break;
-				case QuickInfoSessionState.Visible:
-					var ui = s.Properties.GetProperty<UIElement>(QuickInfoPropertyKey);
-					ui.GetParent<System.Windows.Controls.Border>().Collapse();
-					var quickInfo = ui.GetParent<FrameworkElement>(n => n.GetType().Name == "PopupRoot");
-					if (quickInfo?.Parent is Popup popup) {
-						popup.CustomPopupPlacementCallback = null;
-						popup.Placement = PlacementMode.Bottom;
-						quickInfo.UpdateLayout();
-						new QuickInfoPositioner(s, quickInfo, popup).Reposition(true);
-					}
-					break;
+		sealed class OverrideControllerInfoBlock : InfoBlock, IInteractiveQuickInfoContent
+		{
+			public OverrideControllerInfoBlock(IAsyncQuickInfoSession session) {
+				Session = session;
+			}
+
+			public IAsyncQuickInfoSession Session { get; }
+			public bool KeepQuickInfoOpen { get; set; }
+			public bool IsMouseOverAggregated { get; set; }
+
+			public override UIElement ToUI() {
+				var session = Session;
+				var ui = QuickInfoOverride.CreateOverride(session).CreateControl(session, SetHolder);
+				if (session.Options == QuickInfoSessionOptions.TrackMouse) {
+					session.Properties.AddProperty(QuickInfoPropertyKey, ui);
+					session.StateChanged += Session_StateChanged;
+				}
+				return ui;
+			}
+
+			void SetHolder(bool hold) {
+				IsMouseOverAggregated = hold;
+			}
+
+			void Session_StateChanged(object sender, QuickInfoSessionStateChangedEventArgs e) {
+				var s = (IAsyncQuickInfoSession)sender;
+				switch (e.NewState) {
+					case QuickInfoSessionState.Dismissed:
+						s.StateChanged -= Session_StateChanged;
+						break;
+					case QuickInfoSessionState.Visible:
+						var ui = s.Properties.GetProperty<UIElement>(QuickInfoPropertyKey);
+						ui.GetParent<System.Windows.Controls.Border>().Collapse();
+						var quickInfo = ui.GetParent<FrameworkElement>(n => n.GetType().Name == "PopupRoot");
+						if (quickInfo?.Parent is Popup popup) {
+							popup.CustomPopupPlacementCallback = null;
+							popup.Placement = PlacementMode.Bottom;
+							quickInfo.UpdateLayout();
+							new QuickInfoPositioner(s, quickInfo, popup).Reposition(true);
+						}
+						break;
+				}
 			}
 		}
 

@@ -172,8 +172,16 @@ namespace Codist
 			block.Inlines.Add(new FileLink(folder, file));
 			return block;
 		}
+		public static InlineCollection Append(this InlineCollection inlines, string text) {
+			inlines.Add(text);
+			return inlines;
+		}
 		public static InlineCollection Append(this InlineCollection inlines, string text, Brush foreground) {
 			inlines.Add(text.Render(foreground));
+			return inlines;
+		}
+		public static InlineCollection AppendFileLink(this InlineCollection inlines, string file, string folder) {
+			inlines.Add(new FileLink(folder, file));
 			return inlines;
 		}
 		public static InlineCollection AppendLine(this InlineCollection inlines) {

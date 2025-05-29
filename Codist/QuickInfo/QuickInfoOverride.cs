@@ -24,7 +24,7 @@ namespace Codist.QuickInfo
 	interface IQuickInfoOverride
 	{
 		bool OverrideBuiltInXmlDoc { get; set; }
-		UIElement CreateControl(IAsyncQuickInfoSession session);
+		UIElement CreateControl(IAsyncQuickInfoSession session, Action<bool> holder);
 		void ApplyClickAndGo(ISymbol symbol);
 		void OverrideDocumentation(UIElement docElement);
 		void OverrideException(UIElement exceptionDoc);
@@ -54,7 +54,7 @@ namespace Codist.QuickInfo
 		}
 
 		public static bool CheckCtrlSuppression() {
-			return Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.CtrlSuppress) && WpfHelper.IsControlDown;
+			return Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.CtrlSuppress) && UIHelper.IsCtrlDown;
 		}
 
 		public static void HoldQuickInfo(DependencyObject quickInfoItem, bool hold) {
@@ -69,7 +69,10 @@ namespace Codist.QuickInfo
 			var items = quickInfoItem.GetParent<ItemsControl>(i => i.GetType().Name == "WpfToolTipItemsControl");
 			// version 16.1 or above
 			items = items.GetParent<ItemsControl>(i => i.GetType().Name == "WpfToolTipItemsControl") ?? items;
-			return items != null ? items.GetFirstVisualChild<UIOverride>() : quickInfoItem.GetParent<FrameworkElement>(e => e.GetType().Name == "WpfToolTipControl").GetFirstVisualChild<UIOverride>();
+			return items != null
+				? items.GetFirstVisualChild<UIOverride>()
+				: quickInfoItem.GetParent<FrameworkElement>(e => e.GetType().Name == "WpfToolTipControl")
+					.GetFirstVisualChild<UIOverride>();
 		}
 
 		static ThemedToolTip ShowSymbolLocation(ISymbol symbol) {
@@ -316,12 +319,12 @@ namespace Codist.QuickInfo
 			public ITagAggregator<IErrorTag> ErrorTagger => _ErrorTagger;
 			public ErrorTags ErrorTags => _ErrorTags;
 
-			public UIElement CreateControl(IAsyncQuickInfoSession session) {
+			public UIElement CreateControl(IAsyncQuickInfoSession session, Action<bool> holder) {
 				_Session = session;
 				_IsCSharpDoc = session.TextView.TextBuffer.IsContentTypeIncludingProjection(Constants.CodeTypes.CSharp);
 				session.StateChanged -= ReleaseSession;
 				session.StateChanged += ReleaseSession;
-				return new UIOverride(this);
+				return new UIOverride(this, holder);
 			}
 
 			public void ApplyClickAndGo(ISymbol symbol) {
@@ -377,22 +380,21 @@ namespace Codist.QuickInfo
 			}
 		}
 
-		sealed class UIOverride : UIElement, IInteractiveQuickInfoContent
+		sealed class UIOverride : UIElement
 		{
 			static readonly Thickness __TitlePanelMargin = new Thickness(0, 0, 30, 6);
 
 			readonly DefaultOverride _Override;
+			readonly Action<bool> _Holder;
 			bool _Overridden;
 
-			public UIOverride(DefaultOverride uiOverride) {
+			public UIOverride(DefaultOverride uiOverride, Action<bool> holder) {
 				_Override = uiOverride;
+				_Holder = holder;
 			}
 
-			public bool KeepQuickInfoOpen { get; set; }
-			public bool IsMouseOverAggregated { get; set; }
-
 			public void Hold(bool hold) {
-				IsMouseOverAggregated = hold;
+				_Holder(hold);
 			}
 			public System.Threading.Tasks.Task DismissAsync() {
 				return _Override.Session?.DismissAsync() ?? System.Threading.Tasks.Task.CompletedTask;
@@ -549,7 +551,7 @@ namespace Codist.QuickInfo
 			Grid ShowAlternativeSignature() {
 				var s = _Override.ClickAndGoSymbol;
 				var icon = VsImageHelper.GetImage(s.GetImageId(), ThemeHelper.QuickInfoLargeIconSize)
-					.AsSymbolLink(Keyboard.Modifiers == ModifierKeys.Control ? s.OriginalDefinition : s);
+					.AsSymbolLink(UIHelper.IsCtrlDown ? s.OriginalDefinition : s);
 				icon.VerticalAlignment = VerticalAlignment.Top;
 				var signature = SymbolFormatter.Instance.ShowSignature(s);
 				signature.MaxWidth = (Config.Instance.QuickInfo.MaxWidth >= 100

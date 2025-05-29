@@ -119,13 +119,11 @@ namespace Codist.QuickInfo
 
 		async Task<QuickInfoItem> InternalGetQuickInfoItemAsync(IAsyncQuickInfoSession session, ITextBuffer textBuffer, SnapshotPoint triggerPoint, CancellationToken cancellationToken) {
 			Action<Context> syntaxProcessor;
-			await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
-			if (QuickInfoOverride.CheckCtrlSuppression()
-				|| session.TextView is Microsoft.VisualStudio.Text.Editor.IWpfTextView v == false) {
+			if (session.TextView is Microsoft.VisualStudio.Text.Editor.IWpfTextView v == false) {
 				return null;
 			}
 			var sc = SemanticContext.GetOrCreateSingletonInstance(v);
-			if (await sc.UpdateAsync(textBuffer, triggerPoint, cancellationToken) == false) {
+			if (await sc.UpdateAsync(textBuffer, triggerPoint, cancellationToken).ConfigureAwait(false) == false) {
 				return null;
 			}
 			var semanticModel = sc.SemanticModel;
@@ -246,7 +244,8 @@ namespace Codist.QuickInfo
 			ref var node = ref context.node;
 			node = context.CompilationUnit.FindNode(context.token.Span, true, true);
 			if (node == null
-				|| context.skipTriggerPointCheck == false && node.Span.Contains(context.TriggerPoint.Position, true) == false) {
+				|| context.skipTriggerPointCheck == false
+					&& node.Span.Contains(context.TriggerPoint.Position, true) == false) {
 				return false;
 			}
 			node = node.UnqualifyExceptNamespace();
@@ -289,9 +288,9 @@ namespace Codist.QuickInfo
 		}
 
 		static void ShowUnavailableProjects(Context context, Chain<string> unavailableProjects) {
-			var doc = new ThemedTipDocument().AppendTitle(IconIds.UnavailableSymbol, R.T_SymbolUnavailableIn);
+			var doc = new GeneralInfoBlock(IconIds.UnavailableSymbol, R.T_SymbolUnavailableIn);
 			foreach (var item in unavailableProjects) {
-				doc.Append(new ThemedTipParagraph(IconIds.Project, new ThemedTipText(item)));
+				doc.Add(new BlockItem(IconIds.Project, item));
 			}
 			context.Container.Add(doc);
 		}
@@ -481,12 +480,15 @@ namespace Codist.QuickInfo
 				var st = symbol.GetReturnType();
 				if (st?.TypeKind == TypeKind.Delegate) {
 					var invoke = ((INamedTypeSymbol)st).DelegateInvokeMethod;
-					container.Add(new ThemedTipDocument().Append(new ThemedTipParagraph(IconIds.Delegate,
-						new ThemedTipText(R.T_DelegateSignature, true).Append(": ")
-							.AddSymbol(invoke.ReturnType, false, __SymbolFormatter)
-							.Append(" ")
-							.AddParameters(invoke.Parameters, __SymbolFormatter)
-						)));
+					container.Add(
+						new GeneralInfoBlock(
+							new BlockItem(IconIds.Delegate, R.T_DelegateSignature, true)
+								.Append(": ")
+								.AddSymbol(invoke.ReturnType, false, __SymbolFormatter)
+								.Append(" ")
+								.AddParameters(invoke.Parameters)
+						)
+					);
 				}
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.SymbolLocation)) {
@@ -611,7 +613,11 @@ namespace Codist.QuickInfo
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
 				&& Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle) == false
 				&& property.ContainingType?.TypeKind != TypeKind.Interface
-				&& (property.DeclaredAccessibility != Accessibility.Public || property.IsAbstract || property.IsStatic || property.IsOverride || property.IsVirtual)) {
+				&& (property.DeclaredAccessibility != Accessibility.Public
+					|| property.IsAbstract
+					|| property.IsStatic
+					|| property.IsOverride
+					|| property.IsVirtual)) {
 				ShowDeclarationModifier(qiContent, property);
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfaceImplementations)) {
@@ -622,15 +628,22 @@ namespace Codist.QuickInfo
 		static void ShowEventInfo(InfoContainer qiContent, IEventSymbol ev) {
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)) {
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle) == false
-					&& (ev.DeclaredAccessibility != Accessibility.Public || ev.IsAbstract || ev.IsStatic || ev.IsOverride || ev.IsVirtual)
+					&& (ev.DeclaredAccessibility != Accessibility.Public
+						|| ev.IsAbstract
+						|| ev.IsStatic
+						|| ev.IsOverride
+						|| ev.IsVirtual)
 					&& ev.ContainingType?.TypeKind != TypeKind.Interface) {
 					ShowDeclarationModifier(qiContent, ev);
 				}
 				if (ev.Type.GetMembers("Invoke").FirstOrDefault() is IMethodSymbol invoke
 					&& invoke.Parameters.Length == 2) {
-					qiContent.Add(new ThemedTipDocument().Append(new ThemedTipParagraph(IconIds.Event,
-						new ThemedTipText(R.T_EventSignature, true).AddParameters(invoke.Parameters, __SymbolFormatter)
-						)));
+					qiContent.Add(
+						new GeneralInfoBlock(
+							new BlockItem(IconIds.Event, R.T_EventSignature, true)
+								.AddParameters(invoke.Parameters)
+						)
+					);
 				}
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfaceImplementations)) {
@@ -641,7 +654,10 @@ namespace Codist.QuickInfo
 		void ShowFieldInfo(InfoContainer qiContent, IFieldSymbol field) {
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
 				&& Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle) == false
-				&& (field.DeclaredAccessibility != Accessibility.Public || field.IsReadOnly || field.IsVolatile || field.IsStatic)
+				&& (field.DeclaredAccessibility != Accessibility.Public
+					|| field.IsReadOnly
+					|| field.IsVolatile
+					|| field.IsStatic)
 				&& field.ContainingType.TypeKind != TypeKind.Enum) {
 				ShowDeclarationModifier(qiContent, field);
 			}
@@ -676,7 +692,13 @@ namespace Codist.QuickInfo
 			if (options.MatchFlags(QuickInfoOptions.Declaration)
 				&& Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle) == false
 				&& method.ContainingType?.TypeKind != TypeKind.Interface
-				&& (method.DeclaredAccessibility != Accessibility.Public || method.IsAbstract || method.IsStatic || method.IsVirtual || method.IsOverride || method.IsExtern || method.IsSealed)) {
+				&& (method.DeclaredAccessibility != Accessibility.Public
+					|| method.IsAbstract
+					|| method.IsStatic
+					|| method.IsVirtual
+					|| method.IsOverride
+					|| method.IsExtern
+					|| method.IsSealed)) {
 				ShowDeclarationModifier(container, method);
 			}
 			if (options.MatchFlags(QuickInfoOptions.TypeParameters)
@@ -731,25 +753,31 @@ namespace Codist.QuickInfo
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.NamespaceTypes) == false) {
 				return;
 			}
-			var namespaces = nsSymbol.GetNamespaceMembers().ToImmutableArray().Sort(Comparer<INamespaceSymbol>.Create((x, y) => String.CompareOrdinal(x.Name, y.Name)));
+			var namespaces = nsSymbol.GetNamespaceMembers()
+				.ToImmutableArray()
+				.Sort(Comparer<INamespaceSymbol>.Create((x, y) => String.CompareOrdinal(x.Name, y.Name)));
 			if (namespaces.Length > 0) {
 				var info = new GeneralInfoBlock(IconIds.Namespace, R.T_Namespace);
 				foreach (var ns in namespaces) {
-					info.Add(new BlockItem(IconIds.Namespace).Append(ns.Name, __SymbolFormatter.Namespace));
+					info.Add(
+						new BlockItem(IconIds.Namespace)
+							.Append(ns.Name, __SymbolFormatter.Namespace)
+					);
 				}
 				qiContent.Add(info);
 			}
 
 			var members = nsSymbol.GetTypeMembers().Sort(Comparer<INamedTypeSymbol>.Create((x, y) => String.Compare(x.Name, y.Name)));
 			if (members.Length > 0) {
-				var info = new StackPanel().Add(new ThemedTipText(R.T_Type, true));
+				var info = new GeneralInfoBlock(IconIds.Namespace, R.T_Type);
 				foreach (var type in members) {
-					var t = new ThemedTipText(type.GetImageId());
-					__SymbolFormatter.ShowSymbolDeclaration(type, t, true, true);
-					t.AddSymbol(type, false, __SymbolFormatter);
-					info.Add(t);
+					info.Add(
+						new BlockItem(type.GetImageId())
+							.Append(new SymbolDeclarationSegment(type, true, true))
+							.AddSymbol(type, false, __SymbolFormatter)
+					);
 				}
-				qiContent.Add(info.Scrollable());
+				qiContent.Add(info);
 			}
 		}
 
@@ -795,7 +823,8 @@ namespace Codist.QuickInfo
 				) {
 				ShowDeclarationModifier(qiContent, typeSymbol);
 			}
-			if (typeSymbol.TypeKind == TypeKind.Enum && options.HasAnyFlag(QuickInfoOptions.BaseType | QuickInfoOptions.Enum)) {
+			if (typeSymbol.TypeKind == TypeKind.Enum
+				&& options.HasAnyFlag(QuickInfoOptions.BaseType | QuickInfoOptions.Enum)) {
 				ShowEnumQuickInfo(qiContent, typeSymbol, options.MatchFlags(QuickInfoOptions.BaseType), options.MatchFlags(QuickInfoOptions.Enum));
 			}
 			else if (options.MatchFlags(QuickInfoOptions.BaseType)) {
@@ -816,18 +845,18 @@ namespace Codist.QuickInfo
 		}
 
 		static void ShowConstInfo(InfoContainer qiContent, ISymbol symbol, object value) {
-			if (value is string sv) {
+			if (value is string text) {
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.String)) {
-					qiContent.Add(ShowStringInfo(sv, true));
+					qiContent.Add(new StringInfoBlock(text, true));
 				}
 			}
 			else if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.NumericValues)) {
-				var s = ToolTipHelper.ShowNumericRepresentations(value);
-				if (s != null) {
+				if (value != null
+					&& Type.GetTypeCode(value.GetType()).IsBetween(TypeCode.Char, TypeCode.Double)) {
 					if (symbol?.ContainingType?.TypeKind == TypeKind.Enum) {
 						ShowEnumQuickInfo(qiContent, symbol.ContainingType, Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseType), false);
 					}
-					qiContent.Add(s);
+					qiContent.Add(new NumericInfoBlock(value, false));
 				}
 			}
 		}
@@ -854,43 +883,21 @@ namespace Codist.QuickInfo
 		}
 
 		static void ShowExtensionMethod(InfoContainer qiContent, IMethodSymbol method) {
-			var info = new ThemedTipDocument()
-				.AppendParagraph(IconIds.ExtensionMethod, new ThemedTipText(R.T_ExtendedBy, true).AddSymbolDisplayParts(method.ContainingType.ToDisplayParts(), __SymbolFormatter, -1));
-			var extType = method.MethodKind == MethodKind.ReducedExtension ? method.ReceiverType : method.GetParameters()[0].Type;
+			var info = new GeneralInfoBlock();
+			info.Add(
+				new BlockItem(IconIds.ExtensionMethod, R.T_ExtendedBy, true)
+					.AddSymbolDisplayParts(method.ContainingType.ToDisplayParts(), __SymbolFormatter)
+			);
+			var extType = method.MethodKind == MethodKind.ReducedExtension
+				? method.ReceiverType
+				: method.GetParameters()[0].Type;
 			if (extType != null) {
-				info.AppendParagraph(extType.GetImageId(), new ThemedTipText(R.T_Extending, true).AddSymbol(extType, true, __SymbolFormatter));
+				info.Add(
+					new BlockItem(extType.GetImageId(), R.T_Extending, true)
+						.AddSymbol(extType, true, __SymbolFormatter)
+				);
 			}
 			qiContent.Add(info);
-		}
-
-		static Grid ShowStringInfo(string sv, bool showText) {
-			var g = new Grid {
-				HorizontalAlignment = HorizontalAlignment.Left,
-				RowDefinitions = {
-					new RowDefinition(), new RowDefinition()
-				},
-				ColumnDefinitions = {
-					new ColumnDefinition(), new ColumnDefinition { Width = new GridLength(3, GridUnitType.Star) }
-				},
-				Children = {
-					new ThemedTipText(R.T_Chars, true) { Margin = WpfHelper.GlyphMargin, TextAlignment = TextAlignment.Right },
-					new ThemedTipText(R.T_HashCode, true) { Margin = WpfHelper.GlyphMargin, TextAlignment = TextAlignment.Right }.SetValue(Grid.SetRow, 1),
-					new ThemedTipText(sv.Length.ToString()) { Background = ThemeHelper.TextBoxBackgroundBrush.Alpha(0.5), Foreground = ThemeHelper.TextBoxBrush, Padding = WpfHelper.SmallHorizontalMargin }.WrapBorder(ThemeHelper.TextBoxBorderBrush, WpfHelper.TinyMargin).SetValue(Grid.SetColumn, 1),
-					new ThemedTipText(sv.GetHashCode().ToString()) { Background = ThemeHelper.TextBoxBackgroundBrush.Alpha(0.5), Foreground = ThemeHelper.TextBoxBrush, Padding = WpfHelper.SmallHorizontalMargin }.WrapBorder(ThemeHelper.TextBoxBorderBrush, WpfHelper.TinyMargin).SetValue(Grid.SetRow, 1).SetValue(Grid.SetColumn, 1),
-				},
-				Margin = WpfHelper.MiddleBottomMargin
-			};
-			if (showText) {
-				g.RowDefinitions.Add(new RowDefinition());
-				g.Children.Add(new ThemedTipText(R.T_Text, true) { Margin = WpfHelper.GlyphMargin, TextAlignment = TextAlignment.Right }.SetValue(Grid.SetRow, 2));
-				g.Children.Add(new ThemedTipText(sv) {
-					Background = ThemeHelper.TextBoxBackgroundBrush.Alpha(0.5),
-					Foreground = ThemeHelper.TextBoxBrush,
-					Padding = WpfHelper.SmallHorizontalMargin,
-					FontFamily = ThemeHelper.CodeTextFont
-				}.WrapBorder(ThemeHelper.TextBoxBorderBrush, WpfHelper.TinyMargin).SetValue(Grid.SetRow, 2).SetValue(Grid.SetColumn, 1));
-			}
-			return g;
 		}
 
 		static void ShowBaseType(InfoContainer qiContent, ITypeSymbol typeSymbol) {
@@ -910,7 +917,12 @@ namespace Codist.QuickInfo
 		}
 
 		static void ShowDeclarationModifier(InfoContainer qiContent, ISymbol symbol) {
-			qiContent.Add(new ThemedTipDocument().Append(new ThemedTipParagraph(IconIds.DeclarationModifier, __SymbolFormatter.ShowSymbolDeclaration(symbol, new ThemedTipText(), true, false))));
+			var info = new GeneralInfoBlock();
+			info.Add(
+				new BlockItem(IconIds.DeclarationModifier)
+					.Append(new SymbolDeclarationSegment(symbol, true, false))
+			);
+			qiContent.Add(info);
 		}
 
 		static TextBlock ToUIText(ISymbol symbol) {

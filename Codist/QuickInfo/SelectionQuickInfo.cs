@@ -2,6 +2,7 @@
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
 using CLR;
 using Codist.Controls;
@@ -22,18 +23,14 @@ namespace Codist.QuickInfo
 				: InternalGetQuickInfoItemAsync(session, cancellationToken);
 		}
 
-		static async Task<QuickInfoItem> InternalGetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
-			await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
-			if (QuickInfoOverride.CheckCtrlSuppression()) {
-				return null;
-			}
+		static Task<QuickInfoItem> InternalGetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
 			var textSnapshot = session.TextView.TextSnapshot;
 			var triggerPoint = session.GetTriggerPoint(textSnapshot).GetValueOrDefault();
 			try {
-				return ShowSelectionInfo(session, triggerPoint);
+				return Task.FromResult(ShowSelectionInfo(session, triggerPoint));
 			}
 			catch (ArgumentException /*triggerPoint has a differ TextBuffer from textSnapshot*/) {
-				return null;
+				return Task.FromResult<QuickInfoItem>(null);
 			}
 		}
 
@@ -61,15 +58,14 @@ namespace Codist.QuickInfo
 			if (activeSpan.IsEmpty) {
 				activeSpan = selection.SelectedSpans[0];
 			}
-			ThemedTipText info;
 			if (c == 1) {
 				return ShowCharacterInfo(activeSpan, point.Snapshot.GetText(p1, 1));
 			}
 			if (c == 2 && Char.IsHighSurrogate(point.Snapshot[p1])) {
 				return ShowCharacterInfo(activeSpan, point.Snapshot.GetText(p1, 2));
 			}
-			info = new ThemedTipText() { Name = Name }
-				.Append(R.T_Selection, true)
+			var block = new GeneralInfoBlock() { Name = Name };
+			var info = new BlockItem(IconIds.SelectCode, R.T_Selection, true)
 				.Append($": {c} {R.T_Characters}");
 			if (lines > 1) {
 				info.Append($", {lines.ToText()} {R.T_Spans}");
@@ -80,42 +76,12 @@ namespace Codist.QuickInfo
 					info.Append($", {(lines + 1).ToText()}{R.T_Lines}");
 				}
 			}
-			return new QuickInfoItem(activeSpan.ToTrackingSpan(), info.SetGlyph(IconIds.SelectCode).Tag());
+			block.Add(info);
+			return new QuickInfoItem(activeSpan.ToTrackingSpan(), block);
 		}
 
 		static QuickInfoItem ShowCharacterInfo(SnapshotSpan activeSpan, string ch) {
-			var unicode = Char.ConvertToUtf32(ch, 0);
-			var codes = new StackPanel {
-				Margin = WpfHelper.SmallMargin,
-				Children = {
-					new ThemedTipText($"Unicode: {unicode} / 0x{unicode:X4}")
-				}
-			};
-			if (unicode > 127) {
-				codes.Add(new ThemedTipText($"UTF-8: 0x{InternalToHexBinString(Encoding.UTF8.GetBytes(ch))}"));
-				codes.Add(new ThemedTipText($"UTF-16: 0x{InternalToHexBinString(Encoding.Unicode.GetBytes(ch))}"));
-				codes.Add(new ThemedTipText($"UTF-16BE: 0x{InternalToHexBinString(Encoding.BigEndianUnicode.GetBytes(ch))}"));
-				var gb18030 = Encoding.GetEncoding("GB18030");
-				if (gb18030 != null) {
-					codes.Add(new ThemedTipText($"GB18030: 0x{InternalToHexBinString(gb18030.GetBytes(ch))}"));
-				}
-			}
-			return new QuickInfoItem(activeSpan.ToTrackingSpan(), new StackPanel {
-				Name = Name,
-				Children = {
-					new ThemedTipText(IconIds.SelectCode, R.T_SelectedCharacter),
-					new StackPanel {
-						Orientation = Orientation.Horizontal,
-						Children = {
-							new ThemedTipText (ch) {
-								FontSize = ThemeHelper.ToolTipFontSize * 3,
-								Margin = WpfHelper.SmallMargin
-							},
-							codes
-						}
-					}
-				}
-			});
+			return new QuickInfoItem(activeSpan.ToTrackingSpan(), new CharInfoBlock(ch));
 		}
 
 		unsafe static string InternalToHexBinString(byte[] source) {
@@ -134,6 +100,51 @@ namespace Codist.QuickInfo
 					*(h++) = mapper[*(b++)];
 				}
 				return result;
+			}
+		}
+
+		sealed class CharInfoBlock : InfoBlock
+		{
+			public CharInfoBlock(string character) {
+				Character = character;
+			}
+
+			public string Character { get; }
+
+			public override UIElement ToUI() {
+				var ch = Character;
+				var unicode = Char.ConvertToUtf32(ch, 0);
+				var codes = new StackPanel {
+					Margin = WpfHelper.SmallMargin,
+					Children = {
+					new ThemedTipText($"Unicode: {unicode} / 0x{unicode:X4}")
+				}
+				};
+				if (unicode > 127) {
+					codes.Add(new ThemedTipText($"UTF-8: 0x{InternalToHexBinString(Encoding.UTF8.GetBytes(ch))}"));
+					codes.Add(new ThemedTipText($"UTF-16: 0x{InternalToHexBinString(Encoding.Unicode.GetBytes(ch))}"));
+					codes.Add(new ThemedTipText($"UTF-16BE: 0x{InternalToHexBinString(Encoding.BigEndianUnicode.GetBytes(ch))}"));
+					var gb18030 = Encoding.GetEncoding("GB18030");
+					if (gb18030 != null) {
+						codes.Add(new ThemedTipText($"GB18030: 0x{InternalToHexBinString(gb18030.GetBytes(ch))}"));
+					}
+				}
+				return new StackPanel {
+					Name = Name,
+					Children = {
+					new ThemedTipText(IconIds.SelectCode, R.T_SelectedCharacter),
+					new StackPanel {
+						Orientation = Orientation.Horizontal,
+						Children = {
+							new ThemedTipText (ch) {
+								FontSize = ThemeHelper.ToolTipFontSize * 3,
+								Margin = WpfHelper.SmallMargin
+							},
+							codes
+						}
+					}
+				}
+				};
 			}
 		}
 

@@ -139,9 +139,10 @@ namespace Codist.QuickInfo
 			ctx.symbol = ctx.semanticModel.Compilation.GetSpecialType(SpecialType.System_Char);
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.NumericValues)) {
 				if (ctx.token.Span.Length >= 8) { // tooltip for '\u0000' presentation
-					ctx.Container.Add(new ThemedTipText(ctx.token.ValueText) { FontSize = ThemeHelper.ToolTipFontSize * 2 });
+					ctx.Container.Add(new BigTextInfoBlock(ctx.token.ValueText));
 				}
-				ctx.Container.Add(ToolTipHelper.ShowNumericRepresentations(ctx.node));
+				var node = ctx.node;
+				ctx.Container.Add(new NumericInfoBlock(node.GetFirstToken().Value, node.Parent.IsKind(SyntaxKind.UnaryMinusExpression)));
 			}
 			ctx.isConvertedType = true;
 			ctx.State = State.Process;
@@ -151,7 +152,8 @@ namespace Codist.QuickInfo
 			ctx.UseTokenNode();
 			ctx.symbol = ctx.semanticModel.GetSystemTypeSymbol(ctx.token.Value.GetType().Name);
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.NumericValues)) {
-				ctx.Container.Add(ToolTipHelper.ShowNumericRepresentations(ctx.node));
+				var node = ctx.node;
+				ctx.Container.Add(new NumericInfoBlock(node.GetFirstToken().Value, node.Parent.IsKind(SyntaxKind.UnaryMinusExpression)));
 			}
 			ctx.isConvertedType = true;
 			ctx.State = State.Process;
@@ -163,7 +165,7 @@ namespace Codist.QuickInfo
 			ctx.isConvertedType = true;
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.String)
 				&& ctx.node.IsAnyKind(SyntaxKind.StringLiteralExpression, SyntaxKind.InterpolatedStringText)) {
-				ctx.Container.Add(ShowStringInfo(ctx.node.GetFirstToken().ValueText, false));
+				ctx.Container.Add(new StringInfoBlock(ctx.node.GetFirstToken().ValueText, false));
 			}
 			ctx.State = State.PredefinedSymbol;
 		}
@@ -334,21 +336,28 @@ namespace Codist.QuickInfo
 			ctx.symbol = info.GetEnumeratorMethod;
 			var collectionType = ctx.semanticModel.GetTypeInfo(node.Expression, ctx.cancellationToken).Type;
 			if (collectionType != null && collectionType.TypeKind != TypeKind.Error) {
-				var tip = new ThemedTipDocument();
-				tip.AppendParagraph(IconIds.ForEach, new ThemedTipText()
-						.Append("foreach".Render(__SymbolFormatter.Keyword))
+				var tip = new GeneralInfoBlock();
+				tip.Add(new BlockItem(IconIds.ForEach)
+						.Append("foreach", __SymbolFormatter.Keyword)
 						.Append(" ")
 						.AddSymbol(info.ElementType, false, __SymbolFormatter)
 						.Append(" in ", __SymbolFormatter.PlainText)
-						.AddSymbol(collectionType, false, __SymbolFormatter));
+						.AddSymbol(collectionType, false, __SymbolFormatter)
+				);
 				if (collectionType.TypeKind == TypeKind.Array) {
-					tip.AppendParagraph(IconIds.None, new ThemedTipText(R.T_ForEachOnArrayWillBeOptimized));
+					tip.Add(new BlockItem(IconIds.None, R.T_ForEachOnArrayWillBeOptimized));
 				}
 				else {
-					tip.AppendParagraph(IconIds.None, new ThemedTipText(IconIds.Method).AddSymbol(info.MoveNextMethod, false, __SymbolFormatter));
-					tip.AppendParagraph(IconIds.None, new ThemedTipText(IconIds.ReadonlyProperty).AddSymbol(info.CurrentProperty, false, __SymbolFormatter));
+					tip.Add(new BlockItem(IconIds.None)
+						.AppendIcon(IconIds.Method)
+						.AddSymbol(info.MoveNextMethod, false, __SymbolFormatter));
+					tip.Add(new BlockItem(IconIds.None)
+						.AppendIcon(IconIds.ReadonlyProperty)
+						.AddSymbol(info.CurrentProperty, false, __SymbolFormatter));
 					if (info.DisposeMethod != null) {
-						tip.AppendParagraph(IconIds.None, new ThemedTipText(IconIds.Delete).AddSymbol(info.DisposeMethod, false, __SymbolFormatter));
+						tip.Add(new BlockItem(IconIds.None)
+							.AppendIcon(IconIds.Delete)
+							.AddSymbol(info.DisposeMethod, false, __SymbolFormatter));
 					}
 				}
 				ctx.Container.Add(tip);

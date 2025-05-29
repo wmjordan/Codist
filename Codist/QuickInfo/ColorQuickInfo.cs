@@ -15,10 +15,6 @@ namespace Codist.QuickInfo
 		}
 
 		static async Task<QuickInfoItem> InternalGetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
-			await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
-			if (QuickInfoOverride.CheckCtrlSuppression()) {
-				return null;
-			}
 			var buffer = session.TextView.TextBuffer;
 			var snapshot = session.TextView.TextSnapshot;
 			var navigator = ServicesHelper.Instance.TextStructureNavigator.GetTextStructureNavigator(buffer);
@@ -32,7 +28,7 @@ namespace Codist.QuickInfo
 				brush = ColorHelper.GetBrush(word);
 			}
 			return brush != null && session.Mark(nameof(ColorQuickInfoUI))
-				? new QuickInfoItem(extent.ToTrackingSpan(), ColorQuickInfoUI.PreviewColor(brush).Tag())
+				? new QuickInfoItem(extent.ToTrackingSpan(), new ColorInfoBlock(brush))
 				: null;
 		}
 	}
