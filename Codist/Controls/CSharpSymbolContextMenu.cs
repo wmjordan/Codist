@@ -724,8 +724,7 @@ namespace Codist.Controls
 			}
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindDerivedClasses(object sender, RoutedEventArgs e) {
-				var m = Keyboard.Modifiers;
-				await _SemanticContext.FindDerivedClassesAsync(_Symbol, m.MatchFlags(ModifierKeys.Control), m.MatchFlags(ModifierKeys.Shift) == false);
+				await _SemanticContext.FindDerivedClassesAsync(_Symbol, UIHelper.IsCtrlDown, UIHelper.IsShiftDown == false);
 			}
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindImplementations(object sender, RoutedEventArgs e) {
@@ -804,7 +803,7 @@ namespace Codist.Controls
 							R.CMD_SearchWith.Replace("<NAME>", s.Name),
 							(sender, args) => {
 								var m = (MenuItem)sender;
-								var keyword = Keyboard.Modifiers.MatchFlags(ModifierKeys.Shift) ? m.GetAlternativeSearchParameter() : m.GetSearchParameter();
+								var keyword = UIHelper.IsShiftDown ? m.GetAlternativeSearchParameter() : m.GetSearchParameter();
 								ExternalCommand.OpenWithWebBrowser(m.GetSearchUrl(), keyword);
 							});
 						item.SetLazyToolTip(() => new CommandToolTip(IconIds.SearchWebSite, R.CMD_WebSearchWithSymbolName + "\n" + R.CMDT_WebSearchWithSymbolName)).SetTipOptions();

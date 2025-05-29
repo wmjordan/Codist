@@ -95,7 +95,7 @@ namespace Codist
 			};
 
 			#region Signature
-			var signature = ShowSymbolSignature(Keyboard.Modifiers == ModifierKeys.Shift ? symbol : s);
+			var signature = ShowSymbolSignature(UIHelper.IsShiftDown ? symbol : s);
 			p.Add(signature);
 			if (s.IsObsolete()) {
 				MarkSignatureObsolete(p, signature);

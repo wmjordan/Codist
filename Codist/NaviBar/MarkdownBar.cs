@@ -297,7 +297,8 @@ namespace Codist.NaviBar
 			WRAP:
 			string s = View.GetFirstSelectionText();
 			var modified = View.WrapWith(prefix, suffix);
-			if (s != null && Keyboard.Modifiers.HasAnyFlag(ModifierKeys.Control | ModifierKeys.Shift)
+			if (s != null
+				&& (UIHelper.IsShiftDown || UIHelper.IsCtrlDown)
 				&& View.FindNext(_TextSearch, s, TextEditorHelper.GetFindOptionsFromKeyboardModifiers())) {
 				return modified;
 			}

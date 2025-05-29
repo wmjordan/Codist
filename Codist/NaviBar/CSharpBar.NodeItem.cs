@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using CLR;
 using Codist.Controls;
 using Microsoft.CodeAnalysis;
@@ -73,7 +72,7 @@ namespace Codist.NaviBar
 				var kind = Node.Kind();
 				if (MayHaveChildNodeItems(kind)) {
 					if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.CtrlGoToSource)
-						&& Keyboard.Modifiers.MatchFlags(ModifierKeys.Control)) {
+						&& UIHelper.IsCtrlDown) {
 						Node.GetReference().GoToSource();
 						return;
 					}
@@ -112,7 +111,7 @@ namespace Codist.NaviBar
 					// Hack: since SelectNode will move the cursor to the end of the span--the beginning of next node,
 					//    it will make next node selected, which is undesired in most cases
 					Bar.View.Caret.PositionChanged -= Bar.Update;
-					Bar.View.SelectNode(Node, Keyboard.Modifiers != ModifierKeys.Control);
+					Bar.View.SelectNode(Node, !UIHelper.IsCtrlDown);
 					Bar.View.Caret.PositionChanged += Bar.Update;
 				}
 				else {

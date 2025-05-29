@@ -5,8 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
-using CLR;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -34,7 +32,7 @@ namespace Codist.QuickInfo
 			Completion3 completion;
 			if (elementType != UIElementType.Tooltip
 				|| (completion = itemToRender as Completion3) == null
-				|| Keyboard.Modifiers.MatchFlags(ModifierKeys.Control)
+				|| UIHelper.IsCtrlDown
 				|| (sc = SemanticContext.GetOrCreateSingletonInstance(context.TextView as IWpfTextView)) == null) {
 				return null;
 			}

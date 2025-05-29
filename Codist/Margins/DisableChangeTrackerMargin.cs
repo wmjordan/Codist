@@ -30,7 +30,7 @@ namespace Codist.Margins
 		}
 
 		void EnterMarginContainer(object sender, MouseEventArgs e) {
-			ToggleTracker(_DisabledChangeTracker == false || Keyboard.Modifiers.MatchFlags(ModifierKeys.Control));
+			ToggleTracker(_DisabledChangeTracker == false || UIHelper.IsCtrlDown);
 		}
 
 		void ToggleTracker(bool enable) {

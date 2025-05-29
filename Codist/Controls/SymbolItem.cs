@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using CLR;
 using Microsoft.CodeAnalysis;
 
 namespace Codist.Controls
@@ -165,7 +164,7 @@ namespace Codist.Controls
 
 		void CloseUnpinnedMenus() {
 			if (_Content.GetParent<ListBoxItem>()?.IsMouseOver == false
-				&& System.Windows.Input.Keyboard.Modifiers.MatchFlags(System.Windows.Input.ModifierKeys.Control) == false) {
+				&& UIHelper.IsCtrlDown == false) {
 				TextViewOverlay.Get(Container.SemanticContext.View)?.ClearUnpinnedChildren();
 			}
 		}

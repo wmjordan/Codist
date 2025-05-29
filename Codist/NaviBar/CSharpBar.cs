@@ -337,7 +337,7 @@ namespace Codist.NaviBar
 			}
 			else if (e.Key == Key.Tab && _ActiveItem != null) {
 				int i;
-				if (Keyboard.Modifiers.MatchFlags(ModifierKeys.Shift)) {
+				if (UIHelper.IsShiftDown) {
 					if ((i = Items.IndexOf(_ActiveItem)) > 0) {
 						((ThemedImageButton)Items[i - 1]).PerformClick();
 					}

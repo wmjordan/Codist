@@ -1266,7 +1266,7 @@ namespace Codist.Options
 
 		#region Theme management
 		void ImportTheme() {
-			if (System.Windows.Input.Keyboard.Modifiers == System.Windows.Input.ModifierKeys.Control) {
+			if (UIHelper.IsCtrlDown) {
 				FormatStore.Refresh();
 				return;
 			}
@@ -1306,9 +1306,9 @@ namespace Codist.Options
 				catch (System.Security.SecurityException) { }
 			}
 			try {
-				var fullExport = WpfHelper.IsShiftDown;
+				var fullExport = UIHelper.IsShiftDown;
 				if (d.ShowDialog() == true) {
-					Config.Instance.SaveConfig(d.FileName, true, fullExport || WpfHelper.IsShiftDown);
+					Config.Instance.SaveConfig(d.FileName, true, fullExport || UIHelper.IsShiftDown);
 					_ThemeFolder = System.IO.Path.GetDirectoryName(d.FileName);
 				}
 			}

@@ -217,7 +217,7 @@ namespace Codist.NaviBar
 				_FinderBox.SelectAll();
 			}
 			void ChangeSearchScope(object sender, KeyEventArgs e) {
-				if (Keyboard.Modifiers == ModifierKeys.None) {
+				if (!UIHelper.IsCtrlDown && !UIHelper.IsShiftDown) {
 					if (e.Key.CeqAny(Key.OemPlus, Key.Add)) {
 						_ScopeBox.Filter = ScopeType.ActiveProject;
 						e.Handled = true;

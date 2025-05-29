@@ -511,8 +511,6 @@ namespace Codist
 		#endregion
 
 		#region Others
-		public static bool IsControlDown => (Keyboard.Modifiers & ModifierKeys.Control) != 0;
-		public static bool IsShiftDown => (Keyboard.Modifiers & ModifierKeys.Shift) != 0;
 		public static void Toggle(this UIElement control, bool visible) {
 			control.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
 		}

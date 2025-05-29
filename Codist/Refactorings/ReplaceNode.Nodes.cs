@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Windows.Input;
 using CLR;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -397,7 +396,7 @@ namespace Codist.Refactorings
 				}
 
 				#region Swap operands besides selected operator
-				if (Keyboard.Modifiers.MatchFlags(ModifierKeys.Shift) == false) {
+				if (UIHelper.IsShiftDown == false) {
 					if (left is BinaryExpressionSyntax temp
 						&& temp.RawKind == node.RawKind
 						&& temp.Right != null) {

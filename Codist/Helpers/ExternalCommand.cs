@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Windows.Input;
 using Microsoft.VisualStudio.Shell;
 using R = Codist.Properties.Resources;
 
@@ -14,7 +13,7 @@ namespace Codist
 				if (String.IsNullOrEmpty(text) == false) {
 					url = url.Replace("%s", System.Net.WebUtility.UrlEncode(text));
 				}
-				if (Keyboard.Modifiers == ModifierKeys.Control) {
+				if (UIHelper.IsCtrlDown) {
 					CodistPackage.DTE.ItemOperations.Navigate(url);
 				}
 				else if (String.IsNullOrEmpty(Config.Instance.BrowserPath) == false) {

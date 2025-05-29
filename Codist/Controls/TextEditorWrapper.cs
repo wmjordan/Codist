@@ -159,7 +159,7 @@ namespace Codist.Controls
 			}
 		}
 		void HandleCopyShortcut(object sender, KeyEventArgs e) {
-			if (e.Key == Key.C && Keyboard.Modifiers == ModifierKeys.Control
+			if (e.Key == Key.C && UIHelper.IsCtrlDown
 				&& _Editor != null
 				&& Copy()) {
 				e.Handled = true;
