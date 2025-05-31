@@ -692,6 +692,14 @@ namespace Codist.QuickInfo
 					&& TextEditorWrapper.CreateFor(t) != null
 					&& t.Inlines.FirstInline is InlineUIContainer == false) {
 					t.TextWrapping = TextWrapping.Wrap;
+					var p = t.Parent;
+					if ((p is WrapPanel
+						|| (p is StackPanel sp && sp.Orientation == Orientation.Horizontal)
+						|| p is Grid)
+						&& p.GetFirstVisualChild() != t) {
+						// do not add icon to text blocks that is not the first child of a panel
+						return;
+					}
 					var icon = _Override.GetIconForErrorText(t);
 					if (icon != null) {
 						t.SetGlyph(icon);
