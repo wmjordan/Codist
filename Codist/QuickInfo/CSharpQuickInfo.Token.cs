@@ -216,14 +216,14 @@ namespace Codist.QuickInfo
 		}
 
 		static void ProcessEndIf(Context ctx) {
-			ctx.Container.Add(new ThemedTipText(IconIds.Region, R.T_EndOfIf)
+			ctx.Container.Add(new BlockItem(IconIds.Region, R.T_EndOfIf)
 				.Append((ctx.token.Parent as EndIfDirectiveTriviaSyntax).GetIf()?.GetDeclarationSignature(), true)
 				);
 			ctx.Result = ctx.CreateQuickInfoItem(ctx.Container);
 		}
 
 		static void ProcessEndRegion(Context ctx) {
-			ctx.Container.Add(new ThemedTipText(IconIds.Region, R.T_EndOfRegion)
+			ctx.Container.Add(new BlockItem(IconIds.Region, R.T_EndOfRegion)
 				.Append((ctx.token.Parent as EndRegionDirectiveTriviaSyntax).GetRegion()?.GetDeclarationSignature(), true)
 				);
 			ctx.Result = ctx.CreateQuickInfoItem(ctx.Container);
@@ -252,7 +252,7 @@ namespace Codist.QuickInfo
 			if ((ctx.node = ctx.token.Parent).IsKind(SyntaxKind.ForEachStatement)
 						&& (ctx.symbol = (info = ctx.semanticModel.GetForEachStatementInfo((CommonForEachStatementSyntax)ctx.node)).GetEnumeratorMethod) != null) {
 				if (info.ElementConversion.Exists && info.ElementConversion.IsIdentity == false) {
-					ctx.Container.Add(new ThemedTipText(IconIds.ExplicitConversion).AddSymbol(info.ElementType, false, __SymbolFormatter));
+					ctx.Container.Add(new BlockItem(IconIds.ExplicitConversion).AddSymbol(info.ElementType, false, __SymbolFormatter));
 				}
 				ctx.State = State.Return;
 			}
@@ -274,10 +274,10 @@ namespace Codist.QuickInfo
 			}
 			else if (node.IsAnyKind(CodeAnalysisHelper.CollectionExpression, CodeAnalysisHelper.ListPatternExpression)) {
 				if (node.IsKind(CodeAnalysisHelper.CollectionExpression)) {
-					ctx.Container.Add(new ThemedTipText(IconIds.InstanceMember, R.T_ElementCount + ((ExpressionSyntax)node).GetCollectionExpressionElementsCount().ToText()));
+					ctx.Container.Add(new BlockItem(IconIds.InstanceMember, R.T_ElementCount + ((ExpressionSyntax)node).GetCollectionExpressionElementsCount().ToText()));
 				}
 				else {
-					ctx.Container.Add(new ThemedTipText(IconIds.InstanceMember, R.T_PatternCount + ((PatternSyntax)node).GetListPatternsCount().ToText()));
+					ctx.Container.Add(new BlockItem(IconIds.InstanceMember, R.T_PatternCount + ((PatternSyntax)node).GetListPatternsCount().ToText()));
 				}
 				ctx.SetSymbol(ctx.semanticModel.GetTypeInfo(node, ctx.cancellationToken));
 				if (ctx.symbol != null) {
@@ -455,11 +455,11 @@ namespace Codist.QuickInfo
 		static void ProcessSwitchExpression(Context ctx, SyntaxNode node) {
 			ctx.SetSymbol(ctx.semanticModel.GetTypeInfo(node.ChildNodes().First(), ctx.cancellationToken));
 			if (ctx.symbol != null) {
-				ctx.Container.Add(new ThemedTipText(IconIds.Input).AddSymbol(ctx.symbol, false, __SymbolFormatter));
+				ctx.Container.Add(new BlockItem(IconIds.Input).AddSymbol(ctx.symbol, false, __SymbolFormatter));
 			}
 			var c = ((ExpressionSyntax)node).GetSwitchExpressionArmsCount();
 			if (c > 1) {
-				ctx.Container.Add(new ThemedTipText(IconIds.Switch, R.T_SwitchCases.Replace("<C>", c.ToText())));
+				ctx.Container.Add(new BlockItem(IconIds.Switch, R.T_SwitchCases.Replace("<C>", c.ToText())));
 			}
 			ctx.SetSymbol(ctx.semanticModel.GetTypeInfo(node, ctx.cancellationToken));
 		}
@@ -489,11 +489,11 @@ namespace Codist.QuickInfo
 				ctx.SetSymbol(ctx.semanticModel.GetTypeInfo(node.Parent, ctx.cancellationToken));
 				var patternType = ctx.semanticModel.GetTypeInfo(node.GetSwitchExpressionArmPattern());
 				if (patternType.ConvertedType != null) {
-					var typeInfo = new ThemedTipText(IconIds.Input).AddSymbol(patternType.ConvertedType, null, __SymbolFormatter);
+					var typeInfo = new BlockItem(IconIds.Input).AddSymbol(patternType.ConvertedType, null, __SymbolFormatter);
 					if (patternType.ConvertedType.Equals(patternType.Type) == false) {
-						typeInfo.Append(" (".Render(__SymbolFormatter.PlainText))
+						typeInfo.Append(" (", __SymbolFormatter.PlainText)
 							.AddSymbol(patternType.Type, null, __SymbolFormatter)
-							.Append(")".Render(__SymbolFormatter.PlainText));
+							.Append(")", __SymbolFormatter.PlainText);
 					}
 					ctx.Container.Add(typeInfo);
 				}
