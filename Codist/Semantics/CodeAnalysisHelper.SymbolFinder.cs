@@ -509,6 +509,29 @@ namespace Codist
 			return r;
 		}
 
+		public static async Task<IEnumerable<Location>> FindOccurrencesInDocumentAsync(this ISymbol symbol, Document document, SyntaxTree syntaxTree, CancellationToken cancellationToken = default) {
+			var refs = await SymbolFinder.FindReferencesAsync(symbol, document.Project.Solution, ImmutableHashSet.Create(document), cancellationToken);
+			return MixDeclarationAndOccurrence(symbol.Locations, refs, syntaxTree);
+
+			IEnumerable<Location> MixDeclarationAndOccurrence(ImmutableArray<Location> symLocs, IEnumerable<ReferencedSymbol> refSymbols, SyntaxTree st) {
+				foreach (var item in symLocs) {
+					if (item.SourceTree == st) {
+						yield return item;
+					}
+				}
+				foreach (var item in refSymbols) {
+					foreach (var location in item.Definition.Locations) {
+						if (location.SourceTree == st) {
+							yield return location;
+						}
+					}
+					foreach (var location in item.Locations) {
+						yield return location.Location;
+					}
+				}
+			}
+		}
+
 		static async Task GroupReferenceByContainerAsync(Dictionary<ISymbol, List<(SymbolUsageKind usage, ReferenceLocation loc)>> results, ReferencedSymbol reference, string symbolSignature, Predicate<SyntaxNode> nodeFilter = null, Predicate<SymbolUsageKind> usageFilter = null, CancellationToken cancellationToken = default) {
 			var pu = GetPotentialUsageKinds(reference.Definition);
 			foreach (var docRefs in reference.Locations.GroupBy(l => l.Document)) {

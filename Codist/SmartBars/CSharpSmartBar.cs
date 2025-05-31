@@ -271,9 +271,11 @@ namespace Codist.SmartBars
 					}
 					break;
 				case SymbolKind.Method:
-					if (symbol is IMethodSymbol m && IsTypeNamedMethod(m)) {
-						await SelectSymbolDefinitionAndReferencesAsync(c, selections, symbol = symbol.ContainingType, tokenLength, selectionOffsetSpan);
-						goto case SymbolKind.NamedType;
+					if (symbol is IMethodSymbol m) {
+						if (IsTypeNamedMethod(m)) {
+							await SelectSymbolDefinitionAndReferencesAsync(c, selections, symbol = symbol.ContainingType, tokenLength, selectionOffsetSpan);
+							goto case SymbolKind.NamedType;
+						}
 					}
 					break;
 			}
@@ -283,29 +285,20 @@ namespace Codist.SmartBars
 				return m.MethodKind.CeqAny(MethodKind.Constructor, MethodKind.StaticConstructor, MethodKind.Destructor);
 			}
 
-			async Task SelectSymbolDefinitionAndReferencesAsync(SemanticContext ctx, IMultiSelectionBroker selections, ISymbol symbol, int tokenLength, Span selectionOffsetSpan) {
-				foreach (var refs in await Microsoft.CodeAnalysis.FindSymbols.SymbolFinder.FindReferencesAsync(symbol, ctx.Document.Project.Solution, System.Collections.Immutable.ImmutableHashSet.Create(ctx.Document), default)) {
-					selections.AddSelections(FilterLocations(refs.Locations, tokenLength, selectionOffsetSpan));
-				}
-				selections.AddSelections(FilterDeclarationLocations(symbol.Locations, ctx.Compilation.SyntaxTree, tokenLength, selectionOffsetSpan));
+			async Task SelectSymbolDefinitionAndReferencesAsync(SemanticContext ctx, IMultiSelectionBroker msb, ISymbol s, int len, Span offsetSpan) {
+				msb.AddSelections(OffsetLocations(await s.FindOccurrencesInDocumentAsync(ctx.Document, ctx.Compilation.SyntaxTree, default), len, offsetSpan));
 			}
 
-			IEnumerable<Span> FilterLocations(IEnumerable<Microsoft.CodeAnalysis.FindSymbols.ReferenceLocation> locations, int len, Span off) {
+			IEnumerable<Span> OffsetLocations(IEnumerable<Location> locations, int len, Span off) {
 				foreach (var location in locations) {
-					yield return Offset(location.Location.SourceSpan, len, off);
-				}
-			}
-
-			IEnumerable<Span> FilterDeclarationLocations(System.Collections.Immutable.ImmutableArray<Location> locations, SyntaxTree sTree, int len, Span off) {
-				foreach (var location in locations) {
-					if (location.IsInSource && location.SourceTree == sTree) {
-						yield return Offset(location.SourceSpan, len, off);
-					}
+					yield return Offset(location.SourceSpan, len, off);
 				}
 			}
 
 			Span Offset(TextSpan sourceSpan, int len, Span offsetSpan) {
-				return sourceSpan.Length == len && offsetSpan.Length != 0 ? new Span(sourceSpan.Start + offsetSpan.Start, offsetSpan.Length) : sourceSpan.ToSpan();
+				return sourceSpan.Length == len && offsetSpan.Length != 0
+					? new Span(sourceSpan.Start + offsetSpan.Start, offsetSpan.Length)
+					: sourceSpan.ToSpan();
 			}
 		}
 
