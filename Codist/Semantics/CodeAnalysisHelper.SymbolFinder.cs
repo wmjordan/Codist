@@ -317,7 +317,9 @@ namespace Codist
 			var pl = pn.Length;
 			var d = new SourceSymbolDeduper();
 			foreach (var type in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
-				if (myCodeOnly && type.HasSource() == false || type.IsAccessible(true) == false || ReferenceEquals(type, symbol)) {
+				if (myCodeOnly && type.HasSource() == false
+					|| type.IsAccessible(true) == false
+					|| Op.Ceq(type, symbol)) {
 					continue;
 				}
 				if (cancellationToken.IsCancellationRequested) {
@@ -331,7 +333,7 @@ namespace Codist
 					if (member.Kind != SymbolKind.Method
 						|| member.CanBeReferencedByName == false
 						|| member.IsAccessible(false) == false
-						|| ReferenceEquals(member, symbol)) {
+						|| Op.Ceq(member, symbol)) {
 						// also find delegates with the same signature
 						if (member.Kind != SymbolKind.NamedType
 							|| (m = (member as INamedTypeSymbol)?.DelegateInvokeMethod) == null) {

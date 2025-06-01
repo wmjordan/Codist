@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Threading.Tasks;
 using CLR;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;

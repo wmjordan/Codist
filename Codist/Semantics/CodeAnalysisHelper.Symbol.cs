@@ -34,23 +34,21 @@ namespace Codist
 			if ((k = node.Kind()) == SyntaxKind.AttributeArgument) {
 				s = semanticModel.GetSymbolInfo(((AttributeArgumentSyntax)node).Expression, cancellationToken).Symbol;
 			}
-			else if (node is SimpleBaseTypeSyntax || k == SyntaxKind.TypeConstraint) {
+			else if (node is SimpleBaseTypeSyntax
+				|| k == SyntaxKind.TypeConstraint) {
 				s = semanticModel.GetSymbolInfo(node.FindNode(node.Span, false, true), cancellationToken).Symbol;
 			}
 			else if (k == SyntaxKind.ArgumentList) {
 				s = semanticModel.GetSymbolInfo(node.Parent, cancellationToken).Symbol;
 			}
-			else if (node is AccessorDeclarationSyntax) {
-				s = semanticModel.GetDeclaredSymbol(node, cancellationToken);
-			}
-			else if (k.CeqAny(SyntaxKind.TypeParameter, SyntaxKind.Parameter, RecordDeclaration, RecordStructDeclaration)) {
+			else if (node is AccessorDeclarationSyntax
+				|| k.CeqAny(SyntaxKind.TypeParameter, SyntaxKind.Parameter, RecordDeclaration, RecordStructDeclaration)) {
 				s = semanticModel.GetDeclaredSymbol(node, cancellationToken);
 			}
 			if (s != null) {
 				return s;
 			}
-			node = node.Parent;
-			if (node == null) {
+			if ((node = node.Parent) is null) {
 				return null;
 			}
 			switch (node.Kind()) {
@@ -1489,7 +1487,7 @@ namespace Codist
 		/// </summary>
 		public static bool MatchWith(this INamedTypeSymbol a, INamedTypeSymbol b) {
 			// todo unwrap alias
-			return ReferenceEquals(a, b) ||
+			return Op.Ceq(a, b) ||
 				(a != null && b != null
 					&& a.TypeKind == b.TypeKind
 					&& a.Name == b.Name
@@ -1563,7 +1561,7 @@ namespace Codist
 		}
 
 		public static bool HasSameName(ISymbol a, ISymbol b) {
-			if (ReferenceEquals(a, b)) {
+			if (Op.Ceq(a, b)) {
 				return true;
 			}
 			if (a.Kind != b.Kind || a.Name != b.Name) {
@@ -1592,7 +1590,7 @@ namespace Codist
 		}
 
 		public static bool AreEqual(ITypeSymbol a, ITypeSymbol b, bool ignoreTypeConstraint) {
-			if (ReferenceEquals(a, b)) {
+			if (Op.Ceq(a, b)) {
 				return true;
 			}
 			if (a == null || b == null || a.IsRefLike() != b.IsRefLike()) {
@@ -1618,7 +1616,7 @@ namespace Codist
 		static bool AreEqual(INamedTypeSymbol ta, INamedTypeSymbol tb, bool ignoreTypeConstraint) {
 			if (ta != null && tb != null
 				&& ta.IsGenericType == tb.IsGenericType
-				&& ReferenceEquals(ta.OriginalDefinition, tb.OriginalDefinition)) {
+				&& Op.Ceq(ta.OriginalDefinition, tb.OriginalDefinition)) {
 				var pa = ta.TypeArguments;
 				var pb = tb.TypeArguments;
 				if (pa.Length == pb.Length) {
@@ -1634,7 +1632,7 @@ namespace Codist
 		}
 
 		static bool AreEqual(ITypeParameterSymbol a, ITypeParameterSymbol b) {
-			if (ReferenceEquals(a, b)) {
+			if (Op.Ceq(a, b)) {
 				return true;
 			}
 			if (a == null || b == null

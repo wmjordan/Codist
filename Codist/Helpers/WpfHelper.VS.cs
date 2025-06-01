@@ -9,12 +9,10 @@ using System.Windows.Media;
 using System.Xml.Linq;
 using Codist.Controls;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Utilities;
 using WpfBrush = System.Windows.Media.Brush;
-using WpfBrushes = System.Windows.Media.Brushes;
 
 namespace Codist
 {

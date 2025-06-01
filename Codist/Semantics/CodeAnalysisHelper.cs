@@ -13,31 +13,31 @@ namespace Codist
 		internal static readonly SymbolDisplayFormat QuickInfoSymbolDisplayFormat = new SymbolDisplayFormat(
 			typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypes,
 			genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
-			parameterOptions: SymbolDisplayParameterOptions.IncludeDefaultValue | SymbolDisplayParameterOptions.IncludeName | SymbolDisplayParameterOptions.IncludeOptionalBrackets | SymbolDisplayParameterOptions.IncludeParamsRefOut | SymbolDisplayParameterOptions.IncludeType,
 			memberOptions: SymbolDisplayMemberOptions.IncludeParameters | SymbolDisplayMemberOptions.IncludeType | SymbolDisplayMemberOptions.IncludeContainingType,
 			delegateStyle: SymbolDisplayDelegateStyle.NameAndSignature,
+			parameterOptions: SymbolDisplayParameterOptions.IncludeDefaultValue | SymbolDisplayParameterOptions.IncludeName | SymbolDisplayParameterOptions.IncludeOptionalBrackets | SymbolDisplayParameterOptions.IncludeParamsRefOut | SymbolDisplayParameterOptions.IncludeType,
 			miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes | SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers);
 		internal static readonly SymbolDisplayFormat InTypeOverloadDisplayFormat = new SymbolDisplayFormat(
 			typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameOnly,
 			genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
-			parameterOptions: SymbolDisplayParameterOptions.IncludeDefaultValue | SymbolDisplayParameterOptions.IncludeName | SymbolDisplayParameterOptions.IncludeOptionalBrackets | SymbolDisplayParameterOptions.IncludeParamsRefOut | SymbolDisplayParameterOptions.IncludeType,
 			memberOptions: SymbolDisplayMemberOptions.IncludeParameters | SymbolDisplayMemberOptions.IncludeType,
 			delegateStyle: SymbolDisplayDelegateStyle.NameAndSignature,
+			parameterOptions: SymbolDisplayParameterOptions.IncludeDefaultValue | SymbolDisplayParameterOptions.IncludeName | SymbolDisplayParameterOptions.IncludeOptionalBrackets | SymbolDisplayParameterOptions.IncludeParamsRefOut | SymbolDisplayParameterOptions.IncludeType,
 			miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes | SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers);
 		internal static readonly SymbolDisplayFormat MemberNameFormat = new SymbolDisplayFormat(
 			typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypes,
-			parameterOptions: SymbolDisplayParameterOptions.IncludeParamsRefOut | SymbolDisplayParameterOptions.IncludeOptionalBrackets | SymbolDisplayParameterOptions.IncludeType,
 			genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
+			parameterOptions: SymbolDisplayParameterOptions.IncludeParamsRefOut | SymbolDisplayParameterOptions.IncludeOptionalBrackets | SymbolDisplayParameterOptions.IncludeType,
 			miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
 		internal static readonly SymbolDisplayFormat TypeMemberNameFormat = new SymbolDisplayFormat(
 			typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypes,
-			memberOptions: SymbolDisplayMemberOptions.IncludeContainingType,
 			genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
+			memberOptions: SymbolDisplayMemberOptions.IncludeContainingType,
 			miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
 		internal static readonly SymbolDisplayFormat QualifiedTypeNameFormat = new SymbolDisplayFormat(
 			typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
-			memberOptions: SymbolDisplayMemberOptions.IncludeContainingType,
 			genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
+			memberOptions: SymbolDisplayMemberOptions.IncludeContainingType,
 			miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
 		#region Compatibility constants (for older VS versions)
 		internal const SyntaxKind DotDotToken = (SyntaxKind)8222;

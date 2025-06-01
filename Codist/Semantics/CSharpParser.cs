@@ -373,7 +373,7 @@ namespace Codist
 
 			public bool Start(ITextBuffer buffer, CancellationToken cancellationToken) {
 				return Interlocked.CompareExchange(ref _State, (int)ParserState.Working, (int)ParserState.Idle) == (int)ParserState.Idle
-					&& Task.Run(() => {
+					&& !Task.Run(() => {
 						ITextSnapshot snapshot = buffer.CurrentSnapshot;
 						var workspace = Workspace.GetWorkspaceRegistration(buffer.AsTextContainer()).Workspace;
 						if (workspace == null) {
@@ -390,7 +390,7 @@ namespace Codist
 					QUIT:
 						Interlocked.CompareExchange(ref _State, (int)ParserState.Idle, (int)ParserState.Working);
 						return Task.CompletedTask;
-					}).IsCanceled == false;
+					}).IsCanceled;
 			}
 
 			async Task ParseAsync(Workspace workspace, Document document, ITextSnapshot snapshot, CancellationToken cancellationToken) {

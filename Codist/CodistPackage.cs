@@ -9,6 +9,7 @@ using CLR;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Events;
 using Microsoft.VisualStudio.Shell.Interop;
+using Task = System.Threading.Tasks.Task;
 using R = Codist.Properties.Resources;
 
 namespace Codist
@@ -111,7 +112,7 @@ namespace Codist
 		/// <param name="cancellationToken">A cancellation token to monitor for initialization cancellation, which can occur when VS is shutting down.</param>
 		/// <param name="progress">A provider for progress updates.</param>
 		/// <returns>A task representing the async work of package initialization, or an already completed task if there is none. Do not return null from this method.</returns>
-		protected override async System.Threading.Tasks.Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress) {
+		protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress) {
 			"Initializing package".Log();
 
 			await base.InitializeAsync(cancellationToken, progress);

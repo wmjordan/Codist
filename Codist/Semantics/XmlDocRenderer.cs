@@ -764,7 +764,7 @@ namespace Codist
 			while ((node = node.NextNode) != null) {
 				switch (node.NodeType) {
 					case XmlNodeType.Element: return node;
-					case XmlNodeType.Whitespace: continue;
+					case XmlNodeType.Whitespace:
 					case XmlNodeType.SignificantWhitespace: continue;
 					case XmlNodeType.Text:
 						if (((XText)node).Value.Trim().Length == 0) {
