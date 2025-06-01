@@ -1533,30 +1533,33 @@ namespace Codist
 		}
 
 		public static int CompareSymbol<TSymbol>(TSymbol a, TSymbol b) where TSymbol : ISymbol {
-			var s = b.ContainingAssembly.GetSourceType().CompareTo(a.ContainingAssembly.GetSourceType());
-			if (s != 0) {
-				return s;
+			if (Op.Ceq(a, b)) {
+				return 0;
 			}
-			INamedTypeSymbol ta = a.ContainingType, tb = b.ContainingType;
-			var ct = ta != null && tb != null;
-			if (ct && !Op.Ceq(ta, tb)) {
-				if ((s = tb.DeclaredAccessibility.CompareTo(ta.DeclaredAccessibility)) != 0
-					|| (s = ta.Name.CompareTo(tb.Name)) != 0
-					|| (s = ta.GetHashCode().CompareTo(tb.GetHashCode())) != 0) {
-					return s;
-				}
-			}
-			if (ta is null) {
+			if (a is null) {
 				return -1;
 			}
-			if (tb is null) {
+			if (b is null) {
 				return 1;
 			}
-			if ((s = b.DeclaredAccessibility.CompareTo(a.DeclaredAccessibility)) != 0
-				|| (s = a.Name.CompareTo(b.Name)) != 0) {
-				return s;
+			int d;
+			if (Op.IsTrue(d = b.ContainingAssembly.GetSourceType() - a.ContainingAssembly.GetSourceType())) {
+				return d;
 			}
-			return 0;
+			INamedTypeSymbol ta = a.ContainingType, tb = b.ContainingType;
+			if (!Op.Ceq(ta, tb)) {
+				if (ta is null) {
+					return -1;
+				}
+				if (tb is null) {
+					return 1;
+				}
+				if (Op.IsTrue(d = CompareByAccessibilityKindName(ta, tb))
+					|| Op.IsTrue(d = ta.TypeKind - tb.TypeKind)) {
+					return d;
+				}
+			}
+			return CompareByAccessibilityKindName(a, b);
 		}
 
 		public static bool HasSameName(ISymbol a, ISymbol b) {
@@ -1657,9 +1660,9 @@ namespace Codist
 
 		public static int CompareByAccessibilityKindName(ISymbol a, ISymbol b) {
 			int s;
-			if ((s = b.DeclaredAccessibility - a.DeclaredAccessibility) != 0 // sort by visibility
-				|| (s = GetSymbolKindSortOrder(a.Kind) - GetSymbolKindSortOrder(b.Kind)) != 0 // then by symbol kind
-				|| (s = a.Name.CompareTo(b.Name)) != 0) { // then by name
+			if (Op.IsTrue(s = b.DeclaredAccessibility - a.DeclaredAccessibility) // sort by visibility
+				|| Op.IsTrue(s = GetSymbolKindSortOrder(a.Kind) - GetSymbolKindSortOrder(b.Kind)) // then by symbol kind
+				|| Op.IsTrue(s = a.Name.CompareTo(b.Name))) { // then by name
 				return s;
 			}
 			switch (a.Kind) {
