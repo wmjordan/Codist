@@ -191,9 +191,10 @@ namespace Codist.Taggers
 						if (textSpan.Contains(token.FullSpan) == false) {
 							continue;
 						}
-						if (token.IsKind(SyntaxKind.IdentifierToken)
-							&& token.Parent.IsKind(SyntaxKind.IdentifierName)) {
-							TokenTaggers.TagIdentifier(in token, ctx);
+						if (token.IsKind(SyntaxKind.IdentifierToken)) {
+							if (token.Parent.IsAnyKind(SyntaxKind.IdentifierName, SyntaxKind.GenericName)) {
+								TokenTaggers.TagIdentifier(in token, ctx);
+							}
 						}
 						else if (token.IsKind(SyntaxKind.XmlTextLiteralToken)) {
 							TokenTaggers.Tag(in token, ctx);
