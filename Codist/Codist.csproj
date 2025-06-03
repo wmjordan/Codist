@@ -466,7 +466,7 @@
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </PackageReference>
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers">
-      <Version>3.3.3</Version>
+      <Version>4.14.0</Version>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
@@ -492,7 +492,7 @@
       <Version>17.0.31902.203</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.SDK.Analyzers">
-      <Version>17.7.41</Version>
+      <Version>17.7.79</Version>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>

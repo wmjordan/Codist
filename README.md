@@ -113,6 +113,12 @@ You can customize it in the *symbol markers* section under the *C#* section in t
   
   To disable comment tagger, open the _Options_ dialog, find the _Codist/Syntax Highlight_ section and  uncheck the check box labeled _Enable comment tagger_ in the _Syntax Highlight_ option page.
 
+## Custom Syntax Highlight
+
+From version 8 on, it is possible to use regular expression to highlight any code files, including the Output window pane.
+
+Details can be read on the [Wiki Page](https://github.com/wmjordan/Codist/wiki/ClassificationTypes.json-and-Codist.ct.json).
+
 ## Super Quick Info
 
 The quick info (the tool-tip shown when you hover your mouse pointer on your C# source code) can be enhanced by *Codist*.
@@ -151,7 +157,7 @@ To customize the *Super Quick Info*, adjust the settings in the options page.
 
 * **Quick Info size**
   
-  From version 7.5 on, it is possible to limit the size of the Quick Info popup, so the window won't cover your whole screen.
+  This option limits the size of the Quick Info popup, so the window won't cover your whole screen.
   
   By default, _Codist_ does not apply size limitations. You must manually set the _Max width_ and _Max height_ here. If the contents exceed the width, they are wrapped, and scrollbars will appear when necessary, as the screenshot below demonstrates.
   
@@ -159,7 +165,7 @@ To customize the *Super Quick Info*, adjust the settings in the options page.
 
 * **Display Delay**
 
-  From version 7.5 on, Codist can delay the display of Quick Info, so it won't get into your way when you move your mouse in the document window.
+  Codist can delay the display of Quick Info, so it won't get into your way when you move your mouse in the document window.
 
 * **Background**
   
@@ -171,7 +177,7 @@ _Super Quick Info_ especially enhances programming experience for C# programmers
 
 <img src="doc/super-quick-info-csharp-options.png" title="" alt="Super Quick Info - Options" width="617">
 
-* **Use enhanced symbol signature style** is a new setting in version 6.6, enabled by default, which optimizes the display of symbol signatures with a reorganized layout. The layout is especially optimized for long and complex signatures, yet ordinary short symbols can also benefit from it. The following is an example for the style. A large icon on the top-left part of the quick info can be clicked and brings out a menu for symbol analysis. Next to the icon is the name of the symbol standing out with larger text. Clicking on the name can jump to its definition. The parameters for the method are listed next. The reorganized layout never breaks the parameter type from its name, so it is easier to find out and locate each parameter type and name. Beneath the signature is the containing type of the symbol, as well the kind of the symbol. And the member type (return value) of the symbol is under the containing type.
+* **Use enhanced symbol signature style** is enabled by default, which optimizes the display of symbol signatures with a reorganized layout. The layout is especially optimized for long and complex signatures, yet ordinary short symbols can also benefit from it. The following is an example for the style. A large icon on the top-left part of the quick info can be clicked and brings out a menu for symbol analysis. Next to the icon is the name of the symbol standing out with larger text. Clicking on the name can jump to its definition. The parameters for the method are listed next. The reorganized layout never breaks the parameter type from its name, so it is easier to find out and locate each parameter type and name. Beneath the signature is the containing type of the symbol, as well the kind of the symbol. And the member type (return value) of the symbol is under the containing type.
   ![C# optimized quick info](doc/csharp-optimized-quick-info.png)
 
 * **Highlight current syntax node in code editor** will draw polygonal markers the syntax node related to the place where Quick Info is triggered.
@@ -411,7 +417,7 @@ There are two buttons on the top right corner in the result list of symbol analy
 
 ### Code Refactorings
 
-From version 7.0 on, quite a few code refactorings are provided via a button on the C# Smart Bar.
+Quite a few code refactorings are provided via a button on the C# Smart Bar.
 
   ![Smart Bar Code Refactoring](doc/smart-bar-refactoring.png)
 
@@ -496,7 +502,7 @@ Within the *Extra line margins* group box, you can adjust margins between lines 
 
 Programmers who do not like *ClearType* rendering, which made text blurry and colorful, may want to try _Force Grayscale Text Rendering_ options.
 
-From version 6.6 on, resource monitors can be used to monitorCPU, disk and memory usage via the status bar on Visual Studio. Checking the *Monitor CPU*, *Monitor disk* or _Monitor memory_ check box enables the corresponding monitors.
+Resource monitors can be used to monitorCPU, disk and memory usage via the status bar on Visual Studio. Checking the *Monitor CPU*, *Monitor disk* or _Monitor memory_ check box enables the corresponding monitors.
 
 ![Resource Monitors](doc/resource-monitors.png)
 
@@ -518,7 +524,7 @@ If you are using Open-Shell or other similar Start Menu applications, Codist can
 
 ## Auto Pair Punctuations
 
-From version 7.6 on, Codist can automatically "pair" punctuations around selections.
+Codist can automatically "pair" punctuations around selections while you type.
 
 To make this work, follow the steps below:
 1. Check the _Auto Pair Punctuation_ option in the option page, which is off by default.
@@ -532,7 +538,7 @@ To make this work, follow the steps below:
 6. When we edit Markdown documents, the <tt>\`</tt>, `*`, `_` and `~` are also auto-paired.
 7. For Chinese users, Chinese full width punctuations are also auto-paired.
 
-You can always turn off this feature by unchecking the _Auto Pair Punctuation_ option in the option page.
+You can turn off this feature by unchecking the _Auto Pair Punctuation_ option in the option page.
 
 ## Codist in Your Language
 
@@ -542,11 +548,21 @@ The interface of _Codist_ will change according to the _International_ settings 
 
 ## Other Features
 
-From version 7.4 on, extra menu commands to open build output target folder are added to the _Build_ menu.
+Extra menu commands to open build output target folder are added to the _Build_ menu (currently this command primarily works for C# projects).
 
-It is possible to output a time stamp after each build.
+It is possible to output a time stamp after each build, just check the option in the _Display_ section of the _Options_ dialog.
 
-For VSIX developers, there is also an option to automatically increment version number for your VSIX manifest file.
+From version 8 on, there is a command in the _File_ menu to transform Markdown documents.
+
+For VSIX developers, there is are some options to help your extension development.
+
+1. "Show syntax classification info" button on Smart Bar
+   This feature can help you get classification and tagging information on selected code, which is useful for developing and debugging syntax highlight.
+2. Automatically increment version number for your VSIX manifest file.
+3. "Show active window properties" on File menu
+   This command helps you gather information about active window pane, including the primary code window, for instance, roles of text view, properties of text view or text buffer.
+4. "Open ActivityLog.xml" command on File menu
+   ActivityLog file may contain information when your developing extension goes wrong. This command can help you open and read that file easier.
 
 # Feature Control
 
