@@ -17,13 +17,13 @@ namespace Codist.Controls
 			if (ContextMenu == null) {
 				ContextMenu = new ContextMenu {
 					Resources = SharedDictionaryManager.ContextMenu,
-					Foreground = ThemeHelper.ToolWindowTextBrush,
+					Foreground = ThemeCache.ToolWindowTextBrush,
 					IsOpen = true,
 					Items = {
 						new ThemedMenuItem(IconIds.Copy, Properties.Resources.CMD_CopySelection, CopyHandler)
 					}
 				};
-				ContextMenu.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
+				ContextMenu.SetBackgroundForCrispImage(ThemeCache.TitleBackgroundColor);
 			}
 		}
 

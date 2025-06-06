@@ -175,7 +175,7 @@ namespace Codist.QuickInfo
 							.Append(item.Name);
 					}
 					sb.Append(')');
-					description.Append(sb.ToString(), ThemeHelper.DocumentTextBrush);
+					description.Append(sb.ToString(), ThemeCache.DocumentTextBrush);
 				}
 			}
 
@@ -409,8 +409,8 @@ namespace Codist.QuickInfo
 				if (p == null) {
 					goto EXIT;
 				}
-				p.SetProperty(TextBlock.FontFamilyProperty, ThemeHelper.ToolTipFont)
-					.SetProperty(TextBlock.FontSizeProperty, ThemeHelper.ToolTipFontSize);
+				p.SetProperty(TextBlock.FontFamilyProperty, ThemeCache.ToolTipFont)
+					.SetProperty(TextBlock.FontSizeProperty, ThemeCache.ToolTipFontSize);
 				try {
 					if (Config.Instance.DisplayOptimizations.MatchFlags(DisplayOptimizations.CodeWindow)) {
 						WpfHelper.SetUITextRenderOptions(p, true);
@@ -550,13 +550,13 @@ namespace Codist.QuickInfo
 
 			Grid ShowAlternativeSignature() {
 				var s = _Override.ClickAndGoSymbol;
-				var icon = VsImageHelper.GetImage(s.GetImageId(), ThemeHelper.QuickInfoLargeIconSize)
+				var icon = VsImageHelper.GetImage(s.GetImageId(), ThemeCache.QuickInfoLargeIconSize)
 					.AsSymbolLink(UIHelper.IsCtrlDown ? s.OriginalDefinition : s);
 				icon.VerticalAlignment = VerticalAlignment.Top;
 				var signature = SymbolFormatter.Instance.ShowSignature(s);
 				signature.MaxWidth = (Config.Instance.QuickInfo.MaxWidth >= 100
 					? Config.Instance.QuickInfo.MaxWidth
-					: WpfHelper.GetActiveScreenSize().Width / 2) - (ThemeHelper.QuickInfoLargeIconSize + 30);
+					: WpfHelper.GetActiveScreenSize().Width / 2) - (ThemeCache.QuickInfoLargeIconSize + 30);
 				return new Grid {
 					ColumnDefinitions = {
 						new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
@@ -683,7 +683,7 @@ namespace Codist.QuickInfo
 					Width = VsImageHelper.XLargeIconSize,
 					Height = VsImageHelper.XLargeIconSize
 				};
-				bgIcon.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
+				bgIcon.SetBackgroundForCrispImage(ThemeCache.TitleBackgroundColor);
 				return bgIcon;
 			}
 

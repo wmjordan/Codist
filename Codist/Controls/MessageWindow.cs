@@ -172,7 +172,7 @@ namespace Codist.Controls
 		static StackPanel GetErrorDescription(string description, Exception exception) {
 			return new StackPanel {
 				Children = {
-					MakeText(description).SetProperty(TextBlock.FontSizeProperty, ThemeHelper.ToolTipFontSize * 1.5d),
+					MakeText(description).SetProperty(TextBlock.FontSizeProperty, ThemeCache.ToolTipFontSize * 1.5d),
 					MakeText(exception.Message),
 					MakeText(R.T_StackTrace + Environment.NewLine + exception.StackTrace)
 				}

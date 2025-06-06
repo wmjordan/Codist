@@ -17,7 +17,7 @@ namespace Codist.Controls
 			_State = state;
 			_StateGetter = stateGetter;
 			_StateSetter = stateSetter;
-			this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
+			this.SetBackgroundForCrispImage(ThemeCache.TitleBackgroundColor);
 		}
 
 		public void UpdateState() {

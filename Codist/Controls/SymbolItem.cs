@@ -55,14 +55,14 @@ namespace Codist.Controls
 			Location = location;
 			if (location.IsInSource) {
 				var filePath = location.SourceTree.FilePath;
-				_Content = new ThemedMenuText(Path.GetFileNameWithoutExtension(filePath)).Append(Path.GetExtension(filePath), ThemeHelper.SystemGrayTextBrush);
+				_Content = new ThemedMenuText(Path.GetFileNameWithoutExtension(filePath)).Append(Path.GetExtension(filePath), ThemeCache.SystemGrayTextBrush);
 				_Hint = Path.GetFileName(Path.GetDirectoryName(filePath));
 				_ImageId = IconIds.FileEmpty;
 			}
 			else {
 				var m = location.MetadataModule;
 				Symbol = m;
-				_Content = new ThemedMenuText(Path.GetFileNameWithoutExtension(m.Name)).Append(Path.GetExtension(m.Name), ThemeHelper.SystemGrayTextBrush);
+				_Content = new ThemedMenuText(Path.GetFileNameWithoutExtension(m.Name)).Append(Path.GetExtension(m.Name), ThemeCache.SystemGrayTextBrush);
 				_Hint = String.Empty;
 				_ImageId = IconIds.Module;
 			}
@@ -182,7 +182,7 @@ namespace Codist.Controls
 				t.Margin = new Thickness(10 * IndentLevel, 0, 0, 0);
 			}
 			if (includeType && symbol.ContainingType != null) {
-				t.Append($"{symbol.ContainingType.Name}{symbol.ContainingType.GetParameterString()}.", ThemeHelper.SystemGrayTextBrush);
+				t.Append($"{symbol.ContainingType.Name}{symbol.ContainingType.GetParameterString()}.", ThemeCache.SystemGrayTextBrush);
 			}
 			if (symbol.Kind == SymbolKind.Method) {
 				var m = symbol as IMethodSymbol;
@@ -203,7 +203,7 @@ namespace Codist.Controls
 			t.Append(symbol.GetOriginalName(), SymbolFormatter.Instance.GetBrush(symbol));
 			PARAMETER:
 			if (includeParameter) {
-				t.Append(symbol.GetParameterString(), ThemeHelper.SystemGrayTextBrush);
+				t.Append(symbol.GetParameterString(), ThemeCache.SystemGrayTextBrush);
 			}
 			return t;
 		}

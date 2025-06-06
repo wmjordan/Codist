@@ -98,14 +98,14 @@ namespace Codist.QuickInfo
 							new ThemedTipText("ARGB", true) { Margin = WpfHelper.GlyphMargin, TextAlignment = TextAlignment.Right },
 							new ThemedTipText("HEX", true) { Margin = WpfHelper.GlyphMargin, TextAlignment = TextAlignment.Right }.SetValue(Grid.SetRow, 1),
 							new ThemedTipText("HSL", true) { Margin = WpfHelper.GlyphMargin, TextAlignment = TextAlignment.Right }.SetValue(Grid.SetRow, 2),
-							new ThemedTipText($"{c.A}, {c.R}, {c.G}, {c.B}") { Background = ThemeHelper.TextBoxBackgroundBrush.Alpha(0.5), Foreground = ThemeHelper.TextBoxBrush, Padding = WpfHelper.SmallHorizontalMargin }
-								.WrapBorder(ThemeHelper.TextBoxBorderBrush, WpfHelper.TinyMargin)
+							new ThemedTipText($"{c.A}, {c.R}, {c.G}, {c.B}") { Background = ThemeCache.TextBoxBackgroundBrush.Alpha(0.5), Foreground = ThemeCache.TextBoxBrush, Padding = WpfHelper.SmallHorizontalMargin }
+								.WrapBorder(ThemeCache.TextBoxBorderBrush, WpfHelper.TinyMargin)
 								.SetValue(Grid.SetColumn, 1),
-							new ThemedTipText(c.ToHexString()) { Background = ThemeHelper.TextBoxBackgroundBrush.Alpha(0.5), Foreground = ThemeHelper.TextBoxBrush, Padding = WpfHelper.SmallHorizontalMargin }
-								.WrapBorder(ThemeHelper.TextBoxBorderBrush, WpfHelper.TinyMargin)
+							new ThemedTipText(c.ToHexString()) { Background = ThemeCache.TextBoxBackgroundBrush.Alpha(0.5), Foreground = ThemeCache.TextBoxBrush, Padding = WpfHelper.SmallHorizontalMargin }
+								.WrapBorder(ThemeCache.TextBoxBorderBrush, WpfHelper.TinyMargin)
 								.SetValue(Grid.SetColumn, 1).SetValue(Grid.SetRow, 1),
-							new ThemedTipText($"{v.Hue:0.###}, {v.Saturation:0.###}, {v.Luminosity:0.###}") { Background = ThemeHelper.TextBoxBackgroundBrush.Alpha(0.5), Foreground = ThemeHelper.TextBoxBrush, Padding = WpfHelper.SmallHorizontalMargin }
-								.WrapBorder(ThemeHelper.TextBoxBorderBrush, WpfHelper.TinyMargin)
+							new ThemedTipText($"{v.Hue:0.###}, {v.Saturation:0.###}, {v.Luminosity:0.###}") { Background = ThemeCache.TextBoxBackgroundBrush.Alpha(0.5), Foreground = ThemeCache.TextBoxBrush, Padding = WpfHelper.SmallHorizontalMargin }
+								.WrapBorder(ThemeCache.TextBoxBorderBrush, WpfHelper.TinyMargin)
 								.SetValue(Grid.SetColumn, 1).SetValue(Grid.SetRow, 2),
 						}
 					},

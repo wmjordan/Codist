@@ -137,7 +137,7 @@ namespace Codist.QuickInfo
 						Orientation = Orientation.Horizontal,
 						Children = {
 							new ThemedTipText (ch) {
-								FontSize = ThemeHelper.ToolTipFontSize * 3,
+								FontSize = ThemeCache.ToolTipFontSize * 3,
 								Margin = WpfHelper.SmallMargin
 							},
 							codes

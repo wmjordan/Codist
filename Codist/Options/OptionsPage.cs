@@ -421,7 +421,7 @@ namespace Codist.Options
 					item.WrapMargin(SubOptionMargin);
 				}
 				_OverrideDefaultDocumentation.BindDependentOptionControls(_DocumentationFromBaseType, _DocumentationFromInheritDoc, _TextOnlyDoc, _OrdinaryDoc, _ReturnsDoc, _RemarksDoc, _ExceptionDoc, _SeeAlsoDoc, _ExampleDoc, _ContainingType, _CodeFontForXmlDocSymbol);
-				_BackgroundButton.DefaultColor = () => ThemeHelper.ToolTipBackgroundBrush.Color;
+				_BackgroundButton.DefaultColor = () => ThemeCache.ToolTipBackgroundBrush.Color;
 				_BackgroundButton.Color = Config.Instance.QuickInfo.BackColor;
 			}
 

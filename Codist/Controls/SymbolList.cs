@@ -298,7 +298,7 @@ namespace Codist.Controls
 		static Border GetColorPreviewIcon(WPF.Brush brush) {
 			return brush == null ? null : new Border {
 				BorderThickness = WpfHelper.TinyMargin,
-				BorderBrush = ThemeHelper.MenuTextBrush,
+				BorderBrush = ThemeCache.MenuTextBrush,
 				SnapsToDevicePixels = true,
 				Background = brush,
 				Height = VsImageHelper.DefaultIconSize,
@@ -344,7 +344,7 @@ namespace Codist.Controls
 			CSharpSymbolContextMenu m;
 			((ListBoxItem)sender).ContextMenu = m = new CSharpSymbolContextMenu(item.Symbol, item.SyntaxNode, SemanticContext) {
 				Resources = SharedDictionaryManager.ContextMenu,
-				Foreground = ThemeHelper.ToolWindowTextBrush,
+				Foreground = ThemeCache.ToolWindowTextBrush,
 				IsEnabled = true,
 			};
 			SetupContextMenu(m, item);

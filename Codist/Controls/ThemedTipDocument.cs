@@ -35,7 +35,7 @@ namespace Codist.Controls
 			_Container.Children.Add(new Border {
 				Height = 1,
 				BorderThickness = WpfHelper.TinyMargin,
-				BorderBrush = ThemeHelper.DocumentTextBrush,
+				BorderBrush = ThemeCache.DocumentTextBrush,
 				Margin = WpfHelper.SmallVerticalMargin
 			}.SetValue(Grid.SetRow, _RowCount).SetValue(Grid.SetColumnSpan, 2));
 			_RowCount++;

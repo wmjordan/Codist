@@ -17,7 +17,7 @@ namespace Codist.NaviBar
 			_View = textView;
 			_View.Closed += View_Closed;
 			ViewOverlay = TextViewOverlay.GetOrCreate(textView);
-			this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
+			this.SetBackgroundForCrispImage(ThemeCache.TitleBackgroundColor);
 			textView.Properties.AddProperty(nameof(NaviBar), this);
 			Resources = SharedDictionaryManager.NavigationBar;
 			UseLayoutRounding = true;

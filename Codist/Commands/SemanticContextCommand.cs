@@ -40,7 +40,7 @@ namespace Codist.Commands
 			var b = viewLines.GetCharacterBounds(ctx.View.Caret.Position.BufferPosition);
 			m.HorizontalOffset = b.Left - lineOffset.Left;
 			m.VerticalOffset = b.Bottom - lineOffset.Top;
-			m.SetValue(TextBlock.ForegroundProperty, ThemeHelper.MenuTextBrush);
+			m.SetValue(TextBlock.ForegroundProperty, ThemeCache.MenuTextBrush);
 			var rc = new Refactorings.RefactoringContext(ctx);
 			AddRefactoringCommands(m, Refactorings.All.Refactorings, rc);
 			if (m.Items.Count > 0 && m.Items[0] is ThemedMenuItem item) {

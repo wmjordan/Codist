@@ -104,7 +104,7 @@ namespace Codist.NaviBar
 		}
 
 		void HighlightNodeRanges(SyntaxNode node, SnapshotSpan span) {
-			ViewOverlay.AddRangeAdornment(span, ThemeHelper.MenuHoverBackgroundColor, 3);
+			ViewOverlay.AddRangeAdornment(span, ThemeCache.MenuHoverBackgroundColor, 3);
 			var p = View.Caret.Position.BufferPosition;
 			if (span.Contains(p) == false) {
 				return;
@@ -117,7 +117,7 @@ namespace Codist.NaviBar
 					var nodeKind = n.Kind();
 					if (nodeKind != SyntaxKind.Block) {
 						span = nodeSpan.CreateSnapshotSpan(View.TextSnapshot);
-						ViewOverlay.AddRangeAdornment(span, ThemeHelper.MenuHoverBackgroundColor, nodeKind.IsSyntaxBlock() || nodeKind.IsDeclaration() ? 1 : 0);
+						ViewOverlay.AddRangeAdornment(span, ThemeCache.MenuHoverBackgroundColor, nodeKind.IsSyntaxBlock() || nodeKind.IsDeclaration() ? 1 : 0);
 					}
 				}
 				n = n.Parent;
@@ -418,7 +418,7 @@ namespace Codist.NaviBar
 					p = p.Parent.Parent;
 				}
 				if (p is BaseTypeDeclarationSyntax bt) {
-					t.Append(bt.Identifier.ValueText + ".", ThemeHelper.SystemGrayTextBrush);
+					t.Append(bt.Identifier.ValueText + ".", ThemeCache.SystemGrayTextBrush);
 				}
 			}
 			t.Append(title, highlight, false, SymbolFormatter.Instance.GetBrush(node));
@@ -451,7 +451,7 @@ namespace Codist.NaviBar
 				return;
 			}
 			if (p != null) {
-				text.Append(p.GetParameterListSignature(Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.ParameterListShowParamName)), ThemeHelper.SystemGrayTextBrush);
+				text.Append(p.GetParameterListSignature(Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.ParameterListShowParamName)), ThemeCache.SystemGrayTextBrush);
 			}
 		}
 

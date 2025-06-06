@@ -95,6 +95,7 @@
     <Compile Include="Controls\ThemedHyperlink.cs" />
     <Compile Include="Commands\CancelRepeatingActionCommand.cs" />
     <Compile Include="Helpers\VsImageHelper.cs" />
+    <Compile Include="Helpers\ThemeHelper.cs" />
     <Compile Include="QuickInfo\CSharpQuickInfo.AssignmentWalker.cs" />
     <Compile Include="QuickInfo\CSharpQuickInfo.Node.cs" />
     <Compile Include="QuickInfo\CSharpQuickInfo.Token.cs" />
@@ -274,7 +275,7 @@
     <Compile Include="Semantics\SemanticContext.cs" />
     <Compile Include="Helpers\ServicesHelper.cs" />
     <Compile Include="Helpers\TextEditorHelper.cs" />
-    <Compile Include="Helpers\ThemeHelper.cs" />
+    <Compile Include="Helpers\ThemeCache.cs" />
     <Compile Include="Helpers\ToolTipHelper.cs" />
     <Compile Include="Helpers\UIHelper.cs" />
     <Compile Include="Helpers\WpfHelper.cs" />

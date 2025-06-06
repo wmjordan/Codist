@@ -95,12 +95,12 @@ namespace Codist.QuickInfo
 						g.RowDefinitions.Add(new RowDefinition());
 						var ft = new ThemedTipText {
 							TextAlignment = TextAlignment.Right,
-							Foreground = ThemeHelper.SystemGrayTextBrush,
+							Foreground = ThemeCache.SystemGrayTextBrush,
 							Margin = WpfHelper.SmallHorizontalMargin,
-							FontFamily = ThemeHelper.CodeTextFont
-						}.Append("= ", ThemeHelper.SystemGrayTextBrush);
+							FontFamily = ThemeCache.CodeTextFont
+						}.Append("= ", ThemeCache.SystemGrayTextBrush);
 						SymbolFormatter.Instance.ShowFieldConstantText(ft.Inlines, f, _IsFlags);
-						g.Add(new TextBlock { Foreground = ThemeHelper.ToolTipTextBrush }
+						g.Add(new TextBlock { Foreground = ThemeCache.ToolTipTextBrush }
 								.AddSymbol(f, false, SymbolFormatter.Instance)
 								.SetGlyph(IconIds.EnumField)
 								.SetValue(Grid.SetRow, rc))

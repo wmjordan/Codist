@@ -214,7 +214,7 @@ namespace Codist.SmartBars
 				Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom,
 				PlacementTarget = ctx.Sender,
 			};
-			m.SetValue(TextBlock.ForegroundProperty, ThemeHelper.MenuTextBrush);
+			m.SetValue(TextBlock.ForegroundProperty, ThemeCache.MenuTextBrush);
 			var rc = new Refactorings.RefactoringContext(c);
 			AddRefactoringCommands(m, Refactorings.All.Refactorings, rc);
 			ctx.Sender.ContextMenu = m;

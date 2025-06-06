@@ -10,7 +10,7 @@ namespace Codist.Controls
 	{
 		public ThemedTipText() {
 			TextWrapping = TextWrapping.Wrap;
-			Foreground = ThemeHelper.ToolTipTextBrush;
+			Foreground = ThemeCache.ToolTipTextBrush;
 			TextEditorWrapper.CreateFor(this);
 		}
 		public ThemedTipText(string text) : this() {

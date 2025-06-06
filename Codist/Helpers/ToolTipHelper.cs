@@ -269,23 +269,23 @@ namespace Codist
 						new ThemedTipText(R.T_Hexadecimal, true) { Margin = WpfHelper.GlyphMargin, TextAlignment = TextAlignment.Right }.SetValue(Grid.SetRow, 1),
 						new ThemedTipText(R.T_Binary, true) { Margin = WpfHelper.GlyphMargin, TextAlignment = TextAlignment.Right }.SetValue(Grid.SetRow, 2),
 						new ThemedTipText(number) {
-							Background = ThemeHelper.TextBoxBackgroundBrush.Alpha(0.5),
-							Foreground = ThemeHelper.TextBoxBrush,
+							Background = ThemeCache.TextBoxBackgroundBrush.Alpha(0.5),
+							Foreground = ThemeCache.TextBoxBrush,
 							Padding = WpfHelper.SmallHorizontalMargin,
-							FontFamily = ThemeHelper.CodeTextFont
-						}.WrapBorder(ThemeHelper.TextBoxBorderBrush, WpfHelper.TinyMargin).SetValue(Grid.SetColumn, 1),
+							FontFamily = ThemeCache.CodeTextFont
+						}.WrapBorder(ThemeCache.TextBoxBorderBrush, WpfHelper.TinyMargin).SetValue(Grid.SetColumn, 1),
 						ToHexString(new ThemedTipText() {
-							Background = ThemeHelper.TextBoxBackgroundBrush.Alpha(0.5),
-							Foreground = ThemeHelper.TextBoxBrush,
+							Background = ThemeCache.TextBoxBackgroundBrush.Alpha(0.5),
+							Foreground = ThemeCache.TextBoxBrush,
 							Padding = WpfHelper.SmallHorizontalMargin,
-							FontFamily = ThemeHelper.CodeTextFont
-						}, bytes).WrapBorder(ThemeHelper.TextBoxBorderBrush, WpfHelper.TinyMargin).SetValue(Grid.SetColumn, 1).SetValue(Grid.SetRow, 1),
+							FontFamily = ThemeCache.CodeTextFont
+						}, bytes).WrapBorder(ThemeCache.TextBoxBorderBrush, WpfHelper.TinyMargin).SetValue(Grid.SetColumn, 1).SetValue(Grid.SetRow, 1),
 						ToBinString(new ThemedTipText() {
-							Background = ThemeHelper.TextBoxBackgroundBrush.Alpha(0.5),
-							Foreground = ThemeHelper.TextBoxBrush,
+							Background = ThemeCache.TextBoxBackgroundBrush.Alpha(0.5),
+							Foreground = ThemeCache.TextBoxBrush,
 							Padding = WpfHelper.SmallHorizontalMargin,
-							FontFamily = ThemeHelper.CodeTextFont
-						}, bytes).WrapBorder(ThemeHelper.TextBoxBorderBrush, WpfHelper.TinyMargin).SetValue(Grid.SetColumn, 1).SetValue(Grid.SetRow, 2),
+							FontFamily = ThemeCache.CodeTextFont
+						}, bytes).WrapBorder(ThemeCache.TextBoxBorderBrush, WpfHelper.TinyMargin).SetValue(Grid.SetColumn, 1).SetValue(Grid.SetRow, 2),
 					},
 					Margin = WpfHelper.MiddleBottomMargin,
 				};
@@ -330,7 +330,7 @@ namespace Codist
 			}
 
 			void AddBackground(InlineCollection inlines) {
-				inlines.LastInline.Background = ThemeHelper.TextSelectionHighlightBrush.Alpha(0.2);
+				inlines.LastInline.Background = ThemeCache.TextSelectionHighlightBrush.Alpha(0.2);
 			}
 
 			Grid ShowInt(int v, NumericForm f) {

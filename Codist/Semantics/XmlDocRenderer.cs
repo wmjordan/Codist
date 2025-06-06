@@ -286,19 +286,19 @@ namespace Codist
 								RenderBlockContent(inlines, list, e, BlockType.List);
 								break;
 							case "h1":
-								RenderBlockContent(inlines, list, e, BlockType.Title).FontSize = ThemeHelper.ToolTipFontSize + 5;
+								RenderBlockContent(inlines, list, e, BlockType.Title).FontSize = ThemeCache.ToolTipFontSize + 5;
 								break;
 							case "h2":
-								RenderBlockContent(inlines, list, e, BlockType.Title).FontSize = ThemeHelper.ToolTipFontSize + 3;
+								RenderBlockContent(inlines, list, e, BlockType.Title).FontSize = ThemeCache.ToolTipFontSize + 3;
 								break;
 							case "h3":
-								RenderBlockContent(inlines, list, e, BlockType.Title).FontSize = ThemeHelper.ToolTipFontSize + 2;
+								RenderBlockContent(inlines, list, e, BlockType.Title).FontSize = ThemeCache.ToolTipFontSize + 2;
 								break;
 							case "h4":
-								RenderBlockContent(inlines, list, e, BlockType.Title).FontSize = ThemeHelper.ToolTipFontSize + 1;
+								RenderBlockContent(inlines, list, e, BlockType.Title).FontSize = ThemeCache.ToolTipFontSize + 1;
 								break;
 							case "h5":
-								RenderBlockContent(inlines, list, e, BlockType.Title).FontSize = ThemeHelper.ToolTipFontSize + 0.5;
+								RenderBlockContent(inlines, list, e, BlockType.Title).FontSize = ThemeCache.ToolTipFontSize + 0.5;
 								break;
 							case "h6":
 								RenderBlockContent(inlines, list, e, BlockType.Title);
@@ -325,9 +325,9 @@ namespace Codist
 							case "tt":
 								++_IsCode;
 								StyleInner(e, inlines, new Span() {
-									FontFamily = GetCodeFont(),
-									Background = ThemeHelper.ToolWindowBackgroundBrush,
-									Foreground = ThemeHelper.ToolWindowTextBrush
+									FontFamily = ThemeCache.CodeTextFont,
+									Background = ThemeCache.ToolWindowBackgroundBrush,
+									Foreground = ThemeCache.ToolWindowTextBrush
 								});
 								--_IsCode;
 								break;
@@ -407,7 +407,7 @@ namespace Codist
 		static InlineUIContainer CreateHorizontalRuler() {
 			return new InlineUIContainer(new Border {
 				Height = 1,
-				Background = ThemeHelper.DocumentTextBrush,
+				Background = ThemeCache.DocumentTextBrush,
 				Margin = WpfHelper.MiddleVerticalMargin,
 				Opacity = 0.5,
 				MinWidth = 100
@@ -528,7 +528,7 @@ namespace Codist
 			}
 			var span = new Span();
 			if (_IsCode > 0) {
-				span.FontFamily = GetCodeFont();
+				span.FontFamily = ThemeCache.CodeTextFont;
 			}
 			if (blockType == BlockType.Title) {
 				span.FontWeight = FontWeights.Bold;
@@ -555,12 +555,12 @@ namespace Codist
 					Text = R.T_Code,
 					Padding = WpfHelper.MiddleHorizontalMargin,
 					Margin = WpfHelper.MiddleHorizontalMargin,
-					Foreground = ThemeHelper.MenuTextBrush,
-					Background = ThemeHelper.MenuHoverBackgroundBrush,
+					Foreground = ThemeCache.MenuTextBrush,
+					Background = ThemeCache.MenuHoverBackgroundBrush,
 					TextAlignment = TextAlignment.Left,
 					HorizontalAlignment = HorizontalAlignment.Left,
 				},
-				BorderBrush = ThemeHelper.MenuHoverBackgroundBrush,
+				BorderBrush = ThemeCache.MenuHoverBackgroundBrush,
 				BorderThickness = WpfHelper.TinyBottomMargin,
 				Margin = WpfHelper.MiddleVerticalMargin,
 			}.BindWidthAsAncestor(typeof(ThemedTipText)));
@@ -569,7 +569,7 @@ namespace Codist
 		static InlineUIContainer CreateCodeBlockEnd() {
 			return new InlineUIContainer(new Border {
 				Height = 1,
-				Background = ThemeHelper.MenuHoverBackgroundBrush,
+				Background = ThemeCache.MenuHoverBackgroundBrush,
 				Margin = WpfHelper.MiddleVerticalMargin,
 			}.BindWidthAsAncestor(typeof(ThemedTipText)));
 		}
@@ -577,10 +577,10 @@ namespace Codist
 		static void PopulateListNumber(InlineCollection inlines, ListContext list) {
 			string indent = list.Indent > 0 ? new string(' ', list.Indent) : String.Empty;
 			if (list.ListType > 0) {
-				inlines.Add(new Run(indent + ((int)list.ListType++).ToString() + ". ") { Foreground = ThemeHelper.SystemGrayTextBrush, FontWeight = FontWeights.Bold });
+				inlines.Add(new Run(indent + ((int)list.ListType++).ToString() + ". ") { Foreground = ThemeCache.SystemGrayTextBrush, FontWeight = FontWeights.Bold });
 			}
 			else if (list.ListType == ListType.Bullet) {
-				inlines.Add(new Run(list.Indent > 0 ? indent + " \u00B7 " : " \u00B7 ") { Foreground = ThemeHelper.SystemGrayTextBrush, FontWeight = FontWeights.Bold });
+				inlines.Add(new Run(list.Indent > 0 ? indent + " \u00B7 " : " \u00B7 ") { Foreground = ThemeCache.SystemGrayTextBrush, FontWeight = FontWeights.Bold });
 			}
 		}
 
@@ -613,7 +613,7 @@ namespace Codist
 			_SymbolFormatter.Format(inlines, s, alias, false);
 
 			InlineCollection UseCodeEditorFont(InlineCollection ic) {
-				var span = new Span { FontFamily = ThemeHelper.CodeTextFont };
+				var span = new Span { FontFamily = ThemeCache.CodeTextFont };
 				ic.Add(span);
 				return span.Inlines;
 			}
@@ -663,15 +663,6 @@ namespace Codist
 		void StyleInner(XElement element, InlineCollection inlines, Span span) {
 			inlines.Add(span);
 			Render(element, span.Inlines);
-		}
-
-		FontFamily GetCodeFont() {
-			if (_CodeFont != null) {
-				return _CodeFont;
-			}
-
-			ThemeHelper.GetFontSettings(Microsoft.VisualStudio.Shell.Interop.FontsAndColorsCategory.TextEditor, out var fontName, out _);
-			return _CodeFont = new FontFamily(fontName);
 		}
 
 		static bool IsInlineElementName(string name) {

@@ -286,7 +286,7 @@ namespace Codist.NaviBar
 										_Menu.Add(item);
 										item.Content
 											.Append("#endregion ").Append(d.GetDeclarationSignature())
-											.Foreground = ThemeHelper.SystemGrayTextBrush;
+											.Foreground = ThemeCache.SystemGrayTextBrush;
 									}
 								}
 								directives.RemoveAt(i);
@@ -385,7 +385,7 @@ namespace Codist.NaviBar
 				var item = new SymbolItem(_Menu);
 				_Menu.Add(item);
 				item.Content.Append("end extension")
-					.Foreground = ThemeHelper.SystemGrayTextBrush;
+					.Foreground = ThemeCache.SystemGrayTextBrush;
 			}
 
 			void AddVariables(SeparatedSyntaxList<VariableDeclaratorSyntax> fields, bool isExternal, int pos) {

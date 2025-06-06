@@ -140,13 +140,13 @@ namespace Codist.SmartBars
 		static ContextMenu SetupContextMenu(Button btn) {
 			var m = new ContextMenu {
 				Resources = SharedDictionaryManager.ContextMenu,
-				Foreground = ThemeHelper.ToolWindowTextBrush,
+				Foreground = ThemeCache.ToolWindowTextBrush,
 				IsEnabled = true,
 				PlacementTarget = btn,
 				Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom,
 				IsOpen = true
 			};
-			m.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
+			m.SetBackgroundForCrispImage(ThemeCache.TitleBackgroundColor);
 			return m;
 		}
 
@@ -466,7 +466,7 @@ namespace Codist.SmartBars
 				BorderThickness = WpfHelper.TinyMargin;
 				Content = VsImageHelper.GetImage(imageId, (int)(VsImageHelper.DefaultIconSize * bar.View.ZoomFactor())).WrapMargin(WpfHelper.SmallMargin);
 				this.InheritStyle<Button>(SharedDictionaryManager.ThemedControls);
-				this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
+				this.SetBackgroundForCrispImage(ThemeCache.TitleBackgroundColor);
 				Click += CommandButton_Click;
 				MouseRightButtonUp += CommandButton_MouseRightButtonUp;
 			}

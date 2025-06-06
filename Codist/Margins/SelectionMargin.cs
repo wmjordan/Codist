@@ -73,7 +73,7 @@ namespace Codist.Margins
 		}
 
 		Brush GetMarginBrush() {
-			return (_EditorFormatMap.GetProperties(FormatName).Get<Brush>(EditorFormatDefinition.BackgroundBrushId) ?? ThemeHelper.FileTabProvisionalSelectionBrush).Alpha(WpfHelper.DimmedOpacity);
+			return (_EditorFormatMap.GetProperties(FormatName).Get<Brush>(EditorFormatDefinition.BackgroundBrushId) ?? ThemeCache.FileTabProvisionalSelectionBrush).Alpha(WpfHelper.DimmedOpacity);
 		}
 
 		void TextView_SelectionChanged(object sender, EventArgs args) {

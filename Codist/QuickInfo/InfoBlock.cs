@@ -484,7 +484,7 @@ namespace Codist.QuickInfo
 		public string Text { get; }
 
 		public override UIElement ToUI() {
-			return new ThemedTipText(Text) { FontSize = ThemeHelper.ToolTipFontSize * 2 };
+			return new ThemedTipText(Text) { FontSize = ThemeCache.ToolTipFontSize * 2 };
 		}
 	}
 
@@ -525,8 +525,8 @@ namespace Codist.QuickInfo
 				Children = {
 					new ThemedTipText(R.T_Chars, true) { Margin = WpfHelper.GlyphMargin, TextAlignment = TextAlignment.Right },
 					new ThemedTipText(R.T_HashCode, true) { Margin = WpfHelper.GlyphMargin, TextAlignment = TextAlignment.Right }.SetValue(Grid.SetRow, 1),
-					new ThemedTipText(Text.Length.ToString()) { Background = ThemeHelper.TextBoxBackgroundBrush.Alpha(0.5), Foreground = ThemeHelper.TextBoxBrush, Padding = WpfHelper.SmallHorizontalMargin }.WrapBorder(ThemeHelper.TextBoxBorderBrush, WpfHelper.TinyMargin).SetValue(Grid.SetColumn, 1),
-					new ThemedTipText(Text.GetHashCode().ToString()) { Background = ThemeHelper.TextBoxBackgroundBrush.Alpha(0.5), Foreground = ThemeHelper.TextBoxBrush, Padding = WpfHelper.SmallHorizontalMargin }.WrapBorder(ThemeHelper.TextBoxBorderBrush, WpfHelper.TinyMargin).SetValue(Grid.SetRow, 1).SetValue(Grid.SetColumn, 1),
+					new ThemedTipText(Text.Length.ToString()) { Background = ThemeCache.TextBoxBackgroundBrush.Alpha(0.5), Foreground = ThemeCache.TextBoxBrush, Padding = WpfHelper.SmallHorizontalMargin }.WrapBorder(ThemeCache.TextBoxBorderBrush, WpfHelper.TinyMargin).SetValue(Grid.SetColumn, 1),
+					new ThemedTipText(Text.GetHashCode().ToString()) { Background = ThemeCache.TextBoxBackgroundBrush.Alpha(0.5), Foreground = ThemeCache.TextBoxBrush, Padding = WpfHelper.SmallHorizontalMargin }.WrapBorder(ThemeCache.TextBoxBorderBrush, WpfHelper.TinyMargin).SetValue(Grid.SetRow, 1).SetValue(Grid.SetColumn, 1),
 				},
 				Margin = WpfHelper.MiddleBottomMargin
 			};
@@ -534,11 +534,11 @@ namespace Codist.QuickInfo
 				g.RowDefinitions.Add(new RowDefinition());
 				g.Children.Add(new ThemedTipText(R.T_Text, true) { Margin = WpfHelper.GlyphMargin, TextAlignment = TextAlignment.Right }.SetValue(Grid.SetRow, 2));
 				g.Children.Add(new ThemedTipText(Text) {
-					Background = ThemeHelper.TextBoxBackgroundBrush.Alpha(0.5),
-					Foreground = ThemeHelper.TextBoxBrush,
+					Background = ThemeCache.TextBoxBackgroundBrush.Alpha(0.5),
+					Foreground = ThemeCache.TextBoxBrush,
 					Padding = WpfHelper.SmallHorizontalMargin,
-					FontFamily = ThemeHelper.CodeTextFont
-				}.WrapBorder(ThemeHelper.TextBoxBorderBrush, WpfHelper.TinyMargin).SetValue(Grid.SetRow, 2).SetValue(Grid.SetColumn, 1));
+					FontFamily = ThemeCache.CodeTextFont
+				}.WrapBorder(ThemeCache.TextBoxBorderBrush, WpfHelper.TinyMargin).SetValue(Grid.SetRow, 2).SetValue(Grid.SetColumn, 1));
 			}
 			return g;
 		}

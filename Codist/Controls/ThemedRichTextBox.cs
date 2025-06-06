@@ -9,9 +9,9 @@ namespace Codist.Controls
 	{
 		public ThemedRichTextBox(bool readOnly) {
 			BorderThickness = WpfHelper.NoMargin;
-			Background = ThemeHelper.DocumentPageBrush;
-			Foreground = ThemeHelper.DocumentTextBrush;
-			FontFamily = ThemeHelper.CodeTextFont;
+			Background = ThemeCache.DocumentPageBrush;
+			Foreground = ThemeCache.DocumentTextBrush;
+			FontFamily = ThemeCache.CodeTextFont;
 			IsDocumentEnabled = true;
 			IsReadOnly = readOnly;
 			IsReadOnlyCaretVisible = true;

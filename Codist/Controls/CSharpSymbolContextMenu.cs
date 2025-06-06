@@ -18,8 +18,8 @@ namespace Codist.Controls
 
 		public CSharpSymbolContextMenu(ISymbol symbol, SyntaxNode node, SemanticContext semanticContext) {
 			Resources = SharedDictionaryManager.ContextMenu;
-			Foreground = ThemeHelper.ToolWindowTextBrush;
-			this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
+			Foreground = ThemeCache.ToolWindowTextBrush;
+			this.SetBackgroundForCrispImage(ThemeCache.TitleBackgroundColor);
 			_Host = new UIHost(symbol, node, semanticContext);
 		}
 

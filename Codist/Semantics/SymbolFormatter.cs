@@ -108,7 +108,7 @@ namespace Codist
 			if (cs != null) {
 				var showNs = Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.SymbolLocation) == false && cs.Kind == SymbolKind.Namespace;
 				var showContainer = showNs == false && s.Kind != SymbolKind.Namespace && cs.Kind != SymbolKind.Namespace;
-				b = new ThemedTipText { FontSize = ThemeHelper.ToolTipFontSize, FontFamily = ThemeHelper.ToolTipFont };
+				b = new ThemedTipText { FontSize = ThemeCache.ToolTipFontSize, FontFamily = ThemeCache.ToolTipFont };
 				if (showContainer) {
 					b.Append(VsImageHelper.GetImage(cs.GetImageId()).WrapMargin(WpfHelper.GlyphMargin))
 						.AddSymbol(cs, false, this)
@@ -118,7 +118,7 @@ namespace Codist
 				p.Add(b);
 
 				if (showNs && ((INamespaceSymbol)cs).IsGlobalNamespace == false) {
-					b = new ThemedTipText { FontSize = ThemeHelper.ToolTipFontSize, FontFamily = ThemeHelper.ToolTipFont }.Append(VsImageHelper.GetImage(IconIds.Namespace)
+					b = new ThemedTipText { FontSize = ThemeCache.ToolTipFontSize, FontFamily = ThemeCache.ToolTipFont }.Append(VsImageHelper.GetImage(IconIds.Namespace)
 						.WrapMargin(WpfHelper.GlyphMargin));
 					ShowContainingNamespace(symbol, b);
 					p.Add(b);
@@ -145,13 +145,13 @@ namespace Codist
 			var rt = s.GetReturnType();
 			if (rt == null) {
 				if (s.Kind == SymbolKind.Discard) {
-					p.Add(new ThemedTipText { FontSize = ThemeHelper.ToolTipFontSize, FontFamily = ThemeHelper.ToolTipFont }
+					p.Add(new ThemedTipText { FontSize = ThemeCache.ToolTipFontSize, FontFamily = ThemeCache.ToolTipFont }
 						.AddSymbol(((IDiscardSymbol)s).Type, false, this)
 						.Append($" ({R.T_Discard})"));
 				}
 			}
 			else if (s.Kind != SymbolKind.Method || ((IMethodSymbol)s).IsTypeSpecialMethod() == false) {
-				b = new ThemedTipText { FontSize = ThemeHelper.ToolTipFontSize, FontFamily = ThemeHelper.ToolTipFont }
+				b = new ThemedTipText { FontSize = ThemeCache.ToolTipFontSize, FontFamily = ThemeCache.ToolTipFont }
 					.Append(VsImageHelper.GetImage(IconIds.Return).WrapMargin(WpfHelper.GlyphMargin));
 				if (rt.TypeKind != TypeKind.Delegate) {
 					b.Append(GetRefType(s), Keyword);
@@ -208,12 +208,12 @@ namespace Codist
 				Margin = WpfHelper.MiddleBottomMargin,
 				TextWrapping = TextWrapping.Wrap,
 				Foreground = PlainText,
-				FontFamily = ThemeHelper.ToolTipFont,
-				FontSize = ThemeHelper.ToolTipFontSize
+				FontFamily = ThemeCache.ToolTipFont,
+				FontSize = ThemeCache.ToolTipFontSize
 			};
 			Format(signature.Inlines, symbol, null, true, true);
 			TextEditorWrapper.CreateFor(signature);
-			signature.Inlines.FirstInline.FontSize = ThemeHelper.ToolTipFontSize * 1.2;
+			signature.Inlines.FirstInline.FontSize = ThemeCache.ToolTipFontSize * 1.2;
 
 			switch (symbol.Kind) {
 				case SymbolKind.Property:
@@ -277,7 +277,7 @@ namespace Codist
 			panel.Opacity = TransparentLevel;
 			signature.Inlines.AddRange(new object[] {
 					new LineBreak(),
-					new InlineUIContainer (new TextBlock { Margin = WpfHelper.SmallHorizontalMargin, FontSize = ThemeHelper.ToolTipFontSize, FontFamily = ThemeHelper.ToolTipFont }
+					new InlineUIContainer (new TextBlock { Margin = WpfHelper.SmallHorizontalMargin, FontSize = ThemeCache.ToolTipFontSize, FontFamily = ThemeCache.ToolTipFont }
 						.Append(VsImageHelper.GetImage(IconIds.Obsoleted).WrapMargin(WpfHelper.GlyphMargin))
 						.Append(R.T_Deprecated))
 				});
@@ -347,8 +347,8 @@ namespace Codist
 			inlines.Add(new TextBlock {
 				Text = isProperty ? " [" : " (",
 				VerticalAlignment = VerticalAlignment.Top,
-				FontFamily = ThemeHelper.ToolTipFont,
-				FontSize = ThemeHelper.ToolTipFontSize,
+				FontFamily = ThemeCache.ToolTipFont,
+				FontSize = ThemeCache.ToolTipFontSize,
 			});
 			var pl = parameters.Length;
 			TextBlock inlineBlock = null;
@@ -623,7 +623,7 @@ namespace Codist
 		void ShowTypeParameters(StackPanel panel, ImmutableArray<ITypeParameterSymbol> tp, ImmutableArray<ITypeSymbol> ta) {
 			var tpl = tp.Length;
 			for (int i = 0; i < tpl; i++) {
-				var b = new TextBlock { TextWrapping = TextWrapping.Wrap, Foreground = ThemeHelper.ToolTipTextBrush, FontFamily = ThemeHelper.ToolTipFont, FontSize = ThemeHelper.ToolTipFontSize }
+				var b = new TextBlock { TextWrapping = TextWrapping.Wrap, Foreground = ThemeCache.ToolTipTextBrush, FontFamily = ThemeCache.ToolTipFont, FontSize = ThemeCache.ToolTipFontSize }
 					.SetGlyph(IconIds.GenericDefinition);
 				ShowTypeArgumentInfo(tp[i], ta[i], b.Inlines);
 				panel.Add(b);
@@ -639,7 +639,7 @@ namespace Codist
 		}
 
 		TextBlock ShowTypeParameterConstraints(ITypeParameterSymbol item) {
-			var b = new TextBlock { TextWrapping = TextWrapping.Wrap, Foreground = ThemeHelper.ToolTipTextBrush, FontFamily = ThemeHelper.ToolTipFont, FontSize = ThemeHelper.ToolTipFontSize }
+			var b = new TextBlock { TextWrapping = TextWrapping.Wrap, Foreground = ThemeCache.ToolTipTextBrush, FontFamily = ThemeCache.ToolTipFont, FontSize = ThemeCache.ToolTipFontSize }
 				.SetGlyph(IconIds.GenericDefinition)
 				.AddSymbol(item, false, TypeParameter)
 				.Append(": ");
@@ -1104,7 +1104,7 @@ namespace Codist
 			if (cas.Length == 0 && item.NamedArguments.Length == 0) {
 				var node = item.ApplicationSyntaxReference?.GetSyntax() as AttributeSyntax;
 				if (node?.ArgumentList?.Arguments.Count > 0) {
-					block.Add(node.ArgumentList.ToString().Render(ThemeHelper.SystemGrayTextBrush));
+					block.Add(node.ArgumentList.ToString().Render(ThemeCache.SystemGrayTextBrush));
 				}
 				block.Add("]".Render(PlainText));
 				return;

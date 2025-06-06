@@ -303,8 +303,8 @@ namespace Codist
 						HoldQuickInfo();
 						m.Closed += ReleaseQuickInfo;
 						m.CommandExecuted += DismissQuickInfo;
-						m.SetProperty(TextBlock.FontFamilyProperty, ThemeHelper.ToolTipFont)
-							.SetProperty(TextBlock.FontSizeProperty, ThemeHelper.ToolTipFontSize);
+						m.SetProperty(TextBlock.FontFamilyProperty, ThemeCache.ToolTipFont)
+							.SetProperty(TextBlock.FontSizeProperty, ThemeCache.ToolTipFontSize);
 						ContextMenu = m;
 						m.IsOpen = true;
 					}

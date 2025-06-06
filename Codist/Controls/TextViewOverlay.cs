@@ -64,7 +64,7 @@ namespace Codist.Controls
 		}
 
 		public bool AddRangeAdornment(SnapshotSpan span) {
-			return AddRangeAdornment(span, ThemeHelper.MenuHoverBackgroundColor, 1);
+			return AddRangeAdornment(span, ThemeCache.MenuHoverBackgroundColor, 1);
 		}
 		public bool AddRangeAdornment(SnapshotSpan span, Color color, double thickness) {
 			return _TextRangeAdornment.AddAdornment(span, null, new GeometryAdornment(color, _View.TextViewLines.GetMarkerGeometry(span), thickness));
@@ -293,7 +293,7 @@ namespace Codist.Controls
 				_Child = new DrawingVisual();
 				using (var context = _Child.RenderOpen()) {
 					context.DrawGeometry(new SolidColorBrush(color.Alpha(25)),
-						thickness < 0.1 ? null : new Pen(ThemeHelper.MenuHoverBorderBrush, thickness),
+						thickness < 0.1 ? null : new Pen(ThemeCache.MenuHoverBorderBrush, thickness),
 						geometry);
 				}
 				AddVisualChild(_Child);

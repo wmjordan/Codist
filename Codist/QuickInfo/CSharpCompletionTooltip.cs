@@ -162,7 +162,7 @@ namespace Codist.QuickInfo
 
 			static StackPanel Render(ImmutableArray<ISymbol> symbols, SemanticModel semanticModel, StackPanel content) {
 				var symbol = symbols[0];
-				content.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
+				content.SetBackgroundForCrispImage(ThemeCache.TitleBackgroundColor);
 				content.Add(SymbolFormatter.Instance.ShowSignature(symbol));
 				var doc = new XmlDoc(symbol, semanticModel.Compilation);
 				if (doc?.Summary?.FirstNode != null) {
