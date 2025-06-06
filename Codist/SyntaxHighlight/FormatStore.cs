@@ -1056,6 +1056,7 @@ namespace Codist.SyntaxHighlight
 					}
 					if (PendingEvents.MatchFlags(EventKind.Apply)) {
 						FiringEvent = EventKind.Apply;
+						PendingEvents = EventKind.None;
 						highlighter.Apply();
 					}
 					if (PendingEvents.MatchFlags(EventKind.Refresh)) {
