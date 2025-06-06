@@ -10,6 +10,7 @@ using GdiColor = System.Drawing.Color;
 using WpfBrush = System.Windows.Media.SolidColorBrush;
 using WpfColor = System.Windows.Media.Color;
 using WpfFontFamily = System.Windows.Media.FontFamily;
+using Task = System.Threading.Tasks.Task;
 
 namespace Codist
 {
@@ -149,6 +150,16 @@ namespace Codist
 
 		#region Cache
 		static void RefreshThemeCache() {
+			if (ThreadHelper.CheckAccess()) {
+				RefreshThemeCacheSync();
+				return;
+			}
+			"Theme cache refreshed not on UI thread".Log();
+			RefreshThemeCacheAsync().FireAndForget();
+		}
+
+		static void RefreshThemeCacheSync() {
+			ThreadHelper.ThrowIfNotOnUIThread();
 			DocumentPageColor = CommonDocumentColors.PageColorKey.GetGdiColor();
 			DocumentPageBrush = new WpfBrush(DocumentPageColor.ToWpfColor());
 			DocumentTextColor = CommonDocumentColors.PageTextColorKey.GetGdiColor();
@@ -174,11 +185,20 @@ namespace Codist
 			SystemButtonFaceColor = EnvironmentColors.SystemButtonFaceColorKey.GetWpfColor();
 			SystemThreeDFaceColor = EnvironmentColors.SystemThreeDFaceColorKey.GetWpfColor();
 			SystemGrayTextBrush = EnvironmentColors.SystemGrayTextBrushKey.GetWpfBrush();
-			UpdateToolTipFormatMap(null, EventArgs.Empty);
+			UpdateToolTipFormatMap();
 			"Theme cache refreshed".Log();
 		}
 
+		static async Task RefreshThemeCacheAsync() {
+			await SyncHelper.SwitchToMainThreadAsync(default);
+			RefreshThemeCacheSync();
+		}
+
 		static void UpdateToolTipFormatMap(object sender, EventArgs e) {
+			UpdateToolTipFormatMap();
+		}
+
+		static void UpdateToolTipFormatMap() {
 			var formatMap = __ToolTipFormatMap.DefaultTextProperties;
 			ToolTipTextBrush = formatMap.ForegroundBrush as WpfBrush;
 			ToolTipFont = formatMap.Typeface.FontFamily;
