@@ -265,6 +265,7 @@ namespace Codist.QuickInfo
 			ImmutableArray<DocumentId> linkedDocuments;
 			string docId;
 			return solution.ProjectIds.Count < 2
+				|| ctx.symbol.Kind.CeqAny(SymbolKind.Local, SymbolKind.Label, SymbolKind.ArrayType, SymbolKind.PointerType, SymbolKind.Preprocessing)
 				|| (docId = ctx.symbol.GetDeclarationId()) is null
 				|| (linkedDocuments = doc.GetLinkedDocumentIds()).Length == 0
 				? Task.FromResult<Chain<string>>(null)
