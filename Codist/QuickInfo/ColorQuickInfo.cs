@@ -9,12 +9,12 @@ namespace Codist.QuickInfo
 	sealed class ColorQuickInfo : SingletonQuickInfoSource
 	{
 		protected override Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
-			return Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Color) == false
-				? Task.FromResult<QuickInfoItem>(null)
-				: InternalGetQuickInfoItemAsync(session, cancellationToken);
+			return Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Color)
+				? Task.FromResult(InternalGetQuickInfoItem(session))
+				: Task.FromResult<QuickInfoItem>(null);
 		}
 
-		static async Task<QuickInfoItem> InternalGetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
+		static QuickInfoItem InternalGetQuickInfoItem(IAsyncQuickInfoSession session) {
 			var buffer = session.TextView.TextBuffer;
 			var snapshot = session.TextView.TextSnapshot;
 			var navigator = ServicesHelper.Instance.TextStructureNavigator.GetTextStructureNavigator(buffer);
@@ -22,7 +22,9 @@ namespace Codist.QuickInfo
 			var word = snapshot.GetText(extent);
 			var brush = ColorHelper.GetBrush(word);
 			if (brush == null) {
-				if ((extent.Length == 6 || extent.Length == 8) && extent.Span.Start > 0 && Char.IsPunctuation(snapshot.GetText(extent.Span.Start - 1, 1)[0])) {
+				if ((extent.Length.CeqAny(6, 8))
+					&& extent.Span.Start > 0
+					&& Char.IsPunctuation(snapshot.GetText(extent.Span.Start - 1, 1)[0])) {
 					word = "#" + word;
 				}
 				brush = ColorHelper.GetBrush(word);
