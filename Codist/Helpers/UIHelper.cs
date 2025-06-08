@@ -134,6 +134,7 @@ namespace Codist
 				else {
 					brush.Opacity = opacity;
 				}
+				brush.Freeze();
 			}
 			return brush;
 		}
