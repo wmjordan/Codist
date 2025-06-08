@@ -229,15 +229,9 @@ namespace Codist.QuickInfo
 				}
 			}
 			o?.ApplyClickAndGo(ctx.symbol);
-			if (ctx.Container.ItemCount == 0 && ctx.isConvertedType == false) {
-				if (ctx.symbol != null) {
-					// place holder
-					ctx.Container.Add(new ContentPresenter() { Name = "SymbolPlaceHolder" });
-					return ctx.CreateQuickInfoItem(ctx.Container);
-				}
-				return null;
-			}
-			return ctx.CreateQuickInfoItem(ctx.Container);
+			return ctx.Container.ItemCount == 0 && !ctx.isConvertedType && ctx.symbol is null
+				? null
+				: ctx.CreateQuickInfoItem(ctx.Container);
 		}
 
 		static bool ResolveNode(Context context) {
