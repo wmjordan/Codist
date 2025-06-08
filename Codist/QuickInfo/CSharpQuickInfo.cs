@@ -263,10 +263,11 @@ namespace Codist.QuickInfo
 		static Task<Chain<string>> SearchUnavailableProjectsAsync(Document doc, Context ctx) {
 			var solution = doc.Project.Solution;
 			ImmutableArray<DocumentId> linkedDocuments;
+			ISymbol symbol;
 			string docId;
 			return solution.ProjectIds.Count < 2
-				|| ctx.symbol.Kind.CeqAny(SymbolKind.Local, SymbolKind.Label, SymbolKind.ArrayType, SymbolKind.PointerType, SymbolKind.Preprocessing)
-				|| (docId = ctx.symbol.GetDeclarationId()) is null
+				|| !(symbol = ctx.symbol.GetUnderlyingSymbol()).MayHaveDocumentation()
+				|| (docId = symbol.GetDeclarationId()) is null
 				|| (linkedDocuments = doc.GetLinkedDocumentIds()).Length == 0
 				? Task.FromResult<Chain<string>>(null)
 				: SearchUnavailableProjectsAsync(docId, solution, linkedDocuments, ctx.cancellationToken);

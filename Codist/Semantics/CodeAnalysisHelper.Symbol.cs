@@ -1142,6 +1142,19 @@ namespace Codist
 			return false;
 		}
 
+		public static bool MayHaveDocumentation(this ISymbol symbol) {
+			switch (symbol.Kind) {
+				case SymbolKind.Event:
+				case SymbolKind.Field:
+				case SymbolKind.Method:
+				case SymbolKind.Property:
+				case SymbolKind.NamedType:
+				case SymbolKind.Namespace:
+					return true;
+			}
+			return false;
+		}
+
 		#region Protected/Future property accessors
 		public static int GetNullableAnnotation(this ILocalSymbol local) {
 			return local != null ? NonPublicOrFutureAccessors.GetLocalNullableAnnotation(local) : 0;
