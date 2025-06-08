@@ -22,12 +22,12 @@ namespace Codist.Controls
 		}
 
 		public ThemedButton(int imageId, object toolTip, Action onClickHandler)
-			: this(VsImageHelper.GetImage(imageId), toolTip, onClickHandler) { }
+			: this(VsImageHelper.GetImage(imageId), toolTip is string t ? new CommandToolTip(imageId, t) : toolTip, onClickHandler) { }
 		public ThemedButton(int imageId, string text, object toolTip, Action onClickHandler)
 			: this(new StackPanel {
 				Orientation = Orientation.Horizontal,
 				Children = { VsImageHelper.GetImage(imageId).WrapMargin(WpfHelper.GlyphMargin), new TextBlock { Text = text } }
-			}, toolTip, onClickHandler) { }
+			}, toolTip is string t ? new CommandToolTip(imageId, t) : toolTip, onClickHandler) { }
 
 		public ThemedButton(object content, object toolTip, Action onClickHandler)
 			: this(content, toolTip) {
@@ -124,7 +124,7 @@ namespace Codist.Controls
 					VsImageHelper.GetImage(imageId)
 				}
 			};
-			ToolTip = toolTip;
+			ToolTip = new CommandToolTip(imageId, toolTip);
 			this.ReferenceCrispImageBackground(EnvironmentColors.MainWindowActiveCaptionColorKey);
 		}
 
@@ -177,7 +177,6 @@ namespace Codist.Controls
 				item.Margin = WpfHelper.NoMargin;
 				item.BorderThickness = WpfHelper.NoMargin;
 				item.MinHeight = 10;
-				item.SetValue(ToolTipService.PlacementProperty, PlacementMode.Left);
 				_ControlPanel.Add(item);
 			}
 			return this;

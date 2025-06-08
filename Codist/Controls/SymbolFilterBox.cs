@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using CLR;
 using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Imaging;
@@ -50,7 +49,6 @@ namespace Codist.Controls
 			_FilterContainer
 				.Add(_FilterGroups)
 				.Add(new ThemedButton(IconIds.ClearFilter, R.CMD_ClearFilter, ClearFilters) { MinHeight = 10 }
-					.SetValue(ToolTipService.SetPlacement, PlacementMode.Left)
 					.ClearSpacing());
 			_Filter = filter;
 			foreach (var item in _FilterGroups) {
@@ -333,7 +331,9 @@ namespace Codist.Controls
 			}
 
 			protected ThemedToggleButton CreateButton(int imageId, string toolTip) {
-				var b = new ThemedToggleButton(imageId, toolTip).ClearSpacing();
+				var b = new ThemedToggleButton(imageId, toolTip)
+					.ClearSpacing()
+					.SetTipOptions();
 				b.Checked += UpdateFilterValueHandler;
 				b.Unchecked += UpdateFilterValueHandler;
 				return b;
