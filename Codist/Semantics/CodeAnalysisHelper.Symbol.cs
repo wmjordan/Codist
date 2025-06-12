@@ -383,7 +383,7 @@ namespace Codist
 					return ((IDiscardSymbol)symbol).Type.GetUnderlyingSymbol();
 				case SymbolKind.Method:
 					return ((IMethodSymbol)symbol).MethodKind == MethodKind.BuiltinOperator && symbol.ContainingType != null
-						? symbol.ContainingType.GetMembers(symbol.Name).FirstOrDefault()
+						? (symbol.ContainingType.GetMembers(symbol.Name).FirstOrDefault() ?? symbol)
 						: symbol;
 			}
 			return symbol;
