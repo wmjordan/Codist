@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using CLR;
-using Codist.Controls;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -189,15 +188,22 @@ namespace Codist.QuickInfo
 		}
 
 		static void ProcessThrowKeyword(Context ctx) {
+			ExpressionSyntax throwExpr;
 			if ((ctx.node = ctx.token.Parent) is ThrowStatementSyntax t) {
 				// do not use SetSymbol which prefers ConvertedType,
 				// which will be Exception instead of concrete exception
-				ctx.symbol = ctx.semanticModel.GetTypeInfo(t.Expression).Type;
+				throwExpr = t.Expression ?? t.FirstAncestorOrSelf<CatchClauseSyntax>()?.Declaration?.Type;
 			}
 			else if (ctx.node is ThrowExpressionSyntax te) {
-				ctx.symbol = ctx.semanticModel.GetTypeInfo(te.Expression).Type;
+				if ((throwExpr = te.Expression)?.IsMissing != false) {
+					throwExpr = te.FirstAncestorOrSelf<CatchClauseSyntax>()?.Declaration?.Type;
+				}
 			}
-			if (ctx.symbol != null) {
+			else {
+				return;
+			}
+			if (throwExpr != null
+				&& (ctx.symbol = ctx.semanticModel.GetTypeInfo(throwExpr).Type) != null) {
 				ctx.State = State.Return;
 			}
 		}
