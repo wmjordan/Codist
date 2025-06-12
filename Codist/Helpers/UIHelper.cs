@@ -4,6 +4,7 @@ using GdiColor = System.Drawing.Color;
 using WpfColor = System.Windows.Media.Color;
 using WpfColors = System.Windows.Media.Colors;
 using WpfBrush = System.Windows.Media.Brush;
+using CLR;
 
 namespace Codist
 {
@@ -27,7 +28,7 @@ namespace Codist
 				goto EXIT;
 			}
 			var l = colorText.Length;
-			if (l != 7 && l != 9 && l != 3) {
+			if (!l.CeqAny(7, 9, 4, 3)) {
 				goto EXIT;
 			}
 			try {
@@ -37,6 +38,15 @@ namespace Codist
 						if (ParseByte(colorText, 1, out a)) {
 							opacity = a;
 							color = WpfColors.Transparent;
+							return;
+						}
+						break;
+					case 4:
+						if (ParseSingleByte(colorText, 1, out r)
+							&& ParseSingleByte(colorText, 2, out g)
+							&& ParseSingleByte(colorText, 3, out b)) {
+							color = WpfColor.FromRgb(r, g, b);
+							opacity = 0xFF;
 							return;
 						}
 						break;
@@ -70,6 +80,43 @@ namespace Codist
 		EXIT:
 			color = WpfColors.Transparent;
 			opacity = 0;
+		}
+
+		static bool ParseSingleByte(string text, int index, out byte value) {
+			switch (text[index]) {
+				case '0': value = 0; break;
+				case '1': value = 0x11; break;
+				case '2': value = 0x22; break;
+				case '3': value = 0x33; break;
+				case '4': value = 0x44; break;
+				case '5': value = 0x55; break;
+				case '6': value = 0x66; break;
+				case '7': value = 0x77; break;
+				case '8': value = 0x88; break;
+				case '9': value = 0x99; break;
+				case 'A':
+				case 'a':
+					value = 0xAA; break;
+				case 'B':
+				case 'b':
+					value = 0xBB; break;
+				case 'C':
+				case 'c':
+					value = 0xCC; break;
+				case 'D':
+				case 'd':
+					value = 0xDD; break;
+				case 'E':
+				case 'e':
+					value = 0xEE; break;
+				case 'F':
+				case 'f':
+					value = 0xFF; break;
+				default:
+					value = 0;
+					return false;
+			}
+			return true;
 		}
 
 		static bool ParseByte(string text, int index, out byte value) {
