@@ -67,6 +67,9 @@ namespace Codist.Controls
 			return AddRangeAdornment(span, ThemeCache.MenuHoverBackgroundColor, 1);
 		}
 		public bool AddRangeAdornment(SnapshotSpan span, Color color, double thickness) {
+			if (span.Snapshot != _View.TextSnapshot) {
+				span = span.ToTrackingSpan().GetSpan(_View.TextSnapshot);
+			}
 			return _TextRangeAdornment.AddAdornment(span, null, new GeometryAdornment(color, _View.TextViewLines.GetMarkerGeometry(span), thickness));
 		}
 		public bool SetRangeAdornment(SnapshotSpan span) {
