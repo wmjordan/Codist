@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Windows.Media;
+using CLR;
 using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
@@ -199,6 +201,105 @@ namespace Codist
 			}
 			return WpfColor.FromRgb((byte)Math.Round(r * 255.0, MidpointRounding.AwayFromZero), (byte)Math.Round(g * 255.0, MidpointRounding.AwayFromZero), (byte)Math.Round(b * 255.0, MidpointRounding.AwayFromZero));
 		}
+
+		public static SolidColorBrush ParseColorComponents(string rgbText, bool hsl = false) {
+			var parts = rgbText.Split(',');
+			if (parts.Length.IsOutside(3, 4)) {
+				return null;
+			}
+			byte x, g, b, a;
+			double s, l;
+			try {
+				if (hsl == false) {
+					if (TryParseColorComponent(parts[0], out x) // r
+							&& TryParseColorComponent(parts[1], out g)
+							&& TryParseColorComponent(parts[2], out b)) {
+						if (parts.Length != 4 || !TryParseAlphaComponent(parts[3], out a)) {
+							a = 255;
+						}
+						return new SolidColorBrush(Color.FromArgb(a, x, g, b)).MakeFrozen();
+					}
+				}
+				else {
+					if (TryParseColorComponent(parts[0], out x) // h
+							&& TryParsePercentComponent(parts[1], out s)
+							&& TryParsePercentComponent(parts[2], out l)) {
+						if (parts.Length != 4 || !TryParseAlphaComponent(parts[3], out a)) {
+							a = 255;
+						}
+						return new SolidColorBrush(FromHsl(x, s, l).Alpha(a)).MakeFrozen();
+					}
+				}
+			}
+			catch {
+				// ignore
+			}
+			return null;
+
+			bool TryParseColorComponent(string input, out byte component) {
+				if (input[input.Length - 1] == '%') {
+					if (double.TryParse(input.TrimEnd('%'), NumberStyles.Float, CultureInfo.InvariantCulture, out double percent)) {
+						double value = Math.Round(percent * 2.55); // 255 / 100 = 2.55
+						component = (byte)value.Clamp(0d, 255d);
+						return true;
+					}
+				}
+				else if (byte.TryParse(input, NumberStyles.Integer, CultureInfo.InvariantCulture, out byte value)) {
+					component = value;
+					return true;
+				}
+				component = default;
+				return false;
+			}
+
+			bool TryParsePercentComponent(string input, out double component) {
+				if (input[input.Length - 1] == '%') {
+					if (double.TryParse(input.TrimEnd('%'), NumberStyles.Float, CultureInfo.InvariantCulture, out double percent)) {
+						component = (percent / 100d).Clamp(0d, 1d);
+						return true;
+					}
+				}
+				component = default;
+				return false;
+			}
+
+			bool TryParseAlphaComponent(string input, out byte component) {
+				if (TrimIfEndOfPercent(ref input)) {
+					if (double.TryParse(input, NumberStyles.Float, CultureInfo.InvariantCulture, out double percent)) {
+						double value = Math.Round(percent * 2.55); // 255 / 100 = 2.55
+						component = (byte)value.Clamp(0d, 255d);
+						return true;
+					}
+				}
+				else if (byte.TryParse(input, NumberStyles.Integer, CultureInfo.InvariantCulture, out byte intValue)) {
+					component = intValue;
+					return true;
+				}
+				else if (double.TryParse(input, NumberStyles.Float, CultureInfo.InvariantCulture, out double floatValue)) {
+					double value = Math.Round(floatValue * 255);
+					component = (byte)value.Clamp(0d, 255d);
+					return true;
+				}
+				component = default;
+				return false;
+			}
+
+			bool TrimIfEndOfPercent(ref string input) {
+				for (int i = input.Length - 1; i >= 0; i--) {
+					switch (input[i]) {
+						case ' ':
+						case '\t': continue;
+						case '%':
+							input = input.Substring(0, i);
+							return true;
+						default:
+							return false;
+					}
+				}
+				return false;
+			}
+		}
+
 		static class CurrentResources
 		{
 			public static readonly System.Windows.ResourceDictionary Instance = System.Windows.Application.Current.Resources;

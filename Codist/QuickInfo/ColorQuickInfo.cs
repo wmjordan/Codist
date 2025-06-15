@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Media;
 using CLR;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
@@ -18,12 +19,25 @@ namespace Codist.QuickInfo
 		static QuickInfoItem InternalGetQuickInfoItem(IAsyncQuickInfoSession session) {
 			var buffer = session.TextView.TextBuffer;
 			var snapshot = session.TextView.TextSnapshot;
-			var extent = TextNavigationHelper.GetExtentOfWord(snapshot, session.GetTriggerPoint(snapshot).GetValueOrDefault());
+			var extent = TextNavigationHelper.GetExtentOfWord(snapshot, session.GetTriggerPoint(snapshot).GetValueOrDefault(), 9);
 			if (extent.Length.IsOutside(3, 9)) {
 				return null;
 			}
 			var word = snapshot.GetText(extent);
-			var brush = ColorHelper.GetBrush(word);
+			SolidColorBrush brush;
+			if (String.Equals(word, "rgb", StringComparison.OrdinalIgnoreCase)
+				|| String.Equals(word, "rgba", StringComparison.OrdinalIgnoreCase)
+				|| String.Equals(word, "hsl", StringComparison.OrdinalIgnoreCase)
+				|| String.Equals(word, "hsla", StringComparison.OrdinalIgnoreCase)) {
+				var expr = TextNavigationHelper.GetFollowingParenthesesExpression(snapshot, extent.End, Math.Min(snapshot.Length, extent.End + 64));
+				if (expr.IsEmpty) {
+					return null;
+				}
+				brush = ColorHelper.ParseColorComponents(snapshot.GetText(expr), word[0] == 'h');
+			}
+			else {
+				brush = ColorHelper.GetBrush(word);
+			}
 			if (brush == null) {
 				if ((extent.Length.CeqAny(6, 8))
 					&& extent.Start > 0
@@ -39,9 +53,7 @@ namespace Codist.QuickInfo
 
 		static class TextNavigationHelper
 		{
-			public static Span GetExtentOfWord(ITextSnapshot snapshot, SnapshotPoint position) {
-				const int MAX_LENGTH_OF_WORD = 9;
-
+			public static Span GetExtentOfWord(ITextSnapshot snapshot, SnapshotPoint position, int scope) {
 				if (position.Position.IsOutside(0, snapshot.Length - 1))
 					return default;
 
@@ -49,28 +61,28 @@ namespace Codist.QuickInfo
 				int start = line.Start, end = line.End;
 				char c;
 				if (Char.IsLetterOrDigit(c = snapshot[position])) {
-					start = FindWordStart(line, position, Math.Max(0, start - MAX_LENGTH_OF_WORD));
-					end = FindWordEnd(line, position, Math.Min(end, position.Position + MAX_LENGTH_OF_WORD));
-					return Span.FromBounds(start, end);
+					start = FindWordStart(line, position, Math.Max(0, start - scope));
 				}
 				else if (c == '#') {
 					start = position;
-					end = FindWordEnd(line, position, Math.Min(end, position.Position + MAX_LENGTH_OF_WORD));
-					return Span.FromBounds(start, end);
 				}
-				return default;
+				else {
+					return default;
+				}
+				end = FindWordEnd(line, position, Math.Min(end, position.Position + scope));
+				return Span.FromBounds(start, end);
 			}
 
 			static int FindWordStart(SnapshotSpan text, int position, int bound) {
 				int start = position;
 				char c;
-				while (--start > bound) {
-					if (Char.IsLetterOrDigit(c = text.Snapshot[start - 1])) {
+				while (start > bound) {
+					if (Char.IsLetterOrDigit(c = text.Snapshot[--start])) {
 						continue;
 					}
 					return c == '#'
-						? --start
-						: start;
+						? start
+						: start + 1;
 				}
 				return start;
 			}
@@ -81,6 +93,20 @@ namespace Codist.QuickInfo
 					end++;
 				}
 				return end;
+			}
+
+			public static Span GetFollowingParenthesesExpression(ITextSnapshot snapshot, int start, int end) {
+				start += snapshot.CountPrecedingWhitespace(start, end);
+				if (snapshot[start] != '(') {
+					return default;
+				}
+				++start;
+				for (int i = start; i < end; i++) {
+					if (snapshot[i] == ')') {
+						return Span.FromBounds(start, i);
+					}
+				}
+				return default;
 			}
 		}
 	}
