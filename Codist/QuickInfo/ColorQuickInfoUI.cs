@@ -29,6 +29,7 @@ namespace Codist.QuickInfo
 	static class ColorQuickInfoUI
 	{
 		const string PreviewPanelName = "ColorPreview";
+		static readonly SolidColorBrush __DeepDarkGray = new SolidColorBrush(WpfColor.FromRgb(0x2C, 0x2C, 0x2C)).MakeFrozen();
 
 		public static StackPanel PreviewColorProperty(IPropertySymbol symbol, bool includeVsColors) {
 			return PreviewColor(ColorHelper.GetBrush(symbol, includeVsColors));
@@ -116,6 +117,7 @@ namespace Codist.QuickInfo
 							CreateSampleBlock(brush, WpfBrushes.DarkGray),
 							CreateSampleBlock(brush, WpfBrushes.Gray),
 							CreateSampleBlock(brush, WpfBrushes.DimGray),
+							CreateSampleBlock(brush, __DeepDarkGray),
 							CreateSampleBlock(brush, WpfBrushes.Black),
 						}
 					}.MakeHorizontal(),
@@ -126,18 +128,23 @@ namespace Codist.QuickInfo
 							CreateSampleBlock(WpfBrushes.DarkGray, brush),
 							CreateSampleBlock(WpfBrushes.Gray, brush),
 							CreateSampleBlock(WpfBrushes.DimGray, brush),
+							CreateSampleBlock(__DeepDarkGray, brush),
 							CreateSampleBlock(WpfBrushes.Black, brush),
 						}
 					}.MakeHorizontal()
 				}
 			};
-			TextBlock CreateSampleBlock(Brush foreground, Brush background) {
-				return new TextBlock {
-					Text = SAMPLE,
+			Border CreateSampleBlock(Brush foreground, Brush background) {
+				return new Border {
+					BorderBrush = foreground,
+					BorderThickness = WpfHelper.TinyMargin,
 					Margin = WpfHelper.TinyMargin,
-					Padding = WpfHelper.TinyMargin,
-					Background = background,
-					Foreground = foreground
+					Child = new TextBlock {
+						Text = SAMPLE,
+						Padding = new Thickness(2),
+						Background = background,
+						Foreground = foreground,
+					}
 				};
 			}
 		}
