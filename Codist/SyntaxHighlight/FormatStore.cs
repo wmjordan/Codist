@@ -887,6 +887,7 @@ namespace Codist.SyntaxHighlight
 					changes = trace.Change(current, style, this);
 					if (changes != FormatChanges.None) {
 						$"[{_Category}] update format trace <{c}> ({trace})".Log();
+						_Traces[c] = new ChangeTrace(current);
 					}
 					else {
 						newStyle = default;
@@ -1313,7 +1314,7 @@ namespace Codist.SyntaxHighlight
 
 				void ChangeTextDecorations(ResourceDictionary current, StyleBase style, ref FormatChanges c) {
 					TextDecorationCollection td;
-					if (style?.HasLine == true) {
+					if (style?.HasLineStyle == true) {
 						var t = style.MakeTextDecorations();
 						if (t != (td = current.GetTextDecorations())
 							&& (td == null || t?.SequenceEqual(td) != true)) {
