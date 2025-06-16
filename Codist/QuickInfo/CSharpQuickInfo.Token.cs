@@ -109,6 +109,7 @@ namespace Codist.QuickInfo
 			{ SyntaxKind.XmlTextAttribute, TokenUnavailable },
 			{ SyntaxKind.XmlTextLiteralNewLineToken, TokenUnavailable },
 			{ SyntaxKind.XmlTextLiteralToken, TokenUnavailable },
+			{ SyntaxKind.ArgListKeyword, TokenUnavailable },
 		};
 
 		static void ProcessToken(Context ctx) {
