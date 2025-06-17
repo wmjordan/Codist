@@ -90,13 +90,11 @@ namespace Codist.QuickInfo
 			}
 
 			public void SetSymbol(TypeInfo typeInfo) {
-				if (typeInfo.ConvertedType.OriginallyEquals(typeInfo.Type) == false) {
-					symbol = typeInfo.ConvertedType;
-					isConvertedType = true;
-				}
-				else {
+				if (typeInfo.ConvertedType.OriginallyEquals(typeInfo.Type)) {
 					symbol = typeInfo.Type;
+					return;
 				}
+				isConvertedType = (symbol = typeInfo.ConvertedType) != null;
 			}
 
 			public QuickInfoItem CreateQuickInfoItem(object item) {

@@ -29,6 +29,8 @@ namespace Codist.QuickInfo
 			{ SyntaxKind.ExclamationEqualsToken, ProcessAsConvertedType },
 			{ SyntaxKind.EqualsEqualsToken, ProcessAsConvertedType },
 			{ SyntaxKind.EqualsToken, ProcessAsConvertedType },
+			{ SyntaxKind.CheckedKeyword, ProcessAsConvertedType },
+			{ SyntaxKind.UncheckedKeyword, ProcessAsConvertedType },
 			{ SyntaxKind.SwitchKeyword, ProcessSwitchToken },
 			{ SyntaxKind.IfKeyword, ProcessIfToken },
 			{ SyntaxKind.DoKeyword, ProcessStatementKeyword },
@@ -171,7 +173,7 @@ namespace Codist.QuickInfo
 		}
 
 		static void ProcessExtension(Context ctx) {
-			ctx.symbol = ctx.semanticModel.GetDeclaredSymbol(ctx.node = ctx.token.Parent);
+			ctx.symbol = ctx.semanticModel.GetDeclaredSymbol(ctx.node = ctx.token.Parent, ctx.cancellationToken);
 			ctx.State = State.Process;
 		}
 
@@ -204,7 +206,7 @@ namespace Codist.QuickInfo
 				return;
 			}
 			if (throwExpr != null
-				&& (ctx.symbol = ctx.semanticModel.GetTypeInfo(throwExpr).Type) != null) {
+				&& (ctx.symbol = ctx.semanticModel.GetTypeInfo(throwExpr, ctx.cancellationToken).Type) != null) {
 				ctx.State = State.Return;
 			}
 		}
@@ -485,6 +487,10 @@ namespace Codist.QuickInfo
 
 		static void ProcessAsConvertedType(Context ctx) {
 			ctx.SetSymbol(ctx.semanticModel.GetTypeInfo(ctx.token.Parent, ctx.cancellationToken));
+			MarkConvertedTypeIfSymbolNotNull(ctx);
+		}
+
+		static void MarkConvertedTypeIfSymbolNotNull(Context ctx) {
 			ctx.isConvertedType = ctx.symbol != null;
 			ctx.State = State.AsType;
 		}
@@ -494,7 +500,7 @@ namespace Codist.QuickInfo
 			ctx.node = node = ctx.token.Parent;
 			if (node.IsKind(CodeAnalysisHelper.SwitchExpressionArm) && node.Parent.IsKind(CodeAnalysisHelper.SwitchExpression)) {
 				ctx.SetSymbol(ctx.semanticModel.GetTypeInfo(node.Parent, ctx.cancellationToken));
-				var patternType = ctx.semanticModel.GetTypeInfo(node.GetSwitchExpressionArmPattern());
+				var patternType = ctx.semanticModel.GetTypeInfo(node.GetSwitchExpressionArmPattern(), ctx.cancellationToken);
 				if (patternType.ConvertedType != null) {
 					var typeInfo = new BlockItem(IconIds.Input).AddSymbol(patternType.ConvertedType, null, __SymbolFormatter);
 					if (patternType.ConvertedType.Equals(patternType.Type) == false) {
@@ -504,15 +510,13 @@ namespace Codist.QuickInfo
 					}
 					ctx.Container.Add(typeInfo);
 				}
-				ctx.isConvertedType = ctx.symbol != null;
-				ctx.State = State.AsType;
+				MarkConvertedTypeIfSymbolNotNull(ctx);
 			}
 		}
 
 		static void ProcessAsBoolean(Context ctx) {
 			ctx.symbol = ctx.semanticModel.Compilation.GetSpecialType(SpecialType.System_Boolean);
-			ctx.isConvertedType = ctx.symbol != null;
-			ctx.State = State.AsType;
+			MarkConvertedTypeIfSymbolNotNull(ctx);
 		}
 
 		static void ProcessAsType(Context ctx) {
