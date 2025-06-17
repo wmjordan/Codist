@@ -154,7 +154,7 @@ namespace Codist
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static bool IsHexBinChar(this char ch) {
+		static bool IsHexBinChar(int ch) {
 			const long Mask = 0b111_1110_00000000_00000000_00000000_01111110_00000011_11111111;
 			var n = unchecked((ushort)(ch - '0'));
 			return (Mask & (1L << n) & ~((63 - n) >> 63)) != 0;
@@ -163,7 +163,7 @@ namespace Codist
 			int high = chars[0];
 			int low = chars[1];
 
-			if (!IsHexBinChar((char)high) || !IsHexBinChar((char)low)) {
+			if (!IsHexBinChar(high) || !IsHexBinChar(low)) {
 				value = 0;
 				return false;
 			}
@@ -216,7 +216,8 @@ namespace Codist
 				WriteHexBin(color.B, ref __ArgbBuffer[7]);
 				return new string(__ArgbBuffer);
 			}
-			public static void WriteHexBin(byte value, ref char target) {
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			static void WriteHexBin(byte value, ref char target) {
 				Op.Cast<char, int>(ref target) = __HexBin[value];
 			}
 		}
