@@ -111,7 +111,10 @@ namespace Codist.QuickInfo
 			{ SyntaxKind.XmlTextAttribute, TokenUnavailable },
 			{ SyntaxKind.XmlTextLiteralNewLineToken, TokenUnavailable },
 			{ SyntaxKind.XmlTextLiteralToken, TokenUnavailable },
-			{ SyntaxKind.ArgListKeyword, TokenUnavailable },
+			{ SyntaxKind.ArgListKeyword, ProcessAsConvertedType },
+			{ SyntaxKind.MakeRefKeyword, ProcessAsConvertedType },
+			{ SyntaxKind.RefTypeKeyword, ProcessAsConvertedType },
+			{ SyntaxKind.RefValueKeyword, ProcessAsConvertedType },
 		};
 
 		static void ProcessToken(Context ctx) {
