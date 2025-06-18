@@ -577,6 +577,8 @@ namespace Codist.Taggers
 						return __Classifications.ConstructorMethod;
 					case SyntaxKind.CheckedExpression:
 					case SyntaxKind.UncheckedExpression:
+					case SyntaxKind.MakeRefExpression:
+					case SyntaxKind.RefValueExpression:
 						return __GeneralClassifications.TypeCastKeyword;
 				}
 				node = (node as BaseArgumentListSyntax
