@@ -222,6 +222,8 @@ namespace Codist
 					}
 					break;
 				case SymbolKind.Method:
+					ShowParameters(signature, symbol.GetParameters(), true, true, -1, ((IMethodSymbol)symbol).IsVararg ? ParameterListKind.ArgList : ParameterListKind.Normal);
+					break;
 				case SymbolKind.Event:
 					ShowParameters(signature, symbol.GetParameters(), true, true);
 					break;
@@ -338,14 +340,14 @@ namespace Codist
 		public TextBlock ShowParameters(TextBlock block, ImmutableArray<IParameterSymbol> parameters) {
 			return ShowParameters(block, parameters, false, false);
 		}
-		public TextBlock ShowParameters(TextBlock block, ImmutableArray<IParameterSymbol> parameters, bool showParameterName, bool showDefault, int argIndex = -1, bool isProperty = false) {
-			ShowParameters(block.Inlines, parameters, showParameterName, showDefault, argIndex, isProperty);
+		public TextBlock ShowParameters(TextBlock block, ImmutableArray<IParameterSymbol> parameters, bool showParameterName, bool showDefault, int argIndex = -1, ParameterListKind listKind = ParameterListKind.Normal) {
+			ShowParameters(block.Inlines, parameters, showParameterName, showDefault, argIndex, listKind);
 			return block;
 		}
 
-		public void ShowParameters(InlineCollection inlines, ImmutableArray<IParameterSymbol> parameters, bool showParameterName, bool showDefault, int argIndex, bool isProperty) {
+		public void ShowParameters(InlineCollection inlines, ImmutableArray<IParameterSymbol> parameters, bool showParameterName, bool showDefault, int argIndex, ParameterListKind listKind) {
 			inlines.Add(new TextBlock {
-				Text = isProperty ? " [" : " (",
+				Text = listKind == ParameterListKind.Property ? " [" : " (",
 				VerticalAlignment = VerticalAlignment.Top,
 				FontFamily = ThemeCache.ToolTipFont,
 				FontSize = ThemeCache.ToolTipFontSize,
@@ -392,7 +394,11 @@ namespace Codist
 					inlines.Add(inlineBlock);
 				}
 			}
-			inlines.Add(isProperty ? "]" : ")");
+			switch (listKind) {
+				case ParameterListKind.Property: inlines.Add("]"); break;
+				case ParameterListKind.ArgList: inlines.Append("__arglist", Keyword).Add(")"); break;
+				default: inlines.Add(")"); break;
+			}
 		}
 
 		void AddParameterModifier(InlineCollection inlines, IParameterSymbol p) {
@@ -422,7 +428,7 @@ namespace Codist
 			IMethodSymbol m;
 			ExpressionSyntax exp, init = null;
 			if (p.Parameters.Length > 0) {
-				ShowParameters(signature, p.Parameters, true, true, -1, true);
+				ShowParameters(signature, p.Parameters, true, true, -1, ParameterListKind.Property);
 			}
 			if (p.IsReadOnly) {
 				var r = p.DeclaringSyntaxReferences;
@@ -1454,5 +1460,12 @@ namespace Codist
 				Background = SystemColors.GrayTextBrush.Alpha(WpfHelper.DimmedOpacity);
 			}
 		}
+	}
+
+	enum ParameterListKind
+	{
+		Normal,
+		Property,
+		ArgList
 	}
 }

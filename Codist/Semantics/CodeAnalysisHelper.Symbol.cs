@@ -673,6 +673,9 @@ namespace Codist
 				if (m == null) {
 					return "(?)";
 				}
+				if (m.IsVararg) {
+					return "(__arglist)";
+				}
 				using (var sbr = ReusableStringBuilder.AcquireDefault(100)) {
 					var sb = sbr.Resource;
 					if (m.IsGenericMethod) {

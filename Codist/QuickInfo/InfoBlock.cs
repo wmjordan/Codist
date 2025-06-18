@@ -347,11 +347,11 @@ namespace Codist.QuickInfo
 		public ImmutableArray<IParameterSymbol> Parameters { get; }
 		public bool ShowDefault { get; set; }
 		public bool ShowParameterName { get; set; }
-		public bool IsProperty { get; set; }
+		public ParameterListKind ListKind { get; set; }
 		public int ArgumentIndex { get; set; } = -1;
 
 		public override void ToUI(InlineCollection inlines) {
-			SymbolFormatter.Instance.ShowParameters(inlines, Parameters, ShowParameterName, ShowDefault, ArgumentIndex, IsProperty);
+			SymbolFormatter.Instance.ShowParameters(inlines, Parameters, ShowParameterName, ShowDefault, ArgumentIndex, ListKind);
 		}
 	}
 
