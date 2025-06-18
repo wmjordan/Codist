@@ -596,21 +596,7 @@ namespace Codist.Taggers
 				}
 				switch (node.Kind()) {
 					case SyntaxKind.BracketedArgumentList:
-						if ((node = node.Parent).IsKind(SyntaxKind.ElementAccessExpression)) {
-							node = ((ElementAccessExpressionSyntax)node).Expression;
-							var symbol = semanticModel.GetSymbolInfo(node, cancellationToken).Symbol;
-							if (symbol != null && symbol.Kind == SymbolKind.Property) {
-								return __Classifications.Property;
-							}
-							var type = semanticModel.GetTypeInfo(node, cancellationToken).Type;
-							if (type != null) {
-								return type.TypeKind.CeqAny(TypeKind.Struct, TypeKind.Pointer)
-									? __Classifications.StructName
-									: __Classifications.ClassName;
-							}
-							return null;
-						}
-						return node.IsKind(SyntaxKind.VariableDeclarator) ? __Classifications.ConstructorMethod : null;
+						return ClassifyBracketedArgumentList(semanticModel, node, cancellationToken);
 					case SyntaxKind.BracketedParameterList:
 						return node.Parent.IsKind(SyntaxKind.IndexerDeclaration)
 							? __Classifications.Property
@@ -628,6 +614,24 @@ namespace Codist.Taggers
 						return __GeneralClassifications.BranchingKeyword;
 					default:
 						return null;
+				}
+
+				ClassificationTag ClassifyBracketedArgumentList(SemanticModel sm, SyntaxNode n, CancellationToken ct) {
+					if ((n = n.Parent).IsKind(SyntaxKind.ElementAccessExpression)) {
+						n = ((ElementAccessExpressionSyntax)n).Expression;
+						var symbol = sm.GetSymbolInfo(n, ct).Symbol;
+						if (symbol != null && symbol.Kind == SymbolKind.Property) {
+							return __Classifications.Property;
+						}
+						var type = sm.GetTypeInfo(n, ct).Type;
+						if (type != null) {
+							return type.TypeKind.CeqAny(TypeKind.Struct, TypeKind.Pointer)
+								? __Classifications.StructName
+								: __Classifications.ClassName;
+						}
+						return null;
+					}
+					return n.IsKind(SyntaxKind.VariableDeclarator) ? __Classifications.ConstructorMethod : null;
 				}
 			}
 			#endregion
