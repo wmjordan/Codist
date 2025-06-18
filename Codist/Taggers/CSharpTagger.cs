@@ -317,7 +317,8 @@ namespace Codist.Taggers
 				var node = token.Parent;
 				if (node.IsKind(SyntaxKind.SimpleAssignmentExpression)) {
 					var a = (AssignmentExpressionSyntax)node;
-					if (ctx.semanticModel.GetTypeInfo(a.Left, ctx.cancellationToken).Type.OriginallyEquals(ctx.semanticModel.GetTypeInfo(a.Right, ctx.cancellationToken).Type)) {
+					if ((node = a.Right).IsAnyKind(SyntaxKind.NullLiteralExpression, SyntaxKind.DefaultLiteralExpression)
+						|| ctx.semanticModel.GetTypeInfo(a.Left, ctx.cancellationToken).Type.OriginallyEquals(ctx.semanticModel.GetTypeInfo(node, ctx.cancellationToken).Type)) {
 						return;
 					}
 				}
