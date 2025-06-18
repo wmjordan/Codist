@@ -20,13 +20,13 @@ namespace Codist.SyntaxHighlight
 		}
 		public StyleAttribute(string foreColor) {
 			UIHelper.ParseColor(foreColor, out var c, out var o);
-			ForeColor = c.Alpha(o);
+			ForeColor = o != 0 ? c.Alpha(o) : c;
 		}
 		public StyleAttribute(string foreColor, string backColor) {
 			UIHelper.ParseColor(foreColor, out var c, out var o);
-			ForeColor = c.Alpha(o);
+			ForeColor = o != 0 ? c.Alpha(o) : c;
 			UIHelper.ParseColor(backColor, out c, out o);
-			BackColor = c.Alpha(o);
+			BackColor = o != 0 ? c.Alpha(o) : c;
 		}
 	}
 }
