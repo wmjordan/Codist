@@ -3,6 +3,17 @@ using System.Collections.Generic;
 
 namespace TestProject.Methods.Parameter;
 
+class ArgList
+{
+	public static void PrintFormatted(__arglist) {
+		var args = new ArgIterator(__arglist);
+		while (args.GetRemainingCount() > 0) {
+			var arg = TypedReference.ToObject(args.GetNextArg());
+			Console.WriteLine(arg);
+		}
+	}
+}
+
 class DefaultParams
 {
 	public void Method(int value, int optional = 0, params int[] others) {
