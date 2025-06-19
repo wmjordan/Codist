@@ -335,7 +335,7 @@ namespace Codist
 			}
 
 			void ReleaseResources() {
-				SyncHelper.CancelAndDispose(ref _ParserBreaker, false);
+				_ParserBreaker.CancelAndDispose();
 				if (_Buffer != null) {
 					UnsubscribeBufferEvents(_Buffer);
 					lock (_Container._SyncObj) {

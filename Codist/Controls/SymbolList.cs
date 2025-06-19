@@ -754,8 +754,8 @@ namespace Codist.Controls
 				SemanticContext = null;
 				IconProvider = null;
 				ExtIconProvider = null;
-				SyncHelper.CancelAndDispose(ref _ContextMenuCancellationTokenSource, false);
-				SyncHelper.CancelAndDispose(ref _ToolTipCancellationTokenSource, false);
+				_ContextMenuCancellationTokenSource.CancelAndDispose();
+				_ToolTipCancellationTokenSource.CancelAndDispose();
 			}
 		}
 	}

@@ -157,7 +157,7 @@ namespace Codist.QuickInfo
 			}
 
 			void AfterUnload(object sender, EventArgs e) {
-				SyncHelper.CancelAndDispose(ref _CTS, false);
+				_CTS.CancelAndDispose();
 			}
 
 			static StackPanel Render(ImmutableArray<ISymbol> symbols, SemanticModel semanticModel, StackPanel content) {

@@ -485,7 +485,7 @@ namespace Codist.NaviBar
 			(sender as ITextView).Closed -= View_Closed;
 			_SemanticContext = null;
 			_Buffer = null;
-			SyncHelper.CancelAndDispose(ref _CancellationSource, false);
+			_CancellationSource.CancelAndDispose();
 			if (_SymbolList != null) {
 				DisposeSymbolList(_SymbolList);
 				_SymbolList = null;

@@ -151,7 +151,7 @@ namespace Codist.Margins
 				Config.UnregisterUpdateHandler(UpdateCSharpMembersMarginConfig);
 				_MemberMarker.Dispose();
 				_SymbolReferenceMarker.Dispose();
-				SyncHelper.CancelAndDispose(ref _Cancellation, false);
+				_Cancellation.CancelAndDispose();
 				_Parser.Dispose();
 				_Parser = null;
 				_MemberMarker = null;
@@ -573,7 +573,7 @@ namespace Codist.Margins
 			internal void Dispose() {
 				if (_Margin != null) {
 					UnhookEvents();
-					SyncHelper.CancelAndDispose(ref _Cancellation, false);
+					_Cancellation.CancelAndDispose();
 					_ScrollBar = null;
 					_Margin = null;
 					_References = null;

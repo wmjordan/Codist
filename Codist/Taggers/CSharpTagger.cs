@@ -91,7 +91,7 @@ namespace Codist.Taggers
 				return;
 			}
 			_PendingSpans = null;
-			SyncHelper.CancelAndDispose(ref _RenderBreaker, false);
+			_RenderBreaker.CancelAndDispose();
 			ITextBufferParser t = _Parser;
 			if (t != null) {
 				t.Dispose();

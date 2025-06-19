@@ -72,6 +72,12 @@ namespace Codist
 				c.Dispose();
 			}
 		}
+
+		[DebuggerStepThrough]
+		public static void CancelAndDispose(this CancellationTokenSource tokenSource) {
+			CancelAndDispose(ref tokenSource, false);
+		}
+
 		[DebuggerStepThrough]
 		public static CancellationToken GetToken(this CancellationTokenSource tokenSource) {
 			if (tokenSource == null) {
