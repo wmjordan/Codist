@@ -72,11 +72,11 @@ namespace Codist.Commands
 			var startText = args.TypedChar.ToString();
 			var history = ServicesHelper.Instance.TextUndoHistoryService.GetHistory(view.TextBuffer);
 			var trim = Config.Instance.AutoSurroundSelectionOptions.MatchFlags(AutoSurroundSelectionOptions.Trim);
-			using (var transaction = history.CreateTransaction(startText + R.T_AutoSurround + endText))
+			using (var transaction = history.CreateTransaction(R.T_AutoSurround + startText + endText))
 			using (var edit = view.TextBuffer.CreateEdit()) {
 				foreach (var span in oldSpans) {
 					if (trim
-						&& span.IsEmpty == false
+						&& span.Length != 0
 						&& TryTrimSpan(span, out var trimStart, out var trimEnd)) {
 						edit.Delete(Span.FromBounds(span.Start.Position, trimStart));
 						edit.Delete(Span.FromBounds(trimEnd, span.End.Position));
