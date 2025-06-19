@@ -36,7 +36,7 @@ namespace Codist
 				byte a, r, g, b;
 				switch (l) {
 					case 3:
-						if (ParseByte(colorText.AsSpan(1), out a)) {
+						if (ParseByte(colorText, 1, out a)) {
 							opacity = a;
 							color = WpfColors.Transparent;
 							return;
@@ -52,19 +52,19 @@ namespace Codist
 						}
 						break;
 					case 7:
-						if (ParseByte(colorText.AsSpan(1), out r)
-							&& ParseByte(colorText.AsSpan(3), out g)
-							&& ParseByte(colorText.AsSpan(5), out b)) {
+						if (ParseByte(colorText, 1, out r)
+							&& ParseByte(colorText, 3, out g)
+							&& ParseByte(colorText, 5, out b)) {
 							color = WpfColor.FromRgb(r, g, b);
 							opacity = 0;
 							return;
 						}
 						break;
 					case 9:
-						if (ParseByte(colorText.AsSpan(1), out a)
-							&& ParseByte(colorText.AsSpan(3), out r)
-							&& ParseByte(colorText.AsSpan(5), out g)
-							&& ParseByte(colorText.AsSpan(7), out b)) {
+						if (ParseByte(colorText, 1, out a)
+							&& ParseByte(colorText, 3, out r)
+							&& ParseByte(colorText, 5, out g)
+							&& ParseByte(colorText, 7, out b)) {
 							if (a == 0) {
 								goto EXIT;
 							}
@@ -159,9 +159,9 @@ namespace Codist
 			var n = unchecked((ushort)(ch - '0'));
 			return (Mask & (1L << n) & ~((63 - n) >> 63)) != 0;
 		}
-		static bool ParseByte(ReadOnlySpan<char> chars, out byte value) {
-			int high = chars[0];
-			int low = chars[1];
+		static bool ParseByte(string text, int offset, out byte value) {
+			int high = text[offset];
+			int low = text[offset + 1];
 
 			if (!IsHexBinChar(high) || !IsHexBinChar(low)) {
 				value = 0;
