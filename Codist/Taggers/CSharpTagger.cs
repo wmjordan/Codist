@@ -1131,7 +1131,7 @@ namespace Codist.Taggers
 					: node.IsKind(SyntaxKind.SimpleBaseType) ? semanticModel.GetTypeInfo(((SimpleBaseTypeSyntax)node).Type, cancellationToken).Type
 					: node.IsKind(SyntaxKind.TypeConstraint) ? semanticModel.GetTypeInfo(((TypeConstraintSyntax)node).Type, cancellationToken).Type
 					: node.IsKind(SyntaxKind.ExpressionStatement) ? semanticModel.GetSymbolInfo(((ExpressionStatementSyntax)node).Expression, cancellationToken).CandidateSymbols.FirstOrDefault()
-					: node.IsKind(SyntaxKind.IdentifierName) && parent.Parent.IsKind(SyntaxKind.UsingDirective) ? semanticModel.GetDeclaredSymbol(parent.Parent)?.GetAliasTarget()
+					: node.IsKind(SyntaxKind.IdentifierName) && parent.Parent.IsKind(SyntaxKind.UsingDirective) ? semanticModel.GetDeclaredSymbol(parent.Parent, cancellationToken)?.GetAliasTarget()
 					: semanticModel.GetSymbolInfo(node, cancellationToken).CandidateSymbols.FirstOrDefault();
 			}
 			#endregion
@@ -1197,7 +1197,7 @@ namespace Codist.Taggers
 			}
 		}
 
-		class AttributeListProber
+		sealed class AttributeListProber
 		{
 			[ThreadStatic]
 			static AttributeListProber __Instance;
