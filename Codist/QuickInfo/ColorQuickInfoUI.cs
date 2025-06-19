@@ -62,16 +62,18 @@ namespace Codist.QuickInfo
 								: null;
 					}
 					break;
-				case nameof(WpfColor.FromRgb): {
-						if (methodSymbol.ContainingType.Name != nameof(Color)) {
-							break;
-						}
-						args = GetMethodArguments(semanticModel, node);
-						values = GetColorMethodArguments(semanticModel, args, 3);
-						return values != null
-							? PreviewColor(new SolidColorBrush(WpfColor.FromRgb(values[0], values[1], values[2])))
-							: null;
+				case nameof(WpfColor.FromRgb):
+					if (methodSymbol.ContainingType.Name != nameof(Color)) {
+						break;
 					}
+					args = GetMethodArguments(semanticModel, node);
+					if (args.Count < 3) {
+						break;
+					}
+					values = GetColorMethodArguments(semanticModel, args, 3);
+					return values != null
+						? PreviewColor(new SolidColorBrush(WpfColor.FromRgb(values[0], values[1], values[2])))
+						: null;
 			}
 			return null;
 		}
