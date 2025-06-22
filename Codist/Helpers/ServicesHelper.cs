@@ -2,6 +2,7 @@
 using System.ComponentModel.Composition;
 using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Language.Intellisense;
+using Microsoft.VisualStudio.Language.Intellisense.AsyncCompletion;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Formatting;
@@ -62,6 +63,9 @@ namespace Codist
 
 		[Import]
 		public IAsyncQuickInfoBroker QuickInfoBroker { get; private set; }
+
+		[Import]
+		public IAsyncCompletionBroker CompletionBroker { get; private set; }
 
 		[Import]
 		public Microsoft.VisualStudio.Text.Adornments.IToolTipService ToolTipService { get; private set; }

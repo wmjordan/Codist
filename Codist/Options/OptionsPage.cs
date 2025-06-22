@@ -1415,7 +1415,7 @@ namespace Codist.Options
 	}
 
 	[Guid("496442FC-A36A-4C7A-B312-5D84B2631565")]
-	sealed class AutoSurroundSelectionPage : OptionsPage
+	sealed class AutoPunctuationPage : OptionsPage
 	{
 		PageControl _Child;
 
@@ -1424,28 +1424,42 @@ namespace Codist.Options
 
 		sealed class PageControl : OptionsPageContainer
 		{
-			readonly OptionBox<AutoSurroundSelectionOptions> _TrimSelection;
+			readonly OptionBox<PunctuationOptions> _TrimSelection, _MethodParentheses, _ShowParameterInfo;
 
 			public PageControl(OptionsPage page) : base(page) {
+				var options = Config.Instance.PunctuationOptions;
 				AddPage(R.OT_General,
 					new Note(R.OT_AutoSurroundSelectionNote),
 
-					_TrimSelection = Config.Instance.AutoSurroundSelectionOptions.CreateOptionBox(AutoSurroundSelectionOptions.Trim, UpdateConfig, R.OT_TrimBeforeSurround)
+					new TitleBox(R.OT_AllLanguages),
+					options.CreateOptionBox(PunctuationOptions.Trim, UpdateConfig, R.OT_TrimBeforeSurround)
 						.SetLazyToolTip(() => R.OT_TrimBeforeSurroundTip)
+						.Set(ref _TrimSelection),
+
+					new TitleBox(R.OT_CSharp),
+					options.CreateOptionBox(PunctuationOptions.MethodParentheses, UpdateConfig, R.OT_AppendParenthesesOnMethodName).Set(ref _MethodParentheses),
+					options.CreateOptionBox(PunctuationOptions.ShowParameterInfo, UpdateConfig, R.OT_ShowParameterInfo)
+						.SetLazyToolTip(() => R.OT_ShowParameterInfoTip)
+						.Set(ref _ShowParameterInfo)
 					);
+
+				_ShowParameterInfo.WrapMargin(SubOptionMargin);
+				_MethodParentheses.BindDependentOptionControls(_ShowParameterInfo);
 			}
 
 			protected override void LoadConfig(Config config) {
-				var o = config.AutoSurroundSelectionOptions;
+				var o = config.PunctuationOptions;
 				_TrimSelection.UpdateWithOption(o);
+				_MethodParentheses.UpdateWithOption(o);
+				_ShowParameterInfo.UpdateWithOption(o);
 			}
 
-			void UpdateConfig(AutoSurroundSelectionOptions options, bool set) {
+			void UpdateConfig(PunctuationOptions options, bool set) {
 				if (Page.IsConfigUpdating) {
 					return;
 				}
 				Config.Instance.Set(options, set);
-				Config.Instance.FireConfigChangedEvent(Features.None);
+				Config.Instance.FireConfigChangedEvent(Features.AutoSurround);
 			}
 		}
 	}

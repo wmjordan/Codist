@@ -63,15 +63,17 @@ namespace Codist.Commands
 		bool ProcessChar(TypeCharCommandArgs args) {
 			ITextView view = args.TextView;
 			string endText;
-			if (view.Selection.IsEmpty || (endText = GetEndTextForTypedChar(args.TypedChar)) == null) {
-				return false;
-			}
+			return !view.Selection.IsEmpty
+				&& (endText = GetEndTextForTypedChar(args.TypedChar)) != null
+				&& SurroundSelection(args, view, endText);
+		}
 
+		static bool SurroundSelection(TypeCharCommandArgs args, ITextView view, string endText) {
 			ITextSnapshot newText;
 			var oldSpans = view.Selection.SelectedSpans;
 			var startText = args.TypedChar.ToString();
 			var history = ServicesHelper.Instance.TextUndoHistoryService.GetHistory(view.TextBuffer);
-			var trim = Config.Instance.AutoSurroundSelectionOptions.MatchFlags(AutoSurroundSelectionOptions.Trim);
+			var trim = Config.Instance.PunctuationOptions.MatchFlags(PunctuationOptions.Trim);
 			using (var transaction = history.CreateTransaction(R.T_AutoSurround + startText + endText))
 			using (var edit = view.TextBuffer.CreateEdit()) {
 				foreach (var span in oldSpans) {
@@ -117,7 +119,7 @@ namespace Codist.Commands
 			return from != span.Start.Position || trimEnd != span.End.Position;
 		}
 
-		public CommandState GetCommandState(TypeCharCommandArgs args) {
+		CommandState ICommandHandler<TypeCharCommandArgs>.GetCommandState(TypeCharCommandArgs args) {
 			return CommandState.Available;
 		}
 

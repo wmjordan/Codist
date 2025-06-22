@@ -416,6 +416,18 @@ namespace Codist
 			return ifs?.Parent.IsKind(SyntaxKind.ElseClause) != true;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static int IndexOfParent(this SyntaxNode node) {
+			int p = 0;
+			foreach (var item in node.Parent.ChildNodes()) {
+				if (item == node) {
+					return p;
+				}
+				++p;
+			}
+			return p;
+		}
+
 		/// <summary>
 		/// Returns whether a <see cref="SyntaxNode"/> spans multiple lines.
 		/// </summary>

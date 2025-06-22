@@ -87,6 +87,7 @@
     <Compile Include="AutoBuildVersion\BuildSetting.cs" />
     <Compile Include="AutoBuildVersion\VersionRewriteMode.cs" />
     <Compile Include="AutoBuildVersion\VersionSetting.cs" />
+    <Compile Include="Commands\AutoParenthesisHandler.cs" />
     <Compile Include="Commands\OpenActivityLogCommand.cs" />
     <Compile Include="Commands\TransformDocumentCommand.cs" />
     <Compile Include="Commands\ShowSupportedFileTypesCommand.cs" />

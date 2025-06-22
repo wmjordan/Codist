@@ -3006,6 +3006,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Append parentheses on completing method names.
+        /// </summary>
+        internal static string OT_AppendParenthesesOnMethodName {
+            get {
+                return ResourceManager.GetString("OT_AppendParenthesesOnMethodName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Apply to code window.
         /// </summary>
         internal static string OT_ApplyToCodeWindow {
@@ -4970,6 +4979,24 @@ namespace Codist.Properties {
         internal static string OT_ShowOutputPaneAfterBuild {
             get {
                 return ResourceManager.GetString("OT_ShowOutputPaneAfterBuild", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Show parameter information.
+        /// </summary>
+        internal static string OT_ShowParameterInfo {
+            get {
+                return ResourceManager.GetString("OT_ShowParameterInfo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Displays parameter information after appending parentheses.
+        /// </summary>
+        internal static string OT_ShowParameterInfoTip {
+            get {
+                return ResourceManager.GetString("OT_ShowParameterInfoTip", resourceCulture);
             }
         }
         

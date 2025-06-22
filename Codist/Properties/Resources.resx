@@ -2954,4 +2954,13 @@ Ctrl: Direct implementation types only</value>
   <data name="T_TooManyOverloads" xml:space="preserve">
     <value>Too many overloads (&lt;N&gt;). The reset are hidden.</value>
   </data>
+  <data name="OT_AppendParenthesesOnMethodName" xml:space="preserve">
+    <value>Append parentheses on completing method names</value>
+  </data>
+  <data name="OT_ShowParameterInfo" xml:space="preserve">
+    <value>Show parameter information</value>
+  </data>
+  <data name="OT_ShowParameterInfoTip" xml:space="preserve">
+    <value>Displays parameter information after appending parentheses</value>
+  </data>
 </root>

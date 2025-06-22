@@ -2940,4 +2940,13 @@ Ctrl: 仅列出直接实现接口的类</value>
   <data name="T_TooManyOverloads" xml:space="preserve">
     <value>重载方法过多（&lt;N&gt;），剩余的不再显示</value>
   </data>
+  <data name="OT_AppendParenthesesOnMethodName" xml:space="preserve">
+    <value>自动完成方法名称后附加括号</value>
+  </data>
+  <data name="OT_ShowParameterInfo" xml:space="preserve">
+    <value>显示参数信息</value>
+  </data>
+  <data name="OT_ShowParameterInfoTip" xml:space="preserve">
+    <value>在自动附加括号后，显示方法的参数信息</value>
+  </data>
 </root>

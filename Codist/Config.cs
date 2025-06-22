@@ -72,7 +72,14 @@ namespace Codist
 		[DefaultValue(JumpListOptions.Default)]
 		public JumpListOptions JumpListOptions { get; set; } = JumpListOptions.Default;
 
-		public AutoSurroundSelectionOptions AutoSurroundSelectionOptions { get; set; }
+		[Obsolete]
+		public PunctuationOptions AutoSurroundSelectionOptions {
+			get => PunctuationOptions; set { }
+		}
+		public bool ShouldSerializeAutoSurroundSelectionOptions() => false;
+
+		[DefaultValue(PunctuationOptions.Default)]
+		public PunctuationOptions PunctuationOptions { get; set; } = PunctuationOptions.Default;
 
 		[DefaultValue(0d)]
 		public double TopSpace { get; set; }
@@ -304,7 +311,6 @@ namespace Codist
 				new SearchEngine("Google", "https://www.google.com/search?q=%s"),
 				new SearchEngine("StackOverflow", "https://stackoverflow.com/search?q=%s"),
 				new SearchEngine("GitHub", "https://github.com/search?q=%s"),
-				new SearchEngine("CodeProject", "https://www.codeproject.com/search.aspx?q=%s&x=0&y=0&sbo=kw"),
 				new SearchEngine(".NET Core Source", "https://source.dot.net/#q=%s"),
 				new SearchEngine(".NET Framework Source", "https://referencesource.microsoft.com/#q=%s"),
 			});
@@ -445,8 +451,8 @@ namespace Codist
 		internal void Set(JumpListOptions options, bool set) {
 			JumpListOptions = JumpListOptions.SetFlags(options, set);
 		}
-		internal void Set(AutoSurroundSelectionOptions options, bool set) {
-			AutoSurroundSelectionOptions = AutoSurroundSelectionOptions.SetFlags(options, set);
+		internal void Set(PunctuationOptions options, bool set) {
+			PunctuationOptions = PunctuationOptions.SetFlags(options, set);
 		}
 
 		static void LoadStyleEntries<TStyle, TStyleType> (List<TStyle> styles, bool removeFontNames)
@@ -976,10 +982,13 @@ namespace Codist
 	}
 
 	[Flags]
-	public enum AutoSurroundSelectionOptions
+	public enum PunctuationOptions
 	{
 		None,
-		Trim
+		Trim,
+		MethodParentheses = 1 << 1,
+		ShowParameterInfo = 1 << 2,
+		Default = Trim | MethodParentheses | ShowParameterInfo
 	}
 
 	public enum ScrollbarMarkerStyle
