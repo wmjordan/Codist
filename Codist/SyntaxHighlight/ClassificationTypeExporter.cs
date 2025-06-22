@@ -127,7 +127,7 @@ namespace Codist.SyntaxHighlight
 				var baseNames = type.BaseOn?.Split(__ClassificationTypeDelimiters);
 				var before = type.Before?.Split(__ClassificationTypeDelimiters) ?? [];
 				var after = type.After?.Split(__ClassificationTypeDelimiters) ?? [];
-				var orders = (before.Length > 0 && after.Length > 0) ? new List<(string, bool)>() : null;
+				var orders = (before.Length > 0 && after.Length > 0) ? new List<(string classificationType, bool before)>() : null;
 				if (orders != null) {
 					foreach (var order in before) {
 						orders.Add((order, true));
@@ -350,7 +350,7 @@ namespace Codist.SyntaxHighlight
 			public IClassificationType ClassificationType;
 			public bool Exported => ClassificationType != null;
 
-			public Entry(string name, List<string> baseNames, List<(string, bool)> orders, StyleAttribute style) {
+			public Entry(string name, List<string> baseNames, List<(string classificationType, bool before)> orders, StyleAttribute style) {
 				Name = name;
 				if (baseNames != null) {
 					for (int i = 0; i < baseNames.Count; i++) {

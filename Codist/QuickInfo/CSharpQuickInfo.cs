@@ -306,11 +306,10 @@ namespace Codist.QuickInfo
 					: semanticModel.GetQueryClauseInfo(q, cancellationToken).OperationInfo.Symbol;
 			}
 			var symbolInfo = semanticModel.GetSymbolInfo(node, cancellationToken);
-			if (symbolInfo.CandidateReason != CandidateReason.None) {
-				return (candidates = symbolInfo.CandidateSymbols).FirstOrDefault();
-			}
 			return symbolInfo.Symbol
-				?? (kind.IsDeclaration()
+				?? (symbolInfo.CandidateReason != CandidateReason.None
+				? (candidates = symbolInfo.CandidateSymbols).FirstOrDefault()
+					: kind.IsDeclaration()
 						|| kind == SyntaxKind.SingleVariableDesignation
 							&& node.Parent.IsAnyKind(SyntaxKind.DeclarationExpression, SyntaxKind.DeclarationPattern, SyntaxKind.ParenthesizedVariableDesignation)
 					? semanticModel.GetDeclaredSymbol(node, cancellationToken)
