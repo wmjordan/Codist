@@ -977,7 +977,10 @@ namespace Codist.Taggers
 						if (symbol.ContainingType?.Kind == SymbolKind.NamedType) {
 							tags.Add(itemSpan, __Classifications.NestedType);
 						}
-						if (HighlightOptions.StyleVarAsType && token.IsVarKeyword()) {
+						if (token.IsVarKeyword()) {
+							if (!HighlightOptions.StyleVarAsType) {
+								return;
+							}
 							tags.Add(itemSpan, GetTypeKindClassificationTag(((ITypeSymbol)symbol).TypeKind));
 						}
 						break;
