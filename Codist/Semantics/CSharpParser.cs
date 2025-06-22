@@ -139,12 +139,12 @@ namespace Codist
 
 			public void Ref() {
 				_Ref++;
-				$"Ref+ {_Ref} {_Name}".Log();
+				$"Ref+ {_Ref} {_Name}".Log(LogCategory.SyntaxHighlight);
 			}
 
 			internal void Release() {
 				if (Interlocked.Exchange(ref _Parser, null) != null) {
-					$"{_Name} tagger released".Log();
+					$"{_Name} tagger released".Log(LogCategory.SyntaxHighlight);
 					ReleaseResources();
 					_Ref = 0;
 				}
@@ -274,7 +274,7 @@ namespace Codist
 			}
 
 			void WorkspaceChanged(object sender, WorkspaceChangeEventArgs args) {
-				$"Workspace {args.Kind}: {args.DocumentId}".Log();
+				$"Workspace {args.Kind}: {args.DocumentId}".Log(LogCategory.SyntaxHighlight);
 				var parser = _Parser;
 				if (parser == null) {
 					return;
@@ -308,18 +308,18 @@ namespace Codist
 			void TextBuffer_ContentTypeChanged(object sender, ContentTypeChangedEventArgs e) {
 				if (_IsInteractiveWindow == false
 					&& e.AfterContentType.IsOfType(Constants.CodeTypes.CSharp) == false) {
-					$"ContentType changed to {e.AfterContentType.DisplayName}".Log();
+					$"ContentType changed to {e.AfterContentType.DisplayName}".Log(LogCategory.SyntaxHighlight);
 					Dispose();
 				}
 			}
 
 			public void Dispose() {
 				if (--_Ref > 0) {
-					$"Ref- {_Ref} {_Name}".Log();
+					$"Ref- {_Ref} {_Name}".Log(LogCategory.SyntaxHighlight);
 					return;
 				}
 				if (Interlocked.Exchange(ref _Parser, null) != null) {
-					$"{_Name} tagger disposed".Log();
+					$"{_Name} tagger disposed".Log(LogCategory.SyntaxHighlight);
 					ReleaseResources();
 				}
 			}
@@ -403,7 +403,7 @@ namespace Codist
 					throw;
 				}
 				if (Interlocked.CompareExchange(ref _State, (int)ParserState.Completed, (int)ParserState.Working) == (int)ParserState.Working) {
-					$"{snapshot.TextBuffer.GetDocument().GetDocId()} end parsing {snapshot.Version} on thread {Thread.CurrentThread.ManagedThreadId}".Log();
+					$"{snapshot.TextBuffer.GetDocument().GetDocId()} end parsing {snapshot.Version} on thread {Thread.CurrentThread.ManagedThreadId}".Log(LogCategory.SyntaxHighlight);
 					_Callback(new SemanticState(workspace, model, snapshot, document));
 					Interlocked.CompareExchange(ref _State, (int)ParserState.Idle, (int)ParserState.Completed);
 				}

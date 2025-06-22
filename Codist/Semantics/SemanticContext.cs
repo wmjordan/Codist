@@ -246,7 +246,7 @@ namespace Codist
 				return true;
 			}
 			catch (NullReferenceException) {
-				System.Diagnostics.Debug.WriteLine("Update semantic context failed.");
+				"Update semantic context failed.".Log();
 			}
 			return false;
 		}

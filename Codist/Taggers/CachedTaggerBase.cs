@@ -41,7 +41,7 @@ namespace Codist.Taggers
 
 		// perform a full parse for the first time
 		IEnumerable<ITagSpan<IClassificationTag>> ParseSnapshot() {
-			"Full parse".Log();
+			"Full parse".Log(LogCategory.SyntaxHighlight);
 			var snapshot = _TextView.TextSnapshot;
 			foreach (var span in snapshot.Lines.Select(l => l.Extent)) {
 				Parse(span, _TaggedContents);

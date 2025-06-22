@@ -108,7 +108,7 @@ namespace Codist.SyntaxHighlight
 			CustomizedClassificationTypes customTypes;
 			try {
 				customTypes = JsonConvert.DeserializeObject<CustomizedClassificationTypes>(File.ReadAllText(Config.CustomizedClassificationTypePath));
-				(Config.CustomizedClassificationTypePath + " loaded").Log();
+				(Config.CustomizedClassificationTypePath + " loaded").Log(LogCategory.FormatStore);
 			}
 			catch (Exception ex) {
 				ex.Log();
@@ -390,7 +390,7 @@ namespace Codist.SyntaxHighlight
 
 			public void MarkExported(IClassificationType classificationType) {
 				ClassificationType = classificationType;
-				$"Export classification type: {Name}".Log();
+				$"Export classification type: {Name}".Log(LogCategory.FormatStore);
 			}
 
 			public override string ToString() {

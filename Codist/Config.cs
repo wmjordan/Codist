@@ -177,7 +177,7 @@ namespace Codist
 				return config;
 			}
 			try {
-				"Begin load config".Log();
+				"Begin load config".Log(LogCategory.Config);
 				var config = InternalLoadConfig(ConfigPath, StyleFilters.None);
 				if (System.Version.TryParse(config.Version, out var v) == false
 					|| v < System.Version.Parse(CurrentVersion)) {
@@ -208,7 +208,7 @@ namespace Codist
 			if (Interlocked.Exchange(ref __LoadingConfig, 1) != 0) {
 				return;
 			}
-			$"Load config: {configPath}".Log();
+			$"Load config: {configPath}".Log(LogCategory.Config);
 			try {
 				Instance = InternalLoadConfig(configPath, styleFilter);
 				__Loaded?.Invoke(Instance);
@@ -280,7 +280,7 @@ namespace Codist
 				&& Application.Current.MainWindow.Visibility == Visibility.Visible) {
 				UpdateDisplay(config);
 			}
-			"Config loaded".Log();
+			"Config loaded".Log(LogCategory.Config);
 			return config;
 		}
 
@@ -356,7 +356,7 @@ namespace Codist
 						Converters = { new Newtonsoft.Json.Converters.StringEnumConverter() }
 					}));
 				if (path == ConfigPath) {
-					"Config saved".Log();
+					"Config saved".Log(LogCategory.Config);
 				}
 			}
 			catch (Exception ex) {

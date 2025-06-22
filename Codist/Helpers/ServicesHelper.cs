@@ -89,7 +89,7 @@ namespace Codist
 
 		static void PostInitialization(SyntaxHighlight.ClassificationTypeExporter cte) {
 			#region Create classification types for syntax highlight
-			"Registering classification types".Log();
+			"Registering classification types".Log(LogCategory.FormatStore);
 			cte.RegisterClassificationTypes<SyntaxHighlight.SymbolMarkerStyleTypes>();
 			cte.RegisterClassificationTypes<SyntaxHighlight.CommentStyleTypes>();
 			cte.RegisterClassificationTypes<SyntaxHighlight.CSharpStyleTypes>();
@@ -99,7 +99,7 @@ namespace Codist
 			//e.RegisterClassificationTypes<SyntaxHighlight.CppStyleTypes>();
 			cte.RegisterCustomizedClassificationTypes();
 			cte.ExportClassificationTypes();
-			"Classification types exported".Log();
+			"Classification types exported".Log(LogCategory.FormatStore);
 			#endregion
 		}
 	}

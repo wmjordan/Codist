@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Threading;
+using CLR;
 
 namespace Codist
 {
@@ -13,12 +13,21 @@ namespace Codist
 	static class LogHelper
 	{
 		static readonly int __PSId = Process.GetCurrentProcess().Id;
-		static readonly string __LogPath = InitLogPath($"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\\{Constants.NameOfMe}\\log.ini");
+		static LogCategory __Categories;
+		static readonly string __LogPath = InitLogConfig($"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\\{Constants.NameOfMe}\\log.ini");
 		static int __Sync;
+
+		public static LogCategory Categories {
+			get => __Categories;
+			set => __Categories = value;
+		}
 
 		[Conditional("LOG")]
 		[Conditional("DEBUG")]
-		public static void Log(this string message) {
+		public static void Log(this string message, LogCategory category = LogCategory.None) {
+			if (!Categories.MatchFlags(category)) {
+				return;
+			}
 			if (__LogPath != null) {
 				WriteLog(message);
 			}
@@ -74,14 +83,45 @@ namespace Codist
 			}
 		}
 
-		static string InitLogPath(string logConfigPath) {
+		static string InitLogConfig(string logConfigPath) {
 			try {
-				return File.Exists(logConfigPath) ? File.ReadAllText(logConfigPath) : null;
+				if (!File.Exists(logConfigPath)) {
+					return default;
+				}
+				string f = null;
+				foreach (var line in File.ReadAllLines(logConfigPath)) {
+					var p = line.Split('=');
+					if (p.Length == 2) {
+						switch (p[0]) {
+							case "file": f = p[1]; break;
+							case "category":
+								switch (p[1]) {
+									case "config": __Categories |= LogCategory.Config; break;
+									case "format": __Categories |= LogCategory.FormatStore; break;
+									case "highlight": __Categories |= LogCategory.SyntaxHighlight; break;
+								}
+								break;
+							default:
+								break;
+						}
+					}
+				}
+				return f;
 			}
 			catch (Exception) {
 				// ignore
-				return null;
+				return default;
 			}
 		}
+	}
+
+	[Flags]
+	enum LogCategory
+	{
+		None,
+		Config = 1,
+		FormatStore = 1 << 1,
+		SyntaxHighlight = 1 << 2,
+		All = Config | FormatStore | SyntaxHighlight
 	}
 }
