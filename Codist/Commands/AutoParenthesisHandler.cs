@@ -129,22 +129,20 @@ namespace Codist.Commands
 		}
 
 		static bool IsMethod(SymbolInfo si, SyntaxNode node, SemanticContext sc, CancellationToken ct) {
-			if (si.Symbol?.Kind != SymbolKind.Method
+			if (!(si.Symbol?.Kind == SymbolKind.Method && ((IMethodSymbol)si.Symbol).IsGenericMethod)
 				&& (si.CandidateReason == CandidateReason.None
-					|| !si.CandidateSymbols.All(i => i.Kind == SymbolKind.Method))) {
-				$"Not method: symbol.null = {si.Symbol is null}, candidates = {si.CandidateReason}, {si.CandidateSymbols.Length} {si.CandidateSymbols.All(i => i.Kind == SymbolKind.Method)}, node = {node?.Kind()}".Log();
+					|| !si.CandidateSymbols.All(i => i.Kind == SymbolKind.Method && !((IMethodSymbol)i).IsGenericMethod))) {
+				// do not append parentheses if:
+				//   symbol is not method,
+				//   or method is generic,
+				//   or not all candidates are all non-generic methods
 				return false;
-			}
-			if (si.Symbol is IMethodSymbol m && m.IsGenericMethod
-				|| si.CandidateReason != CandidateReason.None && si.CandidateSymbols.Any(i => i.Kind == SymbolKind.Method && ((IMethodSymbol)i).IsGenericMethod)) {
-				// do not append parentheses if method is generic,
-				//   allowing users to type <> afterwards
-				return true;
 			}
 
 			var pNode = node.GetNodePurpose();
 			switch (pNode.Kind()) {
 				case SyntaxKind.Attribute:
+					// do not append parentheses if attribute constructor does not take parameter
 					return si.Symbol != null && ((IMethodSymbol)si.Symbol).Parameters.Length != 0
 						|| si.CandidateReason != CandidateReason.None
 							&& si.CandidateSymbols.All(i => ((IMethodSymbol)i).Parameters.Length != 0);
@@ -158,6 +156,7 @@ namespace Codist.Commands
 					// already has parentheses
 					return false;
 				case SyntaxKind.EqualsValueClause:
+					// method used as a delegate
 					if (sc.SemanticModel.GetTypeInfo(((EqualsValueClauseSyntax)pNode).Value, ct).ConvertedType?.TypeKind == TypeKind.Delegate) {
 						return false;
 					}
