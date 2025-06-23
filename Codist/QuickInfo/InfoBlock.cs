@@ -203,8 +203,8 @@ namespace Codist.QuickInfo
 			return this;
 		}
 
-		public BlockItem Append(SyntaxNodeOrToken syntax, ITextSnapshot textSnapshot, string text) {
-			Segments.Add(new SyntaxSegment(syntax, textSnapshot, text));
+		public BlockItem Append(SyntaxNodeOrToken syntax, ITextSnapshot textSnapshot, string text, bool highlight) {
+			Segments.Add(new SyntaxSegment(syntax, textSnapshot, text) { Style = highlight ? SegmentStyle.Underline : SegmentStyle.Default});
 			return this;
 		}
 

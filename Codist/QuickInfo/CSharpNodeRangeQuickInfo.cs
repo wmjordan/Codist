@@ -45,9 +45,10 @@ namespace Codist.QuickInfo
 			if (option.MatchFlags(QuickInfoOptions.SyntaxNodePath)) {
 				var block = new BlockItem(IconIds.SyntaxNode, R.T_SyntaxPath, true)
 					.AppendLine()
-					.Append(token, triggerPoint.Snapshot, SyntaxKindCache.Cache[token.Kind()]);
+					.Append(token, triggerPoint.Snapshot, SyntaxKindCache.Cache[token.Kind()], false);
+				var pNode = node.GetNodePurpose();
 				do {
-					block.Append(" < ").Append(node, triggerPoint.Snapshot, SyntaxKindCache.Cache[node.Kind()]);
+					block.Append(" < ").Append(node, triggerPoint.Snapshot, SyntaxKindCache.Cache[node.Kind()], node == pNode);
 				}
 				while (node.Kind().IsDeclaration() == false && (node = node.Parent) != null);
 				return new QuickInfoItem(token.Span.CreateSnapshotSpan(triggerPoint.Snapshot).ToTrackingSpan(), new GeneralInfoBlock(block));
