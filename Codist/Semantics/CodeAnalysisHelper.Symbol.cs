@@ -1158,6 +1158,14 @@ namespace Codist
 			return false;
 		}
 
+		public static bool IsEmpty(this SymbolInfo symbolInfo) {
+			return symbolInfo.Symbol == null && symbolInfo.CandidateReason == CandidateReason.None;
+		}
+
+		public static bool HasSymbol(this SymbolInfo symbolInfo) {
+			return symbolInfo.Symbol != null || symbolInfo.CandidateReason != CandidateReason.None;
+		}
+
 		#region Protected/Future property accessors
 		public static int GetNullableAnnotation(this ILocalSymbol local) {
 			return local != null ? NonPublicOrFutureAccessors.GetLocalNullableAnnotation(local) : 0;

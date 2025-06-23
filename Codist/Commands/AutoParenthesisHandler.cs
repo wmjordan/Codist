@@ -91,7 +91,7 @@ namespace Codist.Commands
 			SemanticContext sc = SemanticContext.GetOrCreateSingletonInstance((IWpfTextView)session.TextView);
 			try {
 				if (!await sc.UpdateAsync(session.ApplicableToSpan.TextBuffer, p, ct)) {
-					"SC not updated".Log();
+					$"{typeof(SemanticContext)} not updated".Log();
 					return;
 				}
 				TryAppendParentheses(sc, p, ct);
@@ -108,28 +108,24 @@ namespace Codist.Commands
 			if (node is ExpressionStatementSyntax es) {
 				node = es.Expression;
 			}
-			switch (node.Kind()) {
-				case SyntaxKind.TypeOfExpression:
-					if (((TypeOfExpressionSyntax)node).OpenParenToken.IsMissing) {
-						InsertParentheses(sc);
-					}
-					return;
-				case SyntaxKind.SizeOfExpression:
-					if (((SizeOfExpressionSyntax)node).OpenParenToken.IsMissing) {
-						InsertParentheses(sc);
-					}
-					return;
-				case SyntaxKind.IdentifierName:
-					if (((IdentifierNameSyntax)node).Identifier.ValueText == "nameof") {
-						InsertParentheses(sc);
-						return;
-					}
-					break;
-			}
-			var si = sc.SemanticModel.GetSymbolInfo(node, ct);
-			if (IsMethod(si, node, sc, ct) || IsConstructor(si, node, ct)) {
+			SymbolInfo si;
+			if (IsTypeReferenceExpression(node)
+				|| (si = sc.SemanticModel.GetSymbolInfo(node, ct)).HasSymbol()
+					&& (IsMethod(si, node, sc, ct) || IsConstructor(si, node))) {
 				InsertParentheses(sc);
 			}
+		}
+
+		static bool IsTypeReferenceExpression(SyntaxNode node) {
+			switch (node.Kind()) {
+				case SyntaxKind.TypeOfExpression:
+					return ((TypeOfExpressionSyntax)node).OpenParenToken.IsMissing;
+				case SyntaxKind.SizeOfExpression:
+					return ((SizeOfExpressionSyntax)node).OpenParenToken.IsMissing;
+				case SyntaxKind.IdentifierName:
+					return ((IdentifierNameSyntax)node).Identifier.ValueText == "nameof";
+			}
+			return false;
 		}
 
 		static bool IsMethod(SymbolInfo si, SyntaxNode node, SemanticContext sc, CancellationToken ct) {
@@ -139,6 +135,13 @@ namespace Codist.Commands
 				$"Not method: symbol.null = {si.Symbol is null}, candidates = {si.CandidateReason}, {si.CandidateSymbols.Length} {si.CandidateSymbols.All(i => i.Kind == SymbolKind.Method)}, node = {node?.Kind()}".Log();
 				return false;
 			}
+			if (si.Symbol is IMethodSymbol m && m.IsGenericMethod
+				|| si.CandidateReason != CandidateReason.None && si.CandidateSymbols.Any(i => i.Kind == SymbolKind.Method && ((IMethodSymbol)i).IsGenericMethod)) {
+				// do not append parentheses if method is generic,
+				//   allowing users to type <> afterwards
+				return true;
+			}
+
 			var pNode = node.GetNodePurpose();
 			switch (pNode.Kind()) {
 				case SyntaxKind.Attribute:
@@ -146,7 +149,7 @@ namespace Codist.Commands
 						|| si.CandidateReason != CandidateReason.None
 							&& si.CandidateSymbols.All(i => ((IMethodSymbol)i).Parameters.Length != 0);
 				case SyntaxKind.Argument:
-					if (IsDelegateTypedArgumentOrName(node, sc, pNode, ct)) {
+					if (IsDelegateTypedArgumentOrName(sc, pNode, ct)) {
 						// do not append parentheses if method used as delegate or within nameof
 						return false;
 					}
@@ -163,10 +166,7 @@ namespace Codist.Commands
 			return true;
 		}
 
-		static bool IsDelegateTypedArgumentOrName(SyntaxNode node, SemanticContext sc, SyntaxNode pNode, CancellationToken ct) {
-			if (sc.SemanticModel.GetTypeInfo(node, ct).ConvertedType?.TypeKind == TypeKind.Delegate) {
-				return true;
-			}
+		static bool IsDelegateTypedArgumentOrName(SemanticContext sc, SyntaxNode pNode, CancellationToken ct) {
 			var pp = pNode.Parent.Parent;
 			if (pp is InvocationExpressionSyntax ie) {
 				if (ie.Expression is IdentifierNameSyntax n && n.Identifier.Text == "nameof") {
@@ -201,7 +201,7 @@ namespace Codist.Commands
 			return false;
 		}
 
-		static bool IsConstructor(SymbolInfo si, SyntaxNode node, CancellationToken ct) {
+		static bool IsConstructor(SymbolInfo si, SyntaxNode node) {
 			if (si.Symbol?.Kind != SymbolKind.NamedType) {
 				return false;
 			}
