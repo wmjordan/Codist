@@ -737,7 +737,7 @@ namespace Codist
 			var n = node;
 			while (n.IsAnyKind(SyntaxKind.QualifiedName, SyntaxKind.SimpleMemberAccessExpression, SyntaxKind.PointerMemberAccessExpression, SyntaxKind.MemberBindingExpression)) {
 				if (n is MemberAccessExpressionSyntax ma && ma.Name != originName
-					|| n.IsKind(SyntaxKind.TypeOfExpression)) {
+					|| n.IsAnyKind(SyntaxKind.TypeOfExpression, SyntaxKind.SizeOfExpression)) {
 					return node;
 				}
 				node = n;
@@ -769,7 +769,7 @@ namespace Codist
 					return SymbolUsageKind.Catch;
 				}
 				if (possibleUsage.MatchFlags(SymbolUsageKind.TypeParameter)
-					&& node.IsAnyKind(SyntaxKind.TypeArgumentList, SyntaxKind.TypeOfExpression)) {
+					&& node.IsAnyKind(SyntaxKind.TypeArgumentList, SyntaxKind.TypeOfExpression, SyntaxKind.SizeOfExpression)) {
 					return SymbolUsageKind.TypeParameter;
 				}
 			}
