@@ -147,7 +147,7 @@ namespace Codist.Commands
 						|| si.CandidateReason != CandidateReason.None
 							&& si.CandidateSymbols.All(i => ((IMethodSymbol)i).Parameters.Length != 0);
 				case SyntaxKind.Argument:
-					if (IsDelegateTypedArgumentOrName(sc, pNode, ct)) {
+					if (IsDelegateTypedArgumentOrName(sc, (ArgumentSyntax)pNode, ct)) {
 						// do not append parentheses if method used as delegate or within nameof
 						return false;
 					}
@@ -161,11 +161,17 @@ namespace Codist.Commands
 						return false;
 					}
 					break;
+				case SyntaxKind.AddAssignmentExpression:
+				case SyntaxKind.SubtractAssignmentExpression:
+					if (sc.SemanticModel.GetTypeInfo(((AssignmentExpressionSyntax)pNode).Right, ct).ConvertedType?.TypeKind == TypeKind.Delegate) {
+						return false;
+					}
+					break;
 			}
 			return true;
 		}
 
-		static bool IsDelegateTypedArgumentOrName(SemanticContext sc, SyntaxNode pNode, CancellationToken ct) {
+		static bool IsDelegateTypedArgumentOrName(SemanticContext sc, ArgumentSyntax pNode, CancellationToken ct) {
 			var pp = pNode.Parent.Parent;
 			if (pp is InvocationExpressionSyntax ie) {
 				if (ie.Expression is IdentifierNameSyntax n && n.Identifier.Text == "nameof") {
@@ -175,15 +181,30 @@ namespace Codist.Commands
 			else if (!pp.IsKind(SyntaxKind.ObjectCreationExpression)) {
 				return false;
 			}
-			var p = pNode.IndexOfParent();
 			var si = sc.SemanticModel.GetSymbolInfo(pp, ct);
-			if (IsDelegateParam(p, si.Symbol)) {
-				return true;
+			if (pNode.NameColon is null) {
+				var index = pNode.IndexOfParent();
+				if (IsDelegateParam(index, si.Symbol)) {
+					return true;
+				}
+				if (si.CandidateReason != CandidateReason.None) {
+					foreach (var item in si.CandidateSymbols) {
+						if (IsDelegateParam(index, item)) {
+							return true;
+						}
+					}
+				}
 			}
-			if (si.CandidateReason != CandidateReason.None) {
-				foreach (var item in si.CandidateSymbols) {
-					if (IsDelegateParam(p, item)) {
-						return true;
+			else {
+				var name = pNode.NameColon.Name.Identifier.Text;
+				if (IsDelegateParam(name, si.Symbol)) {
+					return true;
+				}
+				if (si.CandidateReason != CandidateReason.None) {
+					foreach (var item in si.CandidateSymbols) {
+						if (IsDelegateParam(name, item)) {
+							return true;
+						}
 					}
 				}
 			}
@@ -193,8 +214,19 @@ namespace Codist.Commands
 		static bool IsDelegateParam(int index, ISymbol symbol) {
 			if (symbol is IMethodSymbol m) {
 				var pms = m.Parameters;
-				if (pms.Length > index && pms[index].Type.TypeKind == TypeKind.Delegate) {
+				// use math.min to assume the last one can be is params
+				if (pms[Math.Min(pms.Length - 1, index)].Type.TypeKind == TypeKind.Delegate) {
 					return true;
+				}
+			}
+			return false;
+		}
+		static bool IsDelegateParam(string name, ISymbol symbol) {
+			if (symbol is IMethodSymbol m) {
+				foreach (var p in m.Parameters) {
+					if (p.Name == name) {
+						return p.Type.TypeKind == TypeKind.Delegate;
+					}
 				}
 			}
 			return false;
