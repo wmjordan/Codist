@@ -212,21 +212,21 @@ namespace Codist.Commands
 		}
 
 		static bool IsDelegateParam(int index, ISymbol symbol) {
-			if (symbol is IMethodSymbol m) {
-				var pms = m.Parameters;
-				// use math.min to assume the last one can be is params
-				if (pms[Math.Min(pms.Length - 1, index)].Type.TypeKind == TypeKind.Delegate) {
-					return true;
-				}
+			var pms = symbol.GetParameters();
+			// use math.min to assume the last one can be is params
+			if (pms.Length == 0) {
+				return false;
 			}
-			return false;
+			if (index >= pms.Length - 1) {
+				var pm = pms[pms.Length - 1];
+				return (pm.IsParams ? ((IArrayTypeSymbol)pm.Type).ElementType : pm.Type).TypeKind == TypeKind.Delegate;
+			}
+			return pms[index].Type.TypeKind == TypeKind.Delegate;
 		}
 		static bool IsDelegateParam(string name, ISymbol symbol) {
-			if (symbol is IMethodSymbol m) {
-				foreach (var p in m.Parameters) {
-					if (p.Name == name) {
-						return p.Type.TypeKind == TypeKind.Delegate;
-					}
+			foreach (var p in symbol.GetParameters()) {
+				if (p.Name == name) {
+					return p.Type.TypeKind == TypeKind.Delegate;
 				}
 			}
 			return false;
