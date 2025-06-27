@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Linq;
 using Codist.Controls;
 using Microsoft.VisualStudio.Text;
@@ -97,7 +96,7 @@ namespace Codist.Taggers
 			if (Version == args.AfterVersion.VersionNumber) {
 				return;
 			}
-			$"New snapshot: {args.AfterVersion.VersionNumber}".Log();
+			$"New snapshot: {args.AfterVersion.VersionNumber}".Log(LogCategory.SyntaxHighlight);
 			var tags = _Tags;
 			var after = args.After;
 			tags.RemoveWhere(t => t.Update(after) == false);
