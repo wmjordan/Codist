@@ -212,6 +212,9 @@ namespace Codist.Commands
 		}
 
 		static bool IsDelegateParam(int index, ISymbol symbol) {
+			if (symbol is null) {
+				return false;
+			}
 			var pms = symbol.GetParameters();
 			// use math.min to assume the last one can be is params
 			if (pms.Length == 0) {
