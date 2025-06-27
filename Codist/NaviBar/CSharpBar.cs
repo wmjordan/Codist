@@ -205,8 +205,9 @@ namespace Codist.NaviBar
 					var newItem = new NodeItem(this, node);
 					if (memberNode == null && node.Kind().IsMemberDeclaration()) {
 						memberNode = newItem;
-						((TextBlock)newItem.Header).FontWeight = FontWeights.Bold;
-						((TextBlock)newItem.Header).SetResourceReference(TextBlock.ForegroundProperty, EnvironmentColors.FileTabSelectedTextBrushKey);
+						var header = (TextBlock)newItem.Header;
+						header.FontWeight = FontWeights.Bold;
+						header.SetResourceReference(TextBlock.ForegroundProperty, EnvironmentColors.FileTabSelectedTextBrushKey);
 						newItem.IsChecked = true;
 						if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.ReferencingTypes)) {
 							newItem.ReferencedSymbols.AddRange(node.FindRelatedTypes(_SemanticContext.SemanticModel, token).Take(5));
@@ -451,7 +452,7 @@ namespace Codist.NaviBar
 				return;
 			}
 			if (p != null) {
-				text.Append(p.GetParameterListSignature(Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.ParameterListShowParamName)), ThemeCache.SystemGrayTextBrush);
+				text.Append(p.GetParameterListSignature(Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.ParameterListShowParamName)), SymbolFormatter.SemiTransparent.PlainText);
 			}
 		}
 

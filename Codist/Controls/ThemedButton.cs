@@ -92,7 +92,10 @@ namespace Codist.Controls
 		public object Header { get; }
 		public bool IsChecked {
 			get => _IsChecked;
-			set => SetValue(IsCheckedProperty, _IsChecked = value);
+			set {
+				SetValue(IsCheckedProperty, _IsChecked = value);
+				this.ReferenceCrispImageBackground(value ? VsColors.FileTabSelectedGradientTopKey : EnvironmentColors.MainWindowActiveCaptionColorKey);
+			}
 		}
 		public bool IsHighlighted {
 			get => _IsHighlighted;

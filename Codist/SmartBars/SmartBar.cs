@@ -13,6 +13,7 @@ using Codist.Controls;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Operations;
 using VsBrushes = Microsoft.VisualStudio.Shell.VsBrushes;
+using VsColors = Microsoft.VisualStudio.Shell.VsColors;
 
 namespace Codist.SmartBars
 {
@@ -466,7 +467,7 @@ namespace Codist.SmartBars
 				BorderThickness = WpfHelper.TinyMargin;
 				Content = VsImageHelper.GetImage(imageId, (int)(VsImageHelper.DefaultIconSize * bar.View.ZoomFactor())).WrapMargin(WpfHelper.SmallMargin);
 				this.InheritStyle<Button>(SharedDictionaryManager.ThemedControls);
-				this.SetBackgroundForCrispImage(ThemeCache.TitleBackgroundColor);
+				this.ReferenceCrispImageBackground(VsColors.CommandBarGradientBeginKey);
 				Click += CommandButton_Click;
 				MouseRightButtonUp += CommandButton_MouseRightButtonUp;
 			}

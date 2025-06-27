@@ -135,12 +135,12 @@ namespace Codist
 			DocumentTextBrush = new WpfBrush(DocumentTextColor.ToWpfColor());
 			HyperlinkBrush = CommonDocumentColors.HyperlinkBrushKey.GetWpfBrush();
 			FileTabProvisionalSelectionBrush = EnvironmentColors.FileTabProvisionalSelectedActiveBrushKey.GetWpfBrush();
-			ToolWindowBackgroundColor = EnvironmentColors.ToolWindowBackgroundColorKey.GetWpfColor();
 			TitleBackgroundColor = EnvironmentColors.MainWindowActiveCaptionColorKey.GetWpfColor();
 			TitleTextBrush = EnvironmentColors.MainWindowActiveCaptionTextBrushKey.GetWpfBrush();
 			ToolTipBackgroundBrush = EnvironmentColors.ToolTipBrushKey.GetWpfBrush();
 			ToolWindowTextBrush = EnvironmentColors.ToolWindowTextBrushKey.GetWpfBrush();
 			ToolWindowBackgroundBrush = EnvironmentColors.ToolWindowBackgroundBrushKey.GetWpfBrush();
+			ToolWindowBackgroundColor = EnvironmentColors.ToolWindowBackgroundColorKey.GetWpfColor();
 			MenuTextBrush = EnvironmentColors.SystemMenuTextBrushKey.GetWpfBrush();
 			MenuBackgroundBrush = EnvironmentColors.SystemMenuBrushKey.GetWpfBrush();
 			MenuHoverBorderBrush = EnvironmentColors.CommandBarMenuItemMouseOverBrushKey.GetWpfBrush();

@@ -41,8 +41,13 @@ namespace Codist
 			return GetImage(KnownMonikerNameMap.Map.TryGetValue(monikerName, out int i) ? i : KnownImageIds.Blank, size);
 		}
 
-		public static TControl ReferenceCrispImageBackground<TControl>(this TControl target, ThemeResourceKey colorKey) where TControl : System.Windows.FrameworkElement {
-			target.SetResourceReference(ImageThemingUtilities.ImageBackgroundColorProperty, colorKey);
+		public static TControl ReferenceCrispImageBackground<TControl>(this TControl target, object colorKey) where TControl : System.Windows.FrameworkElement {
+			if (colorKey != null) {
+				target.SetResourceReference(ImageThemingUtilities.ImageBackgroundColorProperty, colorKey);
+			}
+			else {
+				target.ClearValue(ImageThemingUtilities.ImageBackgroundColorProperty);
+			}
 			return target;
 		}
 		public static void SetBackgroundForCrispImage(this System.Windows.DependencyObject target, WpfColor color) {

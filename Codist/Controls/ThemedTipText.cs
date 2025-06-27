@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using Microsoft.VisualStudio.PlatformUI;
 
 namespace Codist.Controls
 {
@@ -10,7 +11,7 @@ namespace Codist.Controls
 	{
 		public ThemedTipText() {
 			TextWrapping = TextWrapping.Wrap;
-			Foreground = ThemeCache.ToolTipTextBrush;
+			this.ReferenceProperty(ForegroundProperty, EnvironmentColors.ToolTipTextBrushKey);
 			TextEditorWrapper.CreateFor(this);
 		}
 		public ThemedTipText(string text) : this() {

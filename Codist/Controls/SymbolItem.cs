@@ -203,7 +203,7 @@ namespace Codist.Controls
 			t.Append(symbol.GetOriginalName(), SymbolFormatter.Instance.GetBrush(symbol));
 			PARAMETER:
 			if (includeParameter) {
-				t.Append(symbol.GetParameterString(), ThemeCache.SystemGrayTextBrush);
+				t.Append(symbol.GetParameterString(), SymbolFormatter.SemiTransparent.PlainText);
 			}
 			return t;
 		}

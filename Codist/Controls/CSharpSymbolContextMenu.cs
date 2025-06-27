@@ -7,6 +7,7 @@ using System.Windows.Input;
 using CLR;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.VisualStudio.Shell;
 using R = Codist.Properties.Resources;
 
 namespace Codist.Controls
@@ -19,7 +20,7 @@ namespace Codist.Controls
 		public CSharpSymbolContextMenu(ISymbol symbol, SyntaxNode node, SemanticContext semanticContext) {
 			Resources = SharedDictionaryManager.ContextMenu;
 			Foreground = ThemeCache.ToolWindowTextBrush;
-			this.SetBackgroundForCrispImage(ThemeCache.TitleBackgroundColor);
+			this.ReferenceCrispImageBackground(VsColors.CommandBarMenuBackgroundGradientBeginKey);
 			_Host = new UIHost(symbol, node, semanticContext);
 		}
 
