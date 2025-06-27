@@ -216,7 +216,6 @@ namespace Codist.Commands
 				return false;
 			}
 			var pms = symbol.GetParameters();
-			// use math.min to assume the last one can be is params
 			if (pms.Length == 0) {
 				return false;
 			}
