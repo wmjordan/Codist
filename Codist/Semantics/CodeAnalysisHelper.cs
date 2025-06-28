@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using CLR;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -80,9 +81,8 @@ namespace Codist
 		internal const RefKind RefReadonly = (RefKind)4;
 		#endregion
 
-		public static Span GetLineSpan(this SyntaxNode node) {
-			var s = node.SyntaxTree.GetLineSpan(node.Span);
-			return Span.FromBounds(s.StartLinePosition.Line, s.EndLinePosition.Line);
+		public static string GetText(this RefKind refKind) {
+			return refKind.Switch(String.Empty, "ref ", "out ", "in ", "ref readonly ", String.Empty);
 		}
 
 		public static ArgumentListSyntax GetImplicitObjectCreationArgumentList(this ExpressionSyntax syntax) {

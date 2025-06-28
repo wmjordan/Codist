@@ -428,6 +428,11 @@ namespace Codist
 			return p;
 		}
 
+		public static Span GetLineSpan(this SyntaxNode node) {
+			var s = node.SyntaxTree.GetLineSpan(node.Span);
+			return Span.FromBounds(s.StartLinePosition.Line, s.EndLinePosition.Line);
+		}
+
 		/// <summary>
 		/// Returns whether a <see cref="SyntaxNode"/> spans multiple lines.
 		/// </summary>
