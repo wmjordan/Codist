@@ -431,9 +431,13 @@ namespace Codist.QuickInfo
 							if (altSign != null) {
 								s.AddTopPart(altSign);
 							}
-							if (locDoc?.Parent is Panel lp) {
-								lp.Children.Remove(locDoc);
-								s.AddFooter(locDoc);
+							if (locDoc != null) {
+								locDoc.SetProperty(TextBlock.FontFamilyProperty, ThemeCache.ToolTipFont)
+									.SetProperty(TextBlock.FontSizeProperty, ThemeCache.ToolTipFontSize);
+								if (locDoc.Parent is Panel lp) {
+									lp.Children.Remove(locDoc);
+									s.AddFooter(locDoc);
+								}
 							}
 							s.Add(c.Scrollable());
 							if (_Override.LimitItemSize) {
