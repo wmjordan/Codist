@@ -10,8 +10,7 @@ namespace Codist.QuickInfo
 {
 	partial class CSharpQuickInfo
 	{
-		static void ShowInterfaceImplementation<TSymbol>(InfoContainer qiContent, TSymbol symbol, IReadOnlyList<TSymbol> explicitImplementations)
-			where TSymbol : class, ISymbol {
+		static void ShowInterfaceImplementation(InfoContainer qiContent, ISymbol symbol, IReadOnlyList<ISymbol> explicitImplementations) {
 			if ((symbol.DeclaredAccessibility != Accessibility.Public && explicitImplementations.Count == 0)
 				|| symbol.ContainingType is null) {
 				return;
@@ -20,6 +19,7 @@ namespace Codist.QuickInfo
 			if (interfaces.Length == 0) {
 				return;
 			}
+			var directIfs = symbol.ContainingType.Interfaces;
 			var implementedIntfs = ImmutableArray.CreateBuilder<ITypeSymbol>(3);
 			GeneralInfoBlock info = null;
 			var refKind = symbol.GetRefKind();
@@ -31,7 +31,8 @@ namespace Codist.QuickInfo
 					if (member.Kind == symbol.Kind
 						&& member.DeclaredAccessibility == Accessibility.Public
 						&& member.GetRefKind() == refKind
-						&& member.MatchSignature(symbol.Kind, returnType, parameters, typeParams)) {
+						&& member.MatchSignature(symbol.Kind, returnType, parameters, typeParams)
+						&& (symbol.IsOverride || directIfs.Contains(intf))) {
 						implementedIntfs.Add(intf);
 					}
 				}
