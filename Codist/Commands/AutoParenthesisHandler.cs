@@ -65,7 +65,7 @@ namespace Codist.Commands
 		}
 
 		void CompletionSessionItemCommitted(object sender, CompletionItemEventArgs e) {
-			if (Char.IsPunctuation(_TypedChar)) {
+			if (Char.IsPunctuation(_TypedChar) || Char.IsWhiteSpace(_TypedChar)) {
 				return;
 			}
 			var s = (IAsyncCompletionSession)sender;
