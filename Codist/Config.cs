@@ -72,7 +72,7 @@ namespace Codist
 		[DefaultValue(JumpListOptions.Default)]
 		public JumpListOptions JumpListOptions { get; set; } = JumpListOptions.Default;
 
-		[Obsolete]
+		[Obsolete("Use PunctuationOptions instead")]
 		public PunctuationOptions AutoSurroundSelectionOptions {
 			get => PunctuationOptions; set { }
 		}
