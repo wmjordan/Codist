@@ -398,6 +398,7 @@ namespace Codist.Options
 					btn.Background = bg;
 				}
 			}
+			UpdateStyleControls(_SelectedStyleButton);
 		}
 
 		void HandleViewChangedEvent(object sender, TextViewCreatedEventArgs args) {
@@ -883,9 +884,14 @@ namespace Codist.Options
 				_Notice.Visibility = Visibility.Collapsed;
 			}
 			_SelectedStyleButton = b;
+			UpdateStyleControls(b);
+		}
+
+		void UpdateStyleControls(StyleSettingsButton b) {
 			try {
 				_Lock.Lock();
 				var s = b.StyleSettings;
+				var f = _FormatCache;
 				_StyleNameHolder.Text = s.ClassificationType;
 				_FontButton.Value = s.Font;
 				_FontSizeBox.Value = (int)(s.FontSize > 100 ? 100 : s.FontSize < -10 ? -10 : s.FontSize);
@@ -902,9 +908,9 @@ namespace Codist.Options
 				_ItalicBox.IsChecked = s.Italic;
 				_UnderlineBox.IsChecked = s.Underline;
 				_StrikethroughBox.IsChecked = s.Strikethrough;
-				_ForegroundButton.Color = s.ForeColor;
-				_BackgroundButton.Color = s.BackColor;
-				_LineColorButton.Color = s.LineColor;
+				_ForegroundButton.Color = f.InvertBrightness ? s.ForeColor.InvertBrightness() : s.ForeColor;
+				_BackgroundButton.Color = f.InvertBrightness ? s.BackColor.InvertBrightness() : s.BackColor;
+				_LineColorButton.Color = f.InvertBrightness ? s.LineColor.InvertBrightness() : s.LineColor;
 				_ForegroundButton.DefaultColor = () => ((_FormatCache.GetCachedProperty(b.Classification)?.ForegroundBrush as SolidColorBrush)?.Color).GetValueOrDefault();
 				_BackgroundButton.DefaultColor = () => ((_FormatCache.GetCachedProperty(b.Classification)?.BackgroundBrush as SolidColorBrush)?.Color).GetValueOrDefault();
 				_LineColorButton.DefaultColor = () => {
@@ -1083,14 +1089,14 @@ namespace Codist.Options
 
 		void OnForeColorChanged(Color color) {
 			Update(() => {
-				ActiveStyle.ForeColor = color;
+				ActiveStyle.ForeColor = _FormatCache.InvertBrightness ? color.InvertBrightness() : color;
 				return true;
 			});
 		}
 
 		void OnBackColorChanged(Color color) {
 			Update(() => {
-				ActiveStyle.BackColor = color;
+				ActiveStyle.BackColor = _FormatCache.InvertBrightness ? color.InvertBrightness() : color;
 				_BackgroundEffectControl.Toggle(color.A > 0);
 				return true;
 			});
@@ -1098,7 +1104,7 @@ namespace Codist.Options
 
 		void OnLineColorChanged(Color color) {
 			Update(() => {
-				ActiveStyle.LineColor = color;
+				ActiveStyle.LineColor = _FormatCache.InvertBrightness ? color.InvertBrightness() : color;
 				_LineOpacityButton.Toggle(color.A > 0);
 				_LineStyleGroup.Toggle(color.A > 0);
 				return true;

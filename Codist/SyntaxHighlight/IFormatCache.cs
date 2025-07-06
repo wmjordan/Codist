@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Media;
 using Microsoft.VisualStudio.Text.Classification;
@@ -14,6 +13,7 @@ namespace Codist.SyntaxHighlight
 		IEditorFormatMap EditorFormatMap { get; }
 		TextFormattingRunProperties DefaultTextProperties { get; }
 		Color ViewBackground { get; }
+		bool InvertBrightness { get; }
 
 		TextFormattingRunProperties GetCachedProperty(IClassificationType classificationType);
 		void Refresh();

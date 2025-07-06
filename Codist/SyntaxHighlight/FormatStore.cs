@@ -445,6 +445,7 @@ namespace Codist.SyntaxHighlight
 			Typeface _DefaultTypeface;
 			double _DefaultFontSize;
 			int _Lock;
+			bool _InvertBrightness;
 
 			public Highlighter(string category, IEditorFormatMap editorFormatMap, IClassificationFormatMap classificationFormatMap) {
 				_Category = category;
@@ -462,6 +463,7 @@ namespace Codist.SyntaxHighlight
 			public TextFormattingRunProperties DefaultTextProperties => _ClassificationFormatMap.DefaultTextProperties;
 			public Color ViewBackground => _ViewBackground;
 			public Typeface ViewTypeface => _DefaultTypeface;
+			public bool InvertBrightness => _InvertBrightness;
 
 			public int FormattableItemCount {
 				get {
@@ -521,7 +523,7 @@ namespace Codist.SyntaxHighlight
 				try {
 					var formats = _ClassificationFormatMap.CurrentPriorityOrder;
 					KeyValuePair<string, ResourceDictionary> newStyle;
-					$"Refresh priority {formats.Count}".Log(LogCategory.FormatStore);
+					$"[{_Category}] refresh priority {formats.Count} inv: {_InvertBrightness}".Log(LogCategory.FormatStore);
 					_PropertiesCache.Clear();
 					foreach (var item in formats) {
 						if (item.IsFormattableClassificationType()
@@ -549,7 +551,7 @@ namespace Codist.SyntaxHighlight
 
 			public void Apply() {
 				var formats = _ClassificationFormatMap.CurrentPriorityOrder;
-				$"[{_Category}] apply priority {formats.Count}".Log(LogCategory.FormatStore);
+				$"[{_Category}] apply priority {formats.Count} inv: {_InvertBrightness}".Log(LogCategory.FormatStore);
 				var newStyles = new List<KeyValuePair<string, ResourceDictionary>>(7);
 				foreach (var item in formats) {
 					if (item.IsFormattableClassificationType()
@@ -719,8 +721,9 @@ namespace Codist.SyntaxHighlight
 				var bgChanged = _ViewBackground != currentBg;
 				if (bgChanged) {
 					$"[{_Category}] background changed {_ViewBackground.ToHexString()}->{currentBg.ToHexString()}".Log(LogCategory.FormatStore);
-					if (_Category == Constants.CodeText) {
-						bgInverted = InvertColorOnBackgroundInverted(currentBg);
+					bgInverted = InvertColorOnBackgroundInverted(currentBg);
+					if (_Category == Constants.CodeText && bgInverted) {
+						UpdateOtherColors(currentBg.IsDark());
 					}
 					_ViewBackground = currentBg;
 					_PendingChange.PendEvent(EventKind.Background);
@@ -737,6 +740,9 @@ namespace Codist.SyntaxHighlight
 				// cache the changes to prevent it from changing during the enumerating procedure
 				var changedItems = e.ChangedItems.ToList();
 				$"[{_Category}] editor format changed: {changedItems.Count}".Log(LogCategory.FormatStore);
+				if (bgInverted) {
+					DetectThemeColorCompatibilityWithBackground();
+				}
 				foreach (var item in changedItems) {
 					HighlightRecursive(__GetClassificationType(item), dedup, newStyles);
 				}
@@ -795,8 +801,10 @@ namespace Codist.SyntaxHighlight
 					CountColorBrightness(style.ForeColor, ref brightness);
 					CountColorBrightness(style.BackColor, ref brightness);
 				}
-				if (brightness > 3 && isBackgroundDark == false || brightness < -3 && isBackgroundDark) {
-					InvertColorBrightness();
+				_InvertBrightness = brightness > 3 && isBackgroundDark == false
+					|| brightness < -3 && isBackgroundDark;
+				if (_InvertBrightness) {
+					UpdateOtherColors(isBackgroundDark);
 				}
 
 				void CountColorBrightness(Color c, ref int b) {
@@ -807,36 +815,19 @@ namespace Codist.SyntaxHighlight
 			}
 
 			bool InvertColorOnBackgroundInverted(Color currentBg) {
-				if (_ViewBackground.IsDark() ^ currentBg.IsDark()) {
-					InvertColorBrightness();
-					return true;
-				}
-				return false;
+				return _ViewBackground.IsDark() ^ currentBg.IsDark();
 			}
 
-			void InvertColorBrightness() {
-				$"[{_Category}] invert color brightness".Log(LogCategory.FormatStore);
-				foreach (var item in GetStyles()) {
-					item.Value.InvertBrightness = true;
-				}
-				if (_Category != Constants.CodeText) {
-					return;
-				}
-
-				foreach (var item in GetStyles()) {
-					item.Value.ConsolidateBrightness();
-				}
+			static void UpdateOtherColors(bool bgIsDark) {
 				var sm = Config.Instance.SymbolReferenceMarkerSettings;
-				if (sm.ReferenceMarker.A != 0 || sm.WriteMarker.A != 0 || sm.SymbolDefinition.A != 0) {
-					if (sm.ReferenceMarker.A != 0) {
-						sm.ReferenceMarker = sm.ReferenceMarker.InvertBrightness();
-					}
-					if (sm.WriteMarker.A != 0) {
-						sm.WriteMarker = sm.WriteMarker.InvertBrightness();
-					}
-					if (sm.SymbolDefinition.A != 0) {
-						sm.SymbolDefinition = sm.SymbolDefinition.InvertBrightness();
-					}
+				if (sm.ReferenceMarker.A != 0 && sm.ReferenceMarker.IsDark() == bgIsDark) {
+					sm.ReferenceMarker = sm.ReferenceMarker.InvertBrightness();
+				}
+				if (sm.WriteMarker.A != 0 && sm.WriteMarker.IsDark() == bgIsDark) {
+					sm.WriteMarker = sm.WriteMarker.InvertBrightness();
+				}
+				if (sm.SymbolDefinition.A != 0 && sm.SymbolDefinition.IsDark() == bgIsDark) {
+					sm.SymbolDefinition = sm.SymbolDefinition.InvertBrightness();
 				}
 			}
 
@@ -1120,13 +1111,13 @@ namespace Codist.SyntaxHighlight
 					var c = FormatChanges.None;
 					ChangeBold(current, style, ref c);
 					ChangeItalic(current, style, ref c);
-					ChangeBrush(current, style, ref c);
+					ChangeBrush(current, style, highlighter, ref c);
 					ChangeBackgroundBrush(current, style, highlighter, ref c);
 					ChangeOpacity(current, style, ref c);
 					ChangeBackgroundOpacity(current, style, ref c);
 					ChangeFontSize(current, style, highlighter, ref c);
 					ChangeTypeface(current, style, highlighter, ref c);
-					ChangeTextDecorations(current, style, ref c);
+					ChangeTextDecorations(current, style, highlighter, ref c);
 					return c;
 				}
 
@@ -1175,10 +1166,10 @@ namespace Codist.SyntaxHighlight
 					}
 				}
 
-				void ChangeBrush(ResourceDictionary current, StyleBase style, ref FormatChanges c) {
+				void ChangeBrush(ResourceDictionary current, StyleBase style, Highlighter highlighter, ref FormatChanges c) {
 					Brush b;
 					if (style != null && style.ForeColor.A != 0) {
-						if (AreBrushesEqual(b = style.MakeBrush(), current.GetBrush()) == false) {
+						if (AreBrushesEqual(b = style.MakeBrush(highlighter._InvertBrightness), current.GetBrush()) == false) {
 							_FormatChanges |= FormatChanges.ForegroundBrush;
 							Changes.SetBrush(b);
 							current.SetBrush(b);
@@ -1200,7 +1191,7 @@ namespace Codist.SyntaxHighlight
 				void ChangeBackgroundBrush(ResourceDictionary current, StyleBase style, Highlighter highlighter, ref FormatChanges c) {
 					Brush b;
 					if (style != null && style.BackColor.A != 0) {
-						b = style.MakeBackgroundBrush(highlighter._ViewBackground);
+						b = style.MakeBackgroundBrush(highlighter._ViewBackground, highlighter._InvertBrightness);
 						if (AreBrushesEqual(b, current.GetBackgroundBrush()) == false) {
 							_FormatChanges |= FormatChanges.BackgroundBrush;
 							Changes.SetBackgroundBrush(b);
@@ -1312,10 +1303,10 @@ namespace Codist.SyntaxHighlight
 					}
 				}
 
-				void ChangeTextDecorations(ResourceDictionary current, StyleBase style, ref FormatChanges c) {
+				void ChangeTextDecorations(ResourceDictionary current, StyleBase style, Highlighter highlighter, ref FormatChanges c) {
 					TextDecorationCollection td;
 					if (style?.HasLineStyle == true) {
-						var t = style.MakeTextDecorations();
+						var t = style.MakeTextDecorations(highlighter._InvertBrightness);
 						if (t != (td = current.GetTextDecorations())
 							&& (td == null || t?.SequenceEqual(td) != true)) {
 							_FormatChanges |= FormatChanges.TextDecorations;
