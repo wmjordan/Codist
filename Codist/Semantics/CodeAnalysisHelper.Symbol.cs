@@ -451,6 +451,45 @@ namespace Codist
 			return false;
 		}
 
+		public static ImmutableArray<INamedTypeSymbol> GetImplementedInterfaces(this ISymbol symbol) {
+			if (symbol.ContainingType.TypeKind == TypeKind.Interface) {
+				return ImmutableArray<INamedTypeSymbol>.Empty;
+			}
+			var interfaces = symbol.ContainingType.AllInterfaces;
+			if (interfaces.Length == 0) {
+				return ImmutableArray<INamedTypeSymbol>.Empty;
+			}
+			var directIfs = symbol.ContainingType.GetImplementedInterfaces();
+			var implementedIntfs = ImmutableArray.CreateBuilder<INamedTypeSymbol>(3);
+			var refKind = symbol.GetRefKind();
+			var returnType = symbol.GetReturnType();
+			var parameters = symbol.GetParameters();
+			var typeParams = symbol.GetTypeParameters();
+			foreach (var intf in interfaces) {
+				foreach (var member in intf.GetMembers(symbol.Name)) {
+					if (member.Kind == symbol.Kind
+						&& member.DeclaredAccessibility == Accessibility.Public
+						&& member.GetRefKind() == refKind
+						&& member.MatchSignature(symbol.Kind, returnType, parameters, typeParams)
+						&& (symbol.IsOverride || directIfs.Contains(intf))) {
+						implementedIntfs.Add(intf);
+					}
+				}
+			}
+			return implementedIntfs.ToImmutable();
+		}
+
+		static ImmutableHashSet<INamedTypeSymbol> GetImplementedInterfaces(this INamedTypeSymbol type) {
+			var intfs = type.Interfaces;
+			var d = new HashSet<INamedTypeSymbol>(intfs);
+			foreach (var i in intfs) {
+				foreach (var item in i.AllInterfaces) {
+					d.Add(item);
+				}
+			}
+			return d.ToImmutableHashSet();
+		}
+
 		public static bool HasDirectImplementationFor(this INamedTypeSymbol symbol, INamedTypeSymbol interfaceType) {
 			Func<INamedTypeSymbol, INamedTypeSymbol, bool> comparer = interfaceType.IsGenericType && interfaceType.ConstructedFrom == interfaceType
 				? (t, infSym) => t.ConstructedFrom == infSym

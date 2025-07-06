@@ -15,41 +15,21 @@ namespace Codist.QuickInfo
 				|| symbol.ContainingType is null) {
 				return;
 			}
-			var interfaces = symbol.ContainingType.AllInterfaces;
-			if (interfaces.Length == 0) {
-				return;
-			}
-			var directIfs = symbol.ContainingType.Interfaces;
-			var implementedIntfs = ImmutableArray.CreateBuilder<ITypeSymbol>(3);
+			var intfs = symbol.GetImplementedInterfaces();
 			GeneralInfoBlock info = null;
-			var refKind = symbol.GetRefKind();
-			var returnType = symbol.GetReturnType();
-			var parameters = symbol.GetParameters();
-			var typeParams = symbol.GetTypeParameters();
-			foreach (var intf in interfaces) {
-				foreach (var member in intf.GetMembers(symbol.Name)) {
-					if (member.Kind == symbol.Kind
-						&& member.DeclaredAccessibility == Accessibility.Public
-						&& member.GetRefKind() == refKind
-						&& member.MatchSignature(symbol.Kind, returnType, parameters, typeParams)
-						&& (symbol.IsOverride || directIfs.Contains(intf))) {
-						implementedIntfs.Add(intf);
-					}
-				}
-			}
-			if (implementedIntfs.Count > 0) {
+			if (intfs.Length > 0) {
 				info = new GeneralInfoBlock(IconIds.InterfaceImplementation, R.T_Implements);
-				foreach (var item in implementedIntfs) {
+				foreach (var item in intfs) {
 					info.Add(new BlockItem { IconId = item.GetImageId() }.AddSymbolDisplayParts(item.ToDisplayParts(CodeAnalysisHelper.QuickInfoSymbolDisplayFormat), __SymbolFormatter));
 				}
 			}
-			if (explicitImplementations != null) {
-				implementedIntfs.Clear();
-				implementedIntfs.AddRange(explicitImplementations.Select(i => i.ContainingType));
-				if (implementedIntfs.Count > 0) {
+			if (explicitImplementations?.Count != 0) {
+				intfs = intfs.Clear();
+				intfs.AddRange(explicitImplementations.Select(i => i.ContainingType));
+				if (intfs.Length > 0) {
 					(info ?? (info = new GeneralInfoBlock()))
 						.Add(new BlockItem(IconIds.InterfaceImplementation, R.T_ExplicitImplements, true));
-					foreach (var item in implementedIntfs) {
+					foreach (var item in intfs) {
 						info.Add(new BlockItem { IconId = item.GetImageId() }.AddSymbolDisplayParts(item.ToDisplayParts(CodeAnalysisHelper.QuickInfoSymbolDisplayFormat), __SymbolFormatter));
 					}
 				}

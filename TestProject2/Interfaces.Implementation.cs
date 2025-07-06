@@ -46,6 +46,15 @@ class Derived : Base, IDerived
 	public void DoMoreWork() { }
 }
 
+class ImplementDerivedInterface : IDerived
+{
+	public int Id { get; }
+
+	public void DoMoreWork() {}
+
+	public void DoWork() {}
+}
+
 class Lazy : Derived
 {
 	public void Sleep() { }
