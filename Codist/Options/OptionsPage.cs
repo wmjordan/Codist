@@ -1011,10 +1011,6 @@ namespace Codist.Options
 				ToggleTitleBarElement(options, value, DisplayOptimizations.HideFeedbackBox);
 			}
 
-			void UpdateHideCodePilotButtonOption(DisplayOptimizations options, bool value) {
-				ToggleTitleBarElement(options, value, DisplayOptimizations.HideCopilotButton);
-			}
-
 			void UpdateHideInfoBadgeButtonOption(DisplayOptimizations options, bool value) {
 				ToggleTitleBarElement(options, value, DisplayOptimizations.HideInfoBadgeButton);
 			}

@@ -765,8 +765,6 @@ namespace Codist
 		HideSearchBox = 1 << 3,
 		HideFeedbackBox = 1 << 4,
 		HideAccountBox = 1 << 5,
-		[Obsolete]
-		HideCopilotButton = 1 << 6,
 		HideInfoBadgeButton = 1 << 7,
 		HideUIElements = HideSearchBox | HideFeedbackBox | HideAccountBox | HideInfoBadgeButton,
 		ShowCpu = 1 << 10,
