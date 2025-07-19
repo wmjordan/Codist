@@ -606,9 +606,9 @@ namespace Codist
 				case SymbolKind.Property: return ((IPropertySymbol)symbol).Parameters;
 				case SymbolKind.NamedType:
 					return (symbol = symbol.AsMethod()) != null ? ((IMethodSymbol)symbol).Parameters
-						: ImmutableArray<IParameterSymbol>.Empty;
+						: default;
 			}
-			return ImmutableArray<IParameterSymbol>.Empty;
+			return default;
 		}
 
 		public static ITypeSymbol GetReturnType(this ISymbol symbol) {
@@ -1182,6 +1182,16 @@ namespace Codist
 					return true;
 			}
 			return false;
+		}
+
+		static readonly string[] __CompilerServicesNamespace = new string[] { "CompilerServices", "Runtime", "System" };
+		public static bool IsCompilerGenerated(this ISymbol symbol) {
+			string name;
+			return symbol.IsImplicitlyDeclared
+				|| (!symbol.CanBeReferencedByName
+					&& !String.IsNullOrEmpty(name = symbol.Name)
+					&& (name[0] == '<'
+						|| symbol.GetAttributes().Any(i => i.AttributeClass.MatchTypeName("CompilerGeneratedAttribute", __CompilerServicesNamespace))));
 		}
 
 		public static bool MayHaveDocumentation(this ISymbol symbol) {

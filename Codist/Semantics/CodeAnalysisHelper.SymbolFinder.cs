@@ -103,17 +103,19 @@ namespace Codist
 			ImmutableArray<IParameterSymbol> parameters;
 			var assembly = compilation.Assembly;
 			foreach (var typeSymbol in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
+				if (typeSymbol.IsCompilerGenerated()) {
+					continue;
+				}
 				foreach (var member in typeSymbol.GetMembers()) {
 					if (cancellationToken.IsCancellationRequested) {
 						return members;
 					}
 					if (member.Kind != SymbolKind.Field
-						&& member.CanBeReferencedByName
-						&& (parameters = member.GetParameters()).IsDefaultOrEmpty == false
+						&& !(parameters = member.GetParameters()).IsDefaultOrEmpty
+						&& !member.IsCompilerGenerated()
 						&& parameters.Any(strictMatch
 								? (Func<IParameterSymbol, bool>)(p => p.Type == type)
-								: (p => type.CanConvertTo(p.Type) && p.Type.IsCommonBaseType() == false))
-							&& type.CanAccess(member, assembly)) {
+								: (p => type.CanConvertTo(p.Type) && p.Type.IsCommonBaseType() == false))) {
 						members.Add(member);
 					}
 				}
@@ -132,22 +134,23 @@ namespace Codist
 				? (Func<IParameterSymbol, bool>)(p => p.Type == type && p.RefKind != RefKind.None)
 				: (p => p.Type.CanConvertTo(type) && p.RefKind != RefKind.None);
 			foreach (var typeSymbol in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
+				if (typeSymbol.IsCompilerGenerated()) {
+					continue;
+				}
 				foreach (var member in typeSymbol.GetMembers()) {
 					if (cancellationToken.IsCancellationRequested) {
 						return members;
 					}
 					ITypeSymbol mt;
 					if (member.Kind == SymbolKind.Field) {
-						if (member.CanBeReferencedByName
-							&& (mt = member.GetReturnType()) != null && (mt == type || strict == false && mt.CanConvertTo(type) || (mt as INamedTypeSymbol).ContainsTypeArgument(type))
-							&& type.CanAccess(member, assembly)) {
+						if (!member.IsCompilerGenerated()
+							&& (mt = member.GetReturnType()) != null && (mt == type || strict == false && mt.CanConvertTo(type) || (mt as INamedTypeSymbol).ContainsTypeArgument(type))) {
 							members.Add(member);
 						}
 					}
-					else if (member.CanBeReferencedByName
+					else if (!member.IsCompilerGenerated()
 						&& ((mt = member.GetReturnType()) != null && (mt == type || strict == false && mt.CanConvertTo(type) || (mt as INamedTypeSymbol).ContainsTypeArgument(type))
-							|| member.Kind == SymbolKind.Method && member.GetParameters().Any(paramComparer))
-						&& type.CanAccess(member, assembly)) {
+							|| member.Kind == SymbolKind.Method && member.GetParameters().Any(paramComparer))) {
 						members.Add(member);
 					}
 				}
@@ -301,7 +304,7 @@ namespace Codist
 				}
 				foreach (var member in type.GetMembers()) {
 					if (member.Kind != SymbolKind.NamedType
-						&& member.CanBeReferencedByName
+						&& !member.IsCompilerGenerated()
 						&& member.IsAccessible(false)
 						&& filter(member.GetOriginalName())
 						&& d.TryAdd(member)) {
@@ -474,14 +477,14 @@ namespace Codist
 					//       but in VS 2019, we have to do that, otherwise we will get nothing.
 					//       The same to SymbolKind.Method.
 					if ((symbol as INamedTypeSymbol).IsBoundedGenericType()
-						|| symbol.GetContainingTypes().Any(t => t.IsBoundedGenericType())) {
+						|| symbol.GetContainingTypes().Any(IsBoundedGenericType)) {
 						sign = symbol.ToDisplayString();
 						symbol = symbol.OriginalDefinition;
 					}
 					break;
 				case SymbolKind.Method:
 					var m = symbol as IMethodSymbol;
-					if (m.IsBoundedGenericMethod() || m.GetContainingTypes().Any(t => t.IsBoundedGenericType())) {
+					if (m.IsBoundedGenericMethod() || m.GetContainingTypes().Any(IsBoundedGenericType)) {
 						sign = symbol.ToDisplayString();
 						symbol = symbol.OriginalDefinition;
 					}
