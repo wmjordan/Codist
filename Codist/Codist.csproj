@@ -103,6 +103,7 @@
     <Compile Include="QuickInfo\InfoBlock.cs" />
     <Compile Include="Semantics\ArgumentAssignment.cs" />
     <Compile Include="Semantics\MarkdownHelper.cs" />
+    <Compile Include="Semantics\SyntaxModel.cs" />
     <Compile Include="SmartBars\MarkupSmartBar.cs" />
     <Compile Include="Suppression.cs" />
     <Compile Include="SyntaxHighlight\ClassificationTypeExporter.cs" />

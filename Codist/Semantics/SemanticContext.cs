@@ -57,7 +57,7 @@ namespace Codist
 		public int Position => _HitPointSyntax?.SourcePosition ?? 0;
 
 		public SyntaxNode GetNode(SnapshotPoint position, bool includeTrivia, bool deep) {
-			return _Model.GetSnapshotSyntax(position, _View)?.GetNode(includeTrivia, deep);
+			return GetSnapshotSyntax(position)?.GetNode(includeTrivia, deep);
 		}
 
 		public Task<ISymbol> GetSymbolAsync(int position, CancellationToken cancellationToken = default) {
@@ -279,7 +279,7 @@ namespace Codist
 						ver
 					);
 				}
-				_HitPointSyntax = _Model.IsEmpty || position.Snapshot == null ? null : _Model.GetSnapshotSyntax(position, _View);
+				_HitPointSyntax = _Model.IsEmpty || position.Snapshot == null ? null : GetSnapshotSyntax(position);
 			}
 			catch (NullReferenceException) {
 				return Reset();
@@ -320,7 +320,7 @@ namespace Codist
 		public ImmutableArray<SyntaxNode> GetContainingNodes(SnapshotPoint position, bool includeSyntaxDetails, bool includeRegions) {
 			var model = _Model;
 			SyntaxNode node;
-			if (model.IsEmpty || (node = model.GetSnapshotSyntax(position, _View).Node) == null) {
+			if (model.IsEmpty || (node = GetSnapshotSyntax(position).Node) == null) {
 				return ImmutableArray<SyntaxNode>.Empty;
 			}
 			var nodes = ImmutableArray.CreateBuilder<SyntaxNode>(5);
@@ -384,6 +384,10 @@ namespace Codist
 				: default;
 		}
 
+		SnapshotPointSyntax GetSnapshotSyntax(SnapshotPoint visualSnapshotPoint) {
+			return new SnapshotPointSyntax(_Model, visualSnapshotPoint, _View);
+		}
+
 		bool Reset() {
 			_HitPointSyntax = null;
 			return false;
@@ -397,46 +401,6 @@ namespace Codist
 				view.Properties.RemoveProperty(typeof(SemanticContext));
 				_OutliningManager = null;
 				_HitPointSyntax = null;
-			}
-		}
-
-		readonly struct SyntaxModel
-		{
-			internal static readonly SyntaxModel Empty = default;
-
-			public readonly Workspace Workspace;
-			public readonly ITextBuffer SourceBuffer;
-			public readonly Document Document;
-			public readonly SemanticModel SemanticModel;
-			public readonly CompilationUnitSyntax Compilation;
-			public readonly VersionStamp Version;
-
-			public SyntaxModel(Workspace workspace, ITextBuffer textBuffer, Document document, SemanticModel semanticModel, CompilationUnitSyntax compilation, VersionStamp version) {
-				Workspace = workspace;
-				Document = document;
-				SourceBuffer = textBuffer;
-				SemanticModel = semanticModel;
-				Compilation = compilation;
-				Version = version;
-			}
-
-			public bool IsEmpty => Document == null;
-
-			public SnapshotPointSyntax GetSnapshotSyntax(SnapshotPoint visualSnapshotPoint, ITextView view) {
-				return new SnapshotPointSyntax(this, visualSnapshotPoint, view);
-			}
-
-			public bool IsSourceBufferInView(ITextView view) {
-				return view.TextBuffer == SourceBuffer;
-			}
-
-			public SnapshotSpan MapSourceSpan(TextSpan span, ITextView view) {
-				var c = view.BufferGraph.MapUpToBuffer(new SnapshotSpan(SourceBuffer.CurrentSnapshot, span.ToSpan()), SpanTrackingMode.EdgeInclusive, view.TextBuffer);
-				return c.Count != 0 ? c[0] : default;
-			}
-
-			public NormalizedSnapshotSpanCollection MapDownToSourceSpan(SnapshotSpan span, ITextView view) {
-				return view.BufferGraph.MapDownToBuffer(span, SpanTrackingMode.EdgeInclusive, SourceBuffer);
 			}
 		}
 
