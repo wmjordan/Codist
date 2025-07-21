@@ -28,14 +28,17 @@ namespace Codist
 				try {
 					v = p.Value;
 				}
-				catch (System.Runtime.InteropServices.COMException) {
-					v = null;
+				catch (System.Runtime.InteropServices.COMException ex) {
+					v = ex;
 				}
-				catch (NotImplementedException) {
-					v = null;
+				catch (NotImplementedException ex) {
+					v = ex;
 				}
-				catch (System.Reflection.TargetParameterCountException) {
-					v = null;
+				catch (System.Reflection.TargetParameterCountException ex) {
+					v = ex;
+				}
+				catch (ArgumentException ex) {
+					v = ex;
 				}
 				yield return new KeyValuePair<string, object>(p.Name, v);
 			}
