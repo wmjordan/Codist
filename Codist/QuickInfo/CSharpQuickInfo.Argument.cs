@@ -195,8 +195,10 @@ namespace Codist.QuickInfo
 				}
 				qiContent.Add(info);
 			}
-			else if (symbol.CandidateSymbols.Length > 0) {
+			else if (symbol.CandidateReason != CandidateReason.None) {
 				var info = new GeneralInfoBlock();
+				const int MaxOverloadCount = 64;
+				int count = 0;
 				info.Add(new BlockItem(IconIds.ParameterCandidate).Append(R.T_MaybeArgument, true).Append(R.T_MaybeArgumentOf));
 				foreach (var candidate in symbol.CandidateSymbols) {
 					info.Add(
@@ -206,6 +208,10 @@ namespace Codist.QuickInfo
 								argName == null ? argIndex : Int32.MinValue)
 						)
 					;
+					if (++count > MaxOverloadCount) {
+						info.Add(new BlockItem().Append(R.T_TooManyOverloads.Replace("<N>", symbol.CandidateSymbols.Length.ToText())));
+						break;
+					}
 				}
 				qiContent.Add(info);
 			}
