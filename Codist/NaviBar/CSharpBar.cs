@@ -43,6 +43,11 @@ namespace Codist.NaviBar
 			Items.Add(_GlobalNamespaceItem = new GlobalNamespaceItem(this));
 			Update(this, EventArgs.Empty);
 			view.Closed += View_Closed;
+			LayoutUpdated += CSharpBar_LayoutUpdated;
+		}
+
+		void CSharpBar_LayoutUpdated(object sender, EventArgs e) {
+			AdjustItems();
 		}
 
 		protected override void OnMouseMove(MouseEventArgs e) {
@@ -205,7 +210,7 @@ namespace Codist.NaviBar
 					var newItem = new NodeItem(this, node);
 					if (memberNode == null && node.Kind().IsMemberDeclaration()) {
 						memberNode = newItem;
-						var header = (TextBlock)newItem.Header;
+						var header = newItem.Header;
 						header.FontWeight = FontWeights.Bold;
 						header.SetResourceReference(TextBlock.ForegroundProperty, EnvironmentColors.FileTabSelectedTextBrushKey);
 						newItem.IsChecked = true;
@@ -228,6 +233,41 @@ namespace Codist.NaviBar
 				}
 			}
 			#endregion
+		}
+
+		void AdjustItems() {
+			var w = 0d;
+			var items = Items;
+			foreach (BarItem item in items) {
+				w += item.DesiredSize.Width;
+			}
+
+			if (w <= this.RenderSize.Width) {
+				return;
+			}
+			var l = items.Count;
+			for (int i = l - 2; i > 1; i--) { // skip last node and home node
+				if (items[i] is BarItem n) {
+					if (n.IsChecked) {
+						break;
+					}
+					if (n.ItemType > BarItemType.GlobalNamespace && n.IsHeaderVisible) {
+						n.IsHeaderVisible = false;
+						return;
+					}
+				}
+			}
+			for (int i = 2; i < l - 1; i++) {
+				if (items[i] is BarItem n) {
+					if (n.IsChecked) {
+						break;
+					}
+					if (n.ItemType > BarItemType.GlobalNamespace && n.IsHeaderVisible) {
+						n.IsHeaderVisible = false;
+						return;
+					}
+				}
+			}
 		}
 
 		void AddNamespaceNodes(SyntaxNode node, NameSyntax ns) {
@@ -484,6 +524,7 @@ namespace Codist.NaviBar
 
 		void View_Closed(object sender, EventArgs e) {
 			(sender as ITextView).Closed -= View_Closed;
+			LayoutUpdated -= CSharpBar_LayoutUpdated;
 			_SemanticContext = null;
 			_Buffer = null;
 			_CancellationSource.CancelAndDispose();

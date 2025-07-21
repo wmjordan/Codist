@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using CLR;
 using Codist.Controls;
@@ -74,7 +73,7 @@ namespace Codist.NaviBar
 				_Menu.NeedsRefresh = true;
 			}
 			internal void SetText(string text) {
-				((TextBlock)Header).Text = text;
+				Header.Text = text;
 			}
 
 			protected override void OnClick() {

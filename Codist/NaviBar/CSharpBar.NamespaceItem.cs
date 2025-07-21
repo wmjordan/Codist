@@ -23,7 +23,7 @@ namespace Codist.NaviBar
 
 			public NamespaceItem(CSharpBar bar, NamespaceNode node) : base(bar, IconIds.Namespace, new ThemedToolBarText()) {
 				_Node = node;
-				((TextBlock)Header).Text = node.Name;
+				Header.Text = node.Name;
 				Click += HandleClick;
 				this.SetLazyToolTip(() => new CommandToolTip(IconIds.Namespace, R.CMD_SearchWithinNamespace, new TextBlock { TextWrapping = TextWrapping.Wrap }.Append(R.CMDT_SearchWithinNamespace)));
 				this.SetTipPlacementBottom();
