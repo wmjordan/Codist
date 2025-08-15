@@ -709,7 +709,8 @@ namespace Codist.QuickInfo
 				&& options.MatchFlags(QuickInfoOptions.AlternativeStyle) == false) {
 				ShowExtensionMethod(container, method);
 			}
-			if (options.MatchFlags(QuickInfoOptions.MethodOverload) && context.IsCandidate == false) {
+			if (method.MethodKind != MethodKind.BuiltinOperator
+				&& options.MatchFlags(QuickInfoOptions.MethodOverload) && context.IsCandidate == false) {
 				ShowOverloadsInfo(context, method);
 			}
 			if (node.Parent.IsKind(SyntaxKind.Attribute)
@@ -799,11 +800,11 @@ namespace Codist.QuickInfo
 				}
 				else {
 					node = node.GetObjectCreationNode();
-					var semanticModel = context.semanticModel;
 					if (node != null
-						&& semanticModel.GetSymbolOrFirstCandidate(node, context.cancellationToken) is IMethodSymbol method
+						&& context.semanticModel.GetSymbolOrFirstCandidate(node, context.cancellationToken) is IMethodSymbol m
+						&& m.MethodKind != MethodKind.BuiltinOperator
 						&& context.IsCandidate == false) {
-						ShowOverloadsInfo(context, method);
+						ShowOverloadsInfo(context, m);
 					}
 				}
 			}
