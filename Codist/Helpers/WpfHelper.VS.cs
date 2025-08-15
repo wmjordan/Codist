@@ -427,6 +427,22 @@ namespace Codist
 			protected override object CreateToolTip() {
 				var t = CreateTipText();
 				var tip = new ThemedToolTip(Text + " = " + _NodeOrToken.RawKind.ToText(), "Span.Length: " + _NodeOrToken.Span.Length);
+				if (_NodeOrToken.IsNode) {
+					var sm = SemanticContext.GetHovered()?.SemanticModel;
+					if (sm != null) {
+						var symbol = sm.GetSymbolInfo(_NodeOrToken.AsNode()).Symbol;
+						if (symbol != null) {
+							var b = tip.AddTextBlock().Append("Symbol: ").AddSymbolDisplayParts(symbol.ToDisplayParts(CodeAnalysisHelper.TypeMemberNameFormat), SymbolFormatter.Instance);
+						}
+						var typeInfo = sm.GetTypeInfo(_NodeOrToken.AsNode());
+						if (typeInfo.Type != null) {
+							tip.AddTextBlock().Append("Type: ").AddSymbol(typeInfo.Type, false, SymbolFormatter.Instance);
+						}
+						if (typeInfo.ConvertedType != null && typeInfo.ConvertedType != typeInfo.Type) {
+							tip.AddTextBlock().Append("Converted type: ").AddSymbol(typeInfo.ConvertedType, false, SymbolFormatter.Instance);
+						}
+					}
+				}
 				tip.AddTextBlock().Text = t;
 				return tip;
 			}
