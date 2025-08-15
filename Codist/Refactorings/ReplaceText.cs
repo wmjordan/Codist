@@ -17,7 +17,7 @@ namespace Codist.Refactorings
 		public static readonly ReplaceText CommentToRegion = new CommentToRegionRefactoring();
 		public static readonly ReplaceText SealType = new SealTypeRefactoring();
 		public static readonly ReplaceText MakeStatic = new StaticRefactoring();
-		public static readonly ReplaceText MakeReadonly = new ReadonlyFieldRefactoring();
+		public static readonly ReplaceText MakeReadonly = new ReadonlyRefactoring();
 		public static readonly ReplaceText MakePublic = new ChangeAccessibilityRefactoring(SyntaxKind.PublicKeyword);
 		public static readonly ReplaceText MakeProtected = new ChangeAccessibilityRefactoring(SyntaxKind.ProtectedKeyword);
 		public static readonly ReplaceText MakeInternal = new ChangeAccessibilityRefactoring(SyntaxKind.InternalKeyword);
@@ -225,7 +225,7 @@ namespace Codist.Refactorings
 		}
 
 
-		sealed class ReadonlyFieldRefactoring : DeclarationModifierRefactoring
+		sealed class ReadonlyRefactoring : DeclarationModifierRefactoring
 		{
 			public override int IconId => IconIds.ReadonlyField;
 			public override string Title => R.CMD_MakeReadonly;
@@ -233,7 +233,7 @@ namespace Codist.Refactorings
 			public override bool Accept(RefactoringContext ctx) {
 				var node = ctx.Node;
 				if (node.IsKind(SyntaxKind.VariableDeclarator) == false) {
-					return false;
+					return node.IsKind(SyntaxKind.StructDeclaration) && CanBeReadonly((StructDeclarationSyntax)node);
 				}
 				node = node.Parent.Parent;
 				return node.IsAnyKind(SyntaxKind.FieldDeclaration, SyntaxKind.EventFieldDeclaration)
@@ -252,20 +252,94 @@ namespace Codist.Refactorings
 				return true;
 			}
 
+			static bool CanBeReadonly(StructDeclarationSyntax node) {
+				foreach (var member in node.Members) {
+					switch (member.Kind()) {
+						case SyntaxKind.FieldDeclaration:
+						case SyntaxKind.EventFieldDeclaration:
+							if (IsWritableInstance((BaseFieldDeclarationSyntax)member)) {
+								return false;
+							}
+							break;
+						case SyntaxKind.PropertyDeclaration:
+						case SyntaxKind.EventDeclaration:
+							if (IsWritableInstance((BasePropertyDeclarationSyntax)member)) {
+								return false;
+							}
+							break;
+					}
+				}
+				return true;
+			}
+
+			static bool IsWritableInstance(BaseFieldDeclarationSyntax field) {
+				foreach (var modifier in field.Modifiers) {
+					switch (modifier.Kind()) {
+						case SyntaxKind.StaticKeyword:
+						case SyntaxKind.ConstKeyword:
+						case SyntaxKind.ReadOnlyKeyword:
+							return false;
+					}
+				}
+				return true;
+			}
+
+			static bool IsWritableInstance(BasePropertyDeclarationSyntax property) {
+				foreach (var modifier in property.Modifiers) {
+					switch (modifier.Kind()) {
+						case SyntaxKind.StaticKeyword:
+						case SyntaxKind.ReadOnlyKeyword:
+							return false;
+					}
+				}
+				var al = property.AccessorList;
+				if (al is null) {
+					return false;
+				}
+				foreach (var accessor in al.Accessors) {
+					switch (accessor.Keyword.Kind()) {
+						case SyntaxKind.SetKeyword:
+							if (accessor.Body is null && accessor.ExpressionBody is null) {
+								return true;
+							}
+							continue;
+						case SyntaxKind.AddKeyword:
+						case SyntaxKind.RemoveKeyword:
+						case CodeAnalysisHelper.InitKeyword:
+							return false;
+					}
+				}
+				return false;
+			}
+
 			public override void Refactor(SemanticContext ctx) {
 				const int LENGTH_OF_READONLY = 8;
 				var node = ctx.Node;
-				if (node.IsKind(SyntaxKind.VariableDeclarator) == false) {
+				SyntaxTokenList m;
+				MemberDeclarationSyntax md;
+				int ip; // default insertion point
+				if (node.IsKind(SyntaxKind.VariableDeclarator)) {
+					if (node.Parent.Parent is BaseFieldDeclarationSyntax d) {
+						m = d.Modifiers;
+						md = d;
+						ip = md.SpanStart;
+					}
+					else {
+						return;
+					}
+				}
+				else if (node.IsKind(SyntaxKind.StructDeclaration)) {
+					var d = (StructDeclarationSyntax)node;
+					m = d.Modifiers;
+					md = d;
+					ip = d.Keyword.SpanStart;
+				}
+				else {
 					return;
 				}
-				var d = node.Parent.Parent as BaseFieldDeclarationSyntax;
-				if (d == null) {
-					return;
-				}
-				var m = d.Modifiers;
-				var insertAt = m.FullSpan.Length == 0 ? d.SpanStart
+				var insertAt = m.FullSpan.Length == 0 ? ip
 					: m[0].IsAnyKind(SyntaxKind.PublicKeyword, SyntaxKind.InternalKeyword, SyntaxKind.PrivateKeyword, SyntaxKind.ProtectedKeyword, SyntaxKind.StaticKeyword) ? m[0].FullSpan.End
-					: GetModifierInsertionPoint(d);
+					: GetModifierInsertionPoint(md);
 				ctx.View.Edit(insertAt, (view, param, edit) => {
 					edit.Insert(param, "readonly ");
 				});
