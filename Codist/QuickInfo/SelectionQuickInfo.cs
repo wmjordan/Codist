@@ -40,11 +40,9 @@ namespace Codist.QuickInfo
 			if (selection.IsEmpty) {
 				return null;
 			}
-			var p1 = selection.Start.Position;
-			if (p1 > point || point > selection.End.Position) {
-				if (session.TextView.GetTextElementSpan(point).Contains(p1) == false) {
-					return null;
-				}
+			var p1 = selection.Start.Position.Position;
+			if (point.Position.IsOutside(p1, selection.End.Position.Position)) {
+				return null;
 			}
 			var c = 0;
 			var lines = selection.SelectedSpans.Count;
