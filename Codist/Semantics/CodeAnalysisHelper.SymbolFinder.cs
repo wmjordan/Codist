@@ -33,7 +33,7 @@ namespace Codist
 			}
 			return r.ToImmutable();
 
-			IImmutableList<ISymbol> ListMembersByOrder(ISymbol source) {
+			ImmutableArray<ISymbol> ListMembersByOrder(ISymbol source) {
 				var nsOrType = source as INamespaceOrTypeSymbol;
 				var members = nsOrType.FindMembers().ToImmutableArray();
 				INamedTypeSymbol type;
@@ -50,9 +50,7 @@ namespace Codist
 					}
 					return members.Sort(CompareByFieldIntegerConst);
 				}
-				else {
-					return members.Sort(CompareByAccessibilityKindName);
-				}
+				return members.Sort(CompareByAccessibilityKindName);
 			}
 
 			int CompareByFieldIntegerConst(ISymbol a, ISymbol b) {
