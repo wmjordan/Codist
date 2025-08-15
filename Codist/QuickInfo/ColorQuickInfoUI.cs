@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using CLR;
 using Codist.Controls;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -40,9 +41,7 @@ namespace Codist.QuickInfo
 			SeparatedSyntaxList<ArgumentSyntax> args;
 			switch (methodSymbol.Name) {
 				case nameof(GdiColor.FromArgb):
-					if (methodSymbol.ContainingType.Name != nameof(Color)) {
-						break;
-					}
+				case "FromARGB":
 					args = GetMethodArguments(semanticModel, node);
 					switch (args.Count) {
 						case 1:
@@ -63,9 +62,7 @@ namespace Codist.QuickInfo
 					}
 					break;
 				case nameof(WpfColor.FromRgb):
-					if (methodSymbol.ContainingType.Name != nameof(Color)) {
-						break;
-					}
+				case "FromRGB":
 					args = GetMethodArguments(semanticModel, node);
 					if (args.Count < 3) {
 						break;
@@ -159,12 +156,21 @@ namespace Codist.QuickInfo
 			var a1 = args[0].Expression;
 			switch (a1.Kind()) {
 				case SyntaxKind.NumericLiteralExpression:
-					try {
-						return Convert.ToInt32(((LiteralExpressionSyntax)a1).Token.Value);
+					var value = ((LiteralExpressionSyntax)a1).Token.Value;
+					switch (Type.GetTypeCode(value.GetType())) {
+						case TypeCode.SByte: return (sbyte)value;
+						case TypeCode.Byte: return (byte)value;
+						case TypeCode.Int16: return (short)value;
+						case TypeCode.UInt16: return (ushort)value;
+						case TypeCode.Int32: return (int)value;
+						case TypeCode.UInt32: return Op.Cast<uint, int>((uint)value);
+						case TypeCode.Int64: return (long)value > UInt32.MaxValue ? null : (int)(long)value;
+						case TypeCode.UInt64: return (ulong)value > UInt32.MaxValue ? null : (int)(ulong)value;
 					}
-					catch (Exception) {
-						return null;
-					}
+					return null;
+				case SyntaxKind.StringLiteralExpression:
+					UIHelper.ParseColor(((LiteralExpressionSyntax)a1).Token.ValueText, out var color, out var opacity);
+					return opacity != 0 ? (color.GetArgbValue() | opacity << 24) : null;
 				case SyntaxKind.SimpleMemberAccessExpression:
 				case SyntaxKind.IdentifierName:
 					var s = semanticModel.GetSymbolInfo(a1).Symbol;

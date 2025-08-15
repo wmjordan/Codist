@@ -18,6 +18,9 @@ namespace Codist
 		public static GdiColor Alpha(this GdiColor color, byte alpha) {
 			return GdiColor.FromArgb(alpha, color.R, color.G, color.B);
 		}
+		public static int GetArgbValue(this WpfColor color) {
+			return color.A << 24 | color.R << 16 | color.G << 8 | color.B;
+		}
 		public static string ToText(this int value) {
 			return value.ToString(CultureInfo.InvariantCulture);
 		}
