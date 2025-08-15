@@ -722,9 +722,6 @@ namespace Codist.SyntaxHighlight
 				if (bgChanged) {
 					$"[{_Category}] background changed {_ViewBackground.ToHexString()}->{currentBg.ToHexString()}".Log(LogCategory.FormatStore);
 					bgInverted = InvertColorOnBackgroundInverted(currentBg);
-					if (_Category == Constants.CodeText && bgInverted) {
-						UpdateOtherColors(currentBg.IsDark());
-					}
 					_ViewBackground = currentBg;
 					_PendingChange.PendEvent(EventKind.Background);
 				}
@@ -803,7 +800,7 @@ namespace Codist.SyntaxHighlight
 				}
 				_InvertBrightness = brightness > 3 && isBackgroundDark == false
 					|| brightness < -3 && isBackgroundDark;
-				if (_InvertBrightness) {
+				if (_InvertBrightness && _Category == Constants.CodeText) {
 					UpdateOtherColors(isBackgroundDark);
 				}
 

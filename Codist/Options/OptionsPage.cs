@@ -289,6 +289,11 @@ namespace Codist.Options
 		protected override Features Feature => Features.SuperQuickInfo;
 		protected override UIElement Child => _Child ?? (_Child = new PageControl(this));
 
+		protected override void OnActivate(CancelEventArgs e) {
+			base.OnActivate(e);
+			_Child.Refresh();
+		}
+
 		sealed class PageControl : OptionsPageContainer
 		{
 			readonly OptionBox<QuickInfoOptions> _DisableUntilShift, _CtrlSuppress, _Selection, _Color;
@@ -458,6 +463,10 @@ namespace Codist.Options
 			void UpdateQuickInfoBackgroundColor(Color color) {
 				Config.Instance.QuickInfo.BackColor = color;
 				Config.Instance.FireConfigChangedEvent(Features.SuperQuickInfo);
+			}
+
+			internal void Refresh() {
+				_BackgroundButton.Color = Config.Instance.QuickInfo.BackColor;
 			}
 		}
 	}
@@ -646,6 +655,11 @@ namespace Codist.Options
 		protected override Features Feature => Features.ScrollbarMarkers;
 		protected override UIElement Child => _Child ?? (_Child = new PageControl(this));
 
+		protected override void OnActivate(CancelEventArgs e) {
+			base.OnActivate(e);
+			_Child.Refresh();
+		}
+
 		sealed class PageControl : OptionsPageContainer
 		{
 			readonly OptionBox<MarkerOptions> _LineNumber, _Selection, _SpecialComment, _MarkerDeclarationLine, _LongMemberDeclaration, _TypeDeclaration, _MethodDeclaration, _RegionDirective, _CompilerDirective, _SymbolReference, _DisableChangeTracker;
@@ -762,6 +776,13 @@ namespace Codist.Options
 					_SymbolDefinitionButton.Color = Margins.SymbolReferenceMarkerStyle.DefaultSymbolDefinitionColor;
 				}
 				Config.Instance.FireConfigChangedEvent(Features.ScrollbarMarkers);
+			}
+
+			internal void Refresh() {
+				Color c;
+				_SymbolReferenceButton.Color = (c = Config.Instance.SymbolReferenceMarkerSettings.ReferenceMarker).A != 0 ? c : Margins.SymbolReferenceMarkerStyle.DefaultReferenceMarkerColor;
+				_SymbolWriteButton.Color = (c = Config.Instance.SymbolReferenceMarkerSettings.WriteMarker).A != 0 ? c : Margins.SymbolReferenceMarkerStyle.DefaultReferenceMarkerColor;
+				_SymbolDefinitionButton.Color = (c = Config.Instance.SymbolReferenceMarkerSettings.SymbolDefinition).A != 0 ? c : Margins.SymbolReferenceMarkerStyle.DefaultSymbolDefinitionColor;
 			}
 		}
 	}

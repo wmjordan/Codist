@@ -26,7 +26,7 @@ namespace Codist.QuickInfo
 			if (bc.A != 0
 					&& __ToolTipFormatMap.DefaultTextProperties.ForegroundBrush is SolidColorBrush b
 					&& b.Color.IsDark() == bc.IsDark()) {
-				bc = bc.InvertBrightness();
+				Config.Instance.QuickInfo.BackColor = bc = bc.InvertBrightness();
 			}
 		}
 		#endregion
