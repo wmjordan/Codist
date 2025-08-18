@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using CLR;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -11,6 +12,7 @@ using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Outlining;
+using SF = Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Codist
 {
@@ -55,6 +57,16 @@ namespace Codist
 		public SyntaxTrivia NodeTrivia => _HitPointSyntax?.GetNodeTrivia() ?? default;
 		public SyntaxToken Token => _HitPointSyntax?.Token ?? default;
 		public int Position => _HitPointSyntax?.SourcePosition ?? 0;
+
+		public (SyntaxTriviaList indent, SyntaxTrivia newLine) GetIndentAndNewLine(int position, int indentUnit = -1) {
+			var options = Workspace.Options;
+			if (indentUnit < 0) {
+				indentUnit = Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.DoubleIndentRefactoring) ? 2 : 1;
+			}
+			string indent = View.TextSnapshot.GetLinePrecedingWhitespaceAtPosition(position)
+				+ options.GetIndentString(indentUnit);
+			return (SF.TriviaList(SF.Whitespace(indent)), SF.Whitespace(options.GetNewLineString()));
+		}
 
 		public SyntaxNode GetNode(SnapshotPoint position, bool includeTrivia, bool deep) {
 			return GetSnapshotSyntax(position)?.GetNode(includeTrivia, deep);

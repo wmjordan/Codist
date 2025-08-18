@@ -2949,4 +2949,7 @@ Ctrl: 仅列出直接实现接口的类</value>
   <data name="OT_ShowParameterInfoTip" xml:space="preserve">
     <value>在自动附加括号后，显示方法的参数信息</value>
   </data>
+  <data name="CMD_UseVarType" xml:space="preserve">
+    <value>将显式类型 改为 &lt;var&gt;</value>
+  </data>
 </root>

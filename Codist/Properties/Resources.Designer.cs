@@ -2243,6 +2243,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Explicit Type to &lt;var&gt;.
+        /// </summary>
+        internal static string CMD_UseVarType {
+            get {
+                return ResourceManager.GetString("CMD_UseVarType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to View URL in browser.
         /// </summary>
         internal static string CMD_ViewUrlInBrowser {

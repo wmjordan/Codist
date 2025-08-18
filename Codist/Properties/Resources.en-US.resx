@@ -2963,4 +2963,7 @@ Ctrl: Direct implementation types only</value>
   <data name="OT_ShowParameterInfoTip" xml:space="preserve">
     <value>Displays parameter information after appending parentheses</value>
   </data>
+  <data name="CMD_UseVarType" xml:space="preserve">
+    <value>Explicit Type to &lt;var&gt;</value>
+  </data>
 </root>

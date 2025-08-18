@@ -22,6 +22,7 @@ namespace Codist.Refactorings
 		public static readonly ReplaceText MakeProtected = new ChangeAccessibilityRefactoring(SyntaxKind.ProtectedKeyword);
 		public static readonly ReplaceText MakeInternal = new ChangeAccessibilityRefactoring(SyntaxKind.InternalKeyword);
 		public static readonly ReplaceText MakePrivate = new ChangeAccessibilityRefactoring(SyntaxKind.PrivateKeyword);
+		public static readonly ReplaceText UseVarType = new UseVarTypeRefactoring();
 
 		public abstract int IconId { get; }
 		public abstract string Title { get; }
@@ -512,6 +513,64 @@ namespace Codist.Refactorings
 					case SyntaxKind.PrivateKeyword: return "private";
 				}
 				return String.Empty;
+			}
+		}
+
+		sealed class UseVarTypeRefactoring : DeclarationModifierRefactoring
+		{
+			public override int IconId => IconIds.Class;
+			public override string Title => R.CMD_UseVarType;
+
+			public override bool Accept(RefactoringContext ctx) {
+				return GetVariableDeclarationNode(ctx.Node) is VariableDeclarationSyntax dec
+					&& !(dec.Type is IdentifierNameSyntax n && n.IsVar)
+					&& dec.Parent is LocalDeclarationStatementSyntax loc
+					&& dec.Variables.All(i => i.Initializer != null)
+					&& !loc.IsConst;
+			}
+
+			static SyntaxNode GetVariableDeclarationNode(SyntaxNode node) {
+				return node is VariableDeclaratorSyntax
+					? node.Parent
+					: node is IdentifierNameSyntax name
+					? name.Parent.UnqualifyExceptNamespace()
+					: node.Parent;
+			}
+
+			public override void Refactor(SemanticContext ctx) {
+				if (GetVariableDeclarationNode(ctx.Node) is VariableDeclarationSyntax dec) {
+					switch (dec.Variables.Count) {
+						case 0: return;
+						case 1: {
+								var span = dec.Type.Span;
+								ctx.View.Edit(span, (view, param, edit) => edit.Replace(param.ToSpan(), "var"));
+								ctx.View.SelectSpan(span.Start, 3, 1);
+								return;
+							}
+					}
+
+					ctx.View.Edit((ctx, dec), (view, param, edit) => {
+						var (indent, newLine) = param.ctx.GetIndentAndNewLine(param.dec.SpanStart, 0);
+						using (var sbr = Microsoft.VisualStudio.Utilities.ReusableStringBuilder.AcquireDefault(128)) {
+							var sb = sbr.Resource;
+							sb.Append(param.dec.GetLeadingTrivia().ToString());
+							bool isFirst = true;
+							foreach (var variable in param.dec.Variables) {
+								if (isFirst) {
+									isFirst = false;
+								}
+								else {
+									sb.Append(newLine).Append(indent);
+								}
+								sb.Append("var ")
+									.Append(variable.ToFullString())
+									.Append(';');
+							}
+							sb.Append(param.dec.Parent.GetTrailingTrivia().ToString());
+							edit.Replace(param.dec.Parent.FullSpan.ToSpan(), sb.ToString());
+						}
+					});
+				}
 			}
 		}
 	}
