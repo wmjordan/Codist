@@ -219,9 +219,7 @@ namespace Codist.Refactorings
 				var insertAt = m.FullSpan.Length == 0 ? d.SpanStart
 					: m[0].IsAnyKind(SyntaxKind.PublicKeyword, SyntaxKind.InternalKeyword, SyntaxKind.PrivateKeyword, SyntaxKind.ProtectedKeyword) ? m[0].FullSpan.End
 					: GetModifierInsertionPoint(d);
-				ctx.View.Edit(insertAt, (view, param, edit) => {
-					edit.Insert(param, "sealed ");
-				});
+				ctx.View.Edit(insertAt, (view, param, edit) => edit.Insert(param, "sealed "));
 				ctx.View.SelectSpan(insertAt, LENGTH_OF_SEALED, 1);
 			}
 		}
@@ -234,7 +232,7 @@ namespace Codist.Refactorings
 
 			public override bool Accept(RefactoringContext ctx) {
 				var node = ctx.Node;
-				if (node.IsKind(SyntaxKind.VariableDeclarator) == false) {
+				if (!node.IsKind(SyntaxKind.VariableDeclarator)) {
 					return node.IsKind(SyntaxKind.StructDeclaration) && CanBeReadonly((StructDeclarationSyntax)node);
 				}
 				node = node.Parent.Parent;
@@ -342,9 +340,7 @@ namespace Codist.Refactorings
 				var insertAt = m.FullSpan.Length == 0 ? ip
 					: m[0].IsAnyKind(SyntaxKind.PublicKeyword, SyntaxKind.InternalKeyword, SyntaxKind.PrivateKeyword, SyntaxKind.ProtectedKeyword, SyntaxKind.StaticKeyword) ? m[0].FullSpan.End
 					: GetModifierInsertionPoint(md);
-				ctx.View.Edit(insertAt, (view, param, edit) => {
-					edit.Insert(param, "readonly ");
-				});
+				ctx.View.Edit(insertAt, (view, param, edit) => edit.Insert(param, "readonly "));
 				ctx.View.SelectSpan(insertAt, LENGTH_OF_READONLY, 1);
 			}
 		}
@@ -359,7 +355,7 @@ namespace Codist.Refactorings
 					var m = d.GetModifiers(out var canHaveModifier);
 					TypeDeclarationSyntax t;
 					return canHaveModifier
-						&& d.IsAnyKind(SyntaxKind.ConstructorDeclaration, SyntaxKind.DestructorDeclaration, CodeAnalysisHelper.RecordDeclaration, CodeAnalysisHelper.RecordStructDeclaration) == false
+						&& !d.IsAnyKind(SyntaxKind.ConstructorDeclaration, SyntaxKind.DestructorDeclaration, CodeAnalysisHelper.RecordDeclaration, CodeAnalysisHelper.RecordStructDeclaration)
 						&& ((t = d as TypeDeclarationSyntax) == null
 							|| t.GetParameterList() == null) // exclude primary constructor
 						&& CanBeStatic(m);
@@ -391,9 +387,7 @@ namespace Codist.Refactorings
 				var insertAt = m.FullSpan.Length == 0 ? d.SpanStart
 					: m[0].IsAnyKind(SyntaxKind.PublicKeyword, SyntaxKind.InternalKeyword, SyntaxKind.PrivateKeyword, SyntaxKind.ProtectedKeyword) ? m[0].FullSpan.End
 					: GetModifierInsertionPoint(d);
-				ctx.View.Edit(insertAt, (view, param, edit) => {
-					edit.Insert(param, "static ");
-				});
+				ctx.View.Edit(insertAt, (view, param, edit) => edit.Insert(param, "static "));
 				ctx.View.SelectSpan(insertAt, LENGTH_OF_STATIC, 1);
 			}
 		}
@@ -435,7 +429,7 @@ namespace Codist.Refactorings
 
 			bool CanChangeAccessibility(MemberDeclarationSyntax d) {
 				var m = d.GetModifiers(out var canHaveModifier);
-				if (canHaveModifier == false
+				if (!canHaveModifier
 					|| m.Any(_KeywordKind)
 					|| m.Any(SyntaxKind.OverrideKeyword)
 					|| d.IsKind(SyntaxKind.EnumMemberDeclaration)) {
@@ -446,12 +440,12 @@ namespace Codist.Refactorings
 					case SyntaxKind.InternalKeyword:
 						return true;
 					case SyntaxKind.ProtectedKeyword:
-						return m.Any(SyntaxKind.SealedKeyword) == false
+						return !m.Any(SyntaxKind.SealedKeyword)
 							&& d.Parent is ClassDeclarationSyntax c
-							&& c.Modifiers.Any(SyntaxKind.SealedKeyword) == false;
+							&& !c.Modifiers.Any(SyntaxKind.SealedKeyword);
 					case SyntaxKind.PrivateKeyword:
 						if (d is BaseTypeDeclarationSyntax t
-							&& t.IsKind(SyntaxKind.InterfaceDeclaration) == false) {
+							&& !t.IsKind(SyntaxKind.InterfaceDeclaration)) {
 							return d.Parent is BaseTypeDeclarationSyntax;
 						}
 						return true;
@@ -461,8 +455,8 @@ namespace Codist.Refactorings
 
 			public override void Refactor(SemanticContext ctx) {
 				var d = GetDeclarationNode(ctx);
-				SyntaxTokenList modifiers = d.GetModifiers(out var canHaveModifier);
-				if (canHaveModifier == false) {
+				var modifiers = d.GetModifiers(out var canHaveModifier);
+				if (!canHaveModifier) {
 					return;
 				}
 
@@ -476,7 +470,7 @@ namespace Codist.Refactorings
 							case SyntaxKind.ProtectedKeyword:
 							case SyntaxKind.InternalKeyword:
 							case SyntaxKind.PrivateKeyword:
-								if (replaced == false) {
+								if (!replaced) {
 									replaced = edit.Replace(span = item.Span.ToSpan(), param.modifier);
 									view.SelectSpan(span);
 								}
