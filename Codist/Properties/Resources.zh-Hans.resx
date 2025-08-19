@@ -2952,4 +2952,7 @@ Ctrl: 仅列出直接实现接口的类</value>
   <data name="CMD_UseVarType" xml:space="preserve">
     <value>将显式类型 改为 &lt;var&gt;</value>
   </data>
+  <data name="CMD_SplitDeclarationAssignment" xml:space="preserve">
+    <value>拆分变量的声明和赋值</value>
+  </data>
 </root>

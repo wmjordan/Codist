@@ -1937,6 +1937,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Split Declaration and Assignment.
+        /// </summary>
+        internal static string CMD_SplitDeclarationAssignment {
+            get {
+                return ResourceManager.GetString("CMD_SplitDeclarationAssignment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Split to Nested &lt;if&gt;.
         /// </summary>
         internal static string CMD_SplitToNested {

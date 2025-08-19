@@ -23,6 +23,7 @@ namespace Codist.Refactorings
 		public static readonly ReplaceText MakeInternal = new ChangeAccessibilityRefactoring(SyntaxKind.InternalKeyword);
 		public static readonly ReplaceText MakePrivate = new ChangeAccessibilityRefactoring(SyntaxKind.PrivateKeyword);
 		public static readonly ReplaceText UseVarType = new UseVarTypeRefactoring();
+		public static readonly ReplaceText SplitDeclaration = new SplitDeclarationAssignmentRefactoring();
 
 		public abstract int IconId { get; }
 		public abstract string Title { get; }
@@ -516,7 +517,18 @@ namespace Codist.Refactorings
 			}
 		}
 
-		sealed class UseVarTypeRefactoring : DeclarationModifierRefactoring
+		abstract class VarDeclarationRefactoring : DeclarationModifierRefactoring
+		{
+			protected static SyntaxNode GetVariableDeclarationNode(SyntaxNode node) {
+				return node is VariableDeclaratorSyntax
+					? node.Parent
+					: node is IdentifierNameSyntax name
+					? name.Parent.UnqualifyExceptNamespace()
+					: node.Parent;
+			}
+		}
+
+		sealed class UseVarTypeRefactoring : VarDeclarationRefactoring
 		{
 			public override int IconId => IconIds.Class;
 			public override string Title => R.CMD_UseVarType;
@@ -525,28 +537,19 @@ namespace Codist.Refactorings
 				return GetVariableDeclarationNode(ctx.Node) is VariableDeclarationSyntax dec
 					&& !(dec.Type is IdentifierNameSyntax n && n.IsVar)
 					&& dec.Parent is LocalDeclarationStatementSyntax loc
-					&& dec.Variables.All(i => i.Initializer != null)
-					&& !loc.IsConst;
-			}
-
-			static SyntaxNode GetVariableDeclarationNode(SyntaxNode node) {
-				return node is VariableDeclaratorSyntax
-					? node.Parent
-					: node is IdentifierNameSyntax name
-					? name.Parent.UnqualifyExceptNamespace()
-					: node.Parent;
+					&& !loc.IsConst
+					&& dec.Variables.All(i => i.Initializer != null);
 			}
 
 			public override void Refactor(SemanticContext ctx) {
 				if (GetVariableDeclarationNode(ctx.Node) is VariableDeclarationSyntax dec) {
 					switch (dec.Variables.Count) {
 						case 0: return;
-						case 1: {
-								var span = dec.Type.Span;
-								ctx.View.Edit(span, (view, param, edit) => edit.Replace(param.ToSpan(), "var"));
-								ctx.View.SelectSpan(span.Start, 3, 1);
-								return;
-							}
+						case 1:
+							var span = dec.Type.Span;
+							ctx.View.Edit(span, (view, param, edit) => edit.Replace(param.ToSpan(), "var"));
+							ctx.View.SelectSpan(span.Start, 3, 1);
+							return;
 					}
 
 					ctx.View.Edit((ctx, dec), (view, param, edit) => {
@@ -570,6 +573,57 @@ namespace Codist.Refactorings
 							edit.Replace(param.dec.Parent.FullSpan.ToSpan(), sb.ToString());
 						}
 					});
+				}
+			}
+		}
+
+		sealed class SplitDeclarationAssignmentRefactoring : VarDeclarationRefactoring
+		{
+			public override int IconId => IconIds.SplitCondition;
+			public override string Title => R.CMD_SplitDeclarationAssignment;
+
+			public override bool Accept(RefactoringContext ctx) {
+				SeparatedSyntaxList<VariableDeclaratorSyntax> vars;
+				return GetVariableDeclarationNode(ctx.Node) is VariableDeclarationSyntax dec
+					&& !(dec.Type is IdentifierNameSyntax n && n.IsVar)
+					&& dec.Parent is LocalDeclarationStatementSyntax loc
+					&& !loc.IsConst
+					&& dec.Variables.All(i => i.Initializer != null);
+			}
+
+			public override void Refactor(SemanticContext ctx) {
+				if (GetVariableDeclarationNode(ctx.Node) is VariableDeclarationSyntax dec) {
+					SeparatedSyntaxList<VariableDeclaratorSyntax> vars = dec.Variables;
+					var v = vars[0];
+					ctx.View.Edit((ctx, dec, v, vars), (view, param, edit) => {
+						var (indent, newLine) = param.ctx.GetIndentAndNewLine(param.dec.SpanStart, 0);
+						var start = param.v.Identifier.Span.Start;
+						var end = param.dec.Parent.FullSpan.End;
+						using (var sbr = Microsoft.VisualStudio.Utilities.ReusableStringBuilder.AcquireDefault(128)) {
+							var sb = sbr.Resource;
+							bool isFirst = true;
+							foreach (var variable in param.dec.Variables) {
+								if (isFirst) {
+									isFirst = false;
+								}
+								else {
+									sb.Append(", ");
+								}
+								sb.Append(variable.Identifier.Text);
+							}
+							sb.Append(';');
+							foreach (var variable in param.dec.Variables) {
+								sb.Append(newLine)
+									.Append(indent)
+									.Append(variable.Identifier.ToFullString())
+									.Append(variable.Initializer.ToFullString())
+									.Append(';');
+							}
+							sb.Append(param.dec.Parent.GetTrailingTrivia().ToString());
+							edit.Replace(Span.FromBounds(start, end), sb.ToString());
+						}
+					});
+					ctx.View.SelectSpan(v.Identifier.Span.ToSpan());
 				}
 			}
 		}

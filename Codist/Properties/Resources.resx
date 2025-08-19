@@ -2966,4 +2966,7 @@ Ctrl: Direct implementation types only</value>
   <data name="CMD_UseVarType" xml:space="preserve">
     <value>Explicit Type to &lt;var&gt;</value>
   </data>
+  <data name="CMD_SplitDeclarationAssignment" xml:space="preserve">
+    <value>Split Declaration and Assignment</value>
+  </data>
 </root>
