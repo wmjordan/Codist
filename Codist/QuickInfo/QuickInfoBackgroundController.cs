@@ -71,6 +71,9 @@ namespace Codist.QuickInfo
 			}
 			else if (color.IsDark()) {
 				l *= 1.5f;
+				if (l > 1) {
+					l = 1;
+				}
 			}
 			else {
 				l *= 0.667f;
