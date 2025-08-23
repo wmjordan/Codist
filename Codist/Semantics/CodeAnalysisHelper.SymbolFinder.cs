@@ -512,23 +512,32 @@ namespace Codist
 			return r;
 		}
 
-		public static async Task<IEnumerable<Location>> FindOccurrencesInDocumentAsync(this ISymbol symbol, Document document, SyntaxTree syntaxTree, CancellationToken cancellationToken = default) {
+		public static async Task<IEnumerable<Location>> FindOccurrencesInDocumentAsync(this ISymbol symbol, Document document, SyntaxTree syntaxTree, string tokenText, CancellationToken cancellationToken = default) {
 			var refs = await SymbolFinder.FindReferencesAsync(symbol, document.Project.Solution, ImmutableHashSet.Create(document), cancellationToken);
-			return MixDeclarationAndOccurrence(symbol.Locations, refs, syntaxTree);
+			return MixDeclarationAndOccurrence(symbol.Locations, refs, syntaxTree, tokenText, cancellationToken);
 
-			IEnumerable<Location> MixDeclarationAndOccurrence(ImmutableArray<Location> symLocs, IEnumerable<ReferencedSymbol> refSymbols, SyntaxTree st) {
+			IEnumerable<Location> MixDeclarationAndOccurrence(ImmutableArray<Location> symLocs, IEnumerable<ReferencedSymbol> refSymbols, SyntaxTree st, string tt, CancellationToken cancellationToken) {
 				foreach (var item in symLocs) {
 					if (item.SourceTree == st) {
+						if (item.GetText(cancellationToken) != tt) {
+							continue;
+						}
 						yield return item;
 					}
 				}
 				foreach (var item in refSymbols) {
 					foreach (var location in item.Definition.Locations) {
 						if (location.SourceTree == st) {
+							if (location.GetText(cancellationToken) != tt) {
+								continue;
+							}
 							yield return location;
 						}
 					}
 					foreach (var location in item.Locations) {
+						if (location.Location.GetText(cancellationToken) != tt) {
+							continue;
+						}
 						yield return location.Location;
 					}
 				}

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Text;
@@ -73,6 +74,10 @@ namespace Codist
 			return document == null
 				? String.Empty
 				: $"{document.Name}({document.Id.Id.ToString("N").Substring(0, 8)})";
+		}
+
+		public static string GetText(this Location location, CancellationToken cancellationToken = default) {
+			return location.SourceTree.GetText(cancellationToken).ToString(location.SourceSpan);
 		}
 	}
 }

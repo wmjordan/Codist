@@ -131,7 +131,8 @@ namespace Codist.SmartBars
 								}
 							}
 							if (_Symbol != null) {
-								if (IsReadOnly == false) {
+								if (IsReadOnly == false
+									&& !tokenKind.CeqAny(SyntaxKind.GetKeyword, SyntaxKind.SetKeyword)) {
 									AddCommand(MyToolBar, IconIds.SelectAll, R.CMD_SelectSymbolInDocument, SelectSymbolOccurrencesAsync);
 								}
 								if (Config.Instance.Features.MatchFlags(Features.SyntaxHighlight)
@@ -248,6 +249,7 @@ namespace Codist.SmartBars
 			Span selectionOffsetSpan = default;
 			var tokenSpan = _Context.Token.Span.ToSpan();
 			var tokenLength = tokenSpan.Length;
+			var tokenText = _Context.Token.Text;
 			if (selections.HasMultipleSelections == false) {
 				// if only part of the symbol token is selected,
 				// select that part in other occurrences too
@@ -256,7 +258,7 @@ namespace Codist.SmartBars
 					selectionOffsetSpan = new Span(selectionOffsetSpan.Start - tokenSpan.Start, selectionOffsetSpan.Length);
 				}
 			}
-			await SelectSymbolDefinitionAndReferencesAsync(c, selections, symbol, tokenLength, selectionOffsetSpan);
+			await SelectSymbolDefinitionAndReferencesAsync(c, selections, symbol, tokenLength, selectionOffsetSpan, tokenText);
 			#region Select others with the same name
 			switch (symbol.Kind) {
 				case SymbolKind.NamedType:
@@ -265,7 +267,7 @@ namespace Codist.SmartBars
 							if (tm.Kind == SymbolKind.Method
 								&& tm.IsImplicitlyDeclared == false
 								&& IsTypeNamedMethod((IMethodSymbol)tm)) {
-								await SelectSymbolDefinitionAndReferencesAsync(c, selections, tm, tokenLength, selectionOffsetSpan);
+								await SelectSymbolDefinitionAndReferencesAsync(c, selections, tm, tokenLength, selectionOffsetSpan, tokenText);
 							}
 						}
 					}
@@ -273,20 +275,21 @@ namespace Codist.SmartBars
 				case SymbolKind.Method:
 					if (symbol is IMethodSymbol m) {
 						if (IsTypeNamedMethod(m)) {
-							await SelectSymbolDefinitionAndReferencesAsync(c, selections, symbol = symbol.ContainingType, tokenLength, selectionOffsetSpan);
+							await SelectSymbolDefinitionAndReferencesAsync(c, selections, symbol = symbol.ContainingType, tokenLength, selectionOffsetSpan, tokenText);
 							goto case SymbolKind.NamedType;
 						}
 					}
 					break;
 			}
 			#endregion
+			ctx.View.VisualElement.Focus();
 
 			bool IsTypeNamedMethod(IMethodSymbol m) {
 				return m.MethodKind.CeqAny(MethodKind.Constructor, MethodKind.StaticConstructor, MethodKind.Destructor);
 			}
 
-			async Task SelectSymbolDefinitionAndReferencesAsync(SemanticContext ctx, IMultiSelectionBroker msb, ISymbol s, int len, Span offsetSpan) {
-				msb.AddSelections(OffsetLocations(await s.FindOccurrencesInDocumentAsync(ctx.Document, ctx.Compilation.SyntaxTree, default), len, offsetSpan));
+			async Task SelectSymbolDefinitionAndReferencesAsync(SemanticContext ctx, IMultiSelectionBroker msb, ISymbol s, int len, Span offsetSpan, string tokenText) {
+				msb.AddSelections(OffsetLocations(await s.FindOccurrencesInDocumentAsync(ctx.Document, ctx.Compilation.SyntaxTree, tokenText, default), len, offsetSpan));
 			}
 
 			IEnumerable<Span> OffsetLocations(IEnumerable<Location> locations, int len, Span off) {
