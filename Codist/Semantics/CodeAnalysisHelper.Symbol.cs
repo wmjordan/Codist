@@ -1036,6 +1036,52 @@ namespace Codist
 				&& method.Equals(method.OriginalDefinition) == false;
 		}
 
+		public static bool CanTypeParametersBeInferred(this IMethodSymbol method) {
+			ImmutableArray<IParameterSymbol> parameters;
+			if (method?.IsGenericMethod != true
+				|| (parameters = method.Parameters).IsEmpty) {
+				return false;
+			}
+
+			foreach (var typeParam in method.TypeParameters) {
+				bool isParamInferred = false;
+				foreach (var param in parameters) {
+					if (TypeContainsTypeParameter(param.Type, typeParam)) {
+						isParamInferred = true;
+						break;
+					}
+				}
+				if (!isParamInferred) {
+					return false;
+				}
+			}
+			return true;
+		}
+
+		static bool TypeContainsTypeParameter(ITypeSymbol type, ITypeParameterSymbol typeParam) {
+			if (type == null) {
+				return false;
+			}
+
+			if (type.Equals(typeParam)) {
+				return true;
+			}
+
+			if (type is IArrayTypeSymbol arrayType) {
+				return TypeContainsTypeParameter(arrayType.ElementType, typeParam);
+			}
+
+			if (type is INamedTypeSymbol namedType) {
+				foreach (var typeArg in namedType.TypeArguments) {
+					if (TypeContainsTypeParameter(typeArg, typeParam)) {
+						return true;
+					}
+				}
+			}
+
+			return false;
+		}
+
 		public static bool IsObjectOrValueType(this INamedTypeSymbol type) {
 			return type.SpecialType == SpecialType.System_Object || type.SpecialType == SpecialType.System_ValueType;
 		}
@@ -1213,6 +1259,12 @@ namespace Codist
 
 		public static bool HasSymbol(this SymbolInfo symbolInfo) {
 			return symbolInfo.Symbol != null || symbolInfo.CandidateReason != CandidateReason.None;
+		}
+
+		public static ImmutableArray<ISymbol> GetSymbolOrCandidates(this SymbolInfo symbolInfo) {
+			return symbolInfo.Symbol != null
+				? ImmutableArray.Create(symbolInfo.Symbol)
+				: symbolInfo.CandidateSymbols;
 		}
 
 		#region Protected/Future property accessors

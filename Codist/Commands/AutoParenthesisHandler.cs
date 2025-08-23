@@ -108,11 +108,11 @@ namespace Codist.Commands
 			if (node is ExpressionStatementSyntax es) {
 				node = es.Expression;
 			}
-			SymbolInfo si;
+			SymbolInfo si = default;
 			if (IsTypeReferenceExpression(node)
 				|| (si = sc.SemanticModel.GetSymbolInfo(node, ct)).HasSymbol()
-					&& (IsMethod(si, node, sc, ct) || IsConstructor(si, node))) {
-				InsertParentheses(sc);
+					&& (IsAcceptableMethod(si, node, sc, ct) || IsConstructor(si, node))) {
+				InsertParentheses(sc, si);
 			}
 		}
 
@@ -128,24 +128,31 @@ namespace Codist.Commands
 			return false;
 		}
 
-		static bool IsMethod(SymbolInfo si, SyntaxNode node, SemanticContext sc, CancellationToken ct) {
-			if (!(si.Symbol?.Kind == SymbolKind.Method && ((IMethodSymbol)si.Symbol).IsGenericMethod)
-				&& (si.CandidateReason == CandidateReason.None
-					|| !si.CandidateSymbols.All(i => i.Kind == SymbolKind.Method && !((IMethodSymbol)i).IsGenericMethod))) {
-				// do not append parentheses if:
-				//   symbol is not method,
-				//   or method is generic,
-				//   or not all candidates are all non-generic methods
+		// this method assumes si has symbol
+		static bool IsAcceptableMethod(SymbolInfo si, SyntaxNode node, SemanticContext sc, CancellationToken ct) {
+			// do not append parentheses if:
+			//   symbol is not method,
+			//   or method is generic and type parameter can not be inferred by parameter types,
+			//   or not all candidates are all non-generic methods
+			var symbols = si.GetSymbolOrCandidates();
+			if (symbols.IsDefaultOrEmpty) {
 				return false;
+			}
+			foreach (var symbol in symbols) {
+				if (symbol.Kind != SymbolKind.Method) {
+					return false;
+				}
+				var m = symbol as IMethodSymbol;
+				if (m.IsGenericMethod && !m.CanTypeParametersBeInferred()) {
+					return false;
+				}
 			}
 
 			var pNode = node.GetNodePurpose();
 			switch (pNode.Kind()) {
 				case SyntaxKind.Attribute:
 					// do not append parentheses if attribute constructor does not take parameter
-					return si.Symbol != null && ((IMethodSymbol)si.Symbol).Parameters.Length != 0
-						|| si.CandidateReason != CandidateReason.None
-							&& si.CandidateSymbols.All(i => ((IMethodSymbol)i).Parameters.Length != 0);
+					return symbols.All(i => ((IMethodSymbol)i).Parameters.Length != 0);
 				case SyntaxKind.Argument:
 					if (IsDelegateTypedArgumentOrName(sc, (ArgumentSyntax)pNode, ct)) {
 						// do not append parentheses if method used as delegate or within nameof
@@ -239,20 +246,43 @@ namespace Codist.Commands
 				return false;
 			}
 			var pNode = node.GetNodePurpose();
-			if (pNode.IsKind(SyntaxKind.ObjectCreationExpression) && !(((ObjectCreationExpressionSyntax)pNode).ArgumentList?.Arguments.Count != 0)) {
-				return true;
-			}
-			return false;
+			return pNode.IsKind(SyntaxKind.ObjectCreationExpression)
+				&& ((ObjectCreationExpressionSyntax)pNode).ArgumentList?.Arguments.Count == 0;
 		}
 
-		static void InsertParentheses(SemanticContext sc) {
+		static void InsertParentheses(SemanticContext sc, SymbolInfo si) {
 			var v = sc.View;
 			var caret = v.GetCaretPosition();
 			SnapshotPoint p;
 			using (var edit = v.TextBuffer.CreateEdit()) {
 				var space = sc.Workspace.Options.GetOption(Microsoft.CodeAnalysis.CSharp.Formatting.CSharpFormattingOptions.SpaceAfterMethodCallName);
-				edit.Insert(caret, space ? " ()" : "()");
-				p = new SnapshotPoint(edit.Apply(), caret.Position + (space ? 2 : 1));
+				bool allVoidMethod = true, allNoParam = true;
+				foreach (var candidate in si.GetSymbolOrCandidates()) {
+					if (candidate is IMethodSymbol m) {
+						allVoidMethod &= m.ReturnsVoid && m.MethodKind != MethodKind.Constructor;
+						allNoParam &= m.Parameters.Length == 0;
+						if (!allNoParam && !allNoParam) {
+							break;
+						}
+					}
+					else {
+						allNoParam = false;
+						allVoidMethod = false;
+						break;
+					}
+				}
+				string insertion;
+				int caretAfterInsertion;
+				if (allVoidMethod) {
+					insertion = space ? " ();" : "();";
+					caretAfterInsertion = allNoParam ? insertion.Length : insertion.Length - 2;
+				}
+				else {
+					insertion = space ? " ()" : "()";
+					caretAfterInsertion = (allNoParam ? 1 : 0) + (space ? 2 : 1);
+				}
+				edit.Insert(caret, insertion);
+				p = new SnapshotPoint(edit.Apply(), caret.Position + caretAfterInsertion);
 			}
 			v.Caret.MoveTo(p);
 			if (Config.Instance.PunctuationOptions.MatchFlags(PunctuationOptions.ShowParameterInfo)) {
