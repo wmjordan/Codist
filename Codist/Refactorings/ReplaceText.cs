@@ -428,11 +428,13 @@ namespace Codist.Refactorings
 			}
 
 			bool CanChangeAccessibility(MemberDeclarationSyntax d) {
+				if (d.IsAnyKind(SyntaxKind.EnumMemberDeclaration, CodeAnalysisHelper.ExtensionDeclaration)) {
+					return false;
+				}
 				var m = d.GetModifiers(out var canHaveModifier);
 				if (!canHaveModifier
 					|| m.Any(_KeywordKind)
-					|| m.Any(SyntaxKind.OverrideKeyword)
-					|| d.IsKind(SyntaxKind.EnumMemberDeclaration)) {
+					|| m.Any(SyntaxKind.OverrideKeyword)) {
 					return false;
 				}
 				switch (_KeywordKind) {
