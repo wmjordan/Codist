@@ -122,11 +122,11 @@ namespace Codist.SmartBars
 					ctx.View.ExpandSelectionToLine();
 				}
 
-				if (ctx.ModifierKeys.MatchFlags(ModifierKeys.Control)) {
-					ctx.View.CopySelectionWithoutIndentation();
+				if (ctx.ModifierKeys.MatchFlags(ModifierKeys.Shift)) {
+					TextEditorHelper.ExecuteEditorCommand("Edit.Copy");
 				}
 				else {
-					TextEditorHelper.ExecuteEditorCommand("Edit.Copy");
+					ctx.View.CopySelectionWithoutIndentation();
 				}
 			});
 		}
@@ -137,12 +137,12 @@ namespace Codist.SmartBars
 					ctx.View.ExpandSelectionToLine();
 				}
 
-				if (ctx.ModifierKeys.MatchFlags(ModifierKeys.Control)) {
-					ctx.View.CopySelectionWithoutIndentation();
-					TextEditorHelper.ExecuteEditorCommand("Edit.Delete");
+				if (ctx.ModifierKeys.MatchFlags(ModifierKeys.Shift)) {
+					TextEditorHelper.ExecuteEditorCommand("Edit.Cut");
 				}
 				else {
-					TextEditorHelper.ExecuteEditorCommand("Edit.Cut");
+					ctx.View.CopySelectionWithoutIndentation();
+					TextEditorHelper.ExecuteEditorCommand("Edit.Delete");
 				}
 			});
 		}

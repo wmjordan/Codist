@@ -146,17 +146,17 @@ Right click: Comment line</value>
     <value>Copy Qualified Symbol Name</value>
   </data>
   <data name="CMD_CopySelectedText" xml:space="preserve">
-    <value>Copy selected text
+    <value>Copy selected text (without indentation)
 Right click: Copy line
-Ctrl: Without indentation</value>
+Shift: With indentation</value>
   </data>
   <data name="CMD_CopySymbolName" xml:space="preserve">
     <value>Copy Symbol Name</value>
   </data>
   <data name="CMD_CutSelectedText" xml:space="preserve">
-    <value>Cut selected text
+    <value>Cut selected text (without indentation)
 Right click: Cut line
-Ctrl: Without indentation</value>
+Shift: With indentation</value>
   </data>
   <data name="CMD_Debugger" xml:space="preserve">
     <value>Debugger...

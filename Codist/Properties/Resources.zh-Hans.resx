@@ -146,17 +146,17 @@
     <value>复制类和符号名称</value>
   </data>
   <data name="CMD_CopySelectedText" xml:space="preserve">
-    <value>复制选中文本
+    <value>复制选中文本（去除行首缩进）
 右键：复制整行
-Ctrl: 去除行首缩进</value>
+Shift: 包含行首缩进</value>
   </data>
   <data name="CMD_CopySymbolName" xml:space="preserve">
     <value>复制符号名称</value>
   </data>
   <data name="CMD_CutSelectedText" xml:space="preserve">
-    <value>剪切选中文本
-右键：剪切整行
-Ctrl: 去除行首缩进</value>
+    <value>剪切选中文本（去除行首缩进）
+右键：复制整行
+Shift: 包含行首缩进</value>
   </data>
   <data name="CMD_Debugger" xml:space="preserve">
     <value>调试器...
