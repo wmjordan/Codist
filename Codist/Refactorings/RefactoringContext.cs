@@ -1,9 +1,7 @@
 ﻿using System.Linq;
-using CLR;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Options;
-using SF = Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Codist.Refactorings
 {
