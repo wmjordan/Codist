@@ -109,10 +109,22 @@ namespace Codist.Commands
 				node = es.Expression;
 			}
 			SymbolInfo si = default;
-			if (IsTypeReferenceExpression(node)
-				|| (si = sc.SemanticModel.GetSymbolInfo(node, ct)).HasSymbol()
-					&& (IsAcceptableMethod(si, node, sc, ct) || IsConstructor(si, node))) {
-				InsertParentheses(sc, si);
+			if (IsTypeReferenceExpression(node)) {
+				InsertParentheses(sc, si, InsertionType.TypeReference, false);
+			}
+			else if ((si = sc.SemanticModel.GetSymbolInfo(node, ct)).HasSymbol()) {
+				if (IsAcceptableMethod(si, node, sc, ct)) {
+					InsertParentheses(sc, si, InsertionType.Method, true);
+				}
+				else if (IsConstructor(si, node)) {
+					if (node.GetContainingStatement() is LocalDeclarationStatementSyntax loc
+						&& sc.SemanticModel.GetTypeInfo(loc.Declaration.Type, ct).Type?.TypeKind == TypeKind.Array) {
+						InsertParentheses(sc, si, InsertionType.Array, loc.SemicolonToken.IsMissing);
+					}
+					else {
+						InsertParentheses(sc, si, InsertionType.Constructor, true);
+					}
+				}
 			}
 		}
 
@@ -124,6 +136,9 @@ namespace Codist.Commands
 					return ((SizeOfExpressionSyntax)node).OpenParenToken.IsMissing;
 				case SyntaxKind.IdentifierName:
 					return ((IdentifierNameSyntax)node).Identifier.ValueText == "nameof";
+				case SyntaxKind.BaseConstructorInitializer:
+				case SyntaxKind.ThisConstructorInitializer:
+					return true;
 			}
 			return false;
 		}
@@ -250,30 +265,43 @@ namespace Codist.Commands
 				&& ((ObjectCreationExpressionSyntax)pNode).ArgumentList?.Arguments.Count == 0;
 		}
 
-		static void InsertParentheses(SemanticContext sc, SymbolInfo si) {
+		static void InsertParentheses(SemanticContext sc, SymbolInfo si, InsertionType type, bool mayInsertSemicolon) {
 			var v = sc.View;
 			var caret = v.GetCaretPosition();
 			SnapshotPoint p;
 			using (var edit = v.TextBuffer.CreateEdit()) {
 				var space = sc.Workspace.Options.GetOption(Microsoft.CodeAnalysis.CSharp.Formatting.CSharpFormattingOptions.SpaceAfterMethodCallName);
-				bool allVoidMethod = true, allNoParam = true;
-				foreach (var candidate in si.GetSymbolOrCandidates()) {
-					if (candidate is IMethodSymbol m) {
-						allVoidMethod &= m.ReturnsVoid && m.MethodKind != MethodKind.Constructor;
-						allNoParam &= m.Parameters.Length == 0;
-						if (!allNoParam && !allNoParam) {
+				bool allVoidMethod, allNoParam;
+				string insertion;
+				int caretAfterInsertion;
+				if (type == InsertionType.Method || type == InsertionType.Constructor) {
+					allVoidMethod = true;
+					allNoParam = true;
+					foreach (var candidate in si.GetSymbolOrCandidates()) {
+						if (candidate is IMethodSymbol m) {
+							allVoidMethod &= m.ReturnsVoid && m.MethodKind != MethodKind.Constructor;
+							allNoParam &= m.Parameters.Length == 0;
+							if (!allNoParam && !allNoParam) {
+								break;
+							}
+						}
+						else {
+							allNoParam = false;
+							allVoidMethod = false;
 							break;
 						}
 					}
-					else {
-						allNoParam = false;
-						allVoidMethod = false;
-						break;
-					}
 				}
-				string insertion;
-				int caretAfterInsertion;
-				if (allVoidMethod) {
+				else if (type == InsertionType.Array) {
+					insertion = mayInsertSemicolon ? "[];" : "[]";
+					caretAfterInsertion = 1;
+					goto INSERT;
+				}
+				else {
+					allVoidMethod = false;
+					allNoParam = false;
+				}
+				if (allVoidMethod && mayInsertSemicolon) {
 					insertion = space ? " ();" : "();";
 					caretAfterInsertion = allNoParam ? insertion.Length : insertion.Length - 2;
 				}
@@ -281,6 +309,7 @@ namespace Codist.Commands
 					insertion = space ? " ()" : "()";
 					caretAfterInsertion = (allNoParam ? 1 : 0) + (space ? 2 : 1);
 				}
+			INSERT:
 				edit.Insert(caret, insertion);
 				p = new SnapshotPoint(edit.Apply(), caret.Position + caretAfterInsertion);
 			}
@@ -302,6 +331,14 @@ namespace Codist.Commands
 				s.ItemCommitted -= CompletionSessionItemCommitted;
 				s.Dismissed -= CompletionSessionDismissed;
 			}
+		}
+
+		enum InsertionType
+		{
+			Method,
+			Constructor,
+			Array,
+			TypeReference
 		}
 	}
 }
