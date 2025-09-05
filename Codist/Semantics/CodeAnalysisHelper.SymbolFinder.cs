@@ -737,7 +737,7 @@ namespace Codist
 		/// <summary>Navigates upward through ancestral axis and find out the first node reflecting the usage.</summary>
 		public static SyntaxNode GetNodePurpose(this SyntaxNode node) {
 			NameSyntax originName;
-			if (node.IsAnyKind(SyntaxKind.IdentifierName, SyntaxKind.GenericName)) {
+			if (node.IsAnyKind(SyntaxKind.IdentifierName, SyntaxKind.GenericName, SyntaxKind.PredefinedType)) {
 				originName = node as NameSyntax;
 				node = node.Parent;
 			}
