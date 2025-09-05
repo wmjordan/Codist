@@ -125,6 +125,9 @@ namespace Codist.Commands
 						InsertParentheses(sc, si, InsertionType.Constructor, true);
 					}
 				}
+				else if (si.Symbol?.GetReturnType()?.TypeKind == TypeKind.Delegate) {
+					InsertParentheses(sc, si, InsertionType.Delegate, true);
+				}
 			}
 		}
 
@@ -297,6 +300,14 @@ namespace Codist.Commands
 					caretAfterInsertion = 1;
 					goto INSERT;
 				}
+				else if (type == InsertionType.Delegate) {
+					var m = (si.Symbol.GetReturnType() as INamedTypeSymbol).DelegateInvokeMethod;
+					if (m is null) {
+						return;
+					}
+					allVoidMethod = m.ReturnsVoid;
+					allNoParam = m.Parameters.Length == 0;
+				}
 				else {
 					allVoidMethod = false;
 					allNoParam = false;
@@ -338,6 +349,7 @@ namespace Codist.Commands
 			Method,
 			Constructor,
 			Array,
+			Delegate,
 			TypeReference
 		}
 	}
