@@ -88,23 +88,39 @@ namespace Codist.QuickInfo
 		}
 
 		static void ShowCapturedVariables(SyntaxNode node, ISymbol symbol, SemanticModel semanticModel, ThemedTipDocument tip, CancellationToken cancellationToken) {
-			if (node is LambdaExpressionSyntax
-				|| (symbol as IMethodSymbol)?.MethodKind == MethodKind.LocalFunction) {
-				var ss = node is LambdaExpressionSyntax
-					? node.AncestorsAndSelf().FirstOrDefault(i => i is StatementSyntax || i is ExpressionSyntax && i.IsKind(SyntaxKind.IdentifierName) == false)
-					: symbol.GetSyntaxNode(cancellationToken);
-				if (ss != null) {
-					var captured = semanticModel.GetCapturedVariables(ss);
-					if (captured.Length > 0) {
-						var p = new ThemedTipParagraph(IconIds.CapturedVariables, new ThemedTipText().Append(R.T_CapturedVariables, true));
-						int i = 0;
-						foreach (var item in captured) {
-							p.Content.Append(++i == 1 ? ": " : ", ").AddSymbol(item, false, __SymbolFormatter);
-						}
-						tip.Append(p);
-					}
+			SyntaxNode ss;
+			if (node is LambdaExpressionSyntax) {
+				ss = node.AncestorsAndSelf()
+					.FirstOrDefault(i => i is StatementSyntax
+						|| i is ExpressionSyntax
+							&& i.IsKind(SyntaxKind.IdentifierName) == false);
+			}
+			else if ((symbol as IMethodSymbol)?.MethodKind == MethodKind.LocalFunction) {
+				ss = symbol.GetSyntaxNode(cancellationToken);
+			}
+			else {
+				return;
+			}
+			if (ss is null) {
+				return;
+			}
+			var captured = semanticModel.GetCapturedVariables(ss);
+			if (captured.Length == 0) {
+				return;
+			}
+			var p = new ThemedTipParagraph(IconIds.CapturedVariables, new ThemedTipText().Append(R.T_CapturedVariables, true));
+			int i = 0;
+			var inlines = p.Content.Inlines;
+			foreach (var item in captured) {
+				inlines.Append(++i == 1 ? ": " : ", ");
+				if (item.Kind == SymbolKind.Parameter && ((IParameterSymbol)item).IsThis) {
+					__SymbolFormatter.Format(inlines, ((IParameterSymbol)item).Type, "this", false);
+				}
+				else {
+					inlines.AddSymbol(item, false, __SymbolFormatter);
 				}
 			}
+			tip.Append(p);
 		}
 	}
 }
