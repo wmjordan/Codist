@@ -1038,11 +1038,13 @@ namespace Codist
 
 		public static bool CanTypeParametersBeInferred(this IMethodSymbol method) {
 			ImmutableArray<IParameterSymbol> parameters;
-			if (method is null) {
+			if (method?.IsGenericMethod != true) {
 				return false;
 			}
-			if (!method.IsGenericMethod
-				|| (parameters = (method = method.ReducedFrom).Parameters).IsEmpty) {
+			if (method.MethodKind == MethodKind.ReducedExtension) {
+				method = method.ReducedFrom;
+			}
+			if ((parameters = method.Parameters).IsEmpty) {
 				return false;
 			}
 
