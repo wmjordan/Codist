@@ -149,6 +149,7 @@ namespace Codist.SyntaxHighlight
 					return new Typeface(new FontFamily($"{Font} {FontVariant}"), ft.Style, ft.Weight, ft.Stretch);
 				}
 			}
+			$"Invalid font: {Font}".Log(LogCategory.FormatStore);
 			return null;
 		}
 
