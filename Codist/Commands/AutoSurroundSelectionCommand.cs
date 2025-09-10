@@ -49,7 +49,7 @@ namespace Codist.Commands
 
 		static bool IsChineseEnvironment() {
 			return System.Globalization.CultureInfo.CurrentCulture.LCID.CeqAny(2052, 3076, 5124, 1028, 4100)
-				|| R.Culture.LCID.CeqAny(2052, 3076, 5124, 1028, 4100);
+				|| R.Culture?.LCID.CeqAny(2052, 3076, 5124, 1028, 4100) == true;
 		}
 
 		protected abstract string GetEndTextForTypedChar(char ch);
