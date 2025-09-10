@@ -117,9 +117,15 @@ namespace Codist.Commands
 					InsertParentheses(sc, si, InsertionType.Method, true);
 				}
 				else if (IsConstructor(si, node)) {
-					if (node.GetContainingStatement() is LocalDeclarationStatementSyntax loc
+					var s = node.GetContainingStatement();
+					if (s is LocalDeclarationStatementSyntax loc
 						&& sc.SemanticModel.GetTypeInfo(loc.Declaration.Type, ct).Type?.TypeKind == TypeKind.Array) {
 						InsertParentheses(sc, si, InsertionType.Array, loc.SemicolonToken.IsMissing);
+					}
+					else if (s is ExpressionStatementSyntax a
+							&& a.Expression.IsKind(SyntaxKind.SimpleAssignmentExpression)
+							&& sc.SemanticModel.GetTypeInfo(((AssignmentExpressionSyntax)a.Expression).Left, ct).Type?.TypeKind == TypeKind.Array) {
+						InsertParentheses(sc, si, InsertionType.Array, a.SemicolonToken.IsMissing);
 					}
 					else {
 						InsertParentheses(sc, si, InsertionType.Constructor, true);
