@@ -1323,7 +1323,7 @@ namespace Codist
 				if (o != null) {
 					t = o.ContainingType;
 					if (t?.IsCommonBaseType() == false) {
-						Format(info, symbol, null, false);
+						Format(info, o.ContainingType, null, false);
 						info.Add(".");
 						Format(info, o, null, false);
 						info.Add(" ");
