@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
   <Metadata>
-    <Identity Id="Codist.WMJ.c7b93d20-621f-4b21-9d28-d51157ef0b94" Version="8.0.7.10505" Language="en-US" Publisher="WMJ" />
+    <Identity Id="Codist.WMJ.c7b93d20-621f-4b21-9d28-d51157ef0b94" Version="8.0.8.10666" Language="en-US" Publisher="WMJ" />
     <DisplayName>Codist</DisplayName>
-    <Description xml:space="preserve">A C# programmer's productivity booster which enhances syntax highlighting, quick info (tooltip), navigation bar, scrollbar, display quality, and brings automatically updated version numbers, smart tool bar with advanced editing, code analysis and refactoring commands to code editor.</Description>
+    <Description xml:space="preserve">A C# programmer's productivity booster which enhances syntax highlighting, quick info (tooltip), navigation bar, scrollbar, display quality, and brings automatically updated version numbers, parentheses auto completion, smart tool bar with advanced editing, code analysis and refactoring commands to code editor.</Description>
     <MoreInfo>https://github.com/wmjordan/Codist</MoreInfo>
     <License>license.txt</License>
     <ReleaseNotes>https://github.com/wmjordan/Codist/releases</ReleaseNotes>
@@ -21,20 +21,20 @@
     <InstallationTarget Version="[15.0,17.0)" Id="Microsoft.VisualStudio.Enterprise">
       <ProductArchitecture>x86</ProductArchitecture>
     </InstallationTarget>
-    <InstallationTarget Version="[17.0,18.0)" Id="Microsoft.VisualStudio.Pro">
+    <InstallationTarget Version="[17.0,19.0)" Id="Microsoft.VisualStudio.Pro">
       <ProductArchitecture>amd64</ProductArchitecture>
     </InstallationTarget>
-    <InstallationTarget Version="[17.0,18.0)" Id="Microsoft.VisualStudio.Community">
+    <InstallationTarget Version="[17.0,19.0)" Id="Microsoft.VisualStudio.Community">
       <ProductArchitecture>amd64</ProductArchitecture>
     </InstallationTarget>
-    <InstallationTarget Version="[17.0,18.0)" Id="Microsoft.VisualStudio.Enterprise">
+    <InstallationTarget Version="[17.0,19.0)" Id="Microsoft.VisualStudio.Enterprise">
       <ProductArchitecture>amd64</ProductArchitecture>
     </InstallationTarget>
   </Installation>
   <Prerequisites>
-    <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[15.0,18.0)" DisplayName="Visual Studio core editor" />
-    <Prerequisite Id="Microsoft.VisualStudio.Component.Roslyn.LanguageServices" Version="[15.0,18.0)" DisplayName="C# and Visual Basic" />
-    <Prerequisite Id="Microsoft.VisualStudio.Component.Roslyn.Compiler" Version="[15.0,18.0)" DisplayName="C# and Visual Basic Roslyn Compiler" />
+    <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[15.0,19.0)" DisplayName="Visual Studio core editor" />
+    <Prerequisite Id="Microsoft.VisualStudio.Component.Roslyn.LanguageServices" Version="[15.0,19.0)" DisplayName="C# and Visual Basic" />
+    <Prerequisite Id="Microsoft.VisualStudio.Component.Roslyn.Compiler" Version="[15.0,19.0)" DisplayName="C# and Visual Basic Roslyn Compiler" />
   </Prerequisites>
   <Assets>
     <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%|" />
