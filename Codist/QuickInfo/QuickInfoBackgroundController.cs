@@ -106,9 +106,18 @@ namespace Codist.QuickInfo
 				var p = this.GetParent<UserControl>(n => n.GetType().Name == "WpfToolTipControl");
 				SolidColorBrush bb;
 				if (p != null && (bb = __Background) != null) {
-					p.Background = bb;
-					if (p.GetFirstVisualChild() is Border tb) {
-						tb.BorderBrush = __Border;
+					if (CodistPackage.VsVersion.Major == 18) {
+						var db = p.GetParent((Border b) => b.Name == "DropShadowBorder");
+						if (db != null) {
+							db.Background = bb;
+							db.BorderBrush = __Border;
+						}
+					}
+					else {
+						p.Background = bb;
+						if (p.GetFirstVisualChild() is Border tb) {
+							tb.BorderBrush = __Border;
+						}
 					}
 				}
 				var b = this.GetParent<Border>();
