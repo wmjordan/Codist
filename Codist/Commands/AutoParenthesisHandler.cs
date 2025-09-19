@@ -117,24 +117,48 @@ namespace Codist.Commands
 					InsertParentheses(sc, si, InsertionType.Method, true);
 				}
 				else if (IsConstructor(si, node)) {
-					var s = node.GetContainingStatement();
-					if (s is LocalDeclarationStatementSyntax loc
-						&& sc.SemanticModel.GetTypeInfo(loc.Declaration.Type, ct).Type?.TypeKind == TypeKind.Array) {
-						InsertParentheses(sc, si, InsertionType.Array, loc.SemicolonToken.IsMissing);
-					}
-					else if (s is ExpressionStatementSyntax a
-							&& a.Expression.IsKind(SyntaxKind.SimpleAssignmentExpression)
-							&& sc.SemanticModel.GetTypeInfo(((AssignmentExpressionSyntax)a.Expression).Left, ct).Type?.TypeKind == TypeKind.Array) {
-						InsertParentheses(sc, si, InsertionType.Array, a.SemicolonToken.IsMissing);
-					}
-					else {
-						InsertParentheses(sc, si, InsertionType.Constructor, true);
-					}
+					TryConstructor(sc, node, si, ct);
 				}
 				else if (si.Symbol?.GetReturnType()?.TypeKind == TypeKind.Delegate) {
-					InsertParentheses(sc, si, InsertionType.Delegate, true);
+					TryDelegate(sc, node.GetNodePurpose(), si);
 				}
 			}
+		}
+
+		static void TryConstructor(SemanticContext sc, SyntaxNode node, SymbolInfo si, CancellationToken ct) {
+			var s = node.GetContainingStatement();
+			if (s is LocalDeclarationStatementSyntax loc
+				&& sc.SemanticModel.GetTypeInfo(loc.Declaration.Type, ct).Type?.TypeKind == TypeKind.Array) {
+				InsertParentheses(sc, si, InsertionType.Array, loc.SemicolonToken.IsMissing);
+			}
+			else if (s is ExpressionStatementSyntax a
+					&& a.Expression.IsKind(SyntaxKind.SimpleAssignmentExpression)
+					&& sc.SemanticModel.GetTypeInfo(((AssignmentExpressionSyntax)a.Expression).Left, ct).Type?.TypeKind == TypeKind.Array) {
+				InsertParentheses(sc, si, InsertionType.Array, a.SemicolonToken.IsMissing);
+			}
+			else {
+				InsertParentheses(sc, si, InsertionType.Constructor, true);
+			}
+		}
+
+		static void TryDelegate(SemanticContext sc, SyntaxNode node, SymbolInfo si) {
+			bool mayInsertSemicolon = true;
+			if (node != null) {
+				switch (node.Kind()) {
+					case SyntaxKind.ExpressionStatement:
+					case SyntaxKind.EqualsValueClause:
+						break;
+					case SyntaxKind.Argument:
+						if ((si.Symbol.GetReturnType() as INamedTypeSymbol).DelegateInvokeMethod.ReturnsVoid) {
+							return;
+						}
+						break;
+					case SyntaxKind.SimpleLambdaExpression:
+						mayInsertSemicolon = false;
+						break;
+				}
+			}
+			InsertParentheses(sc, si, InsertionType.Delegate, mayInsertSemicolon);
 		}
 
 		static bool IsTypeReferenceExpression(SyntaxNode node) {
@@ -294,7 +318,7 @@ namespace Codist.Commands
 								break;
 							}
 						}
-						else {
+						else { // is type
 							allNoParam = false;
 							allVoidMethod = false;
 							break;
@@ -322,6 +346,12 @@ namespace Codist.Commands
 					insertion = space ? " ();" : "();";
 					caretAfterInsertion = allNoParam ? insertion.Length : insertion.Length - 2;
 				}
+				else if (type == InsertionType.Constructor) {
+					HandleInstantiation(si.Symbol as INamedTypeSymbol, space, out insertion, out caretAfterInsertion);
+					if (insertion is null) {
+						return;
+					}
+				}
 				else {
 					insertion = space ? " ()" : "()";
 					caretAfterInsertion = (allNoParam ? 1 : 0) + (space ? 2 : 1);
@@ -333,6 +363,53 @@ namespace Codist.Commands
 			v.Caret.MoveTo(p);
 			if (Config.Instance.PunctuationOptions.MatchFlags(PunctuationOptions.ShowParameterInfo)) {
 				TextEditorHelper.ExecuteEditorCommand("Edit.ParameterInfo");
+			}
+		}
+
+		static void HandleInstantiation(INamedTypeSymbol type, bool space, out string insertion, out int caretAfterInsertion) {
+			if (type?.IsStatic != false) {
+				insertion = null;
+				caretAfterInsertion = 0;
+				return;
+			}
+			var hasCtorParam = false;
+			var hasInitProp = false;
+			foreach (var member in type.GetMembers()) {
+				switch (member.Kind) {
+					case SymbolKind.Field:
+						if (!hasInitProp) {
+							var field = member as IFieldSymbol;
+							hasInitProp |= !field.IsStatic && !field.IsReadOnly;
+						}
+						break;
+					case SymbolKind.Method:
+						if (!hasCtorParam) {
+							var method = member as IMethodSymbol;
+							hasCtorParam |= !member.IsStatic
+								&& method.MethodKind == MethodKind.Constructor
+								&& method.Parameters.Length != 0;
+							break;
+						}
+						break;
+					case SymbolKind.Property:
+						if (!hasInitProp) {
+							var prop = member as IPropertySymbol;
+							hasInitProp |= !prop.IsStatic && prop.SetMethod != null;
+						}
+						break;
+				}
+			}
+			if (hasCtorParam || !hasInitProp && type.InstanceConstructors.Length != 0) {
+				insertion = space ? " ()" : "()";
+				caretAfterInsertion = (hasCtorParam ? 0 : 1) + (space ? 2 : 1);
+			}
+			else if (hasInitProp) {
+				insertion = " {}";
+				caretAfterInsertion = 2;
+			}
+			else {
+				insertion = null;
+				caretAfterInsertion = 0;
 			}
 		}
 
