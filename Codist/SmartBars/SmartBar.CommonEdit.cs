@@ -354,7 +354,7 @@ namespace Codist.SmartBars
 					}
 				});
 			}
-			yield return new CommandItem(IconIds.WrapText, R.CMD_Customize, ctx => CodistPackage.Instance.ShowOptionPage(typeof(Options.WrapTextPage)));
+			yield return new CommandItem(IconIds.WrapText, R.CMD_Customize, ctx => Commands.OptionsWindowCommand.ShowOptionPage(R.OT_WrapText));
 		}
 
 		void AddClassificationInfoCommand() {

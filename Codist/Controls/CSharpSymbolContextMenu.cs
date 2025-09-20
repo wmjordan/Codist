@@ -812,7 +812,7 @@ namespace Codist.Controls
 						return item;
 					})
 				);
-				search.Items.Add(CreateItem(IconIds.CustomizeWebSearch, R.CMD_Customize, (sender, args) => CodistPackage.Instance.ShowOptionPage(typeof(Options.WebSearchPage)))
+				search.Items.Add(CreateItem(IconIds.CustomizeWebSearch, R.CMD_Customize, (sender, args) => Commands.OptionsWindowCommand.ShowOptionPage(R.OT_WebSearch))
 					.SetLazyToolTip(() => new CommandToolTip(IconIds.CustomizeWebSearch, R.CMD_Customize + "\n" + R.CMDT_CustomizeSearchEngines))
 					.SetTipOptions());
 				return search;

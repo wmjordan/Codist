@@ -14,11 +14,11 @@ namespace Codist.Options
 	sealed class TitleBox : ContentControl
 	{
 		public TitleBox() {
-			Margin = new Thickness(0, 3, 0, 0);
+			Margin = new Thickness(0, 10, 0, 3);
 			Content = new Border {
 				BorderThickness = new Thickness(0, 0, 0, 1),
 				BorderBrush = SystemColors.ControlDarkDarkBrush,
-				Padding = WpfHelper.SmallHorizontalMargin,
+				Padding = WpfHelper.MiddleHorizontalMargin,
 				Child = Title = new TextBlock() { FontWeight = FontWeights.Bold }
 			};
 		}
@@ -30,16 +30,18 @@ namespace Codist.Options
 		public TextBlock Title { get; }
 	}
 
-	sealed class Note : Label
+	sealed class Note : Border
 	{
 		public Note(string text) {
-			Content = new TextBlock {
+			Margin = WpfHelper.MiddleVerticalMargin;
+			Child = new TextBlock {
 				Text = text,
 				TextWrapping = TextWrapping.Wrap
 			};
 		}
 		public Note(TextBlock text) {
-			Content = text;
+			Margin = WpfHelper.MiddleVerticalMargin;
+			Child = text;
 			text.TextWrapping = TextWrapping.Wrap;
 		}
 	}
@@ -47,7 +49,7 @@ namespace Codist.Options
 	sealed class DescriptionBox : TextBlock
 	{
 		public DescriptionBox(string text) {
-			Margin = new Thickness(23, 0, 3, 0);
+			Margin = new Thickness(23, 6, 3, 6);
 			TextWrapping = TextWrapping.Wrap;
 			Foreground = SystemColors.GrayTextBrush;
 			Text = text;

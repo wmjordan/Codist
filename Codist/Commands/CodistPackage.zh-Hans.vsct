@@ -164,6 +164,15 @@
 					<CanonicalName>CustomizeSyntaxHighlight</CanonicalName>
 				</Strings>
 			</Button>
+			<Button guid="guidCodistPackageCmdSet" id="OptionsWindowId" priority="0x0101" type="Button">
+				<Parent guid="guidSHLMainMenu" id="IDG_VS_TOOLS_OPTIONS" />
+				<Icon guid="ImageCatalogGuid" id="SettingsPanel" />
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<Strings>
+					<ButtonText>Codist 选项...</ButtonText>
+					<CanonicalName>CodistOptions</CanonicalName>
+				</Strings>
+			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="CodeRefactoringId" priority="0x1000" type="Button">
 				<Parent guid="guidSHLMainMenu" id="IDG_REFACTORING_ADVANCED" />
 				<Icon guid="ImageCatalogGuid" id="Refactoring" />

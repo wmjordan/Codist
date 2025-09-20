@@ -30,6 +30,7 @@ namespace Codist
 		static Action<ConfigUpdatedEventArgs> __Updated;
 
 		ConfigManager _ConfigManager;
+		int _ManagerRefs;
 
 		public static readonly string ConfigDirectory = $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\\{Constants.NameOfMe}\\";
 		public static readonly string ConfigPath = $"{ConfigDirectory}Config.json";
@@ -386,13 +387,23 @@ namespace Codist
 		}
 
 		internal IConfigManager BeginUpdate() {
-			if (_ConfigManager == null) {
-				_ConfigManager = new ConfigManager();
+			if (++_ManagerRefs == 1) {
+				if (_ConfigManager == null) {
+					_ConfigManager = new ConfigManager(this);
+				}
+				else {
+					$"Invalid state of config manager: {_ManagerRefs.ToText()}".Log(LogCategory.Config);
+				}
 			}
 			return _ConfigManager;
 		}
-		internal void EndUpdate(bool apply) {
-			Interlocked.Exchange(ref _ConfigManager, null)?.Quit(apply);
+		void EndUpdate() {
+			if (--_ManagerRefs == 0) {
+				_ConfigManager = null;
+			}
+			if (_ManagerRefs < 0) {
+				$"Invalid state of config manager: {_ManagerRefs.ToText()}".Log(LogCategory.Config);
+			}
 		}
 		internal void FireConfigChangedEvent(Features updatedFeature) {
 			__Updated?.Invoke(new ConfigUpdatedEventArgs(this, updatedFeature));
@@ -580,8 +591,10 @@ namespace Codist
 		sealed class ConfigManager : IConfigManager
 		{
 			int _Version, _OldVersion;
-			public ConfigManager() {
+			readonly Config _Config;
+			public ConfigManager(Config config) {
 				__Updated += MarkUpdated;
+				_Config = config;
 			}
 			public bool IsChanged => _Version != _OldVersion;
 			void MarkUpdated(ConfigUpdatedEventArgs e) {
@@ -589,6 +602,7 @@ namespace Codist
 			}
 			public void Quit(bool apply) {
 				__Updated -= MarkUpdated;
+				_Config.EndUpdate();
 				if (apply) {
 					if (_Version != _OldVersion) {
 						try {
@@ -647,6 +661,10 @@ namespace Codist
 		}
 		public string Name { get; set; }
 		public string Pattern { get; set; }
+
+		public override string ToString() {
+			return Name;
+		}
 	}
 
 	sealed class WrapText

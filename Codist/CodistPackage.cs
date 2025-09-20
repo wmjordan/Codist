@@ -21,17 +21,6 @@ namespace Codist
 	[PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
 	[InstalledProductRegistration("#110", "#112", Config.CurrentVersion, IconResourceID = 400)] // Information on this package for Help/About
 	[Guid(PackageGuidString)]
-	[ProvideOptionPage(typeof(Options.GeneralOptionsPage), Constants.NameOfMe, "General", 200, 301, true, Sort = 0)]
-	[ProvideOptionPage(typeof(Options.SyntaxHighlightOptionsPage), Constants.NameOfMe, "Syntax Highlight", 200, 302, true, Sort = 10)]
-	[ProvideOptionPage(typeof(Options.SuperQuickInfoOptionsPage), Constants.NameOfMe, "Super Quick Info", 200, 303, true, Sort = 20)]
-	[ProvideOptionPage(typeof(Options.SmartBarOptionsPage), Constants.NameOfMe, "Smart Bar", 200, 304, true, Sort = 30)]
-	[ProvideOptionPage(typeof(Options.NavigationBarPage), Constants.NameOfMe, "Navigation Bar", 200, 305, true, Sort = 40)]
-	[ProvideOptionPage(typeof(Options.ScrollBarMarkerPage), Constants.NameOfMe, "Scrollbar Marker", 200, 306, true, Sort = 50)]
-	[ProvideOptionPage(typeof(Options.DisplayPage), Constants.NameOfMe, "Display", 200, 307, true, Sort = 60)]
-	[ProvideOptionPage(typeof(Options.WebSearchPage), Constants.NameOfMe, "Web Search", 200, 308, true, Sort = 70)]
-	[ProvideOptionPage(typeof(Options.WrapTextPage), Constants.NameOfMe, "Smart Bar\\Wrap Text", 200, 310, true, Sort = 80)]
-	[ProvideOptionPage(typeof(Options.ExtensionDeveloperPage), Constants.NameOfMe, "Extension development", 200, 309, true, Sort = 90)]
-	[ProvideOptionPage(typeof(Options.AutoPunctuationPage), Constants.NameOfMe, "Auto Pair Punctuation", 200, 311, true, Sort = 100)]
 	[ProvideMenuResource("Menus.ctmenu", 1)]
 	//[ProvideToolWindow(typeof(Commands.SymbolFinderWindow), Style = VsDockStyle.Tabbed, Window = EnvDTE.Constants.vsWindowKindProperties))]
 	[ProvideAutoLoad(UIContextGuids80.NoSolution, PackageAutoLoadFlags.BackgroundLoad)]
@@ -141,6 +130,7 @@ namespace Codist
 				"Config upgraded.".Log();
 			}
 			Commands.SyntaxCustomizerWindowCommand.Initialize();
+			Commands.OptionsWindowCommand.Initialize();
 
 			"Package initialization finished.".Log();
 			//ListEditorCommands();

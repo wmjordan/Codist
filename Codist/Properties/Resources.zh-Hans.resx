@@ -2955,4 +2955,10 @@ Ctrl: 仅列出直接实现接口的类</value>
   <data name="CMD_SplitDeclarationAssignment" xml:space="preserve">
     <value>拆分变量的声明和赋值</value>
   </data>
+  <data name="OT_ExtensionDevelopment" xml:space="preserve">
+    <value>扩展开发辅助</value>
+  </data>
+  <data name="OT_Display" xml:space="preserve">
+    <value>显示</value>
+  </data>
 </root>

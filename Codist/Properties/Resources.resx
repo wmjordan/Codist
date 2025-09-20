@@ -2969,4 +2969,10 @@ Ctrl: Direct implementation types only</value>
   <data name="CMD_SplitDeclarationAssignment" xml:space="preserve">
     <value>Split Declaration and Assignment</value>
   </data>
+  <data name="OT_ExtensionDevelopment" xml:space="preserve">
+    <value>Extension Development</value>
+  </data>
+  <data name="OT_Display" xml:space="preserve">
+    <value>Display</value>
+  </data>
 </root>

@@ -89,14 +89,34 @@
     <Compile Include="AutoBuildVersion\VersionSetting.cs" />
     <Compile Include="Commands\AutoParenthesisHandler.cs" />
     <Compile Include="Commands\OpenActivityLogCommand.cs" />
+    <Compile Include="Commands\OptionsWindowCommand.cs" />
     <Compile Include="Commands\TransformDocumentCommand.cs" />
     <Compile Include="Commands\ShowSupportedFileTypesCommand.cs" />
     <Compile Include="Commands\TransformDocumentWindow.cs" />
+    <Compile Include="Controls\ThemedListBox.cs" />
     <Compile Include="Controls\ThemedRichTextBox.cs" />
     <Compile Include="Controls\ThemedHyperlink.cs" />
     <Compile Include="Commands\CancelRepeatingActionCommand.cs" />
     <Compile Include="Helpers\VsImageHelper.cs" />
     <Compile Include="Helpers\ThemeHelper.cs" />
+    <Compile Include="Options\OptionsWindow.cs" />
+    <Compile Include="Options\OptionsWindow.DisplayPage.cs" />
+    <Compile Include="Options\OptionsWindow.AutoPunctuationPage.cs" />
+    <Compile Include="Options\OptionsWindow.WrapTextPage.cs" />
+    <Compile Include="Options\OptionsWindow.WebSearchPage.cs" />
+    <Compile Include="Options\OptionsWindow.GeneralOptionPage.cs" />
+    <Compile Include="Options\OptionsWindow.NavigationBarPage.cs" />
+    <Compile Include="Options\OptionsWindow.SuperQuickInfoCSharpPage.cs" />
+    <Compile Include="Options\OptionsWindow.SuperQuickInfoPage.cs" />
+    <Compile Include="Options\OptionsWindow.SmartBarPage.cs" />
+    <Compile Include="Options\OptionsWindow.ScrollBarMarkerPage.cs" />
+    <Compile Include="Options\OptionsWindow.ExtensionDeveloperPage.cs" />
+    <Compile Include="Options\OptionsWindow.SyntaxHighlightPage.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="QuickInfo\CSharpQuickInfo.AssignmentWalker.cs" />
     <Compile Include="QuickInfo\CSharpQuickInfo.Node.cs" />
     <Compile Include="QuickInfo\CSharpQuickInfo.Token.cs" />
@@ -186,15 +206,8 @@
     <Compile Include="NaviBar\INaviBar.cs" />
     <Compile Include="NaviBar\NaviBar.cs" />
     <Compile Include="Options\CommonControls.cs" />
-    <Compile Include="Options\OptionsPage.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="Options\OptionsPage.cs" />
     <Compile Include="Options\SyntaxHighlightCustomizationWindow.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <Compile Include="QuickInfo\CSharpNodeRangeQuickInfo.cs" />
     <Compile Include="QuickInfo\ColorQuickInfoUI.cs" />
     <Compile Include="QuickInfo\CSharpQuickInfo.OpCode.cs" />

@@ -51,6 +51,7 @@ namespace Codist.Commands
 		OpenReleaseOutputFolder,
 		ShowSupportedFileTypes,
 		TransformDocument,
-		OpenActivityLog
+		OpenActivityLog,
+		OptionsWindow
 	}
 }
