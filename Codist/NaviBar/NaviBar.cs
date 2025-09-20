@@ -22,8 +22,10 @@ namespace Codist.NaviBar
 			Resources = SharedDictionaryManager.NavigationBar;
 			UseLayoutRounding = true;
 			SnapsToDevicePixels = true;
-			SetResourceReference(BackgroundProperty, VsBrushes.CommandBarMenuBackgroundGradientKey);
-			SetResourceReference(ForegroundProperty, VsBrushes.CommandBarTextInactiveKey);
+			if (CodistPackage.VsVersion.Major < 18) {
+				SetResourceReference(BackgroundProperty, VsBrushes.CommandBarMenuBackgroundGradientKey);
+				SetResourceReference(ForegroundProperty, VsBrushes.CommandBarTextInactiveKey);
+			}
 		}
 
 		public abstract void ShowActiveItemMenu();
@@ -43,6 +45,16 @@ namespace Codist.NaviBar
 
 		protected override AutomationPeer OnCreateAutomationPeer() {
 			return null;
+		}
+
+		public override void OnApplyTemplate() {
+			base.OnApplyTemplate();
+			if (CodistPackage.VsVersion.Major >= 18) {
+				var b = this.GetFirstVisualChild<StackPanel>();
+				if (b != null) {
+					b.Background = default;
+				}
+			}
 		}
 
 		void View_Closed(object sender, EventArgs e) {
