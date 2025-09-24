@@ -26,8 +26,12 @@ namespace Codist.QuickInfo
 		static Task<QuickInfoItem> InternalGetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
 			var textSnapshot = session.TextView.TextSnapshot;
 			var triggerPoint = session.GetTriggerPoint(textSnapshot).GetValueOrDefault();
+			var selection = session.TextView.Selection;
+			if (selection.IsEmpty) {
+				return Task.FromResult<QuickInfoItem>(null);
+			}
 			try {
-				return Task.FromResult(ShowSelectionInfo(session, triggerPoint));
+				return ShowSelectionInfoAsync(session, selection, triggerPoint, cancellationToken);
 			}
 			catch (ArgumentException /*triggerPoint has a differ TextBuffer from textSnapshot*/) {
 				return Task.FromResult<QuickInfoItem>(null);
@@ -35,11 +39,8 @@ namespace Codist.QuickInfo
 		}
 
 		/// <summary>Displays numbers about selected characters and lines in quick info.</summary>
-		static QuickInfoItem ShowSelectionInfo(IAsyncQuickInfoSession session, SnapshotPoint point) {
-			var selection = session.TextView.Selection;
-			if (selection.IsEmpty) {
-				return null;
-			}
+		static async Task<QuickInfoItem> ShowSelectionInfoAsync(IAsyncQuickInfoSession session, Microsoft.VisualStudio.Text.Editor.ITextSelection selection, SnapshotPoint point, CancellationToken cancellationToken) {
+			await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
 			var p1 = selection.Start.Position.Position;
 			if (point.Position.IsOutside(p1, selection.End.Position.Position)) {
 				return null;
