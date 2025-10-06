@@ -106,9 +106,10 @@ namespace Codist.SmartBars
 			string s = ctx.View.GetFirstSelectionText();
 			ctx.KeepToolBar(false);
 			var m = ctx.View.WrapWith(wrapText);
-			if (s != null && ctx.ModifierKeys.HasAnyFlag(ModifierKeys.Control | ModifierKeys.Shift)
-				&& FindNext(ctx, s) == false) {
-				ctx.HideToolBar();
+			if (s != null && ctx.ModifierKeys.HasAnyFlag(ModifierKeys.Control | ModifierKeys.Shift)) {
+				if (FindNext(ctx, s) == false) {
+					ctx.HideToolBar();
+				}
 			}
 			else if (selectModified) {
 				ctx.View.SelectSpans(m);
@@ -649,7 +650,7 @@ namespace Codist.SmartBars
 				new CommandItem(IconIds.SurroundWith, R.CMD_SurroundWith, ctx => TextEditorHelper.ExecuteEditorCommand("Edit.SurroundWith")){ QuickAccessCondition = CommandItem.HasEditableSelection },
 				new CommandItem(IconIds.ToggleParentheses, R.CMD_ToggleParentheses, ctx => {
 					if (ctx.View.TryGetFirstSelectionSpan(out var span)) {
-						WrapWith(ctx, "(", ")", true);
+						WrapWith(ctx, "(", ")", !UIHelper.IsCtrlDown);
 					}
 				}) { QuickAccessCondition = CommandItem.HasEditableSelection },
 			};
