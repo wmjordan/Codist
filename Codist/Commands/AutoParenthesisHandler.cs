@@ -115,7 +115,7 @@ namespace Codist.Commands
 			}
 			else if ((si = sc.SemanticModel.GetSymbolInfo(node, ct)).HasSymbol()) {
 				if (IsAcceptableMethod(si, node, sc, ct)) {
-					InsertParentheses(sc, si, InsertionType.Method, true);
+					InsertParentheses(sc, si, InsertionType.Method, !node.GetNodePurpose().IsAnyKind(SyntaxKind.SimpleLambdaExpression, SyntaxKind.ParenthesizedLambdaExpression));
 				}
 				else if (IsConstructor(si, node)) {
 					TryConstructor(sc, node, si, ct);
