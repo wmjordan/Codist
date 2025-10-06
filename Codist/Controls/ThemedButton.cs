@@ -55,6 +55,9 @@ namespace Codist.Controls
 			IsPressed = !IsPressed;
 			OnClick();
 		}
+		internal void Release() {
+			IsPressed = false;
+		}
 
 		public void Dispose() {
 			if (Content is StackPanel p) {

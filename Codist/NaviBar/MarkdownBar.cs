@@ -327,6 +327,7 @@ namespace Codist.NaviBar
 			readonly MarkdownBar _Bar;
 			readonly ThemedTextBox _FinderBox;
 			readonly TextBlock _FilteredItemCount;
+			readonly ThemedButton[] _LevelFilterButtons;
 			Predicate<object> _Filter;
 
 			public MarkdownList(MarkdownBar bar, LocationItem[] titles) {
@@ -377,6 +378,8 @@ namespace Codist.NaviBar
 				};
 				_FinderBox.TextChanged += SearchCriteriaChanged;
 				_FinderBox.SetOnVisibleSelectAll();
+				_LevelFilterButtons = new ThemedButton[b.Length - 1];
+				Array.Copy(b, 0, _LevelFilterButtons, 0, _LevelFilterButtons.Length);
 				_Bar = bar;
 				if (bar._FilterLevel != 0) {
 					b[bar._FilterLevel - 1].Press();
@@ -461,6 +464,7 @@ namespace Codist.NaviBar
 			}
 
 			void ClearFilter() {
+				Array.ForEach(_LevelFilterButtons, i => i.Release());
 				if (_FinderBox.Text.Length > 0) {
 					_Bar._FilterLevel = 0;
 					_FinderBox.Text = String.Empty;
