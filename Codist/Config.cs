@@ -1004,7 +1004,8 @@ namespace Codist
 		Trim,
 		MethodParentheses = 1 << 1,
 		ShowParameterInfo = 1 << 2,
-		Default = Trim | MethodParentheses | ShowParameterInfo
+		Selection = 1 << 3,
+		Default = Trim | MethodParentheses | ShowParameterInfo | Selection
 	}
 
 	public enum ScrollbarMarkerStyle

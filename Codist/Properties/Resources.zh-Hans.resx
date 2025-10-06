@@ -2619,7 +2619,7 @@ Ctrl: 仅直接继承的接口</value>
     <value>配对符号包围选区</value>
   </data>
   <data name="OT_AutoSurround" xml:space="preserve">
-    <value>自动插入配对的引号或括号以包围选中内容</value>
+    <value>自动插入配对的引号或括号以包围选中内容或附加到键入的方法名称之后</value>
   </data>
   <data name="OT_BoldPreferUnderscore" xml:space="preserve">
     <value>粗体以 __下划线__ 标记</value>
@@ -2675,8 +2675,8 @@ Ctrl: 仅直接继承的接口</value>
   <data name="CMD_MakeStatic" xml:space="preserve">
     <value>改成静态</value>
   </data>
-  <data name="OT_AutoSurroundSelectionNote" xml:space="preserve">
-    <value>本页面更改自动插入配对符号包围选中内容的行为</value>
+  <data name="OT_AutoSurroundSelection" xml:space="preserve">
+    <value>自动配对结束符号</value>
   </data>
   <data name="OT_TrimBeforeSurround" xml:space="preserve">
     <value>插入配对符号前删除首尾空白字符</value>
@@ -2960,5 +2960,11 @@ Ctrl: 仅列出直接实现接口的类</value>
   </data>
   <data name="OT_Display" xml:space="preserve">
     <value>显示</value>
+  </data>
+  <data name="OT_AutoSurroundSelectionTip" xml:space="preserve">
+    <value>选中文本内容后，键入起始符号，将自动在选区结尾插入配对符号</value>
+  </data>
+  <data name="OT_AutoPunctuationNote" xml:space="preserve">
+    <value>本页面的选项更改自动插入标点符号的行为</value>
   </data>
 </root>

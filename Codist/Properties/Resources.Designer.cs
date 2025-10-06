@@ -3105,7 +3105,16 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Automatically pair quotations, parentheses and braces arround selections.
+        ///   Looks up a localized string similar to This page changes the behavior of automatically inserting punctuations.
+        /// </summary>
+        internal static string OT_AutoPunctuationNote {
+            get {
+                return ResourceManager.GetString("OT_AutoPunctuationNote", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Automatically pair quotations, parentheses and braces arround selections or after completed method names.
         /// </summary>
         internal static string OT_AutoSurround {
             get {
@@ -3114,11 +3123,20 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to This page changes the behavior of the auto surround feature, which automatically inserts paired punctuations around selections when typing the leading punctuation.
+        ///   Looks up a localized string similar to Pair close punctuation.
         /// </summary>
-        internal static string OT_AutoSurroundSelectionNote {
+        internal static string OT_AutoSurroundSelection {
             get {
-                return ResourceManager.GetString("OT_AutoSurroundSelectionNote", resourceCulture);
+                return ResourceManager.GetString("OT_AutoSurroundSelection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Automatically inserts paired punctuations around selections when typing the leading punctuation.
+        /// </summary>
+        internal static string OT_AutoSurroundSelectionTip {
+            get {
+                return ResourceManager.GetString("OT_AutoSurroundSelectionTip", resourceCulture);
             }
         }
         

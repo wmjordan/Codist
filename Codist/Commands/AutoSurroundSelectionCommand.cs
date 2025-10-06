@@ -57,7 +57,9 @@ namespace Codist.Commands
 		public abstract string DisplayName { get; }
 
 		public bool ExecuteCommand(TypeCharCommandArgs args, CommandExecutionContext executionContext) {
-			return Config.Instance.Features.MatchFlags(Features.AutoSurround) && ProcessChar(args);
+			return Config.Instance.Features.MatchFlags(Features.AutoSurround)
+				&& Config.Instance.PunctuationOptions.MatchFlags(PunctuationOptions.Selection)
+				&& ProcessChar(args);
 		}
 
 		bool ProcessChar(TypeCharCommandArgs args) {

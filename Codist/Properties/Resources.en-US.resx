@@ -2633,7 +2633,7 @@ Ctrl: Directly inherited interfaces only</value>
     <value>Auto Pair Punctuation</value>
   </data>
   <data name="OT_AutoSurround" xml:space="preserve">
-    <value>Automatically pair quotations, parentheses and braces arround selections</value>
+    <value>Automatically pair quotations, parentheses and braces arround selections or after completed method names</value>
   </data>
   <data name="OT_BoldPreferUnderscore" xml:space="preserve">
     <value>Bold style prefer __underscore__</value>
@@ -2689,8 +2689,8 @@ Ctrl: Directly inherited interfaces only</value>
   <data name="CMD_MakeStatic" xml:space="preserve">
     <value>Make Static</value>
   </data>
-  <data name="OT_AutoSurroundSelectionNote" xml:space="preserve">
-    <value>This page changes the behavior of the auto surround feature, which automatically inserts paired punctuations around selections when typing the leading punctuation</value>
+  <data name="OT_AutoSurroundSelection" xml:space="preserve">
+    <value>Pair close punctuation</value>
   </data>
   <data name="OT_TrimBeforeSurround" xml:space="preserve">
     <value>Trim whitespace before surrounding punctuations</value>
@@ -2974,5 +2974,11 @@ Ctrl: Direct implementation types only</value>
   </data>
   <data name="OT_Display" xml:space="preserve">
     <value>Display</value>
+  </data>
+  <data name="OT_AutoSurroundSelectionTip" xml:space="preserve">
+    <value>Automatically inserts paired punctuations around selections when typing the leading punctuation</value>
+  </data>
+  <data name="OT_AutoPunctuationNote" xml:space="preserve">
+    <value>This page changes the behavior of automatically inserting punctuations</value>
   </data>
 </root>
