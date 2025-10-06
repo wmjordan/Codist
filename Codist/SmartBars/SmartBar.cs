@@ -278,10 +278,10 @@ namespace Codist.SmartBars
 			if (TextEditorHelper.ActiveViewFocused() == false) {
 				return;
 			}
-			if (e.Key == Key.Escape) {
-				HideToolBar();
-			}
 			if (e.Key != Key.LeftShift && e.Key != Key.RightShift) {
+				if (e.Key == Key.Escape) {
+					HideToolBar();
+				}
 				_LastShiftHit = DateTime.MinValue;
 				return;
 			}
