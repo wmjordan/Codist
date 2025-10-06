@@ -35,6 +35,7 @@ namespace Codist.Commands
 
 		void CompletionTriggered(object sender, CompletionTriggeredEventArgs e) {
 			if (_HookedEvents
+				|| !Config.Instance.Features.MatchFlags(Features.AutoSurround)
 				|| !Config.Instance.PunctuationOptions.MatchFlags(PunctuationOptions.MethodParentheses)) {
 				return;
 			}
