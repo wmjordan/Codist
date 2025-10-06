@@ -23,7 +23,7 @@ namespace Codist.Commands
 	{
 		static bool __Inited;
 		CancellationTokenSource _CancellationTokenSource;
-		bool _HookedEvents;
+		bool _AttachedEvents;
 		char _TypedChar;
 
 		public void TextViewCreated(IWpfTextView textView) {
@@ -34,7 +34,7 @@ namespace Codist.Commands
 		}
 
 		void CompletionTriggered(object sender, CompletionTriggeredEventArgs e) {
-			if (_HookedEvents
+			if (_AttachedEvents
 				|| !Config.Instance.Features.MatchFlags(Features.AutoSurround)
 				|| !Config.Instance.PunctuationOptions.MatchFlags(PunctuationOptions.MethodParentheses)) {
 				return;
@@ -45,7 +45,7 @@ namespace Codist.Commands
 			}
 			s.ItemCommitted += CompletionSessionItemCommitted;
 			s.Dismissed += CompletionSessionDismissed;
-			_HookedEvents = true;
+			_AttachedEvents = true;
 		}
 
 		void HandleTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e) {
@@ -56,13 +56,7 @@ namespace Codist.Commands
 
 		void CompletionSessionDismissed(object sender, EventArgs e) {
 			_TypedChar = default;
-			var s = (IAsyncCompletionSession)sender;
-			if (s.TextView is IWpfTextView v) {
-				v.VisualElement.PreviewTextInput -= HandleTextInput;
-			}
-			s.ItemCommitted -= CompletionSessionItemCommitted;
-			s.Dismissed -= CompletionSessionDismissed;
-			_HookedEvents = false;
+			DetachEvents((IAsyncCompletionSession)sender);
 		}
 
 		void CompletionSessionItemCommitted(object sender, CompletionItemEventArgs e) {
@@ -417,15 +411,18 @@ namespace Codist.Commands
 		void TextView_Closed(object sender, EventArgs e) {
 			_CancellationTokenSource.CancelAndDispose();
 
-			if (_HookedEvents) {
-				var cb = ServicesHelper.Instance.CompletionBroker;
-				var s = cb.GetSession((ITextView)sender);
-				if (s.TextView is IWpfTextView v) {
-					v.VisualElement.PreviewTextInput -= HandleTextInput;
-				}
-				s.ItemCommitted -= CompletionSessionItemCommitted;
-				s.Dismissed -= CompletionSessionDismissed;
+			if (_AttachedEvents) {
+				DetachEvents(ServicesHelper.Instance.CompletionBroker.GetSession((ITextView)sender));
 			}
+		}
+
+		void DetachEvents(IAsyncCompletionSession s) {
+			if (s.TextView is IWpfTextView v) {
+				v.VisualElement.PreviewTextInput -= HandleTextInput;
+			}
+			s.ItemCommitted -= CompletionSessionItemCommitted;
+			s.Dismissed -= CompletionSessionDismissed;
+			_AttachedEvents = false;
 		}
 
 		enum InsertionType
