@@ -478,7 +478,7 @@ namespace Codist.Controls
 					case CommandId.GoToSymbolDefinition:
 						return CreateItem(IconIds.GoToDefinition, R.CMD_GoToDefinition, GoToSymbolDefinition);
 					case CommandId.CopySymbolName:
-						return CreateItem(IconIds.Copy, R.CMD_CopySymbolName, CopySymbolName);
+						return CreateItem(IconIds.Copy, R.CMD_CopySymbol, CopySymbolNameOrDefinition, R.CMDT_CopySymbol);
 					case CommandId.CopyQualifiedSymbolName:
 						return CreateItem(IconIds.Copy, R.CMD_CopyQualifiedSymbolName, CopyQualifiedSymbolName, R.CMDT_CopyQualifiedSymbolName);
 					case CommandId.CopyConstantValue:
@@ -593,9 +593,16 @@ namespace Codist.Controls
 			void GoToSpecialGenericSymbolReturnType(object sender, RoutedEventArgs args) {
 				_Symbol.GetReturnType().ResolveElementType().ResolveSingleGenericTypeArgument().GoToSource();
 			}
-			void CopySymbolName(object sender, RoutedEventArgs args) {
+			void CopySymbolNameOrDefinition(object sender, RoutedEventArgs args) {
 				try {
-					Clipboard.SetDataObject(_Symbol.GetOriginalName());
+                    if (args.RoutedEvent == PreviewMouseRightButtonUpEvent) {
+						var s = _Symbol.OriginalDefinition;
+						Clipboard.SetDataObject(s.Kind == SymbolKind.NamedType
+							? ((INamedTypeSymbol)s).GetDefinition(CodeAnalysisHelper.DefinitionNameFormat)
+							: s.ToDisplayString(CodeAnalysisHelper.DefinitionNameFormat));
+						return;
+                    }
+                    Clipboard.SetDataObject(_Symbol.GetOriginalName());
 				}
 				catch (SystemException) {
 					// ignore failure

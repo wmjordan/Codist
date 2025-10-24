@@ -289,11 +289,11 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Copy Symbol Name.
+        ///   Looks up a localized string similar to Copy Symbol.
         /// </summary>
-        internal static string CMD_CopySymbolName {
+        internal static string CMD_CopySymbol {
             get {
-                return ResourceManager.GetString("CMD_CopySymbolName", resourceCulture);
+                return ResourceManager.GetString("CMD_CopySymbol", resourceCulture);
             }
         }
         
@@ -2395,6 +2395,16 @@ namespace Codist.Properties {
         internal static string CMDT_CopyQualifiedSymbolName {
             get {
                 return ResourceManager.GetString("CMDT_CopyQualifiedSymbolName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copy Symbol Name
+        ///Right click: Copy symbol signature and member definitions.
+        /// </summary>
+        internal static string CMDT_CopySymbol {
+            get {
+                return ResourceManager.GetString("CMDT_CopySymbol", resourceCulture);
             }
         }
         

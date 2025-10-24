@@ -40,6 +40,18 @@ namespace Codist
 			genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
 			memberOptions: SymbolDisplayMemberOptions.IncludeContainingType,
 			miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
+		internal static readonly SymbolDisplayFormat DefinitionNameFormat = new SymbolDisplayFormat(SymbolDisplayGlobalNamespaceStyle.Omitted,
+			SymbolDisplayTypeQualificationStyle.NameOnly,
+			SymbolDisplayGenericsOptions.IncludeTypeParameters | SymbolDisplayGenericsOptions.IncludeTypeConstraints | SymbolDisplayGenericsOptions.IncludeVariance,
+			SymbolDisplayMemberOptions.IncludeType | SymbolDisplayMemberOptions.IncludeModifiers | SymbolDisplayMemberOptions.IncludeAccessibility | SymbolDisplayMemberOptions.IncludeExplicitInterface | SymbolDisplayMemberOptions.IncludeParameters | SymbolDisplayMemberOptions.IncludeConstantValue | SymbolDisplayMemberOptions.IncludeRef,
+			SymbolDisplayDelegateStyle.NameAndSignature,
+			SymbolDisplayExtensionMethodStyle.StaticMethod,
+			SymbolDisplayParameterOptions.IncludeExtensionThis | SymbolDisplayParameterOptions.IncludeParamsRefOut | SymbolDisplayParameterOptions.IncludeType | SymbolDisplayParameterOptions.IncludeName | SymbolDisplayParameterOptions.IncludeDefaultValue | SymbolDisplayParameterOptions.IncludeOptionalBrackets,
+			SymbolDisplayPropertyStyle.ShowReadWriteDescriptor,
+			SymbolDisplayLocalOptions.IncludeType | SymbolDisplayLocalOptions.IncludeConstantValue | SymbolDisplayLocalOptions.IncludeRef,
+			SymbolDisplayKindOptions.IncludeNamespaceKeyword | SymbolDisplayKindOptions.IncludeTypeKeyword | SymbolDisplayKindOptions.IncludeMemberKeyword,
+			SymbolDisplayMiscellaneousOptions.UseSpecialTypes | SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers | SymbolDisplayMiscellaneousOptions.UseErrorTypeSymbolName | SymbolDisplayMiscellaneousOptions.RemoveAttributeSuffix);
+
 		#region Compatibility constants (for older VS versions)
 		internal const SyntaxKind DotDotToken = (SyntaxKind)8222;
 		internal const SyntaxKind QuestionQuestionEqualsToken = (SyntaxKind)8284;

@@ -150,8 +150,8 @@
 右键：复制整行
 Shift: 包含行首缩进</value>
   </data>
-  <data name="CMD_CopySymbolName" xml:space="preserve">
-    <value>复制符号名称</value>
+  <data name="CMD_CopySymbol" xml:space="preserve">
+    <value>复制符号</value>
   </data>
   <data name="CMD_CutSelectedText" xml:space="preserve">
     <value>剪切选中文本（去除行首缩进）
@@ -2966,5 +2966,9 @@ Ctrl: 仅列出直接实现接口的类</value>
   </data>
   <data name="OT_AutoPunctuationNote" xml:space="preserve">
     <value>本页面的选项更改自动插入标点符号的行为</value>
+  </data>
+  <data name="CMDT_CopySymbol" xml:space="preserve">
+    <value>复制符号名称
+右键：复制符号签名和成员定义</value>
   </data>
 </root>

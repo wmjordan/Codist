@@ -150,8 +150,8 @@ Right click: Comment line</value>
 Right click: Copy line
 Shift: With indentation</value>
   </data>
-  <data name="CMD_CopySymbolName" xml:space="preserve">
-    <value>Copy Symbol Name</value>
+  <data name="CMD_CopySymbol" xml:space="preserve">
+    <value>Copy Symbol</value>
   </data>
   <data name="CMD_CutSelectedText" xml:space="preserve">
     <value>Cut selected text (without indentation)
@@ -2980,5 +2980,9 @@ Ctrl: Direct implementation types only</value>
   </data>
   <data name="OT_AutoPunctuationNote" xml:space="preserve">
     <value>This page changes the behavior of automatically inserting punctuations</value>
+  </data>
+  <data name="CMDT_CopySymbol" xml:space="preserve">
+    <value>Copy Symbol Name
+Right click: Copy symbol signature and member definitions</value>
   </data>
 </root>
