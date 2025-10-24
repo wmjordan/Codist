@@ -101,8 +101,6 @@ namespace Codist
 									case "highlight": __Categories |= LogCategory.SyntaxHighlight; break;
 								}
 								break;
-							default:
-								break;
 						}
 					}
 				}
