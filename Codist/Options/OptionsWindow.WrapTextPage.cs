@@ -99,10 +99,10 @@ namespace Codist.Options
 					var c = _List.SelectedItem as WrapTextContainer;
 					if (_RemoveButton.IsEnabled = _SaveButton.IsEnabled = _Name.IsEnabled = _Pattern.IsEnabled = _Indicator.IsEnabled = c != null) {
 						_MoveUpButton.IsEnabled = _List.SelectedIndex > 0;
-						var se = c.WrapText;
-						_Name.Text = se.Name;
-						_Pattern.Text = se.Pattern;
-						_Indicator.Text = se.Indicator.ToString();
+						var t = c.WrapText;
+						_Name.Text = t.Name;
+						_Pattern.Text = t.Pattern;
+						_Indicator.Text = t.Indicator.ToString();
 					}
 					else {
 						_MoveUpButton.IsEnabled = false;
@@ -150,13 +150,16 @@ namespace Codist.Options
 				}
 
 				void HandleSaveButtonClick(object s, RoutedEventArgs args) {
-					var se = _List.SelectedItem as WrapText;
-					se.Name = _Name.Text;
-					se.Pattern = _Pattern.Text;
-					se.Indicator = _Indicator.Text.Length > 0 ? _Indicator.Text[0] : WrapText.DefaultIndicator;
+					var t = (_List.SelectedItem as WrapTextContainer)?.WrapText;
+					if (t is null) {
+						return;
+					}
+					t.Name = _Name.Text;
+					t.Pattern = _Pattern.Text;
+					t.Indicator = _Indicator.Text.Length > 0 ? _Indicator.Text[0] : WrapText.DefaultIndicator;
 					var p = _List.SelectedIndex;
 					_List.Items.RemoveAt(p);
-					_List.Items.Insert(p, new WrapTextContainer(se));
+					_List.Items.Insert(p, new WrapTextContainer(t));
 					Config.Instance.FireConfigChangedEvent(Features.WrapText);
 				}
 
