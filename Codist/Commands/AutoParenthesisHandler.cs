@@ -271,7 +271,13 @@ namespace Codist.Commands
 			}
 			if (index >= pms.Length - 1) {
 				var pm = pms[pms.Length - 1];
-				return (pm.IsParams ? ((IArrayTypeSymbol)pm.Type).ElementType : pm.Type).TypeKind == TypeKind.Delegate;
+				if (!pm.IsParams) {
+					return pm.Type.TypeKind == TypeKind.Delegate;
+				}
+				var itemType = pm.Type.TypeKind == TypeKind.Array
+					? ((IArrayTypeSymbol)pm.Type).ElementType
+					: ((INamedTypeSymbol)pm.Type).TypeArguments.FirstOrDefault();
+				return itemType?.TypeKind == TypeKind.Delegate;
 			}
 			return pms[index].Type.TypeKind == TypeKind.Delegate;
 		}
