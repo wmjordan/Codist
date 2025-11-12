@@ -143,7 +143,7 @@ To customize the *Super Quick Info*, adjust the settings in the options page.
 
 * **Color info**
   
-  This option enables you preview color values. It works for hex color values (such as `#00FF00`，`#33993300`), named colors (such as `Black`, `White`, etc.). The 12 sample blocks under color values list the color as the foreground or background against various gray scale colors to help designers to determine the best readability.
+  This option enables you preview color values. It works for hex color values (such as `#0a0`, `#00FF00`，`#33993300`), named colors (such as `Black`, `White`, etc.). The 12 sample blocks under color values list the color as the foreground or background against various gray scale colors to help designers to determine the best readability.
   
   ![Super Quick Info - Color](doc/super-quick-info-color.png)
   
@@ -538,7 +538,9 @@ To make this work, follow the steps below:
 6. When we edit Markdown documents, the <tt>\`</tt>, `*`, `_` and `~` are also auto-paired.
 7. For Chinese users, Chinese full width punctuations are also auto-paired.
 
-You can turn off this feature by unchecking the _Auto Pair Punctuation_ option in the option page.
+From version 8.1 on, while you auto-complete a C# method name or a delegate variable, Codist will try to append parentheses for method or delegate invocation, by evaluating the context.
+
+You can toggle the above features by changing the _Pair close punctuation_ and the _Append parentheses on completing method names_ options in the option page under the __Auto Pair Punctuation_ section.
 
 ## Codist in Your Language
 
@@ -566,7 +568,7 @@ For VSIX developers, there is are some options to help your extension developmen
 
 # Feature Control
 
-Open the *Codist* section in the *Tools->Options* dialog. In the *General* section you can toggle features of *Codist*.
+Open the *Codist Options* dialog by clicking the corresponding command in the *Tools* dialog. In the *General* section you can toggle features of *Codist*.
 
 ![General customization](doc/general-options.png)
 
