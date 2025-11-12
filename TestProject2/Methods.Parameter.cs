@@ -31,6 +31,25 @@ class DefaultParams
 	}
 }
 
+class TakeDelegate
+{
+	public void Take(Action action, Action action2, params Action[] moreActions) {
+		action();
+		action2();
+		foreach (var a in moreActions) {
+			a();
+		}
+	}
+
+	public void Use() {
+		// Test auto parentheses feature,
+		// no parentheses should be inserted on completing "Dummy"
+		Take(Dummy, Dummy, Dummy);
+	}
+
+	public void Dummy() { }
+}
+
 [ApiVersion(12)]
 class RefReadonly
 {
@@ -68,7 +87,19 @@ class EnumerableParams
 	}
 	public void Use() {
 		Concat(1, 2, 3);
+		Action a, b, c;
+		a = b = c = () => { };
+		TakeEnumerableParams<Action> e = Concat<Action>;
+		e(a, b, Console.WriteLine);
+		int x, y, z;
+		x = y = z = 0;
+		TakeReadOnlySpanParams<int> s = Concat<int>;
+		s(x, y, z);
 	}
+
+	delegate void TakeEnumerableParams<T>(params IEnumerable<T> values);
+
+	delegate void TakeReadOnlySpanParams<T>(params ReadOnlySpan<T> values);
 }
 
 [ApiVersion(14)]
