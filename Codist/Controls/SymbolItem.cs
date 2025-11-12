@@ -109,6 +109,7 @@ namespace Codist.Controls
 		async Task GoToNodeAsync() {
 			await RefreshSyntaxNodeAsync();
 			var node = SyntaxNode;
+			await SyncHelper.SwitchToMainThreadAsync();
 			CloseUnpinnedMenus();
 			node.GetIdentifierToken().GetLocation().GoToSource();
 		}
