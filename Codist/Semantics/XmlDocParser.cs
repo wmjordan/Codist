@@ -196,6 +196,9 @@ namespace Codist
 		}
 
 		void InheritDocumentation(ISymbol symbol, ISymbol querySymbol) {
+			if (symbol.Kind == SymbolKind.ErrorType) {
+				return;
+			}
 			var t = symbol.Kind == SymbolKind.NamedType ? symbol as INamedTypeSymbol : symbol.ContainingType;
 			if (t == null) {
 				return;
