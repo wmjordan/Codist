@@ -92,7 +92,7 @@ namespace Codist.SyntaxHighlight
 				ServicesHelper.Instance.ClassificationTypeExporter.UpdateClassificationFormatMap(category);
 				highlighter.SubscribeConfigUpdateHandler();
 				highlighter.SubscribeFormatMappingChanges();
-				highlighter.DetectThemeColorCompatibilityWithBackground();
+				highlighter.DetectThemeColorCompatibilityWithBackground(true);
 				highlighter.Apply();
 				highlighter.Refresh();
 				return highlighter;
@@ -789,24 +789,40 @@ namespace Codist.SyntaxHighlight
 			/// This method counts major brightness of colors in a theme and compare it with the editor background. If the brightness does not match, it automatically inverts brightness of each colors in the theme.
 			/// </summary>
 			/// <remarks>Since syntax highlight colors are used majorly in primary document editor window, thus this method only works for the primary editor.</remarks>
-			internal void DetectThemeColorCompatibilityWithBackground() {
+			internal void DetectThemeColorCompatibilityWithBackground(bool firstLoad = false) {
 				var isBackgroundDark = _ViewBackground.IsDark();
 				// color counter
 				int brightness = 0;
 				foreach (var item in GetStyles()) {
 					var style = item.Value;
-					CountColorBrightness(style.ForeColor, ref brightness);
-					CountColorBrightness(style.BackColor, ref brightness);
+					CountForegroundBrightColor(style.ForeColor, ref brightness);
+					CountBackgroundBrightColor(style.BackColor, ref brightness);
 				}
-				_InvertBrightness = brightness > 3 && isBackgroundDark == false
-					|| brightness < -3 && isBackgroundDark;
-				if (_InvertBrightness && _Category == Constants.CodeText) {
-					UpdateOtherColors(isBackgroundDark);
+				_InvertBrightness = brightness > 3 && isBackgroundDark == false // fg and bg both bright
+					|| brightness < -3 && isBackgroundDark; // fg and bg both dark
+				if (!firstLoad && _Category == Constants.CodeText) {
+					// we assume that the other colors are harmonious with the current syntax style theme
+					AdjustOtherColors(isBackgroundDark);
 				}
 
-				void CountColorBrightness(Color c, ref int b) {
+				void CountForegroundBrightColor(Color c, ref int b) {
 					if (c.A != 0) {
-						b += c.IsDark() ? -1 : 1;
+						if (c.IsDark()) {
+							b--;
+						}
+						else {
+							b++;
+						}
+					}
+				}
+				void CountBackgroundBrightColor(Color c, ref int b) {
+					if (c.A != 0) {
+						if (c.IsDark()) {
+							b++;
+						}
+						else {
+							b--;
+						}
 					}
 				}
 			}
@@ -815,15 +831,15 @@ namespace Codist.SyntaxHighlight
 				return _ViewBackground.IsDark() ^ currentBg.IsDark();
 			}
 
-			static void UpdateOtherColors(bool bgIsDark) {
+			static void AdjustOtherColors(bool isDarkTheme) {
 				var sm = Config.Instance.SymbolReferenceMarkerSettings;
-				if (sm.ReferenceMarker.A != 0 && sm.ReferenceMarker.IsDark() == bgIsDark) {
+				if (sm.ReferenceMarker.A != 0 && sm.ReferenceMarker.IsDark() == isDarkTheme) {
 					sm.ReferenceMarker = sm.ReferenceMarker.InvertBrightness();
 				}
-				if (sm.WriteMarker.A != 0 && sm.WriteMarker.IsDark() == bgIsDark) {
+				if (sm.WriteMarker.A != 0 && sm.WriteMarker.IsDark() == isDarkTheme) {
 					sm.WriteMarker = sm.WriteMarker.InvertBrightness();
 				}
-				if (sm.SymbolDefinition.A != 0 && sm.SymbolDefinition.IsDark() == bgIsDark) {
+				if (sm.SymbolDefinition.A != 0 && sm.SymbolDefinition.IsDark() == isDarkTheme) {
 					sm.SymbolDefinition = sm.SymbolDefinition.InvertBrightness();
 				}
 			}
