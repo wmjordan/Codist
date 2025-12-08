@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -122,11 +123,20 @@ namespace Codist.Taggers
 			}
 		}
 
-		static List<CustomTagDefinitionSet> LoadConfigFile(string configPath, string extension) {
-			var t = File.ReadAllText(configPath);
-			return extension == YamlExtension
-				? YamlLoader.Load(t)
-				: JsonConvert.DeserializeObject<List<CustomTagDefinitionSet>>(t);
+		static bool NameEquals(string a, string b) {
+			return String.Equals(a, b, StringComparison.OrdinalIgnoreCase);
+		}
+
+		static List<CustomTagDefinitionSet> LoadAndConvertJsonConfigFile(string configPath, string extension, string t) {
+			var r = JsonConvert.DeserializeObject<List<CustomTagDefinitionSet>>(t);
+			try {
+				YamlLoader.Save(configPath.Substring(0, configPath.Length - extension.Length) + YamlExtension, r);
+				File.Delete(configPath);
+			}
+			catch {
+				// ignore
+			}
+			return r;
 		}
 
 		sealed class TaggerContext
@@ -285,7 +295,7 @@ namespace Codist.Taggers
 
 		static class TagDefinitionProvider
 		{
-			static readonly Dictionary<string, TaggerConfig> _TaggerConfigs = new Dictionary<string, TaggerConfig>(StringComparer.OrdinalIgnoreCase);
+			static readonly Dictionary<string, TaggerConfig> __TaggerConfigs = new Dictionary<string, TaggerConfig>(StringComparer.OrdinalIgnoreCase);
 			static readonly TaggerConfig __GlobalTaggerConfigs = GetTaggerConfig(GlobalConfigIdentifier);
 			const string OutputWindowIdentifier = "<output>", GlobalConfigIdentifier = "<global>",
 				JsonConfigExtension = ".ct.json",
@@ -293,9 +303,11 @@ namespace Codist.Taggers
 			const int MaxLookupParentDir = 5;
 
 			static TagDefinitionProvider() {
-				Microsoft.VisualStudio.Shell.Events.SolutionEvents.OnAfterCloseSolution += (object sender, EventArgs e) => {
+				Microsoft.VisualStudio.Shell.Events.SolutionEvents.OnAfterCloseSolution += ClearConfigsAfterCloseSolution;
+
+				static void ClearConfigsAfterCloseSolution(object sender, EventArgs a) {
 					var removes = new Chain<string>();
-					foreach (var item in _TaggerConfigs) {
+					foreach (var item in __TaggerConfigs) {
 						var c = item.Value;
 						c.CleanUp();
 						if (c.AssociatedTaggerCount == 0) {
@@ -304,9 +316,9 @@ namespace Codist.Taggers
 						}
 					}
 					foreach (var item in removes) {
-						_TaggerConfigs.Remove(item);
+						__TaggerConfigs.Remove(item);
 					}
-				};
+				}
 			}
 
 			public static CustomTagger CreateCustomTagger(ITextView view, ITextDocument doc) {
@@ -325,6 +337,7 @@ namespace Codist.Taggers
 			internal static TaggerConfig GetTaggerConfig(string path) {
 				string dir;
 				int level;
+				bool isGlobal = false;
 				if (String.IsNullOrEmpty(path)
 					|| path.EndsWith(JsonConfigExtension, StringComparison.OrdinalIgnoreCase)
 					|| path.EndsWith(YamlConfigExtension, StringComparison.OrdinalIgnoreCase)) {
@@ -333,6 +346,7 @@ namespace Codist.Taggers
 				if (path == GlobalConfigIdentifier) {
 					dir = Config.ConfigDirectory;
 					level = MaxLookupParentDir; // disable up-dir lookup
+					isGlobal = true;
 				}
 				else {
 					dir = Path.GetDirectoryName(path);
@@ -340,29 +354,39 @@ namespace Codist.Taggers
 				}
 				do {
 					if (dir.Length == 0) {
-						return null;
+						goto EXIT;
 					}
-					if (TryGetConfig(dir, YamlExtension, out var config)
-						|| TryGetConfig(dir, JsonExtension, out config)) {
+					if (TryGetConfig(dir, YamlExtension, isGlobal, out var config)
+						|| TryGetConfig(dir, JsonExtension, isGlobal, out config)) {
 						return config;
 					}
 					dir = Path.GetDirectoryName(dir);
 				}
 				while (++level < MaxLookupParentDir && dir != null);
-				return null;
+				EXIT:
+				return path == GlobalConfigIdentifier
+					? new TaggerConfig(Config.ConfigDirectory, ConfigFileName + YamlExtension, null)
+					: null;
 			}
 
-			static bool TryGetConfig(string dir, string extension, out TaggerConfig config) {
+			static bool TryGetConfig(string dir, string extension, bool isGlobal, out TaggerConfig config) {
 				var configPath = Path.Combine(dir, ConfigFileName + extension);
-				if (_TaggerConfigs.TryGetValue(configPath, out config)) {
+				if (isGlobal) {
+					config = null;
+				}
+				else if (__TaggerConfigs.TryGetValue(configPath, out config)) {
 					if (config.Items != null) {
 						return true;
 					}
-					_TaggerConfigs.Remove(configPath);
+					config.Dispose();
+					__TaggerConfigs.Remove(configPath);
 				}
 				var s = LoadDefinitionSets(configPath, extension);
 				if (s != null) {
-					config = _TaggerConfigs[configPath] = new TaggerConfig(dir, ConfigFileName + extension, s);
+					config = new TaggerConfig(dir, ConfigFileName + extension, s);
+					if (!isGlobal) {
+						__TaggerConfigs[configPath] = config;
+					}
 					return true;
 				}
 				return false;
@@ -381,19 +405,33 @@ namespace Codist.Taggers
 				}
 				return new List<CustomTagDefinitionSet>();
 			}
+
+			static List<CustomTagDefinitionSet> LoadConfigFile(string configPath, string extension) {
+				var t = File.ReadAllText(configPath);
+				return extension == YamlExtension
+					? YamlLoader.Load(t)
+					: JsonConvert.DeserializeObject<List<CustomTagDefinitionSet>>(t);
+			}
 		}
 
+		// This class represents a config file for custom syntax highlight rules
+		// It can be shared by multiple taggers
+		// FileSystemWatcher is used to monitor file changes
+		//   once the underlying config file is changed,
+		//   it will reload the config file and signals linked _CustomTaggers about the change
 		sealed class TaggerConfig : IDisposable
 		{
 			readonly FileSystemWatcher _Watcher;
 			readonly object _Sync = new object();
-			readonly string _Path;
+			readonly string _Dir;
+			bool _UsingYaml;
+			string _MonitoringFileName, _ChangedFile;
 			Timer _Timer;
 			List<CustomTagDefinitionSet> _Items;
 			List<CustomTagger> _CustomTaggers;
 
 			public TaggerConfig(string dir, string fileName, List<CustomTagDefinitionSet> taggers) {
-				var watcher = new FileSystemWatcher(dir, fileName);
+				var watcher = new FileSystemWatcher(dir, ConfigFileName + ".*");
 				watcher.Changed += OnConfigFileChanged;
 				watcher.Renamed += OnConfigFileChanged;
 				watcher.Created += OnConfigFileChanged;
@@ -401,7 +439,9 @@ namespace Codist.Taggers
 				watcher.EnableRaisingEvents = true;
 				_Watcher = watcher;
 				_Items = taggers?.Count != 0 ? taggers : null;
-				_Path = Path.Combine(dir, fileName);
+				_Dir = dir;
+				_MonitoringFileName = fileName;
+				_UsingYaml = NameEquals(Path.GetExtension(fileName), YamlExtension);
 			}
 
 			public List<CustomTagDefinitionSet> Items => _Items;
@@ -447,11 +487,28 @@ namespace Codist.Taggers
 			}
 
 			void OnConfigFileChanged(object sender, FileSystemEventArgs e) {
+				var file = e.ChangeType == WatcherChangeTypes.Renamed ? ((RenamedEventArgs)e).OldName : e.Name;
 				if (e.ChangeType.HasAnyFlag(WatcherChangeTypes.Deleted | WatcherChangeTypes.Renamed | WatcherChangeTypes.Created)) {
-					_Items = null;
+					if (NameEquals(_MonitoringFileName, file)) {
+						_Items = null;
+						_UsingYaml = false;
+					}
 				}
+				var ext = Path.GetExtension(e.FullPath);
+				var isYaml = NameEquals(ext, YamlExtension);
+				if (!isYaml) {
+					if (_UsingYaml) {
+						// ignore JSON file change if using YAML
+						return;
+					}
+					if (!NameEquals(ext, JsonExtension)) {
+						// if file extension is not JSON or YAML
+						return;
+					}
+				}
+				_ChangedFile = e.FullPath;
 				if (_Timer == null) {
-					_Timer = new Timer(UpdateConfigFile, _Path, 1000, -1);
+					_Timer = new Timer(UpdateConfigFile, e.FullPath, 1000, -1);
 				}
 				else {
 					_Timer.Change(1000, -1);
@@ -459,12 +516,21 @@ namespace Codist.Taggers
 			}
 
 			void UpdateConfigFile(object filePath) {
+				var f = _ChangedFile;
 				try {
-					_Items = File.Exists(_Path)
-						? _Path.EndsWith(YamlExtension, StringComparison.OrdinalIgnoreCase)
-							? YamlLoader.Load(File.ReadAllText(_Path))
-							: JsonConvert.DeserializeObject<List<CustomTagDefinitionSet>>(File.ReadAllText(_Path))
-						: null;
+					if (!File.Exists(f)) {
+						_Items = null;
+						_UsingYaml = false;
+					}
+					else {
+						var isYaml = NameEquals(Path.GetExtension(f), YamlExtension);
+						var t = File.ReadAllText(f);
+						_Items = isYaml
+							? YamlLoader.Load(t)
+							: JsonConvert.DeserializeObject<List<CustomTagDefinitionSet>>(t);
+						_UsingYaml = isYaml;
+						_MonitoringFileName = Path.GetFileName(f);
+					}
 					lock (_Sync) {
 						foreach (var item in _CustomTaggers) {
 							item._Taggers = GetTaggers(item._Path);
@@ -475,7 +541,7 @@ namespace Codist.Taggers
 				catch (Exception ex) {
 					_Items = null;
 					ex.Log();
-					CodistPackage.ShowError(ex, R.T_FailedToLoadSyntaxCustomizationFile + "\n" + filePath);
+					CodistPackage.ShowError(ex, R.T_FailedToLoadSyntaxCustomizationFile + "\n" + f);
 				}
 			}
 
@@ -484,7 +550,7 @@ namespace Codist.Taggers
 				_Timer?.Dispose();
 				Debug.Assert(_CustomTaggers == null || _CustomTaggers.Count == 0);
 				_CustomTaggers = null;
-				$"Unload tagger config: {_Path}".Log();
+				$"Unload tagger config: {_Dir}\\{_MonitoringFileName}".Log();
 			}
 		}
 
@@ -522,12 +588,14 @@ namespace Codist.Taggers
 			[JsonProperty("contains")]
 			public string Contains { get; set; }
 			[JsonProperty("ignoreCase")]
+			[DefaultValue(false)]
 			public bool IgnoreCase { get; set; }
 			[JsonProperty("tag")]
 			public string Tag { get; set; }
 			[JsonProperty("groupTags")]
 			public string[] GroupTags { get; set; }
 			[JsonProperty("tagLine")]
+			[DefaultValue(false)]
 			public bool TagLine { get; set; }
 		}
 
@@ -535,11 +603,16 @@ namespace Codist.Taggers
 		{
 			static readonly Serializer __Serializer = new Serializer(new SerializerSettings {
 				NamingConvention = new CamelCaseNamingConvention(),
+				IgnoreNulls = true,
 			});
 			internal static List<CustomTagDefinitionSet> Load(string yaml) {
 				return String.IsNullOrWhiteSpace(yaml)
 					? null
 					: __Serializer.Deserialize<List<CustomTagDefinitionSet>>(yaml);
+			}
+
+			internal static void Save(string filePath, List<CustomTagDefinitionSet> r) {
+				File.WriteAllText(filePath, __Serializer.Serialize(r));
 			}
 		}
 	}
