@@ -125,6 +125,32 @@
 					<LocCanonicalName>.生成.打开Release输出文件夹</LocCanonicalName>
 				</Strings>
 			</Button>
+			<Button guid="guidCodistPackageCmdSet" id="OpenIntermediateFolderId" priority="0x0102" type="Button">
+				<Parent guid="guidCodistPackageCmdSet" id="IDG_VS_BUILD_MISC" />
+				<Icon guid="ImageCatalogGuid" id="SpecialFolderOpened" />
+				<CommandFlag>DefaultInvisible</CommandFlag>
+				<CommandFlag>DontCache</CommandFlag>
+				<CommandFlag>DynamicVisibility</CommandFlag>
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<Strings>
+					<ButtonText>打开中间输出文件夹</ButtonText>
+					<CanonicalName>.Build.OpenIntermediateFolder</CanonicalName>
+					<LocCanonicalName>.生成.打开中间输出文件夹</LocCanonicalName>
+				</Strings>
+			</Button>
+			<Button guid="guidCodistPackageCmdSet" id="OpenReleaseIntermediateFolderId" priority="0x0102" type="Button">
+				<Parent guid="guidCodistPackageCmdSet" id="IDG_VS_BUILD_MISC" />
+				<Icon guid="ImageCatalogGuid" id="SpecialFolderOpened" />
+				<CommandFlag>DefaultInvisible</CommandFlag>
+				<CommandFlag>DontCache</CommandFlag>
+				<CommandFlag>DynamicVisibility</CommandFlag>
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<Strings>
+					<ButtonText>打开 Release 中间输出文件夹</ButtonText>
+					<CanonicalName>.Build.OpenIntermediateFolder</CanonicalName>
+					<LocCanonicalName>.生成.打开Release中间输出文件夹</LocCanonicalName>
+				</Strings>
+			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="NaviBarSearchActiveClassId" priority="0x0100" type="Button">
 				<Parent guid="guidCodistPackageCmdSet" id="IDG_VS_EDIT_GOTO" />
 				<Icon guid="ImageCatalogGuid" id="SearchMember" />

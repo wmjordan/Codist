@@ -11,39 +11,52 @@ namespace Codist.Commands
 {
 	internal static class OpenOutputFolderCommand
 	{
+		const string OutputPathId = "OutputPath", IntermediatePathId = "IntermediatePath",
+			DebugConfigId = "Debug", ReleaseConfigId = "Release";
+
 		public static void Initialize() {
-			Command.OpenOutputFolder.Register(Execute, (s, args) => {
-				ThreadHelper.ThrowIfNotOnUIThread();
-				((OleMenuCommand)s).Visible = GetSelectedProject()?.ConfigurationManager != null;
-			});
+            Command.OpenOutputFolder.Register(Execute, HasSelectedProject);
 			Command.OpenDebugOutputFolder.Register(ExecuteDebug, (s, args) => {
 				ThreadHelper.ThrowIfNotOnUIThread();
 				((OleMenuCommand)s).Visible = GetSelectedProjectConfigurationExceptActive("Debug") != null;
 			});
-			Command.OpenReleaseOutputFolder.Register(ExecuteRelease, (s, args) => {
-				ThreadHelper.ThrowIfNotOnUIThread();
-				((OleMenuCommand)s).Visible = GetSelectedProjectConfigurationExceptActive("Release") != null;
-			});
+			Command.OpenReleaseOutputFolder.Register(ExecuteRelease, HasReleaseConfig);
+			Command.OpenIntermediateFolder.Register(ExecuteIntermediate, HasSelectedProject);
+			Command.OpenReleaseIntermediateFolder.Register(ExecuteReleaseIntermediate, HasReleaseConfig);
+		}
+
+		static void HasSelectedProject(object s, EventArgs e) {
+			ThreadHelper.ThrowIfNotOnUIThread();
+			((OleMenuCommand)s).Visible = GetSelectedProject()?.ConfigurationManager != null;
+		}
+		static void HasReleaseConfig(object s, EventArgs e) {
+			ThreadHelper.ThrowIfNotOnUIThread();
+			((OleMenuCommand)s).Visible = GetSelectedProjectConfigurationExceptActive("Release") != null;
 		}
 
 		static void Execute(object sender, EventArgs e) {
-			var p = GetSelectedProject();
-			if (p != null) {
-				OpenOutputFolder(p, null);
-			}
+            TryOpenPath(null, OutputPathId);
+		}
+		static void ExecuteIntermediate(object sender, EventArgs e) {
+            TryOpenPath(null, IntermediatePathId);
+		}
+		static void ExecuteReleaseIntermediate(object sender, EventArgs e) {
+            TryOpenPath(ReleaseConfigId, IntermediatePathId);
 		}
 		static void ExecuteDebug(object sender, EventArgs e) {
-			var p = GetSelectedProject();
-			if (p != null) {
-				OpenOutputFolder(p, "Debug");
-			}
+            TryOpenPath(DebugConfigId, OutputPathId);
+        }
+
+        static void ExecuteRelease(object sender, EventArgs e) {
+			TryOpenPath(ReleaseConfigId, OutputPathId);
 		}
-		static void ExecuteRelease(object sender, EventArgs e) {
-			var p = GetSelectedProject();
-			if (p != null) {
-				OpenOutputFolder(p, "Release");
-			}
-		}
+
+		static void TryOpenPath(string configId, string pathId) {
+            var p = GetSelectedProject();
+            if (p != null) {
+                OpenOutputFolder(p, configId, pathId);
+            }
+        }
 		[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.EventHandler)]
 		static Configuration GetSelectedProjectConfigurationExceptActive(string rowName) {
 			var cm = GetSelectedProject()?.ConfigurationManager;
@@ -61,10 +74,10 @@ namespace Codist.Commands
 		}
 
 		[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.EventHandler)]
-		static void OpenOutputFolder(Project p, string rowName) {
+		static void OpenOutputFolder(Project p, string rowName, string pathId) {
 			try {
 				if (p.Properties.Item("FullPath")?.Value is string projectPath
-					&& (rowName == null ? p.ConfigurationManager.ActiveConfiguration : GetSelectedProjectConfigurationExceptActive(rowName))?.Properties.Item("OutputPath")?.Value is string confPath) {
+					&& (rowName == null ? p.ConfigurationManager.ActiveConfiguration : GetSelectedProjectConfigurationExceptActive(rowName))?.Properties.Item(pathId)?.Value is string confPath) {
 					var outputPath = Path.Combine(projectPath, confPath);
 					if (Directory.Exists(outputPath)) {
 						FileHelper.TryRun(outputPath);

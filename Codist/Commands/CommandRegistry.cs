@@ -52,6 +52,8 @@ namespace Codist.Commands
 		ShowSupportedFileTypes,
 		TransformDocument,
 		OpenActivityLog,
-		OptionsWindow
+		OptionsWindow,
+		OpenIntermediateFolder,
+		OpenReleaseIntermediateFolder,
 	}
 }

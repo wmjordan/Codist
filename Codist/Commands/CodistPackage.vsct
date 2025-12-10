@@ -99,6 +99,8 @@
 			<IDSymbol name="NaviBarSearchActiveClassId" value="0x4007" />
 			<IDSymbol name="NaviBarSearchDeclarationInProjectId" value="0x4008" />
 			<IDSymbol name="OptionsWindowId" value="0x4012" />
+			<IDSymbol name="OpenIntermediateFolderId" value="0x4013" />
+			<IDSymbol name="OpenReleaseIntermediateFolderId" value="0x4014" />
 			<IDSymbol name="CodeRefactoringId" value="0x400B" />
 		</GuidSymbol>
 	</Symbols>
