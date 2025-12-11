@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using CLR;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -58,9 +60,6 @@ namespace Codist.Controls
 		public void AddCopyAndSearchSymbolCommands() {
 			var symbol = _Host.Symbol;
 			AddCommand(CommandId.CopySymbolName);
-			if (symbol.IsQualifiable()) {
-				AddCommand(CommandId.CopyQualifiedSymbolName);
-			}
 			if (symbol.Kind == SymbolKind.Field && ((IFieldSymbol)symbol).HasConstantValue) {
 				AddCommand(CommandId.CopyConstantValue);
 			}
@@ -100,7 +99,7 @@ namespace Codist.Controls
 				if (_Host.Node?.Kind().IsDeclaration() == true
 					&& _Host.Node.SyntaxTree == _Host.Context.SemanticModel.SyntaxTree
 					&& _Host.Symbol.Kind != SymbolKind.Namespace) {
-					AddCommand(CommandId.FindReferencedSymbols);
+					AddCommand(CommandId.ListReferencedSymbols);
 				}
 
 				if (String.IsNullOrEmpty(_Host.Symbol.Name) == false) {
@@ -268,7 +267,7 @@ namespace Codist.Controls
 			}
 			if (ReferenceEquals(ga, et) == false) {
 				typeName = ga.Name + ga.GetParameterString();
-				AddCommand(CommandId.FindSpecialGenericReturnTypeMembers, typeName);
+				AddCommand(CommandId.ListSpecialGenericReturnTypeMembers, typeName);
 				if (ga.ContainingAssembly.GetSourceType() != AssemblySource.Metadata) {
 					AddCommand(CommandId.GoToSpecialGenericSymbolReturnType, typeName);
 				}
@@ -308,6 +307,11 @@ namespace Codist.Controls
 			return new CustomMenuItem(imageId, title).AddClickHandler(clickHandler).SetToolTip(tooltip);
 		}
 
+		void FireCommandExecuted(RoutedEventArgs e) {
+			CommandExecuted?.Invoke(this, e);
+			IsOpen = false;
+		}
+
 		void CSharpSymbolContextMenu_Closed(object sender, RoutedEventArgs e) {
 			Closed -= CSharpSymbolContextMenu_Closed;
 			Dispose();
@@ -341,13 +345,12 @@ namespace Codist.Controls
 			SelectSymbolNode,
 			GoToSymbolDefinition,
 			CopySymbolName,
-			CopyQualifiedSymbolName,
 			CopyConstantValue,
 			WebSearch,
 			ListReturnTypeMembers,
 			FindReturnTypeExtensionMethods,
 			GoToSymbolReturnType,
-			FindSpecialGenericReturnTypeMembers,
+			ListSpecialGenericReturnTypeMembers,
 			GoToSpecialGenericSymbolReturnType,
 			FindExtensionMethods,
 			FindSubInterfaces,
@@ -355,14 +358,14 @@ namespace Codist.Controls
 			FindDerivedClasses,
 			FindOverrides,
 			FindReferrers,
-			FindReferencedSymbols,
-			ListSymbolMembers,
 			FindSymbolsWithName,
 			FindMethodsBySignature,
 			FindConstructorReferrers,
 			FindObjectInitializers,
 			FindParameterAssignments,
 			FindOptionalParameterAssignments,
+			ListReferencedSymbols,
+			ListSymbolMembers,
 			DebugUnitTest,
 			RunUnitTest,
 			FindInstanceProducers,
@@ -374,12 +377,30 @@ namespace Codist.Controls
 			ListEventArgsMembers,
 		}
 
+		[Flags]
+		enum CommandOptions
+		{
+			Default,
+			CurrentFile = 1,
+			CurrentProject = 1 << 1,
+			RelatedProjects = 1 << 2,
+			SourceCode = 1 << 3,
+			ExtractMatch = 1 << 4,
+			DirectDerive = 1 << 5,
+			MatchCase = 1 << 6,
+			Explicit = 1 << 7,
+			Implicit = 1 << 8
+		}
+
 		sealed class CustomMenuItem : MenuItem
 		{
 			readonly int _ImageId;
 			RoutedEventHandler _ClickHandler;
 			string _ToolTip;
 			bool _Handled;
+			bool _hasSubCommand;
+			Chain<System.Windows.Controls.Primitives.ButtonBase> _SubCommands;
+			CommandOptions _Option;
 
 			public CustomMenuItem(int imageId, string title) {
 				Icon = VsImageHelper.GetImage(_ImageId = imageId);
@@ -404,9 +425,57 @@ namespace Codist.Controls
 				Header = new ThemedMenuText { Text = title };
 			}
 
+			public CommandOptions Option => _Option;
+
 			public CustomMenuItem AddClickHandler(RoutedEventHandler clickHandler) {
 				_ClickHandler += clickHandler;
 				return this;
+			}
+			public CustomMenuItem AddSubCommand(string tooltip, RoutedEventHandler handler, int imageId = 0) {
+				handler += HideMenu;
+				var button = new ThemedButton(imageId > 0 ? imageId : _ImageId, tooltip, handler);
+				(_SubCommands ??= []).Add(button);
+				_hasSubCommand = true;
+				return this;
+			}
+			public CustomMenuItem AddOptionButton(string tooltip, CommandOptions option, int imageId = 0, Action<ThemedToggleButton> buttonConfigurator = null) {
+				var button = new ThemedToggleButton(imageId > 0 ? imageId : _ImageId, tooltip, SetCommandOption) { Tag = option };
+				buttonConfigurator?.Invoke(button);
+				(_SubCommands ??= []).Add(button);
+				_hasSubCommand = true;
+				return this;
+			}
+			public CustomMenuItem HasExtractMatchOption(ISymbol symbol) {
+				if (symbol == null || symbol.IsStatic) {
+					return this;
+				}
+				var t = symbol.GetReturnType() ?? symbol as INamedTypeSymbol;
+				return t?.IsAnyKind(TypeKind.Class, TypeKind.Structure, TypeKind.Interface, TypeKind.Delegate) == true
+					? AddOptionButton(R.CMDT_FindExtract, CommandOptions.ExtractMatch, IconIds.CurrentSymbolOnly)
+					: this;
+			}
+			public CustomMenuItem HasDirectDeriveOption() {
+				return AddOptionButton(R.CMDT_FindDirectlyDerived, CommandOptions.DirectDerive, IconIds.DirectDerive);
+			}
+			public CustomMenuItem HasFileScopeOptions() {
+				return AddOptionButton(R.CMDT_ScopeToCurrentFile, CommandOptions.CurrentFile, IconIds.File, ExclusiveButtonConfigurator.FileProject)
+					.AddOptionButton(R.CMDT_ScopeToCurrentProject, CommandOptions.CurrentProject, IconIds.Project, ExclusiveButtonConfigurator.FileProject)
+					.AddOptionButton(R.CMDT_ScopeToRelatedProjects, CommandOptions.RelatedProjects, IconIds.RelatedProjects, ExclusiveButtonConfigurator.Projects);
+			}
+			public CustomMenuItem HasProjectScopeOptions() {
+				return AddOptionButton(R.CMDT_ScopeToCurrentProject, CommandOptions.CurrentProject, IconIds.Project,  ExclusiveButtonConfigurator.Projects)
+					.AddOptionButton(R.CMDT_ScopeToRelatedProjects, CommandOptions.RelatedProjects, IconIds.RelatedProjects, ExclusiveButtonConfigurator.Projects);
+			}
+			public CustomMenuItem HasSourceCodeScopeOption() {
+				return AddOptionButton(R.CMDT_ScopeToSourceCode, CommandOptions.SourceCode, IconIds.SourceCode);
+			}
+
+			void HideMenu(object sender, RoutedEventArgs e) {
+				this.GetParent<CSharpSymbolContextMenu>()?.FireCommandExecuted(e);
+			}
+			void SetCommandOption(object sender, RoutedEventArgs e) {
+				var b = sender as ThemedToggleButton;
+				_Option = _Option.SetFlags((CommandOptions)b.Tag, b.IsChecked == true);
 			}
 
 			public CustomMenuItem SetToolTip(string tooltip) {
@@ -425,6 +494,15 @@ namespace Codist.Controls
 				base.OnPreviewMouseRightButtonUp(e);
 				_Handled = false;
 				HandleExecuteEvent(e);
+			}
+			public override void OnApplyTemplate() {
+				base.OnApplyTemplate();
+				if (!_hasSubCommand) {
+					return;
+				}
+				if (GetTemplateChild("SubCommands") is ContentPresenter c) {
+					c.Content = new ThemedControlGroup().AddRange(_SubCommands);
+				}
 			}
 
 			protected override void OnClick() {
@@ -472,51 +550,93 @@ namespace Codist.Controls
 					case CommandId.GoToNode:
 						return CreateItem(IconIds.GoToDefinition, R.CMD_GoToDefinition, GoToNode);
 					case CommandId.SelectNode:
-						return CreateItem(IconIds.SelectCode, R.CMD_SelectCode, SelectNode);
+						return CreateItem(IconIds.SelectCode, R.CMD_SelectCode, SelectNode)
+							.AddSubCommand(R.CMDT_SelectCodeWithoutTrivia, SelectNodeWithoutTrivia, IconIds.SelectCodeWithoutTrivia);
 					case CommandId.SelectSymbolNode:
-						return CreateItem(IconIds.SelectCode, R.CMD_SelectCode, SelectSymbolNode);
+						return CreateItem(IconIds.SelectCode, R.CMD_SelectCode, SelectSymbolNode)
+							.AddSubCommand(R.CMDT_SelectCodeWithoutTrivia, SelectSymbolNodeWithoutTrivia, IconIds.SelectCodeWithoutTrivia);
 					case CommandId.GoToSymbolDefinition:
 						return CreateItem(IconIds.GoToDefinition, R.CMD_GoToDefinition, GoToSymbolDefinition);
-					case CommandId.CopySymbolName:
-						return CreateItem(IconIds.Copy, R.CMD_CopySymbol, CopySymbolNameOrDefinition, R.CMDT_CopySymbol);
-					case CommandId.CopyQualifiedSymbolName:
-						return CreateItem(IconIds.Copy, R.CMD_CopyQualifiedSymbolName, CopyQualifiedSymbolName, R.CMDT_CopyQualifiedSymbolName);
+					case CommandId.CopySymbolName: {
+						var cmd = CreateItem(IconIds.Copy, R.CMD_CopySymbol, CopySymbolName, R.CMDT_CopySymbol)
+							.AddSubCommand(R.CMDT_CopyQualifiedName, CopyTypeQualifiedSymbolName, IconIds.Class);
+						if (_Symbol != null) {
+							if (_Symbol.IsQualifiable()) {
+								cmd.AddSubCommand(R.CMDT_CopyFullyQualifiedName, CopyFullyQualifiedSymbolName, IconIds.Namespace);
+							}
+							if (_Symbol.Kind != SymbolKind.Namespace) {
+								cmd.AddSubCommand(R.CMDT_CopyDefinition, CopyDefinition, IconIds.Definition);
+							}
+						}
+						return cmd;
+					}
 					case CommandId.CopyConstantValue:
 						return CreateItem(IconIds.Constant, R.CMD_CopyConstantValue, CopyConstantValue);
 					case CommandId.FindExtensionMethods:
-						return CreateItem(IconIds.ExtensionMethod, R.CMD_FindExtensions, FindExtensionMethods);
+						return CreateItem(IconIds.ExtensionMethod, R.CMD_FindExtensions, FindExtensionMethods)
+							.HasExtractMatchOption(_Symbol)
+							.HasSourceCodeScopeOption();
 					case CommandId.FindSubInterfaces:
-						return CreateItem(IconIds.FindDerivedTypes, R.CMD_FindInheritedInterfaces, FindSubInterfaces, R.CMDT_FindInheritedInterfaces);
+						return CreateItem(IconIds.FindDerivedTypes, R.CMD_FindInheritedInterfaces, FindSubInterfaces, R.CMDT_FindInheritedInterfaces)
+							.HasDirectDeriveOption()
+							.HasSourceCodeScopeOption();
 					case CommandId.FindImplementations:
-						return CreateItem(IconIds.FindImplementations, R.CMD_FindImplementations, FindImplementations, R.CMDT_FindImplementations);
+						return CreateItem(IconIds.FindImplementations, R.CMD_FindImplementations, FindImplementations, R.CMDT_FindImplementations)
+							.AddOptionButton(R.CMDT_FindDirectImplementations, CommandOptions.DirectDerive, IconIds.DirectDerive)
+							.HasProjectScopeOptions()
+							.HasSourceCodeScopeOption();
 					case CommandId.FindDerivedClasses:
-						return CreateItem(IconIds.FindDerivedTypes, R.CMD_FindDerivedClasses, FindDerivedClasses, R.CMDT_FindDerivedClasses);
+						return CreateItem(IconIds.FindDerivedTypes, R.CMD_FindDerivedClasses, FindDerivedClasses, R.CMDT_FindDerivedClasses)
+							.HasDirectDeriveOption()
+							.HasProjectScopeOptions()
+							.HasSourceCodeScopeOption();
 					case CommandId.FindOverrides:
-						return CreateItem(IconIds.FindOverloads, R.CMD_FindOverrides, FindOverrides);
+						return CreateItem(IconIds.FindOverloads, R.CMD_FindOverrides, FindOverrides)
+							.HasProjectScopeOptions()
+							.HasSourceCodeScopeOption();
 					case CommandId.FindReferrers:
-						return CreateItem(IconIds.FindReferrers, R.CMD_FindReferrers, FindReferrers, R.CMDT_FindReferrers);
-					case CommandId.FindReferencedSymbols:
-						return CreateItem(IconIds.FindReferencingSymbols, R.CMD_FindReferencedSymbols, FindReferencedSymbols, R.CMDT_ListReferencedSymbols);
-					case CommandId.ListSymbolMembers:
-						return CreateItem(IconIds.ListMembers, R.CMD_ListMembers, ListSymbolMembers);
+						return CreateItem(IconIds.FindReferrers, R.CMD_FindReferrers, FindReferrers, R.CMDT_FindReferrers)
+							.HasExtractMatchOption(_Symbol)
+							.HasFileScopeOptions();
 					case CommandId.FindSymbolsWithName:
-						return CreateItem(IconIds.FindSymbolsWithName, R.CMD_FindSymbolwithName, _Symbol.Name, FindSymbolWithName, R.CMDT_FindSymbolwithName);
+						return CreateItem(IconIds.FindSymbolsWithName, R.CMD_FindSymbolwithName, _Symbol.Name, FindSymbolWithName, R.CMDT_FindSymbolwithName)
+							.AddOptionButton(R.CMDT_FindSymbolWithFullName, CommandOptions.ExtractMatch, IconIds.SameName)
+							.AddOptionButton(R.CMDT_MatchCase, CommandOptions.MatchCase, IconIds.MatchCase);
 					case CommandId.FindMethodsBySignature:
-						return CreateItem(IconIds.FindMethodsMatchingSignature, R.CMD_FindMethodsSameSignature, FindMethodsBySignature, R.CMDT_FindMethodsSameSignature);
+						return CreateItem(IconIds.FindMethodsMatchingSignature, R.CMD_FindMethodsSameSignature, FindMethodsBySignature, R.CMDT_FindMethodsSameSignature)
+							.HasSourceCodeScopeOption();
 					case CommandId.FindConstructorReferrers:
-						return CreateItem(IconIds.FindReferrers, R.CMD_FindCallers, FindConstructorReferrers, R.CMDT_FindCallers);
+						return CreateItem(IconIds.FindReferrers, R.CMD_FindCallers, FindConstructorReferrers, R.CMDT_FindCallers)
+							.AddOptionButton(R.CMDT_FindDirectCallers, CommandOptions.DirectDerive, IconIds.DirectDerive)
+							.HasFileScopeOptions();
 					case CommandId.FindObjectInitializers:
-						return CreateItem(IconIds.FindReferrers, R.CMD_FindConstructorCallers, FindObjectInitializers, R.CMDT_FindConstructorCallers);
+						return CreateItem(IconIds.FindReferrers, R.CMD_FindConstructorCallers, FindObjectInitializers, R.CMDT_FindConstructorCallers)
+							.HasExtractMatchOption(_Symbol)
+							.HasFileScopeOptions();
 					case CommandId.FindInstanceProducers:
-						return CreateItem(IconIds.InstanceProducer, R.CMD_FindInstanceProducer, FindInstanceProducers, R.CMDT_FindInstanceProducer);
+						return CreateItem(IconIds.InstanceProducer, R.CMD_FindInstanceProducer, FindInstanceProducers, R.CMDT_FindInstanceProducer)
+							.HasExtractMatchOption(_Symbol)
+							.HasSourceCodeScopeOption();
 					case CommandId.FindInstanceConsumers:
-						return CreateItem(IconIds.Argument, R.CMD_FindInstanceAsParameter, FindInstanceConsumers, R.CMDT_FindInstanceAsParameter);
+						return CreateItem(IconIds.Argument, R.CMD_FindInstanceAsParameter, FindInstanceConsumers, R.CMDT_FindInstanceAsParameter)
+							.HasExtractMatchOption(_Symbol)
+							.HasSourceCodeScopeOption();
 					case CommandId.FindContainingTypeInstanceProducers:
-						return CreateItem(IconIds.InstanceProducer, R.CMD_FindInstanceProducer, FindContainingTypeInstanceProducers, R.CMDT_FindContainingTypeInstanceProducer);
+						return CreateItem(IconIds.InstanceProducer, R.CMD_FindInstanceProducer, FindContainingTypeInstanceProducers, R.CMDT_FindContainingTypeInstanceProducer)
+							.HasExtractMatchOption(_Symbol)
+							.HasSourceCodeScopeOption();
 					case CommandId.FindContainingTypeInstanceConsumers:
-						return CreateItem(IconIds.Argument, R.CMD_FindInstanceAsParameter, FindContainingTypeInstanceConsumers, R.CMDT_FindContainingTypeInstanceAsParameter);
+						return CreateItem(IconIds.Argument, R.CMD_FindInstanceAsParameter, FindContainingTypeInstanceConsumers, R.CMDT_FindContainingTypeInstanceAsParameter)
+							.HasExtractMatchOption(_Symbol)
+							.HasSourceCodeScopeOption();
 					case CommandId.FindTypeReferrers:
-						return CreateItem(IconIds.FindTypeReferrers, R.CMD_FindTypeReferrers, FindTypeReferrers, R.CMDT_FindTypeReferrers);
+						return CreateItem(IconIds.FindTypeReferrers, R.CMD_FindTypeReferrers, FindTypeReferrers, R.CMDT_FindTypeReferrers)
+							.HasExtractMatchOption(_Symbol)
+							.HasFileScopeOptions();
+					case CommandId.ListReferencedSymbols:
+						return CreateItem(IconIds.ListReferencedSymbols, R.CMD_ListReferencedSymbols, ListReferencedSymbols, R.CMDT_ListReferencedSymbols);
+					case CommandId.ListSymbolMembers:
+						return CreateItem(IconIds.ListMembers, R.CMD_ListMembers, ListSymbolMembers, R.CMDT_ListTypeMembers);
 					case CommandId.ListSymbolLocations:
 						return CreateItem(IconIds.FileLocations, R.CMD_ListSymbolLocations, ListSymbolLocations);
 					case CommandId.DebugUnitTest:
@@ -531,21 +651,25 @@ namespace Codist.Controls
 			public CustomMenuItem CreateCommand(CommandId commandId, string substitution) {
 				switch (commandId) {
 					case CommandId.ListReturnTypeMembers:
-						return CreateItem(IconIds.ListMembers, R.CMD_ListMembersOf, substitution, ListReturnTypeMembers, R.CMDT_ListSymbolTypeMembers);
+						return CreateItem(IconIds.ListMembers, R.CMD_ListMembersOf, substitution, ListReturnTypeMembers, R.CMDT_ListTypeMembers);
 					case CommandId.FindReturnTypeExtensionMethods:
-						return CreateItem(IconIds.ExtensionMethod, R.CMD_FindExtensionsFor, substitution, FindReturnTypeExtensionMethods, R.CMDT_FindSymbolTypeExtensionMethods);
+						return CreateItem(IconIds.ExtensionMethod, R.CMD_FindExtensionsFor, substitution, FindReturnTypeExtensionMethods, R.CMDT_FindTypeExtensionMethods)
+							.HasExtractMatchOption(_Symbol)
+							.HasSourceCodeScopeOption();
 					case CommandId.GoToSymbolReturnType:
-						return CreateItem(IconIds.GoToReturnType, R.CMD_GoTo, substitution, GoToSymbolReturnType, R.CMDT_GoToSymbolTypeDefinition);
-					case CommandId.FindSpecialGenericReturnTypeMembers:
-						return CreateItem(IconIds.ListMembers, R.CMD_ListMembersOf, substitution, FindSpecialGenericReturnTypeMembers, R.CMDT_ListSymbolTypeMembers);
+						return CreateItem(IconIds.GoToReturnType, R.CMD_GoTo, substitution, GoToSymbolReturnType, R.CMDT_GoToTypeDefinition);
+					case CommandId.ListSpecialGenericReturnTypeMembers:
+						return CreateItem(IconIds.ListMembers, R.CMD_ListMembersOf, substitution, ListSpecialGenericReturnTypeMembers, R.CMDT_ListTypeMembers);
 					case CommandId.FindParameterAssignments:
 						return CreateItem(IconIds.FindParameterAssignment, R.CMD_FindAssignmentsFor, substitution, FindParameterAssignments, R.CMDT_FindAssignmentsFor);
 					case CommandId.FindOptionalParameterAssignments:
-						return CreateItem(IconIds.FindParameterAssignment, R.CMD_FindAssignmentsFor, substitution, FindOptionalParameterAssignments, R.CMDT_FindAssignmentsFor + Environment.NewLine + R.CMDT_FindAssignmentsForOption);
+						return CreateItem(IconIds.FindParameterAssignment, R.CMD_FindAssignmentsFor, substitution, FindOptionalParameterAssignments, R.CMDT_FindAssignmentsFor)
+							.AddOptionButton(R.CMDT_ExplicitAssignment, CommandOptions.Explicit, IconIds.ExplicitAssignment, ExclusiveButtonConfigurator.ExplicitImplicit)
+							.AddOptionButton(R.CMDT_DefaultAssignment, CommandOptions.Implicit, IconIds.DefaultAssignment, ExclusiveButtonConfigurator.ExplicitImplicit);
 					case CommandId.GoToSpecialGenericSymbolReturnType:
-						return CreateItem(IconIds.GoToReturnType, R.CMD_GoTo, substitution, GoToSpecialGenericSymbolReturnType, R.CMDT_GoToSymbolTypeDefinition);
+						return CreateItem(IconIds.GoToReturnType, R.CMD_GoTo, substitution, GoToSpecialGenericSymbolReturnType, R.CMDT_GoToTypeDefinition);
 					case CommandId.ListEventArgsMembers:
-						return CreateItem(IconIds.ListMembers, R.CMD_ListMembersOf, substitution, ListEventArgsMembers, "List members of arguments of event");
+						return CreateItem(IconIds.ListMembers, R.CMD_ListMembersOf, substitution, ListEventArgsMembers, R.CMDT_ListEventArgumentMember);
 				}
 				return null;
 			}
@@ -556,8 +680,14 @@ namespace Codist.Controls
 			void SelectNode(object sender, RoutedEventArgs args) {
 				_Node.SelectNode(true);
 			}
+			void SelectNodeWithoutTrivia(object sender, RoutedEventArgs args) {
+				_Node.SelectNode(false);
+			}
 			void SelectSymbolNode(object sender, RoutedEventArgs args) {
 				_Symbol.GetSyntaxNode().SelectNode(true);
+			}
+			void SelectSymbolNodeWithoutTrivia(object sender, RoutedEventArgs args) {
+				_Symbol.GetSyntaxNode().SelectNode(false);
 			}
 			void RunUnitTest(object sender, RoutedEventArgs args) {
 				if (_SemanticContext.Node.FirstAncestorOrSelf<SyntaxNode>(n => n.IsAnyKind(SyntaxKind.ClassDeclaration, SyntaxKind.MethodDeclaration)) != _Node) {
@@ -593,65 +723,65 @@ namespace Codist.Controls
 			void GoToSpecialGenericSymbolReturnType(object sender, RoutedEventArgs args) {
 				_Symbol.GetReturnType().ResolveElementType().ResolveSingleGenericTypeArgument().GoToSource();
 			}
-			void CopySymbolNameOrDefinition(object sender, RoutedEventArgs args) {
+			static void TryCopy(string content) {
 				try {
-                    if (args.RoutedEvent == PreviewMouseRightButtonUpEvent) {
-						var s = _Symbol.OriginalDefinition;
-						Clipboard.SetDataObject(s.Kind == SymbolKind.NamedType
-							? ((INamedTypeSymbol)s).GetDefinition(CodeAnalysisHelper.DefinitionNameFormat)
-							: s.ToDisplayString(CodeAnalysisHelper.DefinitionNameFormat));
-						return;
-                    }
-                    Clipboard.SetDataObject(_Symbol.GetOriginalName());
+					Clipboard.SetDataObject(content);
 				}
 				catch (SystemException) {
 					// ignore failure
 				}
 			}
-			void CopyQualifiedSymbolName(object sender, RoutedEventArgs args) {
-				try {
-					var s = _Symbol.OriginalDefinition;
-					string t;
-					switch (s.Kind) {
-						case SymbolKind.Namespace:
-						case SymbolKind.NamedType:
-							t = _Symbol.ToDisplayString(CodeAnalysisHelper.QualifiedTypeNameFormat);
-							break;
-						case SymbolKind.Method:
-							var m = s as IMethodSymbol;
-							if (m.ReducedFrom != null) {
-								s = m.ReducedFrom;
-							}
-							if (m.MethodKind == MethodKind.Constructor) {
-								s = m.ContainingType;
-								goto case SymbolKind.NamedType;
-							}
-							else if (m.MethodKind == MethodKind.ExplicitInterfaceImplementation) {
-								t = m.Name;
-								break;
-							}
-							goto default;
-						default:
-							t = s.ToDisplayString(args.RoutedEvent == PreviewMouseRightButtonUpEvent ? CodeAnalysisHelper.QualifiedTypeNameFormat : CodeAnalysisHelper.TypeMemberNameFormat);
-							break;
-					}
-					Clipboard.SetDataObject(t);
-				}
-				catch (SystemException) {
-					// ignore failure
-				}
+			void CopySymbolName(object sender, RoutedEventArgs args) {
+				TryCopy(_Symbol.GetOriginalName());
 			}
+			void CopyDefinition(object sender, RoutedEventArgs args) {
+				var s = _Symbol.OriginalDefinition;
+				TryCopy(s.Kind == SymbolKind.NamedType
+					? ((INamedTypeSymbol)s).GetDefinition(CodeAnalysisHelper.DefinitionNameFormat)
+					: s.ToDisplayString(CodeAnalysisHelper.DefinitionNameFormat));
+			}
+			void CopyTypeQualifiedSymbolName(object sender, RoutedEventArgs args) {
+				CopyQualifiedSymbolName(false);
+			}
+			void CopyFullyQualifiedSymbolName(object sender, RoutedEventArgs args) {
+				CopyQualifiedSymbolName(true);
+			}
+
+			void CopyQualifiedSymbolName(bool fullyQualified) {
+				var s = _Symbol.OriginalDefinition;
+				string t;
+				switch (s.Kind) {
+					case SymbolKind.Namespace:
+					case SymbolKind.NamedType:
+						t = _Symbol.ToDisplayString(CodeAnalysisHelper.QualifiedTypeNameFormat);
+						break;
+					case SymbolKind.Method:
+						var m = s as IMethodSymbol;
+						if (m.ReducedFrom != null) {
+							s = m.ReducedFrom;
+						}
+						if (m.MethodKind == MethodKind.Constructor) {
+							s = m.ContainingType;
+							goto case SymbolKind.NamedType;
+						}
+						else if (m.MethodKind == MethodKind.ExplicitInterfaceImplementation) {
+							t = m.Name;
+							break;
+						}
+						goto default;
+					default:
+						t = s.ToDisplayString(fullyQualified ? CodeAnalysisHelper.QualifiedTypeNameFormat : CodeAnalysisHelper.TypeMemberNameFormat);
+						break;
+				}
+				TryCopy(t);
+			}
+
 			void CopyConstantValue(object sender, RoutedEventArgs args) {
 				var f = _Symbol as IFieldSymbol;
 				if (f.HasConstantValue == false) {
 					return;
 				}
-				try {
-					Clipboard.SetDataObject(f.ConstantValue?.ToString() ?? "null");
-				}
-				catch (SystemException) {
-					// ignore failure
-				}
+				TryCopy(f.ConstantValue?.ToString() ?? "null");
 			}
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void ListSymbolMembers(object sender, RoutedEventArgs e) {
@@ -672,21 +802,28 @@ namespace Codist.Controls
 			}
 
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
-			async void FindSpecialGenericReturnTypeMembers(object sender, RoutedEventArgs e) {
+			async void ListSpecialGenericReturnTypeMembers(object sender, RoutedEventArgs e) {
 				await _SemanticContext.FindMembersAsync(_Symbol.GetReturnType().ResolveElementType().ResolveSingleGenericTypeArgument());
 			}
 
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindParameterAssignments(object sender, RoutedEventArgs e) {
-				await _SemanticContext.FindParameterAssignmentsAsync(_Symbol as IParameterSymbol);
+				var options = GetOptions(sender);
+				var docs = MakeDocumentListFromOption(options);
+				await _SemanticContext.FindParameterAssignmentsAsync(_Symbol as IParameterSymbol, docs);
 			}
 
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindOptionalParameterAssignments(object sender, RoutedEventArgs e) {
-				await _SemanticContext.FindParameterAssignmentsAsync(_Symbol as IParameterSymbol, false, UIHelper.IsCtrlDown ? ArgumentAssignmentFilter.ExplicitValue : UIHelper.IsShiftDown ? ArgumentAssignmentFilter.DefaultValue : ArgumentAssignmentFilter.Undefined);
+				var options = GetOptions(sender);
+				var docs = MakeDocumentListFromOption(options);
+				var o = options.MatchFlags(CommandOptions.Explicit) ? ArgumentAssignmentFilter.ExplicitValue
+					: options.MatchFlags(CommandOptions.Implicit) ? ArgumentAssignmentFilter.DefaultValue
+					: ArgumentAssignmentFilter.Undefined;
+				await _SemanticContext.FindParameterAssignmentsAsync(_Symbol as IParameterSymbol, docs, false, o);
 			}
 
-			void FindReferencedSymbols(object sender, RoutedEventArgs e) {
+			void ListReferencedSymbols(object sender, RoutedEventArgs e) {
 				var m = new SymbolMenu(_SemanticContext);
 				var c = 0;
 				var containerType = _Symbol.ContainingType ?? _Symbol;
@@ -718,83 +855,148 @@ namespace Codist.Controls
 				m.Show();
 			}
 
+			IEnumerable<Document> MakeDocumentListFromOption(CommandOptions options) {
+				return options.MatchFlags(CommandOptions.CurrentProject)
+					? _SemanticContext.Document.Project.Documents
+					: options.MatchFlags(CommandOptions.CurrentFile)
+					? [_SemanticContext.Document]
+					: options.MatchFlags(CommandOptions.RelatedProjects)
+					? _SemanticContext.Document.Project.GetRelatedProjectDocuments()
+					: null;
+			}
+			IEnumerable<Project> MakeProjectListFromOption(CommandOptions options) {
+				return options.MatchFlags(CommandOptions.CurrentProject)
+					? [_SemanticContext.Document.Project]
+					: options.MatchFlags(CommandOptions.RelatedProjects)
+					? _SemanticContext.Document.Project.GetRelatedProjects()
+					: null;
+			}
+
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindReferrers(object sender, RoutedEventArgs e) {
-				await _SemanticContext.FindReferrersAsync(_Symbol, UIHelper.IsCtrlDown);
+				var options = GetOptions(sender);
+				var docs = MakeDocumentListFromOption(options);
+				var m = options.MatchFlags(CommandOptions.ExtractMatch) || UIHelper.IsCtrlDown;
+				await _SemanticContext.FindReferrersAsync(_Symbol, m, docs);
 			}
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindTypeReferrers(object sender, RoutedEventArgs e) {
-				await _SemanticContext.FindReferrersAsync(_Symbol.Kind == SymbolKind.Method ? _Symbol.ContainingType : _Symbol, UIHelper.IsCtrlDown, s => s.Kind == SymbolKind.NamedType, IsTypeReference);
+				var options = GetOptions(sender);
+				var docs = MakeDocumentListFromOption(options);
+				var m = options.MatchFlags(CommandOptions.ExtractMatch) || UIHelper.IsCtrlDown;
+				await _SemanticContext.FindReferrersAsync(_Symbol.Kind == SymbolKind.Method ? _Symbol.ContainingType : _Symbol, m, docs, s => s.Kind == SymbolKind.NamedType, IsTypeReference);
 			}
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindOverrides(object sender, RoutedEventArgs e) {
-				await _SemanticContext.FindOverridesAsync(_Symbol);
+				var options = GetOptions(sender);
+				var p = MakeProjectListFromOption(options);
+				var s = options.MatchFlags(CommandOptions.SourceCode);
+				await _SemanticContext.FindOverridesAsync(_Symbol, p, s);
 			}
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindDerivedClasses(object sender, RoutedEventArgs e) {
-				await _SemanticContext.FindDerivedClassesAsync(_Symbol, UIHelper.IsCtrlDown, UIHelper.IsShiftDown == false);
+				var options = GetOptions(sender);
+				var i = options.MatchFlags(CommandOptions.DirectDerive) || UIHelper.IsCtrlDown;
+				var p = MakeProjectListFromOption(options);
+				var s = options.MatchFlags(CommandOptions.SourceCode);
+				await _SemanticContext.FindDerivedClassesAsync(_Symbol, i, p, s, UIHelper.IsShiftDown == false);
 			}
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindImplementations(object sender, RoutedEventArgs e) {
-				await _SemanticContext.FindImplementationsAsync(_Symbol, UIHelper.IsCtrlDown);
+				var options = GetOptions(sender);
+				var d = options.MatchFlags(CommandOptions.DirectDerive) || UIHelper.IsCtrlDown;
+				var p = MakeProjectListFromOption(options);
+				var s = options.MatchFlags(CommandOptions.SourceCode);
+				await _SemanticContext.FindImplementationsAsync(_Symbol, d, p, s);
 			}
 
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindSubInterfaces(object sender, RoutedEventArgs e) {
-				await _SemanticContext.FindSubInterfacesAsync(_Symbol, UIHelper.IsCtrlDown);
+				var options = GetOptions(sender);
+				var o = options.MatchFlags(CommandOptions.DirectDerive) || UIHelper.IsCtrlDown;
+				var s = options.MatchFlags(CommandOptions.SourceCode);
+				await _SemanticContext.FindSubInterfacesAsync(_Symbol, o, s);
 			}
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindMethodsBySignature(object sender, RoutedEventArgs e) {
-				await _SemanticContext.FindMethodsBySignatureAsync(_Symbol, UIHelper.IsCtrlDown);
+				var o = HasOption(sender, CommandOptions.SourceCode);
+				await _SemanticContext.FindMethodsBySignatureAsync(_Symbol, o);
 			}
 
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindExtensionMethods(object sender, RoutedEventArgs e) {
-				await _SemanticContext.FindExtensionMethodsAsync(_Symbol, UIHelper.IsCtrlDown);
+				var options = GetOptions(sender);
+				var m = options.MatchFlags(CommandOptions.ExtractMatch) || UIHelper.IsCtrlDown;
+				var s = options.MatchFlags(CommandOptions.SourceCode);
+				await _SemanticContext.FindExtensionMethodsAsync(_Symbol, m, s);
 			}
 
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindReturnTypeExtensionMethods(object sender, RoutedEventArgs e) {
-				await _SemanticContext.FindExtensionMethodsAsync(_Symbol.GetReturnType(), UIHelper.IsCtrlDown);
+				var options = GetOptions(sender);
+				var m = options.MatchFlags(CommandOptions.ExtractMatch) || UIHelper.IsCtrlDown;
+				var s = options.MatchFlags(CommandOptions.SourceCode);
+				await _SemanticContext.FindExtensionMethodsAsync(_Symbol.GetReturnType(), m, s);
 			}
 
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindSymbolWithName(object sender, RoutedEventArgs e) {
-				await _SemanticContext.FindSymbolWithNameAsync(_Symbol, UIHelper.IsCtrlDown);
+				var options = GetOptions(sender);
+				var m = options.MatchFlags(CommandOptions.ExtractMatch) || UIHelper.IsCtrlDown;
+				var c = options.MatchFlags(CommandOptions.MatchCase);
+				await _SemanticContext.FindSymbolWithNameAsync(_Symbol, m, c);
 			}
 
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindConstructorReferrers(object sender, RoutedEventArgs e) {
-				await _SemanticContext.FindReferrersAsync(_SemanticContext.SemanticModel.GetSymbolOrFirstCandidate(_Node.GetObjectCreationNode()), UIHelper.IsCtrlDown);
+				var options = GetOptions(sender);
+				var d = options.MatchFlags(CommandOptions.DirectDerive) || UIHelper.IsCtrlDown;
+				var docs = MakeDocumentListFromOption(options);
+				await _SemanticContext.FindReferrersAsync(_SemanticContext.SemanticModel.GetSymbolOrFirstCandidate(_Node.GetObjectCreationNode()), d, docs);
 			}
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindObjectInitializers(object sender, RoutedEventArgs e) {
+				var options = GetOptions(sender);
+				var docs = MakeDocumentListFromOption(options);
+				var m = options.MatchFlags(CommandOptions.ExtractMatch) || UIHelper.IsCtrlDown;
 				if (_Symbol is INamedTypeSymbol t && t.GetPrimaryConstructor() != null) {
-					await _SemanticContext.FindReferrersAsync(_Symbol, UIHelper.IsCtrlDown, null, n => IsTypeReference(n) == false);
+					await _SemanticContext.FindReferrersAsync(_Symbol, m, docs, null, n => IsTypeReference(n) == false);
 				}
 				else {
-					await _SemanticContext.FindReferrersAsync(_Symbol, UIHelper.IsCtrlDown, s => s.Kind == SymbolKind.Method);
+					await _SemanticContext.FindReferrersAsync(_Symbol, m, docs, s => s.Kind == SymbolKind.Method);
 				}
 			}
 
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindInstanceProducers(object sender, RoutedEventArgs e) {
-				await _SemanticContext.FindInstanceProducerAsync(_Symbol, UIHelper.IsCtrlDown);
+				var options = GetOptions(sender);
+				var m = options.MatchFlags(CommandOptions.ExtractMatch) || UIHelper.IsCtrlDown;
+				var s = options.MatchFlags(CommandOptions.SourceCode);
+				await _SemanticContext.FindInstanceProducerAsync(_Symbol, m, s);
 			}
 
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindContainingTypeInstanceProducers(object sender, RoutedEventArgs e) {
-				await _SemanticContext.FindInstanceProducerAsync(_Symbol.ContainingType, UIHelper.IsCtrlDown);
+				var options = GetOptions(sender);
+				var m = options.MatchFlags(CommandOptions.ExtractMatch) || UIHelper.IsCtrlDown;
+				var s = options.MatchFlags(CommandOptions.SourceCode);
+				await _SemanticContext.FindInstanceProducerAsync(_Symbol.ContainingType, m, s);
 			}
 
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindInstanceConsumers(object sender, RoutedEventArgs e) {
-				await _SemanticContext.FindInstanceAsParameterAsync(_Symbol, UIHelper.IsCtrlDown);
+				var options = GetOptions(sender);
+				var m = options.MatchFlags(CommandOptions.ExtractMatch) || UIHelper.IsCtrlDown;
+				var s = options.MatchFlags(CommandOptions.SourceCode);
+				await _SemanticContext.FindInstanceAsParameterAsync(_Symbol, m, s);
 			}
 
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindContainingTypeInstanceConsumers(object sender, RoutedEventArgs e) {
-				await _SemanticContext.FindInstanceAsParameterAsync(_Symbol.ContainingType, UIHelper.IsCtrlDown);
+				var options = GetOptions(sender);
+				var m = options.MatchFlags(CommandOptions.ExtractMatch) || UIHelper.IsCtrlDown;
+				var s = options.MatchFlags(CommandOptions.SourceCode);
+				await _SemanticContext.FindInstanceAsParameterAsync(_Symbol.ContainingType, m, s);
 			}
 
 			CustomMenuItem CreateWebSearchCommand() {
@@ -826,6 +1028,13 @@ namespace Codist.Controls
 			}
 			#endregion
 
+			static CommandOptions GetOptions(object sender) {
+				return (sender as UIElement)?.GetParentOrSelf<CustomMenuItem>()?.Option ?? 0;
+			}
+			static bool HasOption(object sender, CommandOptions option) {
+				return (sender as UIElement)?.GetParentOrSelf<CustomMenuItem>()?.Option.MatchFlags(option) == true;
+			}
+
 			bool IsTypeReference(SyntaxNode node) {
 				var p = node.Parent.UnqualifyExceptNamespace();
 				switch (p.Kind()) {
@@ -849,6 +1058,36 @@ namespace Codist.Controls
 						return p.Parent.IsAnyKind(SyntaxKind.IsPatternExpression, SyntaxKind.CasePatternSwitchLabel);
 				}
 				return false;
+			}
+		}
+
+		sealed class ExclusiveButtonConfigurator
+		{
+			readonly CommandOptions _ExclusiveOptions;
+
+			ExclusiveButtonConfigurator(CommandOptions exclusiveOptions) {
+				_ExclusiveOptions = exclusiveOptions;
+			}
+
+			public readonly static Action<ThemedToggleButton> ExplicitImplicit = new ExclusiveButtonConfigurator(CommandOptions.Explicit | CommandOptions.Implicit).ConfigureExclusiveAssignmentButton;
+			public readonly static Action<ThemedToggleButton> FileProject = new ExclusiveButtonConfigurator(CommandOptions.CurrentFile | CommandOptions.CurrentProject | CommandOptions.RelatedProjects).ConfigureExclusiveAssignmentButton;
+			public readonly static Action<ThemedToggleButton> Projects = new ExclusiveButtonConfigurator(CommandOptions.CurrentProject | CommandOptions.RelatedProjects).ConfigureExclusiveAssignmentButton;
+
+			void ConfigureExclusiveAssignmentButton(ThemedToggleButton button) {
+				button.Checked += ExclusiveToggleButton;
+			}
+			void ExclusiveToggleButton(object sender, RoutedEventArgs e) {
+				var b = (ThemedToggleButton)sender;
+				if (b.IsChecked != true) {
+					return;
+				}
+				foreach (var c in b.GetParent<ThemedControlGroup>().Controls) {
+					if (c != b
+						&& c is ThemedToggleButton tb
+						&& ((CommandOptions)c.Tag).HasAnyFlag(_ExclusiveOptions)) {
+						tb.IsChecked = false;
+					}
+				}
 			}
 		}
 	}

@@ -227,8 +227,8 @@ Right click: Duplicate line</value>
   <data name="CMD_FindOverrides" xml:space="preserve">
     <value>Find Overrides...</value>
   </data>
-  <data name="CMD_FindReferencedSymbols" xml:space="preserve">
-    <value>Find Referenced Symbols...</value>
+  <data name="CMD_ListReferencedSymbols" xml:space="preserve">
+    <value>List Referenced Symbols...</value>
   </data>
   <data name="CMD_FindReferrers" xml:space="preserve">
     <value>Find Referrers...</value>
@@ -2472,64 +2472,54 @@ Expression too long</value>
   <data name="OT_ShowOutputPaneAfterBuild" xml:space="preserve">
     <value>Show Output window when build finishes</value>
   </data>
-  <data name="CMDT_CopyQualifiedSymbolName" xml:space="preserve">
-    <value>Copy symbol name in type.member or namespace.type format
-Right click: Copy symbol name in namespace.type.member format</value>
+  <data name="CMDT_CopyFullyQualifiedName" xml:space="preserve">
+    <value>Copy Fully Qualified Name
+Copy qualified name in namespace.type.member format</value>
   </data>
   <data name="CMDT_CustomizeSearchEngines" xml:space="preserve">
     <value>Add, update or delete search engines listed in this menu</value>
   </data>
   <data name="CMDT_FindCallers" xml:space="preserve">
-    <value>Search places where active constructor is called
-Ctrl: Match current symbol only, excluding base or derived symbols</value>
+    <value>Search places where active constructor is called</value>
   </data>
   <data name="CMDT_FindConstructorCallers" xml:space="preserve">
-    <value>Search places where constructor of current type is called
-Ctrl: Match current symbol only, excluding base or derived symbols</value>
+    <value>Search places where constructor of current type is called</value>
   </data>
   <data name="CMDT_FindContainingTypeInstanceAsParameter" xml:space="preserve">
-    <value>Search for members that take containing type of current symbol as parameter
-Ctrl: Match current symbol only, excluding base or derived symbols</value>
+    <value>Search for members that take containing type of current symbol as parameter</value>
   </data>
   <data name="CMDT_FindContainingTypeInstanceProducer" xml:space="preserve">
-    <value>Search for members that return containing type of current symbol
-Ctrl: Match current symbol only, excluding base or derived symbols</value>
+    <value>Search for members that return containing type of current symbol</value>
   </data>
   <data name="CMDT_FindInstanceAsParameter" xml:space="preserve">
-    <value>Search for members that take current type as parameter
-Ctrl: Match current symbol only, excluding base or derived symbols</value>
+    <value>Search for members that take current type as parameter</value>
   </data>
   <data name="CMDT_FindInstanceProducer" xml:space="preserve">
-    <value>Search for members that return current type
-Ctrl: Match current symbol only, excluding base or derived symbols</value>
+    <value>Search for members that return current type</value>
   </data>
   <data name="CMDT_FindMethodsSameSignature" xml:space="preserve">
-    <value>Search symbol having the same signature as current symbol
-Ctrl: Only search in source code</value>
+    <value>Search symbol having the same signature as current symbol</value>
   </data>
   <data name="CMDT_ListReferencedSymbols" xml:space="preserve">
     <value>List symbols referenced within current symbol</value>
   </data>
   <data name="CMDT_FindReferrers" xml:space="preserve">
-    <value>Search places where active method is called, field/property is read/write
-Ctrl: Match current symbol only, excluding base or derived symbols</value>
+    <value>Search places where active method is called, field/property is read/write</value>
   </data>
   <data name="CMDT_FindSymbolwithName" xml:space="preserve">
-    <value>Search symbols whose name contains current symbol name
-Ctrl: Match full name</value>
+    <value>Search symbols whose name contains current symbol name</value>
   </data>
   <data name="CMDT_FindTypeReferrers" xml:space="preserve">
-    <value>Search for members that reference current type
-Ctrl: Match current symbol only, excluding base or derived symbols</value>
+    <value>Search for members that reference current type</value>
   </data>
-  <data name="CMDT_FindSymbolTypeExtensionMethods" xml:space="preserve">
-    <value>Find extension methods for current symbol type</value>
+  <data name="CMDT_FindTypeExtensionMethods" xml:space="preserve">
+    <value>Find extension methods for current type</value>
   </data>
-  <data name="CMDT_ListSymbolTypeMembers" xml:space="preserve">
-    <value>List members of current symbol type</value>
+  <data name="CMDT_ListTypeMembers" xml:space="preserve">
+    <value>List members of current type</value>
   </data>
-  <data name="CMDT_GoToSymbolTypeDefinition" xml:space="preserve">
-    <value>Go to definition of current symbol type</value>
+  <data name="CMDT_GoToTypeDefinition" xml:space="preserve">
+    <value>Go to definition of current type</value>
   </data>
   <data name="CMD_ListSymbolLocations" xml:space="preserve">
     <value>List Symbol Locations...</value>
@@ -2613,12 +2603,10 @@ Ctrl: Match current symbol only, excluding base or derived symbols</value>
     <value>Show only customized styles</value>
   </data>
   <data name="CMDT_FindDerivedClasses" xml:space="preserve">
-    <value>Search classes that derive from current class
-Ctrl: Directly derived classes only</value>
+    <value>Search for classes that derive from current class</value>
   </data>
   <data name="CMDT_FindInheritedInterfaces" xml:space="preserve">
-    <value>Search interfaces that inherit from current interface
-Ctrl: Directly inherited interfaces only</value>
+    <value>Search for interfaces that inherit from current interface</value>
   </data>
   <data name="T_DirectlyDerivedClasses" xml:space="preserve">
     <value> directly derived classes</value>
@@ -2771,10 +2759,6 @@ Ctrl: toggle and select next</value>
   <data name="T_ErrorExecutingCommand" xml:space="preserve">
     <value>Error occurred when executing command:</value>
   </data>
-  <data name="CMDT_FindAssignmentsForOption" xml:space="preserve">
-    <value>Ctrl: Explicit assignment only
-Shift: Assign by default only</value>
-  </data>
   <data name="CMD_ExtractLinesContainingSelection" xml:space="preserve">
     <value>Extract Lines Containing Selection</value>
   </data>
@@ -2924,8 +2908,7 @@ Discard its changes?</value>
     <value>Syntax path:</value>
   </data>
   <data name="CMDT_FindImplementations" xml:space="preserve">
-    <value>Search for implementations of current interface type or member
-Ctrl: Direct implementation types only</value>
+    <value>Search for implementations of current interface type or member</value>
   </data>
   <data name="CMD_WebSearchWithSymbolName" xml:space="preserve">
     <value>Web Search with Symbol Name...</value>
@@ -2982,7 +2965,68 @@ Ctrl: Direct implementation types only</value>
     <value>This page changes the behavior of automatically inserting punctuations</value>
   </data>
   <data name="CMDT_CopySymbol" xml:space="preserve">
-    <value>Copy Symbol Name
-Right click: Copy symbol signature and member definitions</value>
+    <value>Copy the name of current type or member</value>
+  </data>
+  <data name="CMDT_CopyQualifiedName" xml:space="preserve">
+    <value>Copy Qualified Name
+Copy name in type.member or namespace.type format</value>
+  </data>
+  <data name="CMDT_CopyDefinition" xml:space="preserve">
+    <value>Copy Definition
+Copy symbol signature and member definitions</value>
+  </data>
+  <data name="CMDT_SelectCodeWithoutTrivia" xml:space="preserve">
+    <value>Without Trivia
+Select code without surrounding comment or whitespace</value>
+  </data>
+  <data name="CMDT_FindDirectImplementations" xml:space="preserve">
+    <value>Directly Implemented
+Find types that directly implement current interface</value>
+  </data>
+  <data name="CMDT_ScopeToCurrentProject" xml:space="preserve">
+    <value>Current Project
+Only search in current project</value>
+  </data>
+  <data name="CMDT_ScopeToSourceCode" xml:space="preserve">
+    <value>Source Code
+Only search in source code</value>
+  </data>
+  <data name="CMDT_FindDirectCallers" xml:space="preserve">
+    <value>Without Derived
+Match current constructor only, excluding base or derived symbols</value>
+  </data>
+  <data name="CMDT_FindExtract" xml:space="preserve">
+    <value>Extract Match
+Match current symbol only, excluding base or derived symbols</value>
+  </data>
+  <data name="CMDT_FindSymbolWithFullName" xml:space="preserve">
+    <value>Full Name Match
+Match symbols having the same name of current symbol</value>
+  </data>
+  <data name="CMDT_MatchCase" xml:space="preserve">
+    <value>Match Case</value>
+  </data>
+  <data name="CMDT_ScopeToCurrentFile" xml:space="preserve">
+    <value>Current File
+Only search in current file</value>
+  </data>
+  <data name="CMDT_FindDirectlyDerived" xml:space="preserve">
+    <value>Directly Derived
+Limit results to types directly derive from current type</value>
+  </data>
+  <data name="CMDT_ExplicitAssignment" xml:space="preserve">
+    <value>Explicit Assignment
+Match explicitly assignment of argument only</value>
+  </data>
+  <data name="CMDT_DefaultAssignment" xml:space="preserve">
+    <value>Default Assignment
+Match assignment of argument by default value only</value>
+  </data>
+  <data name="CMDT_ListEventArgumentMember" xml:space="preserve">
+    <value>List members of event arguments</value>
+  </data>
+  <data name="CMDT_ScopeToRelatedProjects" xml:space="preserve">
+    <value>Related Projects
+Search in referenced or referencing projects</value>
   </data>
 </root>

@@ -70,7 +70,6 @@
 					<ColumnDefinition Width="Auto"/>
 					<ColumnDefinition Width="*"/>
 					<ColumnDefinition Width="Auto"/>
-					<ColumnDefinition Width="13"/>
 				</Grid.ColumnDefinitions>
 				<ContentPresenter Name="Icon" Width="16" Height="16" Margin="3,3,8,3" VerticalAlignment="Center" ContentSource="Icon"/>
 				<Border Name="Check" Width="16" Height="16" Visibility="Collapsed" Margin="6,0,6,0" Background="{DynamicResource VsBrush.CommandBarMenuBackgroundGradient}" BorderThickness="1" BorderBrush="#5082a4">
@@ -78,6 +77,7 @@
 				</Border>
 				<ContentPresenter Name="HeaderHost" MaxWidth="500" Grid.Column="1" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="Center" ContentSource="Header" RecognizesAccessKey="False"/>
 				<TextBlock x:Name="InputGestureText" Grid.Column="2" Text="{TemplateBinding InputGestureText}" Margin="5,2,0,2" Height="{Binding ElementName=HeaderHost,Path=ActualHeight}" VerticalAlignment="Center" DockPanel.Dock="Right" Foreground="{DynamicResource VsBrush.GrayText}"/>
+				<ContentPresenter x:Name="SubCommands" Grid.Column="2" Margin="8,0,0,0" VerticalAlignment="Center" Visibility="Hidden"/>
 			</Grid>
 		</Border>
 		<ControlTemplate.Triggers>
@@ -97,6 +97,7 @@
 			<Trigger Property="IsHighlighted" Value="true">
 				<Setter TargetName="Border" Property="Background" Value="{DynamicResource {x:Static vsp:EnvironmentColors.CommandBarMenuItemMouseOverBrushKey}}" />
 				<Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource VsBrush.CommandBarHoverOverSelectedIconBorder}"/>
+				<Setter TargetName="SubCommands" Property="Visibility" Value="Visible"/>
 			</Trigger>
 			<Trigger Property="IsEnabled" Value="false">
 				<Setter Property="Foreground" Value="Gray"/>

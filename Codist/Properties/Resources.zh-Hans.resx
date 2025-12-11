@@ -227,8 +227,8 @@ Shift：删除并选中下一项（整个单词）</value>
   <data name="CMD_FindOverrides" xml:space="preserve">
     <value>查找重载方法...</value>
   </data>
-  <data name="CMD_FindReferencedSymbols" xml:space="preserve">
-    <value>查找引用的符号...</value>
+  <data name="CMD_ListReferencedSymbols" xml:space="preserve">
+    <value>列出引用的符号...</value>
   </data>
   <data name="CMD_FindReferrers" xml:space="preserve">
     <value>查找引用...</value>
@@ -2457,64 +2457,54 @@ Right click: 显示“线程”窗口</value>
   <data name="OT_ShowOutputPaneAfterBuild" xml:space="preserve">
     <value>在生成结束时显示输出窗口</value>
   </data>
-  <data name="CMDT_CopyQualifiedSymbolName" xml:space="preserve">
-    <value>使用“类名.成员名”或“名称空间.类名”的格式复制符号名称
-右键: 使用“名称空间.类名.成员名”的格式复制符号名称</value>
+  <data name="CMDT_CopyFullyQualifiedName" xml:space="preserve">
+    <value>复制完全限定名称
+使用“名称空间.类名.成员名”的格式复制符号名称</value>
   </data>
   <data name="CMDT_CustomizeSearchEngines" xml:space="preserve">
     <value>添加、更新或删除本菜单列出的搜索引擎</value>
   </data>
   <data name="CMDT_FindCallers" xml:space="preserve">
-    <value>查找调用当前构造函数的位置
-Ctrl: 仅匹配当前构造函数，不匹配其它派生方法或继承方法</value>
+    <value>查找调用当前构造函数的位置</value>
   </data>
   <data name="CMDT_FindConstructorCallers" xml:space="preserve">
-    <value>查找调用当前类型构造函数的位置
-Ctrl: 仅匹配当前类的构造函数，不匹配其它派生类或继承类</value>
+    <value>查找调用当前类型构造函数的位置</value>
   </data>
   <data name="CMDT_FindContainingTypeInstanceAsParameter" xml:space="preserve">
-    <value>查找以当前符号所属类型为参数的位置
-Ctrl: 仅匹配当前类，不匹配其它派生类或继承类</value>
+    <value>查找以当前符号所属类型为参数的位置</value>
   </data>
   <data name="CMDT_FindContainingTypeInstanceProducer" xml:space="preserve">
-    <value>查找返回当前符号所属类型的位置
-Ctrl: 仅匹配当前类，不匹配其它派生类或继承类</value>
+    <value>查找返回当前符号所属类型的位置</value>
   </data>
   <data name="CMDT_FindInstanceAsParameter" xml:space="preserve">
-    <value>查找以当前类型为参数的位置
-Ctrl: 仅匹配当前类，不匹配其它派生类或继承类</value>
+    <value>查找以当前类型为参数的位置</value>
   </data>
   <data name="CMDT_FindInstanceProducer" xml:space="preserve">
-    <value>查找返回当前类型的位置
-Ctrl: 仅匹配当前类，不匹配其它派生类或继承类</value>
+    <value>查找返回当前类型的位置</value>
   </data>
   <data name="CMDT_FindMethodsSameSignature" xml:space="preserve">
-    <value>查找和当前方法具有相同签名的其它方法
-Ctrl: 仅在源代码中查找</value>
+    <value>查找和当前方法具有相同签名的其它方法</value>
   </data>
   <data name="CMDT_ListReferencedSymbols" xml:space="preserve">
     <value>列出当前符号内引用的其它符号</value>
   </data>
   <data name="CMDT_FindReferrers" xml:space="preserve">
-    <value>搜索调用当前方法、读写当前属性或字段的位置
-Ctrl: 仅匹配当前成员的类型，忽略继承或派生的类型</value>
+    <value>搜索调用当前方法、读写当前属性或字段的位置</value>
   </data>
   <data name="CMDT_FindSymbolwithName" xml:space="preserve">
-    <value>查找名称包含当前符号名称的符号
-Ctrl: 符号名称完全匹配</value>
+    <value>查找名称包含当前符号名称的符号</value>
   </data>
   <data name="CMDT_FindTypeReferrers" xml:space="preserve">
-    <value>查找引用当前类型的成员
-Ctrl: 仅匹配当前类，不匹配其它派生类或继承类</value>
+    <value>查找引用当前类型的成员</value>
   </data>
-  <data name="CMDT_FindSymbolTypeExtensionMethods" xml:space="preserve">
-    <value>查找当前符号类型的扩展方法</value>
+  <data name="CMDT_FindTypeExtensionMethods" xml:space="preserve">
+    <value>查找当前类型的扩展方法</value>
   </data>
-  <data name="CMDT_ListSymbolTypeMembers" xml:space="preserve">
-    <value>列出当前符号类型的成员</value>
+  <data name="CMDT_ListTypeMembers" xml:space="preserve">
+    <value>列出当前类型的成员</value>
   </data>
-  <data name="CMDT_GoToSymbolTypeDefinition" xml:space="preserve">
-    <value>转到当前符号类型的定义</value>
+  <data name="CMDT_GoToTypeDefinition" xml:space="preserve">
+    <value>转到当前类型的定义</value>
   </data>
   <data name="CMD_ListSymbolLocations" xml:space="preserve">
     <value>列出定义符号的位置...</value>
@@ -2599,12 +2589,10 @@ Ctrl: 仅匹配当前类，不匹配其它派生类或继承类</value>
     <value>仅显示修改过的语法样式</value>
   </data>
   <data name="CMDT_FindDerivedClasses" xml:space="preserve">
-    <value>查找继承当前类的子类
-Ctrl: 仅直接继承的子类</value>
+    <value>查找继承当前类的子类</value>
   </data>
   <data name="CMDT_FindInheritedInterfaces" xml:space="preserve">
-    <value>查找继承当前接口的接口
-Ctrl: 仅直接继承的接口</value>
+    <value>查找继承当前接口的接口</value>
   </data>
   <data name="T_DirectlyDerivedClasses" xml:space="preserve">
     <value> 直接派生类</value>
@@ -2757,10 +2745,6 @@ Ctrl: 切换标记并选择下一处</value>
   <data name="T_ErrorExecutingCommand" xml:space="preserve">
     <value>在执行命令时出错:</value>
   </data>
-  <data name="CMDT_FindAssignmentsForOption" xml:space="preserve">
-    <value>Ctrl: 仅显示显式赋值的参数
-Shift: 仅显式默认赋值的参数</value>
-  </data>
   <data name="CMD_ExtractLinesContainingSelection" xml:space="preserve">
     <value>提取包含选中文字的行</value>
   </data>
@@ -2910,8 +2894,7 @@ Ctrl: 将下划线分隔的单词转换为首字母大写的单词</value>
     <value>语法结构路径：</value>
   </data>
   <data name="CMDT_FindImplementations" xml:space="preserve">
-    <value>搜索当前接口类或成员的实现
-Ctrl: 仅列出直接实现接口的类</value>
+    <value>搜索当前接口类或成员的实现</value>
   </data>
   <data name="CMD_WebSearchWithSymbolName" xml:space="preserve">
     <value>联网搜索符号名称</value>
@@ -2968,7 +2951,68 @@ Ctrl: 仅列出直接实现接口的类</value>
     <value>本页面的选项更改自动插入标点符号的行为</value>
   </data>
   <data name="CMDT_CopySymbol" xml:space="preserve">
-    <value>复制符号名称
-右键：复制符号签名和成员定义</value>
+    <value>复制当前类或成员的名称</value>
+  </data>
+  <data name="CMDT_CopyQualifiedName" xml:space="preserve">
+    <value>复制限定名称
+以“类名.成员名”或“名称空间.类名”的格式复制符号名称</value>
+  </data>
+  <data name="CMDT_CopyDefinition" xml:space="preserve">
+    <value>复制定义
+复制符号签名和成员定义</value>
+  </data>
+  <data name="CMDT_SelectCodeWithoutTrivia" xml:space="preserve">
+    <value>仅代码
+仅选中代码，不包含前后的注释和空白</value>
+  </data>
+  <data name="CMDT_FindDirectImplementations" xml:space="preserve">
+    <value>仅直接实现
+仅列出直接实现当前接口的类型</value>
+  </data>
+  <data name="CMDT_ScopeToCurrentProject" xml:space="preserve">
+    <value>当前项目
+限制搜索范围为当前项目</value>
+  </data>
+  <data name="CMDT_ScopeToSourceCode" xml:space="preserve">
+    <value>源代码
+限制搜索范围为源代码</value>
+  </data>
+  <data name="CMDT_FindDirectCallers" xml:space="preserve">
+    <value>仅直接调用
+仅匹配当前构造函数，不匹配其它派生方法或继承方法</value>
+  </data>
+  <data name="CMDT_FindExtract" xml:space="preserve">
+    <value>精确匹配
+仅匹配当前成员，不匹配其它派生成员或继承成员</value>
+  </data>
+  <data name="CMDT_FindSymbolWithFullName" xml:space="preserve">
+    <value>全名匹配
+仅匹配名称完全相同的符号</value>
+  </data>
+  <data name="CMDT_MatchCase" xml:space="preserve">
+    <value>匹配大小写</value>
+  </data>
+  <data name="CMDT_ScopeToCurrentFile" xml:space="preserve">
+    <value>当前文件
+限制搜索范围为当前文件</value>
+  </data>
+  <data name="CMDT_FindDirectlyDerived" xml:space="preserve">
+    <value>仅直接继承
+排除间接继承的类型</value>
+  </data>
+  <data name="CMDT_ExplicitAssignment" xml:space="preserve">
+    <value>显式赋值
+仅返回参数被显式赋值的位置</value>
+  </data>
+  <data name="CMDT_DefaultAssignment" xml:space="preserve">
+    <value>默认赋值
+仅返回参数以默认值赋值的位置</value>
+  </data>
+  <data name="CMDT_ListEventArgumentMember" xml:space="preserve">
+    <value>列出事件参数的成员</value>
+  </data>
+  <data name="CMDT_ScopeToRelatedProjects" xml:space="preserve">
+    <value>相关项目
+限制搜索范围为引用或被引用的项目</value>
   </data>
 </root>

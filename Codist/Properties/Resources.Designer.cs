@@ -798,15 +798,6 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Find Referenced Symbols....
-        /// </summary>
-        internal static string CMD_FindReferencedSymbols {
-            get {
-                return ResourceManager.GetString("CMD_FindReferencedSymbols", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Find Referrers....
         /// </summary>
         internal static string CMD_FindReferrers {
@@ -1152,6 +1143,15 @@ namespace Codist.Properties {
         internal static string CMD_ListMembersOf {
             get {
                 return ResourceManager.GetString("CMD_ListMembersOf", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to List Referenced Symbols....
+        /// </summary>
+        internal static string CMD_ListReferencedSymbols {
+            get {
+                return ResourceManager.GetString("CMD_ListReferencedSymbols", resourceCulture);
             }
         }
         
@@ -2389,18 +2389,37 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Copy symbol name in type.member or namespace.type format
-        ///Right click: Copy symbol name in namespace.type.member format.
+        ///   Looks up a localized string similar to Copy Definition
+        ///Copy symbol signature and member definitions.
         /// </summary>
-        internal static string CMDT_CopyQualifiedSymbolName {
+        internal static string CMDT_CopyDefinition {
             get {
-                return ResourceManager.GetString("CMDT_CopyQualifiedSymbolName", resourceCulture);
+                return ResourceManager.GetString("CMDT_CopyDefinition", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Copy Symbol Name
-        ///Right click: Copy symbol signature and member definitions.
+        ///   Looks up a localized string similar to Copy Fully Qualified Name
+        ///Copy qualified name in namespace.type.member format.
+        /// </summary>
+        internal static string CMDT_CopyFullyQualifiedName {
+            get {
+                return ResourceManager.GetString("CMDT_CopyFullyQualifiedName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copy Qualified Name
+        ///Copy name in type.member or namespace.type format.
+        /// </summary>
+        internal static string CMDT_CopyQualifiedName {
+            get {
+                return ResourceManager.GetString("CMDT_CopyQualifiedName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copy the name of current type or member.
         /// </summary>
         internal static string CMDT_CopySymbol {
             get {
@@ -2436,6 +2455,26 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Default Assignment
+        ///Match assignment of argument by default value only.
+        /// </summary>
+        internal static string CMDT_DefaultAssignment {
+            get {
+                return ResourceManager.GetString("CMDT_DefaultAssignment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Explicit Assignment
+        ///Match explicitly assignment of argument only.
+        /// </summary>
+        internal static string CMDT_ExplicitAssignment {
+            get {
+                return ResourceManager.GetString("CMDT_ExplicitAssignment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Copy all lines containing current selection into a new window
         ///Shift: Match whole word
         ///Ctrl: Match case.
@@ -2456,18 +2495,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Ctrl: Explicit assignment only
-        ///Shift: Assign by default only.
-        /// </summary>
-        internal static string CMDT_FindAssignmentsForOption {
-            get {
-                return ResourceManager.GetString("CMDT_FindAssignmentsForOption", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Search places where active constructor is called
-        ///Ctrl: Match current symbol only, excluding base or derived symbols.
+        ///   Looks up a localized string similar to Search places where active constructor is called.
         /// </summary>
         internal static string CMDT_FindCallers {
             get {
@@ -2476,8 +2504,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Search places where constructor of current type is called
-        ///Ctrl: Match current symbol only, excluding base or derived symbols.
+        ///   Looks up a localized string similar to Search places where constructor of current type is called.
         /// </summary>
         internal static string CMDT_FindConstructorCallers {
             get {
@@ -2486,8 +2513,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Search for members that take containing type of current symbol as parameter
-        ///Ctrl: Match current symbol only, excluding base or derived symbols.
+        ///   Looks up a localized string similar to Search for members that take containing type of current symbol as parameter.
         /// </summary>
         internal static string CMDT_FindContainingTypeInstanceAsParameter {
             get {
@@ -2496,8 +2522,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Search for members that return containing type of current symbol
-        ///Ctrl: Match current symbol only, excluding base or derived symbols.
+        ///   Looks up a localized string similar to Search for members that return containing type of current symbol.
         /// </summary>
         internal static string CMDT_FindContainingTypeInstanceProducer {
             get {
@@ -2506,8 +2531,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Search classes that derive from current class
-        ///Ctrl: Directly derived classes only.
+        ///   Looks up a localized string similar to Search for classes that derive from current class.
         /// </summary>
         internal static string CMDT_FindDerivedClasses {
             get {
@@ -2516,8 +2540,47 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Search for implementations of current interface type or member
-        ///Ctrl: Direct implementation types only.
+        ///   Looks up a localized string similar to Without Derived
+        ///Match current constructor only, excluding base or derived symbols.
+        /// </summary>
+        internal static string CMDT_FindDirectCallers {
+            get {
+                return ResourceManager.GetString("CMDT_FindDirectCallers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Directly Implemented
+        ///Find types that directly implement current interface.
+        /// </summary>
+        internal static string CMDT_FindDirectImplementations {
+            get {
+                return ResourceManager.GetString("CMDT_FindDirectImplementations", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Directly Derived
+        ///Limit results to types directly derive from current type.
+        /// </summary>
+        internal static string CMDT_FindDirectlyDerived {
+            get {
+                return ResourceManager.GetString("CMDT_FindDirectlyDerived", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Extract Match
+        ///Match current symbol only, excluding base or derived symbols.
+        /// </summary>
+        internal static string CMDT_FindExtract {
+            get {
+                return ResourceManager.GetString("CMDT_FindExtract", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search for implementations of current interface type or member.
         /// </summary>
         internal static string CMDT_FindImplementations {
             get {
@@ -2526,8 +2589,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Search interfaces that inherit from current interface
-        ///Ctrl: Directly inherited interfaces only.
+        ///   Looks up a localized string similar to Search for interfaces that inherit from current interface.
         /// </summary>
         internal static string CMDT_FindInheritedInterfaces {
             get {
@@ -2536,8 +2598,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Search for members that take current type as parameter
-        ///Ctrl: Match current symbol only, excluding base or derived symbols.
+        ///   Looks up a localized string similar to Search for members that take current type as parameter.
         /// </summary>
         internal static string CMDT_FindInstanceAsParameter {
             get {
@@ -2546,8 +2607,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Search for members that return current type
-        ///Ctrl: Match current symbol only, excluding base or derived symbols.
+        ///   Looks up a localized string similar to Search for members that return current type.
         /// </summary>
         internal static string CMDT_FindInstanceProducer {
             get {
@@ -2556,8 +2616,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Search symbol having the same signature as current symbol
-        ///Ctrl: Only search in source code.
+        ///   Looks up a localized string similar to Search symbol having the same signature as current symbol.
         /// </summary>
         internal static string CMDT_FindMethodsSameSignature {
             get {
@@ -2566,8 +2625,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Search places where active method is called, field/property is read/write
-        ///Ctrl: Match current symbol only, excluding base or derived symbols.
+        ///   Looks up a localized string similar to Search places where active method is called, field/property is read/write.
         /// </summary>
         internal static string CMDT_FindReferrers {
             get {
@@ -2576,17 +2634,17 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Find extension methods for current symbol type.
+        ///   Looks up a localized string similar to Full Name Match
+        ///Match symbols having the same name of current symbol.
         /// </summary>
-        internal static string CMDT_FindSymbolTypeExtensionMethods {
+        internal static string CMDT_FindSymbolWithFullName {
             get {
-                return ResourceManager.GetString("CMDT_FindSymbolTypeExtensionMethods", resourceCulture);
+                return ResourceManager.GetString("CMDT_FindSymbolWithFullName", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Search symbols whose name contains current symbol name
-        ///Ctrl: Match full name.
+        ///   Looks up a localized string similar to Search symbols whose name contains current symbol name.
         /// </summary>
         internal static string CMDT_FindSymbolwithName {
             get {
@@ -2595,8 +2653,16 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Search for members that reference current type
-        ///Ctrl: Match current symbol only, excluding base or derived symbols.
+        ///   Looks up a localized string similar to Find extension methods for current type.
+        /// </summary>
+        internal static string CMDT_FindTypeExtensionMethods {
+            get {
+                return ResourceManager.GetString("CMDT_FindTypeExtensionMethods", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search for members that reference current type.
         /// </summary>
         internal static string CMDT_FindTypeReferrers {
             get {
@@ -2605,11 +2671,11 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Go to definition of current symbol type.
+        ///   Looks up a localized string similar to Go to definition of current type.
         /// </summary>
-        internal static string CMDT_GoToSymbolTypeDefinition {
+        internal static string CMDT_GoToTypeDefinition {
             get {
-                return ResourceManager.GetString("CMDT_GoToSymbolTypeDefinition", resourceCulture);
+                return ResourceManager.GetString("CMDT_GoToTypeDefinition", resourceCulture);
             }
         }
         
@@ -2623,6 +2689,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to List members of event arguments.
+        /// </summary>
+        internal static string CMDT_ListEventArgumentMember {
+            get {
+                return ResourceManager.GetString("CMDT_ListEventArgumentMember", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to List symbols referenced within current symbol.
         /// </summary>
         internal static string CMDT_ListReferencedSymbols {
@@ -2632,11 +2707,11 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to List members of current symbol type.
+        ///   Looks up a localized string similar to List members of current type.
         /// </summary>
-        internal static string CMDT_ListSymbolTypeMembers {
+        internal static string CMDT_ListTypeMembers {
             get {
-                return ResourceManager.GetString("CMDT_ListSymbolTypeMembers", resourceCulture);
+                return ResourceManager.GetString("CMDT_ListTypeMembers", resourceCulture);
             }
         }
         
@@ -2646,6 +2721,15 @@ namespace Codist.Properties {
         internal static string CMDT_LoadTheme {
             get {
                 return ResourceManager.GetString("CMDT_LoadTheme", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Match Case.
+        /// </summary>
+        internal static string CMDT_MatchCase {
+            get {
+                return ResourceManager.GetString("CMDT_MatchCase", resourceCulture);
             }
         }
         
@@ -2741,6 +2825,46 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Current File
+        ///Only search in current file.
+        /// </summary>
+        internal static string CMDT_ScopeToCurrentFile {
+            get {
+                return ResourceManager.GetString("CMDT_ScopeToCurrentFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Current Project
+        ///Only search in current project.
+        /// </summary>
+        internal static string CMDT_ScopeToCurrentProject {
+            get {
+                return ResourceManager.GetString("CMDT_ScopeToCurrentProject", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Related Projects
+        ///Search in referenced or referencing projects.
+        /// </summary>
+        internal static string CMDT_ScopeToRelatedProjects {
+            get {
+                return ResourceManager.GetString("CMDT_ScopeToRelatedProjects", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Source Code
+        ///Only search in source code.
+        /// </summary>
+        internal static string CMDT_ScopeToSourceCode {
+            get {
+                return ResourceManager.GetString("CMDT_ScopeToSourceCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Search declarations of namespace, types and members defined in current document or current project.
         /// </summary>
         internal static string CMDT_SearchDeclaration {
@@ -2773,6 +2897,16 @@ namespace Codist.Properties {
         internal static string CMDT_SelectAll {
             get {
                 return ResourceManager.GetString("CMDT_SelectAll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Without Trivia
+        ///Select code without surrounding comment or whitespace.
+        /// </summary>
+        internal static string CMDT_SelectCodeWithoutTrivia {
+            get {
+                return ResourceManager.GetString("CMDT_SelectCodeWithoutTrivia", resourceCulture);
             }
         }
         

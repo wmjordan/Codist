@@ -52,7 +52,7 @@ namespace Codist.QuickInfo
 
 		static void ShowInterfaceMembers(INamedTypeSymbol type, INamedTypeSymbol declaredClass, GeneralInfoBlock doc, bool isInherit) {
 			var members = ImmutableArray.CreateBuilder<ISymbol>();
-			members.AddRange(type.FindMembers());
+			members.AddRange(type.ListMembers());
 			members.Sort(CodeAnalysisHelper.CompareByAccessibilityKindName);
 			var isInterface = type.TypeKind == TypeKind.Interface;
 			foreach (var member in members) {

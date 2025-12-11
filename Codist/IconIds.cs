@@ -43,6 +43,7 @@ namespace Codist
 		public const int ExplicitConversion = KnownImageIds.MacroShortcut;
 		public const int LocalFunction = KnownImageIds.MethodSnippet;
 		public const int LocalVariable = KnownImageIds.LocalVariable;
+		public const int Definition = KnownImageIds.TypeDefinition;
 		public const int Namespace = KnownImageIds.Namespace;
 		public const int Class = KnownImageIds.Class;
 		public const int Structure = KnownImageIds.Structure;
@@ -109,6 +110,8 @@ namespace Codist
 		public const int RunTest = KnownImageIds.RunTest;
 		public const int DebugTest = KnownImageIds.DebugSelection;
 		public const int Project = KnownImageIds.CSProjectNode;
+		public const int RelatedProjects = KnownImageIds.CSClassCollection;
+		public const int SourceCode = KnownImageIds.EditDocument;
 		public const int File = KnownImageIds.CSSourceFile;
 		public const int FileEmpty = KnownImageIds.CSFile;
 		public const int FileLocations = KnownImageIds.DocumentCollection;
@@ -208,6 +211,7 @@ namespace Codist
 		public const int QuickAction = KnownImageIds.IntellisenseLightBulb;
 		public const int QuickInfo = KnownImageIds.ToolTip;
 		public const int SelectCode = KnownImageIds.BlockSelection;
+		public const int SelectCodeWithoutTrivia = KnownImageIds.Uncomment;
 		public const int SelectBlock = KnownImageIds.MatchBrace;
 		public const int SelectText = KnownImageIds.RectangleSelection;
 		public const int SelectAll = KnownImageIds.SelectAll;
@@ -235,6 +239,7 @@ namespace Codist
 		public const int WrapText = KnownImageIds.CorrelationScope;
 		public const int CustomizeWrapText = KnownImageIds.Edit;
 		public const int ToggleParentheses = KnownImageIds.MaskedTextBox;
+		public const int CompletionItem = KnownImageIds.CompleteWord;
 		public const int NewGuid = KnownImageIds.NewNamedSet;
 		public const int IncrementNumber = KnownImageIds.Counter;
 		public const int JoinLines = KnownImageIds.Join;
@@ -248,8 +253,14 @@ namespace Codist
 		public const int ListMembers = KnownImageIds.ListMembers;
 		public const int MissingImplementation = KnownImageIds.StatusInvalid;
 		public const int SymbolAnalysis = KnownImageIds.DimensionBrowserView;
+		public const int CurrentSymbolOnly = KnownImageIds.SelectFrame;
+		public const int DirectDerive = KnownImageIds.ParentChild;
+		public const int SameName = KnownImageIds.Quote;
+		public const int MatchCase = KnownImageIds.Font;
+		public const int ExplicitAssignment = KnownImageIds.EditDocument;
+		public const int DefaultAssignment = KnownImageIds.Snippet;
 		public const int FindReference = KnownImageIds.ReferencedDimension;
-		public const int FindReferencingSymbols = KnownImageIds.ShowBuiltIns;
+		public const int ListReferencedSymbols = KnownImageIds.ShowBuiltIns;
 		public const int FindReferrers = KnownImageIds.ShowCallerGraph;
 		public const int FindTypeReferrers = KnownImageIds.ShowReferencedElements;
 		public const int FindDerivedTypes = KnownImageIds.ParentChildAttribute;

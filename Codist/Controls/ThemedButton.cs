@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Automation.Peers;
 using System.Windows.Controls;
@@ -12,6 +14,7 @@ namespace Codist.Controls
 	{
 		readonly Action _ClickAction;
 		readonly RoutedEventHandler _ClickHandler;
+		readonly int _ImageId;
 
 		public ThemedButton(object content, object toolTip) {
 			Content = content;
@@ -22,12 +25,29 @@ namespace Codist.Controls
 		}
 
 		public ThemedButton(int imageId, object toolTip, Action onClickHandler)
-			: this(VsImageHelper.GetImage(imageId), toolTip is string t ? new CommandToolTip(imageId, t) : toolTip, onClickHandler) { }
+			: this(VsImageHelper.GetImage(imageId), toolTip, onClickHandler) {
+			_ImageId = imageId;
+			if (toolTip is string t) {
+				ToolTipOpening += CreateThemedToolTip;
+			}
+		}
+		public ThemedButton(int imageId, object toolTip, RoutedEventHandler clickHandler)
+			: this(VsImageHelper.GetImage(imageId), toolTip, clickHandler) {
+			_ImageId = imageId;
+			if (toolTip is string t) {
+				ToolTipOpening += CreateThemedToolTip;
+			}
+		}
 		public ThemedButton(int imageId, string text, object toolTip, Action onClickHandler)
 			: this(new StackPanel {
 				Orientation = Orientation.Horizontal,
 				Children = { VsImageHelper.GetImage(imageId).WrapMargin(WpfHelper.GlyphMargin), new TextBlock { Text = text } }
-			}, toolTip is string t ? new CommandToolTip(imageId, t) : toolTip, onClickHandler) { }
+			}, toolTip, onClickHandler) {
+			_ImageId = imageId;
+			if (toolTip is string t) {
+				ToolTipOpening += CreateThemedToolTip;
+			}
+		}
 
 		public ThemedButton(object content, object toolTip, Action onClickHandler)
 			: this(content, toolTip) {
@@ -38,6 +58,11 @@ namespace Codist.Controls
 		public ThemedButton(object content, object toolTip, RoutedEventHandler clickHandler)
 			: this(content, toolTip) {
 			this.HandleEvent(Button.ClickEvent, _ClickHandler = clickHandler);
+		}
+
+		void CreateThemedToolTip(object sender, ToolTipEventArgs e) {
+			ToolTipOpening -= CreateThemedToolTip;
+			ToolTip = new CommandToolTip(_ImageId, ToolTip as string);
 		}
 
 		public void ShowContextMenu(RoutedEventArgs args) {
@@ -181,7 +206,19 @@ namespace Codist.Controls
 			AddRange(controls);
 		}
 
+		public IEnumerable<Control> Controls => _ControlPanel.Children.OfType<Control>();
+
 		public ThemedControlGroup AddRange(params Control[] controls) {
+			foreach (var item in controls) {
+				item.Padding = WpfHelper.NoMargin;
+				item.Margin = WpfHelper.NoMargin;
+				item.BorderThickness = WpfHelper.NoMargin;
+				item.MinHeight = 10;
+				_ControlPanel.Add(item);
+			}
+			return this;
+		}
+		public ThemedControlGroup AddRange(IEnumerable<Control> controls) {
 			foreach (var item in controls) {
 				item.Padding = WpfHelper.NoMargin;
 				item.Margin = WpfHelper.NoMargin;

@@ -54,6 +54,10 @@ namespace Codist
 			return type.TypeKind.CeqAny(kind1, kind2, kind3);
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool IsAnyKind(this ITypeSymbol type, TypeKind kind1, TypeKind kind2, TypeKind kind3, TypeKind kind4) {
+			return type.TypeKind.CeqAny(kind1, kind2, kind3, kind4);
+		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool IsPredefinedSystemType(this SyntaxKind kind) {
 			return kind.IsBetween(SyntaxKind.BoolKeyword, SyntaxKind.ObjectKeyword);
 		}

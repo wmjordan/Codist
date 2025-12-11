@@ -14,7 +14,7 @@ namespace Codist
 {
 	partial class CodeAnalysisHelper
 	{
-		public static ImmutableArray<(string type, IImmutableList<ISymbol> members)> FindMembers(this ISymbol symbol) {
+		public static ImmutableArray<(string type, IImmutableList<ISymbol> members)> ListMembers(this ISymbol symbol) {
 			var r = ImmutableArray.CreateBuilder<(string type, IImmutableList<ISymbol> members)>();
 			r.Add((null, ListMembersByOrder(symbol)));
 			if (symbol is INamedTypeSymbol type) {
@@ -35,7 +35,7 @@ namespace Codist
 
 			ImmutableArray<ISymbol> ListMembersByOrder(ISymbol source) {
 				var nsOrType = source as INamespaceOrTypeSymbol;
-				var members = nsOrType.FindMembers().ToImmutableArray();
+				var members = nsOrType.ListMembers().ToImmutableArray();
 				INamedTypeSymbol type;
 				if (source.Kind == SymbolKind.NamedType && (type = (INamedTypeSymbol)source).TypeKind == TypeKind.Enum) {
 					// sort enum members by value
@@ -70,7 +70,7 @@ namespace Codist
 			}
 		}
 
-		public static IEnumerable<ISymbol> FindMembers(this INamespaceOrTypeSymbol type) {
+		public static IEnumerable<ISymbol> ListMembers(this INamespaceOrTypeSymbol type) {
 			return type.GetMembers().Where(m => {
 				if (m.IsImplicitlyDeclared) {
 					return false;
@@ -95,13 +95,13 @@ namespace Codist
 		/// <summary>
 		/// Finds all members defined or referenced in <paramref name="project"/> which may have a parameter that is of or derived from <paramref name="type"/>.
 		/// </summary>
-		public static async Task<List<ISymbol>> FindInstanceAsParameterAsync(this ITypeSymbol type, Project project, bool strictMatch, CancellationToken cancellationToken = default) {
+		public static async Task<List<ISymbol>> FindInstanceAsParameterAsync(this ITypeSymbol type, Project project, bool strictMatch, bool sourceCode, CancellationToken cancellationToken = default) {
 			var compilation = await project.GetCompilationAsync(cancellationToken).ConfigureAwait(false);
 			var members = new List<ISymbol>(10);
 			ImmutableArray<IParameterSymbol> parameters;
 			var assembly = compilation.Assembly;
 			foreach (var typeSymbol in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
-				if (typeSymbol.IsCompilerGenerated()) {
+				if (typeSymbol.IsCompilerGenerated() || sourceCode && !typeSymbol.HasSource()) {
 					continue;
 				}
 				foreach (var member in typeSymbol.GetMembers()) {
@@ -124,7 +124,7 @@ namespace Codist
 		/// <summary>
 		/// Finds all members defined or referenced in <paramref name="project"/> which may return an instance of <paramref name="type"/>.
 		/// </summary>
-		public static async Task<List<ISymbol>> FindSymbolInstanceProducerAsync(this ITypeSymbol type, Project project, bool strict, CancellationToken cancellationToken = default) {
+		public static async Task<List<ISymbol>> FindSymbolInstanceProducerAsync(this ITypeSymbol type, Project project, bool strict, bool sourceCode, CancellationToken cancellationToken = default) {
 			var compilation = await project.GetCompilationAsync(cancellationToken).ConfigureAwait(false);
 			var assembly = compilation.Assembly;
 			var members = new List<ISymbol>(10);
@@ -132,7 +132,7 @@ namespace Codist
 				? (Func<IParameterSymbol, bool>)(p => p.Type == type && p.RefKind != RefKind.None)
 				: (p => p.Type.CanConvertTo(type) && p.RefKind != RefKind.None);
 			foreach (var typeSymbol in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
-				if (typeSymbol.IsCompilerGenerated()) {
+				if (typeSymbol.IsCompilerGenerated() || sourceCode && !typeSymbol.HasSource()) {
 					continue;
 				}
 				foreach (var member in typeSymbol.GetMembers()) {
@@ -157,13 +157,14 @@ namespace Codist
 		}
 
 		/// <summary>Returns interfaces derived from the given interface <paramref name="type"/> in specific <paramref name="project"/>.</summary>
-		public static async Task<List<INamedTypeSymbol>> FindDerivedInterfacesAsync(this INamedTypeSymbol type, Project project, bool directDerive, CancellationToken cancellationToken = default) {
+		public static async Task<List<INamedTypeSymbol>> FindDerivedInterfacesAsync(this INamedTypeSymbol type, Project project, bool directDerive, bool sourceCode, CancellationToken cancellationToken = default) {
 			var compilation = await project.GetCompilationAsync(cancellationToken).ConfigureAwait(false);
 			var r = new List<INamedTypeSymbol>(7);
 			var d = new SourceSymbolDeduper();
 			foreach (var item in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
 				if (item.TypeKind == TypeKind.Interface
-					&& item != type
+					&& !item.Equals(type)
+					&& !sourceCode || item.HasSource()
 					&& (directDerive ? item.Interfaces : item.AllInterfaces).Contains(type, Comparers.NamedTypeComparer)
 					&& d.TryAdd(item)) {
 					r.Add(item);
@@ -172,13 +173,15 @@ namespace Codist
 			return r;
 		}
 
-		public static async Task<List<IMethodSymbol>> FindExtensionMethodsAsync(this ITypeSymbol type, Project project, bool strict, CancellationToken cancellationToken = default) {
+		public static async Task<List<IMethodSymbol>> FindExtensionMethodsAsync(this ITypeSymbol type, Project project, bool strict, bool sourceCode, CancellationToken cancellationToken = default) {
 			var compilation = await project.GetCompilationAsync(cancellationToken).ConfigureAwait(false);
 			var members = new List<IMethodSymbol>(10);
 			var isValueType = type.IsValueType;
 			var d = new SourceSymbolDeduper();
 			foreach (var typeSymbol in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
-				if (typeSymbol.IsStatic == false || typeSymbol.MightContainExtensionMethods == false) {
+				if (typeSymbol.IsStatic == false
+					|| typeSymbol.MightContainExtensionMethods == false
+					|| sourceCode && !typeSymbol.HasSource()) {
 					continue;
 				}
 				foreach (var member in typeSymbol.GetMembers()) {
@@ -312,13 +315,13 @@ namespace Codist
 			}
 		}
 
-		public static IEnumerable<ISymbol> FindMethodBySignature(this Compilation compilation, ISymbol symbol, bool myCodeOnly, CancellationToken cancellationToken = default) {
+		public static IEnumerable<ISymbol> FindMethodBySignature(this Compilation compilation, ISymbol symbol, bool sourceCode, CancellationToken cancellationToken = default) {
 			var rt = symbol.GetReturnType();
 			var pn = symbol.GetParameters();
 			var pl = pn.Length;
 			var d = new SourceSymbolDeduper();
 			foreach (var type in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
-				if (myCodeOnly && type.HasSource() == false
+				if (sourceCode && type.HasSource() == false
 					|| type.IsAccessible(true) == false
 					|| Op.Ceq(type, symbol)) {
 					continue;
@@ -463,8 +466,7 @@ namespace Codist
 			return a;
 		}
 
-		public static async Task<List<(ISymbol, List<(SymbolUsageKind, ReferenceLocation)>)>> FindReferrersAsync(this ISymbol symbol, Project project, Predicate<ISymbol> definitionFilter = null, Predicate<SyntaxNode> nodeFilter = null, CancellationToken cancellationToken = default) {
-			var docs = ImmutableHashSet.CreateRange(project.GetRelatedProjectDocuments());
+		public static async Task<List<(ISymbol, List<(SymbolUsageKind, ReferenceLocation)>)>> FindReferrersAsync(this ISymbol symbol, Project project, IEnumerable<Document> documents, Predicate<ISymbol> definitionFilter = null, Predicate<SyntaxNode> nodeFilter = null, CancellationToken cancellationToken = default) {
 			var d = new Dictionary<ISymbol, List<(SymbolUsageKind, ReferenceLocation)>>(5);
 			// hack: fix FindReferencesAsync returning unbounded references for generic type or method
 			string sign = null;
@@ -497,7 +499,7 @@ namespace Codist
 					}
 					break;
 			}
-			foreach (var sr in await SymbolFinder.FindReferencesAsync(symbol, project.Solution, docs, cancellationToken).ConfigureAwait(false)) {
+			foreach (var sr in await SymbolFinder.FindReferencesAsync(symbol, project.Solution, documents is null ? null : ImmutableHashSet.CreateRange(documents), cancellationToken).ConfigureAwait(false)) {
 				if (definitionFilter?.Invoke(sr.Definition) == false) {
 					continue;
 				}
@@ -527,18 +529,14 @@ namespace Codist
 				}
 				foreach (var item in refSymbols) {
 					foreach (var location in item.Definition.Locations) {
-						if (location.SourceTree == st) {
-							if (location.GetText(cancellationToken) != tt) {
-								continue;
-							}
+						if (location.SourceTree == st && location.GetText(cancellationToken) == tt) {
 							yield return location;
 						}
 					}
 					foreach (var location in item.Locations) {
-						if (location.Location.GetText(cancellationToken) != tt) {
-							continue;
+						if (location.Location.GetText(cancellationToken) == tt) {
+							yield return location.Location;
 						}
-						yield return location.Location;
 					}
 				}
 			}
@@ -606,7 +604,7 @@ namespace Codist
 			}
 		}
 
-		public static async Task<IReadOnlyCollection<KeyValuePair<ISymbol, List<(ArgumentAssignment assignment, Location location, ExpressionSyntax expression)>>>> FindParameterAssignmentsAsync(this IParameterSymbol parameter, Project project, bool strict, ArgumentAssignmentFilter assignmentFilter,  CancellationToken cancellationToken = default) {
+		public static async Task<IReadOnlyCollection<KeyValuePair<ISymbol, List<(ArgumentAssignment assignment, Location location, ExpressionSyntax expression)>>>> FindParameterAssignmentsAsync(this IParameterSymbol parameter, Project project, IEnumerable<Document> documents, bool strict, ArgumentAssignmentFilter assignmentFilter,  CancellationToken cancellationToken = default) {
 			var method = (parameter.ContainingSymbol as IMethodSymbol);
 			bool mayBeExtension;
 			if (mayBeExtension = method.IsExtensionMethod) {
@@ -615,12 +613,11 @@ namespace Codist
 			var po = parameter.Ordinal;
 			var pn = parameter.Name;
 			var optional = parameter.IsOptional;
-			var docs = ImmutableHashSet.CreateRange(project.GetRelatedProjectDocuments());
 			var modelCache = new System.Runtime.CompilerServices.ConditionalWeakTable<Document, SemanticModel>();
 			var symbolLocations = new Dictionary<ISymbol, List<(ArgumentAssignment, Location, ExpressionSyntax)>>();
 			var locationDedup = new HashSet<Location>(Comparers.SourceLocationComparer);
 			List<(ArgumentAssignment, Location, ExpressionSyntax)> refList;
-			foreach (var callerInfo in await SymbolFinder.FindReferencesAsync(method, project.Solution, docs, cancellationToken)) {
+			foreach (var callerInfo in await SymbolFinder.FindReferencesAsync(method, project.Solution, documents is null ? null : ImmutableHashSet.CreateRange(documents), cancellationToken)) {
 				if (cancellationToken.IsCancellationRequested) {
 					return symbolLocations;
 				}
