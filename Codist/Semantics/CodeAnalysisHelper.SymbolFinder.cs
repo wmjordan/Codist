@@ -290,11 +290,11 @@ namespace Codist
 			}
 		}
 
-		public static IEnumerable<ISymbol> FindDeclarationMatchName(this Compilation compilation, string keywords, bool fullMatch, bool matchCase, CancellationToken cancellationToken = default) {
+		public static IEnumerable<ISymbol> FindDeclarationMatchName(this Compilation compilation, string keywords, bool fullMatch, bool matchCase, SymbolSourceFilter source, CancellationToken cancellationToken = default) {
 			var filter = CreateNameFilter(keywords, fullMatch, matchCase);
 			var d = new SourceSymbolDeduper();
 			foreach (var type in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
-				if (type.IsAccessible(true) == false) {
+				if (type.IsAccessible(true) == false || source.Mismatch(type)) {
 					continue;
 				}
 				if (filter(type.Name) && d.TryAdd(type)) {

@@ -266,8 +266,8 @@ namespace Codist.Controls
 			await ShowSymbolMenuForResultAsync(symbol, context, members, R.T_Extensions, true);
 		}
 
-		internal static async Task FindSymbolWithNameAsync(this SemanticContext context, ISymbol symbol, bool fullMatch, bool matchCase) {
-			var results = await Task.Run(() => new List<ISymbol>(context.SemanticModel.Compilation.FindDeclarationMatchName(symbol.Name, fullMatch, matchCase, default)));
+		internal static async Task FindSymbolWithNameAsync(this SemanticContext context, ISymbol symbol, bool fullMatch, bool matchCase, SymbolSourceFilter source) {
+			var results = await Task.Run(() => new List<ISymbol>(context.SemanticModel.Compilation.FindDeclarationMatchName(symbol.Name, fullMatch, matchCase, source, default)));
 			await ShowSymbolMenuForResultAsync(symbol, context, results, R.T_NameAlike, true);
 		}
 

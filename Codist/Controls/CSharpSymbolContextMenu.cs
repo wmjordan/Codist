@@ -616,7 +616,8 @@ namespace Codist.Controls
 					case CommandId.FindSymbolsWithName:
 						return CreateItem(IconIds.FindSymbolsWithName, R.CMD_FindSymbolwithName, _Symbol.Name, FindSymbolWithName, R.CMDT_FindSymbolwithName)
 							.AddOptionButton(R.CMDT_FindSymbolWithFullName, CommandOptions.ExtractMatch, IconIds.SameName)
-							.AddOptionButton(R.CMDT_MatchCase, CommandOptions.MatchCase, IconIds.MatchCase);
+							.AddOptionButton(R.CMDT_MatchCase, CommandOptions.MatchCase, IconIds.MatchCase)
+							.HasSourceCodeScopeOption();
 					case CommandId.FindMethodsBySignature:
 						return CreateItem(IconIds.FindMethodsMatchingSignature, R.CMD_FindMethodsSameSignature, FindMethodsBySignature, R.CMDT_FindMethodsSameSignature)
 							.AddOptionButton(R.CMDT_ExcludeGenerics, CommandOptions.NoTypeArgument, IconIds.ExcludeGeneric)
@@ -974,7 +975,8 @@ namespace Codist.Controls
 				var options = GetOptions(sender);
 				var m = options.MatchFlags(CommandOptions.ExtractMatch) || UIHelper.IsCtrlDown;
 				var c = options.MatchFlags(CommandOptions.MatchCase);
-				await _SemanticContext.FindSymbolWithNameAsync(_Symbol, m, c);
+				var s = MakeSourceFlagFromOption(options);
+				await _SemanticContext.FindSymbolWithNameAsync(_Symbol, m, c, s);
 			}
 
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
