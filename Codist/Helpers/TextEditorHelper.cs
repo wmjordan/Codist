@@ -1217,7 +1217,7 @@ namespace Codist
 			var endOfSelection = selection.End.Position;
 			ITextSnapshotLine startLine, endLine;
 			if (((startLine = snapshot.GetLineFromPosition(startOfSelection)) == null)
-				|| (endLine = snapshot.GetLineFromPosition(endOfSelection)) == startLine) {
+				|| (endLine = snapshot.GetLineFromPosition(endOfSelection))?.LineNumber == startLine.LineNumber) {
 				goto BUILTIN_COPY;
 			}
 
