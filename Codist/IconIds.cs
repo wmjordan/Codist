@@ -112,6 +112,7 @@ namespace Codist
 		public const int Project = KnownImageIds.CSProjectNode;
 		public const int RelatedProjects = KnownImageIds.CSClassCollection;
 		public const int SourceCode = KnownImageIds.EditDocument;
+		public const int ExternalSymbol = KnownImageIds.ReferenceFolderOpened;
 		public const int File = KnownImageIds.CSSourceFile;
 		public const int FileEmpty = KnownImageIds.CSFile;
 		public const int FileLocations = KnownImageIds.DocumentCollection;
@@ -254,6 +255,8 @@ namespace Codist
 		public const int MissingImplementation = KnownImageIds.StatusInvalid;
 		public const int SymbolAnalysis = KnownImageIds.DimensionBrowserView;
 		public const int CurrentSymbolOnly = KnownImageIds.SelectFrame;
+		public const int MatchTypeArgument = KnownImageIds.Template;
+		public const int ExcludeGeneric = KnownImageIds.Template | KnownImageIds.OverlayNo << OverlayShift;
 		public const int DirectDerive = KnownImageIds.ParentChild;
 		public const int SameName = KnownImageIds.Quote;
 		public const int MatchCase = KnownImageIds.Font;
