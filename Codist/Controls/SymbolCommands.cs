@@ -16,9 +16,10 @@ namespace Codist.Controls
 	//   so they can be repeated (refresh)
 	static class SymbolCommands
 	{
-		internal static async Task FindReferrersAsync(this SemanticContext context, ISymbol symbol, bool strict, IEnumerable<Document> documents, Predicate<ISymbol> definitionFilter = null, Predicate<SyntaxNode> nodeFilter = null) {
-			var filter = strict ? (s => s == symbol) : definitionFilter;
-			var referrers = await symbol.FindReferrersAsync(context.Document.Project, documents, filter, nodeFilter);
+		internal static async Task FindReferrersAsync(this SemanticContext context, ISymbol symbol, bool strict, bool matchTypeArgument, IEnumerable<Document> documents, Predicate<ISymbol> definitionFilter = null, Predicate<SyntaxNode> nodeFilter = null) {
+			var df = strict ? (symbol is IMethodSymbol ms && ms.MethodKind == MethodKind.ReducedExtension ? ms.ReducedFrom : symbol).Equals : definitionFilter;
+			Predicate<ISymbol> of = matchTypeArgument ? symbol.Equals : null;
+			var referrers = await symbol.FindReferrersAsync(context.Document.Project, documents, df, of, nodeFilter);
 			await SyncHelper.SwitchToMainThreadAsync(default);
 			var m = new SymbolMenu(context, SymbolListType.SymbolReferrers);
 			m.Title.SetGlyph(symbol.GetImageId())
@@ -44,17 +45,18 @@ namespace Codist.Controls
 			m.Show();
 		}
 
-		internal static async Task FindDerivedClassesAsync(this SemanticContext context, ISymbol symbol, bool directDerive, IEnumerable<Project> projects, bool sourceCode, bool orderByHierarchy) {
-			var type = (symbol as INamedTypeSymbol).OriginalDefinition;
+		internal static async Task FindDerivedClassesAsync(this SemanticContext context, INamedTypeSymbol symbol, bool directDerive, IEnumerable<Project> projects, SymbolSourceFilter source, bool orderByHierarchy) {
+			var original = symbol.OriginalDefinition;
 #if LOG || DEBUG
-			var typeName = type.GetTypeName();
+			var typeName = original.GetTypeName();
 #endif
-			var classes = await SymbolFinder.FindDerivedClassesAsync(type, context.Document.Project.Solution, projects.MakeImmutableSet()).ConfigureAwait(false);
-			if (sourceCode) {
-				classes = classes.Where(i => i.HasSource());
+			var classes = await SymbolFinder.FindDerivedClassesAsync(original, context.Document.Project.Solution, projects.MakeImmutableSet()).ConfigureAwait(false);
+			classes = classes.FilterBySource(source);
+			if (symbol.IsBoundedGenericType()) {
+				classes = classes.Where(i => !original.Equals(i.BaseType.OriginalDefinition) || symbol.Equals(i.BaseType));
 			}
 			if (directDerive) {
-				await ShowSymbolMenuForResultAsync(symbol, context, classes.Where(c => c.BaseType.OriginalDefinition.MatchWith(type)).ToList(), R.T_DirectlyDerivedClasses, false).ConfigureAwait(false);
+				await ShowSymbolMenuForResultAsync(symbol, context, classes.Where(c => c.BaseType.OriginalDefinition.MatchWith(original)).ToList(), R.T_DirectlyDerivedClasses, false).ConfigureAwait(false);
 				return;
 			}
 			if (orderByHierarchy == false) {
@@ -62,7 +64,7 @@ namespace Codist.Controls
 				return;
 			}
 			var hierarchies = new Dictionary<INamedTypeSymbol, List<INamedTypeSymbol>>(7, CodeAnalysisHelper.GetNamedTypeComparer()) {
-					{ type.OriginalDefinition, new List<INamedTypeSymbol>() }
+					{ original, new List<INamedTypeSymbol>() }
 				};
 			INamedTypeSymbol t, bt;
 			foreach (var c in classes) {
@@ -76,17 +78,17 @@ namespace Codist.Controls
 				var btName = bt.GetTypeName();
 				if (btName == typeName) {
 					$"Found same name type, but not directly derived for {typeName}".Log();
-					if (type.HasSource()) {
-						$"  File: {type.GetSourceReferences()[0].SyntaxTree.FilePath}".Log();
+					if (original.HasSource()) {
+						$"  File: {original.GetSourceReferences()[0].SyntaxTree.FilePath}".Log();
 					}
-					if (type.ContainingAssembly.Equals(bt.ContainingAssembly) == false) {
+					if (original.ContainingAssembly.Equals(bt.ContainingAssembly) == false) {
 						$"  Assembly: {bt.ContainingAssembly?.ToDisplayString()}".Log();
 					}
 				}
 #endif
 				hierarchies.Add(bt, [t]);
-				if (sourceCode) {
-					// add base types that has no source code
+				if (source == SymbolSourceFilter.RequiresSource) {
+					// add excluded base types from referenced types
 					while (!bt.HasSource() && (t = bt.BaseType) != null) {
 						if (hierarchies.TryGetValue(t, out children)) {
 							if (!children.Contains(bt)) {
@@ -96,29 +98,27 @@ namespace Codist.Controls
 						else {
 							hierarchies.Add(t, [bt]);
 						}
-						if (type.Equals(t)) {
+						if (original.Equals(t)) {
 							break;
 						}
 						bt = t;
 					}
 				}
 			}
-			if (hierarchies.TryGetValue(type, out var members)) {
+			if (hierarchies.TryGetValue(original, out var members)) {
 				await ShowHierarchicalSymbolMenuForResultAsync(symbol, context, hierarchies, members, R.T_DerivedClasses).ConfigureAwait(false);
 			}
 		}
 
-		internal static async Task FindSubInterfacesAsync(this SemanticContext context, ISymbol symbol, bool directDerive, bool sourceCode) {
-			var interfaces = await (symbol as INamedTypeSymbol).FindDerivedInterfacesAsync(context.Document.Project, directDerive, sourceCode, default).ConfigureAwait(false);
+		internal static async Task FindSubInterfacesAsync(this SemanticContext context, ISymbol symbol, bool directDerive, SymbolSourceFilter source) {
+			var interfaces = await (symbol as INamedTypeSymbol).FindDerivedInterfacesAsync(context.Document.Project, directDerive, source, default).ConfigureAwait(false);
 			await ShowSymbolMenuForResultAsync(symbol, context, interfaces, directDerive ? R.T_DirectlyDerivedInterfaces : R.T_DerivedInterfaces, false).ConfigureAwait(false);
 		}
 
-		internal static async Task FindOverridesAsync(this SemanticContext context, ISymbol symbol, IEnumerable<Project> projects, bool sourceCode) {
+		internal static async Task FindOverridesAsync(this SemanticContext context, ISymbol symbol, IEnumerable<Project> projects, SymbolSourceFilter source) {
 			var ovs = ImmutableArray.CreateBuilder<ISymbol>();
 			var overrides = await SymbolFinder.FindOverridesAsync(symbol, context.Document.Project.Solution, projects.MakeImmutableSet()).ConfigureAwait(false);
-			if (sourceCode) {
-				overrides = overrides.Where(i => i.HasSource());
-			}
+			overrides = overrides.FilterBySource(source);
 			ovs.AddRange(overrides);
 			int c = ovs.Count;
 			await SyncHelper.SwitchToMainThreadAsync(default);
@@ -133,7 +133,7 @@ namespace Codist.Controls
 			m.Show();
 		}
 
-		internal static async Task FindImplementationsAsync(this SemanticContext context, ISymbol symbol, bool directImplementation, IEnumerable<Project> projects, bool sourceCode, CancellationToken cancellationToken = default) {
+		internal static async Task FindImplementationsAsync(this SemanticContext context, ISymbol symbol, bool directImplementation, IEnumerable<Project> projects, SymbolSourceFilter source, CancellationToken cancellationToken = default) {
 			var s = symbol;
 			INamedTypeSymbol st = null;
 			// workaround for a bug in Roslyn which keeps generic types from returning any result
@@ -177,7 +177,7 @@ namespace Codist.Controls
 			var m = new SymbolMenu(context);
 			SymbolItem si;
 			foreach (var item in impWithContainer) {
-				if (sourceCode && !item.implementation.HasSource()) {
+				if (source.Mismatch(item.implementation)) {
 					continue;
 				}
 				if (item.withContainer) {
@@ -261,8 +261,8 @@ namespace Codist.Controls
 			await ShowSymbolMenuForResultAsync(symbol, context, members, R.T_Producers, true);
 		}
 
-		internal static async Task FindExtensionMethodsAsync(this SemanticContext context, ISymbol symbol, bool strict, bool sourceCode) {
-			var members = await(symbol as ITypeSymbol).FindExtensionMethodsAsync(context.Document.Project, strict, sourceCode, default);
+		internal static async Task FindExtensionMethodsAsync(this SemanticContext context, ISymbol symbol, bool strict, SymbolSourceFilter source) {
+			var members = await(symbol as ITypeSymbol).FindExtensionMethodsAsync(context.Document.Project, strict, source, default);
 			await ShowSymbolMenuForResultAsync(symbol, context, members, R.T_Extensions, true);
 		}
 
@@ -271,8 +271,8 @@ namespace Codist.Controls
 			await ShowSymbolMenuForResultAsync(symbol, context, results, R.T_NameAlike, true);
 		}
 
-		internal static async Task FindMethodsBySignatureAsync(this SemanticContext context, ISymbol symbol, bool sourceCode) {
-			var methods = await Task.Run(() => new List<ISymbol>(context.SemanticModel.Compilation.FindMethodBySignature(symbol, sourceCode, default)));
+		internal static async Task FindMethodsBySignatureAsync(this SemanticContext context, ISymbol symbol, bool excludeGenerics, SymbolSourceFilter source) {
+			var methods = await Task.Run(() => new List<ISymbol>(context.SemanticModel.Compilation.FindMethodBySignature(symbol, excludeGenerics, source, default)));
 			await ShowSymbolMenuForResultAsync(symbol, context, methods, R.T_SignatureMatch, true);
 		}
 
@@ -438,6 +438,15 @@ namespace Codist.Controls
 
 		static IImmutableSet<T> MakeImmutableSet<T>(this IEnumerable<T> values) {
 			return values is null ? null : (IImmutableSet<T>)ImmutableHashSet.CreateRange(values);
+		}
+
+		static IEnumerable<TSymbol> FilterBySource<TSymbol>(this IEnumerable<TSymbol> symbols, SymbolSourceFilter source)
+			where TSymbol : ISymbol {
+			return source == SymbolSourceFilter.RequiresSource
+				? symbols.Where(i => i.HasSource())
+				: source == SymbolSourceFilter.ExcludesSource
+				? symbols.Where(i => !i.HasSource())
+				: symbols;
 		}
 
 		static TTextBlock AppendInfo<TTextBlock>(this TTextBlock text, string filterInfo)

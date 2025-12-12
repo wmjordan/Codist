@@ -1111,7 +1111,26 @@ namespace Codist
 
 		public static bool IsBoundedGenericMethod(this IMethodSymbol method) {
 			return method?.IsGenericMethod == true
-				&& method.Equals(method.OriginalDefinition) == false;
+				&& !method.Equals(method.OriginalDefinition);
+		}
+
+		public static bool IsBoundedGenericType(this INamedTypeSymbol type) {
+			return type?.IsGenericType == true
+				&& type.IsUnboundGenericType == false
+				&& !type.Equals(type.OriginalDefinition)
+				&& type.TypeArguments.All(i => i.TypeKind != TypeKind.TypeParameter); // generic type in generic method, method type parameter as type parameter
+		}
+
+		public static bool ContainsTypeArgument(this INamedTypeSymbol generic, ITypeSymbol target) {
+			if (generic == null || generic.IsGenericType == false || generic.IsUnboundGenericType) {
+				return false;
+			}
+			foreach (var item in generic.TypeArguments) {
+				if (item.CanConvertTo(target)) {
+					return true;
+				}
+			}
+			return false;
 		}
 
 		public static bool CanTypeParametersBeInferred(this IMethodSymbol method) {
@@ -1904,24 +1923,6 @@ namespace Codist
 					default: return 19;
 				}
 			}
-		}
-
-		public static bool IsBoundedGenericType(this INamedTypeSymbol type) {
-			return type?.IsGenericType == true
-				&& type.IsUnboundGenericType == false
-				&& type != type.OriginalDefinition;
-		}
-
-		public static bool ContainsTypeArgument(this INamedTypeSymbol generic, ITypeSymbol target) {
-			if (generic == null || generic.IsGenericType == false || generic.IsUnboundGenericType) {
-				return false;
-			}
-			foreach (var item in generic.TypeArguments) {
-				if (item.CanConvertTo(target)) {
-					return true;
-				}
-			}
-			return false;
 		}
 
 		/// <summary>Checks whether the given symbol has the given <paramref name="kind"/>, <paramref name="returnType"/>, <paramref name="parameters"/> and <paramref name="typeParameters"/>.</summary>

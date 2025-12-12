@@ -157,14 +157,14 @@ namespace Codist
 		}
 
 		/// <summary>Returns interfaces derived from the given interface <paramref name="type"/> in specific <paramref name="project"/>.</summary>
-		public static async Task<List<INamedTypeSymbol>> FindDerivedInterfacesAsync(this INamedTypeSymbol type, Project project, bool directDerive, bool sourceCode, CancellationToken cancellationToken = default) {
+		public static async Task<List<INamedTypeSymbol>> FindDerivedInterfacesAsync(this INamedTypeSymbol type, Project project, bool directDerive, SymbolSourceFilter source, CancellationToken cancellationToken = default) {
 			var compilation = await project.GetCompilationAsync(cancellationToken).ConfigureAwait(false);
 			var r = new List<INamedTypeSymbol>(7);
 			var d = new SourceSymbolDeduper();
 			foreach (var item in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
 				if (item.TypeKind == TypeKind.Interface
 					&& !item.Equals(type)
-					&& !sourceCode || item.HasSource()
+					&& source.Match(item)
 					&& (directDerive ? item.Interfaces : item.AllInterfaces).Contains(type, Comparers.NamedTypeComparer)
 					&& d.TryAdd(item)) {
 					r.Add(item);
@@ -173,7 +173,7 @@ namespace Codist
 			return r;
 		}
 
-		public static async Task<List<IMethodSymbol>> FindExtensionMethodsAsync(this ITypeSymbol type, Project project, bool strict, bool sourceCode, CancellationToken cancellationToken = default) {
+		public static async Task<List<IMethodSymbol>> FindExtensionMethodsAsync(this ITypeSymbol type, Project project, bool strict, SymbolSourceFilter source, CancellationToken cancellationToken = default) {
 			var compilation = await project.GetCompilationAsync(cancellationToken).ConfigureAwait(false);
 			var members = new List<IMethodSymbol>(10);
 			var isValueType = type.IsValueType;
@@ -181,7 +181,7 @@ namespace Codist
 			foreach (var typeSymbol in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
 				if (typeSymbol.IsStatic == false
 					|| typeSymbol.MightContainExtensionMethods == false
-					|| sourceCode && !typeSymbol.HasSource()) {
+					|| source.Mismatch(typeSymbol)) {
 					continue;
 				}
 				foreach (var member in typeSymbol.GetMembers()) {
@@ -315,14 +315,15 @@ namespace Codist
 			}
 		}
 
-		public static IEnumerable<ISymbol> FindMethodBySignature(this Compilation compilation, ISymbol symbol, bool sourceCode, CancellationToken cancellationToken = default) {
+		public static IEnumerable<ISymbol> FindMethodBySignature(this Compilation compilation, ISymbol symbol, bool excludeGenerics, SymbolSourceFilter sourceFilter, CancellationToken cancellationToken = default) {
 			var rt = symbol.GetReturnType();
 			var pn = symbol.GetParameters();
 			var pl = pn.Length;
 			var d = new SourceSymbolDeduper();
 			foreach (var type in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
-				if (sourceCode && type.HasSource() == false
+				if (sourceFilter.Mismatch(type)
 					|| type.IsAccessible(true) == false
+					|| excludeGenerics && (type.IsGenericType || type.IsDefinedInGenericType())
 					|| Op.Ceq(type, symbol)) {
 					continue;
 				}
@@ -347,7 +348,8 @@ namespace Codist
 					else {
 						m = (IMethodSymbol)member;
 					}
-					if (AreEqual(rt, m.ReturnType, true) == false) {
+					if (AreEqual(rt, m.ReturnType, true) == false
+						|| excludeGenerics && m.IsGenericMethod) {
 						continue;
 					}
 					var mp = m.Parameters;
@@ -466,7 +468,7 @@ namespace Codist
 			return a;
 		}
 
-		public static async Task<List<(ISymbol, List<(SymbolUsageKind, ReferenceLocation)>)>> FindReferrersAsync(this ISymbol symbol, Project project, IEnumerable<Document> documents, Predicate<ISymbol> definitionFilter = null, Predicate<SyntaxNode> nodeFilter = null, CancellationToken cancellationToken = default) {
+		public static async Task<List<(ISymbol, List<(SymbolUsageKind, ReferenceLocation)>)>> FindReferrersAsync(this ISymbol symbol, Project project, IEnumerable<Document> documents, Predicate<ISymbol> definitionFilter = null, Predicate<ISymbol> occurrenceFilter = null, Predicate<SyntaxNode> nodeFilter = null, CancellationToken cancellationToken = default) {
 			var d = new Dictionary<ISymbol, List<(SymbolUsageKind, ReferenceLocation)>>(5);
 			// hack: fix FindReferencesAsync returning unbounded references for generic type or method
 			string sign = null;
@@ -478,18 +480,18 @@ namespace Codist
 					//       The same to SymbolKind.Method.
 					if ((symbol as INamedTypeSymbol).IsBoundedGenericType()
 						|| symbol.GetContainingTypes().Any(IsBoundedGenericType)) {
-						sign = symbol.ToDisplayString();
+						//sign = symbol.ToDisplayString();
 						symbol = symbol.OriginalDefinition;
 					}
 					break;
 				case SymbolKind.Method:
 					var m = symbol as IMethodSymbol;
-					if (m.IsBoundedGenericMethod() || m.GetContainingTypes().Any(IsBoundedGenericType)) {
-						sign = symbol.ToDisplayString();
-						symbol = symbol.OriginalDefinition;
-					}
-					else if (m.IsExtensionMethod) {
+					if (m.IsExtensionMethod) {
 						symbol = m.ReducedFrom ?? m;
+					}
+					else if (m.IsBoundedGenericMethod() || m.GetContainingTypes().Any(IsBoundedGenericType)) {
+						//sign = symbol.ToDisplayString();
+						symbol = symbol.OriginalDefinition;
 					}
 					else if (m.MethodKind == MethodKind.PropertyGet) {
 						usageFilter = u => u != SymbolUsageKind.Write;
@@ -503,7 +505,7 @@ namespace Codist
 				if (definitionFilter?.Invoke(sr.Definition) == false) {
 					continue;
 				}
-				await GroupReferenceByContainerAsync(d, sr, sign, nodeFilter, usageFilter, cancellationToken).ConfigureAwait(false);
+				await GroupReferenceByContainerAsync(d, sr, sign, nodeFilter, occurrenceFilter, usageFilter, cancellationToken).ConfigureAwait(false);
 			}
 			if (d.Count == 0) {
 				return null;
@@ -542,7 +544,7 @@ namespace Codist
 			}
 		}
 
-		static async Task GroupReferenceByContainerAsync(Dictionary<ISymbol, List<(SymbolUsageKind usage, ReferenceLocation loc)>> results, ReferencedSymbol reference, string symbolSignature, Predicate<SyntaxNode> nodeFilter = null, Predicate<SymbolUsageKind> usageFilter = null, CancellationToken cancellationToken = default) {
+		static async Task GroupReferenceByContainerAsync(Dictionary<ISymbol, List<(SymbolUsageKind usage, ReferenceLocation loc)>> results, ReferencedSymbol reference, string symbolSignature, Predicate<SyntaxNode> nodeFilter = null, Predicate<ISymbol> occurrenceFilter = null, Predicate<SymbolUsageKind> usageFilter = null, CancellationToken cancellationToken = default) {
 			var pu = GetPotentialUsageKinds(reference.Definition);
 			foreach (var docRefs in reference.Locations.GroupBy(l => l.Document)) {
 				var sm = await docRefs.Key.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
@@ -558,10 +560,14 @@ namespace Codist
 					}
 					var c = n.FirstAncestorOrSelf<SyntaxNode>(i => i.Kind().GetDeclarationCategory().HasAnyFlag(DeclarationCategory.Member | DeclarationCategory.Type));
 					ISymbol s;
-					if (c == null
-						// unfortunately we can't compare the symbol s with the original typeSymbol directly,
-						// even though they are actually the same
-						|| symbolSignature != null && ((s = sm.GetSymbol(n, cancellationToken)) == null || (s?.ToDisplayString() != symbolSignature))) {
+					//if (c == null
+					//	// unfortunately we can't compare the symbol s with the original typeSymbol directly,
+					//	// even though they are actually the same
+					//	|| symbolSignature != null && ((s = sm.GetSymbol(n, cancellationToken)) == null || (s?.ToDisplayString() != symbolSignature))) {
+					//	continue;
+					//}
+					n = n.GetObjectCreationNode() ?? n;
+					if (occurrenceFilter?.Invoke(sm.GetSymbol(n, cancellationToken)) == false) {
 						continue;
 					}
 					s = sm.GetSymbol(c, cancellationToken);

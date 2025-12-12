@@ -2465,6 +2465,16 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Exclude Generic Methods
+        ///Match non-generic methods only.
+        /// </summary>
+        internal static string CMDT_ExcludeGenerics {
+            get {
+                return ResourceManager.GetString("CMDT_ExcludeGenerics", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Explicit Assignment
         ///Match explicitly assignment of argument only.
         /// </summary>
@@ -2734,6 +2744,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Match Type Argument.
+        /// </summary>
+        internal static string CMDT_MatchTypeArgument {
+            get {
+                return ResourceManager.GetString("CMDT_MatchTypeArgument", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Open your browser and donate to project Codist.
         /// </summary>
         internal static string CMDT_OpenDonatePage {
@@ -2841,6 +2860,16 @@ namespace Codist.Properties {
         internal static string CMDT_ScopeToCurrentProject {
             get {
                 return ResourceManager.GetString("CMDT_ScopeToCurrentProject", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to External
+        ///Only search in referenced libraries, excluding source code.
+        /// </summary>
+        internal static string CMDT_ScopeToExternal {
+            get {
+                return ResourceManager.GetString("CMDT_ScopeToExternal", resourceCulture);
             }
         }
         

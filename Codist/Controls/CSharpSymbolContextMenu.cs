@@ -385,11 +385,14 @@ namespace Codist.Controls
 			CurrentProject = 1 << 1,
 			RelatedProjects = 1 << 2,
 			SourceCode = 1 << 3,
-			ExtractMatch = 1 << 4,
-			DirectDerive = 1 << 5,
-			MatchCase = 1 << 6,
-			Explicit = 1 << 7,
-			Implicit = 1 << 8
+			External = 1 << 4,
+			ExtractMatch = 1 << 5,
+			DirectDerive = 1 << 6,
+			MatchCase = 1 << 7,
+			Explicit = 1 << 8,
+			Implicit = 1 << 9,
+			MatchTypeArgument = 1 << 10,
+			NoTypeArgument = 1 << 11,
 		}
 
 		sealed class CustomMenuItem : MenuItem
@@ -446,12 +449,22 @@ namespace Codist.Controls
 				return this;
 			}
 			public CustomMenuItem HasExtractMatchOption(ISymbol symbol) {
-				if (symbol == null || symbol.IsStatic) {
+				if (symbol == null
+					|| symbol.IsStatic
+					|| symbol is IMethodSymbol m && m.MethodKind != MethodKind.Ordinary
+					|| symbol is INamedTypeSymbol nt && !nt.IsBoundedGenericType()) {
 					return this;
 				}
 				var t = symbol.GetReturnType() ?? symbol as INamedTypeSymbol;
 				return t?.IsAnyKind(TypeKind.Class, TypeKind.Structure, TypeKind.Interface, TypeKind.Delegate) == true
 					? AddOptionButton(R.CMDT_FindExtract, CommandOptions.ExtractMatch, IconIds.CurrentSymbolOnly)
+					: this;
+			}
+			public CustomMenuItem HasMatchTypeArgumentOption(ISymbol symbol) {
+				return symbol != null && (symbol is IMethodSymbol m && m.IsBoundedGenericMethod()
+						|| symbol is INamedTypeSymbol t && t.IsBoundedGenericType()
+						|| symbol.ContainingType?.IsBoundedGenericType() == true)
+					? AddOptionButton(R.CMDT_MatchTypeArgument, CommandOptions.MatchTypeArgument, IconIds.MatchTypeArgument)
 					: this;
 			}
 			public CustomMenuItem HasDirectDeriveOption() {
@@ -467,7 +480,8 @@ namespace Codist.Controls
 					.AddOptionButton(R.CMDT_ScopeToRelatedProjects, CommandOptions.RelatedProjects, IconIds.RelatedProjects, ExclusiveButtonConfigurator.Projects);
 			}
 			public CustomMenuItem HasSourceCodeScopeOption() {
-				return AddOptionButton(R.CMDT_ScopeToSourceCode, CommandOptions.SourceCode, IconIds.SourceCode);
+				return AddOptionButton(R.CMDT_ScopeToSourceCode, CommandOptions.SourceCode, IconIds.SourceCode, ExclusiveButtonConfigurator.SourceCode)
+					.AddOptionButton(R.CMDT_ScopeToExternal, CommandOptions.External, IconIds.ExternalSymbol, ExclusiveButtonConfigurator.SourceCode);
 			}
 
 			void HideMenu(object sender, RoutedEventArgs e) {
@@ -597,6 +611,7 @@ namespace Codist.Controls
 					case CommandId.FindReferrers:
 						return CreateItem(IconIds.FindReferrers, R.CMD_FindReferrers, FindReferrers, R.CMDT_FindReferrers)
 							.HasExtractMatchOption(_Symbol)
+							.HasMatchTypeArgumentOption(_Symbol)
 							.HasFileScopeOptions();
 					case CommandId.FindSymbolsWithName:
 						return CreateItem(IconIds.FindSymbolsWithName, R.CMD_FindSymbolwithName, _Symbol.Name, FindSymbolWithName, R.CMDT_FindSymbolwithName)
@@ -604,14 +619,17 @@ namespace Codist.Controls
 							.AddOptionButton(R.CMDT_MatchCase, CommandOptions.MatchCase, IconIds.MatchCase);
 					case CommandId.FindMethodsBySignature:
 						return CreateItem(IconIds.FindMethodsMatchingSignature, R.CMD_FindMethodsSameSignature, FindMethodsBySignature, R.CMDT_FindMethodsSameSignature)
+							.AddOptionButton(R.CMDT_ExcludeGenerics, CommandOptions.NoTypeArgument, IconIds.ExcludeGeneric)
 							.HasSourceCodeScopeOption();
 					case CommandId.FindConstructorReferrers:
 						return CreateItem(IconIds.FindReferrers, R.CMD_FindCallers, FindConstructorReferrers, R.CMDT_FindCallers)
-							.AddOptionButton(R.CMDT_FindDirectCallers, CommandOptions.DirectDerive, IconIds.DirectDerive)
+							.AddOptionButton(R.CMDT_FindDirectCallers, CommandOptions.ExtractMatch, IconIds.EditMatches)
+							.HasMatchTypeArgumentOption(_Symbol)
 							.HasFileScopeOptions();
 					case CommandId.FindObjectInitializers:
 						return CreateItem(IconIds.FindReferrers, R.CMD_FindConstructorCallers, FindObjectInitializers, R.CMDT_FindConstructorCallers)
 							.HasExtractMatchOption(_Symbol)
+							.HasMatchTypeArgumentOption(_Symbol)
 							.HasFileScopeOptions();
 					case CommandId.FindInstanceProducers:
 						return CreateItem(IconIds.InstanceProducer, R.CMD_FindInstanceProducer, FindInstanceProducers, R.CMDT_FindInstanceProducer)
@@ -632,6 +650,7 @@ namespace Codist.Controls
 					case CommandId.FindTypeReferrers:
 						return CreateItem(IconIds.FindTypeReferrers, R.CMD_FindTypeReferrers, FindTypeReferrers, R.CMDT_FindTypeReferrers)
 							.HasExtractMatchOption(_Symbol)
+							.HasMatchTypeArgumentOption(_Symbol)
 							.HasFileScopeOptions();
 					case CommandId.ListReferencedSymbols:
 						return CreateItem(IconIds.ListReferencedSymbols, R.CMD_ListReferencedSymbols, ListReferencedSymbols, R.CMDT_ListReferencedSymbols);
@@ -872,41 +891,50 @@ namespace Codist.Controls
 					: null;
 			}
 
+			static SymbolSourceFilter MakeSourceFlagFromOption(CommandOptions options) {
+				return options.MatchFlags(CommandOptions.SourceCode) ? SymbolSourceFilter.RequiresSource
+					: options.MatchFlags(CommandOptions.External) ? SymbolSourceFilter.ExcludesSource
+					: default;
+			}
+
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindReferrers(object sender, RoutedEventArgs e) {
 				var options = GetOptions(sender);
 				var docs = MakeDocumentListFromOption(options);
 				var m = options.MatchFlags(CommandOptions.ExtractMatch) || UIHelper.IsCtrlDown;
-				await _SemanticContext.FindReferrersAsync(_Symbol, m, docs);
+				var a = options.MatchFlags(CommandOptions.MatchTypeArgument) || UIHelper.IsCtrlDown;
+				await _SemanticContext.FindReferrersAsync(_Symbol, m, a, docs);
 			}
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindTypeReferrers(object sender, RoutedEventArgs e) {
 				var options = GetOptions(sender);
 				var docs = MakeDocumentListFromOption(options);
 				var m = options.MatchFlags(CommandOptions.ExtractMatch) || UIHelper.IsCtrlDown;
-				await _SemanticContext.FindReferrersAsync(_Symbol.Kind == SymbolKind.Method ? _Symbol.ContainingType : _Symbol, m, docs, s => s.Kind == SymbolKind.NamedType, IsTypeReference);
+				var a = options.MatchFlags(CommandOptions.MatchTypeArgument) || UIHelper.IsCtrlDown;
+				await _SemanticContext.FindReferrersAsync(_Symbol.Kind == SymbolKind.Method ? _Symbol.ContainingType : _Symbol, m, a, docs, s => s.Kind == SymbolKind.NamedType, n => IsTypeReference(n));
 			}
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindOverrides(object sender, RoutedEventArgs e) {
 				var options = GetOptions(sender);
 				var p = MakeProjectListFromOption(options);
-				var s = options.MatchFlags(CommandOptions.SourceCode);
+				var s = MakeSourceFlagFromOption(options);
 				await _SemanticContext.FindOverridesAsync(_Symbol, p, s);
 			}
+
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindDerivedClasses(object sender, RoutedEventArgs e) {
 				var options = GetOptions(sender);
 				var i = options.MatchFlags(CommandOptions.DirectDerive) || UIHelper.IsCtrlDown;
 				var p = MakeProjectListFromOption(options);
-				var s = options.MatchFlags(CommandOptions.SourceCode);
-				await _SemanticContext.FindDerivedClassesAsync(_Symbol, i, p, s, UIHelper.IsShiftDown == false);
+				var s = MakeSourceFlagFromOption(options);
+				await _SemanticContext.FindDerivedClassesAsync((INamedTypeSymbol)_Symbol, i, p, s, UIHelper.IsShiftDown == false);
 			}
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindImplementations(object sender, RoutedEventArgs e) {
 				var options = GetOptions(sender);
 				var d = options.MatchFlags(CommandOptions.DirectDerive) || UIHelper.IsCtrlDown;
 				var p = MakeProjectListFromOption(options);
-				var s = options.MatchFlags(CommandOptions.SourceCode);
+				var s = MakeSourceFlagFromOption(options);
 				await _SemanticContext.FindImplementationsAsync(_Symbol, d, p, s);
 			}
 
@@ -914,20 +942,22 @@ namespace Codist.Controls
 			async void FindSubInterfaces(object sender, RoutedEventArgs e) {
 				var options = GetOptions(sender);
 				var o = options.MatchFlags(CommandOptions.DirectDerive) || UIHelper.IsCtrlDown;
-				var s = options.MatchFlags(CommandOptions.SourceCode);
+				var s = MakeSourceFlagFromOption(options);
 				await _SemanticContext.FindSubInterfacesAsync(_Symbol, o, s);
 			}
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindMethodsBySignature(object sender, RoutedEventArgs e) {
-				var o = HasOption(sender, CommandOptions.SourceCode);
-				await _SemanticContext.FindMethodsBySignatureAsync(_Symbol, o);
+				var options = GetOptions(sender);
+				var a = options.MatchFlags(CommandOptions.NoTypeArgument);
+				var s = MakeSourceFlagFromOption(options);
+				await _SemanticContext.FindMethodsBySignatureAsync(_Symbol, a, s);
 			}
 
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindExtensionMethods(object sender, RoutedEventArgs e) {
 				var options = GetOptions(sender);
 				var m = options.MatchFlags(CommandOptions.ExtractMatch) || UIHelper.IsCtrlDown;
-				var s = options.MatchFlags(CommandOptions.SourceCode);
+				var s = MakeSourceFlagFromOption(options);
 				await _SemanticContext.FindExtensionMethodsAsync(_Symbol, m, s);
 			}
 
@@ -935,7 +965,7 @@ namespace Codist.Controls
 			async void FindReturnTypeExtensionMethods(object sender, RoutedEventArgs e) {
 				var options = GetOptions(sender);
 				var m = options.MatchFlags(CommandOptions.ExtractMatch) || UIHelper.IsCtrlDown;
-				var s = options.MatchFlags(CommandOptions.SourceCode);
+				var s = MakeSourceFlagFromOption(options);
 				await _SemanticContext.FindExtensionMethodsAsync(_Symbol.GetReturnType(), m, s);
 			}
 
@@ -950,20 +980,22 @@ namespace Codist.Controls
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindConstructorReferrers(object sender, RoutedEventArgs e) {
 				var options = GetOptions(sender);
-				var d = options.MatchFlags(CommandOptions.DirectDerive) || UIHelper.IsCtrlDown;
+				var d = options.MatchFlags(CommandOptions.ExtractMatch) || UIHelper.IsCtrlDown;
+				var a = options.MatchFlags(CommandOptions.MatchTypeArgument) || UIHelper.IsCtrlDown;
 				var docs = MakeDocumentListFromOption(options);
-				await _SemanticContext.FindReferrersAsync(_SemanticContext.SemanticModel.GetSymbolOrFirstCandidate(_Node.GetObjectCreationNode()), d, docs);
+				await _SemanticContext.FindReferrersAsync(_SemanticContext.SemanticModel.GetSymbolOrFirstCandidate(_Node.GetObjectCreationNode()), d, a, docs);
 			}
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void FindObjectInitializers(object sender, RoutedEventArgs e) {
 				var options = GetOptions(sender);
-				var docs = MakeDocumentListFromOption(options);
 				var m = options.MatchFlags(CommandOptions.ExtractMatch) || UIHelper.IsCtrlDown;
+				var a = options.MatchFlags(CommandOptions.MatchTypeArgument) || UIHelper.IsCtrlDown;
+				var docs = MakeDocumentListFromOption(options);
 				if (_Symbol is INamedTypeSymbol t && t.GetPrimaryConstructor() != null) {
-					await _SemanticContext.FindReferrersAsync(_Symbol, m, docs, null, n => IsTypeReference(n) == false);
+					await _SemanticContext.FindReferrersAsync(_Symbol, m, a, docs, null, n => !IsTypeReference(n));
 				}
 				else {
-					await _SemanticContext.FindReferrersAsync(_Symbol, m, docs, s => s.Kind == SymbolKind.Method);
+					await _SemanticContext.FindReferrersAsync(_Symbol, m, a, docs, s => s.Kind == SymbolKind.Method);
 				}
 			}
 
@@ -1031,11 +1063,8 @@ namespace Codist.Controls
 			static CommandOptions GetOptions(object sender) {
 				return (sender as UIElement)?.GetParentOrSelf<CustomMenuItem>()?.Option ?? 0;
 			}
-			static bool HasOption(object sender, CommandOptions option) {
-				return (sender as UIElement)?.GetParentOrSelf<CustomMenuItem>()?.Option.MatchFlags(option) == true;
-			}
 
-			bool IsTypeReference(SyntaxNode node) {
+			static bool IsTypeReference(SyntaxNode node) {
 				var p = node.Parent.UnqualifyExceptNamespace();
 				switch (p.Kind()) {
 					case SyntaxKind.TypeOfExpression:
@@ -1072,6 +1101,7 @@ namespace Codist.Controls
 			public readonly static Action<ThemedToggleButton> ExplicitImplicit = new ExclusiveButtonConfigurator(CommandOptions.Explicit | CommandOptions.Implicit).ConfigureExclusiveAssignmentButton;
 			public readonly static Action<ThemedToggleButton> FileProject = new ExclusiveButtonConfigurator(CommandOptions.CurrentFile | CommandOptions.CurrentProject | CommandOptions.RelatedProjects).ConfigureExclusiveAssignmentButton;
 			public readonly static Action<ThemedToggleButton> Projects = new ExclusiveButtonConfigurator(CommandOptions.CurrentProject | CommandOptions.RelatedProjects).ConfigureExclusiveAssignmentButton;
+			public readonly static Action<ThemedToggleButton> SourceCode = new ExclusiveButtonConfigurator(CommandOptions.SourceCode | CommandOptions.External).ConfigureExclusiveAssignmentButton;
 
 			void ConfigureExclusiveAssignmentButton(ThemedToggleButton button) {
 				button.Checked += ExclusiveToggleButton;

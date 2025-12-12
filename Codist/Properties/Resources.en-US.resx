@@ -3029,4 +3029,15 @@ Match assignment of argument by default value only</value>
     <value>Related Projects
 Search in referenced or referencing projects</value>
   </data>
+  <data name="CMDT_MatchTypeArgument" xml:space="preserve">
+    <value>Match Type Argument</value>
+  </data>
+  <data name="CMDT_ExcludeGenerics" xml:space="preserve">
+    <value>Exclude Generic Methods
+Match non-generic methods only</value>
+  </data>
+  <data name="CMDT_ScopeToExternal" xml:space="preserve">
+    <value>External
+Only search in referenced libraries, excluding source code</value>
+  </data>
 </root>

@@ -3015,4 +3015,15 @@ Ctrl: 将下划线分隔的单词转换为首字母大写的单词</value>
     <value>相关项目
 限制搜索范围为引用或被引用的项目</value>
   </data>
+  <data name="CMDT_MatchTypeArgument" xml:space="preserve">
+    <value>匹配泛型的类型参数</value>
+  </data>
+  <data name="CMDT_ExcludeGenerics" xml:space="preserve">
+    <value>剔除泛型方法
+仅列出非泛型方法</value>
+  </data>
+  <data name="CMDT_ScopeToExternal" xml:space="preserve">
+    <value>外部引用
+限制搜索范围，排除源代码</value>
+  </data>
 </root>

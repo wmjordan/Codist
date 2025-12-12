@@ -122,6 +122,7 @@
     <Compile Include="QuickInfo\CSharpQuickInfo.Token.cs" />
     <Compile Include="QuickInfo\InfoBlock.cs" />
     <Compile Include="Semantics\ArgumentAssignment.cs" />
+    <Compile Include="Semantics\SymbolSourceFilter.cs" />
     <Compile Include="Semantics\MarkdownHelper.cs" />
     <Compile Include="Semantics\SyntaxModel.cs" />
     <Compile Include="SmartBars\MarkupSmartBar.cs" />
