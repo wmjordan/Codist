@@ -35,7 +35,8 @@ namespace Codist
 
 			ImmutableArray<ISymbol> ListMembersByOrder(ISymbol source) {
 				var nsOrType = source as INamespaceOrTypeSymbol;
-				var members = nsOrType.ListMembers().ToImmutableArray();
+				var members = ImmutableArray.CreateBuilder<ISymbol>();
+				members.AddRange(nsOrType.ListMembers());
 				INamedTypeSymbol type;
 				if (source.Kind == SymbolKind.NamedType && (type = (INamedTypeSymbol)source).TypeKind == TypeKind.Enum) {
 					// sort enum members by value
@@ -46,11 +47,15 @@ namespace Codist
 						case SpecialType.System_UInt16:
 						case SpecialType.System_UInt32:
 						case SpecialType.System_UInt64:
-							return members.Sort(CompareByFieldUnsignedIntegerConst);
+							members.Sort(CompareByFieldUnsignedIntegerConst);
+							goto EXIT;
 					}
-					return members.Sort(CompareByFieldIntegerConst);
+					members.Sort(CompareByFieldIntegerConst);
+					goto EXIT;
 				}
-				return members.Sort(CompareByAccessibilityKindName);
+				members.Sort(CompareByAccessibilityKindName);
+			EXIT:
+				return members.ToImmutable();
 			}
 
 			int CompareByFieldIntegerConst(ISymbol a, ISymbol b) {
@@ -95,9 +100,9 @@ namespace Codist
 		/// <summary>
 		/// Finds all members defined or referenced in <paramref name="project"/> which may have a parameter that is of or derived from <paramref name="type"/>.
 		/// </summary>
-		public static async Task<List<ISymbol>> FindInstanceAsParameterAsync(this ITypeSymbol type, Project project, bool strictMatch, bool sourceCode, CancellationToken cancellationToken = default) {
+		public static async Task<ImmutableArray<ISymbol>> FindInstanceAsParameterAsync(this ITypeSymbol type, Project project, bool strictMatch, bool sourceCode, CancellationToken cancellationToken = default) {
 			var compilation = await project.GetCompilationAsync(cancellationToken).ConfigureAwait(false);
-			var members = new List<ISymbol>(10);
+			var members = ImmutableArray.CreateBuilder<ISymbol>(10);
 			ImmutableArray<IParameterSymbol> parameters;
 			var assembly = compilation.Assembly;
 			foreach (var typeSymbol in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
@@ -106,7 +111,7 @@ namespace Codist
 				}
 				foreach (var member in typeSymbol.GetMembers()) {
 					if (cancellationToken.IsCancellationRequested) {
-						return members;
+						goto EXIT;
 					}
 					if (member.Kind != SymbolKind.Field
 						&& !(parameters = member.GetParameters()).IsDefaultOrEmpty
@@ -118,16 +123,17 @@ namespace Codist
 					}
 				}
 			}
-			return members;
+		EXIT:
+			return members.ToSortedSymbolArray();
 		}
 
 		/// <summary>
 		/// Finds all members defined or referenced in <paramref name="project"/> which may return an instance of <paramref name="type"/>.
 		/// </summary>
-		public static async Task<List<ISymbol>> FindSymbolInstanceProducerAsync(this ITypeSymbol type, Project project, bool strict, bool sourceCode, CancellationToken cancellationToken = default) {
+		public static async Task<ImmutableArray<ISymbol>> FindSymbolInstanceProducerAsync(this ITypeSymbol type, Project project, bool strict, bool sourceCode, CancellationToken cancellationToken = default) {
 			var compilation = await project.GetCompilationAsync(cancellationToken).ConfigureAwait(false);
 			var assembly = compilation.Assembly;
-			var members = new List<ISymbol>(10);
+			var members = ImmutableArray.CreateBuilder<ISymbol>(10);
 			var paramComparer = strict
 				? (Func<IParameterSymbol, bool>)(p => p.Type == type && p.RefKind != RefKind.None)
 				: (p => p.Type.CanConvertTo(type) && p.RefKind != RefKind.None);
@@ -137,7 +143,7 @@ namespace Codist
 				}
 				foreach (var member in typeSymbol.GetMembers()) {
 					if (cancellationToken.IsCancellationRequested) {
-						return members;
+						goto EXIT;
 					}
 					ITypeSymbol mt;
 					if (member.Kind == SymbolKind.Field) {
@@ -153,13 +159,14 @@ namespace Codist
 					}
 				}
 			}
-			return members;
+		EXIT:
+			return members.ToSortedSymbolArray();
 		}
 
 		/// <summary>Returns interfaces derived from the given interface <paramref name="type"/> in specific <paramref name="project"/>.</summary>
-		public static async Task<List<INamedTypeSymbol>> FindDerivedInterfacesAsync(this INamedTypeSymbol type, Project project, bool directDerive, SymbolSourceFilter source, CancellationToken cancellationToken = default) {
+		public static async Task<ImmutableArray<INamedTypeSymbol>> FindDerivedInterfacesAsync(this INamedTypeSymbol type, Project project, bool directDerive, SymbolSourceFilter source, CancellationToken cancellationToken = default) {
 			var compilation = await project.GetCompilationAsync(cancellationToken).ConfigureAwait(false);
-			var r = new List<INamedTypeSymbol>(7);
+			var r = ImmutableArray.CreateBuilder<INamedTypeSymbol>(7);
 			var d = new SourceSymbolDeduper();
 			foreach (var item in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
 				if (item.TypeKind == TypeKind.Interface
@@ -170,23 +177,70 @@ namespace Codist
 					r.Add(item);
 				}
 			}
-			return r;
+			return r.ToSortedSymbolArray();
 		}
 
-		public static async Task<List<IMethodSymbol>> FindExtensionMethodsAsync(this ITypeSymbol type, Project project, bool strict, SymbolSourceFilter source, CancellationToken cancellationToken = default) {
+		public static async Task<IEnumerable<ISymbol>> FindOverridesAsync(this ISymbol symbol, Solution solution, SymbolSourceFilter source = default, IEnumerable<Project> projects = null, CancellationToken cancellationToken = default) {
+			return source.Filter(await SymbolFinder.FindOverridesAsync(symbol, solution, projects.MakeImmutableSet(), cancellationToken).ConfigureAwait(false));
+		}
+
+		public static async Task<ImmutableArray<ISymbol>> FindImplementationsAsync(this ISymbol symbol, Solution solution, bool directImplementation, SymbolSourceFilter source = default, IEnumerable<Project> projects = null, CancellationToken cancellationToken = default) {
+			var s = symbol;
+			INamedTypeSymbol st = null;
+			bool isNamedType = symbol.Kind == SymbolKind.NamedType;
+			// workaround for a bug in early version of Roslyn which keeps generic types from returning any result
+			if (isNamedType && (st = (INamedTypeSymbol)symbol).IsGenericType) {
+				s = st.OriginalDefinition;
+			}
+			var implementations = await SymbolFinder.FindImplementationsAsync(s, solution, projects.MakeImmutableSet(), cancellationToken).ConfigureAwait(false);
+			var r = ImmutableArray.CreateBuilder<ISymbol>();
+			var d = new SourceSymbolDeduper();
+			if (isNamedType) {
+				if (st.ConstructedFrom == st) {
+					foreach (var impl in implementations.OfType<INamedTypeSymbol>()) {
+						if (directImplementation && impl.HasDirectImplementationFor(st) == false) {
+							continue;
+						}
+						if (d.TryAdd(impl) && source.Match(impl)) {
+							r.Add(impl);
+						}
+					}
+				}
+				else {
+					foreach (var impl in implementations.OfType<INamedTypeSymbol>()) {
+						if (directImplementation && impl.HasDirectImplementationFor(st) == false) {
+							continue;
+						}
+						if ((impl.IsGenericType || impl.CanConvertTo(st)) && d.TryAdd(impl) && source.Match(impl)) {
+							r.Add(impl);
+						}
+					}
+				}
+			}
+			else {
+				foreach (var impl in implementations) {
+					if (d.TryAdd(impl) && source.Match(impl)) {
+						r.Add(impl);
+					}
+				}
+			}
+			return r.ToSortedSymbolArray();
+		}
+
+		public static async Task<ImmutableArray<IMethodSymbol>> FindExtensionMethodsAsync(this ITypeSymbol type, Project project, bool strict, SymbolSourceFilter source, CancellationToken cancellationToken = default) {
 			var compilation = await project.GetCompilationAsync(cancellationToken).ConfigureAwait(false);
-			var members = new List<IMethodSymbol>(10);
+			var members = ImmutableArray.CreateBuilder<IMethodSymbol>(10);
 			var isValueType = type.IsValueType;
 			var d = new SourceSymbolDeduper();
 			foreach (var typeSymbol in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
-				if (typeSymbol.IsStatic == false
-					|| typeSymbol.MightContainExtensionMethods == false
+				if (typeSymbol.MightContainExtensionMethods == false
+					|| typeSymbol.IsStatic == false
 					|| source.Mismatch(typeSymbol)) {
 					continue;
 				}
 				foreach (var member in typeSymbol.GetMembers()) {
 					if (cancellationToken.IsCancellationRequested) {
-						return members;
+						goto EXIT;
 					}
 					if (member.IsStatic == false || member.Kind != SymbolKind.Method) {
 						continue;
@@ -221,7 +275,8 @@ namespace Codist
 					}
 				}
 			}
-			return members;
+		EXIT:
+			return members.ToSortedSymbolArray();
 		}
 
 		/// <summary>
@@ -385,7 +440,7 @@ namespace Codist
 						r.Add(n);
 					}
 				}
-				return r.ToImmutable();
+				goto EXIT;
 			}
 			var ns = ImmutableArray.CreateBuilder<string>();
 			do {
@@ -406,7 +461,8 @@ namespace Codist
 					r.Add(n);
 				}
 			}
-			return r.ToImmutable();
+		EXIT:
+			return r.ToSortedSymbolArray();
 		}
 
 		/// <summary>Finds symbols referenced by given context node.</summary>
@@ -471,7 +527,7 @@ namespace Codist
 		public static async Task<List<(ISymbol, List<(SymbolUsageKind, ReferenceLocation)>)>> FindReferrersAsync(this ISymbol symbol, Project project, IEnumerable<Document> documents, Predicate<ISymbol> definitionFilter = null, Predicate<ISymbol> occurrenceFilter = null, Predicate<SyntaxNode> nodeFilter = null, CancellationToken cancellationToken = default) {
 			var d = new Dictionary<ISymbol, List<(SymbolUsageKind, ReferenceLocation)>>(5);
 			// hack: fix FindReferencesAsync returning unbounded references for generic type or method
-			string sign = null;
+			//string sign = null;
 			Predicate<SymbolUsageKind> usageFilter = null;
 			switch (symbol.Kind) {
 				case SymbolKind.NamedType:
@@ -505,7 +561,7 @@ namespace Codist
 				if (definitionFilter?.Invoke(sr.Definition) == false) {
 					continue;
 				}
-				await GroupReferenceByContainerAsync(d, sr, sign, nodeFilter, occurrenceFilter, usageFilter, cancellationToken).ConfigureAwait(false);
+				await GroupReferenceByContainerAsync(d, sr, null, nodeFilter, occurrenceFilter, usageFilter, cancellationToken).ConfigureAwait(false);
 			}
 			if (d.Count == 0) {
 				return null;

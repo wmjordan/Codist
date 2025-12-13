@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Reflection;
 using CLR;
 using Microsoft.CodeAnalysis;
@@ -120,6 +121,17 @@ namespace Codist
 
 		public static IReadOnlyList<SyntaxNode> GetCollectionExpressionElements(this ExpressionSyntax collectionExpression) {
 			return NonPublicOrFutureAccessors.GetCollectionExpressionElements(collectionExpression);
+		}
+
+		public static ImmutableArray<TSymbol> MakeSortedSymbolArray<TSymbol>(this IEnumerable<TSymbol> symbols) where TSymbol : ISymbol {
+			var arrayBuilder = ImmutableArray.CreateBuilder<TSymbol>();
+			arrayBuilder.AddRange(symbols);
+			return arrayBuilder.ToSortedSymbolArray();
+		}
+
+		static ImmutableArray<TSymbol> ToSortedSymbolArray<TSymbol>(this ImmutableArray<TSymbol>.Builder arrayBuilder) where TSymbol : ISymbol {
+			arrayBuilder.Sort(CompareSymbol);
+			return arrayBuilder.ToImmutable();
 		}
 
 		static partial class NonPublicOrFutureAccessors
