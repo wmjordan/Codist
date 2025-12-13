@@ -23,7 +23,7 @@ namespace Codist.Controls
 			await SyncHelper.SwitchToMainThreadAsync(default);
 			var m = new SymbolMenu(context, SymbolListType.SymbolReferrers);
 			m.Title.SetGlyph(symbol.GetImageId())
-				.AddSymbol(symbol, null, true, SymbolFormatter.Instance)
+				.AddSymbol(matchTypeArgument ? symbol : symbol.OriginalDefinition, null, true, SymbolFormatter.Instance)
 				.Append(R.T_Referrers);
 			if (referrers != null) {
 				var containerType = symbol.ContainingType;
