@@ -431,15 +431,22 @@ namespace Codist
 					var sm = SemanticContext.GetHovered()?.SemanticModel;
 					if (sm != null) {
 						var symbol = sm.GetSymbolInfo(_NodeOrToken.AsNode()).Symbol;
+						TextBlock b = null;
 						if (symbol != null) {
-							var b = tip.AddTextBlock().Append("Symbol: ").AddSymbolDisplayParts(symbol.ToDisplayParts(CodeAnalysisHelper.TypeMemberNameFormat), SymbolFormatter.Instance);
+							AddTextBlockOrLineBreak(tip, ref b)
+								.Append("Symbol: ")
+								.AddSymbolDisplayParts(symbol.ToDisplayParts(CodeAnalysisHelper.TypeMemberNameFormat), SymbolFormatter.Instance);
 						}
 						var typeInfo = sm.GetTypeInfo(_NodeOrToken.AsNode());
 						if (typeInfo.Type != null) {
-							tip.AddTextBlock().Append("Type: ").AddSymbol(typeInfo.Type, false, SymbolFormatter.Instance);
+							AddTextBlockOrLineBreak(tip, ref b)
+								.Append("Type: ")
+								.AddSymbol(typeInfo.Type, false, SymbolFormatter.Instance);
 						}
-						if (typeInfo.ConvertedType != null && typeInfo.ConvertedType != typeInfo.Type) {
-							tip.AddTextBlock().Append("Converted type: ").AddSymbol(typeInfo.ConvertedType, false, SymbolFormatter.Instance);
+						if (typeInfo.ConvertedType?.Equals(typeInfo.Type) == false) {
+							AddTextBlockOrLineBreak(tip, ref b)
+								.Append("Converted type: ")
+								.AddSymbol(typeInfo.ConvertedType, false, SymbolFormatter.Instance);
 						}
 					}
 				}
@@ -450,6 +457,12 @@ namespace Codist
 			protected override void OnUnload() {
 				_NodeOrToken = default;
 				base.OnUnload();
+			}
+
+			static TextBlock AddTextBlockOrLineBreak(ThemedToolTip tip, ref TextBlock block) {
+				return block is null
+					? block = tip.AddTextBlock()
+					: block.AppendLineBreak();
 			}
 		}
 	}
