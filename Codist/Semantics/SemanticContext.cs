@@ -161,6 +161,10 @@ namespace Codist
 		public Project GetProject(SyntaxTree syntaxTree) {
 			return GetDocument(syntaxTree)?.Project;
 		}
+		public Project GetProject(ISymbol symbol, CancellationToken cancellationToken = default) {
+			var a = symbol.ContainingAssembly;
+			return a is null ? null : Workspace?.CurrentSolution.GetProject(a, cancellationToken);
+		}
 
 		static void MatchDeclarationNode(MemberDeclarationSyntax member, List<MemberDeclarationSyntax> matches, string signature, SyntaxNode node) {
 			if (member.RawKind == node.RawKind
