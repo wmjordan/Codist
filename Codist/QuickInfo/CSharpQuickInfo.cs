@@ -747,10 +747,10 @@ namespace Codist.QuickInfo
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.NamespaceTypes) == false) {
 				return;
 			}
-			var namespaces = nsSymbol.GetNamespaceMembers()
-				.ToImmutableArray()
-				.Sort(Comparer<INamespaceSymbol>.Create((x, y) => String.CompareOrdinal(x.Name, y.Name)));
-			if (namespaces.Length > 0) {
+			var namespaces = ImmutableArray.CreateBuilder<INamespaceOrTypeSymbol>();
+			namespaces.AddRange(nsSymbol.GetNamespaceMembers());
+			namespaces.Sort((x, y) => String.CompareOrdinal(x.Name, y.Name));
+			if (namespaces.Count > 0) {
 				var info = new GeneralInfoBlock(IconIds.Namespace, R.T_Namespace);
 				foreach (var ns in namespaces) {
 					info.Add(
@@ -761,10 +761,10 @@ namespace Codist.QuickInfo
 				qiContent.Add(info);
 			}
 
-			var members = nsSymbol.GetTypeMembers().Sort(Comparer<INamedTypeSymbol>.Create((x, y) => String.Compare(x.Name, y.Name)));
+			var members = nsSymbol.GetTypeMembers();
 			if (members.Length > 0) {
 				var info = new GeneralInfoBlock(IconIds.Namespace, R.T_Type);
-				foreach (var type in members) {
+				foreach (var type in members.Sort((x, y) => String.CompareOrdinal(x.Name, y.Name))) {
 					info.Add(
 						new BlockItem(type.GetImageId())
 							.Append(new SymbolDeclarationSegment(type, true, true))
