@@ -557,7 +557,7 @@ namespace Codist.QuickInfo
 				var icon = VsImageHelper.GetImage(s.GetImageId(), ThemeCache.QuickInfoLargeIconSize)
 					.AsSymbolLink(UIHelper.IsCtrlDown ? s.OriginalDefinition : s);
 				icon.VerticalAlignment = VerticalAlignment.Top;
-				var signature = SymbolFormatter.Instance.ShowSignature(s);
+				var signature = CSharpSignature.Show(s, SymbolFormatter.Instance);
 				signature.MaxWidth = (Config.Instance.QuickInfo.MaxWidth >= 100
 					? Config.Instance.QuickInfo.MaxWidth
 					: WpfHelper.GetActiveScreenSize().Width / 2) - (ThemeCache.QuickInfoLargeIconSize + 30);
