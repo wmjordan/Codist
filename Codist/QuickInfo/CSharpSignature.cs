@@ -34,24 +34,24 @@ namespace Codist.QuickInfo
 			#endregion
 
 			#region Containing symbol
-			var cs = s.ContainingSymbol;
+			var c = s.ContainingSymbol; // containing symbol
 			ThemedTipText b; // text block for symbol
-			if (cs != null) {
+			if (c != null) {
 				var showNs = Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.SymbolLocation) == false
-					&& cs.Kind == SymbolKind.Namespace;
+					&& c.Kind == SymbolKind.Namespace;
 				var showContainer = !showNs
 					&& s.Kind != SymbolKind.Namespace
-					&& cs.Kind != SymbolKind.Namespace;
+					&& c.Kind != SymbolKind.Namespace;
 				b = new ThemedTipText { FontSize = ThemeCache.ToolTipFontSize, FontFamily = ThemeCache.ToolTipFont };
 				if (showContainer) {
-					b.Append(VsImageHelper.GetImage(cs.GetImageId()).WrapMargin(WpfHelper.GlyphMargin))
-						.AddSymbol(cs, false, formatter)
+					b.Append(VsImageHelper.GetImage(c.GetImageId()).WrapMargin(WpfHelper.GlyphMargin))
+						.AddSymbol(c, false, formatter)
 						.Append(" ");
 				}
 				formatter.ShowSymbolDeclaration(b.Inlines, s, true, false);
 				p.Add(b);
 
-				if (showNs && ((INamespaceSymbol)cs).IsGlobalNamespace == false) {
+				if (showNs && ((INamespaceSymbol)c).IsGlobalNamespace == false) {
 					b = new ThemedTipText { FontSize = ThemeCache.ToolTipFontSize, FontFamily = ThemeCache.ToolTipFont }
 						.Append(VsImageHelper.GetImage(IconIds.Namespace).WrapMargin(WpfHelper.GlyphMargin));
 					formatter.ShowContainingNamespace(symbol, b);
@@ -66,7 +66,7 @@ namespace Codist.QuickInfo
 				}
 
 				if (s.Kind.CeqAny(SymbolKind.Method, SymbolKind.Property, SymbolKind.NamedType)) {
-					var ep = (cs as INamedTypeSymbol).GetExtensionParameter()
+					var ep = (c as INamedTypeSymbol).GetExtensionParameter()
 						?? (s as INamedTypeSymbol).GetExtensionParameter();
 					if (ep != null) {
 						ShowExtensionParameter(p, ep, formatter);
@@ -128,7 +128,7 @@ namespace Codist.QuickInfo
 				case SymbolKind.Discard:
 					goto END;
 			}
-			if (cs != null && (t = symbol.GetContainingTypes().FirstOrDefault(i => i.IsGenericType)) != null) {
+			if (c != null && (t = symbol.GetContainingTypes().FirstOrDefault(i => i.IsGenericType)) != null) {
 				ShowGenericTypeConstraints(p, t, formatter);
 			}
 			#endregion
@@ -152,101 +152,46 @@ namespace Codist.QuickInfo
 
 			switch (symbol.Kind) {
 				case SymbolKind.Property:
-					if (symbol is IPropertySymbol p) {
-						ShowPropertySignature(signature, p, formatter);
-					}
+					ShowProperty((IPropertySymbol)symbol, formatter, signature);
 					break;
 				case SymbolKind.Method:
-					formatter.ShowParameters(signature, symbol.GetParameters(), true, true, -1, ((IMethodSymbol)symbol).IsVararg ? ParameterListKind.ArgList : ParameterListKind.Normal);
+					ShowMethod((IMethodSymbol)symbol, formatter, signature);
 					break;
 				case SymbolKind.Event:
-					formatter.ShowParameters(signature, symbol.GetParameters(), true, true);
+					formatter.ShowParameters(signature, ((IEventSymbol)symbol).AddMethod.Parameters, true, true);
 					break;
 				case SymbolKind.NamedType:
-					if (symbol is INamedTypeSymbol t && t.TypeKind == TypeKind.Delegate) {
-						formatter.ShowParameters(signature, symbol.GetParameters(), true, true);
-					}
+					ShowDelegateParameters((ITypeSymbol)symbol, formatter, signature);
 					break;
 				case SymbolKind.Field:
-					if (symbol is IFieldSymbol f) {
-						if (f.HasConstantValue) {
-							formatter.AppendValue(signature.Inlines, symbol, f.ConstantValue);
-						}
-						else if (f.IsReadOnly && f.ContainingAssembly.GetSourceType() != AssemblySource.Metadata) {
-							var val = f.DeclaringSyntaxReferences.GetHardCodedValue();
-							if (val != null) {
-								signature.Inlines.Add(" = ");
-								formatter.ShowExpression(signature.Inlines, val);
-							}
-						}
-					}
+					ShowField((IFieldSymbol)symbol, formatter, signature);
 					break;
 				case SymbolKind.Parameter:
-					if (symbol is IParameterSymbol pa && pa.HasExplicitDefaultValue) {
-						formatter.AppendValue(signature.Inlines, symbol, pa.ExplicitDefaultValue);
-					}
+					ShowParameter((IParameterSymbol)symbol, formatter, signature);
 					break;
 				case SymbolKind.Local:
-					if (symbol is ILocalSymbol l) {
-						if (l.HasConstantValue) {
-							formatter.AppendValue(signature.Inlines, symbol, l.ConstantValue);
-						}
-					}
+					ShowLocal((ILocalSymbol)symbol, formatter, signature);
 					break;
 				case SymbolKind.TypeParameter:
-					if (symbol is ITypeParameterSymbol tp) {
-						if (tp.Variance != VarianceKind.None) {
-							signature.Inlines.InsertBefore(signature.Inlines.FirstInline, tp.Variance.Case(VarianceKind.Out, "out ", "in ").Render(formatter.Keyword));
-						}
-						if (tp.HasConstraint()) {
-							signature.Append(": ");
-							formatter.ShowTypeConstraints(tp, signature);
-						}
-					}
-
+					ShowTypeParameter((ITypeParameterSymbol)symbol, formatter, signature);
 					break;
 			}
 
 			return signature;
 		}
 
-		static void MarkSignatureObsolete(StackPanel panel, TextBlock signature) {
-			panel.Opacity = SymbolFormatter.TransparentLevel;
-			signature.Inlines.AddRange(new object[] {
-					new LineBreak(),
-					new InlineUIContainer (new TextBlock {
-							Margin = WpfHelper.SmallHorizontalMargin,
-							FontSize = ThemeCache.ToolTipFontSize,
-							FontFamily = ThemeCache.ToolTipFont
-						}.Append(VsImageHelper.GetImage(IconIds.Obsoleted).WrapMargin(WpfHelper.GlyphMargin))
-						.Append(R.T_Deprecated)
-					)
-				});
+		static void ShowMethod(IMethodSymbol method, SymbolFormatter formatter, TextBlock signature) {
+			formatter.ShowParameters(signature, method.Parameters, true, true, -1, method.IsVararg ? ParameterListKind.ArgList : ParameterListKind.Normal);
 		}
 
-		static void ShowExtensionParameter(StackPanel panel, IParameterSymbol ep, SymbolFormatter formatter) {
-			var epa = ep.GetAttributes();
-			if (epa.Length != 0) {
-				var b = new ThemedTipText(IconIds.ExtensionParameter)
-					.Append("(".Render(formatter.PlainText));
-				foreach (var item in epa) {
-					formatter.Format(b.Inlines, item, 0);
-					b.Append(" ");
-				}
-				b.AddSymbol(ep, false, formatter.Parameter)
-					.Append(")".Render(formatter.PlainText));
-				panel.Add(b);
-			}
-		}
-
-		static void ShowPropertySignature(TextBlock signature, IPropertySymbol p, SymbolFormatter formatter) {
+		static void ShowProperty(IPropertySymbol property, SymbolFormatter formatter, TextBlock signature) {
 			IMethodSymbol m;
 			ExpressionSyntax exp, init = null;
-			if (p.Parameters.Length > 0) {
-				formatter.ShowParameters(signature, p.Parameters, true, true, -1, ParameterListKind.Property);
+			if (property.Parameters.Length > 0) {
+				formatter.ShowParameters(signature, property.Parameters, true, true, -1, ParameterListKind.Property);
 			}
-			if (p.IsReadOnly) {
-				var r = p.DeclaringSyntaxReferences;
+			if (property.IsReadOnly) {
+				var r = property.DeclaringSyntaxReferences;
 				if (r.Length > 0 && r[0].GetSyntax() is BasePropertyDeclarationSyntax s) {
 					if (s.IsKind(SyntaxKind.PropertyDeclaration)) {
 						var pd = (PropertyDeclarationSyntax)s;
@@ -267,14 +212,14 @@ namespace Codist.QuickInfo
 				}
 			}
 			signature.Append(" { ");
-			if ((m = p.GetMethod) != null) {
-				if (m.DeclaredAccessibility != Accessibility.Public && m.DeclaredAccessibility != p.DeclaredAccessibility) {
+			if ((m = property.GetMethod) != null) {
+				if (m.DeclaredAccessibility != Accessibility.Public && m.DeclaredAccessibility != property.DeclaredAccessibility) {
 					signature.Append(m.GetAccessibility(), false, false, formatter.Keyword);
 				}
 				signature.Append("get", false, false, formatter.Keyword).Append("; ");
 			}
-			if ((m = p.SetMethod) != null) {
-				if (m.DeclaredAccessibility != Accessibility.Public && m.DeclaredAccessibility != p.DeclaredAccessibility) {
+			if ((m = property.SetMethod) != null) {
+				if (m.DeclaredAccessibility != Accessibility.Public && m.DeclaredAccessibility != property.DeclaredAccessibility) {
 					signature.Append(m.GetAccessibility(), false, false, formatter.Keyword);
 				}
 				signature.Append(m.IsInitOnly() ? "init" : "set", false, false, formatter.Keyword).Append("; ");
@@ -286,37 +231,107 @@ namespace Codist.QuickInfo
 			}
 		}
 
-		static void ShowGenericMethodConstraints(StackPanel panel, IMethodSymbol m, SymbolFormatter formatter) {
-			if (m.IsBoundedGenericMethod()) {
-				ShowTypeParameters(panel, m.TypeParameters, m.TypeArguments, formatter);
-			}
-			else {
-				ShowTypeParameterWithConstraint(panel, m.TypeParameters, formatter);
+		static void ShowDelegateParameters(ITypeSymbol t, SymbolFormatter formatter, TextBlock signature) {
+			if (t.TypeKind == TypeKind.Delegate) {
+				formatter.ShowParameters(signature, ((INamedTypeSymbol)t).DelegateInvokeMethod.GetParameters(), true, true);
 			}
 		}
 
-		static void ShowGenericTypeConstraints(StackPanel panel, INamedTypeSymbol t, SymbolFormatter formatter) {
-			do {
-				if (t.IsUnboundGenericType) {
-					ShowTypeParameterWithConstraint(panel, t.TypeParameters, formatter);
+		static void ShowField(IFieldSymbol field, SymbolFormatter formatter, TextBlock signature) {
+			if (field.HasConstantValue) {
+				formatter.AppendValue(signature.Inlines, field, field.ConstantValue);
+			}
+			else if (field.IsReadOnly && field.ContainingAssembly.GetSourceType() != AssemblySource.Metadata) {
+				var val = field.DeclaringSyntaxReferences.GetHardCodedValue();
+				if (val != null) {
+					signature.Inlines.Add(" = ");
+					formatter.ShowExpression(signature.Inlines, val);
 				}
-				else if (t.IsGenericType) {
-					if (t.IsDefinition == false) {
-						ShowTypeParameters(panel, t.TypeParameters, t.TypeArguments, formatter);
+			}
+		}
+
+		static void ShowParameter(IParameterSymbol parameter, SymbolFormatter formatter, TextBlock signature) {
+			if (parameter.HasExplicitDefaultValue) {
+				formatter.AppendValue(signature.Inlines, parameter, parameter.ExplicitDefaultValue);
+			}
+		}
+
+		static void ShowLocal(ILocalSymbol local, SymbolFormatter formatter, TextBlock signature) {
+			if (local.HasConstantValue) {
+				formatter.AppendValue(signature.Inlines, local, local.ConstantValue);
+			}
+		}
+
+		static void ShowTypeParameter(ITypeParameterSymbol tp, SymbolFormatter formatter, TextBlock signature) {
+			if (tp.Variance != VarianceKind.None) {
+				signature.Inlines.InsertBefore(signature.Inlines.FirstInline, tp.Variance.Case(VarianceKind.Out, "out ", "in ").Render(formatter.Keyword));
+			}
+			if (tp.HasConstraint()) {
+				signature.Append(": ");
+				formatter.ShowTypeConstraints(tp, signature);
+			}
+		}
+
+		static void MarkSignatureObsolete(StackPanel panel, TextBlock signature) {
+			panel.Opacity = SymbolFormatter.TransparentLevel;
+			signature.Inlines.AddRange(new object[] {
+					new LineBreak(),
+					new InlineUIContainer (new TextBlock {
+							Margin = WpfHelper.SmallHorizontalMargin,
+							FontSize = ThemeCache.ToolTipFontSize,
+							FontFamily = ThemeCache.ToolTipFont
+						}.Append(VsImageHelper.GetImage(IconIds.Obsoleted).WrapMargin(WpfHelper.GlyphMargin))
+						.Append(R.T_Deprecated)
+					)
+				});
+		}
+
+		static void ShowExtensionParameter(StackPanel panel, IParameterSymbol parameter, SymbolFormatter formatter) {
+			var epa = parameter.GetAttributes();
+			if (epa.Length != 0) {
+				var b = new ThemedTipText(IconIds.ExtensionParameter)
+					.Append("(".Render(formatter.PlainText));
+				foreach (var item in epa) {
+					formatter.Format(b.Inlines, item, 0);
+					b.Append(" ");
+				}
+				b.AddSymbol(parameter, false, formatter.Parameter)
+					.Append(")".Render(formatter.PlainText));
+				panel.Add(b);
+			}
+		}
+
+		static void ShowGenericMethodConstraints(StackPanel panel, IMethodSymbol method, SymbolFormatter formatter) {
+			if (method.IsBoundedGenericMethod()) {
+				ShowTypeParameters(panel, method.TypeParameters, method.TypeArguments, formatter);
+			}
+			else {
+				ShowTypeParameterWithConstraint(panel, method.TypeParameters, formatter);
+			}
+		}
+
+		static void ShowGenericTypeConstraints(StackPanel panel, INamedTypeSymbol type, SymbolFormatter formatter) {
+			do {
+				if (type.IsUnboundGenericType) {
+					ShowTypeParameterWithConstraint(panel, type.TypeParameters, formatter);
+				}
+				else if (type.IsGenericType) {
+					if (type.IsDefinition == false) {
+						ShowTypeParameters(panel, type.TypeParameters, type.TypeArguments, formatter);
 					}
 					else {
-						foreach (var item in t.TypeParameters) {
+						foreach (var item in type.TypeParameters) {
 							if (item.HasConstraint()) {
 								panel.Add(ShowTypeParameterConstraints(item, formatter));
 							}
 						}
 					}
 				}
-			} while ((t = t.ContainingType) != null);
+			} while ((type = type.ContainingType) != null);
 		}
 
-		static void ShowTypeParameters(StackPanel panel, ImmutableArray<ITypeParameterSymbol> tp, ImmutableArray<ITypeSymbol> ta, SymbolFormatter formatter) {
-			var tpl = tp.Length;
+		static void ShowTypeParameters(StackPanel panel, ImmutableArray<ITypeParameterSymbol> parameters, ImmutableArray<ITypeSymbol> arguments, SymbolFormatter formatter) {
+			var tpl = parameters.Length;
 			for (int i = 0; i < tpl; i++) {
 				var b = new TextBlock {
 					TextWrapping = TextWrapping.Wrap,
@@ -324,7 +339,7 @@ namespace Codist.QuickInfo
 					FontFamily = ThemeCache.ToolTipFont,
 					FontSize = ThemeCache.ToolTipFontSize
 				}.SetGlyph(IconIds.GenericDefinition);
-				formatter.ShowTypeArgumentInfo(tp[i], ta[i], b.Inlines);
+				formatter.ShowTypeArgumentInfo(parameters[i], arguments[i], b.Inlines);
 				panel.Add(b);
 			}
 		}
@@ -337,16 +352,16 @@ namespace Codist.QuickInfo
 			}
 		}
 
-		static TextBlock ShowTypeParameterConstraints(ITypeParameterSymbol item, SymbolFormatter formatter) {
+		static TextBlock ShowTypeParameterConstraints(ITypeParameterSymbol parameter, SymbolFormatter formatter) {
 			var b = new TextBlock {
 				TextWrapping = TextWrapping.Wrap,
 				Foreground = ThemeCache.ToolTipTextBrush,
 				FontFamily = ThemeCache.ToolTipFont,
 				FontSize = ThemeCache.ToolTipFontSize
 			}.SetGlyph(IconIds.GenericDefinition)
-				.AddSymbol(item, false, formatter.TypeParameter)
+				.AddSymbol(parameter, false, formatter.TypeParameter)
 				.Append(": ");
-			formatter.ShowTypeConstraints(item, b);
+			formatter.ShowTypeConstraints(parameter, b);
 			return b;
 		}
 
