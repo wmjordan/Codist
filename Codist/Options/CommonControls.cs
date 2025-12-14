@@ -285,7 +285,7 @@ namespace Codist.Options
 			catch (System.Runtime.InteropServices.ExternalException) {
 				return default;
 			}
-			UIHelper.ParseColor(c, out var color, out _);
+			ColorHelper.ParseColor(c, out var color, out _);
 			return color;
 		}
 

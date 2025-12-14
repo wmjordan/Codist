@@ -19,13 +19,13 @@ namespace Codist.SyntaxHighlight
 			Bold = bold;
 		}
 		public StyleAttribute(string foreColor) {
-			UIHelper.ParseColor(foreColor, out var c, out var o);
+			ColorHelper.ParseColor(foreColor, out var c, out var o);
 			ForeColor = o != 0 ? c.Alpha(o) : c;
 		}
 		public StyleAttribute(string foreColor, string backColor) {
-			UIHelper.ParseColor(foreColor, out var c, out var o);
+			ColorHelper.ParseColor(foreColor, out var c, out var o);
 			ForeColor = o != 0 ? c.Alpha(o) : c;
-			UIHelper.ParseColor(backColor, out c, out o);
+			ColorHelper.ParseColor(backColor, out c, out o);
 			BackColor = o != 0 ? c.Alpha(o) : c;
 		}
 	}

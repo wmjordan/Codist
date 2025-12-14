@@ -169,7 +169,7 @@ namespace Codist.QuickInfo
 					}
 					return null;
 				case SyntaxKind.StringLiteralExpression:
-					UIHelper.ParseColor(((LiteralExpressionSyntax)a1).Token.ValueText, out var color, out var opacity);
+					ColorHelper.ParseColor(((LiteralExpressionSyntax)a1).Token.ValueText, out var color, out var opacity);
 					return opacity != 0 ? (color.GetArgbValue() | opacity << 24) : null;
 				case SyntaxKind.SimpleMemberAccessExpression:
 				case SyntaxKind.IdentifierName:

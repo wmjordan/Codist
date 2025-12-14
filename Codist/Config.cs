@@ -642,7 +642,7 @@ namespace Codist
 		[DefaultValue(Constants.EmptyColor)]
 		public string BackgroundColor {
 			get => _BackColor.A == 0 ? Constants.EmptyColor : _BackColor.ToHexString();
-			set => UIHelper.ParseColor(value, out _BackColor, out _);
+			set => ColorHelper.ParseColor(value, out _BackColor, out _);
 		}
 
 		[DefaultValue(0)]

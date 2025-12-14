@@ -42,7 +42,7 @@ namespace Codist.SyntaxHighlight
 				: _ForeColor.A > 0 && _ForeColorOpacity == 0 ? _ForeColor.ToHexString()
 				: _ForeColor.A == 0 && _ForeColorOpacity > 0 ? "#" + _ForeColorOpacity.ToString("X2")
 				: _ForeColor.Alpha(_ForeColorOpacity).ToHexString();
-			set => UIHelper.ParseColor(value, out _ForeColor, out _ForeColorOpacity);
+			set => ColorHelper.ParseColor(value, out _ForeColor, out _ForeColorOpacity);
 		}
 		/// <summary>Gets or sets the background color to render the text. The color format could be #AARRGGBB or #RRGGBB.</summary>
 		[DefaultValue(Constants.EmptyColor)]
@@ -52,7 +52,7 @@ namespace Codist.SyntaxHighlight
 				: _BackColor.A > 0 && _BackColorOpacity == 0 ? _BackColor.ToHexString()
 				: _BackColor.A == 0 && _BackColorOpacity > 0 ? "#" + _BackColorOpacity.ToString("X2")
 				: _BackColor.Alpha(_BackColorOpacity).ToHexString();
-			set => UIHelper.ParseColor(value, out _BackColor, out _BackColorOpacity);
+			set => ColorHelper.ParseColor(value, out _BackColor, out _BackColorOpacity);
 		}
 		/// <summary>Gets or sets the brush effect to draw the background color.</summary>
 		[DefaultValue(BrushEffect.Solid)]
@@ -65,7 +65,7 @@ namespace Codist.SyntaxHighlight
 				: _LineColor.A > 0 && _LineOpacity == 0 ? _LineColor.ToHexString()
 				: _LineColor.A == 0 && _LineOpacity > 0 ? "#" + _LineOpacity.ToString("X2")
 				: _LineColor.Alpha(_LineOpacity).ToHexString();
-			set => UIHelper.ParseColor(value, out _LineColor, out _LineOpacity);
+			set => ColorHelper.ParseColor(value, out _LineColor, out _LineOpacity);
 		}
 		[DefaultValue(LineStyle.Solid)]
 		public LineStyle LineStyle { get; set; }

@@ -61,7 +61,7 @@ namespace Codist.Margins
 				color = DefaultSymbolDefinitionColor;
 				return;
 			}
-			UIHelper.ParseColor(value, out color, out _);
+			ColorHelper.ParseColor(value, out color, out _);
 		}
 	}
 }
