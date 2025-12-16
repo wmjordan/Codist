@@ -169,6 +169,16 @@ namespace Codist.Controls
 			Unchecked += changedHandler;
 		}
 
+		protected override void OnChecked(RoutedEventArgs e) {
+			base.OnChecked(e);
+			this.ReferenceCrispImageBackground(VsColors.FileTabSelectedGradientTopKey);
+		}
+
+		protected override void OnUnchecked(RoutedEventArgs e) {
+			base.OnUnchecked(e);
+			this.ReferenceCrispImageBackground(EnvironmentColors.MainWindowActiveCaptionColorKey);
+		}
+
 		public TextBlock Text {
 			get => _Text;
 			set {

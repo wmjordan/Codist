@@ -16,6 +16,7 @@ namespace Codist.Controls
 			icon.VerticalAlignment = VerticalAlignment.Top;
 			Children.Add(icon);
 			this.ReferenceProperty(TextBlock.ForegroundProperty, EnvironmentColors.ToolTipTextBrushKey);
+			this.ReferenceCrispImageBackground(EnvironmentColors.ToolTipColorKey);
 		}
 
 		public CommandToolTip(int imageId, string tip) : this(imageId) {
