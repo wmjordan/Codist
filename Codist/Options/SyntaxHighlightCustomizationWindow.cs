@@ -595,7 +595,32 @@ namespace Codist.Options
 						MessageWindow.Error(ex);
 					}
 				}, R.T_ClassificationTypesJsonTip, ThemeCache.HyperlinkBrush));
-				l.Add(new TextBlock { Margin = WpfHelper.SmallMargin }.AppendLink(R.T_AboutCustomSyntaxRules, "https://github.com/wmjordan/Codist/wiki/ClassificationTypes.json-and-Codist.ct.json", R.T_AboutCustomSyntaxRulesTip, ThemeCache.HyperlinkBrush));
+				l.Add(new TextBlock { Margin = WpfHelper.SmallMargin }.AppendLink(R.CMD_ConvertCodistCtJsonToYaml, _ => {
+					var d = new OpenFileDialog {
+						Title = R.T_LoadCodistCtJson,
+						FileName = "Codist.ct.json",
+						DefaultExt = ".json",
+						CheckFileExists = true,
+						Filter = R.F_Config
+					};
+					var p = CodistPackage.DTE.ActiveDocument.Path;
+					if (String.IsNullOrEmpty(p) == false) {
+						try {
+							d.InitialDirectory = System.IO.Path.GetDirectoryName(p);
+						}
+						catch (System.Security.SecurityException) { }
+					}
+					try {
+						if (d.ShowDialog() == true) {
+							CustomTagger.ConvertJsonConfigToYaml(d.FileName);
+							MessageWindow.Show(R.T_ConvertedCodistCtJsonToYaml);
+						}
+					}
+					catch (Exception ex) {
+						MessageWindow.Error(ex.Message, R.T_FailedToLoadSyntaxCustomizationFile);
+					}
+				}, R.CMD_ConvertCodistCtJsonToYaml));
+				l.Add(new TextBlock { Margin = WpfHelper.SmallMargin }.AppendLink(R.T_AboutCustomSyntaxRules, "https://github.com/wmjordan/Codist/wiki/ClassificationTypes.json-and-Codist.ct.yaml", R.T_AboutCustomSyntaxRulesTip, ThemeCache.HyperlinkBrush));
 			}
 		}
 

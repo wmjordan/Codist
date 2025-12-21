@@ -233,6 +233,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Convert Codist.ct.json to YAML format.
+        /// </summary>
+        internal static string CMD_ConvertCodistCtJsonToYaml {
+            get {
+                return ResourceManager.GetString("CMD_ConvertCodistCtJsonToYaml", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Copy color.
         /// </summary>
         internal static string CMD_CopyColor {
@@ -6552,6 +6561,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Codist.ct.json has been converted to Codist.ct.yaml successfully..
+        /// </summary>
+        internal static string T_ConvertedCodistCtJsonToYaml {
+            get {
+                return ResourceManager.GetString("T_ConvertedCodistCtJsonToYaml", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Copy after &lt;NAME&gt;.
         /// </summary>
         internal static string T_CopyAfter {
@@ -7488,6 +7506,15 @@ namespace Codist.Properties {
         internal static string T_LineThickness {
             get {
                 return ResourceManager.GetString("T_LineThickness", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Load Codist.ct.json for conversion.
+        /// </summary>
+        internal static string T_LoadCodistCtJson {
+            get {
+                return ResourceManager.GetString("T_LoadCodistCtJson", resourceCulture);
             }
         }
         

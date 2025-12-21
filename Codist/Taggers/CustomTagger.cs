@@ -56,6 +56,10 @@ namespace Codist.Taggers
 			}
 		}
 
+		public static void ConvertJsonConfigToYaml(string jsonConfigPath) {
+			LoadAndConvertJsonConfigFile(jsonConfigPath, JsonExtension, File.ReadAllText(jsonConfigPath));
+		}
+
 		static List<TextTaggerBase> CreateTaggers(CustomTagDefinitionSet defSet) {
 			var taggers = new List<TextTaggerBase>();
 			var cts = ServicesHelper.Instance.ClassificationTypeRegistry;
@@ -129,13 +133,8 @@ namespace Codist.Taggers
 
 		static List<CustomTagDefinitionSet> LoadAndConvertJsonConfigFile(string configPath, string extension, string t) {
 			var r = JsonConvert.DeserializeObject<List<CustomTagDefinitionSet>>(t);
-			try {
-				YamlLoader.Save(configPath.Substring(0, configPath.Length - extension.Length) + YamlExtension, r);
-				File.Delete(configPath);
-			}
-			catch {
-				// ignore
-			}
+			YamlLoader.Save(configPath.Substring(0, configPath.Length - extension.Length) + YamlExtension, r);
+			File.Delete(configPath);
 			return r;
 		}
 

@@ -3026,4 +3026,13 @@ Ctrl: 将下划线分隔的单词转换为首字母大写的单词</value>
     <value>外部引用
 限制搜索范围，排除源代码</value>
   </data>
+  <data name="CMD_ConvertCodistCtJsonToYaml" xml:space="preserve">
+    <value>将 Codist.ct.json 转换为 YAML 格式</value>
+  </data>
+  <data name="T_LoadCodistCtJson" xml:space="preserve">
+    <value>加载需要转换的 Codist.ct.json</value>
+  </data>
+  <data name="T_ConvertedCodistCtJsonToYaml" xml:space="preserve">
+    <value>Codist.ct.json 已被成功转换为 Codist.ct.yaml。</value>
+  </data>
 </root>

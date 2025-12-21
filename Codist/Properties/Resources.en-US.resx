@@ -3040,4 +3040,13 @@ Match non-generic methods only</value>
     <value>External
 Only search in referenced libraries, excluding source code</value>
   </data>
+  <data name="CMD_ConvertCodistCtJsonToYaml" xml:space="preserve">
+    <value>Convert Codist.ct.json to YAML format</value>
+  </data>
+  <data name="T_LoadCodistCtJson" xml:space="preserve">
+    <value>Load Codist.ct.json for conversion</value>
+  </data>
+  <data name="T_ConvertedCodistCtJsonToYaml" xml:space="preserve">
+    <value>Codist.ct.json has been converted to Codist.ct.yaml successfully.</value>
+  </data>
 </root>
