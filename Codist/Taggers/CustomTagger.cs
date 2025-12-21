@@ -47,8 +47,17 @@ namespace Codist.Taggers
 		protected override bool DoFullParseAtFirstLoad => _FullParse;
 		protected override void Parse(SnapshotSpan span, ICollection<TaggedContentSpan> results) {
 			TextTaggerBase[] taggers;
-			if ((taggers = _Taggers) == null || taggers.Length == 0) {
+			if ((taggers = _Taggers) == null || taggers.Length == 0 || span.Length == 0) {
 				return;
+			}
+			var shot = span.Snapshot;
+			var end = span.End.Position - 1;
+			// strip one trailing line-end
+			if (shot[end] == '\n') {
+				if (end > 0 && shot[end - 1] == '\r') {
+					--end;
+				}
+				span = new SnapshotSpan(span.Start, end - span.Start.Position);
 			}
 			var ctx = new TaggerContext(span, results);
 			foreach (var tagger in taggers) {
@@ -151,7 +160,7 @@ namespace Codist.Taggers
 
 			public SnapshotSpan Span { get; }
 			public ICollection<TaggedContentSpan> Results { get; }
-			public string Text => _SpanText != null ? _SpanText : (_SpanText = Span.GetText());
+			public string Text => _SpanText ??= Span.GetText();
 
 			public void AddTag(IClassificationTag tag) {
 				Results.Add(new TaggedContentSpan(tag, Span, 0, 0));
