@@ -206,19 +206,19 @@ namespace Codist.Commands
 					// already has parentheses
 					return false;
 				case SyntaxKind.EqualsValueClause:
-					// method used as a delegate
-					if (sc.SemanticModel.GetTypeInfo(((EqualsValueClauseSyntax)pNode).Value, ct).ConvertedType?.TypeKind == TypeKind.Delegate) {
-						return false;
-					}
-					break;
+					return !IsExpressionDelegate(sc, ((EqualsValueClauseSyntax)pNode).Value, ct);
+				case SyntaxKind.SimpleAssignmentExpression:
 				case SyntaxKind.AddAssignmentExpression:
 				case SyntaxKind.SubtractAssignmentExpression:
-					if (sc.SemanticModel.GetTypeInfo(((AssignmentExpressionSyntax)pNode).Right, ct).ConvertedType?.TypeKind == TypeKind.Delegate) {
-						return false;
-					}
-					break;
+					return !IsExpressionDelegate(sc, ((AssignmentExpressionSyntax)pNode).Right, ct);
+				case SyntaxKind.ReturnStatement:
+					return !IsExpressionDelegate(sc, ((ReturnStatementSyntax)pNode).Expression, ct);
 			}
 			return true;
+		}
+
+		static bool IsExpressionDelegate(SemanticContext sc, ExpressionSyntax expression, CancellationToken ct) {
+			return sc.SemanticModel.GetTypeInfo(expression, ct).ConvertedType?.TypeKind == TypeKind.Delegate;
 		}
 
 		static bool IsDelegateTypedArgumentOrName(SemanticContext sc, ArgumentSyntax pNode, CancellationToken ct) {
