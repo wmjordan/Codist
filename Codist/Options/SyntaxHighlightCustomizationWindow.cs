@@ -776,8 +776,13 @@ namespace Codist.Options
 			var r = new List<IClassificationType>(styles.Count + 4);
 			string category = null;
 			var ctr = ServicesHelper.Instance.ClassificationTypeRegistry;
+			var ignore = ServicesHelper.Instance.ClassificationTypeExporter.ShouldIgnore;
 			foreach (var item in styles) {
 				if (item.Category.Length == 0) {
+					continue;
+				}
+				var ct = ctr.GetClassificationType(item.ClassificationType);
+				if (ignore(ct)) {
 					continue;
 				}
 				var id = item.Id;
@@ -785,7 +790,7 @@ namespace Codist.Options
 				if (item.Category != category) {
 					r.Add(TextEditorHelper.CreateClassificationCategory(category = item.Category));
 				}
-				r.Add(ctr.GetClassificationType(item.ClassificationType));
+				r.Add(ct);
 			}
 			return r;
 		}

@@ -316,7 +316,8 @@ namespace Codist.SyntaxHighlight
 				&& c != "natural language"
 				&& c != "mismatched brace"
 				&& c != Constants.CodeIdentifier // hack: workaround a VS bug that identifier takes abnormal precedency
-				&& c.StartsWith("brace matching", StringComparison.Ordinal) == false;
+				&& c.StartsWith("brace matching", StringComparison.Ordinal) == false
+				&& !ServicesHelper.Instance.ClassificationTypeExporter.ShouldIgnore(item);
 		}
 
 		static void ResetStyleCache(Config config) {

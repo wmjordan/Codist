@@ -25,6 +25,7 @@ namespace Codist.SyntaxHighlight
 		readonly IEditorFormatMapService _EditorFormatMaps;
 		readonly List<Entry> _Entries = new List<Entry>();
 		readonly List<string> _CustomizedNames = new List<string>();
+		Predicate<IClassificationType> _ShouldIgnoreClassificationType = _ => false;
 
 		public ClassificationTypeExporter(IClassificationTypeRegistryService classifications, IContentTypeRegistryService contentTypes, IClassificationFormatMapService formatMaps, IEditorFormatMapService editorFormatMaps) {
 			_Classifications = classifications;
@@ -84,20 +85,7 @@ namespace Codist.SyntaxHighlight
 			if (HasCustomTypes) {
 				return;
 			}
-			var o = new CustomizedClassificationTypes {
-				Types = {
-						new CustomizedClassificationType { Name = "Error" },
-						new CustomizedClassificationType { Name = "Warning" },
-						new CustomizedClassificationType { Name = "Information" },
-						new CustomizedClassificationType { Name = "Bold", IsBold = true },
-						new CustomizedClassificationType { Name = "Italic", IsItalic = true },
-						new CustomizedClassificationType { Name = "Underline", IsUnderline = true },
-						new CustomizedClassificationType { Name = "Bold Italic", BaseOn = "Bold, Italic" },
-						new CustomizedClassificationType { Name = "Bold Underline", BaseOn = "Bold, Underline" },
-						new CustomizedClassificationType { Name = "Large Text", FontSize = 22 },
-					}
-			};
-			File.WriteAllText(Config.CustomizedClassificationTypePath, JsonConvert.SerializeObject(o));
+			File.WriteAllText(Config.CustomizedClassificationTypePath, JsonConvert.SerializeObject(CustomizedClassificationTypes.Sample));
 		}
 
 		static readonly char[] __ClassificationTypeDelimiters = [';', ','];
@@ -115,7 +103,25 @@ namespace Codist.SyntaxHighlight
 				CodistPackage.ShowError(ex, R.T_FailedToLoadSyntaxCustomizationFile + "\n" + Config.CustomizedClassificationTypePath);
 				return;
 			}
-			if (!(customTypes?.Types?.Count > 0)) {
+			if (customTypes is null) {
+				return;
+			}
+			if (customTypes.IgnoreClassificationTypes.Count != 0) {
+				var ignores = new HashSet<IClassificationType>();
+				foreach (var item in customTypes.IgnoreClassificationTypes) {
+					if (String.IsNullOrWhiteSpace(item)) {
+						continue;
+					}
+					var type = _Classifications.GetClassificationType(item);
+					if (type != null) {
+						ignores.Add(type);
+					}
+				}
+				if (ignores.Count != 0) {
+					_ShouldIgnoreClassificationType = ignores.Contains;
+				}
+			}
+			if (customTypes.Types.Count == 0) {
 				return;
 			}
 			var r = _Classifications;
@@ -176,6 +182,10 @@ namespace Codist.SyntaxHighlight
 
 		public List<IClassificationType> GetCustomClassificationTypes() {
 			return _CustomizedNames.ConvertAll(_Classifications.GetClassificationType);
+		}
+
+		public bool ShouldIgnore(IClassificationType classificationType) {
+			return _ShouldIgnoreClassificationType(classificationType);
 		}
 
 		public void UpdateClassificationFormatMap(string category) {
@@ -405,6 +415,23 @@ namespace Codist.SyntaxHighlight
 
 			[JsonProperty("items")]
 			public List<CustomizedClassificationType> Types { get; } = new List<CustomizedClassificationType>();
+
+			[JsonProperty("ignore")]
+			public List<string> IgnoreClassificationTypes { get; } = new List<string>();
+
+			internal static CustomizedClassificationTypes Sample => new CustomizedClassificationTypes {
+				Types = {
+						new CustomizedClassificationType { Name = "Error" },
+						new CustomizedClassificationType { Name = "Warning" },
+						new CustomizedClassificationType { Name = "Information" },
+						new CustomizedClassificationType { Name = "Bold", IsBold = true },
+						new CustomizedClassificationType { Name = "Italic", IsItalic = true },
+						new CustomizedClassificationType { Name = "Underline", IsUnderline = true },
+						new CustomizedClassificationType { Name = "Bold Italic", BaseOn = "Bold, Italic" },
+						new CustomizedClassificationType { Name = "Bold Underline", BaseOn = "Bold, Underline" },
+						new CustomizedClassificationType { Name = "Large Text", FontSize = 22 },
+					}
+			};
 		}
 
 		sealed class CustomizedClassificationType
