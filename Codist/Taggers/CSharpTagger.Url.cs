@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Windows.Controls.Primitives;
 using CLR;
 
 namespace Codist.Taggers

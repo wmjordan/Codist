@@ -748,9 +748,17 @@ namespace Codist.QuickInfo
 				return;
 			}
 			var namespaces = ImmutableArray.CreateBuilder<INamespaceOrTypeSymbol>();
-			namespaces.AddRange(nsSymbol.GetNamespaceMembers());
-			namespaces.Sort((x, y) => String.CompareOrdinal(x.Name, y.Name));
+			var types = ImmutableArray.CreateBuilder<INamedTypeSymbol>();
+			foreach (var item in nsSymbol.GetMembers()) {
+				if (item.IsType) {
+					types.Add(item as INamedTypeSymbol);
+				}
+				else {
+					namespaces.Add(item);
+				}
+			}
 			if (namespaces.Count > 0) {
+				namespaces.Sort((x, y) => String.CompareOrdinal(x.Name, y.Name));
 				var info = new GeneralInfoBlock(IconIds.Namespace, R.T_Namespace);
 				foreach (var ns in namespaces) {
 					info.Add(
@@ -760,11 +768,10 @@ namespace Codist.QuickInfo
 				}
 				qiContent.Add(info);
 			}
-
-			var members = nsSymbol.GetTypeMembers();
-			if (members.Length > 0) {
+			if (types.Count > 0) {
+				types.Sort((x, y) => String.CompareOrdinal(x.Name, y.Name));
 				var info = new GeneralInfoBlock(IconIds.Namespace, R.T_Type);
-				foreach (var type in members.Sort((x, y) => String.CompareOrdinal(x.Name, y.Name))) {
+				foreach (var type in types) {
 					info.Add(
 						new BlockItem(type.GetImageId())
 							.Append(new SymbolDeclarationSegment(type, true, true))

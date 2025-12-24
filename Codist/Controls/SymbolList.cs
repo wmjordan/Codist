@@ -134,19 +134,20 @@ namespace Codist.Controls
 					? items[0] as SymbolItem
 					: SelectedItem as SymbolItem;
 				if (item != null) {
-					GoToSourceAsync(item);
+					GoToSource(item, this);
 				}
 				e.Handled = true;
 			}
 
-			async void GoToSourceAsync(SymbolItem i) {
+			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
+			async void GoToSource(SymbolItem i, SymbolList me) {
 				try {
 					await i.GoToSourceAsync();
 				}
 				catch (OperationCanceledException) {
 				}
 				catch (Exception ex) {
-					await SyncHelper.SwitchToMainThreadAsync();
+					await SyncHelper.SwitchToMainThreadAsync(default);
 					MessageWindow.Error(ex, R.T_ErrorNavigatingToSource, null, typeof(SymbolItem));
 				}
 			}
@@ -308,49 +309,53 @@ namespace Codist.Controls
 		#endregion
 
 		#region Context menu
-		[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
-		async void OnListItemContextMenuOpening(object sender, ContextMenuEventArgs e) {
+		void OnListItemContextMenuOpening(object sender, ContextMenuEventArgs e) {
 			var sc = SemanticContext;
 			if (sc == null) {
 				return;
 			}
 
-			var item = SelectedSymbolItem;
-			try {
-				var ct = SyncHelper.CancelAndRetainToken(ref _ContextMenuCancellationTokenSource);
-				await sc.UpdateAsync(ct);
-				if (item != null) {
-					if (item.Symbol != null) {
-						await item.RefreshSymbolAsync(ct);
-					}
-					else if (item.SyntaxNode != null) {
-						await item.SetSymbolToSyntaxNodeAsync(ct);
+			ShowContextMenu(sender, e, sc, this);
+
+			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
+			static async void ShowContextMenu(object sender, ContextMenuEventArgs e, SemanticContext sc, SymbolList me) {
+				var item = me.SelectedSymbolItem;
+				try {
+					var ct = SyncHelper.CancelAndRetainToken(ref me._ContextMenuCancellationTokenSource);
+					await sc.UpdateAsync(ct);
+					if (item != null) {
+						if (item.Symbol != null) {
+							await item.RefreshSymbolAsync(ct);
+						}
+						else if (item.SyntaxNode != null) {
+							await item.SetSymbolToSyntaxNodeAsync(ct);
+						}
 					}
 				}
-			}
-			catch (OperationCanceledException) {
-				// ignore
-			}
-			catch (Exception ex) {
-				MessageWindow.Error(ex, null, null, this);
-				e.Handled = true;
-				return;
-			}
+				catch (OperationCanceledException) {
+					// ignore
+				}
+				catch (Exception ex) {
+					MessageWindow.Error(ex, null, null, me);
+					e.Handled = true;
+					return;
+				}
 
-			if (item.Symbol == null && item.SyntaxNode == null) {
+				if (item.Symbol == null && item.SyntaxNode == null) {
+					e.Handled = true;
+					return;
+				}
+				CSharpSymbolContextMenu m;
+				((ListBoxItem)sender).ContextMenu = m = new CSharpSymbolContextMenu(item.Symbol, item.SyntaxNode, sc) {
+					Resources = SharedDictionaryManager.ContextMenu,
+					Foreground = ThemeCache.ToolWindowTextBrush,
+					IsEnabled = true,
+				};
+				SetupContextMenu(m, item);
+				m.AddTitleItem(item.SyntaxNode?.GetDeclarationSignature() ?? item.Symbol.GetOriginalName());
+				m.IsOpen = true;
 				e.Handled = true;
-				return;
 			}
-			CSharpSymbolContextMenu m;
-			((ListBoxItem)sender).ContextMenu = m = new CSharpSymbolContextMenu(item.Symbol, item.SyntaxNode, SemanticContext) {
-				Resources = SharedDictionaryManager.ContextMenu,
-				Foreground = ThemeCache.ToolWindowTextBrush,
-				IsEnabled = true,
-			};
-			SetupContextMenu(m, item);
-			m.AddTitleItem(item.SyntaxNode?.GetDeclarationSignature() ?? item.Symbol.GetOriginalName());
-			m.IsOpen = true;
-			e.Handled = true;
 		}
 
 		static void SetupContextMenu(CSharpSymbolContextMenu menu, SymbolItem item) {

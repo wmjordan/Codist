@@ -604,9 +604,7 @@ namespace Codist
 				case SymbolKind.Method: return ((IMethodSymbol)symbol).Parameters;
 				case SymbolKind.Event: return ((IEventSymbol)symbol).AddMethod.Parameters;
 				case SymbolKind.Property: return ((IPropertySymbol)symbol).Parameters;
-				case SymbolKind.NamedType:
-					return (symbol = symbol.AsMethod()) != null ? ((IMethodSymbol)symbol).Parameters
-						: default;
+				case SymbolKind.NamedType: return symbol.AsMethod()?.Parameters ?? default;
 			}
 			return default;
 		}
@@ -621,10 +619,7 @@ namespace Codist
 				case SymbolKind.Parameter: return ((IParameterSymbol)symbol).Type;
 				case SymbolKind.Property: return ((IPropertySymbol)symbol).Type;
 				case SymbolKind.Alias: return GetReturnType(((IAliasSymbol)symbol).Target);
-				case SymbolKind.NamedType:
-					return (symbol = symbol.AsMethod()) != null
-						? ((IMethodSymbol)symbol).ReturnType
-						: null;
+				case SymbolKind.NamedType: return symbol.AsMethod()?.ReturnType;
 			}
 			return null;
 		}

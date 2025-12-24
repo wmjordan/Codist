@@ -52,7 +52,7 @@ namespace Codist.Taggers
 			}
 			var shot = span.Snapshot;
 			var end = span.End.Position - 1;
-			// strip one trailing line-end
+			// trim one trailing line-end
 			if (shot[end] == '\n') {
 				if (end > 0 && shot[end - 1] == '\r') {
 					--end;
