@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using CLR;
+using Codist.SymbolAnalysis;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.VisualStudio.Shell;
@@ -337,63 +338,6 @@ namespace Codist.Controls
 			TextEditorHelper.ExecuteEditorCommand("Edit.GoToSymbol");
 		}
 		#endregion
-
-		enum CommandId
-		{
-			GoToNode,
-			SelectNode,
-			SelectSymbolNode,
-			GoToSymbolDefinition,
-			CopySymbolName,
-			CopyConstantValue,
-			WebSearch,
-			ListReturnTypeMembers,
-			FindReturnTypeExtensionMethods,
-			GoToSymbolReturnType,
-			ListSpecialGenericReturnTypeMembers,
-			GoToSpecialGenericSymbolReturnType,
-			FindExtensionMethods,
-			FindSubInterfaces,
-			FindImplementations,
-			FindDerivedClasses,
-			FindOverrides,
-			FindReferrers,
-			FindSymbolsWithName,
-			FindMethodsBySignature,
-			FindConstructorReferrers,
-			FindObjectInitializers,
-			FindParameterAssignments,
-			FindOptionalParameterAssignments,
-			ListReferencedSymbols,
-			ListSymbolMembers,
-			DebugUnitTest,
-			RunUnitTest,
-			FindInstanceProducers,
-			FindInstanceConsumers,
-			FindContainingTypeInstanceProducers,
-			FindContainingTypeInstanceConsumers,
-			FindTypeReferrers,
-			ListSymbolLocations,
-			ListEventArgsMembers,
-		}
-
-		[Flags]
-		enum CommandOptions
-		{
-			Default,
-			CurrentFile = 1,
-			CurrentProject = 1 << 1,
-			RelatedProjects = 1 << 2,
-			SourceCode = 1 << 3,
-			External = 1 << 4,
-			ExtractMatch = 1 << 5,
-			DirectDerive = 1 << 6,
-			MatchCase = 1 << 7,
-			Explicit = 1 << 8,
-			Implicit = 1 << 9,
-			MatchTypeArgument = 1 << 10,
-			NoTypeArgument = 1 << 11,
-		}
 
 		sealed class CustomMenuItem : MenuItem
 		{
