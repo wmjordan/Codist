@@ -1,4 +1,4 @@
-﻿namespace Codist.SymbolAnalysis
+﻿namespace Codist.SymbolCommands
 {
 	enum CommandId
 	{

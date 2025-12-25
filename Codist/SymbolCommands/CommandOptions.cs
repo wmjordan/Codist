@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Codist.SymbolAnalysis
+namespace Codist.SymbolCommands
 {
 	[Flags]
 	enum CommandOptions

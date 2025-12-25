@@ -129,8 +129,8 @@
     <Compile Include="Semantics\SyntaxModel.cs" />
     <Compile Include="SmartBars\MarkupSmartBar.cs" />
     <Compile Include="Suppression.cs" />
-    <Compile Include="SymbolAnalysis\CommandId.cs" />
-    <Compile Include="SymbolAnalysis\CommandOptions.cs" />
+    <Compile Include="SymbolCommands\CommandId.cs" />
+    <Compile Include="SymbolCommands\CommandOptions.cs" />
     <Compile Include="SyntaxHighlight\ClassificationTypeExporter.cs" />
     <Compile Include="SyntaxHighlight\CodeStyleTypes.cs" />
     <Compile Include="Commands\AutoBuildVersionWindow.cs" />
