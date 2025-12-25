@@ -1031,7 +1031,7 @@ namespace Codist
 						continue;
 					}
 					if (!member.CanBeReferencedByName
-					    && member.GetExplicitInterfaceImplementations().Count == 0) {
+						&& member.GetExplicitInterfaceImplementations().Count == 0) {
 						continue;
 					}
 					if (member.Kind == SymbolKind.NamedType) {
@@ -1039,9 +1039,11 @@ namespace Codist
 						continue;
 					}
 					sb.Append('\t', indent)
-						.Append(member.ToDisplayString(format))
-						.Append(';')
-						.AppendLine();
+						.Append(member.ToDisplayString(format));
+					if (member.Kind != SymbolKind.Property) {
+						sb.Append(';');
+					}
+					sb.AppendLine();
 				}
 				sb.Append('\t', indent - 1).Append('}').ToString();
 			}
