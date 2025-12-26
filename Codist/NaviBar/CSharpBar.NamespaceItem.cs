@@ -76,7 +76,7 @@ namespace Codist.NaviBar
 					.ReferenceProperty(TextBlock.ForegroundProperty, EnvironmentColors.SystemGrayTextBrushKey);
 				Bar.SetupSymbolListMenu(_Menu);
 				await Bar._SemanticContext.UpdateAsync(cancellationToken).ConfigureAwait(false);
-				var items = await Bar._SemanticContext.GetNamespacesAndTypesAsync(Symbol as INamespaceSymbol, cancellationToken).ConfigureAwait(false);
+				var items = await (Symbol as INamespaceSymbol).GetNamespacesAndTypesAsync(Bar._SemanticContext.Document.Project, cancellationToken).ConfigureAwait(false);
 				await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
 				_Menu.AddNamespaceItems(items, Bar.GetChildSymbolOnNaviBar(this));
 			}
@@ -93,7 +93,7 @@ namespace Codist.NaviBar
 				await ctx.UpdateAsync(cancellationToken).ConfigureAwait(false);
 				if (sm != ctx.SemanticModel) {
 					_Menu.ClearSymbols();
-					var items = await ctx.GetNamespacesAndTypesAsync(Symbol as INamespaceSymbol, cancellationToken).ConfigureAwait(false);
+					var items = await (Symbol as INamespaceSymbol).GetNamespacesAndTypesAsync(ctx.Document.Project, cancellationToken).ConfigureAwait(false);
 					await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
 					_Menu.AddNamespaceItems(items, Bar.GetChildSymbolOnNaviBar(this));
 					_Menu.RefreshItemsSource(true);

@@ -79,5 +79,9 @@ namespace Codist
 		public static string GetText(this Location location, CancellationToken cancellationToken = default) {
 			return location.SourceTree.GetText(cancellationToken).ToString(location.SourceSpan);
 		}
+
+		public static Location ToLocation(this SyntaxReference syntaxReference) {
+			return Location.Create(syntaxReference.SyntaxTree, syntaxReference.Span);
+		}
 	}
 }

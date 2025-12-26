@@ -480,7 +480,7 @@ Shift: Paste and select next (whole word)</value>
     <value> referenced symbols: </value>
   </data>
   <data name="T_Referrers" xml:space="preserve">
-    <value> referrers</value>
+    <value> referrers: </value>
   </data>
   <data name="T_ResultFilter" xml:space="preserve">
     <value>Result Filter</value>

@@ -129,6 +129,13 @@ namespace Codist
 			return arrayBuilder.ToSortedSymbolArray();
 		}
 
+		public static List<TSymbol> MakeSortedSymbolList<TSymbol>(this IEnumerable<TSymbol> symbols) where TSymbol : ISymbol {
+			var list = new List<TSymbol>();
+			list.AddRange(symbols);
+			list.Sort(CompareSymbol);
+			return list;
+		}
+
 		static ImmutableArray<TSymbol> ToSortedSymbolArray<TSymbol>(this ImmutableArray<TSymbol>.Builder arrayBuilder) where TSymbol : ISymbol {
 			arrayBuilder.Sort(CompareSymbol);
 			return arrayBuilder.ToImmutable();

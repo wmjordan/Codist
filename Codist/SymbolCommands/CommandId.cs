@@ -12,7 +12,6 @@
 		GoToSpecialGenericSymbolReturnType,
 		CopySymbolName,
 		CopyConstantValue,
-		WebSearch,
 		FindExtensionMethods,
 		FindReturnTypeExtensionMethods,
 		FindSubInterfaces,

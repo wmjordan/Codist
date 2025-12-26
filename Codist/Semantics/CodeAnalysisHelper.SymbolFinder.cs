@@ -148,12 +148,18 @@ namespace Codist
 					ITypeSymbol mt;
 					if (member.Kind == SymbolKind.Field) {
 						if (!member.IsCompilerGenerated()
-							&& (mt = member.GetReturnType()) != null && (mt == type || strict == false && mt.CanConvertTo(type) || (mt as INamedTypeSymbol).ContainsTypeArgument(type))) {
+							&& (mt = member.GetReturnType()) != null
+							&& (mt == type
+								|| strict == false && mt.CanConvertTo(type)
+								|| (mt as INamedTypeSymbol).ContainsTypeArgument(type, strict))) {
 							members.Add(member);
 						}
 					}
 					else if (!member.IsCompilerGenerated()
-						&& ((mt = member.GetReturnType()) != null && (mt == type || strict == false && mt.CanConvertTo(type) || (mt as INamedTypeSymbol).ContainsTypeArgument(type))
+						&& ((mt = member.GetReturnType()) != null
+							&& (mt == type
+								|| strict == false && mt.CanConvertTo(type)
+								|| (mt as INamedTypeSymbol).ContainsTypeArgument(type, strict))
 							|| member.Kind == SymbolKind.Method && member.GetParameters().Any(paramComparer))) {
 						members.Add(member);
 					}
@@ -227,7 +233,7 @@ namespace Codist
 			return r.ToSortedSymbolArray();
 		}
 
-		public static async Task<ImmutableArray<IMethodSymbol>> FindExtensionMethodsAsync(this ITypeSymbol type, Project project, bool strict, SymbolSourceFilter source, CancellationToken cancellationToken = default) {
+		public static async Task<ImmutableArray<IMethodSymbol>> FindExtensionMethodsAsync(this ITypeSymbol type, Project project, bool strict, bool matchTypeArgument, SymbolSourceFilter source, CancellationToken cancellationToken = default) {
 			var compilation = await project.GetCompilationAsync(cancellationToken).ConfigureAwait(false);
 			var members = ImmutableArray.CreateBuilder<IMethodSymbol>(10);
 			var isValueType = type.IsValueType;
@@ -260,7 +266,8 @@ namespace Codist
 					foreach (var item in m.TypeParameters) {
 						if (item != p.Type
 							|| item.HasValueTypeConstraint && isValueType == false
-							|| item.HasReferenceTypeConstraint && isValueType) {
+							|| item.HasReferenceTypeConstraint && isValueType
+							|| matchTypeArgument && item.ConstraintTypes.Length == 0) {
 							continue;
 						}
 						var constraintTypes = item.ConstraintTypes;

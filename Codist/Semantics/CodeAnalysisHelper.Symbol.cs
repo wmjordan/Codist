@@ -809,6 +809,35 @@ namespace Codist
 			return semanticModel.Compilation.GetCompilationNamespace(namespaceSymbol) ?? namespaceSymbol;
 		}
 
+		public static Task<ISymbol[]> GetNamespacesAndTypesAsync(this INamespaceSymbol symbol, Project project, CancellationToken cancellationToken = default) {
+			return symbol == null
+				? Task.FromResult(Array.Empty<ISymbol>())
+				: GetNamespacesAndTypesUncheckedAsync(project, symbol, cancellationToken);
+
+			async Task<ISymbol[]> GetNamespacesAndTypesUncheckedAsync(Project p, INamespaceSymbol s, CancellationToken ct) {
+				var ss = new HashSet<(Microsoft.CodeAnalysis.Text.TextSpan, string)>();
+				var a = new HashSet<ISymbol>(CodeAnalysisHelper.GetSymbolNameComparer());
+				var defOrRefMembers = new HashSet<INamespaceOrTypeSymbol>(s.GetMembers());
+				var nb = ImmutableArray.CreateBuilder<INamespaceOrTypeSymbol>();
+				var tb = ImmutableArray.CreateBuilder<INamespaceOrTypeSymbol>();
+				foreach (var ns in await s.FindSimilarNamespacesAsync(p, ct).ConfigureAwait(false)) {
+					foreach (var m in ns.GetMembers()) {
+						if (m.CanBeReferencedByName && m.IsImplicitlyDeclared == false && a.Add(m)) {
+							(m.IsNamespace ? nb : tb).Add(m);
+						}
+					}
+				}
+				var r = new ISymbol[nb.Count + tb.Count];
+				var i = -1;
+				foreach (var item in nb.OrderBy(n => n.Name)
+					.Concat(tb.OrderBy(n => n.Name).ThenBy(t => (t as INamedTypeSymbol)?.Arity ?? 0))
+					) {
+					r[++i] = item;
+				}
+				return r;
+			}
+		}
+
 		public static string GetTypeName(this ITypeSymbol symbol) {
 			switch (symbol.Kind) {
 				case SymbolKind.NamedType:
@@ -1118,14 +1147,23 @@ namespace Codist
 				&& type.TypeArguments.All(i => i.TypeKind != TypeKind.TypeParameter); // generic type in generic method, method type parameter as type parameter
 		}
 
-		public static bool ContainsTypeArgument(this INamedTypeSymbol generic, ITypeSymbol target) {
+		public static bool ContainsTypeArgument(this INamedTypeSymbol generic, ITypeSymbol target, bool strict = false) {
 			if (generic == null || generic.IsGenericType == false || generic.IsUnboundGenericType) {
 				return false;
 			}
+			if (strict) {
+				foreach (var item in generic.TypeArguments) {
+					if (Equals(item, target)) {
+						return true;
+					}
+				}
+			}
+			else {
 			foreach (var item in generic.TypeArguments) {
 				if (item.CanConvertTo(target)) {
 					return true;
 				}
+			}
 			}
 			return false;
 		}
@@ -1564,10 +1602,6 @@ namespace Codist
 			}
 		}
 
-		public static Location ToLocation(this SyntaxReference syntaxReference) {
-			return Location.Create(syntaxReference.SyntaxTree, syntaxReference.Span);
-		}
-
 		public static void GoToSource(this ISymbol symbol) {
 			symbol.DeclaringSyntaxReferences.FirstOrDefault().GoToSource();
 		}
@@ -1600,7 +1634,7 @@ namespace Codist
 						&& ServicesHelper.Instance.VisualStudioWorkspace.TryGoToDefinition(symbol, ctx.Document.Project, default)) {
 						return;
 					}
-					Controls.SymbolCommands.ShowLocations(ctx, symbol, r);
+					new SymbolCommands.ListSymbolLocationsCommand { Symbol = symbol, Context = ctx }.Show(r);
 				}
 			}
 		}

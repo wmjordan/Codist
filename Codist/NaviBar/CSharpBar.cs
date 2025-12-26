@@ -418,7 +418,7 @@ namespace Codist.NaviBar
 
 			async void GoToSourceAndHideMenuAsync(CSharpBar me, SymbolItem item) {
 				try {
-					if (await item.GoToSourceAsync()) {
+					if (await item.GoToSourceAsync(me._CancellationSource.Token)) {
 						me.HideMenu();
 					}
 				}
@@ -426,7 +426,7 @@ namespace Codist.NaviBar
 					// ignore
 				}
 				catch (Exception ex) {
-					await SyncHelper.SwitchToMainThreadAsync();
+					await SyncHelper.SwitchToMainThreadAsync(me._CancellationSource.Token);
 					MessageWindow.Error(ex, R.T_ErrorNavigatingToSource, null, typeof(SymbolItem));
 				}
 			}
@@ -488,7 +488,7 @@ namespace Codist.NaviBar
 			else if (node is IndexerDeclarationSyntax id) {
 				p = id.ParameterList;
 			}
-            else {
+			else {
 				return;
 			}
 			if (p != null) {

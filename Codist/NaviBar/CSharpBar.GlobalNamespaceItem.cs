@@ -71,9 +71,9 @@ namespace Codist.NaviBar
 					.ReferenceProperty(TextBlock.ForegroundProperty, EnvironmentColors.SystemGrayTextBrushKey);
 				Bar.SetupSymbolListMenu(_Menu);
 				await Bar._SemanticContext.UpdateAsync(cancellationToken).ConfigureAwait(true);
-				var d = Bar._SemanticContext.Document;
-				if (d != null) {
-					var items = await Bar._SemanticContext.GetNamespacesAndTypesAsync((await d.Project.GetCompilationAsync(cancellationToken).ConfigureAwait(false)).GlobalNamespace, cancellationToken).ConfigureAwait(false);
+				var p = Bar._SemanticContext.Document?.Project;
+				if (p != null) {
+					var items = await (await p.GetCompilationAsync(cancellationToken).ConfigureAwait(false)).GlobalNamespace.GetNamespacesAndTypesAsync(p, cancellationToken).ConfigureAwait(false);
 					await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
 					_Menu.AddNamespaceItems(items, Bar.GetChildSymbolOnNaviBar(this));
 				}
@@ -94,9 +94,9 @@ namespace Codist.NaviBar
 					return;
 				}
 				_Menu.ClearSymbols();
-				var d = ctx.Document;
-				if (d != null) {
-					var items = await ctx.GetNamespacesAndTypesAsync((await d.Project.GetCompilationAsync(cancellationToken).ConfigureAwait(false)).GlobalNamespace, cancellationToken).ConfigureAwait(false);
+				var p = ctx.Document?.Project;
+				if (p != null) {
+					var items = await (await p.GetCompilationAsync(cancellationToken).ConfigureAwait(false)).GlobalNamespace.GetNamespacesAndTypesAsync(p, cancellationToken).ConfigureAwait(false);
 					await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
 					_Menu.AddNamespaceItems(items, Bar.GetChildSymbolOnNaviBar(this));
 				}

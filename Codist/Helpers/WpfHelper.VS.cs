@@ -8,6 +8,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Xml.Linq;
 using Codist.Controls;
+using Codist.SymbolCommands;
 using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
@@ -329,7 +330,7 @@ namespace Codist
 
 			void GoToSymbol(object sender, RoutedEventArgs e) {
 				if (_Symbol.Kind == SymbolKind.Namespace) {
-					FindMembersForNamespace(_Symbol);
+					FindMembersForNamespaceAsync(_Symbol).FireAndForget();
 				}
 				else {
 					try {
@@ -342,8 +343,8 @@ namespace Codist
 				QuickInfo.QuickInfoOverride.DismissQuickInfo(this);
 				e.Handled = true;
 
-				async void FindMembersForNamespace(ISymbol symbol) {
-					await SemanticContext.GetHovered().FindMembersAsync(symbol);
+				async System.Threading.Tasks.Task FindMembersForNamespaceAsync(ISymbol symbol) {
+					await new CommandFactory(SemanticContext.GetHovered(), symbol).Create(CommandId.ListSymbolMembers).ExecuteAsync(default);
 				}
 			}
 		}

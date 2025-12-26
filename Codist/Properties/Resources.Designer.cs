@@ -8052,7 +8052,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to  referrers.
+        ///   Looks up a localized string similar to  referrers: .
         /// </summary>
         internal static string T_Referrers {
             get {

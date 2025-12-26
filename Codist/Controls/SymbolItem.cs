@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using Codist.SymbolCommands;
 using Microsoft.CodeAnalysis;
 
 namespace Codist.Controls
@@ -85,7 +86,7 @@ namespace Codist.Controls
 
 		public event PropertyChangedEventHandler PropertyChanged;
 
-		public async Task<bool> GoToSourceAsync() {
+		public async Task<bool> GoToSourceAsync(CancellationToken cancellationToken = default) {
 			if (Location?.IsInSource == true) {
 				GoToLocation();
 				return true;
@@ -95,7 +96,7 @@ namespace Codist.Controls
 				return true;
 			}
 			if (Symbol != null) {
-				return await GoToSymbolAsync();
+				return await GoToSymbolAsync(cancellationToken);
 			}
 			return false;
 		}
@@ -114,16 +115,16 @@ namespace Codist.Controls
 			node.GetIdentifierToken().GetLocation().GoToSource();
 		}
 
-		async Task<bool> GoToSymbolAsync() {
-			await RefreshSymbolAsync(default);
+		async Task<bool> GoToSymbolAsync(CancellationToken cancellationToken = default) {
+			await RefreshSymbolAsync(cancellationToken);
 			if (Symbol.Kind == SymbolKind.Namespace) {
-				await SyncHelper.SwitchToMainThreadAsync();
+				await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
 				var item = _Content.GetParent<ListBoxItem>().NullIfMouseOver();
-				await Container.SemanticContext.FindMembersAsync(Symbol, item);
+				await new CommandFactory(Container.SemanticContext, Symbol).Create(CommandId.ListSymbolMembers).ExecuteAsync(cancellationToken);
 				return false;
 			}
 			var s = Symbol.GetSourceReferences();
-			await SyncHelper.SwitchToMainThreadAsync();
+			await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
 			switch (s.Length) {
 				case 0:
 					if (Container.SemanticContext.Document != null) {
@@ -157,8 +158,8 @@ namespace Codist.Controls
 					s[0].GoToSource();
 					return true;
 				default:
-					var item = _Content.GetParent<ListBoxItem>().NullIfMouseOver();
-					Container.SemanticContext.ShowLocations(Symbol, s, item);
+					new SymbolCommands.ListSymbolLocationsCommand { Symbol = Symbol, Context = Container.SemanticContext }
+						.Show(s, _Content.GetParent<ListBoxItem>().NullIfMouseOver());
 					return false;
 			}
 		}

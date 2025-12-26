@@ -470,7 +470,7 @@ Shift：粘贴并选中下一项（整个单词）</value>
     <value> 引用的符号: </value>
   </data>
   <data name="T_Referrers" xml:space="preserve">
-    <value> 引用位置</value>
+    <value> 引用位置: </value>
   </data>
   <data name="T_ResultFilter" xml:space="preserve">
     <value>筛选结果</value>
