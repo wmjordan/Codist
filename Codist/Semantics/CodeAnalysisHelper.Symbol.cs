@@ -1051,6 +1051,9 @@ namespace Codist
 						.AppendLine();
 					return;
 				}
+				if (t.ContainingType != null && t.DeclaredAccessibility != Accessibility.Private) {
+					sb.Append(t.GetAccessibility());
+				}
 				sb.Append(t.ToDisplayString(format));
 				GetBaseTypeList(sb, t, format);
 				sb.AppendLine(" {");
@@ -1074,7 +1077,7 @@ namespace Codist
 					}
 					sb.AppendLine();
 				}
-				sb.Append('\t', indent - 1).Append('}').ToString();
+				sb.Append('\t', indent - 1).Append('}').AppendLine().ToString();
 			}
 
 			static void GetBaseTypeList(StringBuilder sb, INamedTypeSymbol t, SymbolDisplayFormat format) {
