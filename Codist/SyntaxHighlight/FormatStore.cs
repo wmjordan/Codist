@@ -527,20 +527,18 @@ namespace Codist.SyntaxHighlight
 					$"[{_Category}] refresh priority {formats.Count} inv: {_InvertBrightness}".Log(LogCategory.FormatStore);
 					_PropertiesCache.Clear();
 					foreach (var item in formats) {
-						if (item.IsFormattableClassificationType()
-							// hack: UnnecessaryCodeDiagnostic behaves weirdly, if we let it run the following code,
-							//   foreground color will be applied.
-							//   thus, we skip it heres
-							&& item.Classification != UnnecessaryCodeDiagnostic) {
-							var p = _ClassificationFormatMap.GetTextProperties(item);
-							// C/C++ styles can somehow get reverted, here we forcefully reinforce our highlights
-							if (Highlight(item, out newStyle) != FormatChanges.None) {
-								p = newStyle.Value.MergeFormatProperties(p);
-							}
-							$"[{_Category}] refresh classification {item.Classification} ({p.Print()})".Log(LogCategory.FormatStore);
-							_ClassificationFormatMap.SetTextProperties(item, p);
-							_PropertiesCache[item] = p;
+						if (!item.IsFormattableClassificationType()) {
+							continue;
 						}
+						var p = _ClassificationFormatMap.GetTextProperties(item);
+						p = FixForegroundOpacity(item, p);
+						// C/C++ styles can somehow get reverted, here we forcefully reinforce our highlights
+						if (Highlight(item, out newStyle) != FormatChanges.None) {
+							p = newStyle.Value.MergeFormatProperties(p);
+						}
+						$"[{_Category}] refresh classification {item.Classification} ({p.Print()})".Log(LogCategory.FormatStore);
+						_ClassificationFormatMap.SetTextProperties(item, p);
+						_PropertiesCache[item] = p;
 					}
 				}
 				finally {
@@ -548,6 +546,16 @@ namespace Codist.SyntaxHighlight
 					_PendingChange.PendingEvents = _PendingChange.PendingEvents.SetFlags(EventKind.Refresh, false);
 					UnlockEvent();
 				}
+			}
+
+			// hack: workaround a bug in VS incorrectly returns ForegroundBrush
+			TextFormattingRunProperties FixForegroundOpacity(IClassificationType item, TextFormattingRunProperties p) {
+				return !p.ForegroundBrushEmpty
+					&& p.ForegroundBrush.Opacity != 1
+					&& p.ForegroundOpacityEmpty
+					&& _EditorFormatMap.GetColor(__DefaultClassificationFormatMap.GetEditorFormatMapKey(item)).A == 0
+					? p.SetForegroundOpacity(p.ForegroundBrush.Opacity).ClearForegroundBrush()
+					: p;
 			}
 
 			public void Apply() {
