@@ -297,14 +297,14 @@ namespace Codist.Options
 											new TextBlock { Text = R.T_CommentTagSettings, FontWeight = FontWeights.Bold },
 											new WrapPanel {
 												Margin = WpfHelper.SmallMargin,
+												Children = { _TagCaseSensitiveBox, _TagHasPunctuationBox, }
+											},
+											new WrapPanel {
+												Margin = WpfHelper.SmallMargin,
 												Children = {
 													new LabeledControl(R.T_Tag, SMALL_LABEL_WIDTH, _TagBox),
 													new LabeledControl(R.T_Style, SMALL_LABEL_WIDTH, _TagStyleBox)
 												}
-											},
-											new WrapPanel {
-												Margin = WpfHelper.SmallMargin,
-												Children = { _TagCaseSensitiveBox, _TagHasPunctuationBox, }
 											},
 											new WrapPanel {
 												Margin = WpfHelper.SmallMargin,
