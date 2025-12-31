@@ -183,7 +183,6 @@
     <Compile Include="Display\ResourceMonitor.cs" />
     <Compile Include="Display\LayoutOverride.cs" />
     <Compile Include="Controls\NumericUpDown.cs" />
-    <Compile Include="Controls\SymbolCommands.cs" />
     <Compile Include="Controls\SymbolItem.cs" />
     <Compile Include="Controls\SymbolMenu.cs" />
     <Compile Include="Display\EditorWindowDisplayOptimizer.cs" />
