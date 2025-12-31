@@ -1,9 +1,11 @@
 ﻿using System;
 using System.ComponentModel.Composition;
 using Microsoft.VisualStudio.ComponentModelHost;
+using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Language.Intellisense.AsyncCompletion;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Text.Adornments;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Formatting;
 using Microsoft.VisualStudio.Text.Operations;
@@ -32,9 +34,6 @@ namespace Codist
 		public static ServicesHelper Instance { get; } = new ServicesHelper();
 
 		[Import]
-		public IBufferTagAggregatorFactoryService BufferTagAggregatorFactory { get; private set; }
-
-		[Import]
 		public IClassificationFormatMapService ClassificationFormatMap { get; private set; }
 
 		[Import]
@@ -54,9 +53,6 @@ namespace Codist
 
 		[Import]
 		public IEditorFormatMapService EditorFormatMap { get; private set; }
-
-		[Import]
-		public IGlyphService Glyph { get; private set; }
 
 		[Import]
 		public Microsoft.VisualStudio.Text.Outlining.IOutliningManagerService OutliningManager { get; private set; }
@@ -84,6 +80,12 @@ namespace Codist
 
 		[Import]
 		public ITextUndoHistoryRegistry TextUndoHistoryService { get; private set; }
+
+		[Import]
+		public ITextMarkerProviderFactory TextMarkerProvider {  get; private set; }
+
+		[Import]
+		public IVsEditorAdaptersFactoryService EditorAdaptersFactoryService { get; private set; }
 
 		internal SyntaxHighlight.ClassificationTypeExporter ClassificationTypeExporter { get; }
 

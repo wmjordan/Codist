@@ -671,59 +671,6 @@ namespace Codist
 		}
 	}
 
-	sealed class WrapText
-	{
-		string _Prefix, _Suffix, _Pattern, _Substitution;
-		char _Indicator;
-		public const char DefaultIndicator = '$';
-		public WrapText(string pattern, string name = null, char indicator = DefaultIndicator) {
-			_Indicator = indicator;
-			Pattern = pattern;
-			Name = name;
-		}
-
-		public string Name { get; set; }
-		public string Pattern {
-			get => _Pattern;
-			set {
-				_Pattern = value;
-				InternalUpdate();
-			}
-		}
-
-		public char Indicator {
-			get => _Indicator;
-			set {
-				_Indicator = value;
-				InternalUpdate();
-			}
-		}
-
-		internal string Prefix => _Prefix;
-		internal string Suffix => _Suffix;
-		internal string Substitution => _Substitution;
-
-		public string Wrap(string text) {
-			return _Prefix
-				+ text
-				+ (_Substitution != null ? _Suffix.Replace(_Substitution, text) : _Suffix);
-		}
-
-		void InternalUpdate() {
-			int p;
-			if (_Pattern != null && (p = _Pattern.IndexOf(Indicator)) >= 0) {
-				_Prefix = _Pattern.Substring(0, p);
-				_Suffix = _Pattern.Substring(p + 1);
-				_Substitution = _Suffix.Contains(Indicator) ? Indicator.ToString() : null;
-			}
-			else {
-				_Prefix = _Pattern;
-				_Suffix = String.Empty;
-				_Substitution = null;
-			}
-		}
-	}
-
 	sealed class ConfigUpdatedEventArgs : EventArgs
 	{
 		public ConfigUpdatedEventArgs(Config config, Features updatedFeature) {

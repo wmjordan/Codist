@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using Codist.Controls;
@@ -22,8 +23,8 @@ namespace Codist.Options
 			sealed class PageControl : OptionPage
 			{
 				readonly TextBox _Name, _Pattern, _Indicator;
-				readonly ListBox _List;
-				readonly Button _AddButton, _RemoveButton, _MoveUpButton, _ResetButton, _SaveButton;
+				readonly ThemedListBox _List;
+				readonly Button _AddButton, _RemoveButton, _MoveUpButton, _ResetButton;
 
 				public PageControl() {
 					var o = Config.Instance.SpecialHighlightOptions;
@@ -32,14 +33,14 @@ namespace Codist.Options
 						new Grid {
 							ColumnDefinitions = {
 								new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star), },
-								new ColumnDefinition { Width = new GridLength(80, GridUnitType.Pixel) },
+								new ColumnDefinition { Width = new GridLength(90, GridUnitType.Pixel) },
 							},
 							RowDefinitions = {
-								new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+								new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
 								new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }
 							},
 							Children = {
-								(_List = new ThemedListBox { Margin = WpfHelper.SmallMargin }),
+								(_List = new ThemedListBox { Margin = WpfHelper.SmallMargin, MaxHeight = 250 }),
 								new Grid {
 									Margin = WpfHelper.SmallMargin,
 									ColumnDefinitions = {
@@ -56,7 +57,7 @@ namespace Codist.Options
 										new Label { Content = R.OTC_Name, Width = 70 },
 										(_Name = new TextBox { IsEnabled = false, Margin = WpfHelper.SmallVerticalMargin }).SetValue(Grid.SetColumn, 1),
 										new Label { Content = R.OTC_Pattern, Width = 70 }.SetValue(Grid.SetRow, 1),
-										(_Pattern = new TextBox { IsEnabled = false, Margin = WpfHelper.SmallVerticalMargin }).SetValue(Grid.SetColumn, 1).SetValue(Grid.SetRow, 1),
+										(_Pattern = new TextBox { IsEnabled = false, Margin = WpfHelper.SmallVerticalMargin, AcceptsReturn = true, AcceptsTab = true }).SetValue(Grid.SetColumn, 1).SetValue(Grid.SetRow, 1),
 										new Label { Content = R.OTC_Indicator, Width = 70 }.SetValue(Grid.SetRow, 2),
 										(_Indicator = new TextBox { IsEnabled = false, Margin = WpfHelper.SmallVerticalMargin, Width = 40, MaxLength = 1, HorizontalAlignment = HorizontalAlignment.Left }).SetValue(Grid.SetColumn, 1).SetValue(Grid.SetRow, 2),
 										new DescriptionBox(R.OT_WrapTextSelectionIndicator).SetValue(Grid.SetRow, 3).SetValue(Grid.SetColumnSpan, 2)
@@ -73,8 +74,7 @@ namespace Codist.Options
 								new StackPanel {
 									Margin = WpfHelper.SmallMargin,
 									Children = {
-										(_AddButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = R.CMD_Add }),
-										(_SaveButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = R.CMD_Update })
+										(_AddButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = R.CMD_Add })
 									}
 								}.SetValue(Grid.SetColumn, 1).SetValue(Grid.SetRow, 1)
 							}
@@ -86,8 +86,10 @@ namespace Codist.Options
 					_AddButton.Click += HandleAddButtonClick;
 					_RemoveButton.Click += HandleRemoveButtonClick;
 					_MoveUpButton.Click += HandleMoveUpButtonClick;
-					_SaveButton.Click += HandleSaveButtonClick;
 					_ResetButton.Click += HandleResetButtonClick;
+					_Name.GotFocus += HandleTextGotFocus;
+					_Pattern.GotFocus += HandleTextGotFocus;
+					_Indicator.GotFocus += HandleTextGotFocus;
 					RefreshWrapTextUI();
 				}
 
@@ -97,7 +99,7 @@ namespace Codist.Options
 
 				void RefreshWrapTextUI() {
 					var c = _List.SelectedItem as WrapTextContainer;
-					if (_RemoveButton.IsEnabled = _SaveButton.IsEnabled = _Name.IsEnabled = _Pattern.IsEnabled = _Indicator.IsEnabled = c != null) {
+					if (_RemoveButton.IsEnabled = _Name.IsEnabled = _Pattern.IsEnabled = _Indicator.IsEnabled = c != null) {
 						_MoveUpButton.IsEnabled = _List.SelectedIndex > 0;
 						var t = c.WrapText;
 						_Name.Text = t.Name;
@@ -122,6 +124,7 @@ namespace Codist.Options
 					_List.Items.Add(new WrapTextContainer(item));
 					Config.Instance.WrapTexts.Add(item);
 					_List.SelectedIndex = _List.Items.Count - 1;
+					_List.ScrollIntoView(item);
 					RefreshWrapTextUI();
 					_Name.Focus();
 					Config.Instance.FireConfigChangedEvent(Features.SmartBar);
@@ -144,19 +147,45 @@ namespace Codist.Options
 						_List.Items.Insert(--p, new WrapTextContainer(se));
 						Config.Instance.WrapTexts.Insert(p, se);
 						_List.SelectedIndex = p;
+						_List.ScrollIntoView(se);
 						Config.Instance.FireConfigChangedEvent(Features.WrapText);
 					}
 					_MoveUpButton.IsEnabled = p > 0;
 				}
 
-				void HandleSaveButtonClick(object s, RoutedEventArgs args) {
+				void HandleTextGotFocus(object s, RoutedEventArgs args) {
+					var sender = (TextBox)s;
+					sender.LostFocus += UpdateWrapText;
+				}
+
+                void UpdateWrapText(object s, RoutedEventArgs e) {
+					var sender = (TextBox)s;
+					sender.LostFocus -= UpdateWrapText;
+
 					var t = (_List.SelectedItem as WrapTextContainer)?.WrapText;
 					if (t is null) {
 						return;
 					}
-					t.Name = _Name.Text;
-					t.Pattern = _Pattern.Text;
-					t.Indicator = _Indicator.Text.Length > 0 ? _Indicator.Text[0] : WrapText.DefaultIndicator;
+					if (sender == _Name) {
+						if (_Name.Text == t.Name) {
+							return;
+						}
+						t.Name = _Name.Text;
+					}
+					else if (sender == _Pattern) {
+						if (_Pattern.Text == t.Pattern) {
+							return;
+						}
+						t.Pattern = _Pattern.Text;
+					}
+					else if (sender == _Indicator) {
+						var indicator = _Indicator.Text.Length > 0 ? _Indicator.Text[0] : WrapText.DefaultIndicator;
+						if (indicator == t.Indicator) {
+							return;
+						}
+						t.Indicator = indicator;
+					}
+
 					var p = _List.SelectedIndex;
 					_List.Items.RemoveAt(p);
 					_List.Items.Insert(p, new WrapTextContainer(t));

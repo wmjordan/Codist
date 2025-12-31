@@ -17,6 +17,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
+using Microsoft.VisualStudio.Text.Editor.OptionsExtensionMethods;
 using Microsoft.VisualStudio.Text.Formatting;
 using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.Text.Projection;
@@ -872,42 +873,6 @@ namespace Codist
 			return Enumerable.Empty<SnapshotSpan>();
 		}
 
-		public static IEnumerable<SnapshotSpan> WrapWith(this ITextView view, WrapText wrapText) {
-			var modified = new Chain<Span>();
-			var prefix = wrapText.Prefix;
-			var suffix = wrapText.Suffix;
-			var substitution = wrapText.Substitution;
-			var psLength = prefix.Length + suffix.Length;
-			var offset = 0;
-			int strippedLength;
-			using (var edit = view.TextSnapshot.TextBuffer.CreateEdit()) {
-				foreach (var item in view.Selection.SelectedSpans) {
-					var t = item.GetText();
-					// remove surrounding items
-					if (substitution == null
-						&& (strippedLength = item.Length - psLength) > 0
-						&& t.StartsWith(prefix, StringComparison.Ordinal)
-						&& t.EndsWith(suffix, StringComparison.Ordinal)
-						&& t.IndexOf(prefix, prefix.Length, strippedLength) <= t.IndexOf(suffix, prefix.Length, strippedLength)) {
-						if (edit.Replace(item, t.Substring(prefix.Length, strippedLength))) {
-							modified.Add(new Span(item.Start.Position + offset, strippedLength));
-							offset -= psLength;
-						}
-					}
-					// surround items
-					else if (edit.Replace(item, wrapText.Wrap(t))) {
-						modified.Add(new Span(item.Start.Position + offset, item.Length + psLength));
-						offset += psLength;
-					}
-				}
-				if (edit.HasEffectiveChanges) {
-					var snapshot = edit.Apply();
-					return modified.Select(i => new SnapshotSpan(snapshot, i));
-				}
-			}
-			return Enumerable.Empty<SnapshotSpan>();
-		}
-
 		public static void CopyOrMoveSyntaxNode(this IWpfTextView view, SyntaxNode sourceNode, SyntaxNode targetNode, bool copy, bool before) {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			var tSpan = (targetNode.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.VariableDeclarator) ? targetNode.Parent.Parent : targetNode).GetSematicSpan(false);
@@ -1443,6 +1408,15 @@ namespace Codist
 			return GetLinePrecedingWhitespace(textSnapshot.GetLineFromPosition(position));
 		}
 
+		public static int GetIndentStringSize(this IEditorOptions options) {
+			return options.IsConvertTabsToSpacesEnabled() ? options.GetIndentSize() : -1;
+		}
+		public static string GetIndentString(this IEditorOptions options, int amount = 1) {
+			return options.IsConvertTabsToSpacesEnabled()
+				? IndentStrings.GetSpaces(options.GetIndentSize() * amount)
+				: IndentStrings.GetTab( amount);
+		}
+
 		public static bool IsCodeWhitespaceChar(this char ch) {
 			return ch.CeqAny(' ', '\t');
 		}
@@ -1722,6 +1696,29 @@ namespace Codist
 			}
 			public void Unregister() {
 				_UnregisterAction();
+			}
+		}
+
+		static class IndentStrings
+		{
+			static readonly string[] __Spaces = MakeSpaceIndentStrings();
+			const int MAX_CACHED_ITEMS = 17;
+			const string Tab = "\t", DoubleTab = "\t\t";
+
+			static string[] MakeSpaceIndentStrings() {
+				var s = new string[MAX_CACHED_ITEMS];
+				s[0] = String.Empty;
+				for (int i = 1; i < MAX_CACHED_ITEMS; i++) {
+					s[i] = new string(' ', i);
+				}
+				return s;
+			}
+
+			public static string GetSpaces(int amount) {
+				return amount < MAX_CACHED_ITEMS ? __Spaces[amount] : new string(' ', amount);
+			}
+			public static string GetTab(int amount) {
+				return amount == 1 ? Tab : amount == 2 ? DoubleTab : new string('\t', amount);
 			}
 		}
 	}
