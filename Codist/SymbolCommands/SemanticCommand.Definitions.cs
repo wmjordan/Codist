@@ -2,20 +2,19 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Codist.Controls;
 using Microsoft.CodeAnalysis;
 using R = Codist.Properties.Resources;
 
 namespace Codist.SymbolCommands
 {
-	sealed class CopySymbolNameCommand : SemanticCommandBase
+	sealed class CopySymbolCommand : SemanticCommandBase
 	{
 		public override int ImageId => IconIds.Copy;
 		public override string Title => R.CMD_CopySymbol;
 		public override string Description => R.CMDT_CopySymbol;
 		public override bool CanRefresh => false;
 
-        public override IEnumerable<SemanticCommandBase> GetSubCommands() {
+		public override IEnumerable<SemanticCommandBase> GetSubCommands() {
 			if (Symbol is IFieldSymbol f && f.ConstantValue != null) {
 				yield return new CopyConstantValueCommand { Value = f.ConstantValue };
 			}

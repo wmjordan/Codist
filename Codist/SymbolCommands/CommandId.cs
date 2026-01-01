@@ -10,7 +10,7 @@
 		GoToSymbolDefinition,
 		GoToSymbolReturnType,
 		GoToSpecialGenericSymbolReturnType,
-		CopySymbolName,
+		CopySymbol,
 		FindExtensionMethods,
 		FindReturnTypeExtensionMethods,
 		FindSubInterfaces,

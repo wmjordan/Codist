@@ -18,7 +18,7 @@ namespace Codist.SymbolCommands
 				CommandId.GoToSymbolDefinition => new GotoDefinitionCommand(),
 				CommandId.GoToSymbolReturnType => new GoToReturnTypeDefinitionCommand(),
 				CommandId.GoToSpecialGenericSymbolReturnType => new GoToSpecialGenericSymbolReturnTypeCommand(),
-				CommandId.CopySymbolName => new CopySymbolNameCommand(),
+				CommandId.CopySymbol => new CopySymbolCommand(),
 				CommandId.FindExtensionMethods => new FindExtensionMethodsCommand(),
 				CommandId.FindReturnTypeExtensionMethods => new FindReturnTypeExtensionMethodsCommand(),
 				CommandId.FindSubInterfaces => new FindSubInterfacesCommand(),
