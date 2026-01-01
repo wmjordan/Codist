@@ -11,6 +11,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
+using Microsoft.VisualStudio.Text.Editor.OptionsExtensionMethods;
 using Microsoft.VisualStudio.Text.Outlining;
 using SF = Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -59,13 +60,13 @@ namespace Codist
 		public int Position => _HitPointSyntax?.SourcePosition ?? 0;
 
 		public (SyntaxTriviaList indent, SyntaxTrivia newLine) GetIndentAndNewLine(int position, int indentUnit = -1) {
-			var options = Workspace.Options;
+			var options = _View.Options;
 			if (indentUnit < 0) {
 				indentUnit = Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.DoubleIndentRefactoring) ? 2 : 1;
 			}
 			string indent = View.TextSnapshot.GetLinePrecedingWhitespaceAtPosition(position)
 				+ options.GetIndentString(indentUnit);
-			return (SF.TriviaList(SF.Whitespace(indent)), SF.Whitespace(options.GetNewLineString()));
+			return (SF.TriviaList(SF.Whitespace(indent)), SF.Whitespace(options.GetNewLineCharacter()));
 		}
 
 		public SyntaxNode GetNode(SnapshotPoint position, bool includeTrivia, bool deep) {
@@ -118,20 +119,20 @@ namespace Codist
 			if (String.Equals(node.SyntaxTree.FilePath, SemanticModel.SyntaxTree.FilePath, StringComparison.OrdinalIgnoreCase)) {
 				return Task.FromResult<SyntaxNode>(RelocateNode(node, Compilation));
 			}
-				// not the same document
+			// not the same document
 			return GetUpdatedNodeAsync(node, cancellationToken);
 		}
 
 		async Task<SyntaxNode> GetUpdatedNodeAsync(SyntaxNode node, CancellationToken cancellationToken) {
 			CompilationUnitSyntax root;
-				var d = GetDocument(node.SyntaxTree);
+			var d = GetDocument(node.SyntaxTree);
 			if (d == null
 				|| (root = (await d.GetSemanticModelAsync(cancellationToken))?.SyntaxTree.GetCompilationUnitRoot(cancellationToken)) == null) {
-					// document no longer exists
-					return null;
-				}
-			return RelocateNode(node, root);
+				// document no longer exists
+				return null;
 			}
+			return RelocateNode(node, root);
+		}
 
 		static MemberDeclarationSyntax RelocateNode(SyntaxNode node, CompilationUnitSyntax root) {
 			var matches = new List<MemberDeclarationSyntax>(3);
