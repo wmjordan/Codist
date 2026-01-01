@@ -16,11 +16,11 @@ namespace Codist.SymbolCommands
 		public override bool CanRefresh => false;
 
         public override IEnumerable<SemanticCommandBase> GetSubCommands() {
+			if (Symbol is IFieldSymbol f && f.ConstantValue != null) {
+				yield return new CopyConstantValueCommand { Value = f.ConstantValue };
+			}
 			yield return new CopyTypeQualifiedSymbolNameCommand { Symbol = Symbol, Context = Context };
 			if (Symbol != null) {
-				if (Symbol is IFieldSymbol f && f.ConstantValue != null) {
-					yield return new CopyConstantValueCommand { Value = f.ConstantValue };
-				}
 				if (Symbol.IsQualifiable()) {
 					yield return new CopyFullyQualifiedSymbolNameCommand { Symbol = Symbol, Context = Context };
 				}

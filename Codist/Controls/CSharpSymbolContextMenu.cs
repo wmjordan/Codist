@@ -60,9 +60,7 @@ namespace Codist.Controls
 		public void AddCopyAndSearchSymbolCommands() {
 			var symbol = _commandFactory.Symbol;
 			AddCommand(CommandId.CopySymbolName);
-			if (symbol.Kind == SymbolKind.Field && ((IFieldSymbol)symbol).HasConstantValue) {
-				AddCommand(CommandId.CopyConstantValue);
-			}
+
 			if (symbol.CanBeReferencedByName) {
 				var cmd = CreateWebSearchCommand();
 				if (cmd != null) {
