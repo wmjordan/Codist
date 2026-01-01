@@ -117,7 +117,7 @@ namespace Codist
 						&& !(parameters = member.GetParameters()).IsDefaultOrEmpty
 						&& !member.IsCompilerGenerated()
 						&& parameters.Any(strictMatch
-								? (Func<IParameterSymbol, bool>)(p => p.Type == type)
+								? (Func<IParameterSymbol, bool>)(p => Equals(p.Type, type))
 								: (p => type.CanConvertTo(p.Type) && p.Type.IsCommonBaseType() == false))) {
 						members.Add(member);
 					}
@@ -135,7 +135,7 @@ namespace Codist
 			var assembly = compilation.Assembly;
 			var members = ImmutableArray.CreateBuilder<ISymbol>(10);
 			var paramComparer = strict
-				? (Func<IParameterSymbol, bool>)(p => p.Type == type && p.RefKind != RefKind.None)
+				? (Func<IParameterSymbol, bool>)(p => Equals(p.Type, type) && p.RefKind != RefKind.None)
 				: (p => p.Type.CanConvertTo(type) && p.RefKind != RefKind.None);
 			foreach (var typeSymbol in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
 				if (typeSymbol.IsCompilerGenerated() || sourceCode && !typeSymbol.HasSource()) {
@@ -149,16 +149,16 @@ namespace Codist
 					if (member.Kind == SymbolKind.Field) {
 						if (!member.IsCompilerGenerated()
 							&& (mt = member.GetReturnType()) != null
-							&& (mt == type
-								|| strict == false && mt.CanConvertTo(type)
+							&& (Equals(mt, type)
+                                || strict == false && mt.CanConvertTo(type)
 								|| (mt as INamedTypeSymbol).ContainsTypeArgument(type, strict))) {
 							members.Add(member);
 						}
 					}
 					else if (!member.IsCompilerGenerated()
 						&& ((mt = member.GetReturnType()) != null
-							&& (mt == type
-								|| strict == false && mt.CanConvertTo(type)
+							&& (Equals(mt, type)
+                                || strict == false && mt.CanConvertTo(type)
 								|| (mt as INamedTypeSymbol).ContainsTypeArgument(type, strict))
 							|| member.Kind == SymbolKind.Method && member.GetParameters().Any(paramComparer))) {
 						members.Add(member);
@@ -202,7 +202,7 @@ namespace Codist
 			var r = ImmutableArray.CreateBuilder<ISymbol>();
 			var d = new SourceSymbolDeduper();
 			if (isNamedType) {
-				if (st.ConstructedFrom == st) {
+				if (Equals(st.ConstructedFrom, st)) {
 					foreach (var impl in implementations.OfType<INamedTypeSymbol>()) {
 						if (directImplementation && impl.HasDirectImplementationFor(st) == false) {
 							continue;
@@ -264,15 +264,15 @@ namespace Codist
 						continue;
 					}
 					foreach (var item in m.TypeParameters) {
-						if (item != p.Type
-							|| item.HasValueTypeConstraint && isValueType == false
+						if (!Equals(item, p.Type)
+                            || item.HasValueTypeConstraint && isValueType == false
 							|| item.HasReferenceTypeConstraint && isValueType
 							|| matchTypeArgument && item.ConstraintTypes.Length == 0) {
 							continue;
 						}
 						var constraintTypes = item.ConstraintTypes;
 						if (constraintTypes.Length != 0
-							&& constraintTypes.Any(i => i == type || type.CanConvertTo(i)) == false) {
+							&& constraintTypes.Any(i => Equals(i, type) || type.CanConvertTo(i)) == false) {
 							continue;
 						}
 

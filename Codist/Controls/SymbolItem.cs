@@ -92,7 +92,7 @@ namespace Codist.Controls
 				return true;
 			}
 			if (SyntaxNode != null) {
-				await GoToNodeAsync();
+				await GoToNodeAsync(cancellationToken);
 				return true;
 			}
 			if (Symbol != null) {
@@ -107,10 +107,10 @@ namespace Codist.Controls
 			loc.GoToSource();
 		}
 
-		async Task GoToNodeAsync() {
-			await RefreshSyntaxNodeAsync();
+		async Task GoToNodeAsync(CancellationToken cancellationToken = default) {
+			await RefreshSyntaxNodeAsync(cancellationToken);
 			var node = SyntaxNode;
-			await SyncHelper.SwitchToMainThreadAsync();
+			await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
 			CloseUnpinnedMenus();
 			node.GetIdentifierToken().GetLocation().GoToSource();
 		}
@@ -223,8 +223,8 @@ namespace Codist.Controls
 		internal async Task SetSymbolToSyntaxNodeAsync(CancellationToken cancellationToken) {
 			Symbol = await Container.SemanticContext.GetSymbolAsync(SyntaxNode, cancellationToken);
 		}
-		internal async Task RefreshSyntaxNodeAsync() {
-			var node = await Container.SemanticContext.RelocateDeclarationNodeAsync(SyntaxNode);
+		internal async Task RefreshSyntaxNodeAsync(CancellationToken cancellationToken = default) {
+			var node = await Container.SemanticContext.RelocateDeclarationNodeAsync(SyntaxNode, cancellationToken);
 			if (node != null && node != SyntaxNode) {
 				SyntaxNode = node;
 			}

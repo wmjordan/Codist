@@ -104,26 +104,36 @@ namespace Codist
 		/// </summary>
 		/// <param name="node">The old node.</param>
 		/// <returns>The new node.</returns>
-		public async Task<SyntaxNode> RelocateDeclarationNodeAsync(SyntaxNode node) {
+		public Task<SyntaxNode> RelocateDeclarationNodeAsync(SyntaxNode node, CancellationToken cancellationToken = default) {
 			if (node.SyntaxTree == SemanticModel.SyntaxTree) {
 				// the syntax tree is the same (not changed)
-				return node;
+				return Task.FromResult(node);
 			}
 			if (node.IsKind(SyntaxKind.VariableDeclarator)) {
 				node = node.Parent.Parent;
 			}
 			if (node is MemberDeclarationSyntax == false) {
-				return null;
+				return Task.FromResult<SyntaxNode>(null);
 			}
-			var root = Compilation;
-			if (String.Equals(node.SyntaxTree.FilePath, SemanticModel.SyntaxTree.FilePath, StringComparison.OrdinalIgnoreCase) == false) {
+			if (String.Equals(node.SyntaxTree.FilePath, SemanticModel.SyntaxTree.FilePath, StringComparison.OrdinalIgnoreCase)) {
+				return Task.FromResult<SyntaxNode>(RelocateNode(node, Compilation));
+			}
 				// not the same document
+			return GetUpdatedNodeAsync(node, cancellationToken);
+		}
+
+		async Task<SyntaxNode> GetUpdatedNodeAsync(SyntaxNode node, CancellationToken cancellationToken) {
+			CompilationUnitSyntax root;
 				var d = GetDocument(node.SyntaxTree);
-				if (d == null || (root = (await d.GetSemanticModelAsync())?.SyntaxTree.GetCompilationUnitRoot()) == null) {
+			if (d == null
+				|| (root = (await d.GetSemanticModelAsync(cancellationToken))?.SyntaxTree.GetCompilationUnitRoot(cancellationToken)) == null) {
 					// document no longer exists
 					return null;
 				}
+			return RelocateNode(node, root);
 			}
+
+		static MemberDeclarationSyntax RelocateNode(SyntaxNode node, CompilationUnitSyntax root) {
 			var matches = new List<MemberDeclarationSyntax>(3);
 			int nodeStart = node.SpanStart;
 			var s = node.GetDeclarationSignature(nodeStart);
@@ -141,11 +151,11 @@ namespace Codist
 				case 0: return match;
 			}
 			matches = matches.FindAll(i => i.MatchAncestorDeclaration(node));
-			switch (matches.Count) {
-				case 1: return matches[0];
-				case 0: return match;
-				default: return matches.OrderBy(i => Math.Abs(i.SpanStart - nodeStart)).First();
-			}
+			return matches.Count switch {
+				1 => matches[0],
+				0 => match,
+				_ => matches.OrderBy(i => Math.Abs(i.SpanStart - nodeStart)).First(),
+			};
 		}
 
 		/// <summary>Locates document despite of version changes.</summary>
@@ -190,17 +200,15 @@ namespace Codist
 
 		public Task<ISymbol> GetSymbolAsync(SyntaxNode node, CancellationToken cancellationToken = default) {
 			var sm = SemanticModel;
+			Document doc;
 			return node.SyntaxTree == sm.SyntaxTree
 				? Task.FromResult(sm.GetSymbol(node, cancellationToken))
-				: RefreshSymbol(this, node, sm, cancellationToken);
+				: (doc = GetDocument(node.SyntaxTree)) is null
+				? Task.FromResult<ISymbol>(null) // doc no longer exists
+				: RefreshSymbolAsync(doc, node, sm, cancellationToken);
 
-			async Task<ISymbol> RefreshSymbol(SemanticContext me, SyntaxNode n, SemanticModel m, CancellationToken ct) {
-				var doc = me.GetDocument(n.SyntaxTree);
-				// doc no longer exists
-				if (doc == null) {
-					return null;
-				}
-				m = await doc.GetSemanticModelAsync(ct).ConfigureAwait(false);
+			async Task<ISymbol> RefreshSymbolAsync(Document d, SyntaxNode n, SemanticModel m, CancellationToken ct) {
+				m = await d.GetSemanticModelAsync(ct).ConfigureAwait(false);
 				var p = n.SpanStart;
 				if (p >= m.SyntaxTree.Length) {
 					return null;
@@ -212,7 +220,11 @@ namespace Codist
 					}
 					p += item.NewText.Length - item.Span.Length;
 				}
-				var newNode = m.SyntaxTree.GetCompilationUnitRoot(ct).FindNode(new TextSpan(p, 0)).AncestorsAndSelf().FirstOrDefault(i => i is MemberDeclarationSyntax || i is BaseTypeDeclarationSyntax || i is VariableDeclaratorSyntax);
+				var newNode = m.SyntaxTree
+					.GetCompilationUnitRoot(ct)
+					.FindNode(new TextSpan(p, 0))
+					.AncestorsAndSelf()
+					.FirstOrDefault(i => i is MemberDeclarationSyntax || i is BaseTypeDeclarationSyntax || i is VariableDeclaratorSyntax);
 				if (newNode.RawKind != n.RawKind) {
 					return null;
 				}

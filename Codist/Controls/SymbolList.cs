@@ -658,6 +658,7 @@ namespace Codist.Controls
 				Handler(this, item, e);
 			}
 
+			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void Handler(SymbolList me, SymbolItem i, MouseEventArgs args) {
 				if (await me.SemanticContext.UpdateAsync(default).ConfigureAwait(false) == false) {
 					return;

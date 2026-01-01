@@ -158,7 +158,7 @@ namespace Codist.NaviBar
 				if (sm != ctx.SemanticModel) {
 					_Menu.ClearSymbols();
 					_Symbol = null;
-					Node = await ctx.RelocateDeclarationNodeAsync(Node).ConfigureAwait(false);
+					Node = await ctx.RelocateDeclarationNodeAsync(Node, cancellationToken).ConfigureAwait(false);
 					await AddItemsAsync(Node, cancellationToken);
 					await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
 					_Menu.RefreshItemsSource(true);

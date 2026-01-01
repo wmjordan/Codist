@@ -1162,11 +1162,11 @@ namespace Codist
 				}
 			}
 			else {
-			foreach (var item in generic.TypeArguments) {
-				if (item.CanConvertTo(target)) {
-					return true;
+				foreach (var item in generic.TypeArguments) {
+					if (item.CanConvertTo(target)) {
+						return true;
+					}
 				}
-			}
 			}
 			return false;
 		}
@@ -1504,23 +1504,6 @@ namespace Codist
 			return listPattern.IsKind(ListPatternExpression) ? NonPublicOrFutureAccessors.GetListPatternsCount(listPattern) : 0;
 		}
 		#endregion
-
-		public static Task<Project> GetProjectAsync(this ISymbol symbol, Solution solution, CancellationToken cancellationToken = default) {
-			var asm = symbol.ContainingAssembly;
-			return asm == null
-				? Task.FromResult<Project>(null)
-				: GetProjectAsync(asm, solution, cancellationToken);
-
-			async Task<Project> GetProjectAsync(IAssemblySymbol a, Solution s, CancellationToken ct) {
-				foreach (var item in s.Projects) {
-					if (item.SupportsCompilation
-						&& (await item.GetCompilationAsync(ct).ConfigureAwait(false)).Assembly.OriginallyEquals(a)) {
-						return item;
-					}
-				}
-				return null;
-			}
-		}
 		#endregion
 
 		#region Enum

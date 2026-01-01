@@ -10,6 +10,8 @@ namespace Codist
 {
 	static partial class CodeAnalysisHelper
 	{
+		public static Solution CurrentSolution => ServicesHelper.Instance.VisualStudioWorkspace.CurrentSolution;
+
 		public static Document GetDocument(this Workspace workspace, ITextBuffer textBuffer) {
 			if (workspace == null) {
 				throw new ArgumentNullException(nameof(workspace));
@@ -80,8 +82,35 @@ namespace Codist
 			return location.SourceTree.GetText(cancellationToken).ToString(location.SourceSpan);
 		}
 
+		public static Project GetProject(this ISymbol symbol, Solution solution = null, CancellationToken cancellationToken = default) {
+			var asm = symbol.ContainingAssembly;
+			return asm == null
+				? null
+				: (solution ?? CurrentSolution).GetProject(asm, cancellationToken);
+		}
+
+		public static IEnumerable<Document> GetDeclarationDocuments(this ISymbol symbol) {
+			var solution = CurrentSolution;
+			foreach (var r in symbol.GetSourceReferences()) {
+				yield return solution.GetDocument(r.SyntaxTree);
+			}
+		}
+
 		public static Location ToLocation(this SyntaxReference syntaxReference) {
 			return Location.Create(syntaxReference.SyntaxTree, syntaxReference.Span);
+		}
+
+		public static Document GetDocument(this SyntaxReference syntaxReference) {
+			return CurrentSolution.GetDocument(syntaxReference.SyntaxTree);
+		}
+
+		public static Document GetDocument(this Location location) {
+			var t = location.SourceTree;
+			return t is null ? null : CurrentSolution.GetDocument(t);
+		}
+
+		public static void Open(this Document document, bool activate = true) {
+			ServicesHelper.Instance.VisualStudioWorkspace.OpenDocument(document.Id, activate);
 		}
 	}
 }
