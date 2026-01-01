@@ -203,7 +203,7 @@ namespace Codist
 		}
 
 		public static string GetQualifiedName(this ISymbol symbol) {
-			if (symbol.Name.Contains('.')) {
+			if (symbol.GetExplicitInterfaceImplementations().Count != 0) {
 				// explicit interface implementation name
 				return symbol.Name;
 			}
@@ -228,6 +228,11 @@ namespace Codist
 				chain.Insert(symbol.Name);
 			}
 			return String.Join(".", chain);
+		}
+
+		public static bool HasReferenceableName(this ISymbol symbol) {
+			return symbol.CanBeReferencedByName
+				|| (symbol.Kind == SymbolKind.Method && ((IMethodSymbol)symbol).MethodKind == MethodKind.Constructor);
 		}
 
 		public static string GetOriginalName(this ISymbol symbol) {

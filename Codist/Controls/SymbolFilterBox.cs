@@ -402,11 +402,7 @@ namespace Codist.Controls
 				int pu = 0, pro = 0, i = 0, p = 0;
 				foreach (var item in symbols) {
 					var symbol = item.Symbol;
-					if (symbol == null || symbol.IsImplicitlyDeclared) {
-						continue;
-					}
-					if (symbol.CanBeReferencedByName == false
-						&& (symbol.Kind != SymbolKind.Method || ((IMethodSymbol)symbol).MethodKind != MethodKind.Constructor)) {
+					if (symbol == null || symbol.IsImplicitlyDeclared || !symbol.HasReferenceableName()) {
 						continue;
 					}
 					switch (symbol.DeclaredAccessibility) {

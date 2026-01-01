@@ -61,7 +61,7 @@ namespace Codist.Controls
 			var symbol = _commandFactory.Symbol;
 			AddCommand(CommandId.CopySymbolName);
 
-			if (symbol.CanBeReferencedByName) {
+			if (symbol.HasReferenceableName()) {
 				var cmd = CreateWebSearchCommand();
 				if (cmd != null) {
 					AddCommand(cmd);
