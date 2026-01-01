@@ -787,22 +787,22 @@ namespace Codist.SyntaxHighlight
 		[Category(Constants.SyntaxCategory.Task)]
 		[BaseDefinition(Constants.CodistComment)]
 		[ClassificationType(ClassificationTypeNames = Constants.TodoComment)]
-		[Style("#FFFFFF", "#00008B")]
+		[Style("#00008B")]
 		ToDo,
 		[Category(Constants.SyntaxCategory.Task)]
 		[BaseDefinition(Constants.CodistComment)]
 		[ClassificationType(ClassificationTypeNames = Constants.NoteComment)]
-		[Style("#000000", "#FFA500")]
+		[Style("#FFA500")]
 		Note,
 		[Category(Constants.SyntaxCategory.Task)]
 		[BaseDefinition(Constants.CodistComment)]
 		[ClassificationType(ClassificationTypeNames = Constants.HackComment)]
-		[Style("#90EE90", "#000000")]
+		[Style("#90EE90")]
 		Hack,
 		[Category(Constants.SyntaxCategory.Task)]
 		[BaseDefinition(Constants.CodistComment)]
 		[ClassificationType(ClassificationTypeNames = Constants.UndoneComment)]
-		[Style("#A4AFD1", "#714136")]
+		[Style("#714136")]
 		Undone,
 		[Category(Constants.SyntaxCategory.Heading)]
 		[BaseDefinition(Constants.CodistComment)]
