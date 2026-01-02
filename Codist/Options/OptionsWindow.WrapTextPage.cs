@@ -74,7 +74,7 @@ namespace Codist.Options
 								new StackPanel {
 									Margin = WpfHelper.SmallMargin,
 									Children = {
-										(_AddButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = R.CMD_Add })
+										(_AddButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = R.CMD_NewItem })
 									}
 								}.SetValue(Grid.SetColumn, 1).SetValue(Grid.SetRow, 1)
 							}
@@ -120,11 +120,12 @@ namespace Codist.Options
 				}
 
 				void HandleAddButtonClick(object s, RoutedEventArgs args) {
-					var item = new WrapText("<c>" + WrapText.DefaultIndicator + "</c>", R.CMD_NewItem);
-					_List.Items.Add(new WrapTextContainer(item));
+					var item = new WrapText((_List.SelectedItem as WrapTextContainer)?.WrapText?.Pattern ?? "<c>" + WrapText.DefaultIndicator + "</c>", R.CMD_NewItem);
+					var container = new WrapTextContainer(item);
+					_List.Items.Add(container);
 					Config.Instance.WrapTexts.Add(item);
 					_List.SelectedIndex = _List.Items.Count - 1;
-					_List.ScrollIntoView(item);
+					_List.ScrollIntoView(container);
 					RefreshWrapTextUI();
 					_Name.Focus();
 					Config.Instance.FireConfigChangedEvent(Features.SmartBar);
@@ -144,10 +145,11 @@ namespace Codist.Options
 						var se = Config.Instance.WrapTexts[p];
 						_List.Items.RemoveAt(p);
 						Config.Instance.WrapTexts.RemoveAt(p);
-						_List.Items.Insert(--p, new WrapTextContainer(se));
+						var container = new WrapTextContainer(se);
+						_List.Items.Insert(--p, container);
 						Config.Instance.WrapTexts.Insert(p, se);
 						_List.SelectedIndex = p;
-						_List.ScrollIntoView(se);
+						_List.ScrollIntoView(container);
 						Config.Instance.FireConfigChangedEvent(Features.WrapText);
 					}
 					_MoveUpButton.IsEnabled = p > 0;
@@ -158,11 +160,12 @@ namespace Codist.Options
 					sender.LostFocus += UpdateWrapText;
 				}
 
-                void UpdateWrapText(object s, RoutedEventArgs e) {
+				void UpdateWrapText(object s, RoutedEventArgs e) {
 					var sender = (TextBox)s;
 					sender.LostFocus -= UpdateWrapText;
 
-					var t = (_List.SelectedItem as WrapTextContainer)?.WrapText;
+					var container = _List.SelectedItem as WrapTextContainer;
+					var t = container?.WrapText;
 					if (t is null) {
 						return;
 					}
@@ -186,9 +189,7 @@ namespace Codist.Options
 						t.Indicator = indicator;
 					}
 
-					var p = _List.SelectedIndex;
-					_List.Items.RemoveAt(p);
-					_List.Items.Insert(p, new WrapTextContainer(t));
+					container.Refresh();
 					Config.Instance.FireConfigChangedEvent(Features.WrapText);
 				}
 
@@ -204,6 +205,7 @@ namespace Codist.Options
 			sealed class WrapTextContainer : ListBoxItem
 			{
 				readonly WrapText _WrapText;
+				readonly TextBlock _Name, _Pattern;
 
 				public WrapTextContainer(WrapText wrapText) {
 					_WrapText = wrapText;
@@ -211,15 +213,25 @@ namespace Codist.Options
 					Content = p = new StackPanel {
 						Orientation = Orientation.Horizontal,
 						Children = {
-							new TextBlock { Text = wrapText.Name, FontWeight = FontWeights.Bold, MinWidth = 150 }
-								.SetGlyph(IconIds.WrapText),
-							new TextBlock { Text = wrapText.Pattern, Margin = WpfHelper.MiddleHorizontalMargin }.ReferenceProperty(ForegroundProperty, VsBrushes.GrayTextKey)
+							VsImageHelper.GetImage(IconIds.WrapText)
+								.WrapMargin(WpfHelper.GlyphMargin)
+								.SetProperty(Image.VerticalAlignmentProperty, VerticalAlignment.Top),
+							new TextBlock { Text = wrapText.Name, FontWeight = FontWeights.Bold, MinWidth = 140 }
+								.Set(ref _Name),
+							new TextBlock { Text = wrapText.Pattern, Margin = WpfHelper.MiddleHorizontalMargin }
+								.ReferenceProperty(ForegroundProperty, VsBrushes.GrayTextKey)
+								.Set(ref _Pattern)
 						}
 					};
 					p.SetBackgroundForCrispImage(ThemeCache.ToolWindowBackgroundColor);
 				}
 
 				public WrapText WrapText => _WrapText;
+
+				public void Refresh() {
+					_Name.Text = _WrapText.Name;
+					_Pattern.Text = _WrapText.Pattern;
+				}
 			}
 		}
 	}
