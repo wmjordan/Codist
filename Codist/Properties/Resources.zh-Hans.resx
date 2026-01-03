@@ -1066,7 +1066,7 @@ Shift：粘贴并选中下一项（整个单词）</value>
 https://github.com/snowie2000/mactype/releases</value>
   </data>
   <data name="OT_ManualSmartBar" xml:space="preserve">
-    <value>手动显示智能工具栏</value>
+    <value>手动显示智能工具条</value>
   </data>
   <data name="OT_ManualSmartBarTip" xml:space="preserve">
     <value>更改选择后，不要自动显示Smart Bar，请结合以下选项！</value>
@@ -1288,7 +1288,7 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
     <value>双击 Shift 键显示工具栏；单击 Shift 键隐藏工具栏</value>
   </data>
   <data name="OT_ToggleSmartBarTip" xml:space="preserve">
-    <value>使用 Shift 键切换智能工具栏的显示</value>
+    <value>使用 Shift 键切换智能工具条的显示</value>
   </data>
   <data name="OTC_TopMargin" xml:space="preserve">
     <value>上边距:</value>
@@ -1334,7 +1334,7 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   </data>
   <data name="OT_WebSearchNote" xml:space="preserve">
     <value>该页面定义搜索引擎，搜索菜单在如下场景出现：
-1. 右键单击智能工具栏上的“查找”按钮；
+1. 右键单击智能工具条上的“查找”按钮；
 2. 超级代码提示选中内容的右键菜单</value>
   </data>
   <data name="F_Config" xml:space="preserve">
@@ -1826,7 +1826,7 @@ Shift：匹配整个单词</value>
     <value>环绕文本</value>
   </data>
   <data name="OT_WrapTextNote" xml:space="preserve">
-    <value>本页面定义环绕文本，环绕文本可用于智能工具栏的“文本环绕选中内容”命令</value>
+    <value>本页面定义环绕文本，环绕文本可用于智能工具条的“文本环绕选中内容”命令</value>
   </data>
   <data name="OT_WrapTextPattern" xml:space="preserve">
     <value>环绕文本内容</value>
@@ -3034,5 +3034,20 @@ Ctrl: 将下划线分隔的单词转换为首字母大写的单词</value>
   </data>
   <data name="T_ConvertedCodistCtJsonToYaml" xml:space="preserve">
     <value>Codist.ct.json 已被成功转换为 Codist.ct.yaml。</value>
+  </data>
+  <data name="CMD_ListBaseTypes" xml:space="preserve">
+    <value>列出基类和接口...</value>
+  </data>
+  <data name="T_BaseTypes" xml:space="preserve">
+    <value> 基类和接口</value>
+  </data>
+  <data name="CMDT_ListBaseTypes" xml:space="preserve">
+    <value>列出当前类型的基类和所实现的接口</value>
+  </data>
+  <data name="OT_CtrlSuppressSmartBar" xml:space="preserve">
+    <value>按下 Ctrl 键时不弹出智能工具条</value>
+  </data>
+  <data name="OT_CtrlSuppressSmartBarTip" xml:space="preserve">
+    <value>在按住 Ctrl 键时不弹出智能工具条</value>
   </data>
 </root>

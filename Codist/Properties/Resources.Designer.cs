@@ -1138,6 +1138,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to List Base Types....
+        /// </summary>
+        internal static string CMD_ListBaseTypes {
+            get {
+                return ResourceManager.GetString("CMD_ListBaseTypes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to List Members....
         /// </summary>
         internal static string CMD_ListMembers {
@@ -2708,6 +2717,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to List base types and implemented interfaces of current type.
+        /// </summary>
+        internal static string CMDT_ListBaseTypes {
+            get {
+                return ResourceManager.GetString("CMDT_ListBaseTypes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to List members of event arguments.
         /// </summary>
         internal static string CMDT_ListEventArgumentMember {
@@ -2726,7 +2744,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to List members of current type.
+        ///   Looks up a localized string similar to List members of current type....
         /// </summary>
         internal static string CMDT_ListTypeMembers {
             get {
@@ -3690,6 +3708,24 @@ namespace Codist.Properties {
         internal static string OT_CtrlSuppressQuickInfoTip {
             get {
                 return ResourceManager.GetString("OT_CtrlSuppressQuickInfoTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Suppress Smart Bar when Ctrl key is pressed.
+        /// </summary>
+        internal static string OT_CtrlSuppressSmartBar {
+            get {
+                return ResourceManager.GetString("OT_CtrlSuppressSmartBar", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Don&apos;t display Smart Bar when Ctrl key is being pressed.
+        /// </summary>
+        internal static string OT_CtrlSuppressSmartBarTip {
+            get {
+                return ResourceManager.GetString("OT_CtrlSuppressSmartBarTip", resourceCulture);
             }
         }
         
@@ -6242,6 +6278,15 @@ namespace Codist.Properties {
         internal static string T_BaseType {
             get {
                 return ResourceManager.GetString("T_BaseType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to  base types.
+        /// </summary>
+        internal static string T_BaseTypes {
+            get {
+                return ResourceManager.GetString("T_BaseTypes", resourceCulture);
             }
         }
         

@@ -2516,7 +2516,7 @@ Copy qualified name in namespace.type.member format</value>
     <value>Find extension methods for current type</value>
   </data>
   <data name="CMDT_ListTypeMembers" xml:space="preserve">
-    <value>List members of current type</value>
+    <value>List members of current type...</value>
   </data>
   <data name="CMDT_GoToTypeDefinition" xml:space="preserve">
     <value>Go to definition of current type</value>
@@ -3048,5 +3048,20 @@ Only search in referenced libraries, excluding source code</value>
   </data>
   <data name="T_ConvertedCodistCtJsonToYaml" xml:space="preserve">
     <value>Codist.ct.json has been converted to Codist.ct.yaml successfully.</value>
+  </data>
+  <data name="CMD_ListBaseTypes" xml:space="preserve">
+    <value>List Base Types...</value>
+  </data>
+  <data name="T_BaseTypes" xml:space="preserve">
+    <value> base types</value>
+  </data>
+  <data name="CMDT_ListBaseTypes" xml:space="preserve">
+    <value>List base types and implemented interfaces of current type</value>
+  </data>
+  <data name="OT_CtrlSuppressSmartBar" xml:space="preserve">
+    <value>Suppress Smart Bar when Ctrl key is pressed</value>
+  </data>
+  <data name="OT_CtrlSuppressSmartBarTip" xml:space="preserve">
+    <value>Don't display Smart Bar when Ctrl key is being pressed</value>
   </data>
 </root>

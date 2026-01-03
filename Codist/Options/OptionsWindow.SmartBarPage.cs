@@ -16,13 +16,15 @@ namespace Codist.Options
 
 			sealed class PageControl : OptionPage
 			{
-				readonly OptionBox<SmartBarOptions> _ShiftToggleDisplay, _ManualDisplaySmartBar, _UnderscoreBold, _UnderscoreItalic, _DoubleIndentRefactoring;
+				readonly OptionBox<SmartBarOptions> _ShiftToggleDisplay, _ManualDisplaySmartBar, _CtrlSuppression, _UnderscoreBold, _UnderscoreItalic, _DoubleIndentRefactoring;
 				readonly OptionBox<SmartBarOptions>[] _Options;
 
 				public PageControl() {
 					var o = Config.Instance.SmartBarOptions;
 					SetContents(
 						new Note(R.OT_BehaviorTip),
+						_CtrlSuppression = o.CreateOptionBox(SmartBarOptions.CtrlSuppressDisplay, UpdateConfig, R.OT_CtrlSuppressSmartBar)
+							.SetLazyToolTip(() => R.OT_CtrlSuppressSmartBarTip),
 						_ManualDisplaySmartBar = o.CreateOptionBox(SmartBarOptions.ManualDisplaySmartBar, UpdateConfig, R.OT_ManualSmartBar)
 							.SetLazyToolTip(() => R.OT_ManualSmartBarTip),
 						_ShiftToggleDisplay = o.CreateOptionBox(SmartBarOptions.ShiftToggleDisplay, UpdateConfig, R.OT_ToggleSmartBar)
@@ -39,7 +41,7 @@ namespace Codist.Options
 						_UnderscoreItalic = o.CreateOptionBox(SmartBarOptions.UnderscoreItalic, UpdateConfig, R.OT_ItalicPreferUnderscore)
 							.SetLazyToolTip(() => R.OT_PreferUnderscoreTip)
 					);
-					_Options = new[] { _ShiftToggleDisplay, _ManualDisplaySmartBar, _DoubleIndentRefactoring, _UnderscoreBold, _UnderscoreItalic };
+					_Options = [_ShiftToggleDisplay, _ManualDisplaySmartBar, _CtrlSuppression, _DoubleIndentRefactoring, _UnderscoreBold, _UnderscoreItalic];
 				}
 
 				void UpdateConfig(SmartBarOptions options, bool set) {

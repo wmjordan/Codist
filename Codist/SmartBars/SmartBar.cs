@@ -34,6 +34,7 @@ namespace Codist.SmartBars
 		DateTime _LastExecute;
 		DateTime _LastShiftHit;
 		int _SelectionStatus;
+		bool _CtrlSuppression;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="SmartBar"/> class.
@@ -51,6 +52,7 @@ namespace Codist.SmartBars
 			if (Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.ManualDisplaySmartBar) == false) {
 				_View.Selection.SelectionChanged += ViewSelectionChanged;
 			}
+			_CtrlSuppression = Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.CtrlSuppressDisplay);
 			_View.Closed += ViewClosed;
 			ToolBar = new ToolBar {
 				BorderThickness = new Thickness(1),
@@ -166,7 +168,8 @@ namespace Codist.SmartBars
 		async Task CreateToolBarAsync(CancellationToken cancellationToken) {
 			await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
 			while ((Mouse.LeftButton == MouseButtonState.Pressed
-				|| UIHelper.IsShiftDown)
+				|| UIHelper.IsShiftDown
+				|| _CtrlSuppression && UIHelper.IsCtrlDown)
 				&& cancellationToken.IsCancellationRequested == false) {
 				// postpone the even handler until the left mouse button and keyboard modifiers are released
 				await Task.Delay(100, cancellationToken);
@@ -255,6 +258,7 @@ namespace Codist.SmartBars
 				if (Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.ManualDisplaySmartBar) == false) {
 					v.Selection.SelectionChanged += ViewSelectionChanged;
 				}
+				_CtrlSuppression = Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.CtrlSuppressDisplay);
 			}
 		}
 

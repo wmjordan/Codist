@@ -808,6 +808,7 @@ namespace Codist
 		DoubleIndentRefactoring = 1 << 4,
 		UnderscoreBold = 1 << 5,
 		UnderscoreItalic = 1 << 6,
+		CtrlSuppressDisplay = 1 << 7,
 		Default = ExpansionIncludeTrivia | ShiftToggleDisplay
 	}
 
