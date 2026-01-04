@@ -495,6 +495,29 @@ namespace Codist
 			return d.ToImmutableHashSet();
 		}
 
+		public static bool HasActualImplementationFor(this INamedTypeSymbol type, INamedTypeSymbol interfaceType) {
+			if (interfaceType.IsGenericType && !interfaceType.IsBoundedGenericType()) {
+				type = type.ConstructedFrom;
+			}
+			var typeMembers = type.GetMembers();
+			var memberNames = new HashSet<string>();
+			foreach (var member in typeMembers) {
+				memberNames.Add(member.Name);
+			}
+			var interfaceMembers = interfaceType.GetMembers().Where(i => i.IsAbstract && i.Kind.CeqAny(SymbolKind.Property, SymbolKind.Method, SymbolKind.Event));
+			ISymbol implementation;
+			foreach (var member in interfaceMembers) {
+				if (!memberNames.Contains(member.Name)
+					&& (implementation = type.FindImplementationForInterfaceMember(member)) is null) {
+					continue;
+					if (type.Equals(implementation.ContainingType)) {
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
 		public static bool HasDirectImplementationFor(this INamedTypeSymbol symbol, INamedTypeSymbol interfaceType) {
 			Func<INamedTypeSymbol, INamedTypeSymbol, bool> comparer = interfaceType.IsGenericType && interfaceType.ConstructedFrom == interfaceType
 				? (t, infSym) => t.ConstructedFrom == infSym
@@ -528,6 +551,14 @@ namespace Codist
 			return false;
 		}
 
+		public static ISymbol GetOverriddenMember(this ISymbol symbol) {
+			return symbol.Kind switch {
+				SymbolKind.Method => ((IMethodSymbol)symbol).OverriddenMethod,
+				SymbolKind.Property => ((IPropertySymbol)symbol).OverriddenProperty,
+				SymbolKind.Event => ((IEventSymbol)symbol).OverriddenEvent,
+				_ => null,
+			};
+		}
 		public static IReadOnlyList<ISymbol> GetExplicitInterfaceImplementations(this ISymbol symbol) {
 			switch (symbol.Kind) {
 				case SymbolKind.Method:

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
@@ -8,6 +9,7 @@ using Codist.Controls;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.FindSymbols;
 using R = Codist.Properties.Resources;
+using TypeRelations = Codist.SymbolCommands.SymbolRelations<Microsoft.CodeAnalysis.INamedTypeSymbol, Microsoft.CodeAnalysis.INamedTypeSymbol>;
 
 namespace Codist.SymbolCommands
 {
@@ -29,7 +31,7 @@ namespace Codist.SymbolCommands
 		public override IEnumerable<OptionDescriptor> OptionDescriptors => __Options;
 		protected override string ResultLabel => _ResultLabel;
 
-		public override async Task<(Dictionary<INamedTypeSymbol, List<INamedTypeSymbol>>, IReadOnlyList<INamedTypeSymbol>)> PrepareListDataAsync(CancellationToken cancellationToken) {
+		public override async Task<(TypeRelations, IReadOnlyList<INamedTypeSymbol>)> PrepareListDataAsync(CancellationToken cancellationToken) {
 			var projects = MakeProjectListFromOption(Options);
 			var source = MakeSourceFilterFromOption(Options);
 			var orderByHierarchy = !UIHelper.IsShiftDown;
@@ -52,16 +54,12 @@ namespace Codist.SymbolCommands
 				return (default, classes.MakeSortedSymbolList());
 			}
 
-			var members = new List<INamedTypeSymbol>();
-			var hierarchies = new Dictionary<INamedTypeSymbol, List<INamedTypeSymbol>>(7, CodeAnalysisHelper.GetNamedTypeComparer()) {
-					{ original, members }
-				};
+			var hierarchies = new TypeRelations(CodeAnalysisHelper.GetNamedTypeComparer());
 			INamedTypeSymbol t, bt;
 			foreach (var c in classes) {
 				t = c.OriginalDefinition;
 				bt = t.BaseType.OriginalDefinition;
-				if (hierarchies.TryGetValue(bt, out var children)) {
-					children.Add(t);
+				if (!hierarchies.Add(bt, t)) {
 					continue;
 				}
 #if LOG || DEBUG
@@ -76,18 +74,11 @@ namespace Codist.SymbolCommands
 					}
 				}
 #endif
-				hierarchies.Add(bt, [t]);
+				hierarchies.Add(bt, t);
 				if (source == SymbolSourceFilter.RequiresSource) {
 					// add excluded base types from referenced types
 					while (!bt.HasSource() && (t = bt.BaseType) != null) {
-						if (hierarchies.TryGetValue(t, out children)) {
-							if (!children.Contains(bt)) {
-								children.Add(bt);
-							}
-						}
-						else {
-							hierarchies.Add(t, [bt]);
-						}
+						hierarchies.AddNew(t, bt);
 						if (original.Equals(t)) {
 							break;
 						}
@@ -98,7 +89,7 @@ namespace Codist.SymbolCommands
 			return (hierarchies, classes.MakeSortedSymbolList());
 		}
 
-		public override void UpdateList(SymbolMenu resultList, (Dictionary<INamedTypeSymbol, List<INamedTypeSymbol>> hierarchicalData, IReadOnlyList<INamedTypeSymbol> topList) data) {
+		public override void UpdateList(SymbolMenu resultList, (TypeRelations hierarchicalData, IReadOnlyList<INamedTypeSymbol> topList) data) {
 			SetupList(data, resultList);
 		}
 	}
@@ -197,6 +188,71 @@ namespace Codist.SymbolCommands
 				resultList.Add(item, item.ContainingType);
 			}
 			_ResultLabel = R.T_Overrides + data.Length.ToText();
+		}
+	}
+
+	sealed class ListBaseTypesCommand : HierarchicalListCommand<INamedTypeSymbol>
+	{
+		public override int ImageId => IconIds.BaseTypes;
+		public override string Title => R.CMD_ListBaseTypes;
+
+		protected override string ResultLabel => R.T_BaseTypes;
+		protected override ISymbol ResultSymbol => Symbol.Kind == SymbolKind.Method ? Symbol.ContainingType : Symbol;
+
+		public override Task<(TypeRelations hierarchicalData, IReadOnlyList<INamedTypeSymbol> topList)> PrepareListDataAsync(CancellationToken cancellationToken) {
+			var type = ((INamedTypeSymbol)ResultSymbol);
+			var rootTypes = new List<INamedTypeSymbol>();
+			ImmutableArray<INamedTypeSymbol> interfaces;
+			var hierarchies = new TypeRelations(CodeAnalysisHelper.GetNamedTypeComparer());
+			hierarchies.SetRelations(type, rootTypes);
+
+			if (type.TypeKind == TypeKind.Interface) {
+				interfaces = type.Interfaces;
+				rootTypes.AddRange(interfaces);
+				var dedup = new HashSet<INamedTypeSymbol>(CodeAnalysisHelper.GetNamedTypeComparer());
+				foreach (var super in interfaces) {
+					AddSubInterfaces(super, hierarchies, dedup);
+				}
+				goto EXIT;
+			}
+			var implementations = type.FindInterfaceImplementations();
+			foreach (var key in implementations.KeySymbols) {
+				foreach (var item in implementations.GetRelations(key)) {
+					hierarchies.AddNew(key, item.ContainingType);
+				}
+			}
+			var rootInterfaces = implementations.GetRelations(type)?.Select(i => i.ContainingType);
+			if (rootInterfaces != null) {
+				rootTypes.AddRange(rootInterfaces);
+			}
+			if ((type = type.BaseType) != null && type.TypeKind != TypeKind.Error) {
+				rootTypes.Add(type);
+				while (type.BaseType != null) {
+					hierarchies.Add(type, type.BaseType);
+					type = type.BaseType;
+				}
+			}
+		EXIT:
+			return Task.FromResult((hierarchies, (IReadOnlyList<INamedTypeSymbol>)rootTypes));
+		}
+
+		static void AddSubInterfaces(INamedTypeSymbol i, TypeRelations h, HashSet<INamedTypeSymbol> dedup) {
+			if (h.HasRelation(i) || dedup.Add(i)) {
+				return;
+			}
+			var interfaces = i.Interfaces;
+			if (interfaces.Length == 0) {
+				h.SetEmpty(i);
+				return;
+			}
+			h.SetRelations(i, interfaces.MakeSortedSymbolArray());
+			foreach (var item in interfaces) {
+				AddSubInterfaces(item, h, dedup);
+			}
+		}
+
+		public override void UpdateList(SymbolMenu resultList, (TypeRelations hierarchicalData, IReadOnlyList<INamedTypeSymbol> topList) data) {
+			SetupList(data, resultList);
 		}
 	}
 }

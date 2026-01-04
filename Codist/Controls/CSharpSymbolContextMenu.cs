@@ -186,6 +186,7 @@ namespace Codist.Controls
 					case MethodKind.Constructor:
 						if (st.SpecialType == SpecialType.None) {
 							AddCommand(CommandId.FindTypeReferrers);
+							AddCommand(CommandId.ListBaseTypes);
 							CreateInstanceCommandsForContainingType();
 						}
 						break;
@@ -241,6 +242,9 @@ namespace Codist.Controls
 					AddCommand(CommandId.FindImplementations);
 					AddCommand(CommandId.FindSubInterfaces);
 				}
+			}
+			if (t.IsAnyKind(TypeKind.Class, TypeKind.Struct, TypeKind.Interface)) {
+				AddCommand(CommandId.ListBaseTypes);
 			}
 			if (t.TypeKind == TypeKind.Delegate) {
 				AddCommand(CommandId.FindMethodsBySignature);

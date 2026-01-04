@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CLR;
+using Codist.SymbolCommands;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -150,7 +151,7 @@ namespace Codist
 						if (!member.IsCompilerGenerated()
 							&& (mt = member.GetReturnType()) != null
 							&& (Equals(mt, type)
-                                || strict == false && mt.CanConvertTo(type)
+								|| strict == false && mt.CanConvertTo(type)
 								|| (mt as INamedTypeSymbol).ContainsTypeArgument(type, strict))) {
 							members.Add(member);
 						}
@@ -158,7 +159,7 @@ namespace Codist
 					else if (!member.IsCompilerGenerated()
 						&& ((mt = member.GetReturnType()) != null
 							&& (Equals(mt, type)
-                                || strict == false && mt.CanConvertTo(type)
+								|| strict == false && mt.CanConvertTo(type)
 								|| (mt as INamedTypeSymbol).ContainsTypeArgument(type, strict))
 							|| member.Kind == SymbolKind.Method && member.GetParameters().Any(paramComparer))) {
 						members.Add(member);
@@ -233,6 +234,77 @@ namespace Codist
 			return r.ToSortedSymbolArray();
 		}
 
+		/// <summary>
+		/// Finds what interface members implementations for specific type.
+		/// </summary>
+		/// <param name="type">A class or struct type.</param>
+		/// <returns>The key of the relation is the class (current type or its base type). The relations are implementation of interface members (excluding implementation via inheritance).</returns>
+		public static SymbolRelations<INamedTypeSymbol, ISymbol> FindInterfaceImplementations(this INamedTypeSymbol type) {
+			var typeImps = new SymbolRelations<INamedTypeSymbol, ISymbol>();
+			var memberImps = new Dictionary<ISymbol, ISymbol>();
+			var interfaceMembers = new Dictionary<string, Chain<ISymbol>>();
+			Chain<ISymbol> c;
+			var types = new List<INamedTypeSymbol>();
+			types.Add(type);
+			types.AddRange(type.GetBaseTypes().Where(i => !i.IsCommonBaseType()));
+			types.Reverse();
+			var interfaces = new HashSet<INamedTypeSymbol>();
+			foreach (var t in types) { // start from the most base type
+				foreach (var intf in t.Interfaces) {
+					if (!interfaces.Add(intf)) {
+						continue;
+					}
+					foreach (var member in intf.GetMembers()
+						.Where(i => i.IsAbstract
+							&& i.CanBeReferencedByName
+							&& i.Kind.CeqAny(SymbolKind.Property, SymbolKind.Method, SymbolKind.Event))) {
+						if (interfaceMembers.TryGetValue(member.Name, out c)) {
+							c.Add(member);
+						}
+						else {
+							interfaceMembers[member.Name] = new(member);
+						}
+					}
+				}
+				foreach (var member in t.GetMembers()) {
+					if (!member.CanBeReferencedByName
+						|| member.IsAbstract
+						|| !member.Kind.CeqAny(SymbolKind.Property, SymbolKind.Method, SymbolKind.Event)) {
+						continue;
+					}
+					var exp = member.GetExplicitInterfaceImplementations();
+					if (exp.Count != 0) {
+						foreach (var imp in exp) {
+							typeImps.Add(imp.ContainingType, imp);
+						}
+						continue;
+					}
+
+					if (member.IsOverride) {
+						var ov = member.GetOverriddenMember();
+						if (ov != null && memberImps.TryGetValue(ov, out var iMember)) {
+							typeImps.AddNew(t, iMember);
+							memberImps[ov] = iMember;
+							continue;
+						}
+					}
+
+					if (!interfaceMembers.TryGetValue(member.Name, out c)) {
+						continue;
+					}
+
+					foreach (var interfaceMember in c) {
+						if (interfaceMember.MatchSignature(member.Kind, member.GetReturnType(), member.GetParameters(), member.GetTypeParameters())) {
+							typeImps.AddNew(t, interfaceMember);
+							memberImps[member] = interfaceMember;
+						}
+					}
+				}
+			}
+			return typeImps;
+		}
+
+
 		public static async Task<ImmutableArray<IMethodSymbol>> FindExtensionMethodsAsync(this ITypeSymbol type, Project project, bool strict, bool matchTypeArgument, SymbolSourceFilter source, CancellationToken cancellationToken = default) {
 			var compilation = await project.GetCompilationAsync(cancellationToken).ConfigureAwait(false);
 			var members = ImmutableArray.CreateBuilder<IMethodSymbol>(10);
@@ -265,7 +337,7 @@ namespace Codist
 					}
 					foreach (var item in m.TypeParameters) {
 						if (!Equals(item, p.Type)
-                            || item.HasValueTypeConstraint && isValueType == false
+							|| item.HasValueTypeConstraint && isValueType == false
 							|| item.HasReferenceTypeConstraint && isValueType
 							|| matchTypeArgument && item.ConstraintTypes.Length == 0) {
 							continue;

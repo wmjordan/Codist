@@ -22,6 +22,7 @@ namespace Codist.SymbolCommands
 				CommandId.FindExtensionMethods => new FindExtensionMethodsCommand(),
 				CommandId.FindReturnTypeExtensionMethods => new FindReturnTypeExtensionMethodsCommand(),
 				CommandId.FindSubInterfaces => new FindSubInterfacesCommand(),
+				CommandId.ListBaseTypes => new ListBaseTypesCommand(),
 				CommandId.FindImplementations => new FindImplementationsCommand(),
 				CommandId.FindDerivedClasses => new FindDerivedClassesCommand(),
 				CommandId.FindOverrides => new FindOverridesCommand(),

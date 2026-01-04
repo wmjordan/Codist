@@ -142,6 +142,7 @@
     <Compile Include="SymbolCommands\CommandId.cs" />
     <Compile Include="SymbolCommands\CommandOptions.cs" />
     <Compile Include="SymbolCommands\OptionDescriptor.cs" />
+    <Compile Include="SymbolCommands\SymbolRelations.cs" />
     <Compile Include="SyntaxHighlight\ClassificationTypeExporter.cs" />
     <Compile Include="SyntaxHighlight\CodeStyleTypes.cs" />
     <Compile Include="Commands\AutoBuildVersionWindow.cs" />

@@ -14,6 +14,7 @@
 		FindExtensionMethods,
 		FindReturnTypeExtensionMethods,
 		FindSubInterfaces,
+		ListBaseTypes,
 		FindImplementations,
 		FindDerivedClasses,
 		FindOverrides,

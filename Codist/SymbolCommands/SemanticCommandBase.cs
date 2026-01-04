@@ -161,9 +161,9 @@ namespace Codist.SymbolCommands
 	// displays a list with hierarchical structure of inheritance
 	// first item in tuple is the hierarchical data, where each symbol in item.Value may refer to other item.Key
 	// second item is the flat top-level list
-	abstract class HierarchicalListCommand<TSymbol> : AnalysisListCommandBase<(Dictionary<TSymbol, List<TSymbol>> hierarchicalData, IReadOnlyList<TSymbol> topList)> where TSymbol : ISymbol
+	abstract class HierarchicalListCommand<TSymbol> : AnalysisListCommandBase<(SymbolRelations<TSymbol, TSymbol> hierarchicalData, IReadOnlyList<TSymbol> topList)> where TSymbol : ISymbol
 	{
-		protected void SetupList((Dictionary<TSymbol, List<TSymbol>> hierarchicalData, IReadOnlyList<TSymbol> topList) data, SymbolMenu resultList) {
+		protected void SetupList((SymbolRelations<TSymbol, TSymbol> hierarchicalData, IReadOnlyList<TSymbol> topList) data, SymbolMenu resultList) {
 			var hierarchies = data.hierarchicalData;
 			if (hierarchies != null) {
 				foreach (var item in data.topList) {
@@ -178,13 +178,15 @@ namespace Codist.SymbolCommands
 			}
 		}
 
-		static void AddChildren(Dictionary<TSymbol, List<TSymbol>> hierarchies, SymbolMenu resultList, byte indentLevel, TSymbol item) {
+		static void AddChildren(SymbolRelations<TSymbol, TSymbol> hierarchies, SymbolMenu resultList, byte indentLevel, TSymbol item) {
+			var children = hierarchies.GetRelations(item);
+			if (children is null) {
+				return;
+			}
 			indentLevel++;
-			if (hierarchies.TryGetValue(item, out var children)) {
-				foreach (var child in children) {
-					resultList.Add(child, false).IndentLevel = indentLevel;
-					AddChildren(hierarchies, resultList, indentLevel, child);
-				}
+			foreach (var child in children) {
+				resultList.Add(child, false).IndentLevel = indentLevel;
+				AddChildren(hierarchies, resultList, indentLevel, child);
 			}
 		}
 	}
