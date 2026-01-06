@@ -74,7 +74,7 @@ namespace Codist.Commands
 			ITextSnapshot newText;
 			var oldSpans = view.Selection.SelectedSpans;
 			var startText = args.TypedChar.ToString();
-			var history = ServicesHelper.Instance.TextUndoHistoryService.GetHistory(view.TextBuffer);
+			var history = ServicesHelper.Instance.TextUndoHistory.GetHistory(view.TextBuffer);
 			var trim = Config.Instance.PunctuationOptions.MatchFlags(PunctuationOptions.Trim);
 			using (var transaction = history.CreateTransaction(R.T_AutoSurround + startText + endText))
 			using (var edit = view.TextBuffer.CreateEdit()) {

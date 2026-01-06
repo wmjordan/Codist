@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using CLR;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
+using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.TextManager.Interop;
 
@@ -13,100 +13,103 @@ namespace Codist.SnippetTexts
 {
 	sealed class SnippetSession : IOleCommandTarget
 	{
-		static readonly TextMarkerTag __PlaceholderTag = new ("Code Snippet Field");
+		static readonly TextMarkerTag __PlaceholderTag = new("Code Snippet Field"),
+			__PlaceholderDependentTag = new("Code Snippet Dependent Field");
 		readonly IWpfTextView _view;
 		readonly IVsTextView _vsView;
-		readonly List<ITrackingSpan> _placeholders;
+
+		readonly List<PlaceholderGroup> _placeholderGroups;
 		readonly SimpleTagger<TextMarkerTag> _markerTagger;
 		readonly List<TrackingTagSpan<TextMarkerTag>> _markerSpans = new List<TrackingTagSpan<TextMarkerTag>>();
-		int _currentIndex;
-		IOleCommandTarget _nextCommandTarget;
+
+		readonly ITextUndoHistory _undoHistory;
+		readonly int _snapshotVersion;
+		readonly IOleCommandTarget _nextCommandTarget;
+		int _currentGroupIndex;
 		bool _isDisposed;
 
-		public SnippetSession(IWpfTextView view, string insertedText, int position) {
+		public SnippetSession(IWpfTextView view, IEnumerable<PlaceholderInfo> placeholderInfos, int position, ITextUndoHistory undoHistory) {
 			_view = view;
-			_placeholders = new List<ITrackingSpan>();
-			_currentIndex = -1;
+			_placeholderGroups = new List<PlaceholderGroup>();
+			_currentGroupIndex = -1;
 			_markerTagger = ServicesHelper.Instance.TextMarkerProvider.GetTextMarkerTagger(_view.TextBuffer);
 
-			MarkPlaceholders(insertedText, position);
+			CreatePlaceholderGroups(placeholderInfos, position);
 
-			if (_placeholders.Count == 0) {
-				_isDisposed = true;
-				return;
+			if (_placeholderGroups.Count == 0) {
+				goto ERROR;
 			}
 
-			MoveToPlaceholder(0);
-
-			_view.Caret.PositionChanged += Caret_PositionChanged;
-
 			var vsView = ServicesHelper.Instance.EditorAdaptersFactoryService.GetViewAdapter(view);
-			vsView.AddCommandFilter(this, out var nextTarget);
-			SetCommandTarget(nextTarget);
+			if (vsView.AddCommandFilter(this, out var nextTarget) != VSConstants.S_OK) {
+				goto ERROR;
+			}
+			_nextCommandTarget = nextTarget;
 			_vsView = vsView;
 
+			_snapshotVersion = view.TextSnapshot.Version.ReiteratedVersionNumber;
+			_undoHistory = undoHistory;
+			_undoHistory.UndoRedoHappened += HandleUndo;
+			MoveToPlaceholderGroup(0);
+
 			_view.Closed += View_Closed;
+			return;
+		ERROR:
+			_isDisposed = true;
+		}
+
+		void CreatePlaceholderGroups(IEnumerable<PlaceholderInfo> placeholderInfos, int insertPosition) {
+			var snapshot = _view.TextSnapshot;
+			var groupsDict = new Dictionary<string, PlaceholderGroup>(StringComparer.Ordinal);
+
+			foreach (var info in placeholderInfos) {
+
+				bool isNewGroup;
+				if (isNewGroup = !groupsDict.TryGetValue(info.Name, out var group)) {
+					group = new PlaceholderGroup(info.Name);
+					groupsDict[info.Name] = group;
+					_placeholderGroups.Add(group);
+				}
+
+				var span = new SnapshotSpan(snapshot, insertPosition + info.Position, info.Length).ToTrackingSpan();
+				group.Spans.Add(span);
+				_markerSpans.Add(_markerTagger.CreateTagSpan(span, isNewGroup ? __PlaceholderTag : __PlaceholderDependentTag));
+			}
 		}
 
 		bool IsCompletionActive() {
 			return ServicesHelper.Instance.CompletionBroker.IsCompletionActive(_view);
 		}
 
-		void MarkPlaceholders(string text, int position) {
-			var snapshot = _view.TextSnapshot;
-			var textSpan = new Span(position, text.Length);
-
-			foreach (var match in GetPlaceholders(new SnapshotSpan(snapshot, textSpan).GetText(), "[[", "]]")) {
-				var span = new SnapshotSpan(snapshot, position + match.Start, match.Length)
-					.ToTrackingSpan();
-				_placeholders.Add(span);
-				_markerSpans.Add(_markerTagger.CreateTagSpan(span, __PlaceholderTag));
-			}
-		}
-
-		static IEnumerable<Span> GetPlaceholders(string text, string patternStart, string patternEnd) {
-			int start = 0, end, length = text.Length;
-			while ((start = text.IndexOf(patternStart, start, StringComparison.Ordinal)) >= 0
-				&& (end = text.IndexOf(patternEnd, start + patternStart.Length, StringComparison.Ordinal)) > 0) {
-				yield return new Span(start, (end += patternEnd.Length) - start);
-				start = end;
-				if (start >= length) {
-					yield break;
-				}
-			}
-		}
-
-		public void SetCommandTarget(IOleCommandTarget nextCommandTarget) {
-			_nextCommandTarget = nextCommandTarget;
-		}
-
 		[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
 		public int Exec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut) {
-			if (pguidCmdGroup == VSConstants.VSStd2K && _placeholders.Count > 0) {
-				if (nCmdID == (uint)VSConstants.VSStd2KCmdID.TAB) {
-					if (IsCompletionActive()) {
-						goto DEFAULT;
-					}
-					MoveToNext();
-					return VSConstants.S_OK;
-				}
-				// Shift+Tab
-				if (nCmdID == (uint)VSConstants.VSStd2KCmdID.BACKTAB) {
-					MoveToPrevious();
-					return VSConstants.S_OK;
-				}
-				// Esc or Enter
-				if (nCmdID.CeqAny((uint)VSConstants.VSStd2KCmdID.CANCEL, (uint)VSConstants.VSStd2KCmdID.RETURN)) {
-					if (IsCompletionActive()) {
-						goto DEFAULT;
-					}
-					Terminate();
-					return VSConstants.S_OK;
+			var nextCmd = _nextCommandTarget;
+			if (pguidCmdGroup == VSConstants.VSStd2K
+				&& _placeholderGroups.Count != 0) {
+				switch ((VSConstants.VSStd2KCmdID)nCmdID) {
+					case VSConstants.VSStd2KCmdID.TAB:
+						if (IsCompletionActive()) {
+							break;
+						}
+						MoveToNextGroup();
+						return VSConstants.S_OK;
+					case VSConstants.VSStd2KCmdID.BACKTAB: // Shift+Tab
+						MoveToPreviousGroup();
+						return VSConstants.S_OK;
+					case VSConstants.VSStd2KCmdID.CANCEL: // Esc
+					case VSConstants.VSStd2KCmdID.RETURN: // Enter
+						if (IsCompletionActive()) {
+							break;
+						}
+
+						if (!IsCaretInPlaceholder()) {
+							nextCmd.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
+						}
+						Terminate();
+						return VSConstants.S_OK;
 				}
 			}
-
-		DEFAULT:
-			return _nextCommandTarget.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
+			return nextCmd.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
 		}
 
 		[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
@@ -114,46 +117,79 @@ namespace Codist.SnippetTexts
 			return _nextCommandTarget.QueryStatus(ref pguidCmdGroup, cCmds, prgCmds, pCmdText);
 		}
 
-		void MoveToNext() {
-			int nextIndex = (_currentIndex + 1) % _placeholders.Count;
-			MoveToPlaceholder(nextIndex);
+		void MoveToNextGroup() {
+			if (_placeholderGroups.Count < 2) {
+				return;
+			}
+			MoveToPlaceholderGroup((_currentGroupIndex + 1) % _placeholderGroups.Count);
 		}
 
-		void MoveToPrevious() {
-			int prevIndex = (_currentIndex - 1 + _placeholders.Count) % _placeholders.Count;
-			MoveToPlaceholder(prevIndex);
+		void MoveToPreviousGroup() {
+			int c = _placeholderGroups.Count;
+			if (c < 2) {
+				return;
+			}
+			MoveToPlaceholderGroup((_currentGroupIndex - 1 + c) % c);
 		}
 
-		void MoveToPlaceholder(int index) {
-			if (index < 0 || index >= _placeholders.Count) return;
+		void MoveToPlaceholderGroup(int index) {
+			if (index < 0 || index >= _placeholderGroups.Count) return;
 
-			_currentIndex = index;
-			var currentSpan = _placeholders[index].GetSpan(_view.TextSnapshot);
-			_view.Selection.Select(currentSpan, false);
-			_view.Caret.MoveTo(currentSpan.Start);
+			var currentGroup = _placeholderGroups[index];
+			var snapshot = _view.TextSnapshot;
+
+			var spansToSelect = new Chain<SnapshotSpan>();
+			foreach (var trackingSpan in currentGroup.Spans) {
+				var span = trackingSpan.GetSpan(snapshot);
+				spansToSelect.Add(span);
+			}
+
+			if (!spansToSelect.IsEmpty) {
+				_view.Selection.Clear();
+				if (spansToSelect.IsSingle) {
+					_view.SelectSpan(spansToSelect.Head);
+				}
+				else {
+					_view.Caret.MoveTo(spansToSelect.Head.End);
+					_view.SelectSpans(spansToSelect);
+				}
+			}
+			_currentGroupIndex = index;
 		}
 
-		void Caret_PositionChanged(object sender, CaretPositionChangedEventArgs e) {
-			if (_isDisposed || _placeholders.Count == 0) return;
+		bool IsCaretInPlaceholder() {
+			if (_isDisposed || _placeholderGroups.Count == 0) {
+				return false;
+			}
 
-			var currentSpan = _placeholders[_currentIndex].GetSpan(_view.TextSnapshot);
+			var snapshot = _view.TextSnapshot;
+			var pos = _view.Caret.Position.BufferPosition;
 
-			if (!currentSpan.Contains(e.NewPosition.BufferPosition)) {
-				for (int i = 0; i < _placeholders.Count; i++) {
-					if (_placeholders[i].GetSpan(_view.TextSnapshot).Contains(e.NewPosition.BufferPosition)) {
-						_currentIndex = i;
-						_view.Selection.Select(_placeholders[i].GetSpan(_view.TextSnapshot), false);
-						return;
+			if (_currentGroupIndex >= 0 && _currentGroupIndex < _placeholderGroups.Count) {
+				var currentGroup = _placeholderGroups[_currentGroupIndex];
+				foreach (var span in currentGroup.Spans) {
+					if (span.GetSpan(snapshot).Contains(pos, true)) {
+						return true;
 					}
 				}
-				Terminate();
 			}
+			for (int i = 0; i < _placeholderGroups.Count; i++) {
+				if (i == _currentGroupIndex) continue;
+
+				var group = _placeholderGroups[i];
+				foreach (var span in group.Spans) {
+					if (span.GetSpan(snapshot).Contains(pos, true)) {
+						_currentGroupIndex = i;
+						return true;
+					}
+				}
+			}
+			return false;
 		}
 
 		public void Terminate() {
 			if (_isDisposed) return;
-
-			_view.Caret.PositionChanged -= Caret_PositionChanged;
+			_undoHistory.UndoRedoHappened -= HandleUndo;
 			_view.Closed -= View_Closed;
 			foreach (var span in _markerSpans) {
 				_markerTagger.RemoveTagSpan(span);
@@ -165,6 +201,12 @@ namespace Codist.SnippetTexts
 			OnSessionEnd();
 		}
 
+		void HandleUndo(object sender, TextUndoRedoEventArgs e) {
+			if (_view.TextSnapshot.Version.ReiteratedVersionNumber < _snapshotVersion) {
+				Terminate();
+			}
+		}
+
 		void OnSessionEnd() {
 			OnSessionEnded?.Invoke(this, EventArgs.Empty);
 		}
@@ -174,5 +216,11 @@ namespace Codist.SnippetTexts
 		}
 
 		public event EventHandler OnSessionEnded;
+
+		sealed class PlaceholderGroup(string name)
+		{
+			public readonly string Name = name;
+			public List<ITrackingSpan> Spans = [];
+		}
 	}
 }

@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Media;
 using CLR;
 using Codist.Margins;
+using Codist.SnippetTexts;
 using Codist.SyntaxHighlight;
 using Codist.Taggers;
 using Newtonsoft.Json;

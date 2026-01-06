@@ -79,7 +79,7 @@ namespace Codist
 		public IRtfBuilderService RtfService { get; private set; }
 
 		[Import]
-		public ITextUndoHistoryRegistry TextUndoHistoryService { get; private set; }
+		public ITextUndoHistoryRegistry TextUndoHistory { get; private set; }
 
 		[Import]
 		public ITextMarkerProviderFactory TextMarkerProvider {  get; private set; }

@@ -3,6 +3,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using Codist.Controls;
+using Codist.SnippetTexts;
 using Microsoft.VisualStudio.Shell;
 using R = Codist.Properties.Resources;
 

@@ -13,5 +13,8 @@ namespace Codist
 		public static string ToText(this int value) {
 			return value.ToString(CultureInfo.InvariantCulture);
 		}
+		public static bool Contains(this string text, char character) {
+			return text.IndexOf(character) >= 0;
+		}
 	}
 }

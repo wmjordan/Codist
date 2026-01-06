@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Input;
 using CLR;
 using Codist.Controls;
+using Codist.SnippetTexts;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;

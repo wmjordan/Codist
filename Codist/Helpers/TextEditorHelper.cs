@@ -60,6 +60,9 @@ namespace Codist
 		public static bool Contains(this TextSpan span, int position, bool inclusive) {
 			return span.Contains(position) || (inclusive && span.End == position);
 		}
+		public static bool Contains(this SnapshotSpan span, int position, bool inclusive) {
+			return span.Contains(position) || (inclusive && span.End == position);
+		}
 		public static bool Contains(this TextSpan span, ITextSelection selection, bool inclusive) {
 			var start = selection.Start.Position.Position;
 			var end = selection.End.Position.Position;
@@ -1377,7 +1380,7 @@ namespace Codist
 		}
 
 		public static void ClearUndoHistory(this ITextBuffer textBuffer) {
-			var s = ServicesHelper.Instance.TextUndoHistoryService;
+			var s = ServicesHelper.Instance.TextUndoHistory;
 			if (s.TryGetHistory(textBuffer, out var history)) {
 				s.RemoveHistory(history);
 			}

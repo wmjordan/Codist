@@ -7,20 +7,29 @@ using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Editor.OptionsExtensionMethods;
 using Microsoft.VisualStudio.Utilities;
 
-namespace Codist
+namespace Codist.SnippetTexts
 {
+	readonly struct PlaceholderInfo(string name, int position, int length)
+	{
+		public string Name { get; } = name;
+		public int Position { get; } = position;
+		public int Length { get; } = length;
+	}
+
 	sealed class WrapText
 	{
-		string _Prefix, _Suffix, _Pattern, _Substitution;
+		string _Pattern;
 		char _Indicator;
 
-		string[] _prefixLines;
-		string[] _suffixLines;
-		int[] _prefixTabCounts;
-		int[] _suffixTabCounts;
-		string[] _prefixWithoutLeadingTabs;
-		string[] _suffixWithoutLeadingTabs;
-		bool _hasPlaceholder;
+		string _Prefix;
+		string _Suffix;
+		string _Substitution;
+
+		List<ISnippetCommand> _prefixCommands;
+		List<ISnippetCommand> _suffixCommands;
+
+		readonly List<PlaceholderInfo> _placeholderInfos = new List<PlaceholderInfo>();
+		bool _IsSimple;
 
 		public const char DefaultIndicator = '$';
 
@@ -32,6 +41,11 @@ namespace Codist
 
 		public string Name { get; set; }
 
+		public char Indicator {
+			get => _Indicator;
+			set => _Indicator = value;
+		}
+
 		public string Pattern {
 			get => _Pattern;
 			set {
@@ -40,120 +54,174 @@ namespace Codist
 			}
 		}
 
-		public char Indicator {
-			get => _Indicator;
-			set {
-				_Indicator = value;
-				InternalUpdate();
+		internal string Prefix => _Prefix;
+		internal string Suffix => _Suffix;
+		internal bool HasSubstitution => _Substitution != null;
+		internal bool HasMultilinePrefix => _prefixCommands?.Any(c => c.Type == CommandType.NewLine) == true;
+		internal bool HasMultilineSuffix => _suffixCommands?.Any(c => c.Type == CommandType.NewLine) == true;
+		internal List<PlaceholderInfo> PlaceholderInfos => _placeholderInfos;
+
+		void InternalUpdate() {
+			int splitPos = _Pattern != null ? _Pattern.IndexOf(_Indicator) : -1;
+			_Prefix = splitPos >= 0 ? _Pattern.Substring(0, splitPos) : _Pattern;
+			_Suffix = splitPos >= 0 ? _Pattern.Substring(splitPos + 1) : string.Empty;
+
+			bool hasNewline = _Pattern.Contains('\n');
+			bool hasPlaceholder = _Pattern.Contains("[[");
+			_Substitution = _Suffix.Contains(_Indicator) ? _Indicator.ToString() : null;
+
+			if (_IsSimple = !hasNewline && !hasPlaceholder && _Substitution == null) {
+				_prefixCommands = _suffixCommands = null;
+				return;
+			}
+
+			_prefixCommands = new List<ISnippetCommand>();
+			_suffixCommands = new List<ISnippetCommand>();
+
+			ParseToCommands(_Prefix?.Replace("\r\n", "\n"), _prefixCommands);
+			ParseToCommands(_Suffix?.Replace("\r\n", "\n"), _suffixCommands);
+		}
+
+		void ParseToCommands(string text, List<ISnippetCommand> commands) {
+			if (string.IsNullOrEmpty(text)) return;
+
+			var lines = text.Split('\n');
+			for (int i = 0; i < lines.Length; i++) {
+				string line = lines[i];
+				int lineIndex = 0;
+
+				int tabCount = 0;
+				while (lineIndex < line.Length && line[lineIndex] == '\t') {
+					tabCount++;
+					lineIndex++;
+				}
+				if (tabCount > 0) {
+					commands.Add(new IndentCommand(tabCount));
+				}
+
+				while (lineIndex < line.Length) {
+					#region Check placeholders
+					if (lineIndex + 1 < line.Length && line[lineIndex] == '[' && line[lineIndex + 1] == '[') {
+						int endBracket = line.IndexOf("]]", lineIndex + 2);
+						if (endBracket > lineIndex) {
+							string name = line.Substring(lineIndex + 2, endBracket - lineIndex - 2);
+							commands.Add(new PlaceholderCommand(name));
+							lineIndex = endBracket + 2;
+							continue;
+						}
+					}
+					#endregion
+
+					if (line[lineIndex] == _Indicator) {
+						commands.Add(SelectionCommand.Instance);
+						lineIndex++;
+						continue;
+					}
+
+					int textStart = lineIndex;
+					while (lineIndex < line.Length) {
+						if ((lineIndex + 1 < line.Length && line[lineIndex] == '[' && line[lineIndex + 1] == '[')
+							|| line[lineIndex] == _Indicator) {
+							break;
+						}
+						lineIndex++;
+					}
+
+					if (lineIndex > textStart) {
+						commands.Add(new TextCommand(line.Substring(textStart, lineIndex - textStart)));
+					}
+				}
+
+				if (i < lines.Length - 1) {
+					commands.Add(NewLineCommand.Instance);
+				}
 			}
 		}
 
-		internal string Prefix => _Prefix;
-		internal string Suffix => _Suffix;
-		internal string Substitution => _Substitution;
-		internal bool HasMultilinePrefix => _prefixLines != null;
-		internal bool HasMultilineSuffix => _suffixLines != null;
-		internal bool HasPlaceholder => _hasPlaceholder;
-
 		public string Wrap(string text) {
-			return _Prefix
-				+ text
-				+ (_Substitution != null ? _Suffix.Replace(_Substitution, text) : _Suffix);
+			return _Prefix + text + (_Substitution != null ? _Suffix.Replace(_Substitution, text) : _Suffix);
 		}
 
 		public string Wrap(string text, string startLineSpace, string endLineSpace, int indentStringSize, string newLineChar) {
-			// 计算大致的容量，考虑到多行情况
-			int estimatedCapacity = _Prefix.Length + _Suffix.Length + text.Length +
-				(startLineSpace?.Length ?? 0 + endLineSpace?.Length ?? 0) *
-				Math.Max(_prefixLines?.Length ?? 1, _suffixLines?.Length ?? 1);
+			_placeholderInfos.Clear();
 
-			using var sbr = ReusableStringBuilder.AcquireDefault(estimatedCapacity);
+			using var sbr = ReusableStringBuilder.AcquireDefault(text.Length + _Pattern.Length);
 			StringBuilder sb = sbr.Resource;
 
-			// 处理前缀部分
-			AppendParts(startLineSpace, indentStringSize, newLineChar, _Prefix, _prefixLines, _prefixTabCounts, _prefixWithoutLeadingTabs, sb);
+			ExecuteCommands(_prefixCommands, sb, startLineSpace, indentStringSize, newLineChar, null);
 
-			// 添加原始文本
+			int selectionStartPos = sb.Length;
 			sb.Append(text);
+			int selectionEndPos = sb.Length;
 
-			// 处理后缀部分
-			string suffix = _Suffix;
-			// 如果存在替换模式，先进行替换
-			if (_Substitution != null) {
-				suffix = suffix.Replace(_Substitution, text);
-				// 替换后需要重新计算多行后缀
-				if (_suffixLines != null) {
-					ProcessSuffixForMultiline(sb, suffix, endLineSpace, indentStringSize, newLineChar);
-				}
-				else {
-					sb.Append(suffix);
-				}
-			}
-			else {
-				AppendParts(endLineSpace, indentStringSize, newLineChar, suffix, _suffixLines, _suffixTabCounts, _suffixWithoutLeadingTabs, sb);
-			}
+			ExecuteCommands(_suffixCommands, sb, endLineSpace, indentStringSize, newLineChar, text);
+
 			return sb.ToString();
 		}
 
-		static void AppendParts(string startLineSpace, int indentStringSize, string newLineChar, string fullContent, string[] lines, int[] tabCounts, string[] contentLines, StringBuilder sb) {
-			if (lines == null) {
-				sb.Append(fullContent);
-				return;
+		void ExecuteCommands(List<ISnippetCommand> commands, StringBuilder sb, string linePrefix, int indentSize, string newLineChar, string selectionText) {
+			foreach (var cmd in commands) {
+				switch (cmd.Type) {
+					case CommandType.Text:
+						sb.Append(((TextCommand)cmd).Content);
+						break;
+					case CommandType.Indent:
+						var ic = (IndentCommand)cmd;
+						if (indentSize > 0 && ic.TabCount > 0) {
+							sb.Append(' ', ic.TabCount * indentSize);
+						}
+						break;
+					case CommandType.NewLine:
+						sb.Append(newLineChar);
+						if (!string.IsNullOrEmpty(linePrefix)) {
+							sb.Append(linePrefix);
+						}
+						break;
+					case CommandType.Selection:
+						if (selectionText != null) {
+							sb.Append(selectionText);
+						}
+						break;
+					case CommandType.Placeholder:
+						int pos = sb.Length;
+						string name = ((PlaceholderCommand)cmd).Name;
+						sb.Append(name);
+						_placeholderInfos.Add(new PlaceholderInfo(name, pos, name.Length));
+						break;
+				}
 			}
-			for (int i = 0; i < lines.Length; i++) {
-                if (i == 0) {
-                    sb.Append(lines[i]);
-					continue;
-                }
-                sb.Append(newLineChar);
-                sb.Append(startLineSpace);
-
-                // 处理行首的制表符
-                if (indentStringSize >= 0 && tabCounts[i] > 0) {
-                    // 使用预计算的行内容和制表符数量
-                    sb.Append(' ', tabCounts[i] * indentStringSize);
-                    sb.Append(contentLines[i]);
-                }
-                else {
-                    sb.Append(lines[i]);
-                }
-            }
 		}
 
 		public IEnumerable<SnapshotSpan> WrapInView(ITextView view) {
-			var modified = new Chain<Span>();
-			var prefix = Prefix;
-			var suffix = Suffix;
-			var substitution = Substitution;
-			var psLength = prefix.Length + suffix.Length;
+			return _IsSimple ? SimpleWrapOrUnwrap(view) : ComplexWrap(view);
+		}
+
+		IEnumerable<SnapshotSpan> SimpleWrapOrUnwrap(ITextView view) {
 			var offset = 0;
-			int strippedLength;
 			string replacement = null;
+			var modified = new Chain<Span>();
 			using (var edit = view.TextSnapshot.TextBuffer.CreateEdit()) {
 				foreach (var item in view.Selection.SelectedSpans) {
 					var t = item.GetText();
-					// remove surrounding items
-					if (substitution == null
-						&& (strippedLength = item.Length - psLength) > 0
-						&& t.StartsWith(prefix, StringComparison.Ordinal)
-						&& t.EndsWith(suffix, StringComparison.Ordinal)
-						&& t.IndexOf(prefix, prefix.Length, strippedLength) <= t.IndexOf(suffix, prefix.Length, strippedLength)) {
-						if (edit.Replace(item, t.Substring(prefix.Length, strippedLength))) {
+					int strippedLength;
+					var psLength = _Prefix.Length + _Suffix.Length;
+					if ((strippedLength = item.Length - psLength) > 0
+						&& t.StartsWith(_Prefix, StringComparison.Ordinal)
+						&& t.EndsWith(_Suffix, StringComparison.Ordinal)
+						&& t.IndexOf(_Prefix, _Prefix.Length, strippedLength) <= t.IndexOf(_Suffix, _Prefix.Length, strippedLength)) {
+						// unwrap
+						if (edit.Replace(item, t.Substring(_Prefix.Length, strippedLength))) {
 							modified.Add(new Span(item.Start.Position + offset, strippedLength));
 							offset -= psLength;
 						}
-						continue;
 					}
-					// surround items
-					replacement = HasMultilinePrefix || HasMultilineSuffix ? Wrap(t, HasMultilinePrefix ? view.TextSnapshot.GetLinePrecedingWhitespaceAtPosition(item.Start.Position) : null, HasMultilineSuffix ? view.TextSnapshot.GetLinePrecedingWhitespaceAtPosition(item.End.Position) : null, view.Options.GetIndentStringSize(), view.Options.GetNewLineCharacter()) : Wrap(t);
-					if (edit.Replace(item, replacement)) {
-						modified.Add(new Span(item.Start.Position + offset, replacement.Length));
-						offset += replacement.Length - t.Length;
-					}
-					if (HasPlaceholder && edit.HasEffectiveChanges) {
-						edit.Apply();
-						var session = new SnippetTexts.SnippetSession((IWpfTextView)view, replacement, item.Start.Position);
-						return null;
+					else {
+						// wrap
+						replacement = Wrap(t);
+						if (edit.Replace(item, replacement)) {
+							modified.Add(new Span(item.Start.Position + offset, replacement.Length));
+							offset += replacement.Length - t.Length;
+						}
 					}
 				}
 				if (edit.HasEffectiveChanges) {
@@ -164,100 +232,82 @@ namespace Codist
 			return Enumerable.Empty<SnapshotSpan>();
 		}
 
-		// 处理替换后的多行后缀
-		static void ProcessSuffixForMultiline(StringBuilder sb, string suffix, string endLineSpace, int indentStringSize, string newLineChar) {
-			string[] suffixLines = suffix.Split('\n');
-			for (int i = 0; i < suffixLines.Length; i++) {
-				if (i > 0) {
-					sb.Append(newLineChar);
-					sb.Append(endLineSpace);
+		IEnumerable<SnapshotSpan> ComplexWrap(ITextView view) {
+			var offset = 0;
+			string replacement = null;
+			var modified = new Chain<Span>();
+			using (var edit = view.TextSnapshot.TextBuffer.CreateEdit()) {
+				foreach (var item in view.Selection.SelectedSpans) {
+					var t = item.GetText();
+					int start = item.Start.Position;
 
-					// 处理行首的制表符
-					if (indentStringSize >= 0) {
-						string line = suffixLines[i];
-						int tabCount = CountLeadingTabs(line);
-						if (tabCount > 0) {
-							sb.Append(' ', tabCount * indentStringSize);
-							sb.Append(line, tabCount, line.Length - tabCount);
-						}
-						else {
-							sb.Append(line);
-						}
+					replacement = Wrap(
+						t,
+						HasMultilinePrefix ? view.TextSnapshot.GetLinePrecedingWhitespaceAtPosition(start) : null,
+						HasMultilineSuffix ? view.TextSnapshot.GetLinePrecedingWhitespaceAtPosition(item.End.Position) : null,
+						view.Options.GetIndentStringSize(),
+						view.Options.GetNewLineCharacter()
+					);
+
+					if (edit.Replace(item, replacement)) {
+						modified.Add(new Span(start + offset, replacement.Length));
+						offset += replacement.Length - t.Length;
 					}
-					else {
-						sb.Append(suffixLines[i]);
+
+					if (edit.HasEffectiveChanges) {
+						edit.Apply();
+						if (_placeholderInfos.Count != 0) {
+							if (view.TryGetProperty(out SnippetSession session)) {
+								session.Terminate();
+							}
+							view.Properties[typeof(SnippetSession)] = new SnippetSession((IWpfTextView)view, _placeholderInfos, start, ServicesHelper.Instance.TextUndoHistory.GetHistory(view.TextBuffer));
+						}
+						return null;
 					}
 				}
-				else {
-					sb.Append(suffixLines[i]);
-				}
 			}
+			return Enumerable.Empty<SnapshotSpan>();
+
 		}
 
-		// 计算行首的制表符数量
-		static int CountLeadingTabs(string line) {
-			int count = 0;
-			while (count < line.Length && line[count] == '\t') {
-				count++;
-			}
-			return count;
+		interface ISnippetCommand {
+			CommandType Type { get; }
+		}
+		sealed class TextCommand(string content) : ISnippetCommand
+		{
+			public CommandType Type => CommandType.Text;
+			public readonly string Content = content;
+		}
+		sealed class PlaceholderCommand(string name) : ISnippetCommand
+		{
+			public CommandType Type => CommandType.Placeholder;
+			public readonly string Name = name;
+		}
+		sealed class SelectionCommand : ISnippetCommand
+		{
+			public CommandType Type => CommandType.Selection;
+			private SelectionCommand() { }
+			public static readonly SelectionCommand Instance = new();
+		}
+		sealed class NewLineCommand : ISnippetCommand
+		{
+			public CommandType Type => CommandType.NewLine;
+			private NewLineCommand() { }
+			public static readonly NewLineCommand Instance = new();
+		}
+		sealed class IndentCommand(int tabCount) : ISnippetCommand
+		{
+			public CommandType Type => CommandType.Indent;
+			public readonly int TabCount = tabCount;
 		}
 
-		void InternalUpdate() {
-			int p;
-			if (_Pattern != null && (p = _Pattern.IndexOf(_Indicator)) >= 0) {
-				_Prefix = _Pattern.Substring(0, p).Replace("\r\n", "\n");
-				_Suffix = _Pattern.Substring(p + 1).Replace("\r\n", "\n");
-			}
-			else {
-				_Prefix = _Pattern?.Replace("\r\n", "\n") ?? String.Empty;
-				_Suffix = String.Empty;
-			}
-
-			_Substitution = _Suffix.Contains(_Indicator) ? _Indicator.ToString() : null;
-
-			// 预计算多行前缀
-			UpdateMultilineData(_Prefix, _Prefix.Contains('\n'), ref _prefixLines, ref _prefixTabCounts, ref _prefixWithoutLeadingTabs);
-
-			// 预计算多行后缀（只有当不包含替换时才预计算）
-			if (_Substitution == null) {
-				UpdateMultilineData(_Suffix, _Suffix.Contains('\n'), ref _suffixLines, ref _suffixTabCounts, ref _suffixWithoutLeadingTabs);
-			}
-			else {
-				ClearMultilineData(ref _suffixLines, ref _suffixTabCounts, ref _suffixWithoutLeadingTabs);
-			}
-
-			_hasPlaceholder = _Prefix.Contains("[[") || _Suffix.Contains("[[");
-		}
-
-		// 更新多行数据的辅助方法
-		static void UpdateMultilineData(string text, bool isMultiline,
-			ref string[] lines, ref int[] tabCounts, ref string[] withoutTabs) {
-
-			if (isMultiline) {
-				lines = text.Split('\n');
-				tabCounts = new int[lines.Length];
-				withoutTabs = new string[lines.Length];
-
-				for (int i = 0; i < lines.Length; i++) {
-					int tabCount = CountLeadingTabs(lines[i]);
-					tabCounts[i] = tabCount;
-					withoutTabs[i] = tabCount > 0 ?
-						lines[i].Substring(tabCount) : lines[i];
-				}
-			}
-			else {
-				ClearMultilineData(ref lines, ref tabCounts, ref withoutTabs);
-			}
-		}
-
-		// 清空多行数据的辅助方法
-		static void ClearMultilineData(ref string[] linesArray,
-			ref int[] tabCountsArray, ref string[] withoutTabsArray) {
-
-			linesArray = null;
-			tabCountsArray = null;
-			withoutTabsArray = null;
+		enum CommandType
+		{
+			Text,
+			Placeholder,
+			Selection,
+			NewLine,
+			Indent
 		}
 	}
 }

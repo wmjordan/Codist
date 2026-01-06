@@ -26,6 +26,7 @@ namespace Codist
 		public bool IsEmpty => _Head == null;
 		public T Head => _Head != null ? _Head.Value : default;
 		public T Tail => _Tail != null ? _Tail.Value : default;
+		public bool IsSingle => _Head != null && _Tail != null && _Head == _Tail;
 
 		public Chain<T> Add(T item) {
 			if (_Head != null) {
