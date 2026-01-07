@@ -3064,4 +3064,10 @@ Only search in referenced libraries, excluding source code</value>
   <data name="OT_CtrlSuppressSmartBarTip" xml:space="preserve">
     <value>Don't display Smart Bar when Ctrl key is being pressed</value>
   </data>
+  <data name="T_WrapTextName" xml:space="preserve">
+    <value>Wrap Text: &lt;NAME&gt;</value>
+  </data>
+  <data name="T_UpdatePlaceholderText" xml:space="preserve">
+    <value>Update Placeholder Text</value>
+  </data>
 </root>

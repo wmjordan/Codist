@@ -8,6 +8,7 @@ using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.TextManager.Interop;
+using R = Codist.Properties.Resources;
 
 namespace Codist.SnippetTexts
 {
@@ -28,13 +29,13 @@ namespace Codist.SnippetTexts
 		int _currentGroupIndex;
 		bool _isDisposed;
 
-		public SnippetSession(IWpfTextView view, IEnumerable<PlaceholderInfo> placeholderInfos, int position, ITextUndoHistory undoHistory) {
+		public SnippetSession(IWpfTextView view, IEnumerable<PlaceholderInfo> placeholderInfos, ITextUndoHistory undoHistory) {
 			_view = view;
 			_placeholderGroups = new List<PlaceholderGroup>();
 			_currentGroupIndex = -1;
 			_markerTagger = ServicesHelper.Instance.TextMarkerProvider.GetTextMarkerTagger(_view.TextBuffer);
 
-			CreatePlaceholderGroups(placeholderInfos, position);
+			CreatePlaceholderGroups(placeholderInfos);
 
 			if (_placeholderGroups.Count == 0) {
 				goto ERROR;
@@ -52,13 +53,14 @@ namespace Codist.SnippetTexts
 			_undoHistory.UndoRedoHappened += HandleUndo;
 			MoveToPlaceholderGroup(0);
 
+			_view.Caret.PositionChanged += View_CaretPositionChanged;
 			_view.Closed += View_Closed;
 			return;
 		ERROR:
 			_isDisposed = true;
 		}
 
-		void CreatePlaceholderGroups(IEnumerable<PlaceholderInfo> placeholderInfos, int insertPosition) {
+		void CreatePlaceholderGroups(IEnumerable<PlaceholderInfo> placeholderInfos) {
 			var snapshot = _view.TextSnapshot;
 			var groupsDict = new Dictionary<string, PlaceholderGroup>(StringComparer.Ordinal);
 
@@ -71,7 +73,7 @@ namespace Codist.SnippetTexts
 					_placeholderGroups.Add(group);
 				}
 
-				var span = new SnapshotSpan(snapshot, insertPosition + info.Position, info.Length).ToTrackingSpan();
+				var span = info.ToSnapshotSpan(snapshot).ToTrackingSpan();
 				group.Spans.Add(span);
 				_markerSpans.Add(_markerTagger.CreateTagSpan(span, isNewGroup ? __PlaceholderTag : __PlaceholderDependentTag));
 			}
@@ -105,6 +107,7 @@ namespace Codist.SnippetTexts
 						if (!IsCaretInPlaceholder()) {
 							nextCmd.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
 						}
+						SynchronizeCurrentGroup();
 						Terminate();
 						return VSConstants.S_OK;
 				}
@@ -113,7 +116,7 @@ namespace Codist.SnippetTexts
 		}
 
 		[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
-		public int QueryStatus(ref Guid pguidCmdGroup, uint cCmds, OLECMD[] prgCmds, IntPtr pCmdText) {
+		int IOleCommandTarget.QueryStatus(ref Guid pguidCmdGroup, uint cCmds, OLECMD[] prgCmds, IntPtr pCmdText) {
 			return _nextCommandTarget.QueryStatus(ref pguidCmdGroup, cCmds, prgCmds, pCmdText);
 		}
 
@@ -121,6 +124,7 @@ namespace Codist.SnippetTexts
 			if (_placeholderGroups.Count < 2) {
 				return;
 			}
+			SynchronizeCurrentGroup();
 			MoveToPlaceholderGroup((_currentGroupIndex + 1) % _placeholderGroups.Count);
 		}
 
@@ -129,6 +133,7 @@ namespace Codist.SnippetTexts
 			if (c < 2) {
 				return;
 			}
+			SynchronizeCurrentGroup();
 			MoveToPlaceholderGroup((_currentGroupIndex - 1 + c) % c);
 		}
 
@@ -138,23 +143,56 @@ namespace Codist.SnippetTexts
 			var currentGroup = _placeholderGroups[index];
 			var snapshot = _view.TextSnapshot;
 
-			var spansToSelect = new Chain<SnapshotSpan>();
-			foreach (var trackingSpan in currentGroup.Spans) {
-				var span = trackingSpan.GetSpan(snapshot);
-				spansToSelect.Add(span);
+			// 修改点：只获取第一个 Span 进行选中，不再遍历添加所有 Spans
+			if (currentGroup.Spans.Count > 0) {
+				_view.Selection.Clear();
+				_view.SelectSpan(currentGroup.Spans[0].GetSpan(snapshot));
 			}
 
-			if (!spansToSelect.IsEmpty) {
-				_view.Selection.Clear();
-				if (spansToSelect.IsSingle) {
-					_view.SelectSpan(spansToSelect.Head);
+			_currentGroupIndex = index;
+		}
+
+		void SynchronizeCurrentGroup() {
+			if (_currentGroupIndex < 0 || _currentGroupIndex >= _placeholderGroups.Count) return;
+
+			var group = _placeholderGroups[_currentGroupIndex];
+			var snapshot = _view.TextSnapshot;
+
+			var sourceTrackingSpan = GetSourceTrackingSpanWithCaret(group);
+			if (sourceTrackingSpan == null) return;
+
+			string newText = sourceTrackingSpan.GetText(snapshot);
+
+			using (var tran = _undoHistory.CreateTransaction(R.T_UpdatePlaceholderText))
+			using (var edit = _view.TextBuffer.CreateEdit()) {
+				foreach (var span in group.Spans) {
+					var currentSpan = span.GetSpan(snapshot);
+					if (currentSpan.GetText() != newText) {
+						edit.Replace(currentSpan, newText);
+					}
 				}
-				else {
-					_view.Caret.MoveTo(spansToSelect.Head.End);
-					_view.SelectSpans(spansToSelect);
+				if (edit.HasEffectiveChanges) {
+					edit.Apply();
+					tran.Complete();
 				}
 			}
-			_currentGroupIndex = index;
+		}
+
+		ITrackingSpan GetSourceTrackingSpanWithCaret(PlaceholderGroup group) {
+			ITrackingSpan sourceTrackingSpan = null;
+			var caretPos = _view.Caret.Position.BufferPosition;
+			var snapshot = _view.TextSnapshot;
+			foreach (var span in group.Spans) {
+				if (span.GetSpan(snapshot).Contains(caretPos)) {
+					sourceTrackingSpan = span;
+					break;
+				}
+			}
+			if (sourceTrackingSpan == null && group.Spans.Count > 0) {
+				sourceTrackingSpan = group.Spans[0];
+			}
+
+			return sourceTrackingSpan;
 		}
 
 		bool IsCaretInPlaceholder() {
@@ -187,9 +225,21 @@ namespace Codist.SnippetTexts
 			return false;
 		}
 
+		void View_CaretPositionChanged(object sender, CaretPositionChangedEventArgs e) {
+			if (_isDisposed || _currentGroupIndex < 0 || _currentGroupIndex >= _placeholderGroups.Count) return;
+
+			var newPosition = e.NewPosition.BufferPosition;
+			var currentGroup = _placeholderGroups[_currentGroupIndex];
+
+			if (!currentGroup.Spans[0].GetSpan(newPosition.Snapshot).Contains(newPosition)) {
+				SynchronizeCurrentGroup();
+			}
+		}
+
 		public void Terminate() {
 			if (_isDisposed) return;
 			_undoHistory.UndoRedoHappened -= HandleUndo;
+			_view.Caret.PositionChanged -= View_CaretPositionChanged;
 			_view.Closed -= View_Closed;
 			foreach (var span in _markerSpans) {
 				_markerTagger.RemoveTagSpan(span);
@@ -202,7 +252,8 @@ namespace Codist.SnippetTexts
 		}
 
 		void HandleUndo(object sender, TextUndoRedoEventArgs e) {
-			if (_view.TextSnapshot.Version.ReiteratedVersionNumber < _snapshotVersion) {
+			if (e.State == TextUndoHistoryState.Undoing
+				&& _view.TextSnapshot.Version.ReiteratedVersionNumber < _snapshotVersion) {
 				Terminate();
 			}
 		}

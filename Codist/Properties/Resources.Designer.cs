@@ -8803,6 +8803,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Update Placeholder Text.
+        /// </summary>
+        internal static string T_UpdatePlaceholderText {
+            get {
+                return ResourceManager.GetString("T_UpdatePlaceholderText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Value.
         /// </summary>
         internal static string T_Value {
@@ -8853,6 +8862,15 @@ namespace Codist.Properties {
         internal static string T_ViewRoles {
             get {
                 return ResourceManager.GetString("T_ViewRoles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wrap Text: &lt;NAME&gt;.
+        /// </summary>
+        internal static string T_WrapTextName {
+            get {
+                return ResourceManager.GetString("T_WrapTextName", resourceCulture);
             }
         }
         

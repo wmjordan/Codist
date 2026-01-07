@@ -6,6 +6,7 @@ using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Editor.OptionsExtensionMethods;
 using Microsoft.VisualStudio.Utilities;
+using R = Codist.Properties.Resources;
 
 namespace Codist.SnippetTexts
 {
@@ -14,6 +15,10 @@ namespace Codist.SnippetTexts
 		public string Name { get; } = name;
 		public int Position { get; } = position;
 		public int Length { get; } = length;
+
+		public SnapshotSpan ToSnapshotSpan(ITextSnapshot snapshot) {
+			return new SnapshotSpan(snapshot, Position, Length);
+		}
 	}
 
 	sealed class WrapText
@@ -234,14 +239,18 @@ namespace Codist.SnippetTexts
 
 		IEnumerable<SnapshotSpan> ComplexWrap(ITextView view) {
 			var offset = 0;
-			string replacement = null;
+			var placeholders = new List<PlaceholderInfo>();
 			var modified = new Chain<Span>();
+			var undoHistory = ServicesHelper.Instance.TextUndoHistory.GetHistory(view.TextBuffer);
+
+			using (var tran = undoHistory.CreateTransaction(R.T_WrapTextName.Replace("<NAME>", Name)))
 			using (var edit = view.TextSnapshot.TextBuffer.CreateEdit()) {
 				foreach (var item in view.Selection.SelectedSpans) {
 					var t = item.GetText();
-					int start = item.Start.Position;
+					var start = item.Start.Position;
+					var length = item.Length;
 
-					replacement = Wrap(
+					var replacement = Wrap(
 						t,
 						HasMultilinePrefix ? view.TextSnapshot.GetLinePrecedingWhitespaceAtPosition(start) : null,
 						HasMultilineSuffix ? view.TextSnapshot.GetLinePrecedingWhitespaceAtPosition(item.End.Position) : null,
@@ -249,25 +258,32 @@ namespace Codist.SnippetTexts
 						view.Options.GetNewLineCharacter()
 					);
 
-					if (edit.Replace(item, replacement)) {
-						modified.Add(new Span(start + offset, replacement.Length));
-						offset += replacement.Length - t.Length;
+					// Calculate absolute positions for placeholders based on the current offset
+					foreach (var info in _placeholderInfos) {
+						int absolutePosition = start + offset + info.Position;
+						placeholders.Add(new PlaceholderInfo(info.Name, absolutePosition, info.Length));
 					}
 
-					if (edit.HasEffectiveChanges) {
-						edit.Apply();
-						if (_placeholderInfos.Count != 0) {
-							if (view.TryGetProperty(out SnippetSession session)) {
-								session.Terminate();
-							}
-							view.Properties[typeof(SnippetSession)] = new SnippetSession((IWpfTextView)view, _placeholderInfos, start, ServicesHelper.Instance.TextUndoHistory.GetHistory(view.TextBuffer));
-						}
-						return null;
+					if (edit.Replace(item, replacement)) {
+						modified.Add(new Span(start + offset, replacement.Length));
+						offset += replacement.Length - length;
 					}
+				}
+
+				if (edit.HasEffectiveChanges) {
+					var snapshot = edit.Apply();
+					tran.Complete();
+					if (placeholders.Count != 0) {
+						if (view.TryGetProperty(out SnippetSession session)) {
+							session.Terminate();
+						}
+						view.Properties[typeof(SnippetSession)] = new SnippetSession((IWpfTextView)view, placeholders, undoHistory);
+						return new Chain<SnapshotSpan>(placeholders[0].ToSnapshotSpan(snapshot));
+					}
+					return modified.Select(i => new SnapshotSpan(snapshot, i));
 				}
 			}
 			return Enumerable.Empty<SnapshotSpan>();
-
 		}
 
 		interface ISnippetCommand {
