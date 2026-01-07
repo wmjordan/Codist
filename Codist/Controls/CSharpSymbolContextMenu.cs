@@ -186,7 +186,9 @@ namespace Codist.Controls
 					case MethodKind.Constructor:
 						if (st.SpecialType == SpecialType.None) {
 							AddCommand(CommandId.FindTypeReferrers);
-							AddCommand(CommandId.ListBaseTypes);
+							if (st.BaseType != null || st.Interfaces.Length != 0) {
+								AddCommand(CommandId.ListBaseTypes);
+							}
 							CreateInstanceCommandsForContainingType();
 						}
 						break;
@@ -243,7 +245,8 @@ namespace Codist.Controls
 					AddCommand(CommandId.FindSubInterfaces);
 				}
 			}
-			if (t.IsAnyKind(TypeKind.Class, TypeKind.Struct, TypeKind.Interface)) {
+			if (t.IsAnyKind(TypeKind.Class, TypeKind.Struct, TypeKind.Interface)
+				&& (t.BaseType != null || t.Interfaces.Length != 0)) {
 				AddCommand(CommandId.ListBaseTypes);
 			}
 			if (t.TypeKind == TypeKind.Delegate) {
