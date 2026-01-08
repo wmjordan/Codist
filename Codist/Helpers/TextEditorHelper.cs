@@ -142,7 +142,7 @@ namespace Codist
 			var start = offset = span.Start.Position + offset;
 			var end = span.End.Position - l;
 			char t0 = text[0];
-			while (offset < end) {
+			while (offset <= end) {
 				if (snapshot[offset] == t0) {
 					for (i = 1; i < l; i++) {
 						if (snapshot[offset + i] != text[i]) {

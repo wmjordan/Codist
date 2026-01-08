@@ -726,6 +726,14 @@ namespace Codist.SyntaxHighlight
 		[ClassificationType(ClassificationTypeNames = Constants.MarkdownCodeBlock)]
 		CodeBlock,
 		[Category(Constants.SyntaxCategory.Block)]
+		[ClassificationType(ClassificationTypeNames = Constants.MarkdownFencedCodeBlock)]
+		[BaseDefinition(Constants.MarkdownCodeBlock)]
+		FencedCodeBlock,
+		[Category(Constants.SyntaxCategory.Block)]
+		[ClassificationType(ClassificationTypeNames = Constants.MarkdownHtmlCodeBlock)]
+		[BaseDefinition(Constants.MarkdownCodeBlock)]
+		HtmlCodeBlock,
+		[Category(Constants.SyntaxCategory.Block)]
 		[ClassificationType(ClassificationTypeNames = Constants.MarkdownThematicBreak)]
 		ThematicBreak,
 		[Category(Constants.SyntaxCategory.Style)]
