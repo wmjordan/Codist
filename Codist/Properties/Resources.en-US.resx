@@ -3070,4 +3070,7 @@ Only search in referenced libraries, excluding source code</value>
   <data name="T_UpdatePlaceholderText" xml:space="preserve">
     <value>Update Placeholder Text</value>
   </data>
+  <data name="OT_HighlightMarkdown" xml:space="preserve">
+    <value>Highlight markdown extra styles</value>
+  </data>
 </root>

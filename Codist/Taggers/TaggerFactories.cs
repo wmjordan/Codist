@@ -259,11 +259,11 @@ namespace Codist.Taggers
 	{
 		public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag {
 			// the results produced by the tagger are also reused by the NaviBar and ScrollbarMarker
-			if (Config.Instance.Features.HasAnyFlag(Features.SyntaxHighlight | Features.NaviBar | Features.ScrollbarMarkers) == false
-				|| textView.TextBuffer.LikeContentType(Constants.CodeTypes.Markdown) == false) {
+			if (!Config.Instance.Features.HasAnyFlag(Features.SyntaxHighlight | Features.NaviBar | Features.ScrollbarMarkers)
+				|| !textView.TextBuffer.LikeContentType(Constants.CodeTypes.Markdown)) {
 				return null;
 			}
-			return textView.Properties.GetOrCreateSingletonProperty(() => new MarkdownTagger(textView, buffer, Config.Instance.Features.MatchFlags(Features.SyntaxHighlight))) as ITagger<T>;
+			return textView.Properties.GetOrCreateSingletonProperty(() => new MarkdownTagger(textView, buffer, Config.Instance.Features.MatchFlags(Features.SyntaxHighlight) && Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.Markdown))) as ITagger<T>;
 		}
 	}
 }

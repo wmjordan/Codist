@@ -17,7 +17,7 @@ namespace Codist.Options
 
 			sealed class PageControl : OptionPage
 			{
-				readonly OptionBox<SpecialHighlightOptions> _CommentTaggerBox, _SearchResultBox;
+				readonly OptionBox<SpecialHighlightOptions> _CommentTaggerBox, _SearchResultBox, _MarkdownBox;
 
 				public PageControl() {
 					var o = Config.Instance.SpecialHighlightOptions;
@@ -27,7 +27,8 @@ namespace Codist.Options
 						new TitleBox(R.OT_ExtraHighlight),
 						_CommentTaggerBox = o.CreateOptionBox(SpecialHighlightOptions.SpecialComment, UpdateConfig, R.OT_EnableCommentTagger),
 						_SearchResultBox = o.CreateOptionBox(SpecialHighlightOptions.SearchResult, UpdateConfig, R.OT_HighlightSearchResults),
-						new DescriptionBox("*: The highlight search results feature is under development and may not work as expected")
+						new DescriptionBox("*: The highlight search results feature is under development and may not work as expected"),
+						_MarkdownBox = o.CreateOptionBox(SpecialHighlightOptions.Markdown, UpdateConfig, R.OT_HighlightMarkdown)
 					);
 				}
 
@@ -42,6 +43,7 @@ namespace Codist.Options
 				protected override void LoadConfig(Config config) {
 					_CommentTaggerBox.UpdateWithOption(config.SpecialHighlightOptions);
 					_SearchResultBox.UpdateWithOption(config.SpecialHighlightOptions);
+					_MarkdownBox.UpdateWithOption(config.SpecialHighlightOptions);
 				}
 			}
 		}

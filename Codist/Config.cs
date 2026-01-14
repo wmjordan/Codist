@@ -836,6 +836,7 @@ namespace Codist
 		// bold semantic punctuation
 		[Obsolete]
 		SpecialPunctuation = 1 << 8,
+		Markdown = 1 << 9,
 		LocalFunctionDeclaration = 1 << 10,
 		NonPrivateField = 1 << 11,
 		UseTypeStyleOnConstructor = 1 << 12,

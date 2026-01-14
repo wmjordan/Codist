@@ -4135,6 +4135,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Highlight markdown extra styles.
+        /// </summary>
+        internal static string OT_HighlightMarkdown {
+            get {
+                return ResourceManager.GetString("OT_HighlightMarkdown", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Highlight search results (*).
         /// </summary>
         internal static string OT_HighlightSearchResults {
