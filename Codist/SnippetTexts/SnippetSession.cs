@@ -93,10 +93,24 @@ namespace Codist.SnippetTexts
 						if (IsCompletionActive()) {
 							break;
 						}
-						MoveToNextGroup();
+						if (IsCaretInPlaceholder()) {
+							MoveToNextGroup();
+						}
+						else {
+							nextCmd.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
+							SynchronizeCurrentGroup();
+							Terminate();
+						}
 						return VSConstants.S_OK;
 					case VSConstants.VSStd2KCmdID.BACKTAB: // Shift+Tab
-						MoveToPreviousGroup();
+						if (IsCaretInPlaceholder()) {
+							MoveToPreviousGroup();
+						}
+						else {
+							nextCmd.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
+							SynchronizeCurrentGroup();
+							Terminate();
+						}
 						return VSConstants.S_OK;
 					case VSConstants.VSStd2KCmdID.CANCEL: // Esc
 					case VSConstants.VSStd2KCmdID.RETURN: // Enter
