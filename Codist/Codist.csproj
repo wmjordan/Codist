@@ -100,6 +100,7 @@
     <Compile Include="Helpers\ValueHelper.cs" />
     <Compile Include="Helpers\VsImageHelper.cs" />
     <Compile Include="Helpers\ThemeHelper.cs" />
+    <Compile Include="Margins\MatchMargin.cs" />
     <Compile Include="Options\OptionsWindow.cs" />
     <Compile Include="Options\OptionsWindow.DisplayPage.cs" />
     <Compile Include="Options\OptionsWindow.AutoPunctuationPage.cs" />

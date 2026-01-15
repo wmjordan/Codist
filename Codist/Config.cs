@@ -875,6 +875,8 @@ namespace Codist
 		Selection = 1 << 8,
 		LineNumber = 1 << 9,
 		DisableChangeTracker = 1 << 10,
+		MatchSelection = 1 << 11,
+		KeyboardControlMatch = 1 << 12,
 		CodeMarginMask = SpecialComment | CompilerDirective,
 		MemberMarginMask = MemberDeclaration | SymbolReference,
 		Default = SpecialComment | MemberDeclaration | LineNumber | Selection | LongMemberDeclaration | SymbolReference

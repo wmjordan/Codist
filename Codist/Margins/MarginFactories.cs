@@ -123,4 +123,26 @@ namespace Codist.Margins
 				: null;
 		}
 	}
+
+	[Export(typeof(IWpfTextViewMarginProvider))]
+	[Name(nameof(MatchMargin))]
+	[Order(Before = PredefinedMarginNames.OverviewChangeTracking)]
+	[MarginContainer(PredefinedMarginNames.VerticalScrollBar)]
+	[ContentType(Constants.CodeTypes.Code)]
+	[ContentType(Constants.CodeTypes.Text)]
+	[ContentType(Constants.CodeTypes.Markdown)]
+	[ContentType(Constants.CodeTypes.VsMarkdown)]
+	[ContentType(Constants.CodeTypes.Output)]
+	[ContentType(Constants.CodeTypes.InteractiveContent)]
+	[TextViewRole(PredefinedTextViewRoles.Interactive)]
+	sealed class MatchSelectionMarginFactory : IWpfTextViewMarginProvider
+	{
+		public IWpfTextViewMargin CreateMargin(IWpfTextViewHost wpfTextViewHost, IWpfTextViewMargin marginContainer) {
+			return Config.Instance.Features.MatchFlags(Features.ScrollbarMarkers)
+				&& marginContainer is IVerticalScrollBar scrollBar
+				&& wpfTextViewHost.TextView.TextBuffer.MayBeEditor()
+				? new MatchMargin(wpfTextViewHost.TextView, scrollBar)
+				: null;
+		}
+	}
 }

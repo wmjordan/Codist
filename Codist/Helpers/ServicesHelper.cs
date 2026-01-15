@@ -85,6 +85,9 @@ namespace Codist
 		public ITextMarkerProviderFactory TextMarkerProvider {  get; private set; }
 
 		[Import]
+		public ITextSearchService2 TextSearch {  get; private set; }
+
+		[Import]
 		public IVsEditorAdaptersFactoryService EditorAdaptersFactoryService { get; private set; }
 
 		internal SyntaxHighlight.ClassificationTypeExporter ClassificationTypeExporter { get; }

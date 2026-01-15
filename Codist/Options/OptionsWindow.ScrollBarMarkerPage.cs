@@ -18,7 +18,7 @@ namespace Codist.Options
 
 			sealed class PageControl : OptionPage
 			{
-				readonly OptionBox<MarkerOptions> _LineNumber, _Selection, _SpecialComment, _MarkerDeclarationLine, _LongMemberDeclaration, _TypeDeclaration, _MethodDeclaration, _RegionDirective, _CompilerDirective, _SymbolReference, _DisableChangeTracker;
+				readonly OptionBox<MarkerOptions> _LineNumber, _Selection, _MatchSelection, _KeyboardControl, _SpecialComment, _MarkerDeclarationLine, _LongMemberDeclaration, _TypeDeclaration, _MethodDeclaration, _RegionDirective, _CompilerDirective, _SymbolReference, _DisableChangeTracker;
 				readonly OptionBox<MarkerOptions>[] _Options;
 				readonly ColorButton _SymbolReferenceButton, _SymbolWriteButton, _SymbolDefinitionButton;
 
@@ -31,6 +31,10 @@ namespace Codist.Options
 							.SetLazyToolTip(() => R.OT_LineNumberTip),
 						_Selection = o.CreateOptionBox(MarkerOptions.Selection, UpdateConfig, R.OT_Selection)
 							.SetLazyToolTip(() => R.OT_SelectionTip),
+						_MatchSelection = o.CreateOptionBox(MarkerOptions.MatchSelection, UpdateConfig, R.OT_MatchSelection)
+							.SetLazyToolTip(() => R.OT_MatchSelectionTip),
+						_KeyboardControl = o.CreateOptionBox(MarkerOptions.KeyboardControlMatch, UpdateConfig, R.OT_KeyboardControlMatchSelection),
+						new DescriptionBox(R.OT_KeyboardControlMatchSelectionNote),
 						_SpecialComment = o.CreateOptionBox(MarkerOptions.SpecialComment, UpdateConfig, R.OT_TaggedComments)
 							.SetLazyToolTip(() => R.OT_TaggedCommentsTip),
 						_DisableChangeTracker = o.CreateOptionBox(MarkerOptions.DisableChangeTracker, UpdateConfig, R.OT_DisableChangeTracker)
@@ -69,12 +73,14 @@ namespace Codist.Options
 							}
 						}.WrapMargin(SubOptionMargin)
 					);
-					_Options = new[] { _LineNumber, _Selection, _SpecialComment, _DisableChangeTracker, _MarkerDeclarationLine, _LongMemberDeclaration, _TypeDeclaration, _MethodDeclaration, _RegionDirective, _CompilerDirective, _SymbolReference };
-					var dubOptions = new[] { _LongMemberDeclaration, _TypeDeclaration, _MethodDeclaration, _RegionDirective };
-					foreach (var item in dubOptions) {
+					_Options = [_LineNumber, _Selection, _MatchSelection, _KeyboardControl, _SpecialComment, _DisableChangeTracker, _MarkerDeclarationLine, _LongMemberDeclaration, _TypeDeclaration, _MethodDeclaration, _RegionDirective, _CompilerDirective, _SymbolReference];
+					_KeyboardControl.WrapMargin(SubOptionMargin);
+					_MatchSelection.BindDependentOptionControls(_KeyboardControl);
+					var subOptions = new[] { _LongMemberDeclaration, _TypeDeclaration, _MethodDeclaration, _RegionDirective };
+					foreach (var item in subOptions) {
 						item.WrapMargin(SubOptionMargin);
 					}
-					_MarkerDeclarationLine.BindDependentOptionControls(dubOptions);
+					_MarkerDeclarationLine.BindDependentOptionControls(subOptions);
 					_SymbolReference.BindDependentOptionControls(_SymbolReferenceButton, _SymbolWriteButton, _SymbolDefinitionButton);
 					_DisableChangeTracker.IsEnabled = CodistPackage.VsVersion.Major >= 17;
 					_SymbolReferenceButton.DefaultColor = () => Margins.SymbolReferenceMarkerStyle.DefaultReferenceMarkerColor;

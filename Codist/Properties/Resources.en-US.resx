@@ -3073,4 +3073,20 @@ Only search in referenced libraries, excluding source code</value>
   <data name="OT_HighlightMarkdown" xml:space="preserve">
     <value>Highlight markdown extra styles</value>
   </data>
+  <data name="OT_MatchSelection" xml:space="preserve">
+    <value>Match selection</value>
+  </data>
+  <data name="OT_MatchSelectionTip" xml:space="preserve">
+    <value>Draws squares for other locations the same as current selected content or current word under caret on the scroll bar</value>
+  </data>
+  <data name="T_10KPlus" xml:space="preserve">
+    <value>10K+</value>
+  </data>
+  <data name="OT_KeyboardControlMatchSelection" xml:space="preserve">
+    <value>Alter match selection behavior with keyboard</value>
+  </data>
+  <data name="OT_KeyboardControlMatchSelectionNote" xml:space="preserve">
+    <value>Ctrl: match whole word
+Shift: match case</value>
+  </data>
 </root>

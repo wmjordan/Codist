@@ -27,7 +27,7 @@ namespace Codist.Options
 		readonly ThemedTextBox _SettingsFilterBox;
 		readonly ThemedToggleButton _OverriddenStyleFilterButton;
 		readonly ThemedButton _ClearFilterButton;
-		readonly Border _OptionPageHolder;
+		readonly Border _OptionPageHolder, _SettingControlHolder;
 		readonly TextBlock _Notice;
 		readonly ListBox _SyntaxSourceBox;
 		readonly Grid _RightPaneTitle;
@@ -234,11 +234,18 @@ namespace Codist.Options
 										}.SetValue(Grid.SetColumn, 1)
 									}
 								}.Set(ref _RightPaneTitle),
+
 								new Border {
 									Child = _SettingsList
 								}.Set(ref _OptionPageHolder)
 								.Scrollable()
 								.SetValue(Grid.SetRow, 1),
+
+								new Border {
+									Padding = new Thickness(0, 6, 0, 0)
+								}.Set(ref _SettingControlHolder)
+									.ReferenceProperty(Border.BorderBrushProperty, VsBrushes.PanelBorderKey)
+										.SetValue(Grid.SetRow, 2),
 
 								new Border {
 									Visibility = Visibility.Collapsed,
@@ -453,7 +460,11 @@ namespace Codist.Options
 		void SyntaxSourceChanged(object source, RoutedEventArgs args) {
 			if (_SyntaxSourceBox.SelectedValue is IControlProvider c) {
 				_Notice.Visibility = _RightPaneTitle.Visibility = _SettingsGroup.Visibility = _StyleNameHolder.Visibility = _TagSettingsGroup.Visibility = _AddTagButton.Visibility = _RemoveTagButton.Visibility = Visibility.Collapsed;
-				_OptionPageHolder.Child = c.Control;
+				_OptionPageHolder.Child = c.OptionsPageControl;
+				var setting = _SettingControlHolder.Child = c.SettingsControl;
+				if (setting == null) {
+					_SettingControlHolder.Visibility = Visibility.Collapsed;
+				}
 			}
 			else {
 				_SettingsList.Visibility = _RightPaneTitle.Visibility = Visibility.Visible;
@@ -1725,14 +1736,45 @@ namespace Codist.Options
 
 		interface IControlProvider
 		{
-			Control Control { get; }
+			Control OptionsPageControl { get; }
+			Control SettingsControl { get; }
+		}
+
+		abstract class StyleConfigPage : IControlProvider
+		{
+			public bool UseStylesList => true;
+			public StyleBase SelectedStyle { get; protected set; }
+			public virtual string EmptyMassage => String.Empty;
+			public virtual string Title => R.T_SyntaxStyles;
+			public virtual Control[] ToolBarButtons => null;
+
+			public Control OptionsPageControl { get; }
+			public Control SettingsControl { get; }
+
+			public abstract IEnumerable<IClassificationType> LoadList(SyntaxHighlightCustomizationWindow window);
+		}
+
+		sealed class PredefinedStylesPage<TStyle> : StyleConfigPage where TStyle : StyleBase
+		{
+			private readonly Func<IReadOnlyList<TStyle>> _StylesFactory;
+
+			public override string EmptyMassage => R.T_NoSyntaxHighlightDefined;
+
+			internal PredefinedStylesPage(Func<IReadOnlyList<TStyle>> stylesFactory) {
+				_StylesFactory = stylesFactory;
+			}
+
+			public override IEnumerable<IClassificationType> LoadList(SyntaxHighlightCustomizationWindow window) {
+				return ToClassificationTypes(_StylesFactory());
+			}
 		}
 
 		sealed class ConfigPageItem<TControl> : IControlProvider
 			where TControl : Control, new()
 		{
 			TControl _ConfigControl;
-			public Control Control => _ConfigControl ?? (_ConfigControl = new TControl());
+			public Control OptionsPageControl => _ConfigControl ?? (_ConfigControl = new TControl());
+			public Control SettingsControl => null;
 			public readonly string Description;
 
 			public ConfigPageItem(string description) {

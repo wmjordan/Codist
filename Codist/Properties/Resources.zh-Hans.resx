@@ -1075,7 +1075,7 @@ https://github.com/snowie2000/mactype/releases</value>
     <value>匹配符号</value>
   </data>
   <data name="OT_MatchSymbolTip" xml:space="preserve">
-    <value>在滚动条上绘制浅蓝色的正方形，标出与当前光标所在符号相同的符号</value>
+    <value>在滚动条上绘制正方形，标出与当前光标所在符号相同的符号</value>
   </data>
   <data name="OT_MaxHeight" xml:space="preserve">
     <value>最大高度:</value>
@@ -3058,5 +3058,21 @@ Ctrl: 将下划线分隔的单词转换为首字母大写的单词</value>
   </data>
   <data name="OT_HighlightMarkdown" xml:space="preserve">
     <value>增强显示 Markdown 语法</value>
+  </data>
+  <data name="OT_MatchSelection" xml:space="preserve">
+    <value>匹配选中内容</value>
+  </data>
+  <data name="OT_MatchSelectionTip" xml:space="preserve">
+    <value>在滚动条上绘制正方形，标出与当前光标所在单词或选中内容相同的其它位置</value>
+  </data>
+  <data name="T_10KPlus" xml:space="preserve">
+    <value>超1万</value>
+  </data>
+  <data name="OT_KeyboardControlMatchSelection" xml:space="preserve">
+    <value>使用键盘调整匹配选中内容的行为</value>
+  </data>
+  <data name="OT_KeyboardControlMatchSelectionNote" xml:space="preserve">
+    <value>Ctrl: 匹配整个单词
+Shift: 匹配大小写</value>
   </data>
 </root>

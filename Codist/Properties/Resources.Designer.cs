@@ -4378,6 +4378,25 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Alter match selection behavior with keyboard.
+        /// </summary>
+        internal static string OT_KeyboardControlMatchSelection {
+            get {
+                return ResourceManager.GetString("OT_KeyboardControlMatchSelection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ctrl: match whole word
+        ///Shift: match case.
+        /// </summary>
+        internal static string OT_KeyboardControlMatchSelectionNote {
+            get {
+                return ResourceManager.GetString("OT_KeyboardControlMatchSelectionNote", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Latest release:.
         /// </summary>
         internal static string OT_LatestRelease {
@@ -4546,6 +4565,24 @@ namespace Codist.Properties {
         internal static string OT_MarkdownSmartBar {
             get {
                 return ResourceManager.GetString("OT_MarkdownSmartBar", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Match selection.
+        /// </summary>
+        internal static string OT_MatchSelection {
+            get {
+                return ResourceManager.GetString("OT_MatchSelection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Draws squares for other locations the same as current selected content or current word under caret on the scroll bar.
+        /// </summary>
+        internal static string OT_MatchSelectionTip {
+            get {
+                return ResourceManager.GetString("OT_MatchSelectionTip", resourceCulture);
             }
         }
         
@@ -6035,6 +6072,15 @@ namespace Codist.Properties {
         internal static string Simple {
             get {
                 return ResourceManager.GetString("Simple", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 10K+.
+        /// </summary>
+        internal static string T_10KPlus {
+            get {
+                return ResourceManager.GetString("T_10KPlus", resourceCulture);
             }
         }
         

@@ -42,5 +42,17 @@ namespace Codist.Options
 			}
 			return false;
 		}
+		public bool DoWithLock<TArg>(Action<TArg> action, TArg arg) {
+			if (Lock()) {
+				try {
+					action(arg);
+				}
+				finally {
+					Unlock();
+				}
+				return true;
+			}
+			return false;
+		}
 	}
 }

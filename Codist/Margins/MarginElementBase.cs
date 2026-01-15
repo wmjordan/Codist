@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Automation.Peers;
+using CLR;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Projection;
 
@@ -15,6 +16,7 @@ namespace Codist.Margins
 
 		public abstract string MarginName { get; }
 		public abstract double MarginSize { get; }
+		protected bool IsFeatureEnabled => Config.Instance.Features.MatchFlags(Features.ScrollbarMarkers);
 
 		protected MarginElementBase(ITextView textView) {
 			IsHitTestVisible = false;
