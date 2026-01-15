@@ -114,9 +114,11 @@ namespace Codist.Margins
 		}
 
 		void UpdateCSharpMembersMarginConfig(ConfigUpdatedEventArgs e) {
+			if (!e.UpdatedFeature.MatchFlags(Features.ScrollbarMarkers)) {
+				return;
+			}
 			_Parser.StateUpdated -= ParserStateUpdated;
-			if (e.UpdatedFeature.HasAnyFlag(Features.ScrollbarMarkers)
-				&& Config.Instance.Features.MatchFlags(Features.ScrollbarMarkers)) {
+			if (Config.Instance.Features.MatchFlags(Features.ScrollbarMarkers)) {
 				_Parser.StateUpdated += ParserStateUpdated;
 				if (_Parser.TryGetSemanticState(_View.TextSnapshot, out var state)) {
 					ParserStateUpdated(_Parser, new EventArgs<SemanticState>(state));
@@ -125,17 +127,18 @@ namespace Codist.Margins
 			}
 			else {
 				if (Visibility == Visibility.Visible) {
+					Visibility = Visibility.Collapsed;
 					InvalidateVisual();
 				}
 				return;
 			}
-			var setVisible = Config.Instance.MarkerOptions.HasAnyFlag(MarkerOptions.MemberMarginMask);
+			var setVisible = IsFeatureEnabled && Config.Instance.MarkerOptions.HasAnyFlag(MarkerOptions.MemberMarginMask);
 			var visible = Visibility == Visibility.Visible;
-			if (setVisible == false && visible) {
+			if (!setVisible && visible) {
 				Visibility = Visibility.Collapsed;
 				_SymbolReferenceMarker.UnhookEvents();
 			}
-			else if (setVisible && visible == false) {
+			else if (setVisible && !visible) {
 				Visibility = Visibility.Visible;
 				if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.SymbolReference)) {
 					_SymbolReferenceMarker.HookEvents();

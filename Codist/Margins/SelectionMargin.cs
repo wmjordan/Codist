@@ -42,10 +42,10 @@ namespace Codist.Margins
 		}
 
 		void UpdateSelectionMarginConfig(ConfigUpdatedEventArgs e) {
-			if (e.UpdatedFeature.MatchFlags(Features.ScrollbarMarkers) == false) {
+			if (!e.UpdatedFeature.MatchFlags(Features.ScrollbarMarkers)) {
 				return;
 			}
-			var setVisible = Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.Selection);
+			var setVisible = IsFeatureEnabled && Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.Selection);
 			var visible = Visibility == Visibility.Visible;
 			_TextView.Selection.SelectionChanged -= TextView_SelectionChanged;
 			_EditorFormatMap.FormatMappingChanged -= EditorFormatMap_FormatMappingChanged;
@@ -54,7 +54,7 @@ namespace Codist.Margins
 				Visibility = Visibility.Collapsed;
 			}
 			else if (setVisible) {
-				if (visible == false) {
+				if (!visible) {
 					Visibility = Visibility.Visible;
 				}
 				Setup();

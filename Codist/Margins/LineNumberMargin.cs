@@ -36,18 +36,18 @@ namespace Codist.Margins
 		public override double MarginSize => 0;
 
 		void UpdateLineNumberMarginConfig(ConfigUpdatedEventArgs e) {
-			if (e.UpdatedFeature.MatchFlags(Features.ScrollbarMarkers) == false) {
+			if (!e.UpdatedFeature.MatchFlags(Features.ScrollbarMarkers)) {
 				return;
 			}
-			var setVisible = Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.LineNumber);
+			var setVisible = IsFeatureEnabled && Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.LineNumber);
 			var visible = Visibility == Visibility.Visible;
-			if (setVisible == false && visible) {
+			if (!setVisible && visible) {
 				Visibility = Visibility.Collapsed;
 				_TextView.TextBuffer.Changed -= TextView_TextBufferChanged;
 				_ScrollBar.TrackSpanChanged -= OnMappingChanged;
 				InvalidateVisual();
 			}
-			else if (setVisible && visible == false) {
+			else if (setVisible && !visible) {
 				Visibility = Visibility.Visible;
 				Setup();
 				InvalidateVisual();

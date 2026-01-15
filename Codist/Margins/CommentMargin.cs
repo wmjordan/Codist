@@ -90,10 +90,10 @@ namespace Codist.Margins
 		}
 
 		void UpdateCommentMarginConfig(ConfigUpdatedEventArgs e) {
-			if (e.UpdatedFeature.HasAnyFlag(Features.SyntaxHighlight | Features.ScrollbarMarkers) == false) {
+			if (!e.UpdatedFeature.HasAnyFlag(Features.SyntaxHighlight | Features.ScrollbarMarkers)) {
 				return;
 			}
-			var setVisible = Config.Instance.MarkerOptions.HasAnyFlag(MarkerOptions.CodeMarginMask);
+			var setVisible = IsFeatureEnabled && Config.Instance.MarkerOptions.HasAnyFlag(MarkerOptions.CodeMarginMask);
 			var visible = Visibility == Visibility.Visible;
 			if (setVisible == false && visible) {
 				Visibility = Visibility.Collapsed;

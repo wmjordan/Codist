@@ -25,7 +25,7 @@ namespace Codist.Margins
 
 		void ConfigUpdateHandler(ConfigUpdatedEventArgs e) {
 			if (e.UpdatedFeature.MatchFlags(Features.ScrollbarMarkers)) {
-				ToggleTracker((_DisabledChangeTracker = e.Config.MarkerOptions.MatchFlags(MarkerOptions.DisableChangeTracker)) == false);
+				ToggleTracker(!(_DisabledChangeTracker = e.Config.MarkerOptions.MatchFlags(MarkerOptions.DisableChangeTracker)));
 			}
 		}
 
