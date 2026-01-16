@@ -103,6 +103,7 @@ namespace Codist
 		public int SmartBarButtonSize { get; set; } = DefaultIconSize;
 		public List<CommentLabel> Labels { get; } = new List<CommentLabel>();
 		public QuickInfoConfig QuickInfo { get; } = new QuickInfoConfig();
+		public MatchMarginConfig MatchMargin { get; } = new MatchMarginConfig();
 		public List<Color> CustomColors { get; } = new List<Color>();
 
 		#region Deprecated style containers
@@ -657,6 +658,20 @@ namespace Codist
 
 		internal Color BackColor { get => _BackColor; set => _BackColor = value; }
 	}
+	public sealed class MatchMarginConfig
+	{
+		public const int DefaultMaxMatch = 10000, DefaultMaxDocumentLength = 1024, DefaultMaxSearchCharLength = 256;
+
+		[DefaultValue(DefaultMaxMatch)]
+		public int MaxMatch { get; set; } = DefaultMaxMatch;
+
+		[DefaultValue(DefaultMaxDocumentLength)]
+		public int MaxDocumentLength { get; set; } = DefaultMaxDocumentLength;
+
+		[DefaultValue(DefaultMaxSearchCharLength)]
+		public int MaxSearchCharLength { get; set; } = DefaultMaxSearchCharLength;
+	}
+
 	sealed class SearchEngine
 	{
 		public SearchEngine() {}

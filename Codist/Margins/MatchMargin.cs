@@ -33,6 +33,7 @@ namespace Codist.Margins
 		List<MatchedSpan> _Matches;
 		SearchContext _SearchContext;
 		bool _KeyboardControl;
+		int _MaxMatch, _MaxDocument, _MaxSearchChar;
 
 		public MatchMargin(IWpfTextView textView, IVerticalScrollBar scrollBar) : base(textView) {
 			_TextView = textView;
@@ -55,7 +56,7 @@ namespace Codist.Margins
 			else {
 				Visibility = Visibility.Collapsed;
 			}
-			_KeyboardControl = Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.KeyboardControlMatch);
+			LoadConfig();
 			Width = FullMarkerSize;
 		}
 
@@ -70,6 +71,19 @@ namespace Codist.Margins
 			UpdateDrawingElements();
 		}
 
+		void LoadConfig() {
+			_KeyboardControl = Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.KeyboardControlMatch);
+			_MaxMatch = Math.Max(0, Config.Instance.MatchMargin.MaxMatch);
+			if (_MaxMatch == 0) {
+				_MaxMatch = Int32.MaxValue;
+			}
+			_MaxDocument = Math.Max(0, Config.Instance.MatchMargin.MaxDocumentLength) * 1024;
+			if (_MaxDocument == 0) {
+				_MaxDocument = Int32.MaxValue;
+			}
+			_MaxSearchChar = Math.Max(1, Config.Instance.MatchMargin.MaxSearchCharLength);
+		}
+
 		void UpdateSelectionMarginConfig(ConfigUpdatedEventArgs e) {
 			if (e.UpdatedFeature.MatchFlags(Features.ScrollbarMarkers) == false) {
 				return;
@@ -79,13 +93,13 @@ namespace Codist.Margins
 			_ScrollBar.TrackSpanChanged -= ScrollBar_TrackSpanChanged;
 			_DelayTimer.Stop();
 			_currentSearchCts.CancelAndDispose();
-			_KeyboardControl = Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.KeyboardControlMatch);
+			LoadConfig();
 			var visible = Visibility == Visibility.Visible;
-			if (setVisible == false && visible) {
+			if (!setVisible && visible) {
 				Visibility = Visibility.Collapsed;
 			}
 			else if (setVisible) {
-				if (visible == false) {
+				if (!visible) {
 					Visibility = Visibility.Visible;
 				}
 				Setup();
@@ -113,7 +127,7 @@ namespace Codist.Margins
 		async Task ExecuteSearchAsync() {
 			var token = SyncHelper.CancelAndRetainToken(ref _currentSearchCts);
 
-			const int MAX_MATCH = 10000;
+			int max = _MaxMatch;
 			int c = 0;
 			var ctx = _SearchContext;
 			string t;
@@ -127,14 +141,15 @@ namespace Codist.Margins
 			var l = ts.Length - 1;
 			var options = ctx.Options;
 			var w = !options.MatchFlags(FindOptions.WholeWord);
-			foreach (var span in _SearchService.FindAll(new SnapshotSpan(ts, searchSpan.End, ts.Length - searchSpan.End), searchSpan.End, t, options)
-				.Union(_SearchService.FindAll(new SnapshotSpan(ts, 0, searchSpan.Start.Position), searchSpan.Start, t, options | FindOptions.SearchReverse))) {
+			var maxLen = _MaxDocument;
+			foreach (var span in _SearchService.FindAll(new SnapshotSpan(ts, searchSpan.End, Math.Min(ts.Length - searchSpan.End, maxLen)), searchSpan.End, t, options)
+				.Union(_SearchService.FindAll(new SnapshotSpan(ts, Math.Max(0, sp - maxLen), Math.Min(maxLen, sp)), searchSpan.Start, t, options | FindOptions.SearchReverse))) {
 				if (token.IsCancellationRequested) {
 					_Matches = null;
 					goto RETURN;
 				}
 				r.Add(new MatchedSpan(span, t == span.GetText(), !w || IsWord(span, l)));
-				if (++c > MAX_MATCH) {
+				if (++c > max) {
 					break;
 				}
 			}
@@ -175,9 +190,6 @@ namespace Codist.Margins
 		}
 
 		void RequestSearch() {
-			if (_TextView.TextSnapshot.Length > 0x1000000) {
-				return;
-			}
 			var ctx = new SearchContext(this);
 			if (ctx.Text != null) {
 				if (_SearchContext?.Success == true && ctx.Span.Equals(_SearchContext.Span)) {
@@ -288,7 +300,7 @@ namespace Codist.Margins
 					return;
 				}
 
-				if (Span.Length.IsBetween(1, 256)) {
+				if (Span.Length.IsBetween(1, me._MaxSearchChar)) {
 					if (String.IsNullOrWhiteSpace(Text = Span.GetText())
 						|| emptySelection && !Text.IsProgrammaticSymbol()) {
 						Text = null;

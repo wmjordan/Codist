@@ -4614,6 +4614,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Search scope: .
+        /// </summary>
+        internal static string OT_MaxDocumentLength {
+            get {
+                return ResourceManager.GetString("OT_MaxDocumentLength", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Max height:.
         /// </summary>
         internal static string OT_MaxHeight {
@@ -4628,6 +4637,24 @@ namespace Codist.Properties {
         internal static string OT_MaxHeightTip {
             get {
                 return ResourceManager.GetString("OT_MaxHeightTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Max match items:.
+        /// </summary>
+        internal static string OT_MaxMatch {
+            get {
+                return ResourceManager.GetString("OT_MaxMatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Max search term length:.
+        /// </summary>
+        internal static string OT_MaxSearchCharLength {
+            get {
+                return ResourceManager.GetString("OT_MaxSearchCharLength", resourceCulture);
             }
         }
         

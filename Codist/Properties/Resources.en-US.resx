@@ -3089,4 +3089,13 @@ Only search in referenced libraries, excluding source code</value>
     <value>Ctrl: match whole word
 Shift: match case</value>
   </data>
+  <data name="OT_MaxMatch" xml:space="preserve">
+    <value>Max match items:</value>
+  </data>
+  <data name="OT_MaxDocumentLength" xml:space="preserve">
+    <value>Search scope: </value>
+  </data>
+  <data name="OT_MaxSearchCharLength" xml:space="preserve">
+    <value>Max search term length:</value>
+  </data>
 </root>
