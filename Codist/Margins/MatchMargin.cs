@@ -135,7 +135,9 @@ namespace Codist.Margins
 				goto QUIT;
 			}
 			var searchSpan = ctx.Span;
-			var r = new List<MatchedSpan>(16);
+			var r = new List<MatchedSpan>(16) {
+				new (ctx.Span, true, true)
+			};
 			var sp = searchSpan.Start.Position;
 			var ts = _TextView.TextSnapshot;
 			var l = ts.Length - 1;
@@ -153,7 +155,7 @@ namespace Codist.Margins
 					break;
 				}
 			}
-			if (r.Count == 0) {
+			if (r.Count == 1) {
 				goto QUIT;
 			}
 			_Matches = r;
@@ -192,7 +194,8 @@ namespace Codist.Margins
 		void RequestSearch() {
 			var ctx = new SearchContext(this);
 			if (ctx.Text != null) {
-				if (_SearchContext?.Success == true && ctx.Span.Equals(_SearchContext.Span)) {
+				if (ctx.MayReuseResult(_SearchContext)) {
+					// reuse existing result
 					return;
 				}
 				_DelayTimer.Stop();
@@ -280,9 +283,9 @@ namespace Codist.Margins
 
 		sealed class SearchContext
 		{
-			public SnapshotSpan Span;
-			public string Text;
-			public FindOptions Options;
+			public readonly SnapshotSpan Span;
+			public readonly string Text;
+			public readonly FindOptions Options;
 			public bool Success;
 
 			public SearchContext(MatchMargin me) {
@@ -316,6 +319,15 @@ namespace Codist.Margins
 						}
 					}
 				}
+			}
+
+			public bool MayReuseResult(SearchContext other) {
+				return other != null
+					&& Success
+					&& (Span.Equals(other.Span)
+						|| Span.Snapshot.Version.VersionNumber == other.Span.Snapshot.Version.VersionNumber 
+							&& Text == other.Text)
+					&& Options == other.Options;
 			}
 		}
 
