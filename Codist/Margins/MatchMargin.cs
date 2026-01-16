@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Threading;
 using CLR;
@@ -123,15 +123,15 @@ namespace Codist.Margins
 			var searchSpan = ctx.Span;
 			var r = new List<MatchedSpan>(16);
 			var sp = searchSpan.Start.Position;
-			var l = _TextView.TextSnapshot.Length - 1;
-			var w = !ctx.Options.MatchFlags(FindOptions.WholeWord) && IsWord(searchSpan, l);
-			foreach (var span in _SearchService.FindAll(_TextView.TextSnapshot.ToSnapshotSpan(), searchSpan.End, t, ctx.Options)) {
+			var ts = _TextView.TextSnapshot;
+			var l = ts.Length - 1;
+			var options = ctx.Options;
+			var w = !options.MatchFlags(FindOptions.WholeWord);
+			foreach (var span in _SearchService.FindAll(new SnapshotSpan(ts, searchSpan.End, ts.Length - searchSpan.End), searchSpan.End, t, options)
+				.Union(_SearchService.FindAll(new SnapshotSpan(ts, 0, searchSpan.Start.Position), searchSpan.Start, t, options | FindOptions.SearchReverse))) {
 				if (token.IsCancellationRequested) {
 					_Matches = null;
 					goto RETURN;
-				}
-				if (span.Start.Position == sp) {
-					continue;
 				}
 				r.Add(new MatchedSpan(span, t == span.GetText(), !w || IsWord(span, l)));
 				if (++c > MAX_MATCH) {
@@ -155,9 +155,9 @@ namespace Codist.Margins
 			}
 			// matches is already null
 
-			static bool IsWord(SnapshotSpan ss, int l) {
+			static bool IsWord(SnapshotSpan ss, int limit) {
 				return (ss.Start.Position == 0 || !(ss.Start - 1).GetChar().IsProgrammaticChar())
-					&& (ss.End.Position == l || !ss.End.GetChar().IsProgrammaticChar());
+					&& (ss.End.Position == limit || !ss.End.GetChar().IsProgrammaticChar());
 			}
 		}
 
@@ -175,6 +175,9 @@ namespace Codist.Margins
 		}
 
 		void RequestSearch() {
+			if (_TextView.TextSnapshot.Length > 0x1000000) {
+				return;
+			}
 			var ctx = new SearchContext(this);
 			if (ctx.Text != null) {
 				if (_SearchContext?.Success == true && ctx.Span.Equals(_SearchContext.Span)) {
@@ -291,7 +294,7 @@ namespace Codist.Margins
 						Text = null;
 						return;
 					}
-					Options = FindOptions.OrdinalComparison | FindOptions.Wrap;
+					Options = FindOptions.OrdinalComparison;
 					if (me._KeyboardControl) {
 						if (UIHelper.IsCtrlDown) {
 							Options |= FindOptions.WholeWord;

@@ -105,6 +105,7 @@ namespace Codist.Margins
 	[Export(typeof(IWpfTextViewMarginProvider))]
 	[Name(nameof(SelectionMargin))]
 	[Order(Before = PredefinedMarginNames.OverviewChangeTracking)]
+	[Order(Before = nameof(MatchMargin))]
 	[MarginContainer(PredefinedMarginNames.VerticalScrollBar)]
 	[ContentType(Constants.CodeTypes.Code)]
 	[ContentType(Constants.CodeTypes.Text)]
