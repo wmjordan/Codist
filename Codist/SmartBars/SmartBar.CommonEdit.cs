@@ -208,10 +208,10 @@ namespace Codist.SmartBars
 				var option = FindOptions.Wrap | FindOptions.OrdinalComparison;
 				var m = ctx.ModifierKeys;
 				if (m.MatchFlags(ModifierKeys.Control)) {
-					option |= FindOptions.MatchCase;
+					option |= FindOptions.WholeWord;
 				}
 				if (m.MatchFlags(ModifierKeys.Shift)) {
-					option |= FindOptions.WholeWord;
+					option |= FindOptions.MatchCase;
 				}
 				var t = s.GetText();
 				if (t.Contains('\n')) {

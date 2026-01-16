@@ -1697,8 +1697,8 @@ Shift: 导出主题包含开发环境主题的样式</value>
   </data>
   <data name="CMD_EditMatches" xml:space="preserve">
     <value>编辑所有匹配的文本
-Ctrl：匹配大小写
-Shift：匹配整个单词</value>
+Ctrl：匹配整个单词
+Shift：匹配大小写</value>
   </data>
   <data name="CMD_EncapsulateField" xml:space="preserve">
     <value>封装字段...</value>

@@ -1706,8 +1706,8 @@ Shift: Save built-in default styles as well</value>
   </data>
   <data name="CMD_EditMatches" xml:space="preserve">
     <value>Edit All Matching
-Ctrl: Match case
-Shift: Match whole word</value>
+Ctrl: Match whole word
+Shift: Match case</value>
   </data>
   <data name="CMD_EncapsulateField" xml:space="preserve">
     <value>Encapsulate field...</value>

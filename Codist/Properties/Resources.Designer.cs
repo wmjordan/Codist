@@ -572,8 +572,8 @@ namespace Codist.Properties {
         
         /// <summary>
         ///   Looks up a localized string similar to Edit All Matching
-        ///Ctrl: Match case
-        ///Shift: Match whole word.
+        ///Ctrl: Match whole word
+        ///Shift: Match case.
         /// </summary>
         internal static string CMD_EditMatches {
             get {
