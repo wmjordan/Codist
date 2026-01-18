@@ -88,7 +88,10 @@ namespace Codist
 		public ITextSearchService2 TextSearch {  get; private set; }
 
 		[Import]
-		public IVsEditorAdaptersFactoryService EditorAdaptersFactoryService { get; private set; }
+		public IVsEditorAdaptersFactoryService EditorAdaptersFactory { get; private set; }
+
+		[Import]
+		public IEditorOperationsFactoryService EditorOperationsFactory { get; private set; }
 
 		internal SyntaxHighlight.ClassificationTypeExporter ClassificationTypeExporter { get; }
 

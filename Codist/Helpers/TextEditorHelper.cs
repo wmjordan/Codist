@@ -843,39 +843,6 @@ namespace Codist
 			return false;
 		}
 
-		public static IEnumerable<SnapshotSpan> WrapWith(this ITextView view, string prefix, string suffix) {
-			var prefixLen = prefix.Length;
-			var psLength = prefixLen + suffix.Length;
-			var modified = new Chain<Span>();
-			var offset = 0;
-			int strippedLength;
-			using (var edit = view.TextSnapshot.TextBuffer.CreateEdit()) {
-				foreach (var item in view.Selection.SelectedSpans) {
-					var t = item.GetText();
-					// remove surrounding items
-					if ((strippedLength = item.Length - psLength) > 0
-						&& t.StartsWith(prefix, StringComparison.Ordinal)
-						&& t.EndsWith(suffix, StringComparison.Ordinal)
-						&& t.IndexOf(prefix, prefixLen, strippedLength) <= t.IndexOf(suffix, prefixLen, strippedLength)) {
-						if (edit.Replace(item, t.Substring(prefixLen, strippedLength))) {
-							modified.Add(new Span(item.Start.Position + offset, strippedLength));
-							offset -= psLength;
-						}
-					}
-					// surround items
-					else if (edit.Replace(item, $"{prefix}{t}{suffix}")) {
-						modified.Add(new Span(item.Start.Position + offset, item.Length + psLength));
-						offset += psLength;
-					}
-				}
-				if (edit.HasEffectiveChanges) {
-					var snapshot = edit.Apply();
-					return modified.Select(i => new SnapshotSpan(snapshot, i));
-				}
-			}
-			return Enumerable.Empty<SnapshotSpan>();
-		}
-
 		public static void CopyOrMoveSyntaxNode(this IWpfTextView view, SyntaxNode sourceNode, SyntaxNode targetNode, bool copy, bool before) {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			var tSpan = (targetNode.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.VariableDeclarator) ? targetNode.Parent.Parent : targetNode).GetSematicSpan(false);

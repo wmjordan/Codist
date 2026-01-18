@@ -30,11 +30,10 @@ namespace Codist.SnippetTexts
 		string _Suffix;
 		string _Substitution;
 
-		List<ISnippetCommand> _prefixCommands;
-		List<ISnippetCommand> _suffixCommands;
-
-		readonly List<PlaceholderInfo> _placeholderInfos = new List<PlaceholderInfo>();
-		bool _IsSimple;
+		int _PlaceholderCount;
+		bool _IsSimple, _HasMultilinePrefix, _HasMultilineSuffix;
+		List<ISnippetCommand> _Commands;
+		Func<ITextView, IEnumerable<SnapshotSpan>> _WrapAction;
 
 		public const char DefaultIndicator = '$';
 
@@ -42,32 +41,50 @@ namespace Codist.SnippetTexts
 			_Indicator = indicator;
 			Pattern = pattern;
 			Name = name;
+			_WrapAction = UndeterminedWrapAction;
 		}
 
 		public string Name { get; set; }
 
 		public char Indicator {
 			get => _Indicator;
-			set => _Indicator = value;
+			set {
+				if (_Indicator != value) {
+					_Indicator = value;
+					_WrapAction = UndeterminedWrapAction;
+				}
+			}
 		}
 
 		public string Pattern {
 			get => _Pattern;
 			set {
-				_Pattern = value;
-				InternalUpdate();
+				value ??= String.Empty;
+				if (_Pattern != value) {
+					_Pattern = value;
+					_WrapAction = UndeterminedWrapAction;
+				}
 			}
 		}
 
-		internal string Prefix => _Prefix;
-		internal string Suffix => _Suffix;
-		internal bool HasSubstitution => _Substitution != null;
-		internal bool HasMultilinePrefix => _prefixCommands?.Any(c => c.Type == CommandType.NewLine) == true;
-		internal bool HasMultilineSuffix => _suffixCommands?.Any(c => c.Type == CommandType.NewLine) == true;
-		internal List<PlaceholderInfo> PlaceholderInfos => _placeholderInfos;
+		public IEnumerable<SnapshotSpan> WrapSelections(ITextView view) {
+			return _WrapAction(view);
+		}
 
-		void InternalUpdate() {
-			int splitPos = _Pattern != null ? _Pattern.IndexOf(_Indicator) : -1;
+		public static IEnumerable<SnapshotSpan> Wrap(ITextView view, string prefix, string suffix) {
+			return WrapOrUnwrap(view, prefix + suffix, prefix, suffix, null);
+		}
+
+		IEnumerable<SnapshotSpan> UndeterminedWrapAction(ITextView view) {
+			// we have not yet parsed the pattern, do it here
+			ParsePattern();
+			// set the delegate to appropriated method,
+			// so we don't need to parse and branch control flow again
+			return (_WrapAction = _IsSimple ? SimpleWrap : ComplexWrap)(view);
+		}
+
+		void ParsePattern() {
+			int splitPos = _Pattern.Length != 0 ? _Pattern.IndexOf(_Indicator) : -1;
 			_Prefix = splitPos >= 0 ? _Pattern.Substring(0, splitPos) : _Pattern;
 			_Suffix = splitPos >= 0 ? _Pattern.Substring(splitPos + 1) : string.Empty;
 
@@ -76,18 +93,23 @@ namespace Codist.SnippetTexts
 			_Substitution = _Suffix.Contains(_Indicator) ? _Indicator.ToString() : null;
 
 			if (_IsSimple = !hasNewline && !hasPlaceholder && _Substitution == null) {
-				_prefixCommands = _suffixCommands = null;
+				_Commands = null;
+				_HasMultilinePrefix = _HasMultilineSuffix = false;
+				_PlaceholderCount = 0;
 				return;
 			}
 
-			_prefixCommands = new List<ISnippetCommand>();
-			_suffixCommands = new List<ISnippetCommand>();
+			_Commands = new List<ISnippetCommand>();
+			int placeholderCount = 0;
 
-			ParseToCommands(_Prefix?.Replace("\r\n", "\n"), _prefixCommands);
-			ParseToCommands(_Suffix?.Replace("\r\n", "\n"), _suffixCommands);
+			ParseToCommands(_Prefix?.Replace("\r\n", "\n"), _Commands, ref placeholderCount, ref _HasMultilinePrefix);
+			_Commands.Add(SelectionCommand.Instance);
+			ParseToCommands(_Suffix?.Replace("\r\n", "\n"), _Commands, ref placeholderCount, ref _HasMultilineSuffix);
+
+			_PlaceholderCount = placeholderCount;
 		}
 
-		void ParseToCommands(string text, List<ISnippetCommand> commands) {
+		void ParseToCommands(string text, List<ISnippetCommand> commands, ref int placeholderCount, ref bool multiline) {
 			if (string.IsNullOrEmpty(text)) return;
 
 			var lines = text.Split('\n');
@@ -110,6 +132,7 @@ namespace Codist.SnippetTexts
 						int endBracket = line.IndexOf("]]", lineIndex + 2);
 						if (endBracket > lineIndex) {
 							string name = line.Substring(lineIndex + 2, endBracket - lineIndex - 2);
+							++placeholderCount;
 							commands.Add(new PlaceholderCommand(name));
 							lineIndex = endBracket + 2;
 							continue;
@@ -139,32 +162,114 @@ namespace Codist.SnippetTexts
 
 				if (i < lines.Length - 1) {
 					commands.Add(NewLineCommand.Instance);
+					multiline = true;
 				}
 			}
 		}
 
-		public string Wrap(string text) {
-			return _Prefix + text + (_Substitution != null ? _Suffix.Replace(_Substitution, text) : _Suffix);
+		IEnumerable<SnapshotSpan> SimpleWrap(ITextView view) {
+			return WrapOrUnwrap(view, Name, _Prefix, _Suffix, _Substitution);
 		}
 
-		public string Wrap(string text, string startLineSpace, string endLineSpace, int indentStringSize, string newLineChar) {
-			_placeholderInfos.Clear();
+		static IEnumerable<SnapshotSpan> WrapOrUnwrap(ITextView view, string name, string prefix, string suffix, string substitution) {
+			var offset = 0;
+			string replacement = null;
+			var modified = new Chain<Span>();
+			var undoHistory = ServicesHelper.Instance.TextUndoHistory.GetHistory(view.TextBuffer);
+			using (var tran = undoHistory.CreateTransaction(R.T_WrapTextName.Replace("<NAME>", name))) {
+				var eo = ServicesHelper.Instance.EditorOperationsFactory.GetEditorOperations(view);
+				eo.AddBeforeTextBufferChangePrimitive();
+				using (var edit = view.TextSnapshot.TextBuffer.CreateEdit()) {
+					foreach (var item in view.Selection.SelectedSpans) {
+						var t = item.GetText();
+						int strippedLength;
+						var psLength = prefix.Length + suffix.Length;
+						if ((strippedLength = item.Length - psLength) > 0
+							&& t.StartsWith(prefix, StringComparison.Ordinal)
+							&& t.EndsWith(suffix, StringComparison.Ordinal)
+							&& t.IndexOf(prefix, prefix.Length, strippedLength) <= t.IndexOf(suffix, prefix.Length, strippedLength)) {
+							// unwrap
+							if (edit.Replace(item, t.Substring(prefix.Length, strippedLength))) {
+								modified.Add(new Span(item.Start.Position + offset, strippedLength));
+								offset -= psLength;
+							}
+						}
+						else {
+							// wrap
+							replacement = prefix + t + (substitution != null ? suffix.Replace(substitution, t) : suffix);
+							if (edit.Replace(item, replacement)) {
+								modified.Add(new Span(item.Start.Position + offset, replacement.Length));
+								offset += replacement.Length - t.Length;
+							}
+						}
+					}
+					if (edit.HasEffectiveChanges) {
+						var snapshot = edit.Apply();
+						tran.Complete();
+						return modified.Select(i => new SnapshotSpan(snapshot, i));
+					}
+				}
+			}
+			return Enumerable.Empty<SnapshotSpan>();
+		}
 
+		IEnumerable<SnapshotSpan> ComplexWrap(ITextView view) {
+			var offset = 0;
+			var placeholders = _PlaceholderCount != 0 ? new List<PlaceholderInfo>() : null;
+			var modified = new Chain<Span>();
+			var undoHistory = ServicesHelper.Instance.TextUndoHistory.GetHistory(view.TextBuffer);
+
+			using (var tran = undoHistory.CreateTransaction(R.T_WrapTextName.Replace("<NAME>", Name))) {
+				var eo = ServicesHelper.Instance.EditorOperationsFactory.GetEditorOperations(view);
+				eo.AddBeforeTextBufferChangePrimitive();
+				using (var edit = view.TextSnapshot.TextBuffer.CreateEdit()) {
+					foreach (var item in view.Selection.SelectedSpans) {
+						var t = item.GetText();
+						var start = item.Start.Position;
+						var length = item.Length;
+						var replacement = Wrap(
+							t,
+							_HasMultilinePrefix ? view.TextSnapshot.GetLinePrecedingWhitespaceAtPosition(start) : null,
+							_HasMultilineSuffix ? view.TextSnapshot.GetLinePrecedingWhitespaceAtPosition(item.End.Position) : null,
+							view.Options.GetIndentStringSize(),
+							view.Options.GetNewLineCharacter(),
+							placeholders,
+							start + offset
+						);
+
+						if (edit.Replace(item, replacement)) {
+							modified.Add(new Span(start + offset, replacement.Length));
+							offset += replacement.Length - length;
+						}
+					}
+
+					if (edit.HasEffectiveChanges) {
+						var snapshot = edit.Apply();
+						tran.Complete();
+						if (placeholders.Count != 0) {
+							if (view.TryGetProperty(out SnippetSession session)) {
+								session.Terminate();
+							}
+							view.Properties[typeof(SnippetSession)] = new SnippetSession((IWpfTextView)view, placeholders, undoHistory);
+							return new Chain<SnapshotSpan>(placeholders[0].ToSnapshotSpan(snapshot));
+						}
+						return modified.Select(i => new SnapshotSpan(snapshot, i));
+					}
+				}
+			}
+			return Enumerable.Empty<SnapshotSpan>();
+		}
+
+		string Wrap(string text, string startLineSpace, string endLineSpace, int indentStringSize, string newLineChar, List<PlaceholderInfo> placeholders, int placeholderOffset) {
 			using var sbr = ReusableStringBuilder.AcquireDefault(text.Length + _Pattern.Length);
 			StringBuilder sb = sbr.Resource;
 
-			ExecuteCommands(_prefixCommands, sb, startLineSpace, indentStringSize, newLineChar, null);
-
-			int selectionStartPos = sb.Length;
-			sb.Append(text);
-			int selectionEndPos = sb.Length;
-
-			ExecuteCommands(_suffixCommands, sb, endLineSpace, indentStringSize, newLineChar, text);
+			ExecuteCommands(_Commands, sb, startLineSpace, indentStringSize, newLineChar, placeholders, placeholderOffset, text);
 
 			return sb.ToString();
 		}
 
-		void ExecuteCommands(List<ISnippetCommand> commands, StringBuilder sb, string linePrefix, int indentSize, string newLineChar, string selectionText) {
+		static void ExecuteCommands(List<ISnippetCommand> commands, StringBuilder sb, string linePrefix, int indentSize, string newLineChar, List<PlaceholderInfo> placeholders, int placeholderOffset, string selectionText) {
 			foreach (var cmd in commands) {
 				switch (cmd.Type) {
 					case CommandType.Text:
@@ -191,99 +296,10 @@ namespace Codist.SnippetTexts
 						int pos = sb.Length;
 						string name = ((PlaceholderCommand)cmd).Name;
 						sb.Append(name);
-						_placeholderInfos.Add(new PlaceholderInfo(name, pos, name.Length));
+						placeholders.Add(new PlaceholderInfo(name, placeholderOffset + pos, name.Length));
 						break;
 				}
 			}
-		}
-
-		public IEnumerable<SnapshotSpan> WrapInView(ITextView view) {
-			return _IsSimple ? SimpleWrapOrUnwrap(view) : ComplexWrap(view);
-		}
-
-		IEnumerable<SnapshotSpan> SimpleWrapOrUnwrap(ITextView view) {
-			var offset = 0;
-			string replacement = null;
-			var modified = new Chain<Span>();
-			using (var edit = view.TextSnapshot.TextBuffer.CreateEdit()) {
-				foreach (var item in view.Selection.SelectedSpans) {
-					var t = item.GetText();
-					int strippedLength;
-					var psLength = _Prefix.Length + _Suffix.Length;
-					if ((strippedLength = item.Length - psLength) > 0
-						&& t.StartsWith(_Prefix, StringComparison.Ordinal)
-						&& t.EndsWith(_Suffix, StringComparison.Ordinal)
-						&& t.IndexOf(_Prefix, _Prefix.Length, strippedLength) <= t.IndexOf(_Suffix, _Prefix.Length, strippedLength)) {
-						// unwrap
-						if (edit.Replace(item, t.Substring(_Prefix.Length, strippedLength))) {
-							modified.Add(new Span(item.Start.Position + offset, strippedLength));
-							offset -= psLength;
-						}
-					}
-					else {
-						// wrap
-						replacement = Wrap(t);
-						if (edit.Replace(item, replacement)) {
-							modified.Add(new Span(item.Start.Position + offset, replacement.Length));
-							offset += replacement.Length - t.Length;
-						}
-					}
-				}
-				if (edit.HasEffectiveChanges) {
-					var snapshot = edit.Apply();
-					return modified.Select(i => new SnapshotSpan(snapshot, i));
-				}
-			}
-			return Enumerable.Empty<SnapshotSpan>();
-		}
-
-		IEnumerable<SnapshotSpan> ComplexWrap(ITextView view) {
-			var offset = 0;
-			var placeholders = new List<PlaceholderInfo>();
-			var modified = new Chain<Span>();
-			var undoHistory = ServicesHelper.Instance.TextUndoHistory.GetHistory(view.TextBuffer);
-
-			using (var tran = undoHistory.CreateTransaction(R.T_WrapTextName.Replace("<NAME>", Name)))
-			using (var edit = view.TextSnapshot.TextBuffer.CreateEdit()) {
-				foreach (var item in view.Selection.SelectedSpans) {
-					var t = item.GetText();
-					var start = item.Start.Position;
-					var length = item.Length;
-
-					var replacement = Wrap(
-						t,
-						HasMultilinePrefix ? view.TextSnapshot.GetLinePrecedingWhitespaceAtPosition(start) : null,
-						HasMultilineSuffix ? view.TextSnapshot.GetLinePrecedingWhitespaceAtPosition(item.End.Position) : null,
-						view.Options.GetIndentStringSize(),
-						view.Options.GetNewLineCharacter()
-					);
-
-					// Calculate absolute positions for placeholders based on the current offset
-					foreach (var info in _placeholderInfos) {
-						int absolutePosition = start + offset + info.Position;
-						placeholders.Add(new PlaceholderInfo(info.Name, absolutePosition, info.Length));
-					}
-
-					if (edit.Replace(item, replacement)) {
-						modified.Add(new Span(start + offset, replacement.Length));
-						offset += replacement.Length - length;
-					}
-				}
-
-				if (edit.HasEffectiveChanges) {
-					var snapshot = edit.Apply();
-					tran.Complete();
-					if (placeholders.Count != 0) {
-						if (view.TryGetProperty(out SnippetSession session)) {
-							session.Terminate();
-						}
-						view.Properties[typeof(SnippetSession)] = new SnippetSession((IWpfTextView)view, placeholders, undoHistory);
-						return new Chain<SnapshotSpan>(placeholders[0].ToSnapshotSpan(snapshot));
-					}
-					return modified.Select(i => new SnapshotSpan(snapshot, i));
-				}
-			}
-			return Enumerable.Empty<SnapshotSpan>();
 		}
 
 		interface ISnippetCommand {

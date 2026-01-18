@@ -7,6 +7,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using CLR;
 using Codist.Controls;
+using Codist.SnippetTexts;
 using Codist.Taggers;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Text;
@@ -296,7 +297,7 @@ namespace Codist.NaviBar
 			}
 			WRAP:
 			string s = View.GetFirstSelectionText();
-			var modified = View.WrapWith(prefix, suffix);
+			var modified = WrapText.Wrap(View, prefix, suffix);
 			if (s != null
 				&& (UIHelper.IsShiftDown || UIHelper.IsCtrlDown)
 				&& View.FindNext(_TextSearch, s, TextEditorHelper.GetFindOptionsFromKeyboardModifiers())) {

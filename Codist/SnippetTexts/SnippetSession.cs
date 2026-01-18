@@ -41,7 +41,7 @@ namespace Codist.SnippetTexts
 				goto ERROR;
 			}
 
-			var vsView = ServicesHelper.Instance.EditorAdaptersFactoryService.GetViewAdapter(view);
+			var vsView = ServicesHelper.Instance.EditorAdaptersFactory.GetViewAdapter(view);
 			if (vsView.AddCommandFilter(this, out var nextTarget) != VSConstants.S_OK) {
 				goto ERROR;
 			}
@@ -157,7 +157,6 @@ namespace Codist.SnippetTexts
 			var currentGroup = _placeholderGroups[index];
 			var snapshot = _view.TextSnapshot;
 
-			// 修改点：只获取第一个 Span 进行选中，不再遍历添加所有 Spans
 			if (currentGroup.Spans.Count > 0) {
 				_view.Selection.Clear();
 				_view.SelectSpan(currentGroup.Spans[0].GetSpan(snapshot));

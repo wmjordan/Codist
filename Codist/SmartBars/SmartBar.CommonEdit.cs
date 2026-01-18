@@ -92,7 +92,7 @@ namespace Codist.SmartBars
 		protected static IEnumerable<SnapshotSpan> WrapWith(CommandContext ctx, string prefix, string suffix, bool selectModified) {
 			string s = ctx.View.GetFirstSelectionText();
 			ctx.KeepToolBar(false);
-			var m = ctx.View.WrapWith(prefix, suffix);
+			var m = WrapText.Wrap(ctx.View, prefix, suffix);
 			if (s != null && ctx.ModifierKeys.HasAnyFlag(ModifierKeys.Control | ModifierKeys.Shift)) {
 				if (FindNext(ctx, s) == false) {
 					ctx.HideToolBar();
@@ -106,7 +106,7 @@ namespace Codist.SmartBars
 		protected static IEnumerable<SnapshotSpan> WrapWith(CommandContext ctx, WrapText wrapText, bool selectModified) {
 			string s = ctx.View.GetFirstSelectionText();
 			ctx.KeepToolBar(false);
-			var m = wrapText.WrapInView(ctx.View);
+			var m = wrapText.WrapSelections(ctx.View);
 			if (s != null && ctx.ModifierKeys.HasAnyFlag(ModifierKeys.Control | ModifierKeys.Shift)) {
 				if (FindNext(ctx, s) == false) {
 					ctx.HideToolBar();
