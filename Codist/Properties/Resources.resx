@@ -2965,7 +2965,8 @@ Discard its changes?</value>
     <value>This page changes the behavior of automatically inserting punctuations</value>
   </data>
   <data name="CMDT_CopySymbol" xml:space="preserve">
-    <value>Copy the name of current type or member</value>
+    <value>Copy the name of current type or member
+Right click: copy fully qualified name</value>
   </data>
   <data name="CMDT_CopyQualifiedName" xml:space="preserve">
     <value>Copy Qualified Name
@@ -3097,5 +3098,8 @@ Shift: match case</value>
   </data>
   <data name="OT_MaxSearchCharLength" xml:space="preserve">
     <value>Max search term length:</value>
+  </data>
+  <data name="CMDT_SemanticCommandCtrlTip" xml:space="preserve">
+    <value>Ctrl: Extract match</value>
   </data>
 </root>

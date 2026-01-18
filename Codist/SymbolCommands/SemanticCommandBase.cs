@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
@@ -18,14 +19,27 @@ namespace Codist.SymbolCommands
 		public SemanticContext Context { get; set; }
 		public CommandOptions Options { get; set; }
 
-		protected bool IsStrictMatch => Options.MatchFlags(CommandOptions.ExtractMatch) || UIHelper.IsCtrlDown;
+		protected bool StrictMatch => Options.MatchFlags(CommandOptions.ExtractMatch) || UIHelper.IsCtrlDown;
 		protected bool MatchTypeArgument => Options.MatchFlags(CommandOptions.MatchTypeArgument) || UIHelper.IsCtrlDown;
 		protected bool DirectDerive => Options.MatchFlags(CommandOptions.DirectDerive) || UIHelper.IsCtrlDown;
 
 		public abstract int ImageId { get; }
+		/// <summary>
+		/// Command title in user interface.
+		/// </summary>
 		public abstract string Title { get; }
+		/// <summary>
+		/// The placeholder for <see cref="Symbol"/> in <see cref="Title"/>.
+		/// </summary>
 		public virtual string TitlePlaceHolderSubstitution { get; set; }
+		/// <summary>
+		/// Description in generating ToolTip.
+		/// </summary>
 		public virtual string Description => null;
+		/// <summary>
+		/// Denotes user can use Ctrl key to restrict execution results.
+		/// </summary>
+		protected virtual bool UseCtrlRestriction => false;
 
 		public virtual bool CanRefresh {
 			get {
@@ -73,6 +87,29 @@ namespace Codist.SymbolCommands
 				: default;
 		}
 
+		internal CommandToolTip CreteToolTip() {
+			return new CommandToolTip(ImageId,
+				TitlePlaceHolderSubstitution != null ? GetTipHeaderText() : Title,
+				new ThemedTipText((UseCtrlRestriction ? Description + Environment.NewLine + R.CMDT_SemanticCommandCtrlTip : Description) ?? String.Empty));
+		}
+
+		string GetTipHeaderText() {
+			var title = Title;
+			string sub = TitlePlaceHolderSubstitution;
+			var i = title.IndexOf('<');
+			if (i < 0) {
+				goto FALLBACK;
+			}
+			var i2 = title.IndexOf('>', i);
+			if (i2 < 0) {
+				goto FALLBACK;
+			}
+			return title.Substring(0, i)
+				+ (String.IsNullOrEmpty(sub) ? "?" : sub)
+				+ title.Substring(i2 + 1);
+		FALLBACK:
+			return title;
+		}
 	}
 
 	abstract class AnalysisListCommandBase<TListData> : SemanticCommandBase
@@ -206,11 +243,12 @@ namespace Codist.SymbolCommands
 		public override string Description => R.CMDT_FindSymbolwithName;
 		public override IEnumerable<OptionDescriptor> OptionDescriptors => __Options;
 		protected override string ResultLabel => R.T_NameAlike;
+		protected override bool UseCtrlRestriction => true;
 
 		public override async Task<ImmutableArray<ISymbol>> PrepareListDataAsync(CancellationToken cancellationToken) {
 			var matchCase = Options.MatchFlags(CommandOptions.MatchCase);
 			var source = MakeSourceFilterFromOption(Options);
-			return await Task.Run(() => ImmutableArray.CreateRange(Context.SemanticModel.Compilation.FindDeclarationMatchName(Symbol.Name, IsStrictMatch, matchCase, source, default))).ConfigureAwait(false);
+			return await Task.Run(() => ImmutableArray.CreateRange(Context.SemanticModel.Compilation.FindDeclarationMatchName(Symbol.Name, StrictMatch, matchCase, source, default))).ConfigureAwait(false);
 		}
 
 		public override void UpdateList(SymbolMenu resultList, ImmutableArray<ISymbol> data) {

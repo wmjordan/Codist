@@ -2437,7 +2437,8 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Copy the name of current type or member.
+        ///   Looks up a localized string similar to Copy the name of current type or member
+        ///Right click: copy fully qualified name.
         /// </summary>
         internal static string CMDT_CopySymbol {
             get {
@@ -2963,6 +2964,15 @@ namespace Codist.Properties {
         internal static string CMDT_SelectCodeWithoutTrivia {
             get {
                 return ResourceManager.GetString("CMDT_SelectCodeWithoutTrivia", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ctrl: Extract match.
+        /// </summary>
+        internal static string CMDT_SemanticCommandCtrlTip {
+            get {
+                return ResourceManager.GetString("CMDT_SemanticCommandCtrlTip", resourceCulture);
             }
         }
         

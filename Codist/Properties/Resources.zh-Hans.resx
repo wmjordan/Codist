@@ -2951,7 +2951,8 @@ Ctrl: 将下划线分隔的单词转换为首字母大写的单词</value>
     <value>本页面的选项更改自动插入标点符号的行为</value>
   </data>
   <data name="CMDT_CopySymbol" xml:space="preserve">
-    <value>复制当前类或成员的名称</value>
+    <value>复制当前类或成员的名称
+右键：复制完全限定名称</value>
   </data>
   <data name="CMDT_CopyQualifiedName" xml:space="preserve">
     <value>复制限定名称
@@ -3083,5 +3084,8 @@ Shift: 匹配大小写</value>
   </data>
   <data name="OT_MaxSearchCharLength" xml:space="preserve">
     <value>限制搜索项的字数:</value>
+  </data>
+  <data name="CMDT_SemanticCommandCtrlTip" xml:space="preserve">
+    <value>Ctrl: 精确匹配符号</value>
   </data>
 </root>

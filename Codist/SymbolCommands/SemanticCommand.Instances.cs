@@ -20,10 +20,11 @@ namespace Codist.SymbolCommands
 		public override string Description => R.CMDT_FindInstanceProducer;
 		public override IEnumerable<OptionDescriptor> OptionDescriptors => __Options;
 		protected override string ResultLabel => R.T_Producers;
+		protected override bool UseCtrlRestriction => true;
 
 		public override Task<ImmutableArray<ISymbol>> PrepareListDataAsync(CancellationToken cancellationToken) {
 			var source = MakeSourceFilterFromOption(Options);
-			return (Symbol as ITypeSymbol).FindSymbolInstanceProducerAsync(Context.Document.Project, IsStrictMatch, source == SymbolSourceFilter.RequiresSource, cancellationToken);
+			return (Symbol as ITypeSymbol).FindSymbolInstanceProducerAsync(Context.Document.Project, StrictMatch, source == SymbolSourceFilter.RequiresSource, cancellationToken);
 		}
 
 		public override void UpdateList(SymbolMenu resultList, ImmutableArray<ISymbol> data) {
@@ -43,10 +44,11 @@ namespace Codist.SymbolCommands
 		public override string Description => R.CMDT_FindInstanceAsParameter;
 		public override IEnumerable<OptionDescriptor> OptionDescriptors => __Options;
 		protected override string ResultLabel => R.T_AsParameter;
+		protected override bool UseCtrlRestriction => true;
 
 		public override Task<ImmutableArray<ISymbol>> PrepareListDataAsync(CancellationToken cancellationToken) {
 			var source = MakeSourceFilterFromOption(Options);
-			return (Symbol as ITypeSymbol).FindInstanceAsParameterAsync(Context.Document.Project, IsStrictMatch, source == SymbolSourceFilter.RequiresSource, cancellationToken);
+			return (Symbol as ITypeSymbol).FindInstanceAsParameterAsync(Context.Document.Project, StrictMatch, source == SymbolSourceFilter.RequiresSource, cancellationToken);
 		}
 
 		public override void UpdateList(SymbolMenu resultList, ImmutableArray<ISymbol> data) {
@@ -67,10 +69,11 @@ namespace Codist.SymbolCommands
 		public override IEnumerable<OptionDescriptor> OptionDescriptors => __Options;
 		protected override ISymbol ResultSymbol => Symbol.ContainingType;
 		protected override string ResultLabel => R.T_Producers;
+		protected override bool UseCtrlRestriction => true;
 
 		public override Task<ImmutableArray<ISymbol>> PrepareListDataAsync(CancellationToken cancellationToken) {
 			var source = MakeSourceFilterFromOption(Options);
-			return Symbol.ContainingType.FindSymbolInstanceProducerAsync(Context.Document.Project, IsStrictMatch, source == SymbolSourceFilter.RequiresSource, cancellationToken);
+			return Symbol.ContainingType.FindSymbolInstanceProducerAsync(Context.Document.Project, StrictMatch, source == SymbolSourceFilter.RequiresSource, cancellationToken);
 		}
 
 		public override void UpdateList(SymbolMenu resultList, ImmutableArray<ISymbol> data) {
@@ -91,10 +94,11 @@ namespace Codist.SymbolCommands
 		public override IEnumerable<OptionDescriptor> OptionDescriptors => __Options;
 		protected override ISymbol ResultSymbol => Symbol.ContainingType;
 		protected override string ResultLabel => R.T_AsParameter;
+		protected override bool UseCtrlRestriction => true;
 
 		public override Task<ImmutableArray<ISymbol>> PrepareListDataAsync(CancellationToken cancellationToken) {
 			var source = MakeSourceFilterFromOption(Options);
-			return Symbol.ContainingType.FindInstanceAsParameterAsync(Context.Document.Project, IsStrictMatch, source == SymbolSourceFilter.RequiresSource, cancellationToken);
+			return Symbol.ContainingType.FindInstanceAsParameterAsync(Context.Document.Project, StrictMatch, source == SymbolSourceFilter.RequiresSource, cancellationToken);
 		}
 
 		public override void UpdateList(SymbolMenu resultList, ImmutableArray<ISymbol> data) {

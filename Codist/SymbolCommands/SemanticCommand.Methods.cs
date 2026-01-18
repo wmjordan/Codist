@@ -52,10 +52,11 @@ namespace Codist.SymbolCommands
 		public override string Title => R.CMD_FindExtensions;
 		public override IEnumerable<OptionDescriptor> OptionDescriptors => __Options;
 		protected override string ResultLabel => R.T_Extensions;
+		protected override bool UseCtrlRestriction => true;
 
 		public override async Task<ImmutableArray<IMethodSymbol>> PrepareListDataAsync(CancellationToken cancellationToken) {
 			var source = MakeSourceFilterFromOption(Options);
-			return await (Symbol as ITypeSymbol).FindExtensionMethodsAsync(Context.Document.Project, IsStrictMatch, MatchTypeArgument, source, cancellationToken).ConfigureAwait(false);
+			return await (Symbol as ITypeSymbol).FindExtensionMethodsAsync(Context.Document.Project, StrictMatch, MatchTypeArgument, source, cancellationToken).ConfigureAwait(false);
 		}
 
 		public override void UpdateList(SymbolMenu resultList, ImmutableArray<IMethodSymbol> data) {
@@ -78,12 +79,13 @@ namespace Codist.SymbolCommands
 		public override string Title => R.CMD_FindExtensionsFor;
 		public override string Description => R.CMDT_FindTypeExtensionMethods;
 		public override IEnumerable<OptionDescriptor> OptionDescriptors => __Options;
-		protected override ISymbol ResultSymbol => Symbol.GetReturnType();
 		protected override string ResultLabel => R.T_Extensions;
+		protected override ISymbol ResultSymbol => Symbol.GetReturnType();
+		protected override bool UseCtrlRestriction => true;
 
 		public override async Task<ImmutableArray<IMethodSymbol>> PrepareListDataAsync(CancellationToken cancellationToken) {
 			var source = MakeSourceFilterFromOption(Options);
-			return await Symbol.GetReturnType().FindExtensionMethodsAsync(Context.Document.Project, IsStrictMatch, MatchTypeArgument, source, cancellationToken).ConfigureAwait(false);
+			return await Symbol.GetReturnType().FindExtensionMethodsAsync(Context.Document.Project, StrictMatch, MatchTypeArgument, source, cancellationToken).ConfigureAwait(false);
 		}
 
 		public override void UpdateList(SymbolMenu resultList, ImmutableArray<IMethodSymbol> data) {
@@ -98,10 +100,11 @@ namespace Codist.SymbolCommands
 		public override string Description => R.CMDT_FindAssignmentsFor;
 		public override IEnumerable<OptionDescriptor> OptionDescriptors => null;
 		protected override string ResultLabel => null;
+		protected override bool UseCtrlRestriction => true;
 
 		public override Task<IReadOnlyCollection<KeyValuePair<ISymbol, List<(ArgumentAssignment assignment, Location location, ExpressionSyntax expression)>>>> PrepareListDataAsync(CancellationToken cancellationToken) {
 			var docs = MakeDocumentListFromOption(Options);
-			return (Symbol as IParameterSymbol).FindParameterAssignmentsAsync(Context.Document.Project, docs, IsStrictMatch, ArgumentAssignmentFilter.Undefined, cancellationToken);
+			return (Symbol as IParameterSymbol).FindParameterAssignmentsAsync(Context.Document.Project, docs, StrictMatch, ArgumentAssignmentFilter.Undefined, cancellationToken);
 		}
 
 		protected override void SetupListTitle(SymbolMenu resultList, IReadOnlyCollection<KeyValuePair<ISymbol, List<(ArgumentAssignment assignment, Location location, ExpressionSyntax expression)>>> data) {

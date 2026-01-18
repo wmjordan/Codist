@@ -22,8 +22,8 @@ namespace Codist.SymbolCommands
 		];
 
 		string _ResultLabel;
-
 		protected override string ResultLabel => _ResultLabel;
+		protected override bool UseCtrlRestriction => true;
 		public override IEnumerable<OptionDescriptor> OptionDescriptors => __Options;
 
 		public override void UpdateList(SymbolMenu resultList, List<(ISymbol, List<(SymbolUsageKind, ReferenceLocation)>)> data) {
@@ -82,7 +82,6 @@ namespace Codist.SymbolCommands
 
 	sealed class FindReferrersCommand : ReferrerAnalysisCommandBase
 	{
-
 		bool _MatchTypeArgument;
 
 		public override int ImageId => IconIds.FindReferrers;
@@ -93,7 +92,7 @@ namespace Codist.SymbolCommands
 		public override Task<List<(ISymbol, List<(SymbolUsageKind, ReferenceLocation)>)>> PrepareListDataAsync(CancellationToken cancellationToken) {
 			var docs = MakeDocumentListFromOption(Options);
 			_MatchTypeArgument = MatchTypeArgument;
-			Predicate<ISymbol> df = IsStrictMatch ? (Symbol is IMethodSymbol ms && ms.MethodKind == MethodKind.ReducedExtension ? ms.ReducedFrom : Symbol).Equals : default;
+			Predicate<ISymbol> df = StrictMatch ? (Symbol is IMethodSymbol ms && ms.MethodKind == MethodKind.ReducedExtension ? ms.ReducedFrom : Symbol).Equals : default;
 			Predicate<ISymbol> of = _MatchTypeArgument ? Symbol.Equals : null;
 			return Symbol.FindReferrersAsync(Context.Document.Project, docs, df, of, null, cancellationToken);
 		}
@@ -122,7 +121,7 @@ namespace Codist.SymbolCommands
 			_MatchTypeArgument = MatchTypeArgument;
 			var symbol = Context.SemanticModel.GetSymbolOrFirstCandidate(Node.GetObjectCreationNode(), cancellationToken);
 
-			Predicate<ISymbol> df = IsStrictMatch ? (symbol is IMethodSymbol ms && ms.MethodKind == MethodKind.ReducedExtension ? ms.ReducedFrom : symbol).Equals : default;
+			Predicate<ISymbol> df = StrictMatch ? (symbol is IMethodSymbol ms && ms.MethodKind == MethodKind.ReducedExtension ? ms.ReducedFrom : symbol).Equals : default;
 			Predicate<ISymbol> of = _MatchTypeArgument ? symbol.Equals : null;
 			return symbol.FindReferrersAsync(Context.Document.Project, docs, df, of, null, cancellationToken);
 		}
@@ -137,7 +136,7 @@ namespace Codist.SymbolCommands
 		public override Task<List<(ISymbol, List<(SymbolUsageKind, ReferenceLocation)>)>> PrepareListDataAsync(CancellationToken cancellationToken) {
 			var docs = MakeDocumentListFromOption(Options);
 
-			Predicate<ISymbol> df = IsStrictMatch ? Symbol.Equals : default;
+			Predicate<ISymbol> df = StrictMatch ? Symbol.Equals : default;
 			Predicate<ISymbol> of = MatchTypeArgument ? Symbol.Equals : null;
 
 			if (Symbol is INamedTypeSymbol typeSymbol && typeSymbol.GetPrimaryConstructor() != null) {
@@ -163,7 +162,7 @@ namespace Codist.SymbolCommands
 			var docs = MakeDocumentListFromOption(Options);
 			var targetSymbol = ResultSymbol;
 
-			Predicate<ISymbol> df = IsStrictMatch ? targetSymbol.Equals : default;
+			Predicate<ISymbol> df = StrictMatch ? targetSymbol.Equals : default;
 			Predicate<ISymbol> of = MatchTypeArgument ? targetSymbol.Equals : null;
 			Predicate<SyntaxNode> nodeFilter = IsTypeReference;
 

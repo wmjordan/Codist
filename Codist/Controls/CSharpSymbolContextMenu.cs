@@ -405,6 +405,7 @@ namespace Codist.Controls
 					}
 				}
 				_ClickHandler = new AsyncCommandExecutor(command).HandleEvent;
+				SetToolTip(command);
 
 				static ThemedMenuText MakeHeader(SemanticCommandBase command) {
 					var title = command.Title;
@@ -455,6 +456,9 @@ namespace Codist.Controls
 				_Option = _Option.SetFlags((CommandOptions)b.Tag, b.IsChecked == true);
 			}
 
+			void SetToolTip(SemanticCommandBase command) {
+				this.SetLazyToolTip(command.CreteToolTip).SetTipOptions();
+			}
 			public CustomMenuItem SetToolTip(string tooltip) {
 				if (tooltip == null) {
 					return this;
