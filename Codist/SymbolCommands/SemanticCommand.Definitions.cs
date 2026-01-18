@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using CLR;
 using Microsoft.CodeAnalysis;
 using R = Codist.Properties.Resources;
 
@@ -31,7 +32,12 @@ namespace Codist.SymbolCommands
 
 		public override async Task ExecuteAsync(CancellationToken cancellationToken) {
 			await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
-			TryCopy(Symbol.GetOriginalName());
+			if (Options.MatchFlags(CommandOptions.Alternative)) {
+				CopyQualifiedSymbolName(Symbol, true);
+			}
+			else {
+				TryCopy(Symbol.GetOriginalName());
+			}
 		}
 
 		static void TryCopy(string content) {

@@ -510,6 +510,9 @@ namespace Codist.Controls
 				if (command.OptionDescriptors != null) {
 					command.Options = (sender as UIElement)?.GetParentOrSelf<CustomMenuItem>()?.Option ?? 0;
 				}
+				if (args is MouseButtonEventArgs mbe && mbe.ChangedButton == MouseButton.Right) {
+					command.Options |= CommandOptions.Alternative;
+				}
 				command.ExecuteAsync(default).FireAndForget();
 			}
 		}

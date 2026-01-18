@@ -18,6 +18,7 @@ namespace Codist.SymbolCommands
 		Implicit = 1 << 9,
 		MatchTypeArgument = 1 << 10,
 		NoTypeArgument = 1 << 11,
+		Alternative = 1 << 12,
 	}
 
 }
