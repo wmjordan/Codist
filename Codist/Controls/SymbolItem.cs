@@ -237,7 +237,7 @@ namespace Codist.Controls
 
 			async Task RefreshSymbolInternalAsync(SymbolItem me, CancellationToken ct) {
 				var oldSymbol = me.Symbol;
-				if (oldSymbol != null) {
+				if (oldSymbol != null && oldSymbol.Kind != SymbolKind.ErrorType) {
 					var symbol = await me.Container?.SemanticContext?.RelocateSymbolAsync(oldSymbol, ct);
 					if (symbol != null && symbol != oldSymbol) {
 						me.Symbol = symbol;
