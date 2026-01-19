@@ -121,7 +121,7 @@ namespace Codist.SymbolCommands
 		public override sealed async Task ExecuteAsync(CancellationToken cancellationToken) {
 			var data = await PrepareListDataAsync(cancellationToken).ConfigureAwait(false);
 			await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
-			var m = new SymbolMenu(Context, ListType);
+			var m = new SymbolMenu(Context);
 			UpdateList(m, data);
 			SetupListTitle(m, data);
 			m.Show();

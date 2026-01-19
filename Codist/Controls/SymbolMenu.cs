@@ -10,7 +10,8 @@ namespace Codist.Controls
 	sealed class SymbolMenu : SymbolList
 	{
 		readonly StackPanel _HeaderPanel;
-		readonly SymbolFilterBox _FilterBox;
+		readonly ContentControl _FilterContainer;
+		SymbolFilterBox _FilterBox;
 		TextViewOverlay _ExternalAdornment;
 
 		public SymbolMenu(SemanticContext semanticContext) : this(semanticContext, SymbolListType.None) { }
@@ -24,9 +25,7 @@ namespace Codist.Controls
 							TextAlignment = TextAlignment.Left,
 							Padding = WpfHelper.SmallVerticalMargin
 						}),
-						(_FilterBox = new SymbolFilterBox(this) {
-							Margin = WpfHelper.NoMargin
-						}),
+						new ContentControl().Set(ref _FilterContainer),
 						new Separator()
 					}
 			};
@@ -66,6 +65,11 @@ namespace Codist.Controls
 		}
 
 		public void Show(UIElement relativeElement = null) {
+			if (_FilterBox is null) {
+				_FilterContainer.Content = _FilterBox = new SymbolFilterBox(this) {
+					Margin = WpfHelper.NoMargin
+				};
+			}
 			ShowMenu(relativeElement);
 			UpdateNumbers();
 			_FilterBox.FocusFilterBox();
@@ -133,7 +137,7 @@ namespace Codist.Controls
 					ex.Log();
 				}
 			}
-			_FilterBox.FocusFilterBox();
+			_FilterBox?.FocusFilterBox();
 		}
 
 		void MouseEnterHeader(object sender, RoutedEventArgs e) {
