@@ -147,7 +147,7 @@ namespace Codist.Margins
 			foreach (var span in _SearchService.FindAll(new SnapshotSpan(ts, searchSpan.End, Math.Min(ts.Length - searchSpan.End, maxLen)), searchSpan.End, t, options)
 				.Union(_SearchService.FindAll(new SnapshotSpan(ts, Math.Max(0, sp - maxLen), Math.Min(maxLen, sp)), searchSpan.Start, t, options | FindOptions.SearchReverse))) {
 				if (token.IsCancellationRequested) {
-					_Matches = null;
+					ClearMatches();
 					goto RETURN;
 				}
 				r.Add(new MatchedSpan(span, t == span.GetText(), !w || IsWord(span, l)));
@@ -163,11 +163,12 @@ namespace Codist.Margins
 		RETURN:
 			await SyncHelper.SwitchToMainThreadAsync(token);
 			ctx.Success = true;
+			_TextView.Properties[typeof(MatchMargin)] = _Matches.Count;
 			InvalidateVisual();
 			return;
 		QUIT:
 			if (_Matches != null) {
-				_Matches = null;
+				ClearMatches();
 				goto RETURN;
 			}
 			// matches is already null
@@ -207,9 +208,16 @@ namespace Codist.Margins
 				SyncHelper.CancelAndDispose(ref _currentSearchCts, false);
 				_SearchContext = null;
 				if (_Matches != null) {
-					_Matches = null;
+					ClearMatches();
 					InvalidateVisual();
 				}
+			}
+		}
+
+		void ClearMatches() {
+			if (_Matches != null) {
+				_Matches = null;
+				_TextView.Properties.RemoveProperty(typeof(MatchMargin));
 			}
 		}
 
@@ -243,20 +251,32 @@ namespace Codist.Margins
 			if (ss is null) {
 				return;
 			}
-			double lastPos = -100;
+			if (ss[0].Span.Snapshot.Version.VersionNumber != _TextView.TextSnapshot.Version.VersionNumber) {
+				// modification may occur outside of document editor window
+				// if snapshot expires, request an update
+				RequestSearch();
+				return;
+			}
+			double p = -100;
 			foreach (var item in ss) {
 				var top = _ScrollBar.GetYCoordinateOfBufferPosition(item.Span.Start);
-				if (top - lastPos >= MarkerSize || top < lastPos) {
+				if (top - p >= MarkerSize || top < p) {
 					if (item.WholeWord) {
 						drawingContext.DrawRectangle(item.MatchCase ? _MatchBrush : _CaseMismatchBrush, null, new Rect(0, top - MarkerSize, FullMarkerSize, FullMarkerSize));
 					}
 					else {
 						drawingContext.DrawRectangle(null, item.MatchCase ? _MatchPen : _CaseMismatchPen, new Rect(0, top - MarkerSize, FullMarkerSize, FullMarkerSize));
 					}
-					lastPos = top;
+					p = top; // last position
 				}
 			}
-			drawingContext.DrawText(WpfHelper.ToFormattedText(ss.Count > 9999 ? R.T_10KPlus : ss.Count.ToText(), 9, _MatchBrush), new Point(FullMarkerSize, _ScrollBar.GetYCoordinateOfBufferPosition(new SnapshotPoint(_TextView.TextSnapshot, 0))));
+			var t = WpfHelper.ToFormattedText(ss.Count > 9999 ? R.T_10KPlus : ss.Count.ToText(), 9, _MatchBrush);
+			p = _ScrollBar.TrackSpanBottom - t.Height - t.Height;
+			if (_ScrollBar.GetYCoordinateOfBufferPosition(_TextView.Caret.Position.BufferPosition).IsBetween(p, p + t.Height)) {
+				// move up to prevent being covered by caret marker
+				p -= t.Height;
+			}
+			drawingContext.DrawText(t, new Point(FullMarkerSize, p));
 		}
 
 		#region IDisposable Support

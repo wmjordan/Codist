@@ -116,11 +116,12 @@ namespace Codist.SymbolCommands
 	{
 		protected virtual ISymbol ResultSymbol => Symbol;
 		protected abstract string ResultLabel { get; }
+		protected virtual SymbolListType ListType => SymbolListType.None;
 
 		public override sealed async Task ExecuteAsync(CancellationToken cancellationToken) {
 			var data = await PrepareListDataAsync(cancellationToken).ConfigureAwait(false);
 			await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
-			var m = new SymbolMenu(Context);
+			var m = new SymbolMenu(Context, ListType);
 			UpdateList(m, data);
 			SetupListTitle(m, data);
 			m.Show();

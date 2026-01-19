@@ -76,6 +76,10 @@ namespace Codist.QuickInfo
 				}
 			}
 			block.Add(info);
+			if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.MatchSelection)
+				&& session.TextView.Properties.TryGetProperty<int>(typeof(Margins.MatchMargin), out int matches)) {
+				block.Add(new BlockItem(IconIds.EditMatches, R.T_Match + matches.ToText()));
+			}
 			return new QuickInfoItem(activeSpan.ToTrackingSpan(), block);
 		}
 

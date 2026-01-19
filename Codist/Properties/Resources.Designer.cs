@@ -7683,6 +7683,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Match selection: .
+        /// </summary>
+        internal static string T_Match {
+            get {
+                return ResourceManager.GetString("T_Match", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Maybe....
         /// </summary>
         internal static string T_Maybe {

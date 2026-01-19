@@ -3088,4 +3088,7 @@ Shift: 匹配大小写</value>
   <data name="CMDT_SemanticCommandCtrlTip" xml:space="preserve">
     <value>Ctrl: 精确匹配符号</value>
   </data>
+  <data name="T_Match" xml:space="preserve">
+    <value>匹配选中内容: </value>
+  </data>
 </root>

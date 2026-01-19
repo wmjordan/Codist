@@ -3102,4 +3102,7 @@ Shift: match case</value>
   <data name="CMDT_SemanticCommandCtrlTip" xml:space="preserve">
     <value>Ctrl: Extract match</value>
   </data>
+  <data name="T_Match" xml:space="preserve">
+    <value>Match selection: </value>
+  </data>
 </root>

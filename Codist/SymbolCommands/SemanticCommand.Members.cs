@@ -20,6 +20,7 @@ namespace Codist.SymbolCommands
 		string _ResultLabel;
 
 		protected override string ResultLabel => _ResultLabel;
+		protected override SymbolListType ListType => SymbolListType.TypeList;
 
 		public override Task<ISymbol[]> PrepareListDataAsync(CancellationToken cancellationToken) {
 			return ((INamespaceSymbol)Symbol).GetNamespacesAndTypesAsync(Context.Document.Project, cancellationToken);
