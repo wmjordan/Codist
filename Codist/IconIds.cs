@@ -310,6 +310,7 @@ namespace Codist
 		public const int Error = KnownImageIds.StatusInvalid;
 		public const int Stop = KnownImageIds.StatusNo;
 		public const int AddFolder = KnownImageIds.AddFolder;
+		public const int VisualStudio = KnownImageIds.VisualStudio;
 		#endregion
 		#region symbol usage icons
 		public const int UseToWrite = KnownImageIds.Writeable;

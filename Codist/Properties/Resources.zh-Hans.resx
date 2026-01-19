@@ -3088,6 +3088,30 @@ Shift: 匹配大小写</value>
   <data name="CMDT_SemanticCommandCtrlTip" xml:space="preserve">
     <value>Ctrl: 精确匹配符号</value>
   </data>
+  <data name="F_Text" xml:space="preserve">
+    <value>文本文件|*.txt|所有文件|*.*</value>
+  </data>
+  <data name="T_ExportDTECommands" xml:space="preserve">
+    <value>导出 DTE.Commands</value>
+  </data>
+  <data name="T_ExportDTECommandsTip" xml:space="preserve">
+    <value>保存 DTE.Commands 的 Name, Guid, Id, Bindings 等信息到文件</value>
+  </data>
+  <data name="T_ExportThemeColors" xml:space="preserve">
+    <value>导出主题颜色</value>
+  </data>
+  <data name="T_ExportThemeColorsTip" xml:space="preserve">
+    <value>将主题颜色导出到文件</value>
+  </data>
+  <data name="T_ExportApplicationResources" xml:space="preserve">
+    <value>导出 Application.Resources</value>
+  </data>
+  <data name="T_ExportApplicationResourcesTip" xml:space="preserve">
+    <value>将 Visual Studio 程序窗口的 ResourceDictionary 导出到文件</value>
+  </data>
+  <data name="OT_Tools" xml:space="preserve">
+    <value>工具</value>
+  </data>
   <data name="T_Match" xml:space="preserve">
     <value>匹配选中内容: </value>
   </data>

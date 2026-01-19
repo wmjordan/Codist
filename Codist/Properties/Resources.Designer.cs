@@ -3074,6 +3074,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Text files|*.txt|All files|*.*.
+        /// </summary>
+        internal static string F_Text {
+            get {
+                return ResourceManager.GetString("F_Text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {
         ///  &quot;CommentStyles&quot;: [
         ///    {
@@ -5698,6 +5707,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Tools.
+        /// </summary>
+        internal static string OT_Tools {
+            get {
+                return ResourceManager.GetString("OT_Tools", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to This option adds extra margin above each line in code editor.
         /// </summary>
         internal static string OT_TopMarginTip {
@@ -7192,6 +7210,60 @@ namespace Codist.Properties {
         internal static string T_ExplicitImplements {
             get {
                 return ResourceManager.GetString("T_ExplicitImplements", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Export Application.Resources.
+        /// </summary>
+        internal static string T_ExportApplicationResources {
+            get {
+                return ResourceManager.GetString("T_ExportApplicationResources", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Export the ResourceDictionary of the Visual Studio Application Window to a file.
+        /// </summary>
+        internal static string T_ExportApplicationResourcesTip {
+            get {
+                return ResourceManager.GetString("T_ExportApplicationResourcesTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Export DTE.Commands.
+        /// </summary>
+        internal static string T_ExportDTECommands {
+            get {
+                return ResourceManager.GetString("T_ExportDTECommands", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Save DTE.Commands (Name, Guid, Id, Bindings) to file.
+        /// </summary>
+        internal static string T_ExportDTECommandsTip {
+            get {
+                return ResourceManager.GetString("T_ExportDTECommandsTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Export Theme Colors.
+        /// </summary>
+        internal static string T_ExportThemeColors {
+            get {
+                return ResourceManager.GetString("T_ExportThemeColors", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Export theme colors to file.
+        /// </summary>
+        internal static string T_ExportThemeColorsTip {
+            get {
+                return ResourceManager.GetString("T_ExportThemeColorsTip", resourceCulture);
             }
         }
         
