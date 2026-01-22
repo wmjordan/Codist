@@ -4588,6 +4588,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Marker size: .
+        /// </summary>
+        internal static string OT_MarkerSize {
+            get {
+                return ResourceManager.GetString("OT_MarkerSize", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Match selection.
         /// </summary>
         internal static string OT_MatchSelection {

@@ -103,7 +103,7 @@ namespace Codist
 		public int SmartBarButtonSize { get; set; } = DefaultIconSize;
 		public List<CommentLabel> Labels { get; } = new List<CommentLabel>();
 		public QuickInfoConfig QuickInfo { get; } = new QuickInfoConfig();
-		public MatchMarginConfig MatchMargin { get; } = new MatchMarginConfig();
+		public MarkerConfig ScrollbarMarker { get; } = new MarkerConfig();
 		public List<Color> CustomColors { get; } = new List<Color>();
 
 		#region Deprecated style containers
@@ -658,9 +658,19 @@ namespace Codist
 
 		internal Color BackColor { get => _BackColor; set => _BackColor = value; }
 	}
-	public sealed class MatchMarginConfig
+	public sealed class MarkerConfig
 	{
-		public const int DefaultMaxMatch = 10000, DefaultMaxDocumentLength = 1024, DefaultMaxSearchCharLength = 256;
+		public const int DefaultMarkerSize = 2,
+			DefaultMaxMatch = 10000,
+			DefaultMaxDocumentLength = 1024,
+			DefaultMaxSearchCharLength = 256;
+
+		int _MarkerSize = DefaultMarkerSize;
+		[DefaultValue(DefaultMarkerSize)]
+		public int MarkerSize {
+			get => _MarkerSize;
+			set => _MarkerSize = value.Clamp(2, 8);
+		}
 
 		[DefaultValue(DefaultMaxMatch)]
 		public int MaxMatch { get; set; } = DefaultMaxMatch;

@@ -3115,4 +3115,7 @@ Shift: 匹配大小写</value>
   <data name="T_Match" xml:space="preserve">
     <value>匹配选中内容: </value>
   </data>
+  <data name="OT_MarkerSize" xml:space="preserve">
+    <value>标记尺寸: </value>
+  </data>
 </root>

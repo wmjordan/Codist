@@ -24,7 +24,7 @@ namespace Codist.Options
 				readonly OptionBox<MarkerOptions> _LineNumber, _Selection, _MatchSelection, _KeyboardControl, _SpecialComment, _MarkerDeclarationLine, _LongMemberDeclaration, _TypeDeclaration, _MethodDeclaration, _RegionDirective, _CompilerDirective, _SymbolReference, _DisableChangeTracker;
 				readonly OptionBox<MarkerOptions>[] _Options;
 				readonly ColorButton _SymbolReferenceButton, _SymbolWriteButton, _SymbolDefinitionButton;
-				readonly IntegerBox _MaxMatch, _MaxDocumentLength, _MaxSearchCharLength;
+				readonly IntegerBox _MarkerSize, _MaxMatch, _MaxDocumentLength, _MaxSearchCharLength;
 				readonly WrapPanel _MatchSelectionOptions;
 
 				public PageControl() {
@@ -42,17 +42,23 @@ namespace Codist.Options
 						new DescriptionBox(R.OT_KeyboardControlMatchSelectionNote),
 						_MatchSelectionOptions = new WrapPanel {
 							Children = {
-								new StackPanel().MakeHorizontal().Add(
+								new StackPanel { Margin = WpfHelper.SmallMargin }.MakeHorizontal().Add(
 									new TextBlock { MinWidth = 150, Margin = WpfHelper.SmallHorizontalMargin, Text = R.OT_MaxMatch },
-									new IntegerBox(Config.Instance.MatchMargin.MaxMatch) { Minimum = 0, Step = 1000, Margin = WpfHelper.SmallHorizontalMargin }.Set(ref _MaxMatch).UseVsTheme()
+									new IntegerBox(Config.Instance.ScrollbarMarker.MaxMatch) { Minimum = 0, Step = 1000, Margin = WpfHelper.SmallHorizontalMargin }
+										.Set(ref _MaxMatch)
+										.UseVsTheme()
 								),
-								new StackPanel().MakeHorizontal().Add(
+								new StackPanel { Margin = WpfHelper.SmallMargin }.MakeHorizontal().Add(
 									new TextBlock { MinWidth = 150, Margin = WpfHelper.SmallHorizontalMargin, Text = R.OT_MaxDocumentLength },
-									new IntegerBox(Config.Instance.MatchMargin.MaxDocumentLength) { Minimum = 0, Step = 1, Unit = "KB", Margin = WpfHelper.SmallHorizontalMargin }.Set(ref _MaxDocumentLength).UseVsTheme()
+									new IntegerBox(Config.Instance.ScrollbarMarker.MaxDocumentLength) { Minimum = 0, Step = 1, Unit = "KB", Margin = WpfHelper.SmallHorizontalMargin }
+										.Set(ref _MaxDocumentLength)
+										.UseVsTheme()
 								),
-								new StackPanel().MakeHorizontal().Add(
+								new StackPanel { Margin = WpfHelper.SmallMargin }.MakeHorizontal().Add(
 									new TextBlock { MinWidth = 150, Margin = WpfHelper.SmallHorizontalMargin, Text = R.OT_MaxSearchCharLength },
-									new IntegerBox(Config.Instance.MatchMargin.MaxSearchCharLength) { Minimum = 1, Step = 1, Margin = WpfHelper.SmallHorizontalMargin }.Set(ref _MaxSearchCharLength).UseVsTheme()
+									new IntegerBox(Config.Instance.ScrollbarMarker.MaxSearchCharLength) { Minimum = 1, Step = 1, Margin = WpfHelper.SmallHorizontalMargin }
+										.Set(ref _MaxSearchCharLength)
+										.UseVsTheme()
 								),
 							}
 						}.WrapMargin(SubOptionMargin),
@@ -60,6 +66,15 @@ namespace Codist.Options
 							.SetLazyToolTip(() => R.OT_TaggedCommentsTip),
 						_DisableChangeTracker = o.CreateOptionBox(MarkerOptions.DisableChangeTracker, UpdateConfig, R.OT_DisableChangeTracker)
 							.SetLazyToolTip(() => R.OT_DisableChangeTrackerTip),
+						new WrapPanel {
+							Children = {
+								new TextBlock { MinWidth = 150, Margin = WpfHelper.SmallHorizontalMargin, Text = R.OT_MarkerSize },
+								new IntegerBox(Config.Instance.ScrollbarMarker.MarkerSize) { Minimum = 2, Maximum = 8, Margin = WpfHelper.SmallHorizontalMargin }
+									.Set(ref _MarkerSize)
+									.UseVsTheme(),
+							},
+							Margin = WpfHelper.SmallMargin
+						},
 
 						new TitleBox(R.OT_CSharp),
 						new DescriptionBox(R.OT_CSharpMarkerNote),
@@ -79,16 +94,16 @@ namespace Codist.Options
 							.SetLazyToolTip(() => R.OT_MatchSymbolTip),
 						new WrapPanel {
 							Children = {
-								new StackPanel().MakeHorizontal().Add(
-									new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin }.Append(R.OT_MatchSymbolColor),
+								new StackPanel { Margin = WpfHelper.SmallMargin }.MakeHorizontal().Add(
+									new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin, VerticalAlignment = VerticalAlignment.Center }.Append(R.OT_MatchSymbolColor),
 									new ColorButton(SymbolReferenceMarkerStyle.DefaultReferenceMarkerColor, R.T_Color, UpdateSymbolReferenceColor).Set(ref _SymbolReferenceButton)
 								),
-								new StackPanel().MakeHorizontal().Add(
-									new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin }.Append(R.OT_WriteSymbolColor),
+								new StackPanel { Margin = WpfHelper.SmallMargin }.MakeHorizontal().Add(
+									new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin, VerticalAlignment = VerticalAlignment.Center }.Append(R.OT_WriteSymbolColor),
 									new ColorButton(SymbolReferenceMarkerStyle.DefaultWriteMarkerColor, R.T_Color, UpdateSymbolWriteColor).Set(ref _SymbolWriteButton)
 									),
-								new StackPanel().MakeHorizontal().Add(
-									new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin }.Append(R.OT_SymbolDefinitionColor),
+								new StackPanel { Margin = WpfHelper.SmallMargin }.MakeHorizontal().Add(
+									new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin, VerticalAlignment = VerticalAlignment.Center }.Append(R.OT_SymbolDefinitionColor),
 									new ColorButton(SymbolReferenceMarkerStyle.DefaultSymbolDefinitionColor, R.T_Color, UpdateSymbolDefinitionColor).Set(ref _SymbolDefinitionButton)
 									)
 							}
@@ -96,6 +111,7 @@ namespace Codist.Options
 					);
 					_Options = [_LineNumber, _Selection, _MatchSelection, _KeyboardControl, _SpecialComment, _DisableChangeTracker, _MarkerDeclarationLine, _LongMemberDeclaration, _TypeDeclaration, _MethodDeclaration, _RegionDirective, _CompilerDirective, _SymbolReference];
 					_MatchSelection.BindDependentOptionControls(_KeyboardControl, _MatchSelectionOptions);
+					_MarkerSize.ValueChanged += UpdateMatchMarginValue;
 					_MaxMatch.ValueChanged += UpdateMatchMarginValue;
 					_MaxDocumentLength.ValueChanged += UpdateMatchMarginValue;
 					_MaxSearchCharLength.ValueChanged += UpdateMatchMarginValue;
@@ -117,13 +133,16 @@ namespace Codist.Options
 						return;
 					}
 					if (sender == _MaxMatch) {
-						Config.Instance.MatchMargin.MaxMatch = _MaxMatch.Value;
+						Config.Instance.ScrollbarMarker.MaxMatch = _MaxMatch.Value;
 					}
 					else if (sender == _MaxDocumentLength) {
-						Config.Instance.MatchMargin.MaxDocumentLength = _MaxDocumentLength.Value;
+						Config.Instance.ScrollbarMarker.MaxDocumentLength = _MaxDocumentLength.Value;
 					}
 					else if (sender == _MaxSearchCharLength) {
-						Config.Instance.MatchMargin.MaxSearchCharLength = _MaxSearchCharLength.Value;
+						Config.Instance.ScrollbarMarker.MaxSearchCharLength = _MaxSearchCharLength.Value;
+					}
+					else if (sender == _MarkerSize) {
+						Config.Instance.ScrollbarMarker.MarkerSize = _MarkerSize.Value;
 					}
 					Config.Instance.FireConfigChangedEvent(Features.ScrollbarMarkers);
 				}
@@ -132,9 +151,10 @@ namespace Codist.Options
 					var o = config.MarkerOptions;
 					Array.ForEach(_Options, i => i.UpdateWithOption(o));
 					LoadColors();
-					_MaxMatch.Value = config.MatchMargin.MaxMatch;
-					_MaxDocumentLength.Value = config.MatchMargin.MaxDocumentLength;
-					_MaxSearchCharLength.Value = config.MatchMargin.MaxSearchCharLength;
+					_MaxMatch.Value = config.ScrollbarMarker.MaxMatch;
+					_MaxDocumentLength.Value = config.ScrollbarMarker.MaxDocumentLength;
+					_MaxSearchCharLength.Value = config.ScrollbarMarker.MaxSearchCharLength;
+					_MarkerSize.Value = config.ScrollbarMarker.MarkerSize;
 				}
 
 				void LoadColors() {

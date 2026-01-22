@@ -39,7 +39,9 @@ namespace Codist.Margins
 			if (!e.UpdatedFeature.MatchFlags(Features.ScrollbarMarkers)) {
 				return;
 			}
-			var setVisible = IsFeatureEnabled && Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.LineNumber);
+			var setVisible = IsFeatureEnabled
+				&& Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.LineNumber);
+			_ScrollbarWidth = 0;
 			var visible = Visibility == Visibility.Visible;
 			if (!setVisible && visible) {
 				Visibility = Visibility.Collapsed;
@@ -81,6 +83,9 @@ namespace Codist.Margins
 			if (_TextView?.IsClosed != false) {
 				return;
 			}
+			if (_ScrollbarWidth == 0) {
+				UpdateScrollbarWidth();
+			}
 			if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.LineNumber)) {
 				DrawLineNumbers(drawingContext);
 			}
@@ -88,9 +93,12 @@ namespace Codist.Margins
 
 		protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo) {
 			base.OnRenderSizeChanged(sizeInfo);
-			var b = _ScrollBar as FrameworkElement;
-			_ScrollbarWidth = b.ActualWidth + LineNumberRenderPadding;
+			UpdateScrollbarWidth();
 			InvalidateVisual();
+		}
+
+		void UpdateScrollbarWidth() {
+			_ScrollbarWidth = ((FrameworkElement)_ScrollBar).ActualWidth + LineNumberRenderPadding;
 		}
 
 		void DrawLineNumbers(DrawingContext drawingContext) {

@@ -3129,4 +3129,7 @@ Shift: match case</value>
   <data name="T_Match" xml:space="preserve">
     <value>Match selection: </value>
   </data>
+  <data name="OT_MarkerSize" xml:space="preserve">
+    <value>Marker size: </value>
+  </data>
 </root>

@@ -31,8 +31,6 @@ namespace Codist.Margins
 		static readonly Dictionary<IClassificationType, Brush> __ClassificationBrushMapper = InitClassificationBrushMapper();
 
 		const double MarkPadding = 1.0;
-		const double MarkSize = 4.0;
-		const double HalfMarkSize = MarkSize / 2 + MarkPadding;
 
 		IWpfTextView _TextView;
 		IEditorFormatMap _EditorFormatMap;
@@ -40,6 +38,7 @@ namespace Codist.Margins
 		TaggerResult _Tags;
 		CommentTagger _CommentTagger;
 		bool _HasEvents;
+		double _MarkerSize, _FullMarkerSize;
 
 		public CommentMargin(IWpfTextView textView, IVerticalScrollBar verticalScrollbar)
 			: base(textView) {
@@ -57,14 +56,13 @@ namespace Codist.Margins
 			_TextView.TextBuffer.ChangedLowPriority += TextView_TextBufferChanged;
 			IsVisibleChanged += Margin_VisibilityChanged;
 			_ScrollBar.TrackSpanChanged += ScrollBar_TrackSpanChanged;
-
-			Width = MarginSize;
+			LoadConfig();
 		}
 
 		FrameworkElement IWpfTextViewMargin.VisualElement => this;
 		bool ITextViewMargin.Enabled => true;
 		public override string MarginName => nameof(CommentMargin);
-		public override double MarginSize => MarkSize + MarkPadding + MarkPadding + /*extra padding*/ 2 * MarkPadding;
+		public override double MarginSize => Width;
 
 		static Dictionary<IClassificationType, Brush> InitClassificationBrushMapper() {
 			var r = ServicesHelper.Instance.ClassificationTypeRegistry;
@@ -89,10 +87,18 @@ namespace Codist.Margins
 			};
 		}
 
+		void LoadConfig() {
+			var options = Config.Instance.ScrollbarMarker;
+			_MarkerSize = options.MarkerSize + MarkPadding;
+			_FullMarkerSize = _MarkerSize + _MarkerSize - MarkPadding * 2;
+			Width = _FullMarkerSize * 2;
+		}
+
 		void UpdateCommentMarginConfig(ConfigUpdatedEventArgs e) {
 			if (!e.UpdatedFeature.HasAnyFlag(Features.SyntaxHighlight | Features.ScrollbarMarkers)) {
 				return;
 			}
+			LoadConfig();
 			var setVisible = IsFeatureEnabled && Config.Instance.MarkerOptions.HasAnyFlag(MarkerOptions.CodeMarginMask);
 			var visible = Visibility == Visibility.Visible;
 			if (setVisible == false && visible) {
@@ -195,7 +201,7 @@ namespace Codist.Margins
 						continue;
 					}
 					DrawMark(drawingContext, b, y, 0);
-					h = MarkSize;
+					h = _FullMarkerSize;
 				}
 				else if (b == __TaskBrush) {
 					if (!Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.SpecialComment)) {
@@ -208,7 +214,7 @@ namespace Codist.Margins
 						continue;
 					}
 					DrawCommentMark(drawingContext, b, y);
-					h = MarkSize;
+					h = _FullMarkerSize;
 				}
 				lastY = y + h;
 				lastBrush = b;
@@ -225,18 +231,18 @@ namespace Codist.Margins
 		}
 
 		/// <summary>draws a rectangle, with a border</summary>
-		static void DrawCommentMark(DrawingContext dc, Brush brush, double y) {
-			dc.DrawRectangle(brush, __CommentPen, new Rect(MarkPadding, y - HalfMarkSize, MarkSize, MarkSize));
+		void DrawCommentMark(DrawingContext dc, Brush brush, double y) {
+			dc.DrawRectangle(brush, __CommentPen, new Rect(MarkPadding, y - _MarkerSize, _FullMarkerSize, _FullMarkerSize));
 		}
 
 		/// <summary>draws circle or a rectangle</summary>
-		static void DrawMark(DrawingContext dc, Brush brush, double y, int style) {
+		void DrawMark(DrawingContext dc, Brush brush, double y, int style) {
 			switch (style) {
 				case 0:
-					dc.DrawEllipse(brush, null, new Point(HalfMarkSize, y - HalfMarkSize), MarkSize, MarkSize);
+					dc.DrawEllipse(brush, null, new Point(_MarkerSize, y - _MarkerSize), _FullMarkerSize, _FullMarkerSize);
 					break;
 				default:
-					dc.DrawRectangle(brush, null, new Rect(MarkPadding, y - HalfMarkSize, MarkSize, MarkSize));
+					dc.DrawRectangle(brush, null, new Rect(MarkPadding, y - _MarkerSize, _FullMarkerSize, _FullMarkerSize));
 					break;
 			}
 		}

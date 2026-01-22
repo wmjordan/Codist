@@ -26,13 +26,14 @@ namespace Codist.Margins
 	sealed class CSharpMargin : MarginElementBase, IWpfTextViewMargin
 	{
 		//todo user customizable opacity of markers
-		const double MarkerSize = 3, Padding = 3, LineSize = 2, TypeLineSize = 1, TypeAlpha = 0.5, MemberAlpha = 0.5;
+		const double Padding = 3, LineSize = 2, TypeLineSize = 1, TypeAlpha = 0.5, MemberAlpha = 0.5;
 
 		IWpfTextView _View;
 		CancellationTokenSource _Cancellation = new CancellationTokenSource();
 		MemberMarker _MemberMarker;
 		SymbolReferenceMarker _SymbolReferenceMarker;
 		ITextBufferParser _Parser;
+		double _MarkerSize, _FullMarkerSize;
 
 		/// <summary>
 		/// Constructor for the <see cref="CSharpMargin"/>.
@@ -48,10 +49,15 @@ namespace Codist.Margins
 
 			Config.RegisterUpdateHandler(UpdateCSharpMembersMarginConfig);
 			UpdateCSharpMembersMarginConfig(new ConfigUpdatedEventArgs(null, Features.ScrollbarMarkers));
+		}
+
+		void LoadConfig() {
 			if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.SymbolReference)) {
 				_SymbolReferenceMarker.HookEvents();
 			}
-			Width = MarginSize;
+			_MarkerSize = Config.Instance.ScrollbarMarker.MarkerSize;
+			_FullMarkerSize = _MarkerSize + _MarkerSize;
+			Width = _FullMarkerSize + Padding;
 		}
 
 		[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
@@ -86,7 +92,7 @@ namespace Codist.Margins
 		bool ITextViewMargin.Enabled => IsVisible;
 		FrameworkElement IWpfTextViewMargin.VisualElement => this;
 		public override string MarginName => nameof(CSharpMargin);
-		public override double MarginSize => Padding + MarkerSize;
+		public override double MarginSize => Width;
 
 		/// <summary>
 		/// Override for the FrameworkElement's OnRender. When called, redraw all markers.
@@ -117,6 +123,7 @@ namespace Codist.Margins
 			if (!e.UpdatedFeature.MatchFlags(Features.ScrollbarMarkers)) {
 				return;
 			}
+			LoadConfig();
 			_Parser.StateUpdated -= ParserStateUpdated;
 			if (Config.Instance.Features.MatchFlags(Features.ScrollbarMarkers)) {
 				_Parser.StateUpdated += ParserStateUpdated;
@@ -286,6 +293,8 @@ namespace Codist.Margins
 				var dt = ImmutableArray.CreateBuilder<DrawText>();
 				double y1, y2;
 				FormattedText text;
+				var markerSize = _Margin._MarkerSize;
+				var fullMarker = _Margin._FullMarkerSize;
 
 				foreach (var block in codeBlocks) {
 					if (_Margin._Cancellation?.IsCancellationRequested != false) {
@@ -322,7 +331,7 @@ namespace Codist.Margins
 							}
 							if (pen.Brush != null) {
 								text = WpfHelper.ToFormattedText(block.Name, labelSize, pen.Brush.Alpha(y2 / _Margin.ActualHeight * 0.5 + 0.5));
-								dt.Add(new DrawText(text, y2, new Point(level + 2, y1 -= text.Height / 2)));
+								dt.Add(new DrawText(text, y2, new Point(level + markerSize, y1 -= text.Height / 2)));
 							}
 						}
 					}
@@ -338,7 +347,7 @@ namespace Codist.Margins
 						pen = penStore.GetPenForCodeMemberType(type);
 						y1 = _ScrollBar.GetYCoordinateOfBufferPosition(start);
 						y2 = _ScrollBar.GetYCoordinateOfBufferPosition(end);
-						drawingContext.DrawRectangle(pen.Brush.Alpha(1), pen, new Rect(level - (MarkerSize / 2), y1 - (MarkerSize / 2), MarkerSize, MarkerSize));
+						drawingContext.DrawRectangle(pen.Brush.Alpha(1), pen, new Rect(level - markerSize, y1 - markerSize, fullMarker, fullMarker));
 						drawingContext.DrawLine(pen, new Point(level, y1), new Point(level, y2));
 						if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.TypeDeclaration) && block.Name != null) {
 							// draw type name
@@ -348,7 +357,7 @@ namespace Codist.Margins
 								text.SetFontStyle(FontStyles.Italic);
 							}
 							y2 -= y1;
-							dt.Add(new DrawText(text, y2, new Point(level + 1, y1 -= text.Height / 2)));
+							dt.Add(new DrawText(text, y2, new Point(level + markerSize, y1 -= text.Height / 2)));
 						}
 						// mark the beginning of the range
 						memberType = type;
@@ -358,12 +367,12 @@ namespace Codist.Margins
 					if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.MethodDeclaration)) {
 						if (type == CodeMemberType.Method) {
 							if (penStore.Method.Brush != null) {
-								drawingContext.DrawRectangle(penStore.Method.Brush.Alpha(1), penStore.Method, new Rect(level - (MarkerSize / 2), _ScrollBar.GetYCoordinateOfBufferPosition(start) - (MarkerSize / 2), MarkerSize, MarkerSize));
+								drawingContext.DrawRectangle(penStore.Method.Brush.Alpha(1), penStore.Method, new Rect(level - markerSize, _ScrollBar.GetYCoordinateOfBufferPosition(start) - markerSize, fullMarker, fullMarker));
 							}
 						}
 						else if (type == CodeMemberType.Constructor) {
 							if (penStore.Constructor.Brush != null) {
-								drawingContext.DrawRectangle(penStore.Constructor.Brush.Alpha(1), penStore.Constructor, new Rect(level - (MarkerSize / 2), _ScrollBar.GetYCoordinateOfBufferPosition(start) - (MarkerSize / 2), MarkerSize, MarkerSize));
+								drawingContext.DrawRectangle(penStore.Constructor.Brush.Alpha(1), penStore.Constructor, new Rect(level - markerSize, _ScrollBar.GetYCoordinateOfBufferPosition(start) - markerSize, fullMarker, fullMarker));
 							}
 						}
 					}
@@ -591,7 +600,10 @@ namespace Codist.Margins
 				}
 				var snapshot = _Margin._View.TextSnapshot;
 				var snapshotLength = snapshot.Length;
-				var penStore = __PenStore ?? (__PenStore = new PenStore());
+				var penStore = __PenStore ??= new PenStore();
+				var markerSize = _Margin._MarkerSize;
+				var fullMarker = _Margin._FullMarkerSize;
+
 				foreach (var item in refs) {
 					if (_Margin._Cancellation?.IsCancellationRequested != false) {
 						break;
@@ -621,8 +633,8 @@ namespace Codist.Margins
 					drawingContext.DrawRectangle(b,
 						p,
 						item.Usage == SymbolUsageKind.Usage
-							? new Rect(0, y - (MarkerSize / 2), MarkerSize + MarkerMargin, MarkerSize + MarkerMargin)
-							: new Rect(MarkerMargin, y - (MarkerSize / 2), MarkerSize, MarkerSize));
+							? new Rect(0, y - markerSize, fullMarker + MarkerMargin, fullMarker + MarkerMargin)
+							: new Rect(MarkerMargin, y - markerSize, fullMarker, fullMarker));
 				}
 			}
 

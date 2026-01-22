@@ -19,7 +19,6 @@ namespace Codist.Margins
 	sealed class MatchMargin : MarginElementBase, IDisposable, IWpfTextViewMargin
 	{
 		const string FormatName = "Selected Text", PartialMatchFormatName = "Inactive Selected Text";
-		const double MarkerSize = 2, FullMarkerSize = MarkerSize * 2;
 
 		IEditorFormatMap _EditorFormatMap;
 		IWpfTextView _TextView;
@@ -34,6 +33,7 @@ namespace Codist.Margins
 		SearchContext _SearchContext;
 		bool _KeyboardControl;
 		int _MaxMatch, _MaxDocument, _MaxSearchChar;
+		double _MarkerSize, _FullMarkerSize;
 
 		public MatchMargin(IWpfTextView textView, IVerticalScrollBar scrollBar) : base(textView) {
 			_TextView = textView;
@@ -57,11 +57,10 @@ namespace Codist.Margins
 				Visibility = Visibility.Collapsed;
 			}
 			LoadConfig();
-			Width = FullMarkerSize;
 		}
 
 		public override string MarginName => nameof(MatchMargin);
-		public override double MarginSize => FullMarkerSize;
+		public override double MarginSize => _FullMarkerSize;
 
 		void Setup() {
 			_EditorFormatMap.FormatMappingChanged += EditorFormatMap_FormatMappingChanged;
@@ -73,15 +72,19 @@ namespace Codist.Margins
 
 		void LoadConfig() {
 			_KeyboardControl = Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.KeyboardControlMatch);
-			_MaxMatch = Math.Max(0, Config.Instance.MatchMargin.MaxMatch);
+			var options = Config.Instance.ScrollbarMarker;
+			_MarkerSize = options.MarkerSize;
+			_FullMarkerSize = _MarkerSize + _MarkerSize;
+			Width = _FullMarkerSize;
+			_MaxMatch = Math.Max(0, options.MaxMatch);
 			if (_MaxMatch == 0) {
 				_MaxMatch = Int32.MaxValue;
 			}
-			_MaxDocument = Math.Max(0, Config.Instance.MatchMargin.MaxDocumentLength) * 1024;
+			_MaxDocument = Math.Max(0, options.MaxDocumentLength) * 1024;
 			if (_MaxDocument == 0) {
 				_MaxDocument = Int32.MaxValue;
 			}
-			_MaxSearchChar = Math.Max(1, Config.Instance.MatchMargin.MaxSearchCharLength);
+			_MaxSearchChar = Math.Max(1, options.MaxSearchCharLength);
 		}
 
 		void UpdateSelectionMarginConfig(ConfigUpdatedEventArgs e) {
@@ -260,12 +263,12 @@ namespace Codist.Margins
 			double p = -100;
 			foreach (var item in ss) {
 				var top = _ScrollBar.GetYCoordinateOfBufferPosition(item.Span.Start);
-				if (top - p >= MarkerSize || top < p) {
+				if (top - p >= _MarkerSize || top < p) {
 					if (item.WholeWord) {
-						drawingContext.DrawRectangle(item.MatchCase ? _MatchBrush : _CaseMismatchBrush, null, new Rect(0, top - MarkerSize, FullMarkerSize, FullMarkerSize));
+						drawingContext.DrawRectangle(item.MatchCase ? _MatchBrush : _CaseMismatchBrush, null, new Rect(0, top - _MarkerSize, _FullMarkerSize, _FullMarkerSize));
 					}
 					else {
-						drawingContext.DrawRectangle(null, item.MatchCase ? _MatchPen : _CaseMismatchPen, new Rect(0, top - MarkerSize, FullMarkerSize, FullMarkerSize));
+						drawingContext.DrawRectangle(null, item.MatchCase ? _MatchPen : _CaseMismatchPen, new Rect(0, top - _MarkerSize, _FullMarkerSize, _FullMarkerSize));
 					}
 					p = top; // last position
 				}
@@ -276,7 +279,7 @@ namespace Codist.Margins
 				// move up to prevent being covered by caret marker
 				p -= t.Height;
 			}
-			drawingContext.DrawText(t, new Point(FullMarkerSize, p));
+			drawingContext.DrawText(t, new Point(_FullMarkerSize, p));
 		}
 
 		#region IDisposable Support
