@@ -3495,6 +3495,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Case mismatch:.
+        /// </summary>
+        internal static string OT_CaseMismatchSelectionColor {
+            get {
+                return ResourceManager.GetString("OT_CaseMismatchSelectionColor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Click and go to source code of symbol definition.
         /// </summary>
         internal static string OT_ClickAndGo {
@@ -4602,6 +4611,15 @@ namespace Codist.Properties {
         internal static string OT_MatchSelection {
             get {
                 return ResourceManager.GetString("OT_MatchSelection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Match marker:.
+        /// </summary>
+        internal static string OT_MatchSelectionColor {
+            get {
+                return ResourceManager.GetString("OT_MatchSelectionColor", resourceCulture);
             }
         }
         

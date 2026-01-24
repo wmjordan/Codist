@@ -660,10 +660,15 @@ namespace Codist
 	}
 	public sealed class MarkerConfig
 	{
-		public const int DefaultMarkerSize = 2,
+		internal const int DefaultMarkerSize = 2,
 			DefaultMaxMatch = 10000,
 			DefaultMaxDocumentLength = 1024,
 			DefaultMaxSearchCharLength = 256;
+
+		internal static Color DefaultMatchColor => Colors.DeepSkyBlue;
+		internal static Color DefaultCaseMismatchColor => Colors.DeepSkyBlue.Alpha(160);
+
+		Color _MatchColor, _CaseMismatchColor;
 
 		int _MarkerSize = DefaultMarkerSize;
 		[DefaultValue(DefaultMarkerSize)]
@@ -680,6 +685,36 @@ namespace Codist
 
 		[DefaultValue(DefaultMaxSearchCharLength)]
 		public int MaxSearchCharLength { get; set; } = DefaultMaxSearchCharLength;
+
+		[DefaultValue(Constants.EmptyColor)]
+		public string MatchColor {
+			get => _MatchColor.ToHexString();
+			set => Parse(value, DefaultMatchColor, out _MatchColor);
+		}
+
+		[DefaultValue(Constants.EmptyColor)]
+		public string CaseMismatchColor {
+			get => _CaseMismatchColor.ToHexString();
+			set => Parse(value, DefaultCaseMismatchColor, out _CaseMismatchColor);
+		}
+
+		internal Color MatchMarker {
+			get => _MatchColor;
+			set => _MatchColor = value;
+		}
+
+		internal Color CaseMismatchMarker {
+			get => _CaseMismatchColor;
+			set => _CaseMismatchColor = value;
+		}
+
+		static void Parse(string value, Color defaultColor, out Color color) {
+			if (value == Constants.EmptyColor) {
+				color = defaultColor;
+				return;
+			}
+			ColorHelper.ParseColor(value, out color, out _);
+		}
 	}
 
 	sealed class SearchEngine

@@ -3132,4 +3132,10 @@ Shift: match case</value>
   <data name="OT_MarkerSize" xml:space="preserve">
     <value>Marker size: </value>
   </data>
+  <data name="OT_MatchSelectionColor" xml:space="preserve">
+    <value>Match marker:</value>
+  </data>
+  <data name="OT_CaseMismatchSelectionColor" xml:space="preserve">
+    <value>Case mismatch:</value>
+  </data>
 </root>

@@ -3118,4 +3118,10 @@ Shift: 匹配大小写</value>
   <data name="OT_MarkerSize" xml:space="preserve">
     <value>标记尺寸: </value>
   </data>
+  <data name="OT_MatchSelectionColor" xml:space="preserve">
+    <value>匹配标记颜色:</value>
+  </data>
+  <data name="OT_CaseMismatchSelectionColor" xml:space="preserve">
+    <value>大小写不匹配:</value>
+  </data>
 </root>

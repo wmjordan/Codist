@@ -23,12 +23,14 @@ namespace Codist.Options
 			{
 				readonly OptionBox<MarkerOptions> _LineNumber, _Selection, _MatchSelection, _KeyboardControl, _SpecialComment, _MarkerDeclarationLine, _LongMemberDeclaration, _TypeDeclaration, _MethodDeclaration, _RegionDirective, _CompilerDirective, _SymbolReference, _DisableChangeTracker;
 				readonly OptionBox<MarkerOptions>[] _Options;
-				readonly ColorButton _SymbolReferenceButton, _SymbolWriteButton, _SymbolDefinitionButton;
+				readonly ColorButton _MatchColorButton, _CaseMismatchColorButton, _SymbolReferenceButton, _SymbolWriteButton, _SymbolDefinitionButton;
 				readonly IntegerBox _MarkerSize, _MaxMatch, _MaxDocumentLength, _MaxSearchCharLength;
 				readonly WrapPanel _MatchSelectionOptions;
 
 				public PageControl() {
 					var o = Config.Instance.MarkerOptions;
+					var mo = Config.Instance.ScrollbarMarker;
+					var so = Config.Instance.SymbolReferenceMarkerSettings;
 					SetContents(
 						new TitleBox(R.OT_AllLanguages),
 						new DescriptionBox(R.OT_AllLanguagesNote),
@@ -42,21 +44,29 @@ namespace Codist.Options
 						new DescriptionBox(R.OT_KeyboardControlMatchSelectionNote),
 						_MatchSelectionOptions = new WrapPanel {
 							Children = {
+								new StackPanel().MakeHorizontal().Add(
+									new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin, VerticalAlignment = VerticalAlignment.Center }.Append(R.OT_MatchSelectionColor),
+									new ColorButton(mo.MatchMarker, R.T_Color, UpdateMatchColor).Set(ref _MatchColorButton)
+								),
+								new StackPanel().MakeHorizontal().Add(
+									new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin, VerticalAlignment = VerticalAlignment.Center }.Append(R.OT_CaseMismatchSelectionColor),
+									new ColorButton(mo.CaseMismatchMarker, R.T_Color, UpdateCaseMismatchColor).Set(ref _CaseMismatchColorButton)
+								),
 								new StackPanel { Margin = WpfHelper.SmallMargin }.MakeHorizontal().Add(
 									new TextBlock { MinWidth = 150, Margin = WpfHelper.SmallHorizontalMargin, Text = R.OT_MaxMatch },
-									new IntegerBox(Config.Instance.ScrollbarMarker.MaxMatch) { Minimum = 0, Step = 1000, Margin = WpfHelper.SmallHorizontalMargin }
+									new IntegerBox(mo.MaxMatch) { Minimum = 0, Step = 1000, Margin = WpfHelper.SmallHorizontalMargin }
 										.Set(ref _MaxMatch)
 										.UseVsTheme()
 								),
 								new StackPanel { Margin = WpfHelper.SmallMargin }.MakeHorizontal().Add(
 									new TextBlock { MinWidth = 150, Margin = WpfHelper.SmallHorizontalMargin, Text = R.OT_MaxDocumentLength },
-									new IntegerBox(Config.Instance.ScrollbarMarker.MaxDocumentLength) { Minimum = 0, Step = 1, Unit = "KB", Margin = WpfHelper.SmallHorizontalMargin }
+									new IntegerBox(mo.MaxDocumentLength) { Minimum = 0, Step = 1, Unit = "KB", Margin = WpfHelper.SmallHorizontalMargin }
 										.Set(ref _MaxDocumentLength)
 										.UseVsTheme()
 								),
 								new StackPanel { Margin = WpfHelper.SmallMargin }.MakeHorizontal().Add(
 									new TextBlock { MinWidth = 150, Margin = WpfHelper.SmallHorizontalMargin, Text = R.OT_MaxSearchCharLength },
-									new IntegerBox(Config.Instance.ScrollbarMarker.MaxSearchCharLength) { Minimum = 1, Step = 1, Margin = WpfHelper.SmallHorizontalMargin }
+									new IntegerBox(mo.MaxSearchCharLength) { Minimum = 1, Step = 1, Margin = WpfHelper.SmallHorizontalMargin }
 										.Set(ref _MaxSearchCharLength)
 										.UseVsTheme()
 								),
@@ -69,7 +79,7 @@ namespace Codist.Options
 						new WrapPanel {
 							Children = {
 								new TextBlock { MinWidth = 150, Margin = WpfHelper.SmallHorizontalMargin, Text = R.OT_MarkerSize },
-								new IntegerBox(Config.Instance.ScrollbarMarker.MarkerSize) { Minimum = 2, Maximum = 8, Margin = WpfHelper.SmallHorizontalMargin }
+								new IntegerBox(mo.MarkerSize) { Minimum = 2, Maximum = 8, Margin = WpfHelper.SmallHorizontalMargin }
 									.Set(ref _MarkerSize)
 									.UseVsTheme(),
 							},
@@ -96,15 +106,15 @@ namespace Codist.Options
 							Children = {
 								new StackPanel { Margin = WpfHelper.SmallMargin }.MakeHorizontal().Add(
 									new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin, VerticalAlignment = VerticalAlignment.Center }.Append(R.OT_MatchSymbolColor),
-									new ColorButton(SymbolReferenceMarkerStyle.DefaultReferenceMarkerColor, R.T_Color, UpdateSymbolReferenceColor).Set(ref _SymbolReferenceButton)
+									new ColorButton(so.ReferenceMarker, R.T_Color, UpdateSymbolReferenceColor).Set(ref _SymbolReferenceButton)
 								),
 								new StackPanel { Margin = WpfHelper.SmallMargin }.MakeHorizontal().Add(
 									new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin, VerticalAlignment = VerticalAlignment.Center }.Append(R.OT_WriteSymbolColor),
-									new ColorButton(SymbolReferenceMarkerStyle.DefaultWriteMarkerColor, R.T_Color, UpdateSymbolWriteColor).Set(ref _SymbolWriteButton)
+									new ColorButton(so.WriteMarker, R.T_Color, UpdateSymbolWriteColor).Set(ref _SymbolWriteButton)
 									),
 								new StackPanel { Margin = WpfHelper.SmallMargin }.MakeHorizontal().Add(
 									new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin, VerticalAlignment = VerticalAlignment.Center }.Append(R.OT_SymbolDefinitionColor),
-									new ColorButton(SymbolReferenceMarkerStyle.DefaultSymbolDefinitionColor, R.T_Color, UpdateSymbolDefinitionColor).Set(ref _SymbolDefinitionButton)
+									new ColorButton(so.SymbolDefinition, R.T_Color, UpdateSymbolDefinitionColor).Set(ref _SymbolDefinitionButton)
 									)
 							}
 						}.WrapMargin(SubOptionMargin)
@@ -122,10 +132,11 @@ namespace Codist.Options
 					_MarkerDeclarationLine.BindDependentOptionControls(subOptions);
 					_SymbolReference.BindDependentOptionControls(_SymbolReferenceButton, _SymbolWriteButton, _SymbolDefinitionButton);
 					_DisableChangeTracker.IsEnabled = CodistPackage.VsVersion.Major >= 17;
+					_MatchColorButton.DefaultColor = () => MarkerConfig.DefaultMatchColor;
+					_CaseMismatchColorButton.DefaultColor = () => MarkerConfig.DefaultCaseMismatchColor;
 					_SymbolReferenceButton.DefaultColor = () => SymbolReferenceMarkerStyle.DefaultReferenceMarkerColor;
 					_SymbolWriteButton.DefaultColor = () => SymbolReferenceMarkerStyle.DefaultWriteMarkerColor;
 					_SymbolDefinitionButton.DefaultColor = () => SymbolReferenceMarkerStyle.DefaultSymbolDefinitionColor;
-					LoadColors();
 				}
 
 				void UpdateMatchMarginValue(object sender, DependencyPropertyChangedEventArgs e) {
@@ -159,9 +170,14 @@ namespace Codist.Options
 
 				void LoadColors() {
 					Color c;
-					_SymbolReferenceButton.Color = (c = Config.Instance.SymbolReferenceMarkerSettings.ReferenceMarker).A != 0 ? c : SymbolReferenceMarkerStyle.DefaultReferenceMarkerColor;
-					_SymbolWriteButton.Color = (c = Config.Instance.SymbolReferenceMarkerSettings.WriteMarker).A != 0 ? c : SymbolReferenceMarkerStyle.DefaultReferenceMarkerColor;
-					_SymbolDefinitionButton.Color = (c = Config.Instance.SymbolReferenceMarkerSettings.SymbolDefinition).A != 0 ? c : SymbolReferenceMarkerStyle.DefaultSymbolDefinitionColor;
+					var mo = Config.Instance.ScrollbarMarker;
+					_MatchColorButton.Color = (c = mo.MatchMarker).A != 0 ? c : MarkerConfig.DefaultMatchColor;
+					_CaseMismatchColorButton.Color = (c = mo.CaseMismatchMarker).A != 0 ? c : MarkerConfig.DefaultCaseMismatchColor;
+
+					var so = Config.Instance.SymbolReferenceMarkerSettings;
+					_SymbolReferenceButton.Color = (c = so.ReferenceMarker).A != 0 ? c : SymbolReferenceMarkerStyle.DefaultReferenceMarkerColor;
+					_SymbolWriteButton.Color = (c = so.WriteMarker).A != 0 ? c : SymbolReferenceMarkerStyle.DefaultReferenceMarkerColor;
+					_SymbolDefinitionButton.Color = (c = so.SymbolDefinition).A != 0 ? c : SymbolReferenceMarkerStyle.DefaultSymbolDefinitionColor;
 				}
 
 				void UpdateConfig(MarkerOptions options, bool set) {
@@ -169,6 +185,28 @@ namespace Codist.Options
 						return;
 					}
 					Config.Instance.Set(options, set);
+					Config.Instance.FireConfigChangedEvent(Features.ScrollbarMarkers);
+				}
+
+				void UpdateMatchColor(Color color) {
+					if (IsConfigUpdating) {
+						return;
+					}
+					Config.Instance.ScrollbarMarker.MatchColor = color.ToHexString();
+					if (color.A == 0) {
+						_MatchColorButton.Color = MarkerConfig.DefaultMatchColor;
+					}
+					Config.Instance.FireConfigChangedEvent(Features.ScrollbarMarkers);
+				}
+
+				void UpdateCaseMismatchColor(Color color) {
+					if (IsConfigUpdating) {
+						return;
+					}
+					Config.Instance.ScrollbarMarker.CaseMismatchColor = color.ToHexString();
+					if (color.A == 0) {
+						_CaseMismatchColorButton.Color = MarkerConfig.DefaultCaseMismatchColor;
+					}
 					Config.Instance.FireConfigChangedEvent(Features.ScrollbarMarkers);
 				}
 
@@ -203,13 +241,6 @@ namespace Codist.Options
 						_SymbolDefinitionButton.Color = SymbolReferenceMarkerStyle.DefaultSymbolDefinitionColor;
 					}
 					Config.Instance.FireConfigChangedEvent(Features.ScrollbarMarkers);
-				}
-
-				internal void Refresh() {
-					Color c;
-					_SymbolReferenceButton.Color = (c = Config.Instance.SymbolReferenceMarkerSettings.ReferenceMarker).A != 0 ? c : SymbolReferenceMarkerStyle.DefaultReferenceMarkerColor;
-					_SymbolWriteButton.Color = (c = Config.Instance.SymbolReferenceMarkerSettings.WriteMarker).A != 0 ? c : SymbolReferenceMarkerStyle.DefaultReferenceMarkerColor;
-					_SymbolDefinitionButton.Color = (c = Config.Instance.SymbolReferenceMarkerSettings.SymbolDefinition).A != 0 ? c : SymbolReferenceMarkerStyle.DefaultSymbolDefinitionColor;
 				}
 			}
 		}

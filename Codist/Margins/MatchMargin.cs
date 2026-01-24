@@ -63,11 +63,9 @@ namespace Codist.Margins
 		public override double MarginSize => _FullMarkerSize;
 
 		void Setup() {
-			_EditorFormatMap.FormatMappingChanged += EditorFormatMap_FormatMappingChanged;
 			_TextView.Selection.SelectionChanged += TextView_SelectionChanged;
 			_ScrollBar.TrackSpanChanged += ScrollBar_TrackSpanChanged;
 			_DelayTimer.Tick += OnDelayTimerElapsed;
-			UpdateDrawingElements();
 		}
 
 		void LoadConfig() {
@@ -85,6 +83,10 @@ namespace Codist.Margins
 				_MaxDocument = Int32.MaxValue;
 			}
 			_MaxSearchChar = Math.Max(1, options.MaxSearchCharLength);
+			_MatchBrush = new SolidColorBrush(Config.Instance.ScrollbarMarker.MatchMarker).MakeFrozen();
+			_MatchPen = new Pen(_MatchBrush, 1);
+			_CaseMismatchBrush = new SolidColorBrush(Config.Instance.ScrollbarMarker.CaseMismatchMarker).MakeFrozen();
+			_CaseMismatchPen = new Pen(_CaseMismatchBrush, 1);
 		}
 
 		void UpdateSelectionMarginConfig(ConfigUpdatedEventArgs e) {
@@ -108,23 +110,6 @@ namespace Codist.Margins
 				Setup();
 			}
 			InvalidateVisual();
-		}
-
-		void EditorFormatMap_FormatMappingChanged(object sender, FormatItemsEventArgs e) {
-			foreach (var item in e.ChangedItems) {
-				if (item == FormatName) {
-					UpdateDrawingElements();
-					InvalidateVisual();
-					return;
-				}
-			}
-		}
-
-		void UpdateDrawingElements() {
-			_MatchBrush = _EditorFormatMap.GetProperties(FormatName).GetBackgroundBrush() ?? ThemeCache.FileTabProvisionalSelectionBrush;
-			_MatchPen = new Pen(_MatchBrush, 1);
-			_CaseMismatchBrush = _EditorFormatMap.GetProperties(PartialMatchFormatName).GetBackgroundBrush() ?? ThemeCache.FileTabProvisionalSelectionBrush.Alpha(0.5).MakeFrozen();
-			_CaseMismatchPen = new Pen(_CaseMismatchBrush, 1);
 		}
 
 		async Task ExecuteSearchAsync() {
@@ -286,7 +271,6 @@ namespace Codist.Margins
 		void UnbindEvents() {
 			Config.UnregisterUpdateHandler(UpdateSelectionMarginConfig);
 			_TextView.Selection.SelectionChanged -= TextView_SelectionChanged;
-			_EditorFormatMap.FormatMappingChanged -= EditorFormatMap_FormatMappingChanged;
 			_ScrollBar.TrackSpanChanged -= ScrollBar_TrackSpanChanged;
 			_DelayTimer.Tick -= OnDelayTimerElapsed;
 		}
