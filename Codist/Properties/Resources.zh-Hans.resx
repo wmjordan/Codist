@@ -3124,4 +3124,7 @@ Shift: 匹配大小写</value>
   <data name="OT_CaseMismatchSelectionColor" xml:space="preserve">
     <value>大小写不匹配:</value>
   </data>
+  <data name="OT_HighlightMatchSelection" xml:space="preserve">
+    <value>在编辑器上显示匹配项</value>
+  </data>
 </root>

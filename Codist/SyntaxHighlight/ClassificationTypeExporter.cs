@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Media;
+using CLR;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Formatting;
 using Microsoft.VisualStudio.Utilities;
@@ -349,6 +350,43 @@ namespace Codist.SyntaxHighlight
 				}
 			}
 			return r;
+		}
+
+		internal void ExportSelectionTagger() {
+			var m = _EditorFormatMaps.GetEditorFormatMap(Constants.CodeText);
+			UpdateMatchMarkerEditorFormat(m);
+			Config.RegisterUpdateHandler(HandleMarkerColorChange);
+		}
+
+		static void HandleMarkerColorChange(ConfigUpdatedEventArgs args) {
+			if (args.UpdatedFeature.MatchFlags(Features.ScrollbarMarkers)) {
+				UpdateMatchMarkerEditorFormat(ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(Constants.CodeText));
+			}
+		}
+
+		static void UpdateMatchMarkerEditorFormat(IEditorFormatMap m) {
+			var o = Config.Instance.ScrollbarMarker;
+			m.SetProperties(Taggers.SelectionTagger.MatchMarkerTag.Type, new ResourceDictionary {
+				{ MarkerFormatDefinition.BorderId, MakeMarkerBrush(o.MatchMarker, 1) }
+			});
+			m.SetProperties(Taggers.SelectionTagger.PartialMatchMarkerTag.Type, new ResourceDictionary {
+				{ MarkerFormatDefinition.BorderId, MakeMarkerPen(o.MatchMarker, 0.7) }
+			});
+
+			m.SetProperties(Taggers.SelectionTagger.CaseMismatchMarkerTag.Type, new ResourceDictionary {
+				{ MarkerFormatDefinition.BorderId, MakeMarkerBrush(o.CaseMismatchMarker, 1) }
+			});
+			m.SetProperties(Taggers.SelectionTagger.PartialCaseMismatchMarkerTag.Type, new ResourceDictionary {
+				{ MarkerFormatDefinition.BorderId, MakeMarkerPen(o.CaseMismatchMarker, 0.7) }
+			});
+
+			static SolidColorBrush MakeMarkerBrush(Color color, double alpha) {
+				return new SolidColorBrush(alpha != 1 ? color.Alpha((byte)(color.A * alpha)) : color).MakeFrozen();
+			}
+
+			static Pen MakeMarkerPen(Color color, double alpha) {
+				return new Pen(MakeMarkerBrush(color, alpha), 1) { DashStyle = DashStyles.Dash }.MakeFrozen();
+			}
 		}
 
 		sealed class Entry

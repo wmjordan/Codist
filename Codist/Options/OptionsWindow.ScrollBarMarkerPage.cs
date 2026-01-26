@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using CLR;
 using Codist.Controls;
 using Codist.Margins;
 using R = Codist.Properties.Resources;
@@ -22,10 +23,11 @@ namespace Codist.Options
 			sealed class PageControl : OptionPage
 			{
 				readonly OptionBox<MarkerOptions> _LineNumber, _Selection, _MatchSelection, _KeyboardControl, _SpecialComment, _MarkerDeclarationLine, _LongMemberDeclaration, _TypeDeclaration, _MethodDeclaration, _RegionDirective, _CompilerDirective, _SymbolReference, _DisableChangeTracker;
+				readonly OptionBox<SpecialHighlightOptions> _HighlightMatchSelection;
 				readonly OptionBox<MarkerOptions>[] _Options;
 				readonly ColorButton _MatchColorButton, _CaseMismatchColorButton, _SymbolReferenceButton, _SymbolWriteButton, _SymbolDefinitionButton;
 				readonly IntegerBox _MarkerSize, _MaxMatch, _MaxDocumentLength, _MaxSearchCharLength;
-				readonly WrapPanel _MatchSelectionOptions;
+				readonly StackPanel _MatchSelectionOptions;
 
 				public PageControl() {
 					var o = Config.Instance.MarkerOptions;
@@ -42,7 +44,7 @@ namespace Codist.Options
 							.SetLazyToolTip(() => R.OT_MatchSelectionTip),
 						_KeyboardControl = o.CreateOptionBox(MarkerOptions.KeyboardControlMatch, UpdateConfig, R.OT_KeyboardControlMatchSelection).WrapMargin(SubOptionMargin),
 						new DescriptionBox(R.OT_KeyboardControlMatchSelectionNote),
-						_MatchSelectionOptions = new WrapPanel {
+						_MatchSelectionOptions = new StackPanel {
 							Children = {
 								new StackPanel().MakeHorizontal().Add(
 									new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin, VerticalAlignment = VerticalAlignment.Center }.Append(R.OT_MatchSelectionColor),
@@ -52,6 +54,8 @@ namespace Codist.Options
 									new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin, VerticalAlignment = VerticalAlignment.Center }.Append(R.OT_CaseMismatchSelectionColor),
 									new ColorButton(mo.CaseMismatchMarker, R.T_Color, UpdateCaseMismatchColor).Set(ref _CaseMismatchColorButton)
 								),
+								Config.Instance.SpecialHighlightOptions.CreateOptionBox(SpecialHighlightOptions.MatchSelection, UpdateConfig, R.OT_HighlightMatchSelection)
+									.Set(ref _HighlightMatchSelection),
 								new StackPanel { Margin = WpfHelper.SmallMargin }.MakeHorizontal().Add(
 									new TextBlock { MinWidth = 150, Margin = WpfHelper.SmallHorizontalMargin, Text = R.OT_MaxMatch },
 									new IntegerBox(mo.MaxMatch) { Minimum = 0, Step = 1000, Margin = WpfHelper.SmallHorizontalMargin }
@@ -104,15 +108,15 @@ namespace Codist.Options
 							.SetLazyToolTip(() => R.OT_MatchSymbolTip),
 						new WrapPanel {
 							Children = {
-								new StackPanel { Margin = WpfHelper.SmallMargin }.MakeHorizontal().Add(
+								new StackPanel().MakeHorizontal().Add(
 									new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin, VerticalAlignment = VerticalAlignment.Center }.Append(R.OT_MatchSymbolColor),
 									new ColorButton(so.ReferenceMarker, R.T_Color, UpdateSymbolReferenceColor).Set(ref _SymbolReferenceButton)
 								),
-								new StackPanel { Margin = WpfHelper.SmallMargin }.MakeHorizontal().Add(
+								new StackPanel().MakeHorizontal().Add(
 									new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin, VerticalAlignment = VerticalAlignment.Center }.Append(R.OT_WriteSymbolColor),
 									new ColorButton(so.WriteMarker, R.T_Color, UpdateSymbolWriteColor).Set(ref _SymbolWriteButton)
 									),
-								new StackPanel { Margin = WpfHelper.SmallMargin }.MakeHorizontal().Add(
+								new StackPanel().MakeHorizontal().Add(
 									new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin, VerticalAlignment = VerticalAlignment.Center }.Append(R.OT_SymbolDefinitionColor),
 									new ColorButton(so.SymbolDefinition, R.T_Color, UpdateSymbolDefinitionColor).Set(ref _SymbolDefinitionButton)
 									)
@@ -161,6 +165,7 @@ namespace Codist.Options
 				protected override void LoadConfig(Config config) {
 					var o = config.MarkerOptions;
 					Array.ForEach(_Options, i => i.UpdateWithOption(o));
+					_HighlightMatchSelection.UpdateWithOption(Config.Instance.SpecialHighlightOptions);
 					LoadColors();
 					_MaxMatch.Value = config.ScrollbarMarker.MaxMatch;
 					_MaxDocumentLength.Value = config.ScrollbarMarker.MaxDocumentLength;
@@ -188,6 +193,14 @@ namespace Codist.Options
 					if (CodistPackage.VsVersion.Major >= 17) {
 						MatchMargin.ExcludeGlobalOption();
 					}
+					Config.Instance.FireConfigChangedEvent(Features.ScrollbarMarkers);
+				}
+
+				void UpdateConfig(SpecialHighlightOptions options, bool set) {
+					if (IsConfigUpdating) {
+						return;
+					}
+					Config.Instance.Set(options, set);
 					Config.Instance.FireConfigChangedEvent(Features.ScrollbarMarkers);
 				}
 

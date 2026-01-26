@@ -4172,6 +4172,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Highlight matches in editor.
+        /// </summary>
+        internal static string OT_HighlightMatchSelection {
+            get {
+                return ResourceManager.GetString("OT_HighlightMatchSelection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Highlight search results (*).
         /// </summary>
         internal static string OT_HighlightSearchResults {

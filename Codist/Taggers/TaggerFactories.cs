@@ -266,4 +266,19 @@ namespace Codist.Taggers
 			return textView.Properties.GetOrCreateSingletonProperty(() => new MarkdownTagger(textView, buffer, Config.Instance.Features.MatchFlags(Features.SyntaxHighlight) && Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.Markdown))) as ITagger<T>;
 		}
 	}
+
+	[Export(typeof(IViewTaggerProvider))]
+	[ContentType(Constants.CodeTypes.Text)]
+	[ContentType(Constants.CodeTypes.Output)]
+	[TextViewRole(PredefinedTextViewRoles.Document)]
+	[TagType(typeof(TextMarkerTag))]
+	sealed class SelectionTaggerProvider : IViewTaggerProvider
+	{
+		public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag {
+			return textView.TextBuffer == buffer
+				&& Config.Instance.Features.MatchFlags(Features.ScrollbarMarkers)
+				? new SelectionTagger(textView, ServicesHelper.Instance.TextStructureNavigator.GetTextStructureNavigator(buffer)) as ITagger<T>
+				: null;
+		}
+	}
 }

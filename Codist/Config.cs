@@ -880,6 +880,7 @@ namespace Codist
 		// comment tagger
 		SpecialComment = 1,
 		SemanticPunctuation = 1 << 1,
+		MatchSelection = 1 << 2,
 		[Obsolete]
 		DeclarationBrace = SemanticPunctuation,
 		[Obsolete]
