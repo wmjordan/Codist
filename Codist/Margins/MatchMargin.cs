@@ -62,6 +62,10 @@ namespace Codist.Margins
 		public override string MarginName => nameof(MatchMargin);
 		public override double MarginSize => _FullMarkerSize;
 
+		public static void ExcludeGlobalOption() {
+			OptionManager.ExcludeGlobalOption();
+		}
+
 		void Setup() {
 			_TextView.Selection.SelectionChanged += TextView_SelectionChanged;
 			_ScrollBar.TrackSpanChanged += ScrollBar_TrackSpanChanged;
@@ -343,6 +347,31 @@ namespace Codist.Margins
 			public readonly SnapshotSpan Span = span;
 			public readonly bool MatchCase = matchCase;
 			public readonly bool WholeWord = wholeWord;
+		}
+
+		static class OptionManager
+		{
+			static bool _UsedBuiltInMatchSelection;
+
+			public static void ExcludeGlobalOption() {
+				const string SelectionMatchOption = "TextView/SelectionMatches";
+
+				if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.MatchSelection)) {
+					var o = GetGlobalOptions();
+					if (o.GetOptionValue<bool>(SelectionMatchOption)) {
+						_UsedBuiltInMatchSelection = true;
+						o.SetOptionValue(SelectionMatchOption, false);
+					}
+				}
+				else if (_UsedBuiltInMatchSelection) {
+					GetGlobalOptions().SetOptionValue(SelectionMatchOption, true);
+					_UsedBuiltInMatchSelection = false;
+				}
+
+				static IEditorOptions GetGlobalOptions() {
+					return ServicesHelper.Instance.EditorOptionsFactory.GlobalOptions;
+				}
+			}
 		}
 	}
 }

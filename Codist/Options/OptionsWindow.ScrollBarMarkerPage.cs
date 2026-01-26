@@ -185,6 +185,9 @@ namespace Codist.Options
 						return;
 					}
 					Config.Instance.Set(options, set);
+					if (CodistPackage.VsVersion.Major >= 17) {
+						MatchMargin.ExcludeGlobalOption();
+					}
 					Config.Instance.FireConfigChangedEvent(Features.ScrollbarMarkers);
 				}
 
