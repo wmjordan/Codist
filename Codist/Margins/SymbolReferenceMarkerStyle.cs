@@ -58,7 +58,7 @@ namespace Codist.Margins
 
 		static void Parse(string value, Color defaultColor, out Color color) {
 			if (value == Constants.EmptyColor) {
-				color = DefaultSymbolDefinitionColor;
+				color = defaultColor;
 				return;
 			}
 			ColorHelper.ParseColor(value, out color, out _);
