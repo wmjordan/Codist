@@ -174,7 +174,9 @@ namespace Codist.SmartBars
 				// postpone the even handler until the left mouse button and keyboard modifiers are released
 				await Task.Delay(100, cancellationToken);
 			}
-			if (_View?.Selection.IsEmpty == true
+			var view = _View;
+			if (view is null
+				|| view.Selection.IsEmpty
 				|| Interlocked.Exchange(ref _SelectionStatus, Working) != Selecting) {
 				goto EXIT;
 			}
@@ -187,10 +189,17 @@ namespace Codist.SmartBars
 			_ToolBarTray.Visibility = Visibility.Hidden;
 			ToolBar.DisposeCollection();
 			ToolBar2.DisposeCollection();
-			IsReadOnly = _View.IsCaretInReadOnlyRegion();
-			IsMultilineSelected = _View.IsMultilineSelected();
+			var view = _View;
+			if (view is null) {
+				return;
+			}
+			IsReadOnly = view.IsCaretInReadOnlyRegion();
+			IsMultilineSelected = view.IsMultilineSelected();
 			try {
 				await AddCommandsAsync(cancellationToken);
+				if (_View is null) {
+					return;
+				}
 				AddCommands();
 			}
 			catch (OperationCanceledException) {
@@ -397,11 +406,12 @@ namespace Codist.SmartBars
 			if (_ToolBarTray != null) {
 				_ToolBarLayer = null;
 			}
-			if (_View != null) {
-				_View.Selection.SelectionChanged -= ViewSelectionChanged;
-				_View.VisualElement.MouseMove -= ViewMouseMove;
-				_View.VisualElement.PreviewKeyUp -= ViewKeyUp;
-				_View.Closed -= ViewClosed;
+			IWpfTextView view;
+			if ((view = _View) != null) {
+				view.Selection.SelectionChanged -= ViewSelectionChanged;
+				view.VisualElement.MouseMove -= ViewMouseMove;
+				view.VisualElement.PreviewKeyUp -= ViewKeyUp;
+				view.Closed -= ViewClosed;
 				_View = null;
 			}
 			Config.UnregisterUpdateHandler(UpdateSmartBarConfig);
