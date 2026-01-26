@@ -18,8 +18,6 @@ namespace Codist.Margins
 {
 	sealed class MatchMargin : MarginElementBase, IDisposable, IWpfTextViewMargin
 	{
-		const string FormatName = "Selected Text", PartialMatchFormatName = "Inactive Selected Text";
-
 		IEditorFormatMap _EditorFormatMap;
 		IWpfTextView _TextView;
 		IVerticalScrollBar _ScrollBar;
@@ -132,17 +130,17 @@ namespace Codist.Margins
 			};
 			var sp = searchSpan.Start.Position;
 			var ts = _TextView.TextSnapshot;
-			var l = ts.Length - 1;
+			var sl = ts.Length;
 			var options = ctx.Options;
 			var w = !options.MatchFlags(FindOptions.WholeWord);
 			var maxLen = _MaxDocument;
-			foreach (var span in _SearchService.FindAll(new SnapshotSpan(ts, searchSpan.End, Math.Min(ts.Length - searchSpan.End, maxLen)), searchSpan.End, t, options)
+			foreach (var span in _SearchService.FindAll(new SnapshotSpan(ts, searchSpan.End, Math.Min(sl - searchSpan.End, maxLen)), searchSpan.End, t, options)
 				.Union(_SearchService.FindAll(new SnapshotSpan(ts, Math.Max(0, sp - maxLen), Math.Min(maxLen, sp)), searchSpan.Start, t, options | FindOptions.SearchReverse))) {
 				if (token.IsCancellationRequested) {
 					ClearMatches();
 					goto RETURN;
 				}
-				r.Add(new MatchedSpan(span, t == span.GetText(), !w || IsWord(span, l)));
+				r.Add(new MatchedSpan(span, t == span.GetText(), !w || IsWord(span, sl)));
 				if (++c > max) {
 					break;
 				}
@@ -155,7 +153,9 @@ namespace Codist.Margins
 		RETURN:
 			await SyncHelper.SwitchToMainThreadAsync(token);
 			ctx.Success = true;
-			_TextView.Properties[typeof(MatchMargin)] = _Matches.Count;
+			if (_Matches != null) {
+				_TextView.Properties[typeof(MatchMargin)] = _Matches.Count;
+			}
 			InvalidateVisual();
 			return;
 		QUIT:
@@ -165,9 +165,9 @@ namespace Codist.Margins
 			}
 			// matches is already null
 
-			static bool IsWord(SnapshotSpan ss, int limit) {
-				return (ss.Start.Position == 0 || !(ss.Start - 1).GetChar().IsProgrammaticChar())
-					&& (ss.End.Position == limit || !ss.End.GetChar().IsProgrammaticChar());
+			static bool IsWord(SnapshotSpan s, int snapshotLength) {
+				return (s.Start.Position == 0 || !(s.Start - 1).GetChar().IsProgrammaticChar())
+					&& (s.End.Position == snapshotLength || !s.End.GetChar().IsProgrammaticChar());
 			}
 		}
 
