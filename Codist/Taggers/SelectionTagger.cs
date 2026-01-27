@@ -94,7 +94,7 @@ sealed class SelectionTagger : ITagger<TextMarkerTag>
 			searchText = null;
 		}
 		else if (isSelectionEmpty) {
-			if (!searchText.IsProgrammaticSymbol()) {
+			if (searchSpan.Length < 2 || !searchText.IsProgrammaticSymbol()) {
 				searchText = null;
 				searchSpan = default;
 			}
