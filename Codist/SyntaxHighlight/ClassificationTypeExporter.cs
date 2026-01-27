@@ -366,17 +366,17 @@ namespace Codist.SyntaxHighlight
 
 		static void UpdateMatchMarkerEditorFormat(IEditorFormatMap m) {
 			var o = Config.Instance.ScrollbarMarker;
-			m.SetProperties(Taggers.SelectionTagger.MatchMarkerTag.Type, new ResourceDictionary {
+			m.SetProperties(Taggers.MatchTagger.MatchMarkerTag.Type, new ResourceDictionary {
 				{ MarkerFormatDefinition.BorderId, MakeMarkerPen(o.MatchMarker, 1, false) }
 			});
-			m.SetProperties(Taggers.SelectionTagger.PartialMatchMarkerTag.Type, new ResourceDictionary {
+			m.SetProperties(Taggers.MatchTagger.PartialMatchMarkerTag.Type, new ResourceDictionary {
 				{ MarkerFormatDefinition.BorderId, MakeMarkerPen(o.MatchMarker, 0.7, true) }
 			});
 
-			m.SetProperties(Taggers.SelectionTagger.CaseMismatchMarkerTag.Type, new ResourceDictionary {
+			m.SetProperties(Taggers.MatchTagger.CaseMismatchMarkerTag.Type, new ResourceDictionary {
 				{ MarkerFormatDefinition.BorderId, MakeMarkerPen(o.CaseMismatchMarker, 1, false) }
 			});
-			m.SetProperties(Taggers.SelectionTagger.PartialCaseMismatchMarkerTag.Type, new ResourceDictionary {
+			m.SetProperties(Taggers.MatchTagger.PartialCaseMismatchMarkerTag.Type, new ResourceDictionary {
 				{ MarkerFormatDefinition.BorderId, MakeMarkerPen(o.CaseMismatchMarker, 0.7, true) }
 			});
 

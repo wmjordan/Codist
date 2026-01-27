@@ -277,7 +277,7 @@ namespace Codist.Taggers
 		public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag {
 			return textView.TextBuffer == buffer
 				&& Config.Instance.Features.MatchFlags(Features.ScrollbarMarkers)
-				? new SelectionTagger(textView, ServicesHelper.Instance.TextStructureNavigator.GetTextStructureNavigator(buffer)) as ITagger<T>
+				? new MatchTagger(textView, ServicesHelper.Instance.TextStructureNavigator.GetTextStructureNavigator(buffer)) as ITagger<T>
 				: null;
 		}
 	}

@@ -8,7 +8,7 @@ using Microsoft.VisualStudio.Text.Tagging;
 
 namespace Codist.Taggers;
 
-sealed class SelectionTagger : ITagger<TextMarkerTag>
+sealed class MatchTagger : ITagger<TextMarkerTag>
 {
 	internal static readonly TextMarkerTag MatchMarkerTag = new("MatchMarker"),
 		PartialMatchMarkerTag = new("PartialMatchMarker"),
@@ -30,7 +30,7 @@ sealed class SelectionTagger : ITagger<TextMarkerTag>
 
 	public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 
-	public SelectionTagger(ITextView view, ITextStructureNavigator navigator) {
+	public MatchTagger(ITextView view, ITextStructureNavigator navigator) {
 		_View = view;
 		_SearchService = ServicesHelper.Instance.TextSearch;
 		_Navigator = navigator;
