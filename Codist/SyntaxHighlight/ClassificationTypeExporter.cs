@@ -367,25 +367,25 @@ namespace Codist.SyntaxHighlight
 		static void UpdateMatchMarkerEditorFormat(IEditorFormatMap m) {
 			var o = Config.Instance.ScrollbarMarker;
 			m.SetProperties(Taggers.SelectionTagger.MatchMarkerTag.Type, new ResourceDictionary {
-				{ MarkerFormatDefinition.BorderId, MakeMarkerBrush(o.MatchMarker, 1) }
+				{ MarkerFormatDefinition.BorderId, MakeMarkerPen(o.MatchMarker, 1, false) }
 			});
 			m.SetProperties(Taggers.SelectionTagger.PartialMatchMarkerTag.Type, new ResourceDictionary {
-				{ MarkerFormatDefinition.BorderId, MakeMarkerPen(o.MatchMarker, 0.7) }
+				{ MarkerFormatDefinition.BorderId, MakeMarkerPen(o.MatchMarker, 0.7, true) }
 			});
 
 			m.SetProperties(Taggers.SelectionTagger.CaseMismatchMarkerTag.Type, new ResourceDictionary {
-				{ MarkerFormatDefinition.BorderId, MakeMarkerBrush(o.CaseMismatchMarker, 1) }
+				{ MarkerFormatDefinition.BorderId, MakeMarkerPen(o.CaseMismatchMarker, 1, false) }
 			});
 			m.SetProperties(Taggers.SelectionTagger.PartialCaseMismatchMarkerTag.Type, new ResourceDictionary {
-				{ MarkerFormatDefinition.BorderId, MakeMarkerPen(o.CaseMismatchMarker, 0.7) }
+				{ MarkerFormatDefinition.BorderId, MakeMarkerPen(o.CaseMismatchMarker, 0.7, true) }
 			});
 
 			static SolidColorBrush MakeMarkerBrush(Color color, double alpha) {
 				return new SolidColorBrush(alpha != 1 ? color.Alpha((byte)(color.A * alpha)) : color).MakeFrozen();
 			}
 
-			static Pen MakeMarkerPen(Color color, double alpha) {
-				return new Pen(MakeMarkerBrush(color, alpha), 1) { DashStyle = DashStyles.Dash }.MakeFrozen();
+			static Pen MakeMarkerPen(Color color, double alpha, bool dash) {
+				return new Pen(MakeMarkerBrush(color, alpha), 1) { DashStyle = dash ? DashStyles.Dash : DashStyles.Solid }.MakeFrozen();
 			}
 		}
 
