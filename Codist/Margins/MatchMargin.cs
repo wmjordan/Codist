@@ -25,7 +25,7 @@ namespace Codist.Margins
 		ITextStructureNavigator _TextNavigator;
 		DispatcherTimer _DelayTimer;
 		CancellationTokenSource _currentSearchCts;
-		Brush _MatchBrush, _CaseMismatchBrush;
+		SolidColorBrush _MatchBrush, _CaseMismatchBrush;
 		Pen _MatchPen, _CaseMismatchPen;
 		List<MatchedSpan> _Matches;
 		SearchContext _SearchContext;
@@ -304,6 +304,9 @@ namespace Codist.Margins
 				var view = me._TextView;
 				if (view.Selection.IsEmpty) {
 					Span = me._TextNavigator.GetExtentOfWord(view.Caret.Position.BufferPosition).Span;
+					if (Span.Length == 1) {
+						return;
+					}
 					emptySelection = true;
 				}
 				else if (!view.IsMultilineSelected()) {
