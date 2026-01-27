@@ -49,12 +49,10 @@ sealed class SelectionTagger : ITagger<TextMarkerTag>
 	}
 
 	void LoadConfig() {
+		_View.Selection.SelectionChanged -= OnSelectionChanged;
 		if (_Enabled = Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.MatchSelection)
 			&& Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.MatchSelection)) {
 			_View.Selection.SelectionChanged += OnSelectionChanged;
-		}
-		else {
-			_View.Selection.SelectionChanged -= OnSelectionChanged;
 		}
 	}
 
