@@ -136,16 +136,17 @@ namespace Codist.SymbolCommands
 		public override Task<List<(ISymbol, List<(SymbolUsageKind, ReferenceLocation)>)>> PrepareListDataAsync(CancellationToken cancellationToken) {
 			var docs = MakeDocumentListFromOption(Options);
 
-			Predicate<ISymbol> df = StrictMatch ? Symbol.Equals : default;
-			Predicate<ISymbol> of = MatchTypeArgument ? Symbol.Equals : null;
+			Predicate<ISymbol> defFilter = StrictMatch ? Symbol.Equals : default;
+			Predicate<ISymbol> symbolFilter;
 
 			if (Symbol is INamedTypeSymbol typeSymbol && typeSymbol.GetPrimaryConstructor() != null) {
 				Predicate<SyntaxNode> nodeFilter = n => !IsTypeReference(n);
-				return Symbol.FindReferrersAsync(Context.Document.Project, docs, df, of, nodeFilter, cancellationToken);
+				symbolFilter = MatchTypeArgument ? Symbol.Equals : null;
+				return Symbol.FindReferrersAsync(Context.Document.Project, docs, defFilter, symbolFilter, nodeFilter, cancellationToken);
 			}
 			else {
-				Predicate<ISymbol> methodFilter = s => s.Kind == SymbolKind.Method;
-				return Symbol.FindReferrersAsync(Context.Document.Project, docs, df, of, null, cancellationToken);
+				symbolFilter = s => s.Kind == SymbolKind.Method;
+				return Symbol.FindReferrersAsync(Context.Document.Project, docs, defFilter, symbolFilter, null, cancellationToken);
 			}
 		}
 	}
