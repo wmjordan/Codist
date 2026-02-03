@@ -607,45 +607,44 @@ namespace Codist.SmartBars
 				new CommandItem(IconIds.Replace, R.CMD_Replace, _ => TextEditorHelper.ExecuteEditorCommand("Edit.Replace")){ QuickAccessCondition = CommandItem.HasSelection },
 				new CommandItem(IconIds.FindInFile, R.CMD_FindInFiles, _ => TextEditorHelper.ExecuteEditorCommand("Edit.FindinFiles")){ QuickAccessCondition = CommandItem.HasSelection },
 				new CommandItem(IconIds.ReplaceInFolder, R.CMD_ReplaceInFiles, _ => TextEditorHelper.ExecuteEditorCommand("Edit.ReplaceinFiles")){ QuickAccessCondition = CommandItem.HasSelection },
-				new CommandItem(IconIds.SelectCode, R.CMD_ExtractLinesContainingSelection, ctx => {
-					ThreadHelper.ThrowIfNotOnUIThread();
-					var snapshot = ctx.View.TextSnapshot;
-					var selection = ctx.View.GetFirstSelectionText();
-					var name = selection.Length > 30 ? selection.Substring(0, 30) : selection;
-					try {
-						name += Path.GetExtension(ctx.View.TextBuffer.GetTextDocument().FilePath);
-					}
-					catch (NullReferenceException) {}
-					catch (ArgumentException) {}
-					var w = CodistPackage.DTE.ItemOperations.NewFile("General\\Text File", name);
-					using (var sbr = ReusableStringBuilder.AcquireDefault(1000)) {
-						var sb = sbr.Resource;
-						var option = FindOptions.OrdinalComparison | FindOptions.SingleLine;
-						if (ctx.ModifierKeys.MatchFlags(ModifierKeys.Shift)) {
-							option |= FindOptions.WholeWord;
-						}
-						if (ctx.ModifierKeys.MatchFlags(ModifierKeys.Control)) {
-							option |= FindOptions.MatchCase;
-						}
-						SnapshotPoint p = new SnapshotPoint(snapshot, 0);
-						SnapshotSpan? occurrence;
-						while ((occurrence = ctx.TextSearchService.Find(p, selection, option)).HasValue) {
-							var line = snapshot.GetLineFromPosition(occurrence.Value.Start);
-							p = line.EndIncludingLineBreak;
-							sb.Append(line.GetTextIncludingLineBreak());
-						}
-						var view = w.Document.GetActiveWpfDocumentView();
-						view.TextBuffer.ChangeContentType(ctx.View.TextBuffer.ContentType, null);
-						using (var edit = view.TextBuffer.CreateEdit()) {
-							edit.Insert(0, sb.ToString());
-							edit.Apply();
-						}
-						w.Document.Saved = true;
-						view.TextBuffer.ClearUndoHistory();
-					}
-				}) { ToolTip = R.CMDT_ExtractLinesContainingSelection, QuickAccessCondition = CommandItem.HasSelection }
+				new CommandItem(IconIds.SelectCode, R.CMD_ExtractLinesContainingSelection, ctx => ExtractLinesContainingSelection(ctx)) { ToolTip = R.CMDT_ExtractLinesContainingSelection, QuickAccessCondition = CommandItem.HasSelection }
 			};
 		}
+
+		static void ExtractLinesContainingSelection(CommandContext ctx) {
+			ThreadHelper.ThrowIfNotOnUIThread();
+			var snapshot = ctx.View.TextSnapshot;
+			var selection = ctx.View.GetFirstSelectionText();
+			var name = selection.Length > 30 ? selection.Substring(0, 30) : selection;
+			try {
+				name += Path.GetExtension(ctx.View.TextBuffer.GetTextDocument().FilePath);
+			}
+			catch (NullReferenceException) { }
+			catch (ArgumentException) { }
+			var w = CodistPackage.DTE.ItemOperations.NewFile("General\\Text File", name);
+			using var sbr = ReusableStringBuilder.AcquireDefault(1000);
+			var sb = sbr.Resource;
+			var option = FindOptions.OrdinalComparison | FindOptions.SingleLine;
+			if (ctx.ModifierKeys.MatchFlags(ModifierKeys.Shift)) {
+				option |= FindOptions.WholeWord;
+			}
+			if (ctx.ModifierKeys.MatchFlags(ModifierKeys.Control)) {
+				option |= FindOptions.MatchCase;
+			}
+			var p = new SnapshotPoint(snapshot, 0);
+			SnapshotSpan? occurrence;
+			while ((occurrence = ctx.TextSearchService.Find(p, selection, option)).HasValue) {
+				var line = snapshot.GetLineFromPosition(occurrence.Value.Start);
+				p = line.EndIncludingLineBreak;
+				sb.Append(line.GetTextIncludingLineBreak());
+			}
+			var newView = w.Document.GetActiveWpfDocumentView();
+			newView.TextBuffer.ChangeContentType(ctx.View.TextBuffer.ContentType, null);
+			w.Document.GetActiveDocumentView().GetBuffer(out var textLines);
+			textLines.InitializeContent(sb.ToString(), sb.Length);
+			textLines.SetStateFlags(0);
+		}
+
 		static CommandItem[] GetSurroundingCommands() {
 			return new CommandItem[] {
 				new CommandItem(IconIds.SurroundWith, R.CMD_SurroundWith, ctx => TextEditorHelper.ExecuteEditorCommand("Edit.SurroundWith")){ QuickAccessCondition = CommandItem.HasEditableSelection },

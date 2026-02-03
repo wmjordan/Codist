@@ -1438,9 +1438,12 @@ namespace Codist
 			var textView = GetIVsTextView(service, doc.FullName);
 			return textView == null ? null : GetWpfTextView(textView);
 		}
-		public static IWpfTextView GetActiveWpfDocumentView(this EnvDTE.Document doc) {
+		public static Microsoft.VisualStudio.TextManager.Interop.IVsTextView GetActiveDocumentView(this EnvDTE.Document doc) {
 			ThreadHelper.ThrowIfNotOnUIThread();
-			var textView = GetIVsTextView(ServiceProvider.GlobalProvider, doc.FullName);
+			return GetIVsTextView(ServiceProvider.GlobalProvider, doc.FullName);
+		}
+		public static IWpfTextView GetActiveWpfDocumentView(this EnvDTE.Document doc) {
+			var textView = doc.GetActiveDocumentView();
 			return textView == null ? null : GetWpfTextView(textView);
 		}
 
