@@ -1653,7 +1653,7 @@ namespace Codist
 				if (ctx != null) {
 					if (r.Length == 0
 						&& ctx.Document != null
-						&& ServicesHelper.Instance.VisualStudioWorkspace.TryGoToDefinition(symbol, ctx.Document.Project, default)) {
+						&& ServicesHelper.Instance.VisualStudioWorkspace.TryGoToDefinition(symbol.OriginalDefinition, ctx.Document.Project, default)) {
 						return;
 					}
 					new SymbolCommands.ListSymbolLocationsCommand { Symbol = symbol, Context = ctx }.Show(r);
