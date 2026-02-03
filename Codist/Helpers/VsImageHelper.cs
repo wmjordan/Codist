@@ -24,10 +24,7 @@ namespace Codist
 			if (imageId.HasOverlay()) {
 				return MakeOverlayImage(imageId, size);
 			}
-			var moniker = new ImageMoniker {
-				Guid = KnownImageIds.ImageCatalogGuid,
-				Id = imageId
-			};
+			var moniker = GetImageMoniker(imageId);
 			if (size < 1) {
 				size = DefaultIconSize;
 			}
@@ -37,6 +34,14 @@ namespace Codist
 				Width = size,
 			};
 		}
+
+		public static ImageMoniker GetImageMoniker(int imageId) {
+			return new ImageMoniker {
+				Guid = KnownImageIds.ImageCatalogGuid,
+				Id = imageId
+			};
+		}
+
 		public static System.Windows.FrameworkElement GetImage(string monikerName, int size = 0) {
 			return GetImage(KnownMonikerNameMap.Map.TryGetValue(monikerName, out int i) ? i : KnownImageIds.Blank, size);
 		}
