@@ -111,7 +111,7 @@ namespace Codist.SymbolCommands
 			var directImplementation = DirectDerive;
 			var projects = MakeProjectListFromOption(Options);
 			var source = MakeSourceFilterFromOption(Options);
-			return await (Symbol as INamedTypeSymbol).FindImplementationsAsync(Context.Document.Project.Solution, directImplementation, source, projects, cancellationToken).ConfigureAwait(false);
+			return await Symbol.FindImplementationsAsync(Context.Document.Project.Solution, directImplementation, source, projects, cancellationToken).ConfigureAwait(false);
 		}
 
 		public override void UpdateList(SymbolMenu resultList, ImmutableArray<ISymbol> data) {
@@ -221,7 +221,9 @@ namespace Codist.SymbolCommands
 					hierarchies.AddNew(key, item.ContainingType);
 				}
 			}
-			var rootInterfaces = implementations.GetRelations(type)?.Select(i => i.ContainingType);
+			var rootInterfaces = implementations.GetRelations(type)
+				?.Select(i => i.ContainingType)
+				.Distinct(CodeAnalysisHelper.GetNamedTypeComparer());
 			if (rootInterfaces != null) {
 				rootTypes.AddRange(rootInterfaces);
 			}
