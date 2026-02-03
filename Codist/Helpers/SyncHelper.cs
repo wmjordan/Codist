@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Codist.Controls;
 using ThreadHelper = Microsoft.VisualStudio.Shell.ThreadHelper;
 
 namespace Codist
@@ -45,6 +46,8 @@ namespace Codist
 				}
 				catch (Exception ex) {
 					// ignore error
+					await SwitchToMainThreadAsync();
+					MessageWindow.Error(ex);
 					ex.Log();
 				}
 			});
