@@ -2020,9 +2020,10 @@ namespace Codist
 
 		/// <summary>Returns whether a symbol could have an override.</summary>
 		public static bool MayHaveOverride(this ISymbol symbol) {
-			return symbol?.ContainingType?.TypeKind == TypeKind.Class &&
-				   (symbol.IsVirtual || symbol.IsAbstract || symbol.IsOverride) &&
-				   symbol.IsSealed == false;
+			return symbol?.ContainingType?.TypeKind == TypeKind.Class
+				&& (symbol.IsVirtual || symbol.IsAbstract || symbol.IsOverride)
+				&& !symbol.IsSealed
+				&& symbol.ContainingType?.IsSealed != true;
 		}
 
 		public static IEqualityComparer<ISymbol> GetSymbolNameComparer() {
