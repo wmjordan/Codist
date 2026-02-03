@@ -10,6 +10,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using CLR;
 using Codist.Controls;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Operations;
 using VsBrushes = Microsoft.VisualStudio.Shell.VsBrushes;
@@ -241,18 +242,37 @@ namespace Codist.SmartBars
 		}
 
 		void SetToolBarPosition() {
+			const double TOOLBAR_MARGIN = 3;
 			// keep tool bar position when the selection is restored and the tool bar reappears after executing command
 			if (DateTime.Now < _LastExecute.AddSeconds(1)) {
 				return;
 			}
 			var v = _View;
+			var cb = v.TextViewLines.GetTextMarkerGeometry(v.GetMultiSelectionBroker().PrimarySelection.Extent.SnapshotSpan).Bounds;
 			var pos = Mouse.GetPosition(v.VisualElement);
+			bool isMouseWithinSelectionRange = (pos.Y + v.ViewportTop).IsBetween(cb.Top, cb.Bottom);
+			double top, bottom;
+			if (isMouseWithinSelectionRange) {
+				var line = v.TextViewLines.GetTextViewLineContainingYCoordinate(pos.Y + v.ViewportTop);
+				if (line is null) {
+					top = pos.Y;
+					bottom = pos.X;
+				}
+				else {
+					top = line.Top;
+					bottom = line.Bottom;
+				}
+			}
+			else {
+				top = cb.Top;
+				bottom = cb.Bottom;
+			}
 			var rs = _ToolBarTray.RenderSize;
 			var z = v.ZoomLevel / 100;
 			var x = Math.Max(0, (pos.X - 35) * z);
-			var y = (pos.Y - 10) * z - rs.Height;
+			var y = (top - v.ViewportTop - TOOLBAR_MARGIN) * z - rs.Height;
 			Canvas.SetLeft(_ToolBarTray, Math.Min(x, v.ViewportWidth * z - rs.Width));
-			Canvas.SetTop(_ToolBarTray, y > 0 ? y : (pos.Y + 10) * z);
+			Canvas.SetTop(_ToolBarTray, y > 0 ? y : (bottom - v.ViewportTop + TOOLBAR_MARGIN) * z);
 		}
 
 		#region Event handlers
