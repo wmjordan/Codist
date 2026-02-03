@@ -143,7 +143,7 @@ namespace Codist.Controls
 
 			var content = description != null
 				? GetErrorDescription(description, error)
-				: (UIElement)MakeText(error.ToString());
+				: (UIElement)MakeTextHighlightMe(error.ToString());
 			var w = ShowErrorWindow(content, title, source);
 			bool? result = w.ShowDialog();
 			if (result == true && source != null && w._SuppressExceptionBox.IsChecked == true) {
@@ -174,7 +174,8 @@ namespace Codist.Controls
 				Children = {
 					MakeText(description).SetProperty(TextBlock.FontSizeProperty, ThemeCache.ToolTipFontSize * 1.5d),
 					MakeText(exception.Message),
-					MakeText(R.T_StackTrace + Environment.NewLine + exception.StackTrace)
+					MakeText(R.T_StackTrace),
+					MakeTextHighlightMe(exception.StackTrace)
 				}
 			};
 		}
@@ -201,6 +202,21 @@ namespace Codist.Controls
 			return new ThemedTipText(text) {
 				Padding = WpfHelper.MiddleMargin,
 			}.ReferenceProperty(ForegroundProperty, CommonControlsColors.TextBoxTextBrushKey);
+		}
+		static ThemedTipText MakeTextHighlightMe(string text) {
+			var c = new ThemedTipText() {
+				Padding = WpfHelper.MiddleMargin,
+			}.ReferenceProperty(ForegroundProperty, CommonControlsColors.TextBoxTextBrushKey);
+			int i = 0, p;
+			while ((p = text.IndexOf('\n', i)) != -1) {
+				c.Append(text.Substring(i, ++p - i), text.IndexOf(Constants.NameOfMe, i, p - i) >= 0);
+				i = p;
+			}
+			if (i < text.Length) {
+				p = text.Length - i;
+				c.Append(text.Substring(i, p), text.IndexOf(Constants.NameOfMe, i, p) >= 0);
+			}
+			return c;
 		}
 
 		void DefaultButton_Click(object sender, RoutedEventArgs e) {
