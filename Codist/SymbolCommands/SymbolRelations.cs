@@ -21,8 +21,9 @@ namespace Codist.SymbolCommands
 			return _Relations.ContainsKey(baseType); 
 		}
 		public IReadOnlyList<TRelSymbol> GetRelations(TKeySymbol baseType) {
-			_Relations.TryGetValue(baseType, out var types);
-			return types;
+			return _Relations.TryGetValue(baseType, out var types)
+				? types
+				: Array.Empty<TRelSymbol>();
 		}
 		public void SetRelations(TKeySymbol baseType, IEnumerable<TRelSymbol> relSymbols) {
 			_Relations[baseType] = new(relSymbols);
