@@ -352,8 +352,8 @@ namespace Codist.SyntaxHighlight
 			return r;
 		}
 
-		internal void ExportSelectionTagger() {
-			var m = _EditorFormatMaps.GetEditorFormatMap(Constants.CodeText);
+		internal void ExportSelectionTagger(string category) {
+			var m = _EditorFormatMaps.GetEditorFormatMap(category);
 			UpdateMatchMarkerEditorFormat(m);
 			Config.RegisterUpdateHandler(HandleMarkerColorChange);
 		}
@@ -366,6 +366,10 @@ namespace Codist.SyntaxHighlight
 
 		static void UpdateMatchMarkerEditorFormat(IEditorFormatMap m) {
 			var o = Config.Instance.ScrollbarMarker;
+			bool b;
+			if (b = !m.IsInBatchUpdate) {
+				m.BeginBatchUpdate();
+			}
 			m.SetProperties(Taggers.MatchTagger.MatchMarkerTag.Type, new ResourceDictionary {
 				{ MarkerFormatDefinition.BorderId, MakeMarkerPen(o.MatchMarker, 1, false) }
 			});
@@ -379,6 +383,9 @@ namespace Codist.SyntaxHighlight
 			m.SetProperties(Taggers.MatchTagger.PartialCaseMismatchMarkerTag.Type, new ResourceDictionary {
 				{ MarkerFormatDefinition.BorderId, MakeMarkerPen(o.CaseMismatchMarker, 0.7, true) }
 			});
+			if (b) {
+				m.EndBatchUpdate();
+			}
 
 			static SolidColorBrush MakeMarkerBrush(Color color, double alpha) {
 				return new SolidColorBrush(alpha != 1 ? color.Alpha((byte)(color.A * alpha)) : color).MakeFrozen();

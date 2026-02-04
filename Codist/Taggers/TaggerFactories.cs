@@ -270,8 +270,9 @@ namespace Codist.Taggers
 	[Export(typeof(IViewTaggerProvider))]
 	[ContentType(Constants.CodeTypes.Text)]
 	[ContentType(Constants.CodeTypes.Output)]
-	[TextViewRole(PredefinedTextViewRoles.Document)]
 	[TagType(typeof(TextMarkerTag))]
+	[TextViewRole(PredefinedTextViewRoles.Document)]
+	[TextViewRole(PredefinedTextViewRoles.Interactive)]
 	sealed class SelectionTaggerProvider : IViewTaggerProvider
 	{
 		public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag {

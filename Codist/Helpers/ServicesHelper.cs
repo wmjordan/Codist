@@ -115,7 +115,6 @@ namespace Codist
 			//e.RegisterClassificationTypes<SyntaxHighlight.CppStyleTypes>();
 			cte.RegisterCustomizedClassificationTypes();
 			cte.ExportClassificationTypes();
-			cte.ExportSelectionTagger();
 			"Classification types exported".Log(LogCategory.FormatStore);
 			#endregion
 		}

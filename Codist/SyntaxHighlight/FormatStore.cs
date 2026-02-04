@@ -90,6 +90,7 @@ namespace Codist.SyntaxHighlight
 				//   by caching applied categories
 				$"[{category}] highlighter created".Log(LogCategory.FormatStore);
 				ServicesHelper.Instance.ClassificationTypeExporter.UpdateClassificationFormatMap(category);
+				ServicesHelper.Instance.ClassificationTypeExporter.ExportSelectionTagger(category);
 				highlighter.SubscribeConfigUpdateHandler();
 				highlighter.SubscribeFormatMappingChanges();
 				highlighter.DetectThemeColorCompatibilityWithBackground(true);
