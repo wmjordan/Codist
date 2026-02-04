@@ -623,16 +623,13 @@ namespace Codist
 
 		public static bool IsMultilineSelected(this ITextView textView) {
 			var s = textView.Selection;
-			if (s.IsEmpty == true) {
+			if (s.IsEmpty) {
 				return false;
 			}
-			int lines = 0;
-			foreach (var item in textView.GetSelectedLines()) {
-				if (++lines > 1) {
-					return true;
-				}
-			}
-			return false;
+			var ss = textView.GetMultiSelectionBroker().SelectionExtent.SnapshotSpan;
+			var sl = textView.TextSnapshot.GetLineFromPosition(ss.Start);
+			var el = textView.TextSnapshot.GetLineFromPosition(ss.End);
+			return sl.Start.Position != el.Start.Position;
 		}
 
 		public static void SelectNode(this SyntaxNode node, bool includeTrivia) {
