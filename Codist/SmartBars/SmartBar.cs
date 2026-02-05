@@ -123,7 +123,7 @@ namespace Codist.SmartBars
 			if (_IsDiffWindow) {
 				AddDiffCommands();
 			}
-			if (IsMultilineSelected == false) {
+			if (View.HasSingleSelection()) {
 				AddFindAndReplaceCommands();
 				AddViewInBrowserCommand();
 				if (Config.Instance.DeveloperOptions.MatchFlags(DeveloperOptions.ShowSyntaxClassificationInfo)) {

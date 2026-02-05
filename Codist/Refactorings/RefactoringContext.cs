@@ -18,7 +18,7 @@ namespace Codist.Refactorings
 		public SelectedSyntax<StatementSyntax> SelectedStatementInfo {
 			get {
 				if (_SelectedStatementInfo.HasValue == false) {
-					var ss = _SemanticContext.View.FirstSelectionSpan();
+					var ss = _SemanticContext.View.GetPrimarySelectionSpan();
 					if (_SemanticContext.IsSourceBufferInView == false) {
 						ss = _SemanticContext.MapDownToSourceSpan(ss).FirstOrDefault();
 						if (ss.Snapshot == null) {

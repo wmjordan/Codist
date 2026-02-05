@@ -310,7 +310,7 @@ namespace Codist.Margins
 					emptySelection = true;
 				}
 				else if (!view.IsMultilineSelected()) {
-					Span = view.FirstSelectionSpan();
+					Span = view.GetPrimarySelectionSpan();
 					emptySelection = false;
 				}
 				else {

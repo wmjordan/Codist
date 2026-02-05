@@ -87,7 +87,7 @@ namespace Codist.SmartBars
 				return;
 			}
 			var trivia = ctx.NodeTrivia;
-			if (trivia.RawKind == 0) {
+			if (trivia.RawKind == 0 && ctx.View.HasSingleSelection()) {
 				var token = ctx.Token;
 				var tokenKind = token.Kind();
 				if (token.Span.Contains(View.Selection, true)) {
@@ -346,7 +346,7 @@ namespace Codist.SmartBars
 		}
 
 		bool SelectionIs<TNode>() where TNode : SyntaxNode {
-			var s = View.Selection.SelectedSpans.FirstOrDefault().ToTextSpan();
+			var s = View.Selection.StreamSelectionSpan.SnapshotSpan.ToTextSpan();
 			foreach (var item in _Context.NodeIncludeTrivia.AncestorsAndSelf()) {
 				TextSpan span;
 				if (item is TNode && (span = item.Span).Contains(s) && span != s) {
@@ -357,7 +357,7 @@ namespace Codist.SmartBars
 		}
 
 		void SelectNodeAsKind<TNode>(CommandContext ctx) where TNode : SyntaxNode {
-			var s = View.Selection.SelectedSpans.FirstOrDefault().ToTextSpan();
+			var s = View.Selection.StreamSelectionSpan.SnapshotSpan.ToTextSpan();
 			foreach (var item in _Context.NodeIncludeTrivia.AncestorsAndSelf()) {
 				TextSpan span;
 				if (item is TNode && (span = item.Span).Contains(s) && span != s) {

@@ -535,8 +535,11 @@ namespace Codist
 		public static string GetFirstSelectionText(this ITextView view) {
 			return view.TryGetFirstSelectionSpan(out var span) ? span.GetText() : String.Empty;
 		}
-		public static SnapshotSpan FirstSelectionSpan(this ITextView view) {
+		public static SnapshotSpan GetPrimarySelectionSpan(this ITextView view) {
 			return view.GetMultiSelectionBroker().PrimarySelection.Extent.SnapshotSpan;
+		}
+		public static string GetPrimarySelectionText(this ITextView view) {
+			return view.GetMultiSelectionBroker().PrimarySelection.Extent.SnapshotSpan.GetText();
 		}
 		public static bool TryGetFirstSelectionSpan(this ITextView view, out SnapshotSpan span) {
 			var s = view.GetMultiSelectionBroker().PrimarySelection;
@@ -619,6 +622,11 @@ namespace Codist
 				}
 			}
 			return t;
+		}
+
+		public static bool HasSingleSelection(this ITextView textView) {
+			return !textView.Selection.IsEmpty
+				&& !textView.GetMultiSelectionBroker().HasMultipleSelections;
 		}
 
 		public static bool IsMultilineSelected(this ITextView textView) {
@@ -1137,14 +1145,14 @@ namespace Codist
 		}
 
 		public static void CopySelectionWithoutIndentation(this ITextView view) {
-			if (view.Selection.SelectedSpans.Count > 1
+			if (!view.HasSingleSelection()
 				|| view.Selection.Mode == TextSelectionMode.Box // Don't handle box selection
 				) {
 				goto BUILTIN_COPY;
 			}
 
 			var snapshot = view.TextBuffer.CurrentSnapshot;
-			var selection = view.FirstSelectionSpan();
+			var selection = view.GetPrimarySelectionSpan();
 			var startOfSelection = selection.Start.Position;
 			var endOfSelection = selection.End.Position;
 			ITextSnapshotLine startLine, endLine;
