@@ -11,27 +11,26 @@ namespace Codist.Taggers
 	sealed class MarkdownTagger : CachedTaggerBase
 	{
 		internal static readonly MarkdownHeadingTag[] HeaderClassificationTypes = InitHeaderClassificationTypes();
-		internal static readonly MarkdownHeadingTag[] DummyHeaderTags = new MarkdownHeadingTag[7] {
+		internal static readonly MarkdownHeadingTag[] DummyHeaderTags = [
 			null,
-			new MarkdownHeadingTag(TextEditorHelper.CreateClassificationCategory(Constants.CodeText), 1),
-			new MarkdownHeadingTag(TextEditorHelper.CreateClassificationCategory(Constants.CodeText), 2),
-			new MarkdownHeadingTag(TextEditorHelper.CreateClassificationCategory(Constants.CodeText), 3),
-			new MarkdownHeadingTag(TextEditorHelper.CreateClassificationCategory(Constants.CodeText), 4),
-			new MarkdownHeadingTag(TextEditorHelper.CreateClassificationCategory(Constants.CodeText), 5),
-			new MarkdownHeadingTag(TextEditorHelper.CreateClassificationCategory(Constants.CodeText), 6)
-		}; // used when syntax highlight is disabled
-		static readonly ClassificationTag __QuotationTag = new ClassificationTag(MarkdownClassificationTypes.Default.Quotation);
-		static readonly ClassificationTag __OrderedListTag = new ClassificationTag(MarkdownClassificationTypes.Default.OrderedList);
-		static readonly ClassificationTag __UnorderedListTag = new ClassificationTag(MarkdownClassificationTypes.Default.UnorderedList);
+			new(TextEditorHelper.CreateClassificationCategory(Constants.CodeText), 1),
+			new(TextEditorHelper.CreateClassificationCategory(Constants.CodeText), 2),
+			new(TextEditorHelper.CreateClassificationCategory(Constants.CodeText), 3),
+			new(TextEditorHelper.CreateClassificationCategory(Constants.CodeText), 4),
+			new(TextEditorHelper.CreateClassificationCategory(Constants.CodeText), 5),
+			new(TextEditorHelper.CreateClassificationCategory(Constants.CodeText), 6)
+		]; // used when syntax highlight is disabled
+		static readonly ClassificationTag __QuotationTag = new(MarkdownClassificationTypes.Default.Quotation);
+		static readonly ClassificationTag __OrderedListTag = new(MarkdownClassificationTypes.Default.OrderedList);
+		static readonly ClassificationTag __UnorderedListTag = new(MarkdownClassificationTypes.Default.UnorderedList);
 		static readonly ClassificationTag __CodeBlockTag = new MarkdownCodeBlockTag(MarkdownClassificationTypes.Default.CodeBlock);
 		static readonly IClassificationType __FencedCodeBlockType = MarkdownClassificationTypes.Default.FencedCodeBlock;
-		static readonly MarkdownFenceEndTag __EndOfFenceBlockTag = new MarkdownFenceEndTag(__FencedCodeBlockType);
-		static readonly ClassificationTag __ThematicBreakTag = new ClassificationTag(MarkdownClassificationTypes.Default.ThematicBreak);
+		static readonly ClassificationTag __ThematicBreakTag = new(MarkdownClassificationTypes.Default.ThematicBreak);
 		const int WaitingEndTag = -1, InvalidTag = -2;
 
 		readonly bool _FullParseAtFirstLoad;
 		readonly Action<SnapshotSpan, ICollection<TaggedContentSpan>> _SyntaxParser;
-		TaggedContentSpan _LastTaggedSpan;
+		TaggedContentSpan _LastTaggedSpan; // shortcut field to quicken the processing of adjacent lines
 		ITextView _TextView;
 		ITextBuffer _TextBuffer;
 
@@ -84,208 +83,435 @@ namespace Codist.Taggers
 				goto MISMATCH;
 			}
 		TAGGED:
-			w += level;
-			results.Add(new TaggedContentSpan(DummyHeaderTags[level], span, w, l - w));
-			return;
+			if (level < 7) {
+				w += level;
+				results.Add(new TaggedContentSpan(DummyHeaderTags[level], span, w, l - w));
+				return;
+			}
 
 		MISMATCH:
 			Result.ClearRange(start, l);
 		}
+		enum ParseResult
+		{
+			Success,       // 解析成功，完成当前行
+			Retry,         // 状态更新（如 c 改变），需要重新进入 switch 判断
+			Failure,       // 解析失败，回退到 TRY_MERGE（可能合并上一行）
+			ForceMismatch  // 解析失败，强制回退到 MISMATCH（清除上一行状态，如遇到换行）
+		}
 
-		// we assume that each span is a line in the editor
 		void ParseSyntax(SnapshotSpan span, ICollection<TaggedContentSpan> results) {
-			int l = span.Length, lineStart, start = span.Start, lineEnd = start + l, contenStart;
-			if (l < 1) {
+			int l = span.Length, start = span.Start, lineEnd = start + l;
+			if (IsProcessingChanges) {
+				RevalidateTaggedSpan(GetPrecedingTaggedSpan(span), span);
+			}
+			if (l < 1 && (_LastTaggedSpan?.Tag as MarkdownTag)?.MayContainEmptyLine != true) {
 				_LastTaggedSpan = null;
 				goto MISMATCH;
 			}
 
 			var s = span.Snapshot;
-			IClassificationTag tag;
-			var c = s[start];
-			var lastTag = GetPrecedingTaggedSpan(span, span.Start, s)?.Tag;
-		PARSE_LEADING_CHAR:
-			lineStart = start;
-			int n = 0;
-			switch (c) {
-				case '\t':
-				INDENTED_CODE_BLOCK:
-					if (IsInRawContentBlock(lastTag)) {
-						goto TRY_MERGE;
-					}
-					n += 4;
-					results.Add(_LastTaggedSpan = new TaggedContentSpan(__CodeBlockTag, s, lineStart, lineEnd - lineStart, start - lineStart, lineEnd - start));
-					return;
-				case ' ':
-					++n;
-					while (++start < lineEnd) {
-						switch (c = s[start]) {
-							case ' ':
-								++n;
-								if (n == 4) {
-									if (PeekForNestedList(ref start, lineEnd, s, ref c)
-										|| PeekForIndentedHtml(ref start, lineEnd, s, ref c)) {
-										goto PARSE_LEADING_CHAR;
-									}
-									goto INDENTED_CODE_BLOCK;
-								}
-								continue;
-							case '\t':
-								goto INDENTED_CODE_BLOCK;
-							case '\r':
-							case '\n':
-								goto MISMATCH;
-							default:
-								goto PARSE_LEADING_CHAR;
-						}
-					}
-					goto MISMATCH;
-				case '#':
-					if (IsInRawContentBlock(lastTag)) {
-						goto TRY_MERGE;
-					}
-					++n;
-					while (++start < lineEnd) {
-						if ((c = s[start]) == '#') {
-							++n;
-							if (n == 7) {
-								goto TRY_MERGE;
-							}
-							continue;
-						}
-						if (c.IsCodeWhitespaceOrNewLine()) {
-							++start;
-							break;
-						}
-						goto TRY_MERGE;
-					}
-					// todo: trim trailing header indicators and whitespaces
-					results.Add(_LastTaggedSpan = new TaggedContentSpan(HeaderClassificationTypes[n], s, lineStart, lineEnd - lineStart, start - lineStart, lineEnd - start));
-					return;
-				case '>':
-					if (IsInRawContentBlock(lastTag)) {
-						goto TRY_MERGE;
-					}
-					contenStart = SkipWhitespace(s, start, lineEnd);
-					results.Add(_LastTaggedSpan = new TaggedContentSpan(new MarkdownBlockQuoteTag(__QuotationTag.ClassificationType, start - lineStart, contenStart != lineEnd), s, lineStart, lineEnd - lineStart, contenStart - lineStart, lineEnd - contenStart));
-					if (++start < lineEnd) {
-						c = s[start];
-						goto PARSE_LEADING_CHAR;
-					}
-					return;
-				case '0':
-				case '1':
-				case '2':
-				case '3':
-				case '4':
-				case '5':
-				case '6':
-				case '7':
-				case '8':
-				case '9':
-					if (IsInRawContentBlock(lastTag)) {
-						goto TRY_MERGE;
-					}
-					++n;
-					while (++start < lineEnd) {
-						if ((c = s[start]).IsBetweenUn('0', '9')) {
-							++n;
-							if (n == 10) {
-								goto TRY_MERGE;
-							}
-						}
-						else if (c.CeqAny('.', ')')) {
-							results.Add(_LastTaggedSpan = new TaggedContentSpan(__OrderedListTag, s, lineStart, lineEnd - lineStart, start - lineStart, lineEnd - start));
-							goto PARSE_LEADING_CHAR;
-						}
-						else {
-							goto TRY_MERGE;
-						}
-					}
-					goto TRY_MERGE;
-				case '_': // candidate of thematic break
-				case '-': // candidate of bullet, thematic break
-				case '*': // candidate of bullet, thematic break
-					if (IsInRawContentBlock(lastTag)) {
-						goto TRY_MERGE;
-					}
-					if (IsThematicBreak(s, start, lineEnd, c)) {
-						results.Add(_LastTaggedSpan = new TaggedContentSpan(__ThematicBreakTag, s, lineStart, lineEnd - lineStart, start - lineStart, lineEnd - start));
-						return;
-					}
-
-					if (c == '_') {
-						goto TRY_MERGE;
-					}
-					goto case '+';
-				case '+': // candidate of bullet
-					if (IsInRawContentBlock(lastTag)) {
-						goto TRY_MERGE;
-					}
-					if (++start < lineEnd) {
-						if ((c = s[start]).IsCodeWhitespaceChar()) {
-							results.Add(_LastTaggedSpan = new TaggedContentSpan(__UnorderedListTag, s, lineStart, lineEnd - lineStart, start - lineStart, lineEnd - start));
-							goto PARSE_LEADING_CHAR;
-						}
-						goto TRY_MERGE;
-					}
-					else {
-						return;
-					}
-				case '`':
-				case '~':
-					n = GetFenceBlockSequence(s, start, lineEnd, c, out bool isOpen);
-					if (n >= 3) {
-						// Check if we are closing an existing fence block
-						if (lastTag is MarkdownFenceTag lastFence
-							&& lastFence.FenceCharacter == c) {
-							if (!isOpen && n >= lastFence.FenceLength) {
-								results.Add(_LastTaggedSpan = new TaggedContentSpan(__EndOfFenceBlockTag, s, lineStart, lineEnd - lineStart, start - lineStart, lineEnd - start));
-								return;
-							}
-							goto TRY_MERGE;
-						}
-						if (IsInRawContentBlock(lastTag)) {
-							goto TRY_MERGE;
-						}
-
-						// It is an opening fence (or an invalid closing fence treated as content)
-						results.Add(_LastTaggedSpan = new TaggedContentSpan(new MarkdownFenceTag(__FencedCodeBlockType, c, n), s, lineStart, lineEnd - lineStart, start - lineStart, lineEnd - start));
-						return;
-					}
-					break;
-				case '<':  // HTML block
-					if (IsInRawContentBlock(lastTag)) {
-						goto TRY_MERGE;
-					}
-					var (htmlEnd, htmlType) = ParseHtmlBlock(s, start, lineEnd);
-					if (htmlEnd == InvalidTag) {
-						break;
-					}
-
-					var htmlTag = new MarkdownHtmlBlockTag(htmlType == MarkupHtmlType.HtmlComment ? MarkdownClassificationTypes.Default.Comment : MarkdownClassificationTypes.Default.HtmlCodeBlock, htmlType);
-
-					results.Add(new TaggedContentSpan(htmlTag, s, lineStart, lineEnd - lineStart, start - lineStart, lineEnd - start));
-
-					if (htmlEnd == WaitingEndTag) {
-						_LastTaggedSpan = new TaggedContentSpan(htmlTag, s, lineStart, lineEnd - lineStart, start - lineStart, lineEnd - start);
-					}
-					else {
-						// HTML block ends here
+			var taggedSpan = GetPrecedingTaggedSpan(span);
+			IClassificationTag lastTag;
+			if (taggedSpan != null) {
+				// --- 1. 验证起始标记 ---
+				if (taggedSpan.Tag is MarkdownTag mt) {
+					if (!mt.ValidateStart(s, taggedSpan.Start)) {
+						Result.ClearRange(taggedSpan);
+						//OnTagsChanged(new SnapshotSpanEventArgs(taggedSpan.Span));
+						taggedSpan = null;
 						_LastTaggedSpan = null;
 					}
-					return;
+					// --- 2. 验证结束标记 (如果当前标记为已闭合状态) ---
+					else if (mt.IsClosed) {
+						// already closed, may reuse
+						if (IsProcessingChanges && taggedSpan.Span.Contains(span) && span.End < taggedSpan.End && mt.ValidateEnd(s, span.End, true)) {
+							// new end inserted in the middle of the block
+							if (span.Start != taggedSpan.Start && span.End < taggedSpan.End) {
+								// we can safely shrink the span since the cache sort by the start majorly
+								var changedLength = taggedSpan.End - span.End;
+								taggedSpan.ExtendTo(span.End);
+								OnTagsChanged(new SnapshotSpanEventArgs(new SnapshotSpan(s, span.End, changedLength)));
+							}
+							goto REUSE;
+						}
+						if (mt.ValidateEnd(s, taggedSpan.End, true)
+							&& (mt.IsRawContentBlock ? taggedSpan.Span.Contains(span) : taggedSpan.Span == span.Span) && (_LastTaggedSpan is null || !_LastTaggedSpan.Span.Contains(span) || (_LastTaggedSpan.Tag as MarkdownTag)?.IsClosed == true)) {
+							goto REUSE;
+						}
+					}
+					else {
+						if (IsProcessingChanges && taggedSpan.Span.Contains(span) && span.End < taggedSpan.End && mt.ValidateEnd(s, span.End, true)) {
+							// new end inserted in the middle of the unclosed block
+							if (span.Start != taggedSpan.Start && span.End < taggedSpan.End) {
+								// we can safely shrink the span since the cache sort by the start majorly
+								var changedLength = taggedSpan.End - span.End;
+								taggedSpan.ExtendTo(span.End);
+								if (mt.BlockType == BlockType.HtmlBlock && ((MarkdownHtmlBlockTag)mt).Type != MarkupHtmlType.General) {
+									((MarkdownHtmlBlockTag)mt).Close();
+								}
+							}
+							goto REUSE;
+						}
+						// reuse existing tag
+						if ((mt.IsRawContentBlock ? taggedSpan.Span.Contains(span) : taggedSpan.Span == span.Span) && (_LastTaggedSpan is null || _LastTaggedSpan == taggedSpan || !_LastTaggedSpan.Span.Contains(span) || (_LastTaggedSpan.Tag as MarkdownTag)?.IsClosed == false)) {
+							goto REUSE;
+						}
+					}
+				}
+
+				lastTag = taggedSpan?.Tag;
 			}
+			else {
+				lastTag = null;
+			}
+			var c = s[start];
+			ParseResult result;
+			int lineStart;
+
+			do {
+				lineStart = start;
+				if (lastTag is MarkdownHtmlBlockTag h
+					&& !h.IsClosed
+					&& h.Type == MarkupHtmlType.HtmlComment
+					&& IsNextTo(ref span, taggedSpan.Span)
+					&& HandleHtml(ref start, lineEnd, s, new SnapshotSpan(s, lineStart, lineEnd - lineStart), results, taggedSpan) == ParseResult.Success) {
+					return;
+				}
+				// 字符分发
+				result = c switch {
+					' ' => HandleSpaces(ref start, ref c, lineEnd, s, new SnapshotSpan(s, lineStart, lineEnd - lineStart), results, taggedSpan),
+					'\t' => HandleIndentedBlock(ref start, lineEnd, s, new SnapshotSpan(s, lineStart, lineEnd - lineStart), results, lastTag),
+					'#' => HandleHeader(ref start, lineEnd, s, new SnapshotSpan(s, lineStart, lineEnd - lineStart), results, lastTag),
+					'>' => HandleQuote(ref start, ref c, lineEnd, s, new SnapshotSpan(s, lineStart, lineEnd - lineStart), results, lastTag),
+					'0' or '1' or '2' or '3' or '4' or '5' or '6' or '7' or '8' or '9' => HandleOrderedList(ref start, lineEnd, s, new SnapshotSpan(s, lineStart, lineEnd - lineStart), results, lastTag),
+					'-' or '*' or '_' => HandleThematicBreakOrList(ref start, lineEnd, s, new SnapshotSpan(s, lineStart, lineEnd - lineStart), results, lastTag, c),
+					'+' => HandleUnorderedList(ref start, lineEnd, s, new SnapshotSpan(s, lineStart, lineEnd - lineStart), results, lastTag),
+					'`' or '~' => HandleFence(ref start, lineEnd, s, new SnapshotSpan(s, lineStart, lineEnd - lineStart), results, taggedSpan),
+					'<' => HandleHtml(ref start, lineEnd, s, new SnapshotSpan(s, lineStart, lineEnd - lineStart), results, taggedSpan),
+					_ => ParseResult.Failure
+				};
+
+				switch (result) {
+					case ParseResult.Success:
+						return;
+					case ParseResult.ForceMismatch:
+						goto MISMATCH;
+					case ParseResult.Failure:
+						goto TRY_MERGE;
+				}
+			}
+			while (start < lineEnd);
 
 		TRY_MERGE:
-			if ((tag = lastTag) == null
-				|| tag is MarkdownTag m && m.ContinueToNextLine == false) {
+			if (lastTag == null || (lastTag is MarkdownTag m && m.ContinueToNextLine == false)) {
 				goto MISMATCH;
 			}
-			results.Add(_LastTaggedSpan = new TaggedContentSpan(tag, span, 0, 0));
+			if (taggedSpan != null) {
+				// 扩展长度至当前行结束
+				taggedSpan.ExtendTo(lineEnd);
+
+				// 将更新后的 Tag 加入 results 以便渲染
+				results.Add(taggedSpan);
+				_LastTaggedSpan = taggedSpan;
+				return;
+			}
+			return;
+
 		MISMATCH:
 			Result.ClearRange(span.Start, l);
+			return;
+
+		REUSE:
+			results.Add(taggedSpan);
+			_LastTaggedSpan = taggedSpan;
 		}
+
+		void RevalidateTaggedSpan(TaggedContentSpan taggedSpan, SnapshotSpan changedSpan) {
+			if (taggedSpan?.Tag is not MarkdownTag tag || !taggedSpan.Contains(changedSpan.End) && taggedSpan.End != changedSpan.End.Position) {
+				return;
+			}
+			var s = taggedSpan.TextSnapshot;
+			if (!tag.ValidateStart(s, taggedSpan.Start)) {
+				Result.ClearRange(taggedSpan);
+				return;
+			}
+			if (tag.IsClosed && !tag.ValidateEnd(s, taggedSpan.End, true)) {
+				if (!tag.ContinueToNextLine) {
+					Result.ClearRange(taggedSpan);
+					return;
+				}
+				_LastTaggedSpan = taggedSpan;
+			}
+		}
+
+		ParseResult HandleSpaces(ref int start, ref char c, int lineEnd, ITextSnapshot s, SnapshotSpan lineSpan, ICollection<TaggedContentSpan> results, TaggedContentSpan taggedSpan) {
+			// n 初始化为 1，因为进入此函数时 c 已经是 ' '
+			int n = 1;
+
+			while (++start < lineEnd) {
+				switch (c = s[start]) {
+					case ' ':
+						++n;
+						if (n == 4) {
+							// 1. 检查嵌套列表
+							if (PeekForNestedList(ref start, lineEnd, s, ref c)) {
+								return ParseResult.Retry;
+							}
+							// 2. 检查缩进 HTML (针对 4+ 空格)
+							if (PeekForIndentedHtml(ref start, lineEnd, s, ref c)) {
+								return ParseResult.Retry;
+							}
+							// 3. 否则是缩进代码块
+							return HandleIndentedBlock(ref start, lineEnd, s, lineSpan, results, taggedSpan?.Tag);
+						}
+						continue;
+					case '\t':
+						return HandleIndentedBlock(ref start, lineEnd, s, lineSpan, results, taggedSpan?.Tag);
+					case '\r':
+					case '\n':
+						return ParseResult.ForceMismatch;
+					case '<':
+						// less then 4 spaces, maybe HTML block
+						var (htmlEnd, htmlType) = ParseHtmlBlock(s, start, lineEnd);
+						if (htmlEnd != InvalidTag) {
+							// 是有效的 HTML 块，委托给 HandleHtml 处理
+							// 传入 lineSpan 可以确保高亮范围包含行首的空格缩进
+							return HandleHtml(ref start, lineEnd, s, lineSpan, results, taggedSpan);
+						}
+						return ParseResult.Failure;
+					default:
+						return ParseResult.Failure;
+				}
+			}
+
+			// 循环结束（行尾），且 n < 4，清除状态
+			return ParseResult.ForceMismatch;
+		}
+
+		ParseResult HandleIndentedBlock(ref int start, int lineEnd, ITextSnapshot s, SnapshotSpan lineSpan, ICollection<TaggedContentSpan> results, IClassificationTag lastTag) {
+			// 如果在原始块中，不创建新的代码块
+			if (IsInRawContentBlock(lastTag)) {
+				return ParseResult.Failure;
+			}
+			// 添加缩进代码块标记
+			results.Add(_LastTaggedSpan = new TaggedContentSpan(__CodeBlockTag, s, lineSpan.Start, lineEnd - lineSpan.Start, start - lineSpan.Start, lineEnd - start));
+			return ParseResult.Success;
+		}
+
+		ParseResult HandleHeader(ref int start, int lineEnd, ITextSnapshot s, SnapshotSpan lineSpan, ICollection<TaggedContentSpan> results, IClassificationTag lastTag) {
+			if (IsInRawContentBlock(lastTag)) {
+				return ParseResult.Failure;
+			}
+
+			// 修复：n 初始化为 1
+			int n = 1;
+			int lineStart = start;
+			char c;
+			while (++start < lineEnd) {
+				if ((c = s[start]) == '#') {
+					++n;
+					if (n == 7) {
+						return ParseResult.Failure;
+					}
+					continue;
+				}
+				if (c.IsCodeWhitespaceOrNewLine()) {
+					++start;
+					break;
+				}
+				return ParseResult.Failure;
+			}
+
+			// 防止越界
+			if (n < 1 || n > 6) return ParseResult.Failure;
+
+			results.Add(_LastTaggedSpan = new TaggedContentSpan(HeaderClassificationTypes[n], s, lineStart, lineEnd - lineStart, start - lineStart, lineEnd - start));
+			return ParseResult.Success;
+		}
+
+		ParseResult HandleQuote(ref int start, ref char c, int lineEnd, ITextSnapshot s, SnapshotSpan lineSpan, ICollection<TaggedContentSpan> results, IClassificationTag lastTag) {
+			if (IsInRawContentBlock(lastTag)) {
+				return ParseResult.Failure;
+			}
+
+			int contenStart = SkipWhitespace(s, start, lineEnd);
+			results.Add(_LastTaggedSpan = new TaggedContentSpan(new MarkdownBlockQuoteTag(__QuotationTag.ClassificationType, start - lineSpan.Start, contenStart != lineEnd), s, lineSpan.Start, lineEnd - lineSpan.Start, contenStart - lineSpan.Start, lineEnd - contenStart));
+
+			if (++start < lineEnd) {
+				c = s[start];
+				return ParseResult.Retry;
+			}
+			return ParseResult.Success;
+		}
+
+		ParseResult HandleOrderedList(ref int start, int lineEnd, ITextSnapshot s, SnapshotSpan lineSpan, ICollection<TaggedContentSpan> results, IClassificationTag lastTag) {
+			if (IsInRawContentBlock(lastTag)) {
+				return ParseResult.Failure;
+			}
+
+			// 修复：n 初始化为 1
+			int n = 1;
+			char c = s[start];
+
+			while (++start < lineEnd) {
+				if ((c = s[start]).IsBetweenUn('0', '9')) {
+					++n;
+					if (n == 10) {
+						return ParseResult.Failure;
+					}
+				}
+				else if (c.CeqAny('.', ')')) {
+					results.Add(_LastTaggedSpan = new TaggedContentSpan(__OrderedListTag, s, lineSpan.Start, lineEnd - lineSpan.Start, start - lineSpan.Start, lineEnd - start));
+					return ParseResult.Success;
+				}
+				else {
+					return ParseResult.Failure;
+				}
+			}
+			return ParseResult.Failure;
+		}
+
+		ParseResult HandleThematicBreakOrList(ref int start, int lineEnd, ITextSnapshot s, SnapshotSpan lineSpan, ICollection<TaggedContentSpan> results, IClassificationTag lastTag, char c) {
+			if (IsInRawContentBlock(lastTag)) {
+				return ParseResult.Failure;
+			}
+
+			if (IsThematicBreak(s, start, lineEnd, c)) {
+				results.Add(_LastTaggedSpan = new TaggedContentSpan(__ThematicBreakTag, s, lineSpan.Start, lineEnd - lineSpan.Start, start - lineSpan.Start, lineEnd - start));
+				return ParseResult.Success;
+			}
+
+			if (c == '_') {
+				return ParseResult.Failure;
+			}
+
+			// 委托给无序列表处理
+			return HandleUnorderedList(ref start, lineEnd, s, lineSpan, results, lastTag);
+		}
+
+		ParseResult HandleUnorderedList(ref int start, int lineEnd, ITextSnapshot s, SnapshotSpan lineSpan, ICollection<TaggedContentSpan> results, IClassificationTag lastTag) {
+			if (IsInRawContentBlock(lastTag)) {
+				return ParseResult.Failure;
+			}
+
+			if (++start < lineEnd && s[start].IsCodeWhitespaceChar()) {
+				results.Add(_LastTaggedSpan = new TaggedContentSpan(__UnorderedListTag, s, lineSpan.Start, lineEnd - lineSpan.Start, start - lineSpan.Start, lineEnd - start));
+				return ParseResult.Success;
+			}
+			return ParseResult.Failure;
+		}
+
+		ParseResult HandleFence(ref int start, int lineEnd, ITextSnapshot s, SnapshotSpan lineSpan, ICollection<TaggedContentSpan> results, TaggedContentSpan taggedSpan) {
+			char c = s[start];
+			int n = GetFenceBlockSequence(s, start, lineEnd, c, out bool isOpen);
+			if (n >= 3) {
+				var lastTag = taggedSpan?.Tag;
+				// 闭合 Fence 的处理
+				if (lastTag is MarkdownFenceTag lastFence && !lastFence.IsClosed) {
+					// 1. 扩展当前 Tag 的范围，使其覆盖当前的闭合行
+					taggedSpan.ExtendTo(lineEnd);
+					results.Add(taggedSpan);
+					if (lastFence.FenceCharacter == c && !isOpen && n >= lastFence.FenceLength) {
+						// 2. 标记 Tag 为已关闭，这样下一行解析时 ContinueToNextLine 将返回 false
+						lastFence.Close();
+					}
+					_LastTaggedSpan = taggedSpan;
+					return ParseResult.Success;
+				}
+
+				// 开启新 Fence 的处理
+				if (lastTag is MarkdownHtmlBlockTag) {
+					return ParseResult.Failure;
+				}
+
+				var newTag = new TaggedContentSpan(new MarkdownFenceTag(__FencedCodeBlockType, c, n), s, lineSpan.Start, lineEnd - lineSpan.Start, start - lineSpan.Start, lineEnd - start);
+				results.Add(_LastTaggedSpan = newTag);
+				return ParseResult.Success;
+			}
+			return ParseResult.Failure;
+		}
+
+		ParseResult HandleHtml(ref int start, int lineEnd, ITextSnapshot s, SnapshotSpan lineSpan, ICollection<TaggedContentSpan> results, TaggedContentSpan taggedSpan) {
+			// 1. 检查是否在 HTML 块内部
+			if (taggedSpan?.Tag is MarkdownFenceTag) {
+				return ParseResult.Failure; // 在代码块中，HTML 块无效
+			}
+
+			// 2. 尝试关闭现有的 HTML 块 (类似 HandleFence 的逻辑)
+			if (taggedSpan?.Tag is MarkdownHtmlBlockTag lastHtml && !lastHtml.IsClosed) {
+				bool isClosing = false;
+				// 简单扫描当前行是否包含结束标记
+				// 注意：这里不需要完全解析，只需要找到闭合符号
+				switch (lastHtml.Type) {
+					case MarkupHtmlType.HtmlComment:
+						// 查找 -->
+						for (int i = start; i < lineEnd - 2; i++) {
+							if (s[i] == '-' && s[i + 1] == '-' && s[i + 2] == '>') {
+								isClosing = true;
+								break;
+							}
+						}
+						break;
+					case MarkupHtmlType.ProcessingInstruction:
+						// 查找 ?>
+						for (int i = start; i < lineEnd - 1; i++) {
+							if (s[i] == '?' && s[i + 1] == '>') {
+								isClosing = true;
+								break;
+							}
+						}
+						break;
+					case MarkupHtmlType.CData:
+						// 查找 ]]>
+						for (int i = start; i < lineEnd - 2; i++) {
+							if (s[i] == ']' && s[i + 1] == ']' && s[i + 2] == '>') {
+								isClosing = true;
+								break;
+							}
+						}
+						break;
+						// DocType 和 General 通常在单行闭合，或者需要匹配 Tag 名（目前较难支持），
+						// 暂时不处理 General 的动态关闭，依靠默认行为或编辑时的重新解析
+				}
+
+				if (isClosing) {
+					lastHtml.Close();
+				}
+				// 找到结束标记：扩展范围，关闭 Tag
+				Result.ClearRange(start, lineEnd - start);
+				taggedSpan.ExtendTo(lineEnd);
+				results.Add(taggedSpan);
+				_LastTaggedSpan = taggedSpan;
+				return ParseResult.Success;
+			}
+
+			// 3. 处理新 HTML 块的开始
+			// 如果当前行已经在某个未关闭的 HTML 块内（且没有找到结束标记），则由 TRY_MERGE 处理扩展
+			if (taggedSpan?.Tag is MarkdownHtmlBlockTag) {
+				return ParseResult.Failure;
+			}
+
+			var (htmlEnd, htmlType) = ParseHtmlBlock(s, start, lineEnd);
+			if (htmlEnd == InvalidTag) {
+				return ParseResult.Failure;
+			}
+
+			var htmlTag = new MarkdownHtmlBlockTag(htmlType == MarkupHtmlType.HtmlComment ? MarkdownClassificationTypes.Default.Comment : MarkdownClassificationTypes.Default.HtmlCodeBlock, htmlType);
+			taggedSpan = new TaggedContentSpan(htmlTag, s, lineSpan.Start, lineEnd - lineSpan.Start, start - lineSpan.Start, lineEnd - start);
+			results.Add(taggedSpan);
+
+			if (htmlEnd == WaitingEndTag) {
+				_LastTaggedSpan = taggedSpan;
+			}
+			else {
+				// 如果是新块且在一行内闭合，标记为已关闭
+				htmlTag.Close();
+				_LastTaggedSpan = null;
+			}
+			return ParseResult.Success;
+		}
+
 
 		static bool PeekForNestedList(ref int start, int lineEnd, ITextSnapshot s, ref char c) {
 			int nextPos = start + 1;
@@ -343,7 +569,8 @@ namespace Codist.Taggers
 			return false;
 		}
 
-		TaggedContentSpan GetPrecedingTaggedSpan(SnapshotSpan span, SnapshotPoint lineStart, ITextSnapshot s) {
+		TaggedContentSpan GetPrecedingTaggedSpan(SnapshotSpan span) {
+			var s = span.Snapshot;
 			if (_LastTaggedSpan != null) {
 				if (_LastTaggedSpan.Update(s)
 					&& IsNextTo(ref span, _LastTaggedSpan.Span)
@@ -355,38 +582,53 @@ namespace Codist.Taggers
 				return null;
 			}
 
-			var ts = Result.GetPrecedingTaggedSpan(lineStart, _ => true);
-			if (ts != null && ts.Tag is MarkdownHeadingTag == false && ts.Update(s)) {
-				if (span.Start.Position.CeqAny(ts.Span.Start, ts.Span.End)) {
-					return ts;
+			var spanStart = span.Start;
+			var ts = Result.GetPrecedingTaggedSpan(spanStart, _ => true);
+			if (ts == null || !ts.Update(s)) {
+				return null;
+			}
+			if (ts.Start > 0) {
+				var prev = Result.GetPrecedingTaggedSpan(ts.Span.Start - 1, _ => true);
+				if (prev?.Tag is MarkdownTag pt && pt.BlockType.CeqAny(BlockType.FencedBlock, BlockType.HtmlBlock) && prev.Update(s)) {
+					if (!pt.IsClosed
+						|| pt.ValidateStart(s, prev.Start) && !pt.ValidateEnd(s, prev.End, IsProcessingChanges)) {
+						return prev;
+					}
 				}
-				var line = s.GetLineFromPosition(ts.Start);
-				var lineCount = s.LineCount;
-				int lineNum = line.LineNumber;
-				var p = lineStart.Position;
-				bool includeEmptyLine = ts.Tag is MarkdownFenceTag;
-				while (++lineNum < lineCount && line.Start.Position < p) {
-					line = s.GetLineFromLineNumber(lineNum);
-					if (line.Start.Position > p) {
+			}
+			if (ts.Tag is MarkdownHeadingTag) {
+				return null;
+			}
+			if (span.Start.Position.CeqAny(ts.Span.Start.Position, ts.Span.End.Position)
+				|| IsNextTo(ref span, ts.Span)) {
+				return ts;
+			}
+			var line = s.GetLineFromPosition(ts.Start);
+			var lineCount = s.LineCount;
+			int lineNum = line.LineNumber;
+			var p = spanStart.Position;
+			bool includeEmptyLine = ts.Tag is MarkdownTag mt && mt.MayContainEmptyLine;
+			while (++lineNum < lineCount && line.Start.Position < p) {
+				line = s.GetLineFromLineNumber(lineNum);
+				if (line.Start.Position > p) {
+					return null;
+				}
+
+				if (includeEmptyLine == false) {
+					var contentStart = line.Extent.GetContentStart();
+					if (contentStart < 0) {
 						return null;
 					}
-
-					if (includeEmptyLine == false) {
-						var contentStart = line.Extent.GetContentStart();
-						if (contentStart < 0) {
-							return null;
-						}
-					}
-					if (line.Start.Position == p) {
-						return ts;
-					}
+				}
+				if (line.Start.Position == p) {
+					return ts;
 				}
 			}
 			return null;
 		}
 
 		static bool IsInRawContentBlock(IClassificationTag tag) {
-			return tag is MarkdownTag m && m.IsRawContentBlock;
+			return tag is MarkdownTag m && m.IsRawContentBlock && m.ContinueToNextLine;
 		}
 
 		static bool IsNextTo(ref SnapshotSpan next, SnapshotSpan prev) {
@@ -404,15 +646,15 @@ namespace Codist.Taggers
 
 		static MarkdownHeadingTag[] InitHeaderClassificationTypes() {
 			var r = ServicesHelper.Instance.ClassificationTypeRegistry;
-			return new MarkdownHeadingTag[7] {
+			return [
 				null,
-				new MarkdownHeadingTag(r.GetClassificationType(Constants.MarkdownHeading1), 1),
-				new MarkdownHeadingTag(r.GetClassificationType(Constants.MarkdownHeading2), 2),
-				new MarkdownHeadingTag(r.GetClassificationType(Constants.MarkdownHeading3), 3),
-				new MarkdownHeadingTag(r.GetClassificationType(Constants.MarkdownHeading4), 4),
-				new MarkdownHeadingTag(r.GetClassificationType(Constants.MarkdownHeading5), 5),
-				new MarkdownHeadingTag(r.GetClassificationType(Constants.MarkdownHeading6), 6)
-			};
+				new(r.GetClassificationType(Constants.MarkdownHeading1), 1),
+				new(r.GetClassificationType(Constants.MarkdownHeading2), 2),
+				new(r.GetClassificationType(Constants.MarkdownHeading3), 3),
+				new(r.GetClassificationType(Constants.MarkdownHeading4), 4),
+				new(r.GetClassificationType(Constants.MarkdownHeading5), 5),
+				new(r.GetClassificationType(Constants.MarkdownHeading6), 6)
+			];
 		}
 
 		static bool IsThematicBreak(ITextSnapshot snapshot, int start, int end, char ch) {

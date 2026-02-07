@@ -85,11 +85,13 @@ namespace Codist.Taggers
 			}
 		}
 
-		public void ClearRange(int start, int length) {
-			var span = new TaggedContentSpan(start, length);
+		public void ClearRange(TaggedContentSpan span) {
 			var tags = _Tags;
-			while (tags.Remove(span)) {
-			}
+			while (tags.Remove(span)) {}
+		}
+
+		public void ClearRange(int start, int length) {
+			ClearRange(new TaggedContentSpan(start, length));
 		}
 
 		public void PurgeOutdatedTags(TextContentChangedEventArgs args) {

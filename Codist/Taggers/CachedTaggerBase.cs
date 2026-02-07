@@ -23,6 +23,7 @@ namespace Codist.Taggers
 		protected ITextView TextView => _TextView;
 		public TaggerResult Result => _Tags;
 		protected abstract bool DoFullParseAtFirstLoad { get; }
+		protected bool IsProcessingChanges { get; private set; }
 		public bool Disabled { get; set; }
 
 		public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
@@ -75,7 +76,13 @@ namespace Codist.Taggers
 			}
 			_Tags.PurgeOutdatedTags(args);
 			if (DoFullParseAtFirstLoad) {
-				ReparseChangedLines(args);
+				IsProcessingChanges = true;
+				try {
+					ReparseChangedLines(args);
+				}
+				finally {
+					IsProcessingChanges = false;
+				}
 			}
 		}
 
@@ -112,6 +119,7 @@ namespace Codist.Taggers
 			foreach (var item in args.Changes) {
 				var line = ss.GetLineFromPosition(item.NewPosition);
 				if (line.Start.Position < lastEnd) {
+					// skip identical lines
 					continue;
 				}
 				yield return line.Extent;

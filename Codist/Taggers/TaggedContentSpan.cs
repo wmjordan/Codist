@@ -59,6 +59,14 @@ namespace Codist.Taggers
 			}
 			return false;
 		}
+		public void ExtendTo(int end) {
+			var newLength = end - Start;
+			if (newLength < 0) {
+				throw new InvalidOperationException("end should not be less than start");
+			}
+			Length = newLength;
+			TrackingSpan = TextSnapshot.CreateTrackingSpan(Start, newLength, SpanTrackingMode.EdgeInclusive);
+		}
 
 		public override string ToString() {
 			return ContentText;
