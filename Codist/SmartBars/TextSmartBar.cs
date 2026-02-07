@@ -1,13 +1,9 @@
 ﻿using System;
 using Microsoft.VisualStudio.Text.Editor;
 
-namespace Codist.SmartBars
-{
-	sealed class TextSmartBar : SmartBar
-	{
-		public TextSmartBar(IWpfTextView textView, Microsoft.VisualStudio.Text.Operations.ITextSearchService2 textSearchService) : base(textView, textSearchService) {
-		}
+namespace Codist.SmartBars;
 
-		protected override BarType Type => BarType.PlainText;
-	}
+sealed class TextSmartBar(IWpfTextView textView) : SmartBar(textView)
+{
+	protected override BarType Type => BarType.PlainText;
 }
