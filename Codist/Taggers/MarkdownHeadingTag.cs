@@ -51,7 +51,7 @@ namespace Codist.Taggers
 				HtmlCodeBlock = types.GetClassificationType(Constants.MarkdownHtmlCodeBlock);
 			}
 			else {
-				var dummy = TextEditorHelper.CreateClassificationCategory(Constants.CodeText);
+				var dummy = ClassificationStyleHelper.CreateClassificationCategory(Constants.CodeText);
 				Headings = new[] {
 					null,
 					dummy,

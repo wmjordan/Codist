@@ -799,7 +799,7 @@ namespace Codist.Options
 				var id = item.Id;
 				var style = styles.FirstOrDefault(i => i.Id == id) ?? item;
 				if (item.Category != category) {
-					r.Add(TextEditorHelper.CreateClassificationCategory(category = item.Category));
+					r.Add(ClassificationStyleHelper.CreateClassificationCategory(category = item.Category));
 				}
 				r.Add(ct);
 			}
@@ -823,7 +823,7 @@ namespace Codist.Options
 				.Select(t => t.Tag.ClassificationType)
 				.ToList(); // cache the results for iterations below
 			return classifications
-				.Union(classifications.SelectMany(i => i.GetBaseTypes()), TextEditorHelper.GetClassificationTypeComparer())
+				.Union(classifications.SelectMany(i => i.GetBaseTypes()), ClassificationStyleHelper.GetClassificationTypeComparer())
 				.Where(t => t.IsFormattableClassificationType() && t.IsOfType("(TRANSIENT)") == false) // remove transient classification types
 				.ToList();
 		}

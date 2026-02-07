@@ -97,6 +97,9 @@
     <Compile Include="Controls\ThemedRichTextBox.cs" />
     <Compile Include="Controls\ThemedHyperlink.cs" />
     <Compile Include="Commands\CancelRepeatingActionCommand.cs" />
+    <Compile Include="Helpers\ClassificationStyleHelper.cs" />
+    <Compile Include="Helpers\EditCommands.cs" />
+    <Compile Include="Helpers\SpanHelper.cs" />
     <Compile Include="Helpers\ValueHelper.cs" />
     <Compile Include="Helpers\VsImageHelper.cs" />
     <Compile Include="Helpers\ThemeHelper.cs" />

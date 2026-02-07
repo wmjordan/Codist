@@ -13,12 +13,12 @@ namespace Codist.Taggers
 		internal static readonly MarkdownHeadingTag[] HeaderClassificationTypes = InitHeaderClassificationTypes();
 		internal static readonly MarkdownHeadingTag[] DummyHeaderTags = [
 			null,
-			new(TextEditorHelper.CreateClassificationCategory(Constants.CodeText), 1),
-			new(TextEditorHelper.CreateClassificationCategory(Constants.CodeText), 2),
-			new(TextEditorHelper.CreateClassificationCategory(Constants.CodeText), 3),
-			new(TextEditorHelper.CreateClassificationCategory(Constants.CodeText), 4),
-			new(TextEditorHelper.CreateClassificationCategory(Constants.CodeText), 5),
-			new(TextEditorHelper.CreateClassificationCategory(Constants.CodeText), 6)
+			new(ClassificationStyleHelper.CreateClassificationCategory(Constants.CodeText), 1),
+			new(ClassificationStyleHelper.CreateClassificationCategory(Constants.CodeText), 2),
+			new(ClassificationStyleHelper.CreateClassificationCategory(Constants.CodeText), 3),
+			new(ClassificationStyleHelper.CreateClassificationCategory(Constants.CodeText), 4),
+			new(ClassificationStyleHelper.CreateClassificationCategory(Constants.CodeText), 5),
+			new(ClassificationStyleHelper.CreateClassificationCategory(Constants.CodeText), 6)
 		]; // used when syntax highlight is disabled
 		static readonly ClassificationTag __QuotationTag = new(MarkdownClassificationTypes.Default.Quotation);
 		static readonly ClassificationTag __OrderedListTag = new(MarkdownClassificationTypes.Default.OrderedList);
