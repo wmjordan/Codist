@@ -133,7 +133,6 @@ namespace Codist
 			Commands.OptionsWindowCommand.Initialize();
 
 			"Package initialization finished.".Log();
-			//ListEditorCommands();
 		}
 
 		void InitializeOrUpgradeConfig() {
@@ -162,44 +161,6 @@ namespace Codist
 			LogHelper.ClearLog();
 			//DTE.ObjectExtenders.UnregisterExtenderProvider(_extenderCookie);
 		}
-
-#pragma warning disable VSTHRD010 // Invoke single-threaded types on Main thread
-		/// <summary>A helper method to discover registered editor commands.</summary>
-		static void ListEditorCommands() {
-			var commands = DTE.Commands;
-			var c = commands.Count;
-			var s = new string[c];
-			var s2 = new string[c];
-			var d = new HashSet<string>();
-			for (int i = 0; i < s.Length; i++) {
-				var name = commands.Item(i+1).Name;
-				if (d.Add(name) == false) {
-					continue;
-				}
-				if (name.IndexOf('.') == -1) {
-					s[i] = name;
-				}
-				else {
-					s2[i] = name;
-				}
-			}
-			Array.Sort(s);
-			Array.Sort(s2);
-			var sb = new System.Text.StringBuilder(16000)
-				.AppendLine("// Call CodistPackage.ListEditorCommands to generate this file")
-				.AppendLine();
-			foreach (var item in s) {
-				if (String.IsNullOrEmpty(item) == false) {
-					sb.AppendLine(item);
-				}
-			}
-			foreach (var item in s2) {
-				if (String.IsNullOrEmpty(item) == false) {
-					sb.AppendLine(item);
-				}
-			}
-			Debug.WriteLine(sb);
-		}
 		#endregion
 
 		static class Vs
@@ -207,5 +168,4 @@ namespace Codist
 			public static readonly Version Version = new Version(Application.Current.MainWindow.GetType().Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version);
 		}
 	}
-#pragma warning restore VSTHRD010 // Invoke single-threaded types on Main thread
 }
