@@ -1215,10 +1215,13 @@ namespace Codist
 					}
 				}
 
-				var rtf = ServicesHelper.Instance.RtfService.GenerateRtf(new NormalizedSnapshotSpanCollection(spans), view);
 
 				var data = new DataObject();
-				data.SetText(rtf.TrimEnd(), TextDataFormat.Rtf);
+				if (sb.Length < 256 << 10) {
+					// don't generate RTF copy if text is too long
+					var rtf = ServicesHelper.Instance.RtfService.GenerateRtf(new NormalizedSnapshotSpanCollection(spans), view);
+					data.SetText(rtf.TrimEnd(), TextDataFormat.Rtf);
+				}
 				data.SetText(sb.ToString(), TextDataFormat.UnicodeText);
 				try {
 					Clipboard.SetDataObject(data, false);
