@@ -10,9 +10,11 @@ using System.Windows.Input;
 using System.Windows.Media;
 using CLR;
 using Codist.Controls;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Operations;
+using Microsoft.VisualStudio.TextManager.Interop;
 using VsBrushes = Microsoft.VisualStudio.Shell.VsBrushes;
 using VsColors = Microsoft.VisualStudio.Shell.VsColors;
 
@@ -20,7 +22,7 @@ namespace Codist.SmartBars
 {
 	//todo Make this class async
 	/// <summary>The contextual toolbar.</summary>
-	internal partial class SmartBar
+	internal partial class SmartBar : IOleCommandTarget
 	{
 		const int Selecting = 1, Working = 2;
 		internal const string QuickInfoSuppressionId = nameof(SmartBar);
@@ -36,6 +38,8 @@ namespace Codist.SmartBars
 		DateTime _LastShiftHit;
 		int _SelectionStatus;
 		bool _CtrlSuppression;
+		IOleCommandTarget _NextCommandTarget;
+		IVsTextView _VsView;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="SmartBar"/> class.
@@ -169,7 +173,7 @@ namespace Codist.SmartBars
 		async Task CreateToolBarAsync(CancellationToken cancellationToken) {
 			await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
 			while ((Mouse.LeftButton == MouseButtonState.Pressed
-				|| UIHelper.IsShiftDown
+				|| UIHelper.IsShiftDown || UIHelper.IsAltDown
 				|| _CtrlSuppression && UIHelper.IsCtrlDown)
 				&& cancellationToken.IsCancellationRequested == false) {
 				// postpone the even handler until the left mouse button and keyboard modifiers are released
@@ -218,6 +222,9 @@ namespace Codist.SmartBars
 				ToolBar2.Visibility = Visibility.Visible;
 				ToolBar2.HideOverflow();
 			}
+			if (_NextCommandTarget is null) {
+				GetVsView(view).AddCommandFilter(this, out _NextCommandTarget);
+			}
 			_ToolBarTray.Visibility = Visibility.Visible;
 			_ToolBarTray.Opacity = WpfHelper.DimmedOpacity;
 			_ToolBarTray.SizeChanged -= ToolBarSizeChanged;
@@ -226,15 +233,26 @@ namespace Codist.SmartBars
 			_View.VisualElement.MouseMove += ViewMouseMove;
 		}
 
-		protected void HideToolBar() {
+		IVsTextView GetVsView(ITextView view) {
+			return _VsView ??= ServicesHelper.Instance.EditorAdaptersFactory.GetViewAdapter(view);
+		}
+
+		protected void HideToolBar(bool cancelAsyncOperation = false) {
 			_ToolBarTray.Visibility = Visibility.Hidden;
 			_ToolBarTray.SizeChanged -= ToolBarSizeChanged;
 			_View.VisualElement.MouseMove -= ViewMouseMove;
+			if (_NextCommandTarget != null) {
+				GetVsView(_View).RemoveCommandFilter(this);
+				_NextCommandTarget = null;
+			}
+			if (cancelAsyncOperation) {
+				_Cancellation.CancelAndDispose();
+			}
 			_LastShiftHit = DateTime.MinValue;
 		}
 
 		void HideToolBar(object sender, RoutedEventArgs e) {
-			HideToolBar();
+			HideToolBar(true);
 		}
 
 		void KeepToolbar() {
@@ -248,24 +266,15 @@ namespace Codist.SmartBars
 				return;
 			}
 			var v = _View;
-			var cb = v.TextViewLines.GetTextMarkerGeometry(v.GetMultiSelectionBroker().PrimarySelection.Extent.SnapshotSpan).Bounds;
 			var pos = Mouse.GetPosition(v.VisualElement);
-			bool isMouseWithinSelectionRange = (pos.Y + v.ViewportTop).IsBetween(cb.Top, cb.Bottom);
-			double top, bottom;
-			if (isMouseWithinSelectionRange) {
-				var line = v.TextViewLines.GetTextViewLineContainingYCoordinate(pos.Y + v.ViewportTop);
-				if (line is null) {
-					top = pos.Y;
-					bottom = pos.X;
-				}
-				else {
-					top = line.Top;
-					bottom = line.Bottom;
-				}
+			double top, bottom, mouseY = (pos.Y + v.ViewportTop).Clamp(v.ViewportTop, v.ViewportBottom);
+			var line = v.TextViewLines.GetTextViewLineContainingYCoordinate(mouseY);
+			if (line is null) {
+				top = bottom = mouseY;
 			}
 			else {
-				top = cb.Top;
-				bottom = cb.Bottom;
+				top = line.TextTop;
+				bottom = line.TextBottom;
 			}
 			var rs = _ToolBarTray.RenderSize;
 			var z = v.ZoomLevel / 100;
@@ -313,7 +322,7 @@ namespace Codist.SmartBars
 			}
 			if (e.Key != Key.LeftShift && e.Key != Key.RightShift) {
 				if (e.Key == Key.Escape) {
-					HideToolBar();
+					HideToolBar(true);
 				}
 				_LastShiftHit = DateTime.MinValue;
 				return;
@@ -325,7 +334,7 @@ namespace Codist.SmartBars
 			}
 			e.Handled = true;
 			if (_ToolBarTray.Visibility == Visibility.Visible) {
-				HideToolBar();
+				HideToolBar(true);
 				return;
 			}
 			if ((now - _LastShiftHit).Ticks < TimeSpan.TicksPerSecond) {
@@ -351,10 +360,10 @@ namespace Codist.SmartBars
 		}
 
 		void ViewMouseMove(object sender, MouseEventArgs e) {
+			const double SensibleRange = 100;
 			if (_ToolBarTray.IsVisible == false) {
 				return;
 			}
-			const double SensibleRange = 100;
 			var p = e.GetPosition(_ToolBarTray);
 			double x = p.X, y = p.Y;
 			var s = _ToolBarTray.RenderSize;
@@ -380,14 +389,14 @@ namespace Codist.SmartBars
 
 		void ViewSelectionChanged(object sender, EventArgs e) {
 			// suppress event handler if KeepToolBar
-			if (TextEditorHelper.ActiveViewFocused() == false && _View.VisualElement.IsKeyboardFocused == false
-				|| DateTime.Now < _LastExecute.AddSeconds(1) && _ToolBarTray.Visibility == Visibility.Visible) {
+			if (TextEditorHelper.ActiveViewFocused() == false
+					&& _View.VisualElement.IsKeyboardFocused == false
+				|| DateTime.Now < _LastExecute.AddSeconds(1)
+					&& _ToolBarTray.Visibility == Visibility.Visible) {
 				return;
 			}
 			if (_View.Selection.IsEmpty) {
-				_ToolBarTray.Visibility = Visibility.Hidden;
-				_View.VisualElement.MouseMove -= ViewMouseMove;
-				SyncHelper.CancelAndDispose(ref _Cancellation, true);
+				HideToolBar();
 				_SelectionStatus = 0;
 				return;
 			}
@@ -432,12 +441,31 @@ namespace Codist.SmartBars
 				view.VisualElement.MouseMove -= ViewMouseMove;
 				view.VisualElement.PreviewKeyUp -= ViewKeyUp;
 				view.Closed -= ViewClosed;
+				if (_VsView != null) {
+					_VsView.RemoveCommandFilter(this);
+					_VsView = null;
+				}
 				_View = null;
 			}
 			Config.UnregisterUpdateHandler(UpdateSmartBarConfig);
 			_TextSearchService = null;
 		}
 		#endregion
+
+		[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
+		int IOleCommandTarget.QueryStatus(ref Guid pguidCmdGroup, uint cCmds, OLECMD[] prgCmds, IntPtr pCmdText) {
+			return _NextCommandTarget?.QueryStatus(ref pguidCmdGroup, cCmds, prgCmds, pCmdText) ?? 0;
+		}
+
+		[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
+		int IOleCommandTarget.Exec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut) {
+			var r = _NextCommandTarget?.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut) ?? 0;
+			if (Op.Ceq(nCmdID, VSConstants.VSStd97CmdID.Copy)
+				&& VSConstants.GUID_VSStandardCommandSet97 == pguidCmdGroup) {
+				HideToolBar(true);
+			}
+			return r;
+		}
 
 		protected sealed class CommandContext
 		{
