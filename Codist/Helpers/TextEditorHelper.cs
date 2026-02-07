@@ -1202,7 +1202,7 @@ namespace Codist
 					if (indentStart >= endOfSelection) {
 						break;
 					}
-					extent = new SnapshotSpan(snapshot, Span.FromBounds(indentStart, line.End));
+					extent = new SnapshotSpan(snapshot, Span.FromBounds(indentStart, Math.Min(endOfSelection, line.End.Position)));
 					spans.Add(extent);
 					sb.Append(extent.GetText().TrimEnd());
 					NEXT_LINE:
