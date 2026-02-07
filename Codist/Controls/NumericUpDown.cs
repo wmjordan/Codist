@@ -40,17 +40,16 @@ namespace Codist.Controls
 			});
 			_ValueBox.TextChanged += (s, args) => {
 				var t = (TextBox)s;
-				if (Int32.TryParse(t.Text, out int v) == false) {
-					if (t.Text.Trim().Length == 0) {
-						Value = 0;
-						t.Text = String.Empty;
-					}
-					else {
-						t.Text = Value.ToString();
-					}
+				if (Int32.TryParse(t.Text, out int v)) {
+					Value = v;
+					return;
+				}
+				if (t.Text.Trim().Length == 0) {
+					Value = 0;
+					t.Text = String.Empty;
 				}
 				else {
-					Value = v;
+					t.Text = Value.ToString();
 				}
 			};
 			_ValueBox.PreviewLostKeyboardFocus += (s, args) => {
