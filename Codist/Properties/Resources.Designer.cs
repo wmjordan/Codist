@@ -7268,6 +7268,24 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Export ClassificationFormatMap.
+        /// </summary>
+        internal static string T_ExportClassificationFormatMap {
+            get {
+                return ResourceManager.GetString("T_ExportClassificationFormatMap", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Export IClassificationFormatMap.CurrentPriorityOrder of current text view to a file.
+        /// </summary>
+        internal static string T_ExportClassificationFormatMapTip {
+            get {
+                return ResourceManager.GetString("T_ExportClassificationFormatMapTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Export DTE.Commands.
         /// </summary>
         internal static string T_ExportDTECommands {
@@ -7277,7 +7295,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Save DTE.Commands (Name, Guid, Id, Bindings) to file.
+        ///   Looks up a localized string similar to Save DTE.Commands (Name, Guid, Id, Bindings) to a file.
         /// </summary>
         internal static string T_ExportDTECommandsTip {
             get {
@@ -7295,7 +7313,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Export theme colors to file.
+        ///   Looks up a localized string similar to Export theme colors to a file.
         /// </summary>
         internal static string T_ExportThemeColorsTip {
             get {

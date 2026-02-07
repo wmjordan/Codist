@@ -3109,13 +3109,13 @@ Shift: match case</value>
     <value>Export DTE.Commands</value>
   </data>
   <data name="T_ExportDTECommandsTip" xml:space="preserve">
-    <value>Save DTE.Commands (Name, Guid, Id, Bindings) to file</value>
+    <value>Save DTE.Commands (Name, Guid, Id, Bindings) to a file</value>
   </data>
   <data name="T_ExportThemeColors" xml:space="preserve">
     <value>Export Theme Colors</value>
   </data>
   <data name="T_ExportThemeColorsTip" xml:space="preserve">
-    <value>Export theme colors to file</value>
+    <value>Export theme colors to a file</value>
   </data>
   <data name="T_ExportApplicationResources" xml:space="preserve">
     <value>Export Application.Resources</value>
@@ -3140,5 +3140,11 @@ Shift: match case</value>
   </data>
   <data name="OT_HighlightMatchSelection" xml:space="preserve">
     <value>Highlight matches in editor</value>
+  </data>
+  <data name="T_ExportClassificationFormatMap" xml:space="preserve">
+    <value>Export ClassificationFormatMap</value>
+  </data>
+  <data name="T_ExportClassificationFormatMapTip" xml:space="preserve">
+    <value>Export IClassificationFormatMap.CurrentPriorityOrder of current text view to a file</value>
   </data>
 </root>

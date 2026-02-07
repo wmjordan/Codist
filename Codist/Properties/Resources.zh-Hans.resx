@@ -3095,7 +3095,7 @@ Shift: 匹配大小写</value>
     <value>导出 DTE.Commands</value>
   </data>
   <data name="T_ExportDTECommandsTip" xml:space="preserve">
-    <value>保存 DTE.Commands 的 Name, Guid, Id, Bindings 等信息到文件</value>
+    <value>导出 DTE.Commands 的 Name, Guid, Id, Bindings 等信息到文件</value>
   </data>
   <data name="T_ExportThemeColors" xml:space="preserve">
     <value>导出主题颜色</value>
@@ -3107,7 +3107,7 @@ Shift: 匹配大小写</value>
     <value>导出 Application.Resources</value>
   </data>
   <data name="T_ExportApplicationResourcesTip" xml:space="preserve">
-    <value>将 Visual Studio 程序窗口的 ResourceDictionary 导出到文件</value>
+    <value>导出 Visual Studio 程序窗口的 ResourceDictionary 到文件</value>
   </data>
   <data name="OT_Tools" xml:space="preserve">
     <value>工具</value>
@@ -3126,5 +3126,11 @@ Shift: 匹配大小写</value>
   </data>
   <data name="OT_HighlightMatchSelection" xml:space="preserve">
     <value>在编辑器上显示匹配项</value>
+  </data>
+  <data name="T_ExportClassificationFormatMap" xml:space="preserve">
+    <value>导出 ClassificationFormatMap</value>
+  </data>
+  <data name="T_ExportClassificationFormatMapTip" xml:space="preserve">
+    <value>导出与当前视图匹配的 IClassificationFormatMap.CurrentPriorityOrder 到文件</value>
   </data>
 </root>
