@@ -86,8 +86,8 @@ namespace Codist.SnippetTexts
 		[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
 		public int Exec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut) {
 			var nextCmd = _nextCommandTarget;
-			if (pguidCmdGroup == VSConstants.VSStd2K
-				&& _placeholderGroups.Count != 0) {
+			if (_placeholderGroups.Count != 0
+				&& pguidCmdGroup == VSConstants.VSStd2K) {
 				switch ((VSConstants.VSStd2KCmdID)nCmdID) {
 					case VSConstants.VSStd2KCmdID.TAB:
 						if (IsCompletionActive()) {
