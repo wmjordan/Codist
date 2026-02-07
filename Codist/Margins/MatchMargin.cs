@@ -18,7 +18,6 @@ namespace Codist.Margins
 {
 	sealed class MatchMargin : MarginElementBase, IDisposable, IWpfTextViewMargin
 	{
-		IEditorFormatMap _EditorFormatMap;
 		IWpfTextView _TextView;
 		IVerticalScrollBar _ScrollBar;
 		ITextSearchService2 _SearchService;
@@ -36,7 +35,6 @@ namespace Codist.Margins
 		public MatchMargin(IWpfTextView textView, IVerticalScrollBar scrollBar) : base(textView) {
 			_TextView = textView;
 			_ScrollBar = scrollBar;
-			_EditorFormatMap = ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(textView);
 			_SearchService = ServicesHelper.Instance.TextSearch;
 			_TextNavigator = ServicesHelper.Instance.TextStructureNavigator.GetTextStructureNavigator(textView.TextBuffer);
 
@@ -283,7 +281,6 @@ namespace Codist.Margins
 			if (_TextView != null) {
 				UnbindEvents();
 				_TextView = null;
-				_EditorFormatMap = null;
 				_ScrollBar = null;
 				_MatchBrush = null;
 				_DelayTimer.Stop();
