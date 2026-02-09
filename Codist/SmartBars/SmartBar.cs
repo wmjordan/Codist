@@ -33,7 +33,6 @@ internal partial class SmartBar : IOleCommandTarget
 	readonly bool _IsDiffWindow;
 	CancellationTokenSource _Cancellation = new CancellationTokenSource();
 	IWpfTextView _View;
-	ITextSearchService2 _TextSearchService;
 	DateTime _LastExecute;
 	DateTime _LastShiftHit;
 	int _SelectionStatus;
@@ -446,7 +445,6 @@ internal partial class SmartBar : IOleCommandTarget
 			_View = null;
 		}
 		Config.UnregisterUpdateHandler(UpdateSmartBarConfig);
-		_TextSearchService = null;
 	}
 	#endregion
 
@@ -469,6 +467,7 @@ internal partial class SmartBar : IOleCommandTarget
 	{
 		const ModifierKeys UnknownModifier = (ModifierKeys)(-1);
 		ModifierKeys _ModifierKeys = UnknownModifier;
+		ITextSearchService2 _TextSearch;
 		int _MultiLine;
 
 		public CommandContext(SmartBar bar, Control control) {
@@ -483,7 +482,7 @@ internal partial class SmartBar : IOleCommandTarget
 		public Control Sender { get; }
 		public bool KeepToolBarOnClick { get; set; }
 		public IWpfTextView View => Bar.View;
-		public ITextSearchService2 TextSearchService => ServicesHelper.Instance.TextSearch;
+		public ITextSearchService2 TextSearchService => _TextSearch ??= ServicesHelper.Instance.TextSearch;
 		public CancellationToken CancellationToken => Bar._Cancellation.GetToken();
 
 		public ModifierKeys ModifierKeys => _ModifierKeys == UnknownModifier ? (_ModifierKeys = Keyboard.Modifiers) : _ModifierKeys;

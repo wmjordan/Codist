@@ -218,7 +218,7 @@ partial class SmartBar
 				option |= FindOptions.Multiline;
 			}
 			// reverse the Selection direction to prevent adjacent selections being merged together
-			b.AddSelectionRange(ctx.Bar._TextSearchService.FindAll(ctx.View.TextSnapshot.ToSnapshotSpan(), t, option).Select(i => new Selection(i.End, i.Start)));
+			b.AddSelectionRange(ctx.TextSearchService.FindAll(ctx.View.TextSnapshot.ToSnapshotSpan(), t, option).Select(i => new Selection(i.End, i.Start)));
 			b.TrySetAsPrimarySelection(new Selection(s.End, s.Start));
 		});
 	}
