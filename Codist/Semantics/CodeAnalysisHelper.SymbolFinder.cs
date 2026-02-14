@@ -148,7 +148,7 @@ namespace Codist
 					if (cancellationToken.IsCancellationRequested) {
 						goto EXIT;
 					}
-					if (member.IsDeclaredMember()) {
+					if (!member.IsDeclaredMember()) {
 						continue;
 					}
 					ITypeSymbol mt;
