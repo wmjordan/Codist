@@ -132,6 +132,10 @@ namespace Codist.Controls
 		}
 
 		void HandleContextMenuOpening(object sender, ContextMenuEventArgs e) {
+			if (e.Source is System.Windows.Documents.Run r && r.ContextMenu != null) {
+				// don't intercept context menu for SymbolLink
+				return;
+			}
 			var s = sender as FrameworkElement;
 			var selection = __TextSelectionProp.GetValue(_Editor);
 			var selectionEmpty = (bool)__TextRangeIsEmptyProp.GetValue(selection);
