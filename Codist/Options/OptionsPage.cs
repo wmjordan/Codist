@@ -18,7 +18,16 @@ namespace Codist.Options
 			}.ReferenceStyle(VsResourceKeys.CheckBoxStyleKey);
 		}
 
+		public static void ApplyMargin(this Thickness margin, params FrameworkElement[] elements) {
+			foreach (var item in elements) {
+				item.Margin = margin;
+			}
+		}
 		public static void BindDependentOptionControls(this System.Windows.Controls.Primitives.ToggleButton checkBox, params UIElement[] dependentControls) {
+			var enabled = checkBox.IsChecked == true;
+			foreach (var item in dependentControls) {
+				item.IsEnabled = enabled;
+			}
 			checkBox.Checked += (s, args) => Array.ForEach(dependentControls, c => c.IsEnabled = true);
 			checkBox.Unchecked += (s, args) => Array.ForEach(dependentControls, c => c.IsEnabled = false);
 		}
