@@ -145,7 +145,7 @@ namespace Codist.SymbolCommands
 				return Symbol.FindReferrersAsync(Context.Document.Project, docs, defFilter, symbolFilter, nodeFilter, cancellationToken);
 			}
 			else {
-				symbolFilter = s => s.Kind == SymbolKind.Method;
+				symbolFilter = s => s?.Kind == SymbolKind.Method;
 				return Symbol.FindReferrersAsync(Context.Document.Project, docs, defFilter, symbolFilter, null, cancellationToken);
 			}
 		}
