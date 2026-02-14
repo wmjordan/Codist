@@ -77,25 +77,27 @@ namespace Codist
 		}
 
 		public static IEnumerable<ISymbol> ListMembers(this INamespaceOrTypeSymbol type) {
-			return type.GetMembers().Where(m => {
-				if (m.IsImplicitlyDeclared) {
+			return type.GetMembers().Where(IsDeclaredMember);
+		}
+
+		public static bool IsDeclaredMember(this ISymbol symbol) {
+			if (symbol.IsImplicitlyDeclared) {
+				return false;
+			}
+			if (symbol.Kind == SymbolKind.Method) {
+				var ms = (IMethodSymbol)symbol;
+				if (ms.AssociatedSymbol != null) {
 					return false;
 				}
-				if (m.Kind == SymbolKind.Method) {
-					var ms = (IMethodSymbol)m;
-					if (ms.AssociatedSymbol != null) {
+				switch (ms.MethodKind) {
+					case MethodKind.PropertyGet:
+					case MethodKind.PropertySet:
+					case MethodKind.EventAdd:
+					case MethodKind.EventRemove:
 						return false;
-					}
-					switch (ms.MethodKind) {
-						case MethodKind.PropertyGet:
-						case MethodKind.PropertySet:
-						case MethodKind.EventAdd:
-						case MethodKind.EventRemove:
-							return false;
-					}
 				}
-				return true;
-			});
+			}
+			return true;
 		}
 
 		/// <summary>
@@ -146,22 +148,23 @@ namespace Codist
 					if (cancellationToken.IsCancellationRequested) {
 						goto EXIT;
 					}
+					if (member.IsDeclaredMember()) {
+						continue;
+					}
 					ITypeSymbol mt;
 					if (member.Kind == SymbolKind.Field) {
-						if (!member.IsCompilerGenerated()
-							&& (mt = member.GetReturnType()) != null
+						if ((mt = member.GetReturnType()) != null
 							&& (Equals(mt, type)
 								|| strict == false && mt.CanConvertTo(type)
 								|| (mt as INamedTypeSymbol).ContainsTypeArgument(type, strict))) {
 							members.Add(member);
 						}
 					}
-					else if (!member.IsCompilerGenerated()
-						&& ((mt = member.GetReturnType()) != null
+					else if ((mt = member.GetReturnType()) != null
 							&& (Equals(mt, type)
 								|| strict == false && mt.CanConvertTo(type)
 								|| (mt as INamedTypeSymbol).ContainsTypeArgument(type, strict))
-							|| member.Kind == SymbolKind.Method && member.GetParameters().Any(paramComparer))) {
+							|| member.Kind == SymbolKind.Method && member.GetParameters().Any(paramComparer)) {
 						members.Add(member);
 					}
 				}
