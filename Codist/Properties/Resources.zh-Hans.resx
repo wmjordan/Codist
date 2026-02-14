@@ -225,7 +225,7 @@ Shift：删除并选中下一项（整个单词）</value>
     <value>查找具有相同签名的方法...</value>
   </data>
   <data name="CMD_FindOverrides" xml:space="preserve">
-    <value>查找重载方法...</value>
+    <value>查找重载成员...</value>
   </data>
   <data name="CMD_ListReferencedSymbols" xml:space="preserve">
     <value>列出引用的符号...</value>
@@ -3132,5 +3132,11 @@ Shift: 匹配大小写</value>
   </data>
   <data name="T_ExportClassificationFormatMapTip" xml:space="preserve">
     <value>导出与当前视图匹配的 IClassificationFormatMap.CurrentPriorityOrder 到文件</value>
+  </data>
+  <data name="CMDT_FindOverrides" xml:space="preserve">
+    <value>查找当前成员的重载</value>
+  </data>
+  <data name="CMDT_FindExtensions" xml:space="preserve">
+    <value>查找当前类型的扩展方法</value>
   </data>
 </root>

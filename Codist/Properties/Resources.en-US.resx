@@ -3147,4 +3147,10 @@ Shift: match case</value>
   <data name="T_ExportClassificationFormatMapTip" xml:space="preserve">
     <value>Export IClassificationFormatMap.CurrentPriorityOrder of current text view to a file</value>
   </data>
+  <data name="CMDT_FindOverrides" xml:space="preserve">
+    <value>Search for members that overrides current symbol</value>
+  </data>
+  <data name="CMDT_FindExtensions" xml:space="preserve">
+    <value>Search for extension methods which extends current type</value>
+  </data>
 </root>

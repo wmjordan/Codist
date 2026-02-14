@@ -50,6 +50,7 @@ namespace Codist.SymbolCommands
 
 		public override int ImageId => IconIds.ExtensionMethod;
 		public override string Title => R.CMD_FindExtensions;
+		public override string Description => R.CMDT_FindExtensions;
 		public override IEnumerable<OptionDescriptor> OptionDescriptors => __Options;
 		protected override string ResultLabel => R.T_Extensions;
 		protected override bool UseCtrlRestriction => true;

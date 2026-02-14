@@ -314,7 +314,7 @@ namespace Codist.Controls
 				return null;
 			}
 			var symbolFullName = symbol.GetQualifiedName();
-			var search = new CustomMenuItem(IconIds.SearchWebSite, R.OT_WebSearch);
+			var search = new CustomMenuItem(IconIds.SearchWebSite, R.OT_WebSearch).SetToolTip(R.CMD_WebSearchWithSymbolName);
 			search.Items.AddRange(
 				Config.Instance.SearchEngines.ConvertAll(s => {
 					var item = CreateItem(

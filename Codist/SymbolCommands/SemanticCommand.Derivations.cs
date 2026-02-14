@@ -174,6 +174,7 @@ namespace Codist.SymbolCommands
 
 		public override int ImageId => IconIds.FindOverloads;
 		public override string Title => R.CMD_FindOverrides;
+		public override string Description => R.CMDT_FindOverrides;
 		public override IEnumerable<OptionDescriptor> OptionDescriptors => __Options;
 		protected override string ResultLabel => _ResultLabel;
 
@@ -195,6 +196,7 @@ namespace Codist.SymbolCommands
 	{
 		public override int ImageId => IconIds.BaseTypes;
 		public override string Title => R.CMD_ListBaseTypes;
+		public override string Description => R.CMDT_ListBaseTypes;
 
 		protected override string ResultLabel => R.T_BaseTypes;
 		protected override ISymbol ResultSymbol => Symbol.Kind == SymbolKind.Method ? Symbol.ContainingType : Symbol;

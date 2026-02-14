@@ -2599,6 +2599,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Search for extension methods which extends current type.
+        /// </summary>
+        internal static string CMDT_FindExtensions {
+            get {
+                return ResourceManager.GetString("CMDT_FindExtensions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Extract Match
         ///Match current symbol only, excluding base or derived symbols.
         /// </summary>
@@ -2650,6 +2659,15 @@ namespace Codist.Properties {
         internal static string CMDT_FindMethodsSameSignature {
             get {
                 return ResourceManager.GetString("CMDT_FindMethodsSameSignature", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search for members that overrides current symbol.
+        /// </summary>
+        internal static string CMDT_FindOverrides {
+            get {
+                return ResourceManager.GetString("CMDT_FindOverrides", resourceCulture);
             }
         }
         
