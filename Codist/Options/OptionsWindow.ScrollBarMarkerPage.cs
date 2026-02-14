@@ -36,7 +36,16 @@ namespace Codist.Options
 					SetContents(
 						new TitleBox(R.OT_AllLanguages),
 						new DescriptionBox(R.OT_AllLanguagesNote),
-						_LineNumber = o.CreateOptionBox(MarkerOptions.LineNumber, UpdateConfig, R.OT_LineNumber)
+						new WrapPanel {
+							Children = {
+								new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin, Text = R.OT_MarkerSize },
+								new IntegerBox(mo.MarkerSize) { Minimum = 2, Maximum = 8, Margin = WpfHelper.SmallHorizontalMargin }
+									.Set(ref _MarkerSize)
+									.UseVsTheme(),
+							},
+							Margin = WpfHelper.SmallMargin
+						},
+					_LineNumber = o.CreateOptionBox(MarkerOptions.LineNumber, UpdateConfig, R.OT_LineNumber)
 							.SetLazyToolTip(() => R.OT_LineNumberTip),
 						_Selection = o.CreateOptionBox(MarkerOptions.Selection, UpdateConfig, R.OT_Selection)
 							.SetLazyToolTip(() => R.OT_SelectionTip),
@@ -46,14 +55,18 @@ namespace Codist.Options
 						new DescriptionBox(R.OT_KeyboardControlMatchSelectionNote),
 						_MatchSelectionOptions = new StackPanel {
 							Children = {
-								new StackPanel().MakeHorizontal().Add(
-									new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin, VerticalAlignment = VerticalAlignment.Center }.Append(R.OT_MatchSelectionColor),
-									new ColorButton(mo.MatchMarker, R.T_Color, UpdateMatchColor).Set(ref _MatchColorButton)
-								),
-								new StackPanel().MakeHorizontal().Add(
-									new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin, VerticalAlignment = VerticalAlignment.Center }.Append(R.OT_CaseMismatchSelectionColor),
-									new ColorButton(mo.CaseMismatchMarker, R.T_Color, UpdateCaseMismatchColor).Set(ref _CaseMismatchColorButton)
-								),
+								new WrapPanel {
+									Children = {
+										new StackPanel().MakeHorizontal().Add(
+											new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin, VerticalAlignment = VerticalAlignment.Center }.Append(R.OT_MatchSelectionColor),
+											new ColorButton(mo.MatchMarker, R.T_Color, UpdateMatchColor).Set(ref _MatchColorButton)
+										),
+										new StackPanel().MakeHorizontal().Add(
+											new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin, VerticalAlignment = VerticalAlignment.Center }.Append(R.OT_CaseMismatchSelectionColor),
+											new ColorButton(mo.CaseMismatchMarker, R.T_Color, UpdateCaseMismatchColor).Set(ref _CaseMismatchColorButton)
+										),
+									}
+								},
 								Config.Instance.SpecialHighlightOptions.CreateOptionBox(SpecialHighlightOptions.MatchSelection, UpdateConfig, R.OT_HighlightMatchSelection)
 									.Set(ref _HighlightMatchSelection),
 								new StackPanel { Margin = WpfHelper.SmallMargin }.MakeHorizontal().Add(
@@ -80,15 +93,6 @@ namespace Codist.Options
 							.SetLazyToolTip(() => R.OT_TaggedCommentsTip),
 						_DisableChangeTracker = o.CreateOptionBox(MarkerOptions.DisableChangeTracker, UpdateConfig, R.OT_DisableChangeTracker)
 							.SetLazyToolTip(() => R.OT_DisableChangeTrackerTip),
-						new WrapPanel {
-							Children = {
-								new TextBlock { MinWidth = 150, Margin = WpfHelper.SmallHorizontalMargin, Text = R.OT_MarkerSize },
-								new IntegerBox(mo.MarkerSize) { Minimum = 2, Maximum = 8, Margin = WpfHelper.SmallHorizontalMargin }
-									.Set(ref _MarkerSize)
-									.UseVsTheme(),
-							},
-							Margin = WpfHelper.SmallMargin
-						},
 
 						new TitleBox(R.OT_CSharp),
 						new DescriptionBox(R.OT_CSharpMarkerNote),
@@ -130,9 +134,7 @@ namespace Codist.Options
 					_MaxDocumentLength.ValueChanged += UpdateMatchMarginValue;
 					_MaxSearchCharLength.ValueChanged += UpdateMatchMarginValue;
 					var subOptions = new[] { _LongMemberDeclaration, _TypeDeclaration, _MethodDeclaration, _RegionDirective };
-					foreach (var item in subOptions) {
-						item.WrapMargin(SubOptionMargin);
-					}
+					SubOptionMargin.ApplyMargin(subOptions);
 					_MarkerDeclarationLine.BindDependentOptionControls(subOptions);
 					_SymbolReference.BindDependentOptionControls(_SymbolReferenceButton, _SymbolWriteButton, _SymbolDefinitionButton);
 					_DisableChangeTracker.IsEnabled = CodistPackage.VsVersion.Major >= 17;

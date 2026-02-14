@@ -65,9 +65,7 @@ namespace Codist.Options
 						new DescriptionBox(R.OT_ShortcutKeysNote)
 					);
 					_Options = new[] { _SyntaxDetail, _SymbolToolTip, _RegionOnBar, _StripRegionNonLetter, _RangeHighlight, _ParameterList, _ParameterListShowParamName, _FieldValue, _AutoPropertyAsField, _MemberType, _PartialClassMember, _BaseClassMember, _Region, _RegionInMember, _LineOfCode };
-					foreach (var item in new[] { _StripRegionNonLetter, _ParameterListShowParamName, _RegionInMember }) {
-						item.WrapMargin(SubOptionMargin);
-					}
+					SubOptionMargin.ApplyMargin(_StripRegionNonLetter, _ParameterListShowParamName, _RegionInMember);
 					_RegionOnBar.BindDependentOptionControls(_StripRegionNonLetter);
 					_ParameterList.BindDependentOptionControls(_ParameterListShowParamName);
 					_Region.BindDependentOptionControls(_RegionInMember);
