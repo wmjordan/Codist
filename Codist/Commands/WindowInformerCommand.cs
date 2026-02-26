@@ -367,7 +367,7 @@ namespace Codist.Commands
 				}
 			}
 			try {
-				ShowPropertyCollection(s, project.Properties, "Properties:");
+				ShowPropertyCollection(s, project.Properties, "Properties:", true);
 			}
 			catch (COMException ex) {
 				AppendNameValue(s, "Properties", ex.Message);
@@ -411,7 +411,7 @@ namespace Codist.Commands
 			if (ca != null && ca.Count != 0) {
 				s = NewIndentSection(s, "ContextAttributes:");
 				foreach (ContextAttribute item in ca) {
-					AppendPropertyValue(s, item.Name, item.Values);
+					AppendPropertyValue(s, item.Name, item.Values, true);
 				}
 			}
 		}
@@ -425,14 +425,14 @@ namespace Codist.Commands
 			}
 		}
 
-		static void ShowPropertyCollection(Section section, PropertyCollection properties, string title) {
+		static void ShowPropertyCollection(Section section, PropertyCollection properties, string title, bool expandProperties = false) {
 			var s = NewIndentSection(section, title);
 			foreach (var (n, k, v) in properties.PropertyList.Select(i => (n: i.Key is Type t ? GetTypeName(t) : i.Key.ToString(), k: i.Key, v: i.Value)).OrderBy(i => i.n)) {
-				AppendPropertyValue(s, k, v);
+				AppendPropertyValue(s, k, v, expandProperties);
 			}
 		}
 		[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
-		static void ShowPropertyCollection(Section section, EnvDTE.Properties properties, string title) {
+		static void ShowPropertyCollection(Section section, EnvDTE.Properties properties, string title = null, bool expandProperties = false) {
 			if (properties == null || properties.Count == 0) {
 				return;
 			}
@@ -452,7 +452,7 @@ namespace Codist.Commands
 				}
 				return new KeyValuePair<string, object>(p.Name, val);
 			}).OrderBy(i => i.Key)) {
-				AppendPropertyValue(s, item.Key, item.Value);
+				AppendPropertyValue(s, item.Key, item.Value, expandProperties);
 			}
 		}
 
@@ -491,7 +491,9 @@ namespace Codist.Commands
 			return section;
 		}
 		static Section NewIndentSection(Section block, string title) {
-			Append(block, title);
+			if (!String.IsNullOrEmpty(title)) {
+				Append(block, title);
+			}
 			Section section = new Section {
 				Margin = new Thickness(block.Margin.Left, 0, 0, 0),
 			};
@@ -510,7 +512,8 @@ namespace Codist.Commands
 			AppendValueRun(p.Inlines, value);
 			section.Blocks.Add(p);
 		}
-		static void AppendPropertyValue(Section section, object key, object value) {
+		[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
+		static void AppendPropertyValue(Section section, object key, object value, bool expandProperties = false) {
 			var p = new Paragraph {
 				Margin = __ParagraphIndent,
 				TextIndent = -10,
@@ -521,6 +524,9 @@ namespace Codist.Commands
 			};
 			AppendValueRun(p.Inlines, value);
 			section.Blocks.Add(p);
+			if (expandProperties && value is EnvDTE.Properties props) {
+				ShowPropertyCollection(section, props, null, false);
+			}
 		}
 		static void Append(Section section, string text, int indent = 0) {
 			section.Blocks.Add(new Paragraph {
