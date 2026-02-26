@@ -74,9 +74,7 @@ sealed class MatchTagger : ITagger<TextMarkerTag>
 		if (isSelectionEmpty = _View.Selection.IsEmpty) {
 			var extent = _Navigator.GetExtentOfWord(_View.GetCaretPosition());
 			if (!extent.IsSignificant) {
-				searchText = null;
-				searchSpan = default;
-				goto EXIT;
+				goto QUIT;
 			}
 			searchSpan = extent.Span;
 		}
@@ -84,24 +82,18 @@ sealed class MatchTagger : ITagger<TextMarkerTag>
 			searchSpan = _View.Selection.StreamSelectionSpan.SnapshotSpan;
 		}
 
-		if (searchSpan.Length.IsOutside(0, Config.Instance.ScrollbarMarker.MaxSearchCharLength)) {
-			searchText = null;
-			searchSpan = default;
-		}
-		else if (string.IsNullOrWhiteSpace(searchText = searchSpan.GetText())) {
-			searchText = null;
+		if (searchSpan.Length.IsOutside(0, Config.Instance.ScrollbarMarker.MaxSearchCharLength)
+			|| string.IsNullOrWhiteSpace(searchText = searchSpan.GetText())) {
+			goto QUIT;
 		}
 		else if (isSelectionEmpty) {
 			if (searchSpan.Length < 2 || !searchText.IsProgrammaticSymbol()) {
-				searchText = null;
-				searchSpan = default;
+				goto QUIT;
 			}
 		}
 		else if (searchText.Contains('\n')) {
-			searchText = null;
-			searchSpan = default;
+			goto QUIT;
 		}
-	EXIT:
 		if (searchText != _SearchText) {
 			_SearchText = searchText;
 			_SearchSpan = searchSpan;
@@ -111,6 +103,15 @@ sealed class MatchTagger : ITagger<TextMarkerTag>
 		else {
 			_SearchSpan = searchSpan;
 		}
+		return;
+	QUIT:
+		if (_SearchText is null) {
+			return;
+		}
+		_SearchText = null;
+		_SearchSpan = default;
+		_SearchTextLength = 0;
+		_Matches.Clear();
 	}
 
 	void RaiseTagsChanged() {
