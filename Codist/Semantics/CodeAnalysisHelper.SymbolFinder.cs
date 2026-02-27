@@ -11,1043 +11,1045 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.FindSymbols;
 
-namespace Codist
+namespace Codist;
+
+partial class CodeAnalysisHelper
 {
-	partial class CodeAnalysisHelper
-	{
-		public static ImmutableArray<(string type, IImmutableList<ISymbol> members)> ListMembers(this ISymbol symbol) {
-			var r = ImmutableArray.CreateBuilder<(string type, IImmutableList<ISymbol> members)>();
-			r.Add((null, ListMembersByOrder(symbol)));
-			if (symbol is INamedTypeSymbol type) {
-				switch (type.TypeKind) {
-					case TypeKind.Class:
-						while ((type = type.BaseType) != null && type.IsCommonBaseType() == false) {
-							r.Add((type.ToDisplayString(MemberNameFormat), ListMembersByOrder(type)));
-						}
-						break;
-					case TypeKind.Interface:
-						foreach (var item in type.AllInterfaces) {
-							r.Add((item.ToDisplayString(MemberNameFormat), ListMembersByOrder(item)));
-						}
-						break;
-				}
-			}
-			return r.ToImmutable();
-
-			ImmutableArray<ISymbol> ListMembersByOrder(ISymbol source) {
-				var nsOrType = source as INamespaceOrTypeSymbol;
-				var members = ImmutableArray.CreateBuilder<ISymbol>();
-				members.AddRange(nsOrType.ListMembers());
-				INamedTypeSymbol type;
-				if (source.Kind == SymbolKind.NamedType && (type = (INamedTypeSymbol)source).TypeKind == TypeKind.Enum) {
-					// sort enum members by value
-					switch (type.EnumUnderlyingType.SpecialType) {
-						case SpecialType.System_Boolean:
-						case SpecialType.System_Byte:
-						case SpecialType.System_Char:
-						case SpecialType.System_UInt16:
-						case SpecialType.System_UInt32:
-						case SpecialType.System_UInt64:
-							members.Sort(CompareByFieldUnsignedIntegerConst);
-							goto EXIT;
+	public static ImmutableArray<(string type, IImmutableList<ISymbol> members)> ListMembers(this ISymbol symbol) {
+		var r = ImmutableArray.CreateBuilder<(string type, IImmutableList<ISymbol> members)>();
+		r.Add((null, ListMembersByOrder(symbol)));
+		if (symbol is INamedTypeSymbol type) {
+			switch (type.TypeKind) {
+				case TypeKind.Class:
+					while ((type = type.BaseType) != null && type.IsCommonBaseType() == false) {
+						r.Add((type.ToDisplayString(MemberNameFormat), ListMembersByOrder(type)));
 					}
-					members.Sort(CompareByFieldIntegerConst);
-					goto EXIT;
+					break;
+				case TypeKind.Interface:
+					foreach (var item in type.AllInterfaces) {
+						r.Add((item.ToDisplayString(MemberNameFormat), ListMembersByOrder(item)));
+					}
+					break;
+			}
+		}
+		return r.ToImmutable();
+
+		ImmutableArray<ISymbol> ListMembersByOrder(ISymbol source) {
+			var nsOrType = source as INamespaceOrTypeSymbol;
+			var members = ImmutableArray.CreateBuilder<ISymbol>();
+			members.AddRange(nsOrType.ListMembers());
+			INamedTypeSymbol type;
+			if (source.Kind == SymbolKind.NamedType && (type = (INamedTypeSymbol)source).TypeKind == TypeKind.Enum) {
+				// sort enum members by value
+				switch (type.EnumUnderlyingType.SpecialType) {
+					case SpecialType.System_Boolean:
+					case SpecialType.System_Byte:
+					case SpecialType.System_Char:
+					case SpecialType.System_UInt16:
+					case SpecialType.System_UInt32:
+					case SpecialType.System_UInt64:
+						members.Sort(CompareByFieldUnsignedIntegerConst);
+						goto EXIT;
 				}
-				members.Sort(CompareByAccessibilityKindName);
-			EXIT:
-				return members.ToImmutable();
+				members.Sort(CompareByFieldIntegerConst);
+				goto EXIT;
 			}
-
-			int CompareByFieldIntegerConst(ISymbol a, ISymbol b) {
-				return a is IFieldSymbol fa
-					? b is IFieldSymbol fb
-						? Convert.ToInt64(fa.ConstantValue).CompareTo(Convert.ToInt64(fb.ConstantValue))
-						: 1
-					: -1;
-			}
-
-			int CompareByFieldUnsignedIntegerConst(ISymbol a, ISymbol b) {
-				return a is IFieldSymbol fa
-					? b is IFieldSymbol fb
-						? Convert.ToInt64(fa.ConstantValue).CompareTo(Convert.ToInt64(fb.ConstantValue))
-						: 1
-					: -1;
-			}
+			members.Sort(CompareByAccessibilityKindName);
+		EXIT:
+			return members.ToImmutable();
 		}
 
-		public static IEnumerable<ISymbol> ListMembers(this INamespaceOrTypeSymbol type) {
-			return type.GetMembers().Where(IsDeclaredMember);
+		int CompareByFieldIntegerConst(ISymbol a, ISymbol b) {
+			return a is IFieldSymbol fa
+				? b is IFieldSymbol fb
+					? Convert.ToInt64(fa.ConstantValue).CompareTo(Convert.ToInt64(fb.ConstantValue))
+					: 1
+				: -1;
 		}
 
-		public static bool IsDeclaredMember(this ISymbol symbol) {
-			if (symbol.IsImplicitlyDeclared) {
+		int CompareByFieldUnsignedIntegerConst(ISymbol a, ISymbol b) {
+			return a is IFieldSymbol fa
+				? b is IFieldSymbol fb
+					? Convert.ToInt64(fa.ConstantValue).CompareTo(Convert.ToInt64(fb.ConstantValue))
+					: 1
+				: -1;
+		}
+	}
+
+	public static IEnumerable<ISymbol> ListMembers(this INamespaceOrTypeSymbol type) {
+		return type.GetMembers().Where(IsDeclaredMember);
+	}
+
+	public static bool IsDeclaredMember(this ISymbol symbol) {
+		if (symbol.IsImplicitlyDeclared) {
+			return false;
+		}
+		if (symbol.Kind == SymbolKind.Method) {
+			var ms = (IMethodSymbol)symbol;
+			if (ms.AssociatedSymbol != null) {
 				return false;
 			}
-			if (symbol.Kind == SymbolKind.Method) {
-				var ms = (IMethodSymbol)symbol;
-				if (ms.AssociatedSymbol != null) {
+			switch (ms.MethodKind) {
+				case MethodKind.PropertyGet:
+				case MethodKind.PropertySet:
+				case MethodKind.EventAdd:
+				case MethodKind.EventRemove:
 					return false;
+			}
+		}
+		return true;
+	}
+
+	/// <summary>
+	/// Finds all members defined or referenced in <paramref name="project"/> which may have a parameter that is of or derived from <paramref name="type"/>.
+	/// </summary>
+	public static async Task<ImmutableArray<ISymbol>> FindInstanceAsParameterAsync(this ITypeSymbol type, Project project, bool strictMatch, bool sourceCode, CancellationToken cancellationToken = default) {
+		var compilation = await project.GetCompilationAsync(cancellationToken).ConfigureAwait(false);
+		var members = ImmutableArray.CreateBuilder<ISymbol>(10);
+		ImmutableArray<IParameterSymbol> parameters;
+		var assembly = compilation.Assembly;
+		foreach (var typeSymbol in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
+			if (typeSymbol.IsCompilerGenerated() || sourceCode && !typeSymbol.HasSource()) {
+				continue;
+			}
+			foreach (var member in typeSymbol.GetMembers()) {
+				if (cancellationToken.IsCancellationRequested) {
+					goto EXIT;
 				}
-				switch (ms.MethodKind) {
-					case MethodKind.PropertyGet:
-					case MethodKind.PropertySet:
-					case MethodKind.EventAdd:
-					case MethodKind.EventRemove:
-						return false;
+				if (member.Kind != SymbolKind.Field
+					&& !(parameters = member.GetParameters()).IsDefaultOrEmpty
+					&& !member.IsCompilerGenerated()
+					&& parameters.Any(strictMatch
+							? (Func<IParameterSymbol, bool>)(p => Equals(p.Type, type))
+							: (p => type.CanConvertTo(p.Type) && p.Type.IsCommonBaseType() == false))) {
+					members.Add(member);
 				}
 			}
-			return true;
 		}
+	EXIT:
+		return members.ToSortedSymbolArray();
+	}
 
-		/// <summary>
-		/// Finds all members defined or referenced in <paramref name="project"/> which may have a parameter that is of or derived from <paramref name="type"/>.
-		/// </summary>
-		public static async Task<ImmutableArray<ISymbol>> FindInstanceAsParameterAsync(this ITypeSymbol type, Project project, bool strictMatch, bool sourceCode, CancellationToken cancellationToken = default) {
-			var compilation = await project.GetCompilationAsync(cancellationToken).ConfigureAwait(false);
-			var members = ImmutableArray.CreateBuilder<ISymbol>(10);
-			ImmutableArray<IParameterSymbol> parameters;
-			var assembly = compilation.Assembly;
-			foreach (var typeSymbol in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
-				if (typeSymbol.IsCompilerGenerated() || sourceCode && !typeSymbol.HasSource()) {
+	/// <summary>
+	/// Finds all members defined or referenced in <paramref name="project"/> which may return an instance of <paramref name="type"/>.
+	/// </summary>
+	public static async Task<ImmutableArray<ISymbol>> FindSymbolInstanceProducerAsync(this ITypeSymbol type, Project project, bool strict, bool sourceCode, CancellationToken cancellationToken = default) {
+		var compilation = await project.GetCompilationAsync(cancellationToken).ConfigureAwait(false);
+		var assembly = compilation.Assembly;
+		var members = ImmutableArray.CreateBuilder<ISymbol>(10);
+		var paramComparer = strict
+			? (Func<IParameterSymbol, bool>)(p => Equals(p.Type, type) && p.RefKind != RefKind.None)
+			: (p => p.Type.CanConvertTo(type) && p.RefKind != RefKind.None);
+		foreach (var typeSymbol in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
+			if (typeSymbol.IsCompilerGenerated() || sourceCode && !typeSymbol.HasSource()) {
+				continue;
+			}
+			foreach (var member in typeSymbol.GetMembers()) {
+				if (cancellationToken.IsCancellationRequested) {
+					goto EXIT;
+				}
+				if (!member.IsDeclaredMember()) {
 					continue;
 				}
-				foreach (var member in typeSymbol.GetMembers()) {
-					if (cancellationToken.IsCancellationRequested) {
-						goto EXIT;
-					}
-					if (member.Kind != SymbolKind.Field
-						&& !(parameters = member.GetParameters()).IsDefaultOrEmpty
-						&& !member.IsCompilerGenerated()
-						&& parameters.Any(strictMatch
-								? (Func<IParameterSymbol, bool>)(p => Equals(p.Type, type))
-								: (p => type.CanConvertTo(p.Type) && p.Type.IsCommonBaseType() == false))) {
+				ITypeSymbol mt;
+				if (member.Kind == SymbolKind.Field) {
+					if ((mt = member.GetReturnType()) != null
+						&& (Equals(mt, type)
+							|| strict == false && mt.CanConvertTo(type)
+							|| (mt as INamedTypeSymbol).ContainsTypeArgument(type, strict))) {
 						members.Add(member);
 					}
 				}
-			}
-		EXIT:
-			return members.ToSortedSymbolArray();
-		}
-
-		/// <summary>
-		/// Finds all members defined or referenced in <paramref name="project"/> which may return an instance of <paramref name="type"/>.
-		/// </summary>
-		public static async Task<ImmutableArray<ISymbol>> FindSymbolInstanceProducerAsync(this ITypeSymbol type, Project project, bool strict, bool sourceCode, CancellationToken cancellationToken = default) {
-			var compilation = await project.GetCompilationAsync(cancellationToken).ConfigureAwait(false);
-			var assembly = compilation.Assembly;
-			var members = ImmutableArray.CreateBuilder<ISymbol>(10);
-			var paramComparer = strict
-				? (Func<IParameterSymbol, bool>)(p => Equals(p.Type, type) && p.RefKind != RefKind.None)
-				: (p => p.Type.CanConvertTo(type) && p.RefKind != RefKind.None);
-			foreach (var typeSymbol in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
-				if (typeSymbol.IsCompilerGenerated() || sourceCode && !typeSymbol.HasSource()) {
-					continue;
+				else if ((mt = member.GetReturnType()) != null
+						&& (Equals(mt, type)
+							|| strict == false && mt.CanConvertTo(type)
+							|| (mt as INamedTypeSymbol).ContainsTypeArgument(type, strict))
+						|| member.Kind == SymbolKind.Method && member.GetParameters().Any(paramComparer)) {
+					members.Add(member);
 				}
-				foreach (var member in typeSymbol.GetMembers()) {
-					if (cancellationToken.IsCancellationRequested) {
-						goto EXIT;
-					}
-					if (!member.IsDeclaredMember()) {
+			}
+		}
+	EXIT:
+		return members.ToSortedSymbolArray();
+	}
+
+	/// <summary>Returns interfaces derived from the given interface <paramref name="type"/> in specific <paramref name="project"/>.</summary>
+	public static async Task<ImmutableArray<INamedTypeSymbol>> FindDerivedInterfacesAsync(this INamedTypeSymbol type, Project project, bool directDerive, SymbolSourceFilter source, CancellationToken cancellationToken = default) {
+		var compilation = await project.GetCompilationAsync(cancellationToken).ConfigureAwait(false);
+		var r = ImmutableArray.CreateBuilder<INamedTypeSymbol>(7);
+		var d = new SourceSymbolDeduper();
+		foreach (var item in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
+			if (item.TypeKind == TypeKind.Interface
+				&& !item.Equals(type)
+				&& source.Match(item)
+				&& (directDerive ? item.Interfaces : item.AllInterfaces).Contains(type, Comparers.NamedTypeComparer)
+				&& d.TryAdd(item)) {
+				r.Add(item);
+			}
+		}
+		return r.ToSortedSymbolArray();
+	}
+
+	public static async Task<IEnumerable<ISymbol>> FindOverridesAsync(this ISymbol symbol, Solution solution, SymbolSourceFilter source = default, IEnumerable<Project> projects = null, CancellationToken cancellationToken = default) {
+		return source.Filter(await SymbolFinder.FindOverridesAsync(symbol, solution, projects.MakeImmutableSet(), cancellationToken).ConfigureAwait(false));
+	}
+
+	public static async Task<ImmutableArray<ISymbol>> FindImplementationsAsync(this ISymbol symbol, Solution solution, bool directImplementation, SymbolSourceFilter source = default, IEnumerable<Project> projects = null, CancellationToken cancellationToken = default) {
+		var s = symbol;
+		INamedTypeSymbol st = null;
+		bool isNamedType = symbol.Kind == SymbolKind.NamedType;
+		// workaround for a bug in early version of Roslyn which keeps generic types from returning any result
+		if (isNamedType && (st = (INamedTypeSymbol)symbol).IsGenericType) {
+			s = st.OriginalDefinition;
+		}
+		var implementations = await SymbolFinder.FindImplementationsAsync(s, solution, projects.MakeImmutableSet(), cancellationToken).ConfigureAwait(false);
+		var r = ImmutableArray.CreateBuilder<ISymbol>();
+		var d = new SourceSymbolDeduper();
+		if (isNamedType) {
+			if (Equals(st.ConstructedFrom, st)) {
+				foreach (var impl in implementations.OfType<INamedTypeSymbol>()) {
+					if (directImplementation && impl.HasDirectImplementationFor(st) == false) {
 						continue;
 					}
-					ITypeSymbol mt;
-					if (member.Kind == SymbolKind.Field) {
-						if ((mt = member.GetReturnType()) != null
-							&& (Equals(mt, type)
-								|| strict == false && mt.CanConvertTo(type)
-								|| (mt as INamedTypeSymbol).ContainsTypeArgument(type, strict))) {
-							members.Add(member);
-						}
-					}
-					else if ((mt = member.GetReturnType()) != null
-							&& (Equals(mt, type)
-								|| strict == false && mt.CanConvertTo(type)
-								|| (mt as INamedTypeSymbol).ContainsTypeArgument(type, strict))
-							|| member.Kind == SymbolKind.Method && member.GetParameters().Any(paramComparer)) {
-						members.Add(member);
-					}
-				}
-			}
-		EXIT:
-			return members.ToSortedSymbolArray();
-		}
-
-		/// <summary>Returns interfaces derived from the given interface <paramref name="type"/> in specific <paramref name="project"/>.</summary>
-		public static async Task<ImmutableArray<INamedTypeSymbol>> FindDerivedInterfacesAsync(this INamedTypeSymbol type, Project project, bool directDerive, SymbolSourceFilter source, CancellationToken cancellationToken = default) {
-			var compilation = await project.GetCompilationAsync(cancellationToken).ConfigureAwait(false);
-			var r = ImmutableArray.CreateBuilder<INamedTypeSymbol>(7);
-			var d = new SourceSymbolDeduper();
-			foreach (var item in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
-				if (item.TypeKind == TypeKind.Interface
-					&& !item.Equals(type)
-					&& source.Match(item)
-					&& (directDerive ? item.Interfaces : item.AllInterfaces).Contains(type, Comparers.NamedTypeComparer)
-					&& d.TryAdd(item)) {
-					r.Add(item);
-				}
-			}
-			return r.ToSortedSymbolArray();
-		}
-
-		public static async Task<IEnumerable<ISymbol>> FindOverridesAsync(this ISymbol symbol, Solution solution, SymbolSourceFilter source = default, IEnumerable<Project> projects = null, CancellationToken cancellationToken = default) {
-			return source.Filter(await SymbolFinder.FindOverridesAsync(symbol, solution, projects.MakeImmutableSet(), cancellationToken).ConfigureAwait(false));
-		}
-
-		public static async Task<ImmutableArray<ISymbol>> FindImplementationsAsync(this ISymbol symbol, Solution solution, bool directImplementation, SymbolSourceFilter source = default, IEnumerable<Project> projects = null, CancellationToken cancellationToken = default) {
-			var s = symbol;
-			INamedTypeSymbol st = null;
-			bool isNamedType = symbol.Kind == SymbolKind.NamedType;
-			// workaround for a bug in early version of Roslyn which keeps generic types from returning any result
-			if (isNamedType && (st = (INamedTypeSymbol)symbol).IsGenericType) {
-				s = st.OriginalDefinition;
-			}
-			var implementations = await SymbolFinder.FindImplementationsAsync(s, solution, projects.MakeImmutableSet(), cancellationToken).ConfigureAwait(false);
-			var r = ImmutableArray.CreateBuilder<ISymbol>();
-			var d = new SourceSymbolDeduper();
-			if (isNamedType) {
-				if (Equals(st.ConstructedFrom, st)) {
-					foreach (var impl in implementations.OfType<INamedTypeSymbol>()) {
-						if (directImplementation && impl.HasDirectImplementationFor(st) == false) {
-							continue;
-						}
-						if (d.TryAdd(impl) && source.Match(impl)) {
-							r.Add(impl);
-						}
-					}
-				}
-				else {
-					foreach (var impl in implementations.OfType<INamedTypeSymbol>()) {
-						if (directImplementation && impl.HasDirectImplementationFor(st) == false) {
-							continue;
-						}
-						if ((impl.IsGenericType || impl.CanConvertTo(st)) && d.TryAdd(impl) && source.Match(impl)) {
-							r.Add(impl);
-						}
-					}
-				}
-			}
-			else {
-				foreach (var impl in implementations) {
 					if (d.TryAdd(impl) && source.Match(impl)) {
 						r.Add(impl);
 					}
 				}
 			}
-			return r.ToSortedSymbolArray();
-		}
-
-		/// <summary>
-		/// Finds what interface members implementations for specific type.
-		/// </summary>
-		/// <param name="type">A class or struct type.</param>
-		/// <returns>The key of the relation is the class (current type or its base type). The relations are implementation of interface members (excluding implementation via inheritance).</returns>
-		public static SymbolRelations<INamedTypeSymbol, ISymbol> FindInterfaceImplementations(this INamedTypeSymbol type) {
-			var typeImps = new SymbolRelations<INamedTypeSymbol, ISymbol>();
-			var memberImps = new Dictionary<ISymbol, ISymbol>();
-			var interfaceMembers = new Dictionary<string, Chain<ISymbol>>();
-			Chain<ISymbol> c;
-			var types = new List<INamedTypeSymbol>();
-			types.Add(type);
-			types.AddRange(type.GetBaseTypes().Where(i => !i.IsCommonBaseType()));
-			types.Reverse();
-			var interfaces = new HashSet<INamedTypeSymbol>();
-			foreach (var t in types) { // start from the most base type
-				foreach (var intf in t.Interfaces) {
-					if (!interfaces.Add(intf)) {
+			else {
+				foreach (var impl in implementations.OfType<INamedTypeSymbol>()) {
+					if (directImplementation && impl.HasDirectImplementationFor(st) == false) {
 						continue;
 					}
-					foreach (var member in intf.GetMembers()
-						.Where(i => i.IsAbstract
-							&& i.CanBeReferencedByName
-							&& i.Kind.CeqAny(SymbolKind.Property, SymbolKind.Method, SymbolKind.Event))) {
-						if (interfaceMembers.TryGetValue(member.Name, out c)) {
-							c.Add(member);
-						}
-						else {
-							interfaceMembers[member.Name] = new(member);
-						}
-					}
-				}
-				foreach (var member in t.GetMembers()) {
-					if (!member.CanBeReferencedByName
-						|| member.IsAbstract
-						|| !member.Kind.CeqAny(SymbolKind.Property, SymbolKind.Method, SymbolKind.Event)) {
-						continue;
-					}
-					var exp = member.GetExplicitInterfaceImplementations();
-					if (exp.Count != 0) {
-						foreach (var imp in exp) {
-							typeImps.Add(imp.ContainingType, imp);
-						}
-						continue;
-					}
-
-					if (member.IsOverride) {
-						var ov = member.GetOverriddenMember();
-						if (ov != null && memberImps.TryGetValue(ov, out var iMember)) {
-							typeImps.AddNew(t, iMember);
-							memberImps[ov] = iMember;
-							continue;
-						}
-					}
-
-					if (!interfaceMembers.TryGetValue(member.Name, out c)) {
-						continue;
-					}
-
-					foreach (var interfaceMember in c) {
-						if (interfaceMember.MatchSignature(member.Kind, member.GetReturnType(), member.GetParameters(), member.GetTypeParameters())) {
-							typeImps.AddNew(t, interfaceMember);
-							memberImps[member] = interfaceMember;
-						}
+					if ((impl.IsGenericType || impl.CanConvertTo(st)) && d.TryAdd(impl) && source.Match(impl)) {
+						r.Add(impl);
 					}
 				}
 			}
-			return typeImps;
 		}
+		else {
+			foreach (var impl in implementations) {
+				if (d.TryAdd(impl) && source.Match(impl)) {
+					r.Add(impl);
+				}
+			}
+		}
+		return r.ToSortedSymbolArray();
+	}
 
-
-		public static async Task<ImmutableArray<IMethodSymbol>> FindExtensionMethodsAsync(this ITypeSymbol type, Project project, bool strict, bool matchTypeArgument, SymbolSourceFilter source, CancellationToken cancellationToken = default) {
-			var compilation = await project.GetCompilationAsync(cancellationToken).ConfigureAwait(false);
-			var members = ImmutableArray.CreateBuilder<IMethodSymbol>(10);
-			var isValueType = type.IsValueType;
-			var d = new SourceSymbolDeduper();
-			foreach (var typeSymbol in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
-				if (typeSymbol.MightContainExtensionMethods == false
-					|| typeSymbol.IsStatic == false
-					|| source.Mismatch(typeSymbol)) {
+	/// <summary>
+	/// Finds what interface members implementations for specific type.
+	/// </summary>
+	/// <param name="type">A class or struct type.</param>
+	/// <returns>The key of the relation is the class (current type or its base type). The relations are implementation of interface members (excluding implementation via inheritance).</returns>
+	public static SymbolRelations<INamedTypeSymbol, ISymbol> FindInterfaceImplementations(this INamedTypeSymbol type) {
+		var typeImps = new SymbolRelations<INamedTypeSymbol, ISymbol>();
+		var memberImps = new Dictionary<ISymbol, ISymbol>();
+		var interfaceMembers = new Dictionary<string, Chain<ISymbol>>();
+		Chain<ISymbol> c;
+		var types = new List<INamedTypeSymbol>();
+		types.Add(type);
+		types.AddRange(type.GetBaseTypes().Where(i => !i.IsCommonBaseType()));
+		types.Reverse();
+		var interfaces = new HashSet<INamedTypeSymbol>();
+		foreach (var t in types) { // start from the most base type
+			foreach (var intf in t.Interfaces) {
+				if (!interfaces.Add(intf)) {
 					continue;
 				}
-				foreach (var member in typeSymbol.GetMembers()) {
-					if (cancellationToken.IsCancellationRequested) {
-						goto EXIT;
+				foreach (var member in intf.GetMembers()
+					.Where(i => i.IsAbstract
+						&& i.CanBeReferencedByName
+						&& i.Kind.CeqAny(SymbolKind.Property, SymbolKind.Method, SymbolKind.Event))) {
+					if (interfaceMembers.TryGetValue(member.Name, out c)) {
+						c.Add(member);
 					}
-					if (member.IsStatic == false || member.Kind != SymbolKind.Method) {
-						continue;
-					}
-					var m = (IMethodSymbol)member;
-					if (m.IsExtensionMethod == false || m.CanBeReferencedByName == false) {
-						continue;
-					}
-					var p = m.Parameters[0];
-					if ((strict ? type.Equals(p.Type) : type.CanConvertTo(p.Type)) && d.TryAdd(m)) {
-						members.Add(m);
-						continue;
-					}
-					if (m.IsGenericMethod == false || p.Type.TypeKind != TypeKind.TypeParameter) {
-						continue;
-					}
-					foreach (var item in m.TypeParameters) {
-						if (!Equals(item, p.Type)
-							|| item.HasValueTypeConstraint && isValueType == false
-							|| item.HasReferenceTypeConstraint && isValueType
-							|| matchTypeArgument && item.ConstraintTypes.Length == 0) {
-							continue;
-						}
-						var constraintTypes = item.ConstraintTypes;
-						if (constraintTypes.Length != 0
-							&& constraintTypes.Any(i => Equals(i, type) || type.CanConvertTo(i)) == false) {
-							continue;
-						}
-
-						if (d.TryAdd(m)) {
-							members.Add(m);
-						}
+					else {
+						interfaceMembers[member.Name] = new(member);
 					}
 				}
 			}
-		EXIT:
-			return members.ToSortedSymbolArray();
+			foreach (var member in t.GetMembers()) {
+				if (!member.CanBeReferencedByName
+					|| member.IsAbstract
+					|| !member.Kind.CeqAny(SymbolKind.Property, SymbolKind.Method, SymbolKind.Event)) {
+					continue;
+				}
+				var exp = member.GetExplicitInterfaceImplementations();
+				if (exp.Count != 0) {
+					foreach (var imp in exp) {
+						typeImps.Add(imp.ContainingType, imp);
+					}
+					continue;
+				}
+
+				if (member.IsOverride) {
+					var ov = member.GetOverriddenMember();
+					if (ov != null && memberImps.TryGetValue(ov, out var iMember)) {
+						typeImps.AddNew(t, iMember);
+						memberImps[ov] = iMember;
+						continue;
+					}
+				}
+
+				if (!interfaceMembers.TryGetValue(member.Name, out c)) {
+					continue;
+				}
+
+				foreach (var interfaceMember in c) {
+					if (interfaceMember.MatchSignature(member.Kind, member.GetReturnType(), member.GetParameters(), member.GetTypeParameters())) {
+						typeImps.AddNew(t, interfaceMember);
+						memberImps[member] = interfaceMember;
+					}
+				}
+			}
 		}
+		return typeImps;
+	}
 
-		/// <summary>
-		/// Finds symbol declarations matching <paramref name="keywords"/> within given <paramref name="project"/>.
-		/// </summary>
-		public static async Task<IReadOnlyCollection<ISymbol>> FindDeclarationsAsync(this Project project, string keywords, int resultLimit, bool fullMatch, bool matchCase, CancellationToken token = default) {
-			var symbols = new SortedSet<ISymbol>(CreateSymbolComparer());
-			int maxNameLength = 0;
-			var predicate = CreateNameFilter(keywords, fullMatch, matchCase);
-			var d = new SourceSymbolDeduper();
 
-			foreach (var symbol in await SymbolFinder.FindSourceDeclarationsAsync(project, predicate, token).ConfigureAwait(false)) {
-				if (symbols.Count < resultLimit) {
+	public static async Task<ImmutableArray<IMethodSymbol>> FindExtensionMethodsAsync(this ITypeSymbol type, Project project, bool strict, bool matchTypeArgument, SymbolSourceFilter source, CancellationToken cancellationToken = default) {
+		var compilation = await project.GetCompilationAsync(cancellationToken).ConfigureAwait(false);
+		var members = ImmutableArray.CreateBuilder<IMethodSymbol>(10);
+		var isValueType = type.IsValueType;
+		var d = new SourceSymbolDeduper();
+		foreach (var typeSymbol in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
+			if (typeSymbol.MightContainExtensionMethods == false
+				|| typeSymbol.IsStatic == false
+				|| source.Mismatch(typeSymbol)) {
+				continue;
+			}
+			foreach (var member in typeSymbol.GetMembers()) {
+				if (cancellationToken.IsCancellationRequested) {
+					goto EXIT;
+				}
+				if (member.IsStatic == false || member.Kind != SymbolKind.Method) {
+					continue;
+				}
+				var m = (IMethodSymbol)member;
+				if (m.IsExtensionMethod == false || m.CanBeReferencedByName == false) {
+					continue;
+				}
+				var p = m.Parameters[0];
+				if ((strict ? type.Equals(p.Type) : type.CanConvertTo(p.Type)) && d.TryAdd(m)) {
+					members.Add(m);
+					continue;
+				}
+				if (m.IsGenericMethod == false || p.Type.TypeKind != TypeKind.TypeParameter) {
+					continue;
+				}
+				foreach (var item in m.TypeParameters) {
+					if (!Equals(item, p.Type)
+						|| item.HasValueTypeConstraint && isValueType == false
+						|| item.HasReferenceTypeConstraint && isValueType
+						|| matchTypeArgument && item.ConstraintTypes.Length == 0) {
+						continue;
+					}
+					var constraintTypes = item.ConstraintTypes;
+					if (constraintTypes.Length != 0
+						&& constraintTypes.Any(i => Equals(i, type) || type.CanConvertTo(i)) == false) {
+						continue;
+					}
+
+					if (d.TryAdd(m)) {
+						members.Add(m);
+					}
+				}
+			}
+		}
+	EXIT:
+		return members.ToSortedSymbolArray();
+	}
+
+	/// <summary>
+	/// Finds symbol declarations matching <paramref name="keywords"/> within given <paramref name="project"/>.
+	/// </summary>
+	public static async Task<IReadOnlyCollection<ISymbol>> FindDeclarationsAsync(this Project project, string keywords, int resultLimit, bool fullMatch, bool matchCase, CancellationToken token = default) {
+		var symbols = new SortedSet<ISymbol>(CreateSymbolComparer());
+		int maxNameLength = 0;
+		var predicate = CreateNameFilter(keywords, fullMatch, matchCase);
+		var d = new SourceSymbolDeduper();
+
+		foreach (var symbol in await SymbolFinder.FindSourceDeclarationsAsync(project, predicate, token).ConfigureAwait(false)) {
+			if (symbols.Count < resultLimit) {
+				if (d.TryAdd(symbol)) {
+					symbols.Add(symbol);
+				}
+			}
+			else {
+				maxNameLength = symbols.Max.Name.Length;
+				if (symbol.Name.Length < maxNameLength) {
+					symbols.Remove(symbols.Max);
 					if (d.TryAdd(symbol)) {
 						symbols.Add(symbol);
 					}
 				}
-				else {
-					maxNameLength = symbols.Max.Name.Length;
-					if (symbol.Name.Length < maxNameLength) {
-						symbols.Remove(symbols.Max);
-						if (d.TryAdd(symbol)) {
-							symbols.Add(symbol);
-						}
-					}
-				}
 			}
-			return symbols;
 		}
+		return symbols;
+	}
 
-		public static IQueryable<ISymbol> FindRelatedTypes(this SyntaxNode node, SemanticModel semanticModel, CancellationToken cancellationToken) {
-			var result = new Dictionary<ISymbol, int>();
-			var activeSyntaxTree = semanticModel.SyntaxTree;
-			foreach (var item in node.DescendantNodes()) {
-				if (item.IsKind(SyntaxKind.IdentifierName) == false) {
+	public static IQueryable<ISymbol> FindRelatedTypes(this SyntaxNode node, SemanticModel semanticModel, CancellationToken cancellationToken) {
+		var result = new Dictionary<ISymbol, int>();
+		var activeSyntaxTree = semanticModel.SyntaxTree;
+		foreach (var item in node.DescendantNodes()) {
+			if (item.IsKind(SyntaxKind.IdentifierName) == false) {
+				continue;
+			}
+			if (cancellationToken.IsCancellationRequested) {
+				break;
+			}
+			var s = semanticModel.GetSymbol(item, cancellationToken);
+			if (s != null) {
+				if (s.Kind == SymbolKind.NamedType && item.Parent.IsKind(SyntaxKind.SimpleMemberAccessExpression)
+					|| s.Kind == SymbolKind.Method && ((IMethodSymbol)s).IsExtensionMethod) {
 					continue;
 				}
-				if (cancellationToken.IsCancellationRequested) {
-					break;
+				var t = s.ContainingType ?? (s.Kind == SymbolKind.NamedType ? s : null);
+				if (t != null) {
+					AddResult(result, activeSyntaxTree, t);
 				}
-				var s = semanticModel.GetSymbol(item, cancellationToken);
+				s = s.GetReturnType();
 				if (s != null) {
-					if (s.Kind == SymbolKind.NamedType && item.Parent.IsKind(SyntaxKind.SimpleMemberAccessExpression)
-						|| s.Kind == SymbolKind.Method && ((IMethodSymbol)s).IsExtensionMethod) {
-						continue;
-					}
-					var t = s.ContainingType ?? (s.Kind == SymbolKind.NamedType ? s : null);
-					if (t != null) {
-						AddResult(result, activeSyntaxTree, t);
-					}
-					s = s.GetReturnType();
-					if (s != null) {
-						AddResult(result, activeSyntaxTree, s);
-					}
-				}
-			}
-			return result.AsQueryable().OrderByDescending(i => i.Value).Select(i => i.Key);
-
-			void AddResult(Dictionary<ISymbol, int> d, SyntaxTree tree, ISymbol s) {
-				foreach (var r in s.DeclaringSyntaxReferences) {
-					var st = r.SyntaxTree;
-					if (st != tree) {
-						d[s] = d.TryGetValue(s, out int i) ? ++i : 1;
-					}
+					AddResult(result, activeSyntaxTree, s);
 				}
 			}
 		}
+		return result.AsQueryable().OrderByDescending(i => i.Value).Select(i => i.Key);
 
-		public static IEnumerable<ISymbol> FindDeclarationMatchName(this Compilation compilation, string keywords, bool fullMatch, bool matchCase, SymbolSourceFilter source, CancellationToken cancellationToken = default) {
-			var filter = CreateNameFilter(keywords, fullMatch, matchCase);
-			var d = new SourceSymbolDeduper();
-			foreach (var type in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
-				if (type.IsAccessible(true) == false || source.Mismatch(type)) {
-					continue;
+		void AddResult(Dictionary<ISymbol, int> d, SyntaxTree tree, ISymbol s) {
+			foreach (var r in s.DeclaringSyntaxReferences) {
+				var st = r.SyntaxTree;
+				if (st != tree) {
+					d[s] = d.TryGetValue(s, out int i) ? ++i : 1;
 				}
-				if (filter(type.Name) && d.TryAdd(type)) {
-					yield return type;
+			}
+		}
+	}
+
+	public static IEnumerable<ISymbol> FindDeclarationMatchName(this Compilation compilation, string keywords, bool fullMatch, bool matchCase, SymbolSourceFilter source, CancellationToken cancellationToken = default) {
+		var filter = CreateNameFilter(keywords, fullMatch, matchCase);
+		var d = new SourceSymbolDeduper();
+		foreach (var type in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
+			if (type.IsAccessible(true) == false || source.Mismatch(type)) {
+				continue;
+			}
+			if (filter(type.Name) && d.TryAdd(type)) {
+				yield return type;
+			}
+			if (cancellationToken.IsCancellationRequested) {
+				break;
+			}
+			foreach (var member in type.GetMembers()) {
+				if (member.Kind != SymbolKind.NamedType
+					&& !member.IsCompilerGenerated()
+					&& member.IsAccessible(false)
+					&& filter(member.GetOriginalName())
+					&& d.TryAdd(member)) {
+					yield return member;
 				}
-				if (cancellationToken.IsCancellationRequested) {
-					break;
-				}
-				foreach (var member in type.GetMembers()) {
+			}
+		}
+	}
+
+	public static IEnumerable<ISymbol> FindMethodBySignature(this Compilation compilation, ISymbol symbol, bool excludeGenerics, SymbolSourceFilter sourceFilter, CancellationToken cancellationToken = default) {
+		var rt = symbol.GetReturnType();
+		var pn = symbol.GetParameters();
+		var pl = pn.Length;
+		var d = new SourceSymbolDeduper();
+		foreach (var type in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
+			if (sourceFilter.Mismatch(type)
+				|| type.IsAccessible(true) == false
+				|| excludeGenerics && (type.IsGenericType || type.IsDefinedInGenericType())
+				|| Op.Ceq(type, symbol)) {
+				continue;
+			}
+			if (cancellationToken.IsCancellationRequested) {
+				break;
+			}
+			var members = type.TypeKind == TypeKind.Delegate && type.DelegateInvokeMethod != null
+				? ImmutableArray.Create<ISymbol>(type.DelegateInvokeMethod)
+				: type.GetMembers();
+			foreach (var member in members) {
+				IMethodSymbol m;
+				if (member.Kind != SymbolKind.Method
+					|| member.CanBeReferencedByName == false
+					|| member.IsAccessible(false) == false
+					|| Op.Ceq(member, symbol)) {
+					// also find delegates with the same signature
 					if (member.Kind != SymbolKind.NamedType
-						&& !member.IsCompilerGenerated()
-						&& member.IsAccessible(false)
-						&& filter(member.GetOriginalName())
-						&& d.TryAdd(member)) {
-						yield return member;
+						|| (m = (member as INamedTypeSymbol)?.DelegateInvokeMethod) == null) {
+						continue;
 					}
 				}
-			}
-		}
-
-		public static IEnumerable<ISymbol> FindMethodBySignature(this Compilation compilation, ISymbol symbol, bool excludeGenerics, SymbolSourceFilter sourceFilter, CancellationToken cancellationToken = default) {
-			var rt = symbol.GetReturnType();
-			var pn = symbol.GetParameters();
-			var pl = pn.Length;
-			var d = new SourceSymbolDeduper();
-			foreach (var type in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
-				if (sourceFilter.Mismatch(type)
-					|| type.IsAccessible(true) == false
-					|| excludeGenerics && (type.IsGenericType || type.IsDefinedInGenericType())
-					|| Op.Ceq(type, symbol)) {
+				else {
+					m = (IMethodSymbol)member;
+				}
+				if (AreEqual(rt, m.ReturnType, true) == false
+					|| excludeGenerics && m.IsGenericMethod) {
 					continue;
 				}
-				if (cancellationToken.IsCancellationRequested) {
-					break;
+				var mp = m.Parameters;
+				if (mp.Length != pl) {
+					continue;
 				}
-				var members = type.TypeKind == TypeKind.Delegate && type.DelegateInvokeMethod != null
-					? ImmutableArray.Create<ISymbol>(type.DelegateInvokeMethod)
-					: type.GetMembers();
-				foreach (var member in members) {
-					IMethodSymbol m;
-					if (member.Kind != SymbolKind.Method
-						|| member.CanBeReferencedByName == false
-						|| member.IsAccessible(false) == false
-						|| Op.Ceq(member, symbol)) {
-						// also find delegates with the same signature
-						if (member.Kind != SymbolKind.NamedType
-							|| (m = (member as INamedTypeSymbol)?.DelegateInvokeMethod) == null) {
-							continue;
-						}
+				var pm = true;
+				for (int i = pl - 1; i >= 0; i--) {
+					if (mp[i].RefKind != pn[i].RefKind
+						|| AreEqual(mp[i].Type, pn[i].Type, true) == false) {
+						pm = false;
+						break;
 					}
-					else {
-						m = (IMethodSymbol)member;
-					}
-					if (AreEqual(rt, m.ReturnType, true) == false
-						|| excludeGenerics && m.IsGenericMethod) {
-						continue;
-					}
-					var mp = m.Parameters;
-					if (mp.Length != pl) {
-						continue;
-					}
-					var pm = true;
-					for (int i = pl - 1; i >= 0; i--) {
-						if (mp[i].RefKind != pn[i].RefKind
-							|| AreEqual(mp[i].Type, pn[i].Type, true) == false) {
-							pm = false;
-							break;
-						}
-					}
-					if (pm && d.TryAdd(member)) {
-						yield return member;
-					}
+				}
+				if (pm && d.TryAdd(member)) {
+					yield return member;
 				}
 			}
 		}
+	}
 
-		/// <summary>Finds namespaces in related projects having the same fully qualified name.</summary>
-		/// <returns>Namespaces having the same name in current solution</returns>
-		public static async Task<ImmutableArray<INamespaceSymbol>> FindSimilarNamespacesAsync(this INamespaceSymbol symbol, Project project, CancellationToken cancellationToken = default) {
-			var r = ImmutableArray.CreateBuilder<INamespaceSymbol>();
-			if (symbol.IsGlobalNamespace) {
-				foreach (var p in GetRelatedProjects(project)) {
-					if (p.SupportsCompilation == false) {
-						continue;
-					}
-					var n = (await p.GetCompilationAsync(cancellationToken).ConfigureAwait(false)).GlobalNamespace;
-					if (n != null) {
-						r.Add(n);
-					}
-				}
-				goto EXIT;
-			}
-			var ns = ImmutableArray.CreateBuilder<string>();
-			do {
-				ns.Add(symbol.Name);
-			} while ((symbol = symbol.ContainingNamespace) != null && symbol.IsGlobalNamespace == false);
-			ns.Reverse();
+	/// <summary>Finds namespaces in related projects having the same fully qualified name.</summary>
+	/// <returns>Namespaces having the same name in current solution</returns>
+	public static async Task<ImmutableArray<INamespaceSymbol>> FindSimilarNamespacesAsync(this INamespaceSymbol symbol, Project project, CancellationToken cancellationToken = default) {
+		var r = ImmutableArray.CreateBuilder<INamespaceSymbol>();
+		if (symbol.IsGlobalNamespace) {
 			foreach (var p in GetRelatedProjects(project)) {
 				if (p.SupportsCompilation == false) {
 					continue;
 				}
-				var n = (await p.GetCompilationAsync(cancellationToken)).GlobalNamespace;
-				foreach (var item in ns) {
-					if ((n = n.GetNamespaceMembers().FirstOrDefault(m => m.Name == item)) == null) {
-						break;
-					}
-				}
+				var n = (await p.GetCompilationAsync(cancellationToken).ConfigureAwait(false)).GlobalNamespace;
 				if (n != null) {
 					r.Add(n);
 				}
 			}
-		EXIT:
-			return r.ToSortedSymbolArray();
+			goto EXIT;
 		}
+		var ns = ImmutableArray.CreateBuilder<string>();
+		do {
+			ns.Add(symbol.Name);
+		} while ((symbol = symbol.ContainingNamespace) != null && symbol.IsGlobalNamespace == false);
+		ns.Reverse();
+		foreach (var p in GetRelatedProjects(project)) {
+			if (p.SupportsCompilation == false) {
+				continue;
+			}
+			var n = (await p.GetCompilationAsync(cancellationToken)).GlobalNamespace;
+			foreach (var item in ns) {
+				if ((n = n.GetNamespaceMembers().FirstOrDefault(m => m.Name == item)) == null) {
+					break;
+				}
+			}
+			if (n != null) {
+				r.Add(n);
+			}
+		}
+	EXIT:
+		return r.ToSortedSymbolArray();
+	}
 
-		/// <summary>Finds symbols referenced by given context node.</summary>
-		/// <returns>An array of <see cref="KeyValuePair{TKey, TValue}"/> which contains referenced symbols and number of occurrences.</returns>
-		public static KeyValuePair<ISymbol, int>[] FindReferencingSymbols(this SyntaxNode node, SemanticModel semanticModel, bool sourceCodeOnly, CancellationToken cancellationToken = default) {
-			var result = new Dictionary<ISymbol, int>();
-			foreach (var item in node.DescendantNodes()) {
-				if (item.IsKind(SyntaxKind.IdentifierName) == false
-					|| item.Kind().IsDeclaration()) {
+	/// <summary>Finds symbols referenced by given context node.</summary>
+	/// <returns>An array of <see cref="KeyValuePair{TKey, TValue}"/> which contains referenced symbols and number of occurrences.</returns>
+	public static KeyValuePair<ISymbol, int>[] FindReferencingSymbols(this SyntaxNode node, SemanticModel semanticModel, bool sourceCodeOnly, CancellationToken cancellationToken = default) {
+		var result = new Dictionary<ISymbol, int>();
+		foreach (var item in node.DescendantNodes()) {
+			if (item.IsKind(SyntaxKind.IdentifierName) == false
+				|| item.Kind().IsDeclaration()) {
+				continue;
+			}
+			var s = semanticModel.GetSymbol(item, cancellationToken) ?? semanticModel.GetSymbolExt(item, cancellationToken);
+			if (s == null) {
+				continue;
+			}
+			switch (s.Kind) {
+				case SymbolKind.Parameter:
+				case SymbolKind.ArrayType:
+				case SymbolKind.PointerType:
+				case SymbolKind.TypeParameter:
+				case SymbolKind.Namespace:
+				case SymbolKind.Local:
+				case SymbolKind.Discard:
+				case SymbolKind.ErrorType:
+				case SymbolKind.DynamicType:
+				case SymbolKind.RangeVariable:
+				case SymbolKind.NamedType:
+					continue;
+				case SymbolKind.Method:
+					if (((IMethodSymbol)s).MethodKind == MethodKind.AnonymousFunction) {
+						continue;
+					}
+					break;
+			}
+			if (sourceCodeOnly && s.ContainingAssembly.GetSourceType() == AssemblySource.Metadata) {
+				continue;
+			}
+			var ct = s.ContainingType;
+			if (ct != null && (ct.IsTupleType || ct.IsAnonymousType)) {
+				continue;
+			}
+			result[s] = result.TryGetValue(s, out int i) ? ++i : 1;
+		}
+		var a = result.ToArray();
+		if (sourceCodeOnly) {
+			Array.Sort(a, (x, y) => {
+				int i = String.CompareOrdinal(x.Key.GetSourceReferences()[0].SyntaxTree.FilePath, y.Key.GetSourceReferences()[0].SyntaxTree.FilePath);
+				return i != 0 ? i
+					: (i = String.CompareOrdinal(x.Key.ContainingType?.Name, y.Key.ContainingType?.Name)) != 0 ? i
+					: String.CompareOrdinal(x.Key.Name, y.Key.Name);
+			});
+		}
+		else {
+			Array.Sort(a, (x, y) => {
+				int i = String.CompareOrdinal(x.Key.ContainingType?.Name, y.Key.ContainingType?.Name);
+				return i != 0 ? i : String.CompareOrdinal(x.Key.Name, y.Key.Name);
+			});
+		}
+		return a;
+	}
+
+	public static async Task<List<(ISymbol, List<(SymbolUsageKind, ReferenceLocation)>)>> FindReferrersAsync(this ISymbol symbol, Project project, IEnumerable<Document> documents, Predicate<ISymbol> definitionFilter = null, Predicate<ISymbol> occurrenceFilter = null, Predicate<SyntaxNode> nodeFilter = null, CancellationToken cancellationToken = default) {
+		var d = new Dictionary<ISymbol, List<(SymbolUsageKind, ReferenceLocation)>>(5);
+		// hack: fix FindReferencesAsync returning unbounded references for generic type or method
+		//string sign = null;
+		Predicate<SymbolUsageKind> usageFilter = null;
+		switch (symbol.Kind) {
+			case SymbolKind.NamedType:
+				// hack: In VS 2017 with Roslyn 2.10, we don't need this,
+				//       but in VS 2019, we have to do that, otherwise we will get nothing.
+				//       The same to SymbolKind.Method.
+				if ((symbol as INamedTypeSymbol).IsBoundedGenericType()
+					|| symbol.GetContainingTypes().Any(IsBoundedGenericType)) {
+					//sign = symbol.ToDisplayString();
+					symbol = symbol.OriginalDefinition;
+				}
+				break;
+			case SymbolKind.Method:
+				var m = symbol as IMethodSymbol;
+				if (m.IsExtensionMethod) {
+					symbol = m.ReducedFrom ?? m;
+				}
+				else if (m.IsBoundedGenericMethod() || m.GetContainingTypes().Any(IsBoundedGenericType)) {
+					//sign = symbol.ToDisplayString();
+					symbol = symbol.OriginalDefinition;
+				}
+				else if (m.MethodKind == MethodKind.PropertyGet) {
+					usageFilter = u => u != SymbolUsageKind.Write;
+				}
+				else if (m.MethodKind == MethodKind.PropertySet || m.IsInitOnly()) {
+					usageFilter = u => u == SymbolUsageKind.Write;
+				}
+				break;
+		}
+		foreach (var sr in await SymbolFinder.FindReferencesAsync(symbol, project.Solution, documents is null ? null : ImmutableHashSet.CreateRange(documents), cancellationToken).ConfigureAwait(false)) {
+			if (definitionFilter?.Invoke(sr.Definition) == false) {
+				continue;
+			}
+			await GroupReferenceByContainerAsync(d, sr, null, nodeFilter, occurrenceFilter, usageFilter, cancellationToken).ConfigureAwait(false);
+		}
+		if (d.Count == 0) {
+			return null;
+		}
+		var r = new List<(ISymbol container, List<(SymbolUsageKind, ReferenceLocation)>)>(d.Count);
+		r.AddRange(d.Select(i => (i.Key, i.Value)));
+		r.Sort((x, y) => CompareSymbol(x.container, y.container));
+		return r;
+	}
+
+	public static async Task<IEnumerable<Location>> FindOccurrencesInDocumentAsync(this ISymbol symbol, Document document, SyntaxTree syntaxTree, string tokenText, CancellationToken cancellationToken = default) {
+		var refs = await SymbolFinder.FindReferencesAsync(symbol, document.Project.Solution, ImmutableHashSet.Create(document), cancellationToken);
+		return MixDeclarationAndOccurrence(symbol.Locations, refs, syntaxTree, tokenText, cancellationToken);
+
+		IEnumerable<Location> MixDeclarationAndOccurrence(ImmutableArray<Location> symLocs, IEnumerable<ReferencedSymbol> refSymbols, SyntaxTree st, string tt, CancellationToken cancellationToken) {
+			foreach (var item in symLocs) {
+				if (item.SourceTree == st) {
+					if (item.GetText(cancellationToken) != tt) {
+						continue;
+					}
+					yield return item;
+				}
+			}
+			foreach (var item in refSymbols) {
+				foreach (var location in item.Definition.Locations) {
+					if (location.SourceTree == st && location.GetText(cancellationToken) == tt) {
+						yield return location;
+					}
+				}
+				foreach (var location in item.Locations) {
+					if (location.Location.GetText(cancellationToken) == tt) {
+						yield return location.Location;
+					}
+				}
+			}
+		}
+	}
+
+	static async Task GroupReferenceByContainerAsync(Dictionary<ISymbol, List<(SymbolUsageKind usage, ReferenceLocation loc)>> results, ReferencedSymbol reference, string symbolSignature, Predicate<SyntaxNode> nodeFilter = null, Predicate<ISymbol> occurrenceFilter = null, Predicate<SymbolUsageKind> usageFilter = null, CancellationToken cancellationToken = default) {
+		var pu = GetPotentialUsageKinds(reference.Definition);
+		foreach (var docRefs in reference.Locations.GroupBy(l => l.Document)) {
+			var sm = await docRefs.Key.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
+			if (sm.IsCSharp() == false) {
+				continue;
+			}
+			var r = sm.SyntaxTree.GetCompilationUnitRoot(cancellationToken);
+			foreach (var location in docRefs) {
+				var ss = location.Location.SourceSpan;
+				var n = r.FindNode(ss);
+				if (n.Span.Contains(ss.Start) == false || nodeFilter?.Invoke(n) == false) {
 					continue;
 				}
-				var s = semanticModel.GetSymbol(item, cancellationToken) ?? semanticModel.GetSymbolExt(item, cancellationToken);
+				var c = n.FirstAncestorOrSelf<SyntaxNode>(i => i.Kind().GetDeclarationCategory().HasAnyFlag(DeclarationCategory.Member | DeclarationCategory.Type));
+				ISymbol s;
+				//if (c == null
+				//	// unfortunately we can't compare the symbol s with the original typeSymbol directly,
+				//	// even though they are actually the same
+				//	|| symbolSignature != null && ((s = sm.GetSymbol(n, cancellationToken)) == null || (s?.ToDisplayString() != symbolSignature))) {
+				//	continue;
+				//}
+				n = n.GetObjectCreationNode() ?? n;
+				if (occurrenceFilter != null) {
+					s = sm.GetSymbol(n, cancellationToken);
+					if (s is null || !occurrenceFilter(s)) {
+						continue;
+					}
+				}
+				s = sm.GetSymbol(c, cancellationToken);
 				if (s == null) {
 					continue;
 				}
-				switch (s.Kind) {
-					case SymbolKind.Parameter:
-					case SymbolKind.ArrayType:
-					case SymbolKind.PointerType:
-					case SymbolKind.TypeParameter:
-					case SymbolKind.Namespace:
-					case SymbolKind.Local:
-					case SymbolKind.Discard:
-					case SymbolKind.ErrorType:
-					case SymbolKind.DynamicType:
-					case SymbolKind.RangeVariable:
-					case SymbolKind.NamedType:
-						continue;
-					case SymbolKind.Method:
-						if (((IMethodSymbol)s).MethodKind == MethodKind.AnonymousFunction) {
-							continue;
-						}
-						break;
+				if (s.Kind == SymbolKind.Method) {
+					switch (((IMethodSymbol)s).MethodKind) {
+						case MethodKind.AnonymousFunction:
+							s = s.ContainingSymbol;
+							break;
+						case MethodKind.EventAdd:
+						case MethodKind.EventRemove:
+						case MethodKind.PropertyGet:
+						case MethodKind.PropertySet:
+							s = ((IMethodSymbol)s).AssociatedSymbol;
+							break;
+					}
 				}
-				if (sourceCodeOnly && s.ContainingAssembly.GetSourceType() == AssemblySource.Metadata) {
+				var u = GetUsageKind(pu, n);
+				if (usageFilter != null && usageFilter(u) == false) {
 					continue;
 				}
-				var ct = s.ContainingType;
-				if (ct != null && (ct.IsTupleType || ct.IsAnonymousType)) {
-					continue;
-				}
-				result[s] = result.TryGetValue(s, out int i) ? ++i : 1;
-			}
-			var a = result.ToArray();
-			if (sourceCodeOnly) {
-				Array.Sort(a, (x, y) => {
-					int i = String.CompareOrdinal(x.Key.GetSourceReferences()[0].SyntaxTree.FilePath, y.Key.GetSourceReferences()[0].SyntaxTree.FilePath);
-					return i != 0 ? i
-						: (i = String.CompareOrdinal(x.Key.ContainingType?.Name, y.Key.ContainingType?.Name)) != 0 ? i
-						: String.CompareOrdinal(x.Key.Name, y.Key.Name);
-				});
-			}
-			else {
-				Array.Sort(a, (x, y) => {
-					int i = String.CompareOrdinal(x.Key.ContainingType?.Name, y.Key.ContainingType?.Name);
-					return i != 0 ? i : String.CompareOrdinal(x.Key.Name, y.Key.Name);
-				});
-			}
-			return a;
-		}
-
-		public static async Task<List<(ISymbol, List<(SymbolUsageKind, ReferenceLocation)>)>> FindReferrersAsync(this ISymbol symbol, Project project, IEnumerable<Document> documents, Predicate<ISymbol> definitionFilter = null, Predicate<ISymbol> occurrenceFilter = null, Predicate<SyntaxNode> nodeFilter = null, CancellationToken cancellationToken = default) {
-			var d = new Dictionary<ISymbol, List<(SymbolUsageKind, ReferenceLocation)>>(5);
-			// hack: fix FindReferencesAsync returning unbounded references for generic type or method
-			//string sign = null;
-			Predicate<SymbolUsageKind> usageFilter = null;
-			switch (symbol.Kind) {
-				case SymbolKind.NamedType:
-					// hack: In VS 2017 with Roslyn 2.10, we don't need this,
-					//       but in VS 2019, we have to do that, otherwise we will get nothing.
-					//       The same to SymbolKind.Method.
-					if ((symbol as INamedTypeSymbol).IsBoundedGenericType()
-						|| symbol.GetContainingTypes().Any(IsBoundedGenericType)) {
-						//sign = symbol.ToDisplayString();
-						symbol = symbol.OriginalDefinition;
-					}
-					break;
-				case SymbolKind.Method:
-					var m = symbol as IMethodSymbol;
-					if (m.IsExtensionMethod) {
-						symbol = m.ReducedFrom ?? m;
-					}
-					else if (m.IsBoundedGenericMethod() || m.GetContainingTypes().Any(IsBoundedGenericType)) {
-						//sign = symbol.ToDisplayString();
-						symbol = symbol.OriginalDefinition;
-					}
-					else if (m.MethodKind == MethodKind.PropertyGet) {
-						usageFilter = u => u != SymbolUsageKind.Write;
-					}
-					else if (m.MethodKind == MethodKind.PropertySet || m.IsInitOnly()) {
-						usageFilter = u => u == SymbolUsageKind.Write;
-					}
-					break;
-			}
-			foreach (var sr in await SymbolFinder.FindReferencesAsync(symbol, project.Solution, documents is null ? null : ImmutableHashSet.CreateRange(documents), cancellationToken).ConfigureAwait(false)) {
-				if (definitionFilter?.Invoke(sr.Definition) == false) {
-					continue;
-				}
-				await GroupReferenceByContainerAsync(d, sr, null, nodeFilter, occurrenceFilter, usageFilter, cancellationToken).ConfigureAwait(false);
-			}
-			if (d.Count == 0) {
-				return null;
-			}
-			var r = new List<(ISymbol container, List<(SymbolUsageKind, ReferenceLocation)>)>(d.Count);
-			r.AddRange(d.Select(i => (i.Key, i.Value)));
-			r.Sort((x, y) => CompareSymbol(x.container, y.container));
-			return r;
-		}
-
-		public static async Task<IEnumerable<Location>> FindOccurrencesInDocumentAsync(this ISymbol symbol, Document document, SyntaxTree syntaxTree, string tokenText, CancellationToken cancellationToken = default) {
-			var refs = await SymbolFinder.FindReferencesAsync(symbol, document.Project.Solution, ImmutableHashSet.Create(document), cancellationToken);
-			return MixDeclarationAndOccurrence(symbol.Locations, refs, syntaxTree, tokenText, cancellationToken);
-
-			IEnumerable<Location> MixDeclarationAndOccurrence(ImmutableArray<Location> symLocs, IEnumerable<ReferencedSymbol> refSymbols, SyntaxTree st, string tt, CancellationToken cancellationToken) {
-				foreach (var item in symLocs) {
-					if (item.SourceTree == st) {
-						if (item.GetText(cancellationToken) != tt) {
-							continue;
-						}
-						yield return item;
-					}
-				}
-				foreach (var item in refSymbols) {
-					foreach (var location in item.Definition.Locations) {
-						if (location.SourceTree == st && location.GetText(cancellationToken) == tt) {
-							yield return location;
-						}
-					}
-					foreach (var location in item.Locations) {
-						if (location.Location.GetText(cancellationToken) == tt) {
-							yield return location.Location;
-						}
-					}
-				}
-			}
-		}
-
-		static async Task GroupReferenceByContainerAsync(Dictionary<ISymbol, List<(SymbolUsageKind usage, ReferenceLocation loc)>> results, ReferencedSymbol reference, string symbolSignature, Predicate<SyntaxNode> nodeFilter = null, Predicate<ISymbol> occurrenceFilter = null, Predicate<SymbolUsageKind> usageFilter = null, CancellationToken cancellationToken = default) {
-			var pu = GetPotentialUsageKinds(reference.Definition);
-			foreach (var docRefs in reference.Locations.GroupBy(l => l.Document)) {
-				var sm = await docRefs.Key.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
-				if (sm.IsCSharp() == false) {
-					continue;
-				}
-				var r = sm.SyntaxTree.GetCompilationUnitRoot(cancellationToken);
-				foreach (var location in docRefs) {
-					var ss = location.Location.SourceSpan;
-					var n = r.FindNode(ss);
-					if (n.Span.Contains(ss.Start) == false || nodeFilter?.Invoke(n) == false) {
-						continue;
-					}
-					var c = n.FirstAncestorOrSelf<SyntaxNode>(i => i.Kind().GetDeclarationCategory().HasAnyFlag(DeclarationCategory.Member | DeclarationCategory.Type));
-					ISymbol s;
-					//if (c == null
-					//	// unfortunately we can't compare the symbol s with the original typeSymbol directly,
-					//	// even though they are actually the same
-					//	|| symbolSignature != null && ((s = sm.GetSymbol(n, cancellationToken)) == null || (s?.ToDisplayString() != symbolSignature))) {
-					//	continue;
-					//}
-					n = n.GetObjectCreationNode() ?? n;
-					if (occurrenceFilter?.Invoke(sm.GetSymbol(n, cancellationToken)) == false) {
-						continue;
-					}
-					s = sm.GetSymbol(c, cancellationToken);
-					if (s == null) {
-						continue;
-					}
-					if (s.Kind == SymbolKind.Method) {
-						switch (((IMethodSymbol)s).MethodKind) {
-							case MethodKind.AnonymousFunction:
-								s = s.ContainingSymbol;
-								break;
-							case MethodKind.EventAdd:
-							case MethodKind.EventRemove:
-							case MethodKind.PropertyGet:
-							case MethodKind.PropertySet:
-								s = ((IMethodSymbol)s).AssociatedSymbol;
-								break;
-						}
-					}
-					var u = GetUsageKind(pu, n);
-					if (usageFilter != null && usageFilter(u) == false) {
-						continue;
-					}
-					if (results.TryGetValue(s, out var l)) {
-						var sf = location.Location.SourceTree.FilePath;
-						foreach (var (usage, loc) in l) {
-							if (usage == u
-								&& loc.Location.SourceSpan == ss
-								&& loc.Location.SourceTree.FilePath == sf) {
-								goto NEXT;
-							}
-						}
-						l.Add((u, location));
-					}
-					else {
-						results[s] = new List<(SymbolUsageKind, ReferenceLocation)> { (u, location) };
-					}
-				NEXT:;
-				}
-			}
-		}
-
-		public static async Task<IReadOnlyCollection<KeyValuePair<ISymbol, List<(ArgumentAssignment assignment, Location location, ExpressionSyntax expression)>>>> FindParameterAssignmentsAsync(this IParameterSymbol parameter, Project project, IEnumerable<Document> documents, bool strict, ArgumentAssignmentFilter assignmentFilter,  CancellationToken cancellationToken = default) {
-			var method = (parameter.ContainingSymbol as IMethodSymbol);
-			bool mayBeExtension;
-			if (mayBeExtension = method.IsExtensionMethod) {
-				method = method.ReducedFrom ?? method;
-			}
-			var po = parameter.Ordinal;
-			var pn = parameter.Name;
-			var optional = parameter.IsOptional;
-			var modelCache = new System.Runtime.CompilerServices.ConditionalWeakTable<Document, SemanticModel>();
-			var symbolLocations = new Dictionary<ISymbol, List<(ArgumentAssignment, Location, ExpressionSyntax)>>();
-			var locationDedup = new HashSet<Location>(Comparers.SourceLocationComparer);
-			List<(ArgumentAssignment, Location, ExpressionSyntax)> refList;
-			foreach (var callerInfo in await SymbolFinder.FindReferencesAsync(method, project.Solution, documents is null ? null : ImmutableHashSet.CreateRange(documents), cancellationToken)) {
-				if (cancellationToken.IsCancellationRequested) {
-					return symbolLocations;
-				}
-				foreach (var r in callerInfo.Locations) {
-					if (modelCache.TryGetValue(r.Document, out var model) == false) {
-						model = await r.Document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
-					}
-					if (model.IsCSharp() == false || locationDedup.Add(r.Location) == false) {
-						continue;
-					}
-					var callerNode = (await r.Location.SourceTree.GetRootAsync(cancellationToken)).FindNode(r.Location.SourceSpan, false, false);
-					var argList = GetArguments(callerNode);
-					if (argList == null) {
-						continue;
-					}
-					ISymbol caller = argList.AttributeList.IsKind(SyntaxKind.AttributeArgumentList)
-						? model.GetSymbol(argList.AttributeList.GetAncestorOrSelfDeclaration())
-						: null;
-					if (caller == null) {
-						caller = model.GetEnclosingSymbol(r.Location.SourceSpan.Start);
-						while (caller.Kind == SymbolKind.Method && ((IMethodSymbol)caller).MethodKind == MethodKind.LambdaMethod) {
-							caller = caller.ContainingSymbol;
-						}
-					}
-					if (symbolLocations.TryGetValue(caller, out refList) == false) {
-						symbolLocations.Add(caller, refList = new List<(ArgumentAssignment, Location, ExpressionSyntax)>());
-					}
-					var pi = po;
-					if (strict || mayBeExtension) {
-						var callee = model.GetSymbolInfo(callerNode).Symbol;
-						if (strict && callee != method) {
-							continue;
-						}
-						if (mayBeExtension) {
-							var isReduced = (callee as IMethodSymbol)?.MethodKind == MethodKind.ReducedExtension;
-							if (isReduced) {
-								if (po == 0) {
-									if (assignmentFilter != ArgumentAssignmentFilter.DefaultValue) {
-										refList.Add((ArgumentAssignment.Normal, r.Location, (callerNode.Parent as MemberAccessExpressionSyntax).Expression));
-									}
-									continue;
-								}
-								else {
-									--pi;
-								}
-							}
-						}
-					}
-					var args = argList;
-					(NameColonSyntax NameColon, ExpressionSyntax Expression) arg;
-					if (args.Count > pi && (arg = args[pi]).NameColon == null) {
-						if (arg.Expression == null
-							|| arg.Expression is IdentifierNameSyntax name && name.Span.Length == 0) {
-							goto DEFAULT_VALUE;
-						}
-						if (assignmentFilter != ArgumentAssignmentFilter.DefaultValue) {
-							refList.Add((HasImplicitConversion(model, arg.Expression, cancellationToken) ? ArgumentAssignment.Normal : ArgumentAssignment.ImplicitlyConverted, null, arg.Expression));
-						}
-						continue;
-					}
-					for (int i = 0; i < args.Count; i++) {
-						arg = args[i];
-						if (arg.NameColon?.Name.Identifier.Text == pn) {
-							if (assignmentFilter != ArgumentAssignmentFilter.DefaultValue) {
-								refList.Add((HasImplicitConversion(model, arg.Expression, cancellationToken) ? ArgumentAssignment.NameValue : ArgumentAssignment.ImplicitlyConvertedNameValue, null, arg.Expression));
-							}
+				if (results.TryGetValue(s, out var l)) {
+					var sf = location.Location.SourceTree.FilePath;
+					foreach (var (usage, loc) in l) {
+						if (usage == u
+							&& loc.Location.SourceSpan == ss
+							&& loc.Location.SourceTree.FilePath == sf) {
 							goto NEXT;
 						}
 					}
-					DEFAULT_VALUE:
-					if (optional && assignmentFilter != ArgumentAssignmentFilter.ExplicitValue) {
-						refList.Add((ArgumentAssignment.Default, r.Location, null));
-					}
-				NEXT:;
+					l.Add((u, location));
 				}
+				else {
+					results[s] = new List<(SymbolUsageKind, ReferenceLocation)> { (u, location) };
+				}
+			NEXT:;
 			}
-			return symbolLocations;
 		}
+	}
 
-		static ArgumentListContainer GetArguments(SyntaxNode node) {
-			switch (node.Kind()) {
-				case SyntaxKind.IdentifierName:
-				case SyntaxKind.QualifiedName:
-					node = node.UnqualifyExceptNamespace().Parent;
-					if (node is MemberAccessExpressionSyntax) {
-						node = node.Parent;
-					}
-					if (node is InvocationExpressionSyntax inv) {
-						return new ArgumentListContainer(inv.ArgumentList);
-					}
-					if (node is ObjectCreationExpressionSyntax oc) {
-						return new ArgumentListContainer(oc.ArgumentList);
-					}
-					if (node is AttributeSyntax a) {
-						return new ArgumentListContainer(a.ArgumentList);
-					}
-					break;
-				case CodeAnalysisHelper.ImplicitObjectCreationExpression:
-					return new ArgumentListContainer((node as ExpressionSyntax).GetImplicitObjectCreationArgumentList());
-				case SyntaxKind.BaseConstructorInitializer:
-				case SyntaxKind.ThisConstructorInitializer:
-					return new ArgumentListContainer(((ConstructorInitializerSyntax)node).ArgumentList);
-				case SyntaxKind.ObjectCreationExpression:
-					return new ArgumentListContainer(((ObjectCreationExpressionSyntax)node).ArgumentList);
-			}
-			return null;
+	public static async Task<IReadOnlyCollection<KeyValuePair<ISymbol, List<(ArgumentAssignment assignment, Location location, ExpressionSyntax expression)>>>> FindParameterAssignmentsAsync(this IParameterSymbol parameter, Project project, IEnumerable<Document> documents, bool strict, ArgumentAssignmentFilter assignmentFilter,  CancellationToken cancellationToken = default) {
+		var method = (parameter.ContainingSymbol as IMethodSymbol);
+		bool mayBeExtension;
+		if (mayBeExtension = method.IsExtensionMethod) {
+			method = method.ReducedFrom ?? method;
 		}
+		var po = parameter.Ordinal;
+		var pn = parameter.Name;
+		var optional = parameter.IsOptional;
+		var modelCache = new System.Runtime.CompilerServices.ConditionalWeakTable<Document, SemanticModel>();
+		var symbolLocations = new Dictionary<ISymbol, List<(ArgumentAssignment, Location, ExpressionSyntax)>>();
+		var locationDedup = new HashSet<Location>(Comparers.SourceLocationComparer);
+		List<(ArgumentAssignment, Location, ExpressionSyntax)> refList;
+		foreach (var callerInfo in await SymbolFinder.FindReferencesAsync(method, project.Solution, documents is null ? null : ImmutableHashSet.CreateRange(documents), cancellationToken)) {
+			if (cancellationToken.IsCancellationRequested) {
+				return symbolLocations;
+			}
+			foreach (var r in callerInfo.Locations) {
+				if (modelCache.TryGetValue(r.Document, out var model) == false) {
+					model = await r.Document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
+				}
+				if (model.IsCSharp() == false || locationDedup.Add(r.Location) == false) {
+					continue;
+				}
+				var callerNode = (await r.Location.SourceTree.GetRootAsync(cancellationToken)).FindNode(r.Location.SourceSpan, false, false);
+				var argList = GetArguments(callerNode);
+				if (argList == null) {
+					continue;
+				}
+				ISymbol caller = argList.AttributeList.IsKind(SyntaxKind.AttributeArgumentList)
+					? model.GetSymbol(argList.AttributeList.GetAncestorOrSelfDeclaration())
+					: null;
+				if (caller == null) {
+					caller = model.GetEnclosingSymbol(r.Location.SourceSpan.Start);
+					while (caller.Kind == SymbolKind.Method && ((IMethodSymbol)caller).MethodKind == MethodKind.LambdaMethod) {
+						caller = caller.ContainingSymbol;
+					}
+				}
+				if (symbolLocations.TryGetValue(caller, out refList) == false) {
+					symbolLocations.Add(caller, refList = new List<(ArgumentAssignment, Location, ExpressionSyntax)>());
+				}
+				var pi = po;
+				if (strict || mayBeExtension) {
+					var callee = model.GetSymbolInfo(callerNode).Symbol;
+					if (strict && callee != method) {
+						continue;
+					}
+					if (mayBeExtension) {
+						var isReduced = (callee as IMethodSymbol)?.MethodKind == MethodKind.ReducedExtension;
+						if (isReduced) {
+							if (po == 0) {
+								if (assignmentFilter != ArgumentAssignmentFilter.DefaultValue) {
+									refList.Add((ArgumentAssignment.Normal, r.Location, (callerNode.Parent as MemberAccessExpressionSyntax).Expression));
+								}
+								continue;
+							}
+							else {
+								--pi;
+							}
+						}
+					}
+				}
+				var args = argList;
+				(NameColonSyntax NameColon, ExpressionSyntax Expression) arg;
+				if (args.Count > pi && (arg = args[pi]).NameColon == null) {
+					if (arg.Expression == null
+						|| arg.Expression is IdentifierNameSyntax name && name.Span.Length == 0) {
+						goto DEFAULT_VALUE;
+					}
+					if (assignmentFilter != ArgumentAssignmentFilter.DefaultValue) {
+						refList.Add((HasImplicitConversion(model, arg.Expression, cancellationToken) ? ArgumentAssignment.Normal : ArgumentAssignment.ImplicitlyConverted, null, arg.Expression));
+					}
+					continue;
+				}
+				for (int i = 0; i < args.Count; i++) {
+					arg = args[i];
+					if (arg.NameColon?.Name.Identifier.Text == pn) {
+						if (assignmentFilter != ArgumentAssignmentFilter.DefaultValue) {
+							refList.Add((HasImplicitConversion(model, arg.Expression, cancellationToken) ? ArgumentAssignment.NameValue : ArgumentAssignment.ImplicitlyConvertedNameValue, null, arg.Expression));
+						}
+						goto NEXT;
+					}
+				}
+				DEFAULT_VALUE:
+				if (optional && assignmentFilter != ArgumentAssignmentFilter.ExplicitValue) {
+					refList.Add((ArgumentAssignment.Default, r.Location, null));
+				}
+			NEXT:;
+			}
+		}
+		return symbolLocations;
+	}
 
-		static bool HasImplicitConversion(SemanticModel model, ExpressionSyntax expression, CancellationToken cancellationToken) {
-			var typeInfo = model.GetTypeInfo(expression, cancellationToken);
-			return AreEqual(typeInfo.Type, typeInfo.ConvertedType, false);
+	static ArgumentListContainer GetArguments(SyntaxNode node) {
+		switch (node.Kind()) {
+			case SyntaxKind.IdentifierName:
+			case SyntaxKind.QualifiedName:
+				node = node.UnqualifyExceptNamespace().Parent;
+				if (node is MemberAccessExpressionSyntax) {
+					node = node.Parent;
+				}
+				if (node is InvocationExpressionSyntax inv) {
+					return new ArgumentListContainer(inv.ArgumentList);
+				}
+				if (node is ObjectCreationExpressionSyntax oc) {
+					return new ArgumentListContainer(oc.ArgumentList);
+				}
+				if (node is AttributeSyntax a) {
+					return new ArgumentListContainer(a.ArgumentList);
+				}
+				break;
+			case CodeAnalysisHelper.ImplicitObjectCreationExpression:
+				return new ArgumentListContainer((node as ExpressionSyntax).GetImplicitObjectCreationArgumentList());
+			case SyntaxKind.BaseConstructorInitializer:
+			case SyntaxKind.ThisConstructorInitializer:
+				return new ArgumentListContainer(((ConstructorInitializerSyntax)node).ArgumentList);
+			case SyntaxKind.ObjectCreationExpression:
+				return new ArgumentListContainer(((ObjectCreationExpressionSyntax)node).ArgumentList);
 		}
+		return null;
+	}
 
-		/// <summary>Navigates upward through ancestral axis and find out the first node reflecting the usage.</summary>
-		public static SyntaxNode GetNodePurpose(this SyntaxNode node) {
-			NameSyntax originName;
-			if (node.IsAnyKind(SyntaxKind.IdentifierName, SyntaxKind.GenericName, SyntaxKind.PredefinedType)) {
-				originName = node as NameSyntax;
-				node = node.Parent;
-			}
-			else {
-				originName = null;
-			}
-			var n = node;
-			while (n.IsAnyKind(SyntaxKind.QualifiedName, SyntaxKind.SimpleMemberAccessExpression, SyntaxKind.PointerMemberAccessExpression, SyntaxKind.MemberBindingExpression)) {
-				if (n is MemberAccessExpressionSyntax ma && ma.Name != originName
-					|| n.IsAnyKind(SyntaxKind.TypeOfExpression, SyntaxKind.SizeOfExpression)) {
-					return node;
-				}
-				node = n;
-				n = n.Parent;
-			}
-			return n;
-		}
+	static bool HasImplicitConversion(SemanticModel model, ExpressionSyntax expression, CancellationToken cancellationToken) {
+		var typeInfo = model.GetTypeInfo(expression, cancellationToken);
+		return AreEqual(typeInfo.Type, typeInfo.ConvertedType, false);
+	}
 
-		public static SymbolUsageKind GetUsageKind(SymbolUsageKind possibleUsage, SyntaxNode node) {
-			if (possibleUsage.MatchFlags(SymbolUsageKind.Write)) {
-				var n = node.GetNodePurpose();
-				if (n is AssignmentExpressionSyntax a && (a.Left == node || a.Left.GetLastIdentifier() == node)) {
-					return a.Right.IsKind(SyntaxKind.NullLiteralExpression)
-						? SymbolUsageKind.Write | SymbolUsageKind.SetNull
-						: SymbolUsageKind.Write;
-				}
-				else if (n.IsAnyKind(SyntaxKind.PostIncrementExpression, SyntaxKind.PreIncrementExpression)
-					|| n is ArgumentSyntax r && r.RefKindKeyword.IsAnyKind(SyntaxKind.RefKeyword, SyntaxKind.OutKeyword)) {
-					return SymbolUsageKind.Write;
-				}
-			}
-			else if (possibleUsage.MatchFlags(SymbolUsageKind.TypeCast)) {
-				node = node.GetNodePurpose();
-				if (node.IsAnyKind(SyntaxKind.AsExpression, SyntaxKind.IsExpression, SyntaxKind.IsPatternExpression, SyntaxKind.CastExpression)) {
-					return SymbolUsageKind.TypeCast;
-				}
-				if (possibleUsage.MatchFlags(SymbolUsageKind.Catch)
-					&& node.IsKind(SyntaxKind.CatchDeclaration)) {
-					return SymbolUsageKind.Catch;
-				}
-				if (possibleUsage.MatchFlags(SymbolUsageKind.TypeParameter)
-					&& node.IsAnyKind(SyntaxKind.TypeArgumentList, SyntaxKind.TypeOfExpression, SyntaxKind.SizeOfExpression)) {
-					return SymbolUsageKind.TypeParameter;
-				}
-			}
-			else if (possibleUsage.HasAnyFlag(SymbolUsageKind.Attach | SymbolUsageKind.Detach | SymbolUsageKind.Trigger)) {
-				node = node.GetNodePurpose();
-				if (node is AssignmentExpressionSyntax a) {
-					if (a.IsKind(SyntaxKind.AddAssignmentExpression)) {
-						return SymbolUsageKind.Attach;
-					}
-					if (a.IsKind(SyntaxKind.SubtractAssignmentExpression)) {
-						return SymbolUsageKind.Detach;
-					}
-				}
-				else if (node.IsAnyKind(SyntaxKind.ConditionalAccessExpression, SyntaxKind.SimpleMemberAccessExpression)) {
-					return SymbolUsageKind.Trigger;
-				}
-			}
-			else if (possibleUsage.MatchFlags(SymbolUsageKind.Delegate)) {
-				var n = node.GetNodePurpose();
-				// todo detect delegate usage buried under calculation expressions
-				if (n.IsKind(SyntaxKind.Argument)) {
-					return SymbolUsageKind.Delegate;
-				}
-				//var last = node.GetLastAncestorExpressionNode();
-				//if (last != null && last.Parent.IsKind(SyntaxKind.Argument) == true && (last == node || last is MemberAccessExpressionSyntax)) {
-				//	return SymbolUsageKind.Read;
-				//}
-				if (n is AssignmentExpressionSyntax a && a.Right == node) {
-					switch (a.Kind()) {
-						case SyntaxKind.AddAssignmentExpression: return SymbolUsageKind.Attach;
-						case SyntaxKind.SubtractAssignmentExpression: return SymbolUsageKind.Detach;
-						case SyntaxKind.SimpleAssignmentExpression: return SymbolUsageKind.Delegate;
-					}
-				}
-			}
-			return SymbolUsageKind.Normal;
+	/// <summary>Navigates upward through ancestral axis and find out the first node reflecting the usage.</summary>
+	public static SyntaxNode GetNodePurpose(this SyntaxNode node) {
+		NameSyntax originName;
+		if (node.IsAnyKind(SyntaxKind.IdentifierName, SyntaxKind.GenericName, SyntaxKind.PredefinedType)) {
+			originName = node as NameSyntax;
+			node = node.Parent;
 		}
+		else {
+			originName = null;
+		}
+		var n = node;
+		while (n.IsAnyKind(SyntaxKind.QualifiedName, SyntaxKind.SimpleMemberAccessExpression, SyntaxKind.PointerMemberAccessExpression, SyntaxKind.MemberBindingExpression)) {
+			if (n is MemberAccessExpressionSyntax ma && ma.Name != originName
+				|| n.IsAnyKind(SyntaxKind.TypeOfExpression, SyntaxKind.SizeOfExpression)) {
+				return node;
+			}
+			node = n;
+			n = n.Parent;
+		}
+		return n;
+	}
 
-		public static SymbolUsageKind GetPotentialUsageKinds(ISymbol symbol) {
-			switch (symbol.Kind) {
-				case SymbolKind.Event:
-					return SymbolUsageKind.Attach | SymbolUsageKind.Detach | SymbolUsageKind.Trigger;
-				case SymbolKind.Field:
-					return ((IFieldSymbol)symbol).IsConst ? SymbolUsageKind.Normal : SymbolUsageKind.Write;
-				case SymbolKind.Local:
-				case SymbolKind.Property:
-					return SymbolUsageKind.Write;
-				case SymbolKind.NamedType:
-					return ((INamedTypeSymbol)symbol).IsExceptionType()
-						? SymbolUsageKind.Catch | SymbolUsageKind.TypeCast | SymbolUsageKind.TypeParameter
-						: SymbolUsageKind.TypeCast | SymbolUsageKind.TypeParameter;
-				case SymbolKind.Method:
-					return SymbolUsageKind.Delegate;
-				default:
-					return SymbolUsageKind.Normal;
+	public static SymbolUsageKind GetUsageKind(SymbolUsageKind possibleUsage, SyntaxNode node) {
+		if (possibleUsage.MatchFlags(SymbolUsageKind.Write)) {
+			var n = node.GetNodePurpose();
+			if (n is AssignmentExpressionSyntax a && (a.Left == node || a.Left.GetLastIdentifier() == node)) {
+				return a.Right.IsKind(SyntaxKind.NullLiteralExpression)
+					? SymbolUsageKind.Write | SymbolUsageKind.SetNull
+					: SymbolUsageKind.Write;
+			}
+			else if (n.IsAnyKind(SyntaxKind.PostIncrementExpression, SyntaxKind.PreIncrementExpression)
+				|| n is ArgumentSyntax r && r.RefKindKeyword.IsAnyKind(SyntaxKind.RefKeyword, SyntaxKind.OutKeyword)) {
+				return SymbolUsageKind.Write;
 			}
 		}
-
-		static Comparer<ISymbol> CreateSymbolComparer() {
-			return Comparer<ISymbol>.Create((x, y) => {
-				var l = x.Name.Length - y.Name.Length;
-				return l != 0 ? l : x.GetHashCode() - y.GetHashCode();
-			});
+		else if (possibleUsage.MatchFlags(SymbolUsageKind.TypeCast)) {
+			node = node.GetNodePurpose();
+			if (node.IsAnyKind(SyntaxKind.AsExpression, SyntaxKind.IsExpression, SyntaxKind.IsPatternExpression, SyntaxKind.CastExpression)) {
+				return SymbolUsageKind.TypeCast;
+			}
+			if (possibleUsage.MatchFlags(SymbolUsageKind.Catch)
+				&& node.IsKind(SyntaxKind.CatchDeclaration)) {
+				return SymbolUsageKind.Catch;
+			}
+			if (possibleUsage.MatchFlags(SymbolUsageKind.TypeParameter)
+				&& node.IsAnyKind(SyntaxKind.TypeArgumentList, SyntaxKind.TypeOfExpression, SyntaxKind.SizeOfExpression)) {
+				return SymbolUsageKind.TypeParameter;
+			}
 		}
-
-		static readonly char[] __SplitArray = new char[] { ' ' };
-		static string[] SplitKeywords(string text) {
-			return text.Split(__SplitArray, StringSplitOptions.RemoveEmptyEntries);
-		}
-		public static Func<string, bool> CreateNameFilter(string keywords, bool fullMatch, bool matchCase) {
-			var k = SplitKeywords(keywords);
-			if (k.Length == 1 || fullMatch) {
-				keywords = k[0];
-				if (fullMatch) {
-					if (matchCase) {
-						return name => name == keywords;
-					}
-					return name => String.Equals(name, keywords, StringComparison.OrdinalIgnoreCase);
+		else if (possibleUsage.HasAnyFlag(SymbolUsageKind.Attach | SymbolUsageKind.Detach | SymbolUsageKind.Trigger)) {
+			node = node.GetNodePurpose();
+			if (node is AssignmentExpressionSyntax a) {
+				if (a.IsKind(SyntaxKind.AddAssignmentExpression)) {
+					return SymbolUsageKind.Attach;
 				}
+				if (a.IsKind(SyntaxKind.SubtractAssignmentExpression)) {
+					return SymbolUsageKind.Detach;
+				}
+			}
+			else if (node.IsAnyKind(SyntaxKind.ConditionalAccessExpression, SyntaxKind.SimpleMemberAccessExpression)) {
+				return SymbolUsageKind.Trigger;
+			}
+		}
+		else if (possibleUsage.MatchFlags(SymbolUsageKind.Delegate)) {
+			var n = node.GetNodePurpose();
+			// todo detect delegate usage buried under calculation expressions
+			if (n.IsKind(SyntaxKind.Argument)) {
+				return SymbolUsageKind.Delegate;
+			}
+			//var last = node.GetLastAncestorExpressionNode();
+			//if (last != null && last.Parent.IsKind(SyntaxKind.Argument) == true && (last == node || last is MemberAccessExpressionSyntax)) {
+			//	return SymbolUsageKind.Read;
+			//}
+			if (n is AssignmentExpressionSyntax a && a.Right == node) {
+				switch (a.Kind()) {
+					case SyntaxKind.AddAssignmentExpression: return SymbolUsageKind.Attach;
+					case SyntaxKind.SubtractAssignmentExpression: return SymbolUsageKind.Detach;
+					case SyntaxKind.SimpleAssignmentExpression: return SymbolUsageKind.Delegate;
+				}
+			}
+		}
+		return SymbolUsageKind.Normal;
+	}
+
+	public static SymbolUsageKind GetPotentialUsageKinds(ISymbol symbol) {
+		switch (symbol.Kind) {
+			case SymbolKind.Event:
+				return SymbolUsageKind.Attach | SymbolUsageKind.Detach | SymbolUsageKind.Trigger;
+			case SymbolKind.Field:
+				return ((IFieldSymbol)symbol).IsConst ? SymbolUsageKind.Normal : SymbolUsageKind.Write;
+			case SymbolKind.Local:
+			case SymbolKind.Property:
+				return SymbolUsageKind.Write;
+			case SymbolKind.NamedType:
+				return ((INamedTypeSymbol)symbol).IsExceptionType()
+					? SymbolUsageKind.Catch | SymbolUsageKind.TypeCast | SymbolUsageKind.TypeParameter
+					: SymbolUsageKind.TypeCast | SymbolUsageKind.TypeParameter;
+			case SymbolKind.Method:
+				return SymbolUsageKind.Delegate;
+			default:
+				return SymbolUsageKind.Normal;
+		}
+	}
+
+	static Comparer<ISymbol> CreateSymbolComparer() {
+		return Comparer<ISymbol>.Create((x, y) => {
+			var l = x.Name.Length - y.Name.Length;
+			return l != 0 ? l : x.GetHashCode() - y.GetHashCode();
+		});
+	}
+
+	static readonly char[] __SplitArray = new char[] { ' ' };
+	static string[] SplitKeywords(string text) {
+		return text.Split(__SplitArray, StringSplitOptions.RemoveEmptyEntries);
+	}
+	public static Func<string, bool> CreateNameFilter(string keywords, bool fullMatch, bool matchCase) {
+		var k = SplitKeywords(keywords);
+		if (k.Length == 1 || fullMatch) {
+			keywords = k[0];
+			if (fullMatch) {
 				if (matchCase) {
-					return name => name.IndexOf(keywords, StringComparison.Ordinal) != -1;
+					return name => name == keywords;
 				}
-				return name => name.IndexOf(keywords, StringComparison.OrdinalIgnoreCase) != -1;
+				return name => String.Equals(name, keywords, StringComparison.OrdinalIgnoreCase);
 			}
-			return name => {
-				int i = 0;
-				var c = matchCase ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
-				foreach (var item in k) {
-					if ((i = name.IndexOf(item, i, c)) == -1) {
-						return false;
-					}
-					i += item.Length;
+			if (matchCase) {
+				return name => name.IndexOf(keywords, StringComparison.Ordinal) != -1;
+			}
+			return name => name.IndexOf(keywords, StringComparison.OrdinalIgnoreCase) != -1;
+		}
+		return name => {
+			int i = 0;
+			var c = matchCase ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+			foreach (var item in k) {
+				if ((i = name.IndexOf(item, i, c)) == -1) {
+					return false;
 				}
-				return true;
-			};
-		}
-
-		static partial class Comparers
-		{
-			internal static readonly GenericEqualityComparer<SymbolCallerInfo> SymbolCallerInfoComparer = new GenericEqualityComparer<SymbolCallerInfo>((x, y) => x.CallingSymbol == y.CallingSymbol, o => o.CallingSymbol.GetHashCode());
-
-			internal static readonly GenericEqualityComparer<Location> SourceLocationComparer = new GenericEqualityComparer<Location>((x, y) => x.SourceTree == y.SourceTree && x.SourceSpan == y.SourceSpan, o => (o.SourceTree?.GetHashCode() ?? 0) ^ (o.SourceSpan.GetHashCode() << 8));
-		}
-
-		sealed class ArgumentListContainer
-		{
-			readonly AttributeArgumentListSyntax _AttributeArguments;
-			readonly ArgumentListSyntax _Arguments;
-
-			public ArgumentListContainer(ArgumentListSyntax argumentList) {
-				_Arguments = argumentList;
+				i += item.Length;
 			}
-			public ArgumentListContainer(AttributeArgumentListSyntax attributeArgumentList) {
-				_AttributeArguments = attributeArgumentList;
-			}
-			public SyntaxNode AttributeList => _Arguments ?? (SyntaxNode)_AttributeArguments;
-			public int Count => _Arguments != null ? _Arguments.Arguments.Count : _AttributeArguments.Arguments.Count;
-			public (NameColonSyntax NameColon, ExpressionSyntax Expression) this[int index] {
-				get{
-					if (_Arguments != null) {
-						var a = _Arguments.Arguments[index];
-						return (a.NameColon, a.Expression);
-					}
-					else {
-						var a = _AttributeArguments.Arguments[index];
-						return (a.NameColon, a.NameEquals == null ? a.Expression : null);
-					}
+			return true;
+		};
+	}
+
+	static partial class Comparers
+	{
+		internal static readonly GenericEqualityComparer<SymbolCallerInfo> SymbolCallerInfoComparer = new GenericEqualityComparer<SymbolCallerInfo>((x, y) => x.CallingSymbol == y.CallingSymbol, o => o.CallingSymbol.GetHashCode());
+
+		internal static readonly GenericEqualityComparer<Location> SourceLocationComparer = new GenericEqualityComparer<Location>((x, y) => x.SourceTree == y.SourceTree && x.SourceSpan == y.SourceSpan, o => (o.SourceTree?.GetHashCode() ?? 0) ^ (o.SourceSpan.GetHashCode() << 8));
+	}
+
+	sealed class ArgumentListContainer
+	{
+		readonly AttributeArgumentListSyntax _AttributeArguments;
+		readonly ArgumentListSyntax _Arguments;
+
+		public ArgumentListContainer(ArgumentListSyntax argumentList) {
+			_Arguments = argumentList;
+		}
+		public ArgumentListContainer(AttributeArgumentListSyntax attributeArgumentList) {
+			_AttributeArguments = attributeArgumentList;
+		}
+		public SyntaxNode AttributeList => _Arguments ?? (SyntaxNode)_AttributeArguments;
+		public int Count => _Arguments != null ? _Arguments.Arguments.Count : _AttributeArguments.Arguments.Count;
+		public (NameColonSyntax NameColon, ExpressionSyntax Expression) this[int index] {
+			get{
+				if (_Arguments != null) {
+					var a = _Arguments.Arguments[index];
+					return (a.NameColon, a.Expression);
+				}
+				else {
+					var a = _AttributeArguments.Arguments[index];
+					return (a.NameColon, a.NameEquals == null ? a.Expression : null);
 				}
 			}
 		}
