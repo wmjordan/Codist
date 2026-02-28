@@ -205,6 +205,7 @@ partial class SmartBar
 			if (s.Length == 0) {
 				return;
 			}
+			ctx.KeepToolBar(true);
 			var option = FindOptions.Wrap | FindOptions.OrdinalComparison;
 			var m = ctx.ModifierKeys;
 			if (m.MatchFlags(ModifierKeys.Control)) {
