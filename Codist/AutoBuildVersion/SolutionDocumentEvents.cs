@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using CLR;
 using Codist.Controls;
 using EnvDTE;
@@ -105,6 +106,13 @@ namespace Codist
 					&& cfgProj.get_DisplayName(out var configDisplayName) == VSConstants.S_OK) {
 					AutoChangeBuildVersion(configDisplayName, project);
 				}
+				if (((VSSOLNBUILDUPDATEFLAGS)action).HasAnyFlag(VSSOLNBUILDUPDATEFLAGS.SBF_OPERATION_BUILD | VSSOLNBUILDUPDATEFLAGS.SBF_OPERATION_FORCE_UPDATE) && Config.Instance.BuildOptions.MatchFlags(BuildOptions.VsixAutoIncrement) && project.IsVsixProject()) {
+					cfgProj.get_DisplayName(out string name);
+					// note: there's a bug in VS 2026,
+					//   which keeps the manifest file in the intermediate folder unchanged,
+					//   consequently causes the version number of the VSIX unchanged and the new VSIX not installable
+					DeleteManifestInIntermediateFolder(project, name);
+				}
 			}
 			return VSConstants.S_OK;
 		}
@@ -154,7 +162,7 @@ namespace Codist
 				if (item.Name.EndsWith(".vsixmanifest", StringComparison.OrdinalIgnoreCase)) {
 					if (item.IsOpen && item.IsDirty) {
 						item.Document.NewWindow().Activate();
-						MessageWindow.Error($"{item.Name} is open and modified. Auto increment VSIX version number failed.");
+						MessageWindow.Error($"{item.Name} is open and modified. Auto increment VSIX version number failed. Please save the file first.");
 					}
 					else if (Commands.IncrementVsixVersionCommand.IncrementVersion(item, out var message)) {
 						WriteBuildText(nameof(Codist) + ": " + message + Environment.NewLine);
@@ -164,6 +172,30 @@ namespace Codist
 					}
 					break;
 				}
+			}
+		}
+
+		[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
+		void DeleteManifestInIntermediateFolder(Project project, string name) {
+			try {
+				var cm = project.ConfigurationManager;
+				var i = name.IndexOf('|');
+				if (i < 0) {
+					return;
+				}
+				var proj = cm.Item(name.Substring(0, i), name.Substring(i + 1));
+				if (proj is null) {
+					return;
+				}
+				var p = proj.Properties.Item("IntermediatePath")?.Value as string;
+				if (!String.IsNullOrEmpty(p)
+					&& File.Exists(p = Path.Combine(Path.GetDirectoryName(project.FileName), p, "extension.vsixmanifest"))) {
+					WriteBuildText(nameof(Codist) + ": Delete intermediate manifest " + p + Environment.NewLine);
+					File.Delete(p);
+				}
+			}
+			catch {
+				// ignore
 			}
 		}
 
