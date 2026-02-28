@@ -32,7 +32,7 @@ namespace Codist.Commands
 				MessageWindow.Error(message, R.T_IncrementVersion);
 			}
 			else {
-				MessageWindow.Show(message, R.T_IncrementVersion);
+				MessageWindow.Info(message, R.T_IncrementVersion);
 			}
 		}
 #pragma warning restore VSTHRD010 // Invoke single-threaded types on Main thread

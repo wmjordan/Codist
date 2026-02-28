@@ -624,7 +624,7 @@ namespace Codist.Options
 					try {
 						if (d.ShowDialog() == true) {
 							CustomTagger.ConvertJsonConfigToYaml(d.FileName);
-							MessageWindow.Show(R.T_ConvertedCodistCtJsonToYaml);
+							MessageWindow.Info(R.T_ConvertedCodistCtJsonToYaml);
 						}
 					}
 					catch (Exception ex) {

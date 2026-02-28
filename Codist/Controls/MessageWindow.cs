@@ -16,6 +16,7 @@ namespace Codist.Controls
 		readonly Button _DefaultButton;
 		readonly ContentPresenter _Icon;
 		CheckBox _SuppressExceptionBox;
+		bool _IsModal;
 
 		public MessageWindow() {
 			MinHeight = 100;
@@ -123,12 +124,14 @@ namespace Codist.Controls
 		public void AddExtraControl(UIElement control) {
 			_ExtraControlPanel.Children.Add(control);
 		}
-
-		public static bool? Show(object content) {
-			return new MessageWindow(content).ShowDialog();
+		public static void Show(object content, string title = null) {
+			new MessageWindow(content, title).Show();
 		}
-		public static bool? Show(object content, string title) {
+		public static bool? ShowDialog(object content, string title) {
 			return new MessageWindow(content, title).ShowDialog();
+		}
+		public static void Info(string content, string title = null) {
+			new MessageWindow(content, title, MessageBoxButton.OK, MessageBoxImage.Information).ShowDialog();
 		}
 		public static bool? Error(string content) {
 			return new MessageWindow(content, null, MessageBoxButton.OK, MessageBoxImage.Error).ShowDialog();
@@ -219,13 +222,22 @@ namespace Codist.Controls
 			return c;
 		}
 
+		public new bool? ShowDialog() {
+			_IsModal = true;
+			return base.ShowDialog();
+		}
+
 		void DefaultButton_Click(object sender, RoutedEventArgs e) {
-			DialogResult = true;
+			if (_IsModal) {
+				DialogResult = true;
+			}
 			Close();
 		}
 
 		void NegativeButton_Click(object sender, RoutedEventArgs e) {
-			DialogResult = false;
+			if (_IsModal) {
+				DialogResult = false;
+			}
 			Close();
 		}
 
