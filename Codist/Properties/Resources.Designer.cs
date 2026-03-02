@@ -1570,6 +1570,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Overline.
+        /// </summary>
+        internal static string CMD_Overline {
+            get {
+                return ResourceManager.GetString("CMD_Overline", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Pale Dark.
         /// </summary>
         internal static string CMD_PaleDarkTheme {

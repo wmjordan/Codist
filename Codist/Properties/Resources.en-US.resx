@@ -3153,4 +3153,7 @@ Shift: match case</value>
   <data name="CMDT_FindExtensions" xml:space="preserve">
     <value>Search for extension methods which extends current type</value>
   </data>
+  <data name="CMD_Overline" xml:space="preserve">
+    <value>Overline</value>
+  </data>
 </root>

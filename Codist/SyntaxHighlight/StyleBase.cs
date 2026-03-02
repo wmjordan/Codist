@@ -266,19 +266,19 @@ abstract class StyleBase
 						d.PenThicknessUnit = TextDecorationUnit.Pixel;
 						return d;
 					}
-					else if (location == TextDecorationLocation.OverLine) {
-						d.Pen.Brush = new VisualBrush(new System.Windows.Controls.TextBlock { Text = "★", Foreground = d.Pen.Brush, FontSize = 8 }) { Stretch = Stretch.None, AlignmentX = AlignmentX.Left };
-						d.PenOffset = -LineOffset;
-						d.PenOffsetUnit = TextDecorationUnit.Pixel;
-						d.Pen.Thickness = 15.0;
-						d.PenThicknessUnit = TextDecorationUnit.Pixel;
-						return d;
-					}
+					//else if (location == TextDecorationLocation.OverLine) {
+					//	d.Pen.Brush = new VisualBrush(new System.Windows.Controls.TextBlock { Text = "★", Foreground = d.Pen.Brush, FontSize = 8 }) { Stretch = Stretch.None, AlignmentX = AlignmentX.Left };
+					//	d.PenOffset = -LineOffset;
+					//	d.PenOffsetUnit = TextDecorationUnit.Pixel;
+					//	d.Pen.Thickness = 15.0;
+					//	d.PenThicknessUnit = TextDecorationUnit.Pixel;
+					//	return d;
+					//}
 					break;
 			}
 		}
 		if (LineOffset != 0 && location != TextDecorationLocation.Strikethrough) {
-			d.PenOffset = LineOffset;
+			d.PenOffset = location == TextDecorationLocation.OverLine ? -LineOffset : LineOffset;
 			d.PenOffsetUnit = TextDecorationUnit.Pixel;
 		}
 		if (LineThickness > 0) {

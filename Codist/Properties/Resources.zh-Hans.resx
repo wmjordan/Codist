@@ -3139,4 +3139,7 @@ Shift: 匹配大小写</value>
   <data name="CMDT_FindExtensions" xml:space="preserve">
     <value>查找当前类型的扩展方法</value>
   </data>
+  <data name="CMD_Overline" xml:space="preserve">
+    <value>上划线</value>
+  </data>
 </root>
