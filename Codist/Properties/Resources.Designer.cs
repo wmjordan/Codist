@@ -7034,7 +7034,7 @@ namespace Codist.Properties {
         
         /// <summary>
         ///   Looks up a localized string similar to &lt;NAME&gt; is not saved.
-        ///Discard its changes?.
+        ///Discard its changes and continue the operation?.
         /// </summary>
         internal static string T_DiscardUnsavedChanges {
             get {
