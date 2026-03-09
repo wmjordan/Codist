@@ -342,18 +342,23 @@ partial class SmartBar
 		if (_RecentWrapText == null) {
 			if (Config.Instance.WrapTexts.Count == 0) {
 				WrapWith(ctx, "(", ")", true);
-				_RecentWrapText = new WrapText("($)");
+				SetRecentWrapText(WrapText.GetDefault());
 				return;
 			}
-			_RecentWrapText = Config.Instance.WrapTexts[0];
+			SetRecentWrapText(Config.Instance.WrapTexts[0]);
 		}
 		WrapWith(ctx, _RecentWrapText, true);
 	}
+
+	void SetRecentWrapText(WrapText recent) {
+		View.Properties[typeof(WrapText)] = _RecentWrapText = recent;
+	}
+
 	IEnumerable<CommandItem> CreateWrapTextMenu(CommandContext context) {
 		foreach (var item in Config.Instance.WrapTexts) {
 			yield return new CommandItem(IconIds.WrapText, String.IsNullOrEmpty(item.Name) ? item.Pattern : item.Name, ctx => {
 				if (WrapWith(ctx, item, true) != Enumerable.Empty<SnapshotSpan>()) {
-					ctx.Bar._RecentWrapText = item;
+					ctx.Bar.SetRecentWrapText(item);
 				}
 			});
 		}

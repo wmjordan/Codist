@@ -29,6 +29,8 @@ sealed class WrapText
 	string _Prefix;
 	string _Suffix;
 	string _Substitution;
+	string _PlaceholderStart = "[[";
+	string _PlaceholderEnd = "]]";
 
 	int _PlaceholderCount;
 	bool _IsSimple, _HasMultilinePrefix, _HasMultilineSuffix;
@@ -36,6 +38,7 @@ sealed class WrapText
 	Func<ITextView, IEnumerable<SnapshotSpan>> _WrapAction;
 
 	public const char DefaultIndicator = '$';
+	public static IReadOnlyList<string> DefaultPlaceholders => ["[[...]]", "((...))", "{{...}}", "<<...>>"];
 
 	public WrapText(string pattern, string name = null, char indicator = DefaultIndicator) {
 		_Indicator = indicator;
@@ -67,6 +70,36 @@ sealed class WrapText
 		}
 	}
 
+	public string PlaceholderStart {
+		get => _PlaceholderStart;
+		set {
+			value ??= "[[";
+			if (_PlaceholderStart != value) {
+				_PlaceholderStart = value;
+				_WrapAction = UndeterminedWrapAction;
+			}
+		}
+	}
+
+	public string PlaceholderEnd {
+		get => _PlaceholderEnd;
+		set {
+			value ??= "]]";
+			if (_PlaceholderEnd != value) {
+				_PlaceholderEnd = value;
+				_WrapAction = UndeterminedWrapAction;
+			}
+		}
+	}
+
+	internal bool HasPlaceholder => !String.IsNullOrEmpty(_PlaceholderStart)
+			&& !String.IsNullOrEmpty(_PlaceholderEnd)
+			&& _Pattern.Contains(_PlaceholderStart);
+
+	internal char PlaceholderCharacter => String.IsNullOrEmpty(_PlaceholderStart) ? '\0' : _PlaceholderStart[0];
+
+	public static WrapText GetDefault() => Config.Instance.WrapTexts.FirstOrDefault() ?? new("($)");
+
 	public IEnumerable<SnapshotSpan> WrapSelections(ITextView view) {
 		return _WrapAction(view);
 	}
@@ -89,17 +122,16 @@ sealed class WrapText
 		_Suffix = splitPos >= 0 ? _Pattern.Substring(splitPos + 1) : string.Empty;
 
 		bool hasNewline = _Pattern.Contains('\n');
-		bool hasPlaceholder = _Pattern.Contains("[[");
 		_Substitution = _Suffix.Contains(_Indicator) ? _Indicator.ToString() : null;
 
-		if (_IsSimple = !hasNewline && !hasPlaceholder && _Substitution == null) {
+		if (_IsSimple = !hasNewline && _Substitution == null && !HasPlaceholder) {
 			_Commands = null;
 			_HasMultilinePrefix = _HasMultilineSuffix = false;
 			_PlaceholderCount = 0;
 			return;
 		}
 
-		_Commands = new List<ISnippetCommand>();
+		_Commands = [];
 		int placeholderCount = 0;
 
 		ParseToCommands(_Prefix?.Replace("\r\n", "\n"), _Commands, ref placeholderCount, ref _HasMultilinePrefix);
@@ -128,15 +160,21 @@ sealed class WrapText
 
 			while (lineIndex < line.Length) {
 				#region Check placeholders
-				if (lineIndex + 1 < line.Length && line[lineIndex] == '[' && line[lineIndex + 1] == '[') {
-					int endBracket = line.IndexOf("]]", lineIndex + 2);
-					if (endBracket > lineIndex) {
-						string name = line.Substring(lineIndex + 2, endBracket - lineIndex - 2);
+				if (line.Length - lineIndex >= _PlaceholderStart.Length &&
+					String.CompareOrdinal(line, lineIndex, _PlaceholderStart, 0, _PlaceholderStart.Length) == 0) {
+					int endPos = line.IndexOf(_PlaceholderEnd, lineIndex + _PlaceholderStart.Length);
+					if (endPos >= lineIndex) {
+						var name = line.Substring(lineIndex + _PlaceholderStart.Length,
+							 endPos - lineIndex - _PlaceholderStart.Length);
 						++placeholderCount;
 						commands.Add(new PlaceholderCommand(name));
-						lineIndex = endBracket + 2;
-						continue;
+						lineIndex = endPos + _PlaceholderEnd.Length;
 					}
+					else {
+						commands.Add(new TextCommand(_PlaceholderStart));
+						lineIndex += _PlaceholderStart.Length;
+					}
+					continue;
 				}
 				#endregion
 
@@ -148,8 +186,9 @@ sealed class WrapText
 
 				int textStart = lineIndex;
 				while (lineIndex < line.Length) {
-					if ((lineIndex + 1 < line.Length && line[lineIndex] == '[' && line[lineIndex + 1] == '[')
-						|| line[lineIndex] == _Indicator) {
+					if (line[lineIndex] == _Indicator
+						|| (line.Length - lineIndex >= _PlaceholderStart.Length &&
+							String.CompareOrdinal(line, lineIndex, _PlaceholderStart, 0, _PlaceholderStart.Length) == 0)) {
 						break;
 					}
 					lineIndex++;
@@ -276,23 +315,11 @@ sealed class WrapText
 					break;
 
 				case CommandType.Indent:
-					var ic = (IndentCommand)cmd;
-					if (ic.TabCount > 0) {
-						currentIndentLevel += ic.TabCount;
-						if (indentSize > 0) {
-							sb.Append(' ', ic.TabCount * indentSize);
-						}
-						else {
-							sb.Append('\t', ic.TabCount);
-						}
-					}
+					AppendIndent(sb, indentSize, ref currentIndentLevel, cmd);
 					break;
 
 				case CommandType.NewLine:
-					sb.Append(newLineChar);
-					if (!string.IsNullOrEmpty(linePrefix)) {
-						sb.Append(linePrefix);
-					}
+					AppendLine(sb, linePrefix, newLineChar);
 					currentIndentLevel = 0;
 					break;
 
@@ -301,13 +328,38 @@ sealed class WrapText
 					break;
 
 				case CommandType.Placeholder:
-					int pos = sb.Length;
-					string name = ((PlaceholderCommand)cmd).Name;
-					sb.Append(name);
-					placeholders.Add(new PlaceholderInfo(name, placeholderOffset + pos, name.Length));
+					AppendPlaceholder(sb, placeholders, placeholderOffset, cmd);
 					break;
 			}
 		}
+	}
+
+	static void AppendIndent(StringBuilder sb, int indentSize, ref int currentIndentLevel, ISnippetCommand cmd) {
+		var tabCount = ((IndentCommand)cmd).TabCount;
+		if (tabCount == 0) {
+			return;
+		}
+		currentIndentLevel += tabCount;
+		if (indentSize > 0) {
+			sb.Append(' ', tabCount * indentSize);
+		}
+		else {
+			sb.Append('\t', tabCount);
+		}
+	}
+
+	static void AppendLine(StringBuilder sb, string linePrefix, string newLineChar) {
+		sb.Append(newLineChar);
+		if (!string.IsNullOrEmpty(linePrefix)) {
+			sb.Append(linePrefix);
+		}
+	}
+
+	static void AppendPlaceholder(StringBuilder sb, List<PlaceholderInfo> placeholders, int placeholderOffset, ISnippetCommand cmd) {
+		int pos = sb.Length;
+		string name = ((PlaceholderCommand)cmd).Name;
+		sb.Append(name);
+		placeholders.Add(new PlaceholderInfo(name, placeholderOffset + pos, name.Length));
 	}
 
 	static void AppendSelection(StringBuilder sb, int indentSize, string newLineChar, string selectionText, int currentIndentLevel) {

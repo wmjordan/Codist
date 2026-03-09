@@ -1835,7 +1835,8 @@ Shift：匹配大小写</value>
     <value>文本项和模式</value>
   </data>
   <data name="OT_WrapTextSelectionIndicator" xml:space="preserve">
-    <value>在执行“文本环绕选中内容”命令时，文本内容中的替代符将会以选中项替换</value>
+    <value>在执行“文本环绕选中内容”命令时，文本内容中的替代符将会替换成选中内容。
+占位符用于在插入的文本中标记可编辑的位置。您可以从下拉列表中选择一种占位符的标记方式（其中“...”可替换为默认提示文本）。插入文本后，按 Tab 键可在占位符间跳转，方便您输入自定义内容。</value>
   </data>
   <data name="T_Configuration" xml:space="preserve">
     <value>生成项目的配置:</value>
@@ -3141,5 +3142,11 @@ Shift: 匹配大小写</value>
   </data>
   <data name="CMD_Overline" xml:space="preserve">
     <value>上划线</value>
+  </data>
+  <data name="OTC_Placeholder" xml:space="preserve">
+    <value>变量占位符:</value>
+  </data>
+  <data name="T_None" xml:space="preserve">
+    <value>无</value>
   </data>
 </root>

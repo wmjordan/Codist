@@ -188,6 +188,7 @@
 				<Strings>
 					<ButtonText>配置 Codist 高级语法样式...</ButtonText>
 					<CanonicalName>CustomizeSyntaxHighlight</CanonicalName>
+					<LocCanonicalName>配置高级语法样式</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="OptionsWindowId" priority="0x0101" type="Button">
@@ -197,6 +198,7 @@
 				<Strings>
 					<ButtonText>Codist 选项...</ButtonText>
 					<CanonicalName>CodistOptions</CanonicalName>
+					<LocCanonicalName>Codist选项</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="CodeRefactoringId" priority="0x1000" type="Button">
@@ -212,6 +214,21 @@
 					<ToolTipText>打开重构代码的菜单...</ToolTipText>
 					<CanonicalName>.Refactor.RefactoringCode</CanonicalName>
 					<LocCanonicalName>.重构.重构代码</LocCanonicalName>
+				</Strings>
+			</Button>
+			<Button guid="guidCodistPackageCmdSet" id="WrapRecentTextId" priority="0x1000" type="Button">
+				<Parent guid="guidSHLMainMenu" id="IDG_VS_EDIT_COMMANDWELL" />
+				<Icon guid="ImageCatalogGuid" id="CorrelationScope" />
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<CommandFlag>DefaultInvisible</CommandFlag>
+				<CommandFlag>DynamicVisibility</CommandFlag>
+				<CommandFlag>DefaultDisabled</CommandFlag>
+				<Strings>
+					<MenuText>插入上一次的环绕文本</MenuText>
+					<ButtonText>插入上一次的环绕文本</ButtonText>
+					<ToolTipText>重复插入上次从智能工具条插入的环绕文本...</ToolTipText>
+					<CanonicalName>.Edit.WrapRecentText</CanonicalName>
+					<LocCanonicalName>.编辑.插入上一次的环绕文本</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="FavoriteWindowCommandId" priority="0x1000" type="Button">

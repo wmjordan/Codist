@@ -1850,7 +1850,8 @@ ALL existing items will be REPLACE by default items.</value>
     <value>Wrap Texts</value>
   </data>
   <data name="OT_WrapTextSelectionIndicator" xml:space="preserve">
-    <value>The Indicator within the Pattern will be replaced by the selection when Wrap Selection With Text command is executed</value>
+    <value>The Indicator within the Pattern will be replaced by the selection when Wrap Selection With Text command is executed.
+Placeholders mark editable positions within the inserted text. Choose one of the placeholder styles from the dropdown list ("..." within the placeholder can be replaced by a descriptive text). After inserting the text, press Tab to jump between placeholders.</value>
   </data>
   <data name="T_Configuration" xml:space="preserve">
     <value>Configuration:</value>
@@ -3155,5 +3156,11 @@ Shift: match case</value>
   </data>
   <data name="CMD_Overline" xml:space="preserve">
     <value>Overline</value>
+  </data>
+  <data name="OTC_Placeholder" xml:space="preserve">
+    <value>Placeholder:</value>
+  </data>
+  <data name="T_None" xml:space="preserve">
+    <value>None</value>
   </data>
 </root>

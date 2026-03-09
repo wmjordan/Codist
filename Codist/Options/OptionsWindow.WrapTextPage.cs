@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using CLR;
 using Codist.Controls;
 using Codist.SnippetTexts;
 using Microsoft.VisualStudio.Shell;
@@ -24,6 +25,7 @@ namespace Codist.Options
 			sealed class PageControl : OptionPage
 			{
 				readonly TextBox _Name, _Pattern, _Indicator;
+				readonly ComboBox _Placeholder;
 				readonly ThemedListBox _List;
 				readonly Button _AddButton, _RemoveButton, _MoveUpButton, _ResetButton;
 
@@ -60,7 +62,14 @@ namespace Codist.Options
 										new Label { Content = R.OTC_Pattern, Width = 70 }.SetValue(Grid.SetRow, 1),
 										(_Pattern = new TextBox { IsEnabled = false, Margin = WpfHelper.SmallVerticalMargin, AcceptsReturn = true, AcceptsTab = true }).SetValue(Grid.SetColumn, 1).SetValue(Grid.SetRow, 1),
 										new Label { Content = R.OTC_Indicator, Width = 70 }.SetValue(Grid.SetRow, 2),
-										(_Indicator = new TextBox { IsEnabled = false, Margin = WpfHelper.SmallVerticalMargin, Width = 40, MaxLength = 1, HorizontalAlignment = HorizontalAlignment.Left }).SetValue(Grid.SetColumn, 1).SetValue(Grid.SetRow, 2),
+										new StackPanel {
+											Orientation = Orientation.Horizontal,
+											Children = {
+												(_Indicator = new TextBox { IsEnabled = false, Margin = WpfHelper.SmallVerticalMargin, Width = 40, MaxLength = 1, HorizontalAlignment = HorizontalAlignment.Left }),
+												new Label { Content = R.OTC_Placeholder, Width = 100 },
+												(_Placeholder = new ComboBox { IsEnabled = false, IsEditable = false, Margin = WpfHelper.SmallVerticalMargin, Width = 80 })
+											},
+										}.SetValue(Grid.SetColumn, 1).SetValue(Grid.SetRow, 2),
 										new DescriptionBox(R.OT_WrapTextSelectionIndicator).SetValue(Grid.SetRow, 3).SetValue(Grid.SetColumnSpan, 2)
 									}
 								}.SetValue(Grid.SetRow, 1),
@@ -84,6 +93,8 @@ namespace Codist.Options
 
 					_List.Items.AddRange(Config.Instance.WrapTexts.Select(i => new WrapTextContainer(i)));
 					_List.SelectionChanged += HandleListSelectedChanged;
+					_Placeholder.Items.AddRange(WrapText.DefaultPlaceholders);
+					_Placeholder.SelectionChanged += HandlePlaceholderChanged;
 					_AddButton.Click += HandleAddButtonClick;
 					_RemoveButton.Click += HandleRemoveButtonClick;
 					_MoveUpButton.Click += HandleMoveUpButtonClick;
@@ -100,12 +111,13 @@ namespace Codist.Options
 
 				void RefreshWrapTextUI() {
 					var c = _List.SelectedItem as WrapTextContainer;
-					if (_RemoveButton.IsEnabled = _Name.IsEnabled = _Pattern.IsEnabled = _Indicator.IsEnabled = c != null) {
+					if (_RemoveButton.IsEnabled = _Name.IsEnabled = _Pattern.IsEnabled = _Indicator.IsEnabled = _Placeholder.IsEnabled =  c != null) {
 						_MoveUpButton.IsEnabled = _List.SelectedIndex > 0;
 						var t = c.WrapText;
 						_Name.Text = t.Name;
 						_Pattern.Text = t.Pattern;
 						_Indicator.Text = t.Indicator.ToString();
+						_Placeholder.SelectedIndex = t.PlaceholderCharacter.Case('[', 0, '(', 1, '{', 2, '<', 3, 0);
 					}
 					else {
 						_MoveUpButton.IsEnabled = false;
@@ -192,6 +204,21 @@ namespace Codist.Options
 
 					container.Refresh();
 					Config.Instance.FireConfigChangedEvent(Features.WrapText);
+				}
+
+				void HandlePlaceholderChanged(object s, RoutedEventArgs e) {
+					var container = _List.SelectedItem as WrapTextContainer;
+					var t = container?.WrapText;
+					if (t is null) {
+						return;
+					}
+					switch ((((ComboBox)s).SelectedItem as string)?[0] ?? '\0') {
+						case '[': t.PlaceholderStart = "[["; t.PlaceholderEnd = "]]"; break;
+						case '(': t.PlaceholderStart = "(("; t.PlaceholderEnd = "))"; break;
+						case '{': t.PlaceholderStart = "{{"; t.PlaceholderEnd = "}}"; break;
+						case '<': t.PlaceholderStart = "<<"; t.PlaceholderEnd = ">>"; break;
+						default: t.PlaceholderStart = t.PlaceholderEnd = null; break;
+					}
 				}
 
 				void HandleResetButtonClick(object s, RoutedEventArgs args) {

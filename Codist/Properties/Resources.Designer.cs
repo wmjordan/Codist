@@ -6014,6 +6014,7 @@ namespace Codist.Properties {
         
         /// <summary>
         ///   Looks up a localized string similar to The Indicator within the Pattern will be replaced by the selection when Wrap Selection With Text command is executed.
+        ///Placeholders mark editable positions within the inserted text. Choose one of the placeholder styles from the dropdown list (&quot;...&quot; within the placeholder can be replaced by a descriptive text). After inserting the text, press Tab to jump between placeholders..
         /// </summary>
         internal static string OT_WrapTextSelectionIndicator {
             get {
@@ -6063,6 +6064,15 @@ namespace Codist.Properties {
         internal static string OTC_Pattern {
             get {
                 return ResourceManager.GetString("OTC_Pattern", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Placeholder:.
+        /// </summary>
+        internal static string OTC_Placeholder {
+            get {
+                return ResourceManager.GetString("OTC_Placeholder", resourceCulture);
             }
         }
         
@@ -8050,6 +8060,15 @@ namespace Codist.Properties {
         internal static string T_NoCustomizedTagDefined {
             get {
                 return ResourceManager.GetString("T_NoCustomizedTagDefined", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to None.
+        /// </summary>
+        internal static string T_None {
+            get {
+                return ResourceManager.GetString("T_None", resourceCulture);
             }
         }
         

@@ -221,6 +221,20 @@
 					<LocCanonicalName>.Refactor.RefactoringCode</LocCanonicalName>
 				</Strings>
 			</Button>
+			<Button guid="guidCodistPackageCmdSet" id="WrapRecentTextId" priority="0x1000" type="Button">
+				<Parent guid="guidSHLMainMenu" id="IDG_VS_EDIT_COMMANDWELL" />
+				<Icon guid="ImageCatalogGuid" id="CorrelationScope" />
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<CommandFlag>DefaultInvisible</CommandFlag>
+				<CommandFlag>DynamicVisibility</CommandFlag>
+				<CommandFlag>DefaultDisabled</CommandFlag>
+				<Strings>
+					<MenuText>Reinsert Last Wrap Text</MenuText>
+					<ButtonText>Reinsert Last Wrap Text</ButtonText>
+					<ToolTipText>Insert previous Wrap Text from the SmartBar...</ToolTipText>
+					<CanonicalName>.Edit.WrapRecentText</CanonicalName>
+				</Strings>
+			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="FavoriteWindowCommandId" priority="0x1000" type="Button">
 				<Parent guid="guidSHLMainMenu" id="IDG_VS_VIEW_BROWSER" />
 				<Icon guid="ImageCatalogGuid" id="Favorite" />
