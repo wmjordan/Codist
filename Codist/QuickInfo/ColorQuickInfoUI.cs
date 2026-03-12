@@ -109,30 +109,27 @@ namespace Codist.QuickInfo
 								.SetValue(Grid.SetColumn, 1).SetValue(Grid.SetRow, 2),
 						}
 					},
-					new StackPanel {
-						Children = {
-							CreateSampleBlock(brush, WpfBrushes.White),
-							CreateSampleBlock(brush, WpfBrushes.LightGray),
-							CreateSampleBlock(brush, WpfBrushes.DarkGray),
-							CreateSampleBlock(brush, WpfBrushes.Gray),
-							CreateSampleBlock(brush, WpfBrushes.DimGray),
-							CreateSampleBlock(brush, __DeepDarkGray),
-							CreateSampleBlock(brush, WpfBrushes.Black),
-						}
-					}.MakeHorizontal(),
-					new StackPanel {
-						Children = {
-							CreateSampleBlock(WpfBrushes.White, brush),
-							CreateSampleBlock(WpfBrushes.LightGray, brush),
-							CreateSampleBlock(WpfBrushes.DarkGray, brush),
-							CreateSampleBlock(WpfBrushes.Gray, brush),
-							CreateSampleBlock(WpfBrushes.DimGray, brush),
-							CreateSampleBlock(__DeepDarkGray, brush),
-							CreateSampleBlock(WpfBrushes.Black, brush),
-						}
-					}.MakeHorizontal()
+					WpfHelper.Stack(true,
+						CreateSampleBlock(brush, WpfBrushes.White),
+						CreateSampleBlock(brush, WpfBrushes.LightGray),
+						CreateSampleBlock(brush, WpfBrushes.DarkGray),
+						CreateSampleBlock(brush, WpfBrushes.Gray),
+						CreateSampleBlock(brush, WpfBrushes.DimGray),
+						CreateSampleBlock(brush, __DeepDarkGray),
+						CreateSampleBlock(brush, WpfBrushes.Black)
+					),
+					WpfHelper.Stack(true,
+						CreateSampleBlock(WpfBrushes.White, brush),
+						CreateSampleBlock(WpfBrushes.LightGray, brush),
+						CreateSampleBlock(WpfBrushes.DarkGray, brush),
+						CreateSampleBlock(WpfBrushes.Gray, brush),
+						CreateSampleBlock(WpfBrushes.DimGray, brush),
+						CreateSampleBlock(__DeepDarkGray, brush),
+						CreateSampleBlock(WpfBrushes.Black, brush)
+					)
 				}
 			};
+
 			Border CreateSampleBlock(Brush foreground, Brush background) {
 				return new Border {
 					BorderBrush = foreground,

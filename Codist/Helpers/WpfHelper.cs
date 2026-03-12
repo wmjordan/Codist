@@ -304,7 +304,7 @@ namespace Codist
 			}
 			return panel;
 		}
-		public static StackPanel Stack(this UIElement[] elements, bool horizontal) {
+		public static StackPanel Stack(bool horizontal = false, params UIElement[] elements) {
 			var p = new StackPanel();
 			if (horizontal) {
 				p.Orientation = Orientation.Horizontal;
