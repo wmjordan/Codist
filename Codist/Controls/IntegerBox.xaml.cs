@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -97,6 +98,7 @@ namespace Codist.Controls
 			PART_UpButton.Click -= UpButtonClicked;
 			PART_DownButton.Click += DownButtonClicked;
 			PART_UpButton.Click += UpButtonClicked;
+			PART_UnitText.ToggleVisibility(!String.IsNullOrEmpty(Unit));
 		}
 
 		void UpButtonClicked(object sender, RoutedEventArgs e) {
