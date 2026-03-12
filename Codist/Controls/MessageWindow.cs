@@ -157,8 +157,8 @@ namespace Codist.Controls
 		public static bool? OkCancel(object content) {
 			return new MessageWindow(content, null, MessageBoxButton.OKCancel, MessageBoxImage.Question).ShowDialog();
 		}
-		public static bool? AskYesNo(object content) {
-			return new MessageWindow(content, null, MessageBoxButton.YesNo, MessageBoxImage.Question).ShowDialog();
+		public static bool? AskYesNo(object content, string title = null) {
+			return new MessageWindow(content, title, MessageBoxButton.YesNo, MessageBoxImage.Question).ShowDialog();
 		}
 		public static bool? AskYesNoCancel(object content) {
 			return new MessageWindow(content, null, MessageBoxButton.YesNoCancel, MessageBoxImage.Question).ShowDialog();
