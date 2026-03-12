@@ -10,6 +10,7 @@ using CLR;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Utilities;
 
 namespace Codist
@@ -1629,17 +1630,17 @@ namespace Codist
 		}
 
 		public static void GoToSource(this Location loc) {
-			if (loc != null) {
-				var pos = loc.GetLineSpan().StartLinePosition;
-				TextEditorHelper.OpenFile(loc.SourceTree.FilePath, pos.Line, pos.Character);
+			if (loc is null) {
+				return;
 			}
+			TextEditorHelper.OpenFile(loc.SourceTree.FilePath, loc.SourceSpan.Start);
 		}
 
 		public static void GoToSource(this SyntaxReference loc) {
-			if (loc != null) {
-				var pos = loc.SyntaxTree.GetLineSpan(loc.Span).StartLinePosition;
-				TextEditorHelper.OpenFile(loc.SyntaxTree.FilePath, pos.Line, pos.Character);
+			if (loc is null) {
+				return;
 			}
+			TextEditorHelper.OpenFile(loc.SyntaxTree.FilePath, loc.Span.Start);
 		}
 
 		public static void GoToDefinition(this ISymbol symbol) {

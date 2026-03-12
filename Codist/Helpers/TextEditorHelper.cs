@@ -580,11 +580,21 @@ static class TextEditorHelper
 	public static void OpenFile(string file, Action<IWpfTextView> action) {
 		OpenFile(file, (VsTextView view) => action(GetWpfTextView(view)));
 	}
-	public static void OpenFile(string file, int line, int column) {
-		OpenFile(file, d => {
-			d.SetTopLine(Math.Max(0, line - 5));
-			d.SetCaretPos(line, column);
-		});
+	public static void OpenFile(string file, int caretPosition) {
+		var view = GetActiveWpfDocumentView();
+		if (view != null
+			&& String.Equals(view.TextBuffer.GetTextDocument().FilePath, file, StringComparison.OrdinalIgnoreCase)) {
+			MoveToActiveViewPosition(view, caretPosition);
+		}
+		else {
+			OpenFile(file, (IWpfTextView view) => MoveToActiveViewPosition(view, caretPosition));
+		}
+	}
+	static void MoveToActiveViewPosition(IWpfTextView view, int position) {
+		view.MoveCaret(position);
+		view.DisplayTextLineContainingBufferPosition(view.Caret.Position.BufferPosition, view.ViewportHeight * 0.2, ViewRelativePosition.Top);
+		view.Caret.EnsureVisible();
+		view.VisualElement.Focus();
 	}
 	#endregion
 
