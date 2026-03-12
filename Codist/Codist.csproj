@@ -282,7 +282,6 @@
     <Compile Include="Controls\KeystrokeThief.cs" />
     <Compile Include="Controls\SymbolFilters.cs" />
     <Compile Include="Controls\QuickInfoTextBox.cs" />
-    <Compile Include="Controls\StateButton.cs" />
     <Compile Include="Controls\VirtualList.cs" />
     <Compile Include="Controls\SymbolList.cs" />
     <Compile Include="Controls\ThemedMenuItem.cs" />
