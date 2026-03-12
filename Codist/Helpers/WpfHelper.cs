@@ -907,6 +907,16 @@ namespace Codist
 				Background = HighlightBrush.Alpha(DimmedOpacity);
 			}
 
+			protected void KeepHighlight() {
+				MouseLeave -= Leave;
+			}
+
+			protected void ReleaseHighlight() {
+				MouseLeave -= Leave;
+				MouseLeave += Leave;
+				Background = WpfBrushes.Transparent;
+			}
+
 			protected override void OnToolTipOpening(ToolTipEventArgs e) {
 				base.OnToolTipOpening(e);
 				if (ReferenceEquals(ToolTip, String.Empty)) {
@@ -923,10 +933,10 @@ namespace Codist
 			}
 
 			void Unload(object sender, RoutedEventArgs e) {
-				//MouseEnter -= InitInteraction;
-				//MouseEnter -= Highlight;
-				//MouseLeave -= Leave;
-				//Unloaded -= Unload;
+				MouseEnter -= InitInteraction;
+				MouseEnter -= Highlight;
+				MouseLeave -= Leave;
+				Unloaded -= Unload;
 
 				OnUnload();
 			}

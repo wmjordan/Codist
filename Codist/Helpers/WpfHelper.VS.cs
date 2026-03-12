@@ -15,8 +15,8 @@ using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Utilities;
 using WpfBrush = System.Windows.Media.Brush;
 
-namespace Codist
-{
+namespace Codist;
+
 	partial class WpfHelper
 	{
 		public static TPanel AddReadOnlyTextBox<TPanel>(this TPanel panel, string text, bool alignLeft = false)
@@ -212,11 +212,13 @@ namespace Codist
 			void HoldQuickInfo(MouseButtonEventArgs e) {
 				QuickInfo.QuickInfoOverride.HoldQuickInfo(this, true);
 				Highlight(this, e);
+				MouseLeave -= Leave;
 			}
 
 			void ReleaseQuickInfo(object sender, RoutedEventArgs e) {
 				QuickInfo.QuickInfoOverride.HoldQuickInfo(this, false);
 				ClearValue(BackgroundProperty);
+				MouseLeave += Leave;
 			}
 
 			void DismissQuickInfo(object sender, RoutedEventArgs e) {
@@ -316,11 +318,13 @@ namespace Codist
 			void HoldQuickInfo() {
 				QuickInfo.QuickInfoOverride.HoldQuickInfo(this, true);
 				DoHighlight();
+				KeepHighlight();
 			}
 
 			void ReleaseQuickInfo(object sender, RoutedEventArgs e) {
 				QuickInfo.QuickInfoOverride.HoldQuickInfo(this, false);
 				ClearValue(BackgroundProperty);
+				ReleaseHighlight();
 			}
 
 			void DismissQuickInfo(object sender, RoutedEventArgs e) {
@@ -467,4 +471,3 @@ namespace Codist
 			}
 		}
 	}
-}
