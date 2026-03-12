@@ -1849,9 +1849,9 @@ ALL existing items will be REPLACE by default items.</value>
   <data name="OT_WrapTexts" xml:space="preserve">
     <value>Wrap Texts</value>
   </data>
-  <data name="OT_WrapTextSelectionIndicator" xml:space="preserve">
-    <value>The Indicator within the Pattern will be replaced by the selection when Wrap Selection With Text command is executed.
-Placeholders mark editable positions within the inserted text. Choose one of the placeholder styles from the dropdown list ("..." within the placeholder can be replaced by a descriptive text). After inserting the text, press Tab to jump between placeholders.</value>
+  <data name="OT_WrapTextIndicatorTip" xml:space="preserve">
+    <value>Indicator
+Indicator within the Pattern will be replaced by the selection when Wrap Selection With Text command is executed.</value>
   </data>
   <data name="T_Configuration" xml:space="preserve">
     <value>Configuration:</value>
@@ -3162,5 +3162,17 @@ Shift: match case</value>
   </data>
   <data name="T_None" xml:space="preserve">
     <value>None</value>
+  </data>
+  <data name="OT_WrapTextPlaceholderTip" xml:space="preserve">
+    <value>Placeholder
+Placeholders mark editable positions within the inserted text. Choose one of the placeholder styles from the dropdown list and use them in the Pattern, for instance, "[[name]]".
+After inserting the text, press Tab to jump between placeholders.</value>
+  </data>
+  <data name="OT_WrapTextPatternTip" xml:space="preserve">
+    <value>Pattern
+Pattern is the content that will be used to replace the selection when Wrap Text arround Selection command is executed.
+You can use Indicator (see below) to denote your selection and Placeholders to allow pressing Tab key to quickly edit contents after Wrap Text.
+Pattern can be multiline.
+Use a Tab character to indicate indentation.</value>
   </data>
 </root>

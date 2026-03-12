@@ -63,6 +63,25 @@
 			</Setter.Value>
 		</Setter>
 	</Style>
+	<Style TargetType="{x:Type c:HelpMessageButton}">
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="{x:Type c:HelpMessageButton}">
+					<Border x:Name="Bd" BorderThickness="{TemplateBinding BorderThickness}" BorderBrush="{DynamicResource {x:Static vsp:CommonControlsColors.ButtonBorderBrushKey}}" Padding="{TemplateBinding Padding}" Margin="{TemplateBinding Margin}">
+						<ContentPresenter />
+					</Border>
+					<ControlTemplate.Triggers>
+						<Trigger Property="IsMouseOver" Value="True">
+							<Setter TargetName="Bd" Property="Background" Value="{DynamicResource {x:Static vsp:EnvironmentColors.CommandBarMenuItemMouseOverBrushKey}}"/>
+						</Trigger>
+						<Trigger Property="IsChecked" Value="True">
+							<Setter TargetName="Bd" Property="Background" Value="{DynamicResource {x:Static vsp:EnvironmentColors.CommandBarMenuItemMouseOverBrushKey}}"/>
+						</Trigger>
+					</ControlTemplate.Triggers>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
 	<Style x:Key="{x:Type c:ThemedButton}" TargetType="{x:Type c:ThemedButton}">
 		<Setter Property="OverridesDefaultStyle" Value="True"/>
 		<Setter Property="Template">

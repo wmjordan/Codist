@@ -1834,9 +1834,9 @@ Shift：匹配大小写</value>
   <data name="OT_WrapTexts" xml:space="preserve">
     <value>文本项和模式</value>
   </data>
-  <data name="OT_WrapTextSelectionIndicator" xml:space="preserve">
-    <value>在执行“文本环绕选中内容”命令时，文本内容中的替代符将会替换成选中内容。
-占位符用于在插入的文本中标记可编辑的位置。您可以从下拉列表中选择一种占位符的标记方式（其中“...”可替换为默认提示文本）。插入文本后，按 Tab 键可在占位符间跳转，方便您输入自定义内容。</value>
+  <data name="OT_WrapTextIndicatorTip" xml:space="preserve">
+    <value>替代符
+在执行“文本环绕选中内容”命令时，文本内容中的替代符将会替换成选中内容。</value>
   </data>
   <data name="T_Configuration" xml:space="preserve">
     <value>生成项目的配置:</value>
@@ -3148,5 +3148,18 @@ Shift: 匹配大小写</value>
   </data>
   <data name="T_None" xml:space="preserve">
     <value>无</value>
+  </data>
+  <data name="OT_WrapTextPlaceholderTip" xml:space="preserve">
+    <value>占位符
+占位符用于在插入的文本中标记可编辑的位置。您可以从下拉列表中选择一种占位符的标记方式，并在模式文本中使用它表示占位符，例如“[[名称]]”。
+插入文本后，按 Tab 键可在占位符间跳转，方便您输入自定义内容。</value>
+  </data>
+  <data name="OT_WrapTextPatternTip" xml:space="preserve">
+    <value>环绕文本内容
+这里的内容将在执行“文本环绕选中内容”时替换原来的内容。
+使用替代符（见下）可表示原来选中的内容。
+使用占位符表示可按 Tab 键快速跳转编辑其中的内容。
+内容可为多行。
+使用制表符表示缩进。</value>
   </data>
 </root>

@@ -5986,6 +5986,16 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Indicator
+        ///Indicator within the Pattern will be replaced by the selection when Wrap Selection With Text command is executed..
+        /// </summary>
+        internal static string OT_WrapTextIndicatorTip {
+            get {
+                return ResourceManager.GetString("OT_WrapTextIndicatorTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to This page defines text items wrapping selection which can be accessed by right clicking the &quot;Wrap selection with text&quot; button on Smart Bar.
         /// </summary>
         internal static string OT_WrapTextNote {
@@ -6004,21 +6014,35 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Pattern
+        ///Pattern is the content that will be used to replace the selection when Wrap Text arround Selection command is executed.
+        ///You can use Indicator (see below) to denote your selection and Placeholders to allow pressing Tab key to quickly edit contents after Wrap Text.
+        ///Pattern can be multiline.
+        ///Use a Tab character to indicate indentation..
+        /// </summary>
+        internal static string OT_WrapTextPatternTip {
+            get {
+                return ResourceManager.GetString("OT_WrapTextPatternTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Placeholder
+        ///Placeholders mark editable positions within the inserted text. Choose one of the placeholder styles from the dropdown list and use them in the Pattern, for instance, &quot;[[name]]&quot;.
+        ///After inserting the text, press Tab to jump between placeholders..
+        /// </summary>
+        internal static string OT_WrapTextPlaceholderTip {
+            get {
+                return ResourceManager.GetString("OT_WrapTextPlaceholderTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Wrap Texts.
         /// </summary>
         internal static string OT_WrapTexts {
             get {
                 return ResourceManager.GetString("OT_WrapTexts", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The Indicator within the Pattern will be replaced by the selection when Wrap Selection With Text command is executed.
-        ///Placeholders mark editable positions within the inserted text. Choose one of the placeholder styles from the dropdown list (&quot;...&quot; within the placeholder can be replaced by a descriptive text). After inserting the text, press Tab to jump between placeholders..
-        /// </summary>
-        internal static string OT_WrapTextSelectionIndicator {
-            get {
-                return ResourceManager.GetString("OT_WrapTextSelectionIndicator", resourceCulture);
             }
         }
         
