@@ -96,7 +96,7 @@ namespace Codist.Controls
 		}
 		public void Remove(UIElement element) {
 			int c;
-			if (element is null || (c = _Canvas.Children.Count) == 0) {
+			if (element is null || _Canvas is null || (c = _Canvas.Children.Count) == 0) {
 				return;
 			}
 			_Canvas.Children.Remove(element);
