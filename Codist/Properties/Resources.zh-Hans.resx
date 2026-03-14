@@ -2463,7 +2463,7 @@ Right click: 显示“线程”窗口</value>
 使用“名称空间.类名.成员名”的格式复制符号名称</value>
   </data>
   <data name="CMDT_CustomizeSearchEngines" xml:space="preserve">
-    <value>添加、更新或删除本菜单列出的搜索引擎</value>
+    <value>添加、更改或删除本菜单列出的搜索引擎</value>
   </data>
   <data name="CMDT_FindCallers" xml:space="preserve">
     <value>查找调用当前构造函数的位置</value>
@@ -3161,5 +3161,11 @@ Shift: 匹配大小写</value>
 使用占位符表示可按 Tab 键快速跳转编辑其中的内容。
 内容可为多行。
 使用制表符表示缩进。</value>
+  </data>
+  <data name="CMDT_CustomizeWrapTexts" xml:space="preserve">
+    <value>添加、更改或删除本菜单列出的环绕文本项</value>
+  </data>
+  <data name="OTC_WrapText" xml:space="preserve">
+    <value>环绕文本:</value>
   </data>
 </root>

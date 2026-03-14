@@ -3175,4 +3175,10 @@ You can use Indicator (see below) to denote your selection and Placeholders to a
 Pattern can be multiline.
 Use a Tab character to indicate indentation.</value>
   </data>
+  <data name="CMDT_CustomizeWrapTexts" xml:space="preserve">
+    <value>Add, update or delete wrap text items listed in this menu</value>
+  </data>
+  <data name="OTC_WrapText" xml:space="preserve">
+    <value>Wrap Text:</value>
+  </data>
 </root>

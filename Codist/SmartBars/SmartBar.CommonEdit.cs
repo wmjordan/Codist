@@ -27,8 +27,6 @@ partial class SmartBar
 	static readonly CommandItem[] __DebugCommands = GetDebugCommands();
 	static readonly Regex __CapitalizeExpression = new Regex(@"(^|\b|[^\w\s])?_?([a-zA-Z])([a-zA-Z]*)(?=_|\b|$)", RegexOptions.Compiled);
 
-	WrapText _RecentWrapText;
-
 	static void ExecuteAndFind(CommandContext ctx, string command, string text, bool excludeLineBreakOnLineCommand) {
 		if (ctx.RightClick) {
 			ctx.View.ExpandSelectionToLine(excludeLineBreakOnLineCommand);
@@ -335,23 +333,30 @@ partial class SmartBar
 	}
 
 	void AddWrapTextCommand() {
-		AddCommands(ToolBar, IconIds.WrapText, R.CMD_WrapText, WrapRecent, CreateWrapTextMenu);
+		AddCommand(ToolBar, IconIds.WrapText, R.CMD_WrapText, ctx => {
+			var me = ctx.Bar;
+			if (!ctx.RightClick) {
+				me.WrapRecent(ctx);
+			}
+			else {
+				new WrapTextPicker(me.View, Config.Instance.WrapTexts).Show();
+			}
+		});
 	}
 
 	void WrapRecent(CommandContext ctx) {
-		if (_RecentWrapText == null) {
-			if (Config.Instance.WrapTexts.Count == 0) {
-				WrapWith(ctx, "(", ")", true);
-				SetRecentWrapText(WrapText.GetDefault());
-				return;
-			}
-			SetRecentWrapText(Config.Instance.WrapTexts[0]);
+		if (!View.TryGetProperty(out ActiveWrapTextTracker wrapText)
+			|| wrapText.Active is null) {
+			var w = WrapText.GetDefault();
+			SetRecentWrapText(w);
+			WrapWith(ctx, w, true);
+			return;
 		}
-		WrapWith(ctx, _RecentWrapText, true);
+		WrapWith(ctx, wrapText.Active, true);
 	}
 
 	void SetRecentWrapText(WrapText recent) {
-		View.Properties[typeof(WrapText)] = _RecentWrapText = recent;
+		ActiveWrapTextTracker.Get(View).Active = recent;
 	}
 
 	IEnumerable<CommandItem> CreateWrapTextMenu(CommandContext context) {

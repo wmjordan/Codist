@@ -221,7 +221,21 @@
 					<LocCanonicalName>.Refactor.RefactoringCode</LocCanonicalName>
 				</Strings>
 			</Button>
-			<Button guid="guidCodistPackageCmdSet" id="WrapRecentTextId" priority="0x1000" type="Button">
+			<Button guid="guidCodistPackageCmdSet" id="ListWrapTextId" priority="0x1000" type="Button">
+				<Parent guid="guidSHLMainMenu" id="IDG_VS_EDIT_COMMANDWELL" />
+				<Icon guid="ImageCatalogGuid" id="CorrelationScope" />
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<CommandFlag>DefaultInvisible</CommandFlag>
+				<CommandFlag>DynamicVisibility</CommandFlag>
+				<CommandFlag>DefaultDisabled</CommandFlag>
+				<Strings>
+					<MenuText>Wrap Text...</MenuText>
+					<ButtonText>Wrap Text...</ButtonText>
+					<ToolTipText>Open a menu and select text to wrap around current selections...</ToolTipText>
+					<CanonicalName>.Edit.ListWrapText</CanonicalName>
+				</Strings>
+			</Button>
+			<Button guid="guidCodistPackageCmdSet" id="WrapRecentTextId" priority="0x1001" type="Button">
 				<Parent guid="guidSHLMainMenu" id="IDG_VS_EDIT_COMMANDWELL" />
 				<Icon guid="ImageCatalogGuid" id="CorrelationScope" />
 				<CommandFlag>IconIsMoniker</CommandFlag>

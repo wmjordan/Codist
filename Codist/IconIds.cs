@@ -315,6 +315,7 @@ static class IconIds
 	public const int Stop = KnownImageIds.StatusNo;
 	public const int AddFolder = KnownImageIds.AddFolder;
 	public const int VisualStudio = KnownImageIds.VisualStudio;
+	public const int Settings = KnownImageIds.Settings;
 	#endregion
 	#region symbol usage icons
 	public const int UseToWrite = KnownImageIds.Writeable;

@@ -216,7 +216,21 @@
 					<LocCanonicalName>.重构.重构代码</LocCanonicalName>
 				</Strings>
 			</Button>
-			<Button guid="guidCodistPackageCmdSet" id="WrapRecentTextId" priority="0x1000" type="Button">
+			<Button guid="guidCodistPackageCmdSet" id="ListWrapTextId" priority="0x1000" type="Button">
+				<Parent guid="guidSHLMainMenu" id="IDG_VS_EDIT_COMMANDWELL" />
+				<Icon guid="ImageCatalogGuid" id="CorrelationScope" />
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<CommandFlag>DefaultInvisible</CommandFlag>
+				<CommandFlag>DynamicVisibility</CommandFlag>
+				<CommandFlag>DefaultDisabled</CommandFlag>
+				<Strings>
+					<MenuText>环绕文本...</MenuText>
+					<ButtonText>环绕文本...</ButtonText>
+					<ToolTipText>显示环绕文本的菜单，从中选择用于环绕当前选中文本的内容...</ToolTipText>
+					<CanonicalName>.编辑.列出环绕文本</CanonicalName>
+				</Strings>
+			</Button>
+			<Button guid="guidCodistPackageCmdSet" id="WrapRecentTextId" priority="0x1001" type="Button">
 				<Parent guid="guidSHLMainMenu" id="IDG_VS_EDIT_COMMANDWELL" />
 				<Icon guid="ImageCatalogGuid" id="CorrelationScope" />
 				<CommandFlag>IconIsMoniker</CommandFlag>

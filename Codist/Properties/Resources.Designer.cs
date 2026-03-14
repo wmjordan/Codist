@@ -2465,6 +2465,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Add, update or delete wrap text items listed in this menu.
+        /// </summary>
+        internal static string CMDT_CustomizeWrapTexts {
+            get {
+                return ResourceManager.GetString("CMDT_CustomizeWrapTexts", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Load a predefined theme for dark editing environment.
         /// </summary>
         internal static string CMDT_DarkTheme {
@@ -6115,6 +6124,15 @@ namespace Codist.Properties {
         internal static string OTC_URL {
             get {
                 return ResourceManager.GetString("OTC_URL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wrap Text:.
+        /// </summary>
+        internal static string OTC_WrapText {
+            get {
+                return ResourceManager.GetString("OTC_WrapText", resourceCulture);
             }
         }
         

@@ -90,7 +90,7 @@
     <Compile Include="Commands\AutoParenthesisHandler.cs" />
     <Compile Include="Commands\OpenActivityLogCommand.cs" />
     <Compile Include="Commands\OptionsWindowCommand.cs" />
-    <Compile Include="Commands\RepeatWrapTextCommand.cs" />
+    <Compile Include="Commands\WrapTextCommand.cs" />
     <Compile Include="Commands\TransformDocumentCommand.cs" />
     <Compile Include="Commands\ShowSupportedFileTypesCommand.cs" />
     <Compile Include="Commands\TransformDocumentWindow.cs" />
@@ -134,7 +134,9 @@
     <Compile Include="Semantics\MarkdownHelper.cs" />
     <Compile Include="Semantics\SyntaxModel.cs" />
     <Compile Include="SmartBars\MarkupSmartBar.cs" />
+    <Compile Include="SnippetTexts\ActiveWrapTextTracker.cs" />
     <Compile Include="SnippetTexts\SnippetSession.cs" />
+    <Compile Include="SnippetTexts\WrapTextPicker.cs" />
     <Compile Include="Suppression.cs" />
     <Compile Include="SymbolCommands\SemanticCommand.Derivations.cs" />
     <Compile Include="SymbolCommands\SemanticCommand.Methods.cs" />
