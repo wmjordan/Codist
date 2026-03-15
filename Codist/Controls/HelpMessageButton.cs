@@ -36,10 +36,7 @@ public class HelpMessageButton : ToggleButton
 			PlacementTarget = this,
 			Placement = PlacementMode.Bottom,
 			StaysOpen = false,
-			AllowsTransparency = true,
-			PopupAnimation = PopupAnimation.Slide,
-			HorizontalOffset = 0,
-			VerticalOffset = 5
+			AllowsTransparency = true
 		};
 
 		_popupFocusTarget = new Border {
@@ -55,8 +52,6 @@ public class HelpMessageButton : ToggleButton
 
 		_popup.Child = _popupFocusTarget;
 
-		Unloaded += HandleUnloaded;
-		_popup.Closed += HandlePopupClose;
 	}
 
 	public HelpMessageButton(int iconId, string message) : this() {
@@ -70,11 +65,15 @@ public class HelpMessageButton : ToggleButton
 
 	protected override void OnChecked(RoutedEventArgs e) {
 		base.OnChecked(e);
+		Unloaded += HandleUnloaded;
+		_popup.Closed += HandlePopupClose;
 		_popup.IsOpen = true;
 	}
 
 	protected override void OnUnchecked(RoutedEventArgs e) {
 		base.OnUnchecked(e);
+		Unloaded -= HandleUnloaded;
+		_popup.Closed -= HandlePopupClose;
 		_popup.IsOpen = false;
 	}
 
