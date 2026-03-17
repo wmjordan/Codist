@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Windows;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Editor.OptionsExtensionMethods;
 using Microsoft.VisualStudio.Utilities;
 using R = Codist.Properties.Resources;
+using Inlines = System.Windows.Documents.InlineCollection;
 
 namespace Codist.SnippetTexts;
 
@@ -215,38 +217,37 @@ sealed class WrapText
 		string replacement = null;
 		var modified = new Chain<Span>();
 		var undoHistory = ServicesHelper.Instance.TextUndoHistory.GetHistory(view.TextBuffer);
-		using (var tran = undoHistory.CreateTransaction(R.T_WrapTextName.Replace("<NAME>", name))) {
-			var eo = ServicesHelper.Instance.EditorOperationsFactory.GetEditorOperations(view);
-			eo.AddBeforeTextBufferChangePrimitive();
-			using var edit = view.TextSnapshot.TextBuffer.CreateEdit();
-			foreach (var item in view.Selection.SelectedSpans) {
-				var t = item.GetText();
-				int strippedLength;
-				var psLength = prefix.Length + suffix.Length;
-				if ((strippedLength = item.Length - psLength) > 0
-					&& t.StartsWith(prefix, StringComparison.Ordinal)
-					&& t.EndsWith(suffix, StringComparison.Ordinal)
-					&& t.IndexOf(prefix, prefix.Length, strippedLength) <= t.IndexOf(suffix, prefix.Length, strippedLength)) {
-					// unwrap
-					if (edit.Replace(item, t.Substring(prefix.Length, strippedLength))) {
-						modified.Add(new Span(item.Start.Position + offset, strippedLength));
-						offset -= psLength;
-					}
-				}
-				else {
-					// wrap
-					replacement = prefix + t + (substitution != null ? suffix.Replace(substitution, t) : suffix);
-					if (edit.Replace(item, replacement)) {
-						modified.Add(new Span(item.Start.Position + offset, replacement.Length));
-						offset += replacement.Length - t.Length;
-					}
+		using var tran = undoHistory.CreateTransaction(R.T_WrapTextName.Replace("<NAME>", name));
+		var eo = ServicesHelper.Instance.EditorOperationsFactory.GetEditorOperations(view);
+		eo.AddBeforeTextBufferChangePrimitive();
+		using var edit = view.TextSnapshot.TextBuffer.CreateEdit();
+		foreach (var item in view.Selection.SelectedSpans) {
+			var t = item.GetText();
+			int strippedLength;
+			var psLength = prefix.Length + suffix.Length;
+			if ((strippedLength = item.Length - psLength) > 0
+				&& t.StartsWith(prefix, StringComparison.Ordinal)
+				&& t.EndsWith(suffix, StringComparison.Ordinal)
+				&& t.IndexOf(prefix, prefix.Length, strippedLength) <= t.IndexOf(suffix, prefix.Length, strippedLength)) {
+				// unwrap
+				if (edit.Replace(item, t.Substring(prefix.Length, strippedLength))) {
+					modified.Add(new Span(item.Start.Position + offset, strippedLength));
+					offset -= psLength;
 				}
 			}
-			if (edit.HasEffectiveChanges) {
-				var snapshot = edit.Apply();
-				tran.Complete();
-				return modified.Select(i => new SnapshotSpan(snapshot, i));
+			else {
+				// wrap
+				replacement = prefix + t + (substitution != null ? suffix.Replace(substitution, t) : suffix);
+				if (edit.Replace(item, replacement)) {
+					modified.Add(new Span(item.Start.Position + offset, replacement.Length));
+					offset += replacement.Length - t.Length;
+				}
 			}
+		}
+		if (edit.HasEffectiveChanges) {
+			var snapshot = edit.Apply();
+			tran.Complete();
+			return modified.Select(i => new SnapshotSpan(snapshot, i));
 		}
 		return Enumerable.Empty<SnapshotSpan>();
 	}
@@ -257,42 +258,41 @@ sealed class WrapText
 		var modified = new Chain<Span>();
 		var undoHistory = ServicesHelper.Instance.TextUndoHistory.GetHistory(view.TextBuffer);
 
-		using (var tran = undoHistory.CreateTransaction(R.T_WrapTextName.Replace("<NAME>", Name))) {
-			var eo = ServicesHelper.Instance.EditorOperationsFactory.GetEditorOperations(view);
-			eo.AddBeforeTextBufferChangePrimitive();
-			using var edit = view.TextSnapshot.TextBuffer.CreateEdit();
-			foreach (var item in view.Selection.SelectedSpans) {
-				var t = item.GetText();
-				var start = item.Start.Position;
-				var length = item.Length;
-				var replacement = Wrap(
-					t,
-					_HasMultilinePrefix ? view.TextSnapshot.GetLinePrecedingWhitespaceAtPosition(start) : null,
-					_HasMultilineSuffix ? view.TextSnapshot.GetLinePrecedingWhitespaceAtPosition(item.End.Position) : null,
-					view.Options.GetIndentStringSize(),
-					view.Options.GetNewLineCharacter(),
-					placeholders,
-					start + offset
-				);
+		using var tran = undoHistory.CreateTransaction(R.T_WrapTextName.Replace("<NAME>", Name));
+		var eo = ServicesHelper.Instance.EditorOperationsFactory.GetEditorOperations(view);
+		eo.AddBeforeTextBufferChangePrimitive();
+		using var edit = view.TextSnapshot.TextBuffer.CreateEdit();
+		foreach (var item in view.Selection.SelectedSpans) {
+			var t = item.GetText();
+			var start = item.Start.Position;
+			var length = item.Length;
+			var replacement = Wrap(
+				t,
+				_HasMultilinePrefix ? view.TextSnapshot.GetLinePrecedingWhitespaceAtPosition(start) : null,
+				_HasMultilineSuffix ? view.TextSnapshot.GetLinePrecedingWhitespaceAtPosition(item.End.Position) : null,
+				view.Options.GetIndentStringSize(),
+				view.Options.GetNewLineCharacter(),
+				placeholders,
+				start + offset
+			);
 
-				if (edit.Replace(item, replacement)) {
-					modified.Add(new Span(start + offset, replacement.Length));
-					offset += replacement.Length - length;
-				}
+			if (edit.Replace(item, replacement)) {
+				modified.Add(new Span(start + offset, replacement.Length));
+				offset += replacement.Length - length;
 			}
+		}
 
-			if (edit.HasEffectiveChanges) {
-				var snapshot = edit.Apply();
-				tran.Complete();
-				if (placeholders.Count != 0) {
-					if (view.TryGetProperty(out SnippetSession session)) {
-						session.Terminate();
-					}
-					view.Properties[typeof(SnippetSession)] = new SnippetSession((IWpfTextView)view, placeholders, undoHistory);
-					return new Chain<SnapshotSpan>(placeholders[0].ToSnapshotSpan(snapshot));
+		if (edit.HasEffectiveChanges) {
+			var snapshot = edit.Apply();
+			tran.Complete();
+			if (placeholders.Count != 0) {
+				if (view.TryGetProperty(out SnippetSession session)) {
+					session.Terminate();
 				}
-				return modified.Select(i => new SnapshotSpan(snapshot, i));
+				view.Properties[typeof(SnippetSession)] = new SnippetSession((IWpfTextView)view, placeholders, undoHistory);
+				return new Chain<SnapshotSpan>(placeholders[0].ToSnapshotSpan(snapshot));
 			}
+			return modified.Select(i => new SnapshotSpan(snapshot, i));
 		}
 		return Enumerable.Empty<SnapshotSpan>();
 	}
@@ -388,6 +388,55 @@ sealed class WrapText
 		}
 		if (start < selectionText.Length) {
 			sb.Append(selectionText, start, selectionText.Length - start);
+		}
+	}
+
+	public void Render(Inlines inlines) {
+		if (_WrapAction == UndeterminedWrapAction) {
+			ParsePattern();
+		}
+		if (_IsSimple) {
+			RenderSimple(inlines);
+		}
+		else {
+			RenderComplex(inlines);
+		}
+	}
+
+	void RenderSimple(Inlines inlines) {
+		if (!String.IsNullOrEmpty(_Prefix)) {
+			inlines.Add(_Prefix);
+		}
+		if (!String.IsNullOrEmpty(_Suffix)) {
+			inlines.Append(_Indicator.ToString(), SymbolFormatter.Instance.Class)
+				.Add(_Suffix);
+		}
+	}
+
+	void RenderComplex(Inlines inlines) {
+		foreach (var cmd in _Commands) {
+			switch (cmd.Type) {
+				case CommandType.Text: inlines.Add(((TextCommand)cmd).Content);
+					break;
+				case CommandType.Placeholder:
+					var name = ((PlaceholderCommand)cmd).Name;
+					if (!String.IsNullOrEmpty(name)) {
+						inlines.Add(new System.Windows.Documents.Run(name) {
+							Foreground = SymbolFormatter.Instance.Field,
+							TextDecorations = TextDecorations.Underline
+						});
+					}
+					break;
+				case CommandType.Selection:
+					inlines.Append(_Indicator.ToString(), SymbolFormatter.Instance.Class);
+					break;
+				case CommandType.NewLine:
+					inlines.AppendLine();
+					break;
+				case CommandType.Indent:
+					inlines.Add("    ");
+					break;
+			}
 		}
 	}
 

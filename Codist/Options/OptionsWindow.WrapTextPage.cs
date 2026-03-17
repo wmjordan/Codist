@@ -242,21 +242,23 @@ sealed partial class OptionsWindow
 						VsImageHelper.GetImage(IconIds.WrapText)
 							.WrapMargin(WpfHelper.GlyphMargin)
 							.SetProperty(Image.VerticalAlignmentProperty, VerticalAlignment.Top),
-						new TextBlock { Text = wrapText.Name, FontWeight = FontWeights.Bold, MinWidth = 140 }
+						new TextBlock { FontWeight = FontWeights.Bold, MinWidth = 140 }
 							.Set(ref _Name),
-						new TextBlock { Text = wrapText.Pattern, Margin = WpfHelper.MiddleHorizontalMargin }
+						new TextBlock { Margin = WpfHelper.MiddleHorizontalMargin }
 							.ReferenceProperty(ForegroundProperty, VsBrushes.GrayTextKey)
 							.Set(ref _Pattern)
 					}
 				};
 				p.SetBackgroundForCrispImage(ThemeCache.ToolWindowBackgroundColor);
+				Refresh();
 			}
 
 			public WrapText WrapText => _WrapText;
 
 			public void Refresh() {
 				_Name.Text = _WrapText.Name;
-				_Pattern.Text = _WrapText.Pattern;
+				_Pattern.Inlines.Clear();
+				_WrapText.Render(_Pattern.Inlines);
 			}
 		}
 	}

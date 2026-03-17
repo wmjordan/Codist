@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -44,7 +45,7 @@ sealed class WrapTextPicker : UserControl
 
 		_SearchBox = new ThemedTextBox {
 			VerticalContentAlignment = VerticalAlignment.Center,
-			Width = 120
+			Width = 140
 		};
 		_ListView = new ListCollectionView(_AllItems) { Filter = FilterPredicate };
 		_ListBox = new ThemedListBox {
@@ -53,11 +54,15 @@ sealed class WrapTextPicker : UserControl
 			DisplayMemberPath = "Name",
 			ItemContainerStyle = new Style(typeof(ListBoxItem)) {
 				Setters = {
-					new Setter(ToolTipService.ToolTipProperty, new Binding("Pattern")),
+					new Setter(ToolTipService.ToolTipProperty,
+						new Binding {
+							Path = new PropertyPath("."),
+							Converter = WrapTextToToolTipConverter.Instance
+						}),
 					new Setter(ToolTipService.PlacementProperty, PlacementMode.Right)
 				}
 			},
-			Width = 120,
+			Width = 140,
 			MinHeight = 40,
 			MaxHeight = 250,
 			HorizontalAlignment = HorizontalAlignment.Right
@@ -248,5 +253,26 @@ sealed class WrapTextPicker : UserControl
 		var text = _SearchBox.Text;
 		return string.IsNullOrWhiteSpace(text)
 			|| ((WrapText)obj)?.Name?.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0;
+	}
+
+	sealed class WrapTextToToolTipConverter : IValueConverter
+	{
+		public readonly static WrapTextToToolTipConverter Instance = new();
+		public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
+			if (value is WrapText wrapText) {
+				var textBlock = new TextBlock {
+					Foreground = SymbolFormatter.Instance.PlainText,
+					FontFamily = ThemeCache.CodeTextFont,
+					FontSize = ThemeCache.ToolTipFontSize,
+					Padding = new Thickness(4)
+				};
+				wrapText.Render(textBlock.Inlines);
+				return textBlock;
+			}
+			return null;
+		}
+
+		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+			=> throw new NotSupportedException();
 	}
 }
