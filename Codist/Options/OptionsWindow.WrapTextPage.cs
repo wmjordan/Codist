@@ -258,7 +258,7 @@ sealed partial class OptionsWindow
 			public void Refresh() {
 				_Name.Text = _WrapText.Name;
 				_Pattern.Inlines.Clear();
-				_WrapText.Render(_Pattern.Inlines);
+				_WrapText.Render(_Pattern.Inlines, true);
 			}
 		}
 	}

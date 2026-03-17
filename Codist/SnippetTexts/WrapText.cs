@@ -391,15 +391,18 @@ sealed class WrapText
 		}
 	}
 
-	public void Render(Inlines inlines) {
+	public void Render(Inlines inlines, bool singleLine = false) {
 		if (_WrapAction == UndeterminedWrapAction) {
 			ParsePattern();
 		}
 		if (_IsSimple) {
 			RenderSimple(inlines);
 		}
+		else if (singleLine) {
+			RenderComplex(inlines, true);
+		}
 		else {
-			RenderComplex(inlines);
+			RenderComplex(inlines, false);
 		}
 	}
 
@@ -413,8 +416,13 @@ sealed class WrapText
 		}
 	}
 
-	void RenderComplex(Inlines inlines) {
+	void RenderComplex(Inlines inlines, bool singleLine) {
+		bool hasIcon = false;
 		foreach (var cmd in _Commands) {
+			if (hasIcon) {
+				inlines.Append("...");
+				return;
+			}
 			switch (cmd.Type) {
 				case CommandType.Text: inlines.Add(((TextCommand)cmd).Content);
 					break;
@@ -428,13 +436,23 @@ sealed class WrapText
 					}
 					break;
 				case CommandType.Selection:
-					inlines.Append(_Indicator.ToString(), SymbolFormatter.Instance.Class);
+					inlines.Add(_Indicator.ToString().Render(true, false, SymbolFormatter.Instance.Class));
 					break;
 				case CommandType.NewLine:
-					inlines.AppendLine();
+					if (singleLine) {
+						if (!hasIcon) {
+							inlines.SetGlyph(IconIds.MultiLine);
+							hasIcon = true;
+						}
+					}
+					else {
+						inlines.AppendLine();
+					}
 					break;
 				case CommandType.Indent:
-					inlines.Add("    ");
+					if (!singleLine) {
+						inlines.Add("    ");
+					}
 					break;
 			}
 		}

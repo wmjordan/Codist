@@ -58,16 +58,23 @@ namespace Codist
 			return block;
 		}
 		public static TextBlock SetGlyph(this TextBlock block, FrameworkElement glyph) {
-			var first = block.Inlines.FirstInline;
+			block.Inlines.SetGlyph(glyph);
+			return block;
+		}
+		public static InlineCollection SetGlyph(this InlineCollection inlines, FrameworkElement glyph) {
+			var first = inlines.FirstInline;
 			glyph.Margin = GlyphMargin;
 			var container = new InlineUIContainer(glyph) { BaselineAlignment = BaselineAlignment.TextTop };
 			if (first != null) {
-				block.Inlines.InsertBefore(first, container);
+				inlines.InsertBefore(first, container);
 			}
 			else {
-				block.Inlines.Add(container);
+				inlines.Add(container);
 			}
-			return block;
+			return inlines;
+		}
+		public static InlineCollection SetGlyph(this InlineCollection inlines, int iconId) {
+			return inlines.SetGlyph(VsImageHelper.GetImage(iconId));
 		}
 		public static TTextBlock AppendLine<TTextBlock>(this TTextBlock block)
 			where TTextBlock : TextBlock {
