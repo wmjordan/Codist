@@ -19,6 +19,7 @@
 				<Strings>
 					<ButtonText>Save Code &amp;Window Screenshot...</ButtonText>
 					<ToolTipText>Take a screenshot for the active code window</ToolTipText>
+					<LocCanonicalName>.Codist.SaveCodeWindowScreenshot</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="ShowActiveWindowPropertiesId" priority="4133" type="Button">
@@ -30,6 +31,7 @@
 				<Strings>
 					<ButtonText>Show Active Window Properties...</ButtonText>
 					<ToolTipText>Display properties of the active window</ToolTipText>
+					<LocCanonicalName>.Codist.ShowActiveWindowProperties</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="ShowActivityLogId" priority="4134" type="Button">
@@ -40,6 +42,7 @@
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
 					<ButtonText>Open ActivityLog.xml...</ButtonText>
+					<LocCanonicalName>.Codist.OpenActivityLog</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="ShowSupportedFileTypesId" priority="4134" type="Button">
@@ -62,6 +65,7 @@
 				<Strings>
 					<ButtonText>Transform Document...</ButtonText>
 					<ToolTipText>Save active document to another format</ToolTipText>
+					<LocCanonicalName>.Codist.TransformDocument</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="IncrementVsixVersionId" priority="0x0100" type="Button">
@@ -72,6 +76,7 @@
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
 					<ButtonText>Increment Version</ButtonText>
+					<LocCanonicalName>.Codist.IncrementVersion</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="AutoBuildVersionWindowId" priority="0x0101" type="Button">
@@ -82,6 +87,7 @@
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
 					<ButtonText>Auto Build Version Settings...</ButtonText>
+					<LocCanonicalName>.Codist.AutoBuildVersionSettings</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="ToggleAutoBuildVersionId" priority="0x0101" type="Button">
@@ -90,7 +96,8 @@
 				<CommandFlag>DontCache</CommandFlag>
 				<CommandFlag>DynamicVisibility</CommandFlag>
 				<Strings>
-					<ButtonText>Auto Build Version</ButtonText>
+					<ButtonText>Toggle Auto Build Version</ButtonText>
+					<LocCanonicalName>.Codist.ToggleAutoBuildVersion</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="OpenOutputFolderId" priority="0x0102" type="Button">
@@ -102,8 +109,7 @@
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
 					<ButtonText>Open Output Folder</ButtonText>
-					<CanonicalName>.Build.OpenOutputFolder</CanonicalName>
-					<LocCanonicalName>.Build.OpenOutputFolder</LocCanonicalName>
+					<LocCanonicalName>.Codist.OpenOutputFolder</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="OpenDebugOutputFolderId" priority="0x0102" type="Button">
@@ -115,8 +121,7 @@
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
 					<ButtonText>Open Debug Output Folder</ButtonText>
-					<CanonicalName>.Build.OpenDebugOutputFolder</CanonicalName>
-					<LocCanonicalName>.Build.OpenDebugOutputFolder</LocCanonicalName>
+					<LocCanonicalName>.Codist.OpenDebugOutputFolder</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="OpenReleaseOutputFolderId" priority="0x0102" type="Button">
@@ -128,8 +133,7 @@
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
 					<ButtonText>Open Release Output Folder</ButtonText>
-					<CanonicalName>.Build.OpenReleaseOutputFolder</CanonicalName>
-					<LocCanonicalName>.Build.OpenReleaseOutputFolder</LocCanonicalName>
+					<LocCanonicalName>.Codist.OpenReleaseOutputFolder</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="OpenIntermediateFolderId" priority="0x0102" type="Button">
@@ -141,8 +145,7 @@
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
 					<ButtonText>Open Intermediate Folder</ButtonText>
-					<CanonicalName>.Build.OpenIntermediateFolder</CanonicalName>
-					<LocCanonicalName>.Build.OpenIntermediateFolder</LocCanonicalName>
+					<LocCanonicalName>.Codist.OpenIntermediateFolder</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="OpenReleaseIntermediateFolderId" priority="0x0102" type="Button">
@@ -154,8 +157,7 @@
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
 					<ButtonText>Open Release Intermediate Folder</ButtonText>
-					<CanonicalName>.Build.OpenReleaseIntermediateFolder</CanonicalName>
-					<LocCanonicalName>.Build.OpenReleaseIntermediateFolder</LocCanonicalName>
+					<LocCanonicalName>.Codist.OpenReleaseIntermediateFolder</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="NaviBarSearchActiveClassId" priority="0x0100" type="Button">
@@ -165,7 +167,7 @@
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
 					<ButtonText>Search Class Member</ButtonText>
-					<CanonicalName>CodistNaviBarSearchActiveClass</CanonicalName>
+					<LocCanonicalName>.Codist.SearchClassMember</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="NaviBarSearchDeclarationId" priority="0x0101" type="Button">
@@ -175,7 +177,7 @@
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
 					<ButtonText>Search Declaration in Document</ButtonText>
-					<CanonicalName>CodistNaviBarSearchDeclaration</CanonicalName>
+					<LocCanonicalName>.Codist.SearchDocumentDeclaration</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="NaviBarSearchDeclarationInProjectId" priority="0x0102" type="Button">
@@ -185,7 +187,7 @@
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
 					<ButtonText>Search Declaration in Project</ButtonText>
-					<CanonicalName>CodistNaviBarSearchDeclarationInProject</CanonicalName>
+					<LocCanonicalName>.Codist.SearchProjectDeclaration</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="SyntaxCustomizeHighlightId" priority="0x0100" type="Button">
@@ -194,7 +196,7 @@
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
 					<ButtonText>Customize Codist Syntax Highlight...</ButtonText>
-					<CanonicalName>CustomizeSyntaxHighlight</CanonicalName>
+					<LocCanonicalName>.Codist.CustomizeSyntaxHighlight</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="OptionsWindowId" priority="0x0101" type="Button">
@@ -203,7 +205,7 @@
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
 					<ButtonText>Codist Options...</ButtonText>
-					<CanonicalName>CodistOptions</CanonicalName>
+					<LocCanonicalName>.Codist.Options</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="CodeRefactoringId" priority="0x1000" type="Button">
@@ -214,11 +216,10 @@
 				<CommandFlag>DynamicVisibility</CommandFlag>
 				<CommandFlag>DefaultDisabled</CommandFlag>
 				<Strings>
-					<MenuText>Refactoring Code...</MenuText>
-					<ButtonText>Refactorings</ButtonText>
+					<MenuText>Refactor Code...</MenuText>
+					<ButtonText>Refactor Code...</ButtonText>
 					<ToolTipText>Bring out the menu for refactoring code...</ToolTipText>
-					<CanonicalName>.Refactor.RefactoringCode</CanonicalName>
-					<LocCanonicalName>.Refactor.RefactoringCode</LocCanonicalName>
+					<LocCanonicalName>.Codist.RefactorCode</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="ListWrapTextId" priority="0x1000" type="Button">
@@ -232,7 +233,7 @@
 					<MenuText>Wrap Text...</MenuText>
 					<ButtonText>Wrap Text...</ButtonText>
 					<ToolTipText>Open a menu and select text to wrap around current selections...</ToolTipText>
-					<CanonicalName>.Edit.ListWrapText</CanonicalName>
+					<LocCanonicalName>.Codist.ListWrapText</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="WrapRecentTextId" priority="0x1001" type="Button">
@@ -246,10 +247,10 @@
 					<MenuText>Reinsert Last Wrap Text</MenuText>
 					<ButtonText>Reinsert Last Wrap Text</ButtonText>
 					<ToolTipText>Insert previous Wrap Text from the SmartBar...</ToolTipText>
-					<CanonicalName>.Edit.WrapRecentText</CanonicalName>
+					<LocCanonicalName>.Codist.ReinsertLastWrapText</LocCanonicalName>
 				</Strings>
 			</Button>
-			<Button guid="guidCodistPackageCmdSet" id="FavoriteWindowCommandId" priority="0x1000" type="Button">
+			<!--<Button guid="guidCodistPackageCmdSet" id="FavoriteWindowCommandId" priority="0x1000" type="Button">
 				<Parent guid="guidSHLMainMenu" id="IDG_VS_VIEW_BROWSER" />
 				<Icon guid="ImageCatalogGuid" id="Favorite" />
 				<CommandFlag>IconIsMoniker</CommandFlag>
@@ -257,10 +258,9 @@
 					<MenuText>Favorites Window...</MenuText>
 					<ButtonText>Favorites</ButtonText>
 					<ToolTipText>Displays Favorite Window...</ToolTipText>
-					<CanonicalName>.View.FavoriteWindow</CanonicalName>
-					<LocCanonicalName>.View.FavoriteWindow</LocCanonicalName>
+					<LocCanonicalName>.Codist.FavoriteWindow</LocCanonicalName>
 				</Strings>
-			</Button>
+			</Button>-->
 		</Buttons>
 	</Commands>
 </CommandTable>

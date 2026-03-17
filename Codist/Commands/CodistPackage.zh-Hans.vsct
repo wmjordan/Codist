@@ -12,6 +12,7 @@
 				<Strings>
 					<ButtonText>保存代码窗口截图...</ButtonText>
 					<ToolTipText>对当前代码窗口截图，保存为图像文件</ToolTipText>
+					<LocCanonicalName>.Codist.保存代码窗口截图</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="ShowActiveWindowPropertiesId" priority="4133" type="Button">
@@ -23,6 +24,7 @@
 				<Strings>
 					<ButtonText>显示当前窗口属性...</ButtonText>
 					<ToolTipText>显示当前窗口的属性和文档属性</ToolTipText>
+					<LocCanonicalName>.Codist.显示当前窗口属性</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="ShowActivityLogId" priority="4134" type="Button">
@@ -33,6 +35,7 @@
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
 					<ButtonText>打开 ActivityLog.xml 文件...</ButtonText>
+					<LocCanonicalName>.Codist.打开ActivityLog</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="ShowSupportedFileTypesId" priority="4134" type="Button">
@@ -55,6 +58,7 @@
 				<Strings>
 					<ButtonText>转换文档格式...</ButtonText>
 					<ToolTipText>将当前文档转换为另一个格式</ToolTipText>
+					<LocCanonicalName>.Codist.转换文档格式</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="IncrementVsixVersionId" priority="0x0100" type="Button">
@@ -65,6 +69,7 @@
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
 					<ButtonText>递增版本修订号</ButtonText>
+					<LocCanonicalName>.Codist.递增版本修订号</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="AutoBuildVersionWindowId" priority="0x0101" type="Button">
@@ -75,6 +80,7 @@
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
 					<ButtonText>自动生成版本号设置...</ButtonText>
+					<LocCanonicalName>.Codist.自动生成版本号设置</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="ToggleAutoBuildVersionId" priority="0x0101" type="Button">
@@ -83,7 +89,8 @@
 				<CommandFlag>DontCache</CommandFlag>
 				<CommandFlag>DynamicVisibility</CommandFlag>
 				<Strings>
-					<ButtonText>自动更改版本号</ButtonText>
+					<ButtonText>切换自动更改版本号</ButtonText>
+					<LocCanonicalName>.Codist.切换自动更改版本号</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="OpenOutputFolderId" priority="0x0102" type="Button">
@@ -95,8 +102,7 @@
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
 					<ButtonText>打开输出文件夹</ButtonText>
-					<CanonicalName>.Build.OpenOutputFolder</CanonicalName>
-					<LocCanonicalName>.生成.打开输出文件夹</LocCanonicalName>
+					<LocCanonicalName>.Codist.打开输出文件夹</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="OpenDebugOutputFolderId" priority="0x0102" type="Button">
@@ -108,8 +114,7 @@
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
 					<ButtonText>打开 Debug 输出文件夹</ButtonText>
-					<CanonicalName>.Build.OpenDebugOutputFolder</CanonicalName>
-					<LocCanonicalName>.生成.打开Debug输出文件夹</LocCanonicalName>
+					<LocCanonicalName>.Codist.打开Debug输出文件夹</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="OpenReleaseOutputFolderId" priority="0x0102" type="Button">
@@ -121,8 +126,7 @@
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
 					<ButtonText>打开 Release 输出文件夹</ButtonText>
-					<CanonicalName>.Build.OpenReleaseOutputFolder</CanonicalName>
-					<LocCanonicalName>.生成.打开Release输出文件夹</LocCanonicalName>
+					<LocCanonicalName>.Codist.打开Release输出文件夹</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="OpenIntermediateFolderId" priority="0x0102" type="Button">
@@ -134,8 +138,7 @@
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
 					<ButtonText>打开中间输出文件夹</ButtonText>
-					<CanonicalName>.Build.OpenIntermediateFolder</CanonicalName>
-					<LocCanonicalName>.生成.打开中间输出文件夹</LocCanonicalName>
+					<LocCanonicalName>.Codist.打开中间输出文件夹</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="OpenReleaseIntermediateFolderId" priority="0x0102" type="Button">
@@ -148,7 +151,7 @@
 				<Strings>
 					<ButtonText>打开 Release 中间输出文件夹</ButtonText>
 					<CanonicalName>.Build.OpenIntermediateFolder</CanonicalName>
-					<LocCanonicalName>.生成.打开Release中间输出文件夹</LocCanonicalName>
+					<LocCanonicalName>.Codist.打开Release中间输出文件夹</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="NaviBarSearchActiveClassId" priority="0x0100" type="Button">
@@ -158,7 +161,7 @@
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
 					<ButtonText>查找类成员</ButtonText>
-					<CanonicalName>CodistNaviBarSearchActiveClass</CanonicalName>
+					<LocCanonicalName>.Codist.查找类成员</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="NaviBarSearchDeclarationId" priority="0x0101" type="Button">
@@ -167,8 +170,8 @@
 				<CommandFlag>DefaultDisabled</CommandFlag>
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
-					<ButtonText>在当前文档查找定义</ButtonText>
-					<CanonicalName>CodistNaviBarSearchDeclaration</CanonicalName>
+					<ButtonText>在当前文档查找声明</ButtonText>
+					<LocCanonicalName>.Codist.在当前文档查找声明</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="NaviBarSearchDeclarationInProjectId" priority="0x0102" type="Button">
@@ -177,8 +180,8 @@
 				<CommandFlag>DefaultDisabled</CommandFlag>
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
-					<ButtonText>在当前项目查找定义</ButtonText>
-					<CanonicalName>CodistNaviBarSearchDeclarationInProject</CanonicalName>
+					<ButtonText>在当前项目查找声明</ButtonText>
+					<LocCanonicalName>.Codist.在当前项目查找声明</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="SyntaxCustomizeHighlightId" priority="0x0100" type="Button">
@@ -187,8 +190,7 @@
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
 					<ButtonText>配置 Codist 高级语法样式...</ButtonText>
-					<CanonicalName>CustomizeSyntaxHighlight</CanonicalName>
-					<LocCanonicalName>配置高级语法样式</LocCanonicalName>
+					<LocCanonicalName>.Codist.配置高级语法样式</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="OptionsWindowId" priority="0x0101" type="Button">
@@ -198,7 +200,7 @@
 				<Strings>
 					<ButtonText>Codist 选项...</ButtonText>
 					<CanonicalName>CodistOptions</CanonicalName>
-					<LocCanonicalName>Codist选项</LocCanonicalName>
+					<LocCanonicalName>.Codist.选项</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="CodeRefactoringId" priority="0x1000" type="Button">
@@ -212,8 +214,7 @@
 					<MenuText>重构代码...</MenuText>
 					<ButtonText>重构代码</ButtonText>
 					<ToolTipText>打开重构代码的菜单...</ToolTipText>
-					<CanonicalName>.Refactor.RefactoringCode</CanonicalName>
-					<LocCanonicalName>.重构.重构代码</LocCanonicalName>
+					<LocCanonicalName>.Codist.重构代码</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="ListWrapTextId" priority="0x1000" type="Button">
@@ -224,10 +225,10 @@
 				<CommandFlag>DynamicVisibility</CommandFlag>
 				<CommandFlag>DefaultDisabled</CommandFlag>
 				<Strings>
-					<MenuText>环绕文本...</MenuText>
-					<ButtonText>环绕文本...</ButtonText>
+					<MenuText>列出环绕文本...</MenuText>
+					<ButtonText>列出环绕文本...</ButtonText>
 					<ToolTipText>显示环绕文本的菜单，从中选择用于环绕当前选中文本的内容...</ToolTipText>
-					<CanonicalName>.编辑.列出环绕文本</CanonicalName>
+					<LocCanonicalName>.Codist.列出环绕文本</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="WrapRecentTextId" priority="0x1001" type="Button">
@@ -241,11 +242,10 @@
 					<MenuText>插入上一次的环绕文本</MenuText>
 					<ButtonText>插入上一次的环绕文本</ButtonText>
 					<ToolTipText>重复插入上次从智能工具条插入的环绕文本...</ToolTipText>
-					<CanonicalName>.Edit.WrapRecentText</CanonicalName>
-					<LocCanonicalName>.编辑.插入上一次的环绕文本</LocCanonicalName>
+					<LocCanonicalName>.Codist.插入上一次的环绕文本</LocCanonicalName>
 				</Strings>
 			</Button>
-			<Button guid="guidCodistPackageCmdSet" id="FavoriteWindowCommandId" priority="0x1000" type="Button">
+			<!--<Button guid="guidCodistPackageCmdSet" id="FavoriteWindowCommandId" priority="0x1000" type="Button">
 				<Parent guid="guidSHLMainMenu" id="IDG_VS_VIEW_BROWSER" />
 				<Icon guid="ImageCatalogGuid" id="Favorite" />
 				<CommandFlag>IconIsMoniker</CommandFlag>
@@ -253,10 +253,9 @@
 					<MenuText>收藏夹...</MenuText>
 					<ButtonText>收藏夹</ButtonText>
 					<ToolTipText>显示收藏夹窗口...</ToolTipText>
-					<CanonicalName>.View.FavoriteWindow</CanonicalName>
-					<LocCanonicalName>.视图.收藏夹窗口</LocCanonicalName>
+					<LocCanonicalName>.Codist.收藏夹窗口</LocCanonicalName>
 				</Strings>
-			</Button>
+			</Button>-->
 		</Buttons>
 	</Commands>
 </CommandTable>

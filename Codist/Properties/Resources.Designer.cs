@@ -4904,9 +4904,9 @@ namespace Codist.Properties {
         
         /// <summary>
         ///   Looks up a localized string similar to Default shortcut keys to access the menus of the navigation bar:
-        ///Ctrl+1, Ctrl+1: Edit.SearchClassMember
-        ///Ctrl+1, Ctrl+2: Edit.SearchDeclaration
-        ///Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject.
+        ///Ctrl+1, Ctrl+1: Codist.SearchClassMember
+        ///Ctrl+1, Ctrl+2: Codist.SearchDocumentDeclaration
+        ///Ctrl+1, Ctrl+3: Codist.SearchProjectDeclaration.
         /// </summary>
         internal static string OT_NaviBarShortcutKeys {
             get {
