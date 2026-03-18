@@ -29,10 +29,8 @@ static class WrapTextCommand
 		if (view is null) {
 			return;
 		}
-		if (!view.TryGetProperty(out WrapText wrapText)) {
-			wrapText = WrapText.GetDefault();
-		}
-		wrapText.WrapSelections(view);
+		var t = ActiveWrapTextTracker.Get(view);
+		(t.Active ??= WrapText.GetDefault()).WrapSelections(view);
 	}
 
 	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
