@@ -9,121 +9,120 @@ using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using R = Codist.Properties.Resources;
 using Task = System.Threading.Tasks.Task;
-using TH = Microsoft.VisualStudio.Shell.ThreadHelper;
 
-namespace Codist.NaviBar
+namespace Codist.NaviBar;
+
+public sealed partial class CSharpBar
 {
-	public sealed partial class CSharpBar
+	sealed class GlobalNamespaceItem : BarItem
 	{
-		sealed class GlobalNamespaceItem : BarItem
-		{
-			SymbolList _Menu;
-			SymbolFilterBox _FilterBox;
+		SymbolList _Menu;
+		SymbolFilterBox _FilterBox;
 
-			public GlobalNamespaceItem(CSharpBar bar) : base(bar, IconIds.GlobalNamespace, new ThemedToolBarText()) {
-				Click += HandleClick;
-				this.SetLazyToolTip(() => new CommandToolTip(IconIds.GlobalNamespace, R.CMD_GlobalNamespace, new TextBlock { TextWrapping = TextWrapping.Wrap }.Append(R.CMDT_SearchWithinGlobalNamespace)));
-				this.SetTipPlacementBottom();
+		public GlobalNamespaceItem(CSharpBar bar) : base(bar, IconIds.GlobalNamespace, new ThemedToolBarText()) {
+			Click += HandleClick;
+			this.SetLazyToolTip(() => new CommandToolTip(IconIds.GlobalNamespace, R.CMD_GlobalNamespace, new TextBlock { TextWrapping = TextWrapping.Wrap }.Append(R.CMDT_SearchWithinGlobalNamespace)));
+			this.SetTipPlacementBottom();
+		}
+
+		public override BarItemType ItemType => BarItemType.GlobalNamespace;
+
+		void HandleClick(object sender, RoutedEventArgs e) {
+			SyncHelper.CancelAndDispose(ref Bar._CancellationSource, true);
+			if (_Menu != null && Bar._SymbolList == _Menu && _Menu.IsVisible) {
+				Bar.HideMenu();
+				return;
 			}
+			ShowMenuAsync(this).FireAndForget();
 
-			public override BarItemType ItemType => BarItemType.GlobalNamespace;
-
-			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
-			async void HandleClick(object sender, RoutedEventArgs e) {
-				SyncHelper.CancelAndDispose(ref Bar._CancellationSource, true);
-				if (_Menu != null && Bar._SymbolList == _Menu && _Menu.IsVisible) {
-					Bar.HideMenu();
-					return;
-				}
-				var ct = Bar._CancellationSource.GetToken();
+			static async Task ShowMenuAsync(GlobalNamespaceItem me) {
+				var ct = me.Bar._CancellationSource.GetToken();
 				try {
-					await CreateMenuForGlobalNamespaceNodeAsync(ct);
-					_FilterBox.UpdateNumbers(_Menu.Symbols);
-					Bar.ShowMenu(this, _Menu);
+					await me.CreateMenuForGlobalNamespaceNodeAsync(ct);
+					me._FilterBox.UpdateNumbers(me._Menu.Symbols);
+					me.Bar.ShowMenu(me, me._Menu);
 				}
 				catch (OperationCanceledException) {
 					// ignore
 				}
 			}
+		}
 
-			async Task CreateMenuForGlobalNamespaceNodeAsync(CancellationToken cancellationToken) {
-				if (_Menu != null) {
-					((TextBlock)_Menu.Footer).Clear();
-					Controls.DragDropHelper.SetScrollOnDragDrop(_Menu, false);
-					await RefreshItemsAsync(cancellationToken);
-					return;
-				}
-
-				_Menu = new SymbolList(Bar._SemanticContext) {
-					Container = Bar.ViewOverlay,
-					ContainerType = SymbolListType.TypeList,
-					ExtIconProvider = ExtIconProvider.Default.GetExtIcons,
-					EnableVirtualMode = true,
-					Owner = this
-				};
-				Controls.DragDropHelper.SetScrollOnDragDrop(_Menu, true);
-				if (_FilterBox != null) {
-					_FilterBox.FilterChanged -= FilterChanged;
-				}
-				_Menu.Header = _FilterBox = new SymbolFilterBox(_Menu) { HorizontalAlignment = HorizontalAlignment.Right };
-				_FilterBox.FilterChanged += FilterChanged;
-				_Menu.Footer = new TextBlock { Margin = WpfHelper.MenuItemMargin }
-					.ReferenceProperty(TextBlock.ForegroundProperty, EnvironmentColors.SystemGrayTextBrushKey);
-				Bar.SetupSymbolListMenu(_Menu);
-				await Bar._SemanticContext.UpdateAsync(cancellationToken).ConfigureAwait(true);
-				var p = Bar._SemanticContext.Document?.Project;
-				if (p != null) {
-					var items = await (await p.GetCompilationAsync(cancellationToken).ConfigureAwait(false)).GlobalNamespace.GetNamespacesAndTypesAsync(p, cancellationToken).ConfigureAwait(false);
-					await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
-					_Menu.AddNamespaceItems(items, Bar.GetChildSymbolOnNaviBar(this));
-				}
+		async Task CreateMenuForGlobalNamespaceNodeAsync(CancellationToken cancellationToken) {
+			if (_Menu != null) {
+				((TextBlock)_Menu.Footer).Clear();
+				Controls.DragDropHelper.SetScrollOnDragDrop(_Menu, false);
+				await RefreshItemsAsync(cancellationToken);
+				return;
 			}
 
-			void FilterChanged(object sender, SymbolFilterBox.FilterEventArgs e) {
-				if (e.FilterText.Length == 0) {
-					SelectChild(default);
-				}
+			_Menu = new SymbolList(Bar._SemanticContext) {
+				Container = Bar.ViewOverlay,
+				ContainerType = SymbolListType.TypeList,
+				ExtIconProvider = ExtIconProvider.Default.GetExtIcons,
+				EnableVirtualMode = true,
+				Owner = this
+			};
+			Controls.DragDropHelper.SetScrollOnDragDrop(_Menu, true);
+			_FilterBox?.FilterChanged -= FilterChanged;
+			_Menu.Header = _FilterBox = new SymbolFilterBox(_Menu) { HorizontalAlignment = HorizontalAlignment.Right };
+			_FilterBox.FilterChanged += FilterChanged;
+			_Menu.Footer = new TextBlock { Margin = WpfHelper.MenuItemMargin }
+				.ReferenceProperty(TextBlock.ForegroundProperty, EnvironmentColors.SystemGrayTextBrushKey);
+			Bar.SetupSymbolListMenu(_Menu);
+			await Bar._SemanticContext.UpdateAsync(cancellationToken).ConfigureAwait(true);
+			var p = Bar._SemanticContext.Document?.Project;
+			if (p != null) {
+				var items = await (await p.GetCompilationAsync(cancellationToken).ConfigureAwait(false)).GlobalNamespace.GetNamespacesAndTypesAsync(p, cancellationToken).ConfigureAwait(false);
+				await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
+				_Menu.AddNamespaceItems(items, Bar.GetChildSymbolOnNaviBar(this));
 			}
+		}
 
-			async Task RefreshItemsAsync(CancellationToken cancellationToken) {
-				var ctx = Bar._SemanticContext;
-				var sm = ctx.SemanticModel;
-				await ctx.UpdateAsync(cancellationToken).ConfigureAwait(true);
-				if (sm == ctx.SemanticModel) {
-					SelectChild(cancellationToken);
-					return;
-				}
-				_Menu.ClearSymbols();
-				var p = ctx.Document?.Project;
-				if (p != null) {
-					var items = await (await p.GetCompilationAsync(cancellationToken).ConfigureAwait(false)).GlobalNamespace.GetNamespacesAndTypesAsync(p, cancellationToken).ConfigureAwait(false);
-					await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
-					_Menu.AddNamespaceItems(items, Bar.GetChildSymbolOnNaviBar(this));
-				}
-				_Menu.RefreshItemsSource(true);
+		void FilterChanged(object sender, SymbolFilterBox.FilterEventArgs e) {
+			if (e.FilterText.Length == 0) {
+				SelectChild(default);
 			}
+		}
 
-			void SelectChild(CancellationToken cancellationToken) {
-				var child = Bar.GetChildSymbolOnNaviBar(this);
-				if (child != null && _Menu.HasItems) {
-					var c = CodeAnalysisHelper.GetSpecificSymbolComparer(child);
-					_Menu.SelectedItem = _Menu.Symbols.FirstOrDefault(s => c(s.Symbol));
-				}
+		async Task RefreshItemsAsync(CancellationToken cancellationToken) {
+			var ctx = Bar._SemanticContext;
+			var sm = ctx.SemanticModel;
+			await ctx.UpdateAsync(cancellationToken).ConfigureAwait(true);
+			if (sm == ctx.SemanticModel) {
+				SelectChild(cancellationToken);
+				return;
 			}
+			_Menu.ClearSymbols();
+			var p = ctx.Document?.Project;
+			if (p != null) {
+				var items = await (await p.GetCompilationAsync(cancellationToken).ConfigureAwait(false)).GlobalNamespace.GetNamespacesAndTypesAsync(p, cancellationToken).ConfigureAwait(false);
+				await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
+				_Menu.AddNamespaceItems(items, Bar.GetChildSymbolOnNaviBar(this));
+			}
+			_Menu.RefreshItemsSource(true);
+		}
 
-			public override void Dispose() {
-				if (_Menu != null) {
-					Bar.DisposeSymbolList(_Menu);
-					_Menu = null;
-				}
-				base.Dispose();
-				Click -= HandleClick;
-				if (_FilterBox != null) {
-					_FilterBox.FilterChanged -= FilterChanged;
-					_FilterBox = null;
-				}
-				DataContext = null;
+		void SelectChild(CancellationToken cancellationToken) {
+			var child = Bar.GetChildSymbolOnNaviBar(this);
+			if (child != null && _Menu.HasItems) {
+				var c = CodeAnalysisHelper.GetSpecificSymbolComparer(child);
+				_Menu.SelectedItem = _Menu.Symbols.FirstOrDefault(s => c(s.Symbol));
 			}
+		}
+
+		public override void Dispose() {
+			if (_Menu != null) {
+				Bar.DisposeSymbolList(_Menu);
+				_Menu = null;
+			}
+			base.Dispose();
+			Click -= HandleClick;
+			if (_FilterBox != null) {
+				_FilterBox.FilterChanged -= FilterChanged;
+				_FilterBox = null;
+			}
+			DataContext = null;
 		}
 	}
 }

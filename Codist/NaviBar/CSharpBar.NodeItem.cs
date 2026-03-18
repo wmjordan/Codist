@@ -40,9 +40,9 @@ public sealed partial class CSharpBar
 		public override BarItemType ItemType => BarItemType.Node;
 		public SyntaxNode Node { get; private set; }
 		public bool IsSymbolNode => false;
-		public ISymbol Symbol => _Symbol ?? (_Symbol = SyncHelper.RunSync(() => Bar._SemanticContext.GetSymbolAsync(Node, Bar._CancellationSource.GetToken())));
+		public ISymbol Symbol => _Symbol ??= SyncHelper.RunSync(() => Bar._SemanticContext.GetSymbolAsync(Node, Bar._CancellationSource.GetToken()));
 		public bool HasReferencedSymbols => _ReferencedSymbols?.Count > 0;
-		public List<ISymbol> ReferencedSymbols => _ReferencedSymbols ?? (_ReferencedSymbols = new List<ISymbol>());
+		public List<ISymbol> ReferencedSymbols => _ReferencedSymbols ??= [];
 
 		public void ShowContextMenu(RoutedEventArgs args) {
 			if (ContextMenu == null) {
@@ -531,9 +531,7 @@ public sealed partial class CSharpBar
 			}
 
 			void AddIcon(ref StackPanel container, int imageId) {
-				if (container == null) {
-					container = new StackPanel { Orientation = Orientation.Horizontal };
-				}
+				container ??= new StackPanel { Orientation = Orientation.Horizontal };
 				container.Children.Add(VsImageHelper.GetImage(imageId));
 			}
 		}
