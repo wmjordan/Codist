@@ -55,6 +55,7 @@ public sealed partial class CSharpBar
 					m.AddAnalysisCommands();
 					m.AddCopyAndSearchSymbolCommands();
 					m.AddTitleItem(Node.GetDeclarationSignature());
+					m.PlacementTarget = this;
 				}
 				ContextMenu = m;
 			}

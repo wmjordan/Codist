@@ -350,6 +350,7 @@ namespace Codist.Controls
 					Resources = SharedDictionaryManager.ContextMenu,
 					Foreground = ThemeCache.ToolWindowTextBrush,
 					IsEnabled = true,
+					PlacementTarget = me
 				};
 				SetupContextMenu(m, item);
 				m.AddTitleItem(item.SyntaxNode?.GetDeclarationSignature() ?? item.Symbol.GetOriginalName());

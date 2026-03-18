@@ -125,6 +125,7 @@ namespace Codist.NaviBar
 						m.AddAnalysisCommands();
 						m.AddCopyAndSearchSymbolCommands();
 						m.AddTitleItem(s.Name);
+					m.PlacementTarget = this;
 					}
 					ContextMenu = m;
 				}
