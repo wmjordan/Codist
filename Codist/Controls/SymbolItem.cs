@@ -184,7 +184,7 @@ namespace Codist.Controls
 				t.Margin = new Thickness(10 * IndentLevel, 0, 0, 0);
 			}
 			if (includeType && symbol.ContainingType != null) {
-				t.Append($"{symbol.ContainingType.Name}{symbol.ContainingType.GetParameterString()}.", ThemeCache.SystemGrayTextBrush);
+				t.Append($"{symbol.ContainingType.Name}{symbol.ContainingType.GetParameterString()}.", ThemeCache.SystemGrayTextBrush.Alpha(0.5));
 			}
 			if (symbol.Kind == SymbolKind.Method) {
 				var m = symbol as IMethodSymbol;
@@ -202,7 +202,7 @@ namespace Codist.Controls
 					}
 				}
 			}
-			t.Append(symbol.GetOriginalName(), SymbolFormatter.Instance.GetBrush(symbol));
+			t.Append(symbol.GetOriginalName(), includeType, false, SymbolFormatter.Instance.GetBrush(symbol));
 			PARAMETER:
 			if (includeParameter) {
 				t.Append(symbol.GetParameterString(), SymbolFormatter.SemiTransparent.PlainText);
