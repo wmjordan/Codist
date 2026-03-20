@@ -158,17 +158,12 @@ namespace Codist.Refactorings
 					&& v.Parent is VariableDeclarationSyntax d
 					&& d.Variables.Count == 1
 					&& d.Parent.IsKind(SyntaxKind.LocalDeclarationStatement)
-					&& d.Type is RefTypeSyntax == false;
+					&& d.Type is not RefTypeSyntax;
 			}
 
 			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
 				var d = ctx.Node as VariableDeclaratorSyntax;
 				var value = d.Initializer.Value;
-				var inline = value is BinaryExpressionSyntax
-						|| value is LambdaExpressionSyntax
-						|| value.IsKind(SyntaxKind.ConditionalExpression)
-					? SF.ParenthesizedExpression(value)
-					: value;
 
 				var sc = ctx.SemanticContext;
 				var v = ValueType.None;
@@ -226,20 +221,20 @@ namespace Codist.Refactorings
 							case SyntaxKind.PostDecrementExpression:
 							case SyntaxKind.PreIncrementExpression:
 							case SyntaxKind.PreDecrementExpression:
-								if (v.MatchFlags(ValueType.Write) == false
+								if (!v.MatchFlags(ValueType.Write)
 										&& rp.SpanStart == location.Location.SourceSpan.Start
 									|| v.HasAnyFlag(ValueType.Unassignable)) {
 									goto KEEP;
 								}
 								break;
 							case SyntaxKind.Argument:
-								if (v.MatchFlags(ValueType.Ref) == false
+								if (!v.MatchFlags(ValueType.Ref)
 									&& ((ArgumentSyntax)rp).RefKindKeyword.IsKind(SyntaxKind.None) == false) {
 									goto KEEP;
 								}
 								else {
 									replaced = true;
-									yield return Replace(rn, value.AnnotateSelect().WithTriviaFrom(rn));
+									yield return Replace(rn, CreateReplacement(value, rn));
 									continue;
 								}
 							case SyntaxKind.IsExpression:
@@ -258,16 +253,71 @@ namespace Codist.Refactorings
 								break;
 						}
 						replaced = true;
-						yield return Replace(rn, inline.AnnotateSelect().WithTriviaFrom(rn));
+						yield return Replace(rn, CreateReplacement(value, rn));
 						continue;
 					KEEP:
 						keep = true;
 					}
 				}
 
-				if (keep == false && replaced) {
+				if (!keep && replaced) {
 					yield return Remove(d.Parent.Parent);
 				}
+			}
+
+			static ExpressionSyntax CreateReplacement(ExpressionSyntax expr, SyntaxNode originalNode) {
+				var result = expr;
+				if (NeedsParentheses(expr)) {
+					result = SF.ParenthesizedExpression(expr.WithoutLeadingTrivia().WithoutTrailingTrivia()) // keep inner trivia
+						.WithLeadingTrivia(expr.GetLeadingTrivia())
+						.WithTrailingTrivia(expr.GetTrailingTrivia());
+				}
+				return result.WithLeadingTrivia(originalNode.GetLeadingTrivia().Concat(result.GetLeadingTrivia()))
+					.WithTrailingTrivia(result.GetTrailingTrivia().Concat(originalNode.GetTrailingTrivia()))
+					.AnnotateSelect();
+			}
+
+			static bool NeedsParentheses(ExpressionSyntax expr) {
+				return expr is not ParenthesizedExpressionSyntax
+					&& expr.Kind() switch {
+					SyntaxKind.IdentifierName
+						or SyntaxKind.GenericName
+						or SyntaxKind.AliasQualifiedName
+						or SyntaxKind.QualifiedName
+						or SyntaxKind.SimpleMemberAccessExpression
+						or SyntaxKind.PointerMemberAccessExpression
+						or SyntaxKind.ConditionalAccessExpression
+						or SyntaxKind.InvocationExpression
+						or SyntaxKind.ElementAccessExpression
+						or SyntaxKind.NumericLiteralExpression
+						or SyntaxKind.StringLiteralExpression
+						or SyntaxKind.CharacterLiteralExpression
+						or SyntaxKind.TrueLiteralExpression
+						or SyntaxKind.FalseLiteralExpression
+						or SyntaxKind.NullLiteralExpression
+						or SyntaxKind.DefaultLiteralExpression
+						or SyntaxKind.PredefinedType
+						or SyntaxKind.ThisExpression
+						or SyntaxKind.BaseExpression
+						or SyntaxKind.TypeOfExpression
+						or SyntaxKind.DefaultExpression
+						or SyntaxKind.CheckedExpression
+						or SyntaxKind.UncheckedExpression
+						or SyntaxKind.SizeOfExpression
+						or SyntaxKind.RefTypeExpression
+						or SyntaxKind.RefValueExpression
+						or SyntaxKind.MakeRefExpression
+						or SyntaxKind.ObjectCreationExpression
+						or CodeAnalysisHelper.ImplicitObjectCreationExpression
+						or SyntaxKind.AnonymousObjectCreationExpression
+						or SyntaxKind.ArrayCreationExpression
+						or SyntaxKind.ImplicitArrayCreationExpression
+						or SyntaxKind.StackAllocArrayCreationExpression
+						or SyntaxKind.InterpolatedStringExpression
+						or SyntaxKind.TupleExpression
+						or SyntaxKind.AnonymousMethodExpression => false,
+					_ => true,// unlisted expressions (CastExpression, BinaryExpression, Lambda, etc.) require parentheses
+				};
 			}
 
 			[Flags]
