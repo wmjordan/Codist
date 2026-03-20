@@ -52,6 +52,7 @@ static class IconIds
 	public const int Interface = KnownImageIds.Interface;
 	public const int Delegate = KnownImageIds.Delegate;
 	public const int Field = KnownImageIds.Field;
+	public const int Property = KnownImageIds.Property;
 	public const int Event = KnownImageIds.Event;
 	public const int Method = KnownImageIds.Method;
 	public const int Constructor = KnownImageIds.Type;
