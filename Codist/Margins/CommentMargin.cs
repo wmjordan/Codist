@@ -170,7 +170,7 @@ namespace Codist.Margins
 					DrawMarkers(drawingContext);
 				}
 				catch (Exception ex) {
-					Controls.MessageWindow.Error(ex);
+					Controls.MessageWindow.Error(ex, source: this);
 				}
 			}
 		}

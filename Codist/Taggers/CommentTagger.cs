@@ -249,13 +249,18 @@ namespace Codist.Taggers
 				--contentEnd;
 			}
 
+			spanLength = contentEnd - contentStart;
+			Debug.Assert(spanLength >= 0);
+			if (spanLength < 0) {
+				return null;
+			}
 			switch (label.StyleApplication) {
 				case CommentStyleApplication.Tag:
-					return new TaggedContentSpan(tag, snapshotSpan.Snapshot, snapshotSpan.Start.Position + commentStart, label.LabelLength, contentStart - commentStart, contentEnd - contentStart);
+					return new TaggedContentSpan(tag, snapshotSpan.Snapshot, snapshotSpan.Start.Position + commentStart, label.LabelLength, contentStart - commentStart, spanLength);
 				case CommentStyleApplication.Content:
-					return new TaggedContentSpan(tag, snapshotSpan.Snapshot, snapshotSpan.Start.Position + contentStart, contentEnd - contentStart, 0, contentEnd - contentStart);
+					return new TaggedContentSpan(tag, snapshotSpan.Snapshot, snapshotSpan.Start.Position + contentStart, spanLength, 0, spanLength);
 				default:
-					return new TaggedContentSpan(tag, snapshotSpan.Snapshot, snapshotSpan.Start.Position + commentStart, contentEnd - commentStart, contentStart - commentStart, contentEnd - contentStart);
+					return new TaggedContentSpan(tag, snapshotSpan.Snapshot, snapshotSpan.Start.Position + commentStart, contentEnd - commentStart, contentStart - commentStart, spanLength);
 			}
 		}
 
