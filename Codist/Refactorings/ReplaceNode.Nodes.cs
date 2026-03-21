@@ -34,29 +34,29 @@ abstract partial class ReplaceNode
 			var node = ctx.NodeIncludeTrivia;
 			switch (node.Kind()) {
 				case SyntaxKind.IfStatement:
-					return ((IfStatementSyntax)node).Statement.IsKind(SyntaxKind.Block) == false;
+					return !((IfStatementSyntax)node).Statement.IsKind(SyntaxKind.Block);
 				case SyntaxKind.ForEachStatement:
-					return ((ForEachStatementSyntax)node).Statement.IsKind(SyntaxKind.Block) == false;
+					return !((ForEachStatementSyntax)node).Statement.IsKind(SyntaxKind.Block);
 				case SyntaxKind.ForStatement:
-					return ((ForStatementSyntax)node).Statement.IsKind(SyntaxKind.Block) == false;
+					return !((ForStatementSyntax)node).Statement.IsKind(SyntaxKind.Block);
 				case SyntaxKind.ForEachVariableStatement:
-					return ((ForEachVariableStatementSyntax)node).Statement.IsKind(SyntaxKind.Block) == false;
+					return !((ForEachVariableStatementSyntax)node).Statement.IsKind(SyntaxKind.Block);
 				case SyntaxKind.WhileStatement:
-					return ((WhileStatementSyntax)node).Statement.IsKind(SyntaxKind.Block) == false;
+					return !((WhileStatementSyntax)node).Statement.IsKind(SyntaxKind.Block);
 				case SyntaxKind.UsingStatement:
-					return ((UsingStatementSyntax)node).Statement.IsKind(SyntaxKind.Block) == false;
+					return !((UsingStatementSyntax)node).Statement.IsKind(SyntaxKind.Block);
 				case SyntaxKind.LockStatement:
-					return ((LockStatementSyntax)node).Statement.IsKind(SyntaxKind.Block) == false;
+					return !((LockStatementSyntax)node).Statement.IsKind(SyntaxKind.Block);
 				case SyntaxKind.ElseClause:
-					return ((ElseClauseSyntax)node).Statement.IsKind(SyntaxKind.Block) == false;
+					return !((ElseClauseSyntax)node).Statement.IsKind(SyntaxKind.Block);
 				case SyntaxKind.FixedStatement:
-					return ((FixedStatementSyntax)node).Statement.IsKind(SyntaxKind.Block) == false;
+					return !((FixedStatementSyntax)node).Statement.IsKind(SyntaxKind.Block);
 				case SyntaxKind.CaseSwitchLabel:
 					node = node.Parent;
 					goto case SyntaxKind.SwitchSection;
 				case SyntaxKind.SwitchSection:
 					var statements = ((SwitchSectionSyntax)node).Statements;
-					return statements.Count != 0 && statements[0].IsKind(SyntaxKind.Block) == false;
+					return statements.Count != 0 && !statements[0].IsKind(SyntaxKind.Block);
 				default: return false;
 			}
 		}
@@ -185,10 +185,10 @@ abstract partial class ReplaceNode
 					v = ValueType.Const; break;
 			}
 			if (s != null) {
-				if (s is IFieldSymbol f && f.IsReadOnly == false && f.IsConst == false) {
+				if (s is IFieldSymbol f && !f.IsReadOnly && !f.IsConst) {
 					v = ValueType.WriteRef;
 				}
-				else if (s is IPropertySymbol p && p.IsReadOnly == false) {
+				else if (s is IPropertySymbol p && !p.IsReadOnly) {
 					v = ValueType.Write;
 				}
 				else if (s is IMethodSymbol m) {
@@ -229,7 +229,7 @@ abstract partial class ReplaceNode
 							break;
 						case SyntaxKind.Argument:
 							if (!v.MatchFlags(ValueType.Ref)
-								&& ((ArgumentSyntax)rp).RefKindKeyword.IsKind(SyntaxKind.None) == false) {
+								&& !((ArgumentSyntax)rp).RefKindKeyword.IsKind(SyntaxKind.None)) {
 								goto KEEP;
 							}
 							else {
@@ -380,7 +380,7 @@ abstract partial class ReplaceNode
 				? b.Statements
 				: new SyntaxList<StatementSyntax>(statement);
 			if (statement.Parent.IsKind(SyntaxKind.Block) && (remove.Parent.IsKind(SyntaxKind.ElseClause) || remove.IsKind(SyntaxKind.ElseClause))
-				|| keep.Count > 1 && remove.Parent.IsKind(SyntaxKind.Block) == false) {
+				|| keep.Count > 1 && !remove.Parent.IsKind(SyntaxKind.Block)) {
 				var (indent, newLine) = ctx.GetIndentAndNewLine(remove.SpanStart, 0);
 				if (remove.IsKind(SyntaxKind.ElseClause)) {
 					return Chain.Create(InsertAfter(remove.Parent, keep.AttachAnnotation(CodeFormatHelper.Reformat, CodeFormatHelper.Select)))
@@ -446,7 +446,7 @@ abstract partial class ReplaceNode
 			}
 
 			#region Swap operands besides selected operator
-			if (UIHelper.IsShiftDown == false) {
+			if (!UIHelper.IsShiftDown) {
 				if (left is BinaryExpressionSyntax temp
 					&& temp.RawKind == node.RawKind
 					&& temp.Right != null) {
@@ -488,7 +488,7 @@ abstract partial class ReplaceNode
 				case SyntaxKind.CoalesceExpression: _Title = R.CMD_MultiLineCoalesce; break;
 				case SyntaxKind.ConditionalExpression:
 					_Title = R.CMD_MultiLineConditional;
-					return node.IsMultiLine(false) == false;
+					return !node.IsMultiLine(false);
 				default: return false;
 			}
 			SyntaxNode p = node.Parent;
@@ -504,7 +504,7 @@ abstract partial class ReplaceNode
 					p = p.Parent;
 				}
 			}
-			return node.IsMultiLine(false) == false;
+			return !node.IsMultiLine(false);
 		}
 
 		public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
@@ -602,13 +602,13 @@ abstract partial class ReplaceNode
 			var node = ctx.NodeIncludeTrivia;
 			switch (node.Kind()) {
 				case SyntaxKind.ArgumentList:
-					if (((ArgumentListSyntax)node).Arguments.Count > 1 && node.IsMultiLine(false) == false) {
+					if (((ArgumentListSyntax)node).Arguments.Count > 1 && !node.IsMultiLine(false)) {
 						_Title = R.CMD_ArgumentsOnMultiLine;
 						return true;
 					}
 					break;
 				case SyntaxKind.ParameterList:
-					if (((ParameterListSyntax)node).Parameters.Count > 1 && node.IsMultiLine(false) == false) {
+					if (((ParameterListSyntax)node).Parameters.Count > 1 && !node.IsMultiLine(false)) {
 						_Title = R.CMD_MultiLineParameters;
 						return true;
 					}
@@ -616,19 +616,19 @@ abstract partial class ReplaceNode
 				case SyntaxKind.ArrayInitializerExpression:
 				case SyntaxKind.CollectionInitializerExpression:
 				case SyntaxKind.ObjectInitializerExpression:
-					if (((InitializerExpressionSyntax)node).Expressions.Count > 1 && node.IsMultiLine(false) == false) {
+					if (((InitializerExpressionSyntax)node).Expressions.Count > 1 && !node.IsMultiLine(false)) {
 						_Title = R.CMD_MultiLineExpressions;
 						return true;
 					}
 					break;
 				case SyntaxKind.AnonymousObjectCreationExpression:
-					if (((AnonymousObjectCreationExpressionSyntax)node).Initializers.Count > 1 && node.IsMultiLine(false) == false) {
+					if (((AnonymousObjectCreationExpressionSyntax)node).Initializers.Count > 1 && !node.IsMultiLine(false)) {
 						_Title = R.CMD_MultiLineExpressions;
 						return true;
 					}
 					break;
 				case SyntaxKind.VariableDeclaration:
-					if (((VariableDeclarationSyntax)node).Variables.Count > 1 && node.IsMultiLine(false) == false) {
+					if (((VariableDeclarationSyntax)node).Variables.Count > 1 && !node.IsMultiLine(false)) {
 						_Title = R.CMD_MultiLineDeclarations;
 						return true;
 					}
