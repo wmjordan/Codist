@@ -583,7 +583,7 @@ static class TextEditorHelper
 	public static void OpenFile(string file, int caretPosition) {
 		var view = GetActiveWpfDocumentView();
 		if (view != null
-			&& String.Equals(view.TextBuffer.GetTextDocument().FilePath, file, StringComparison.OrdinalIgnoreCase)) {
+			&& String.Equals(view.TextBuffer.GetTextDocument()?.FilePath, file, StringComparison.OrdinalIgnoreCase)) {
 			MoveToActiveViewPosition(view, caretPosition);
 		}
 		else {
@@ -649,7 +649,15 @@ static class TextEditorHelper
 	}
 
 	public static ITextDocument GetTextDocument(this ITextBuffer textBuffer) {
-		return textBuffer.Properties.TryGetProperty<ITextDocument>(typeof(ITextDocument), out var d) ? d : null;
+		if (!textBuffer.Properties.TryGetProperty<ITextDocument>(typeof(ITextDocument), out var d)
+			&& textBuffer is IProjectionBuffer pb) {
+			foreach (var b in pb.SourceBuffers) {
+				if (b.Properties.TryGetProperty<ITextDocument>(typeof(ITextDocument), out d)) {
+					return d;
+				}
+			}
+		}
+		return d;
 	}
 	public static string GetText(this ITextBuffer textBuffer) {
 		return textBuffer.CurrentSnapshot.GetText();
