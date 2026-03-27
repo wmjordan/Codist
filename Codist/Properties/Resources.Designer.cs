@@ -2938,6 +2938,16 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Current Namespace
+        ///Only search in current namespace.
+        /// </summary>
+        internal static string CMDT_ScopeToNamespace {
+            get {
+                return ResourceManager.GetString("CMDT_ScopeToNamespace", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Related Projects
         ///Search in referenced or referencing projects.
         /// </summary>

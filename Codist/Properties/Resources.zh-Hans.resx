@@ -3168,4 +3168,8 @@ Shift: 匹配大小写</value>
   <data name="OTC_WrapText" xml:space="preserve">
     <value>环绕文本:</value>
   </data>
+  <data name="CMDT_ScopeToNamespace" xml:space="preserve">
+    <value>当前名称空间
+限制搜索范围为当前名称空间</value>
+  </data>
 </root>

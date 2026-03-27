@@ -130,6 +130,7 @@
     <Compile Include="QuickInfo\CSharpSignature.cs" />
     <Compile Include="QuickInfo\InfoBlock.cs" />
     <Compile Include="Semantics\ArgumentAssignment.cs" />
+    <Compile Include="Semantics\SymbolNamespaceFilter.cs" />
     <Compile Include="Semantics\SymbolSourceFilter.cs" />
     <Compile Include="Semantics\MarkdownHelper.cs" />
     <Compile Include="Semantics\SyntaxModel.cs" />

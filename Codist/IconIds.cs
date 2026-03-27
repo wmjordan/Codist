@@ -261,6 +261,7 @@ static class IconIds
 	public const int SymbolAnalysis = KnownImageIds.DimensionBrowserView;
 	public const int CurrentSymbolOnly = KnownImageIds.SelectFrame;
 	public const int MatchTypeArgument = KnownImageIds.Template;
+	public const int MatchNamespace = KnownImageIds.XMLNamespace;
 	public const int ExcludeGeneric = KnownImageIds.Template | KnownImageIds.OverlayNo << OverlayShift;
 	public const int DirectDerive = KnownImageIds.ParentChild;
 	public const int SameName = KnownImageIds.Quote;

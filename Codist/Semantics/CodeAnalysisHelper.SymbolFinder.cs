@@ -103,13 +103,14 @@ partial class CodeAnalysisHelper
 	/// <summary>
 	/// Finds all members defined or referenced in <paramref name="project"/> which may have a parameter that is of or derived from <paramref name="type"/>.
 	/// </summary>
-	public static async Task<ImmutableArray<ISymbol>> FindInstanceAsParameterAsync(this ITypeSymbol type, Project project, bool strictMatch, bool sourceCode, CancellationToken cancellationToken = default) {
+	public static async Task<ImmutableArray<ISymbol>> FindInstanceAsParameterAsync(this ITypeSymbol type, Project project, bool strictMatch, bool sourceCode, SymbolNamespaceFilter nsFilter, CancellationToken cancellationToken = default) {
 		var compilation = await project.GetCompilationAsync(cancellationToken).ConfigureAwait(false);
 		var members = ImmutableArray.CreateBuilder<ISymbol>(10);
 		ImmutableArray<IParameterSymbol> parameters;
 		var assembly = compilation.Assembly;
-		foreach (var typeSymbol in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
-			if (typeSymbol.IsCompilerGenerated() || sourceCode && !typeSymbol.HasSource()) {
+		foreach (var typeSymbol in nsFilter.Filter(compilation.GlobalNamespace.GetAllTypes(cancellationToken))) {
+			if (typeSymbol.IsCompilerGenerated()
+				|| sourceCode && !typeSymbol.HasSource()) {
 				continue;
 			}
 			foreach (var member in typeSymbol.GetMembers()) {
@@ -133,17 +134,19 @@ partial class CodeAnalysisHelper
 	/// <summary>
 	/// Finds all members defined or referenced in <paramref name="project"/> which may return an instance of <paramref name="type"/>.
 	/// </summary>
-	public static async Task<ImmutableArray<ISymbol>> FindSymbolInstanceProducerAsync(this ITypeSymbol type, Project project, bool strict, bool sourceCode, CancellationToken cancellationToken = default) {
+	public static async Task<ImmutableArray<ISymbol>> FindSymbolInstanceProducerAsync(this ITypeSymbol type, Project project, bool strict, bool sourceCode, SymbolNamespaceFilter nsFilter, CancellationToken cancellationToken = default) {
 		var compilation = await project.GetCompilationAsync(cancellationToken).ConfigureAwait(false);
 		var assembly = compilation.Assembly;
 		var members = ImmutableArray.CreateBuilder<ISymbol>(10);
 		var paramComparer = strict
 			? (Func<IParameterSymbol, bool>)(p => Equals(p.Type, type) && p.RefKind != RefKind.None)
 			: (p => p.Type.CanConvertTo(type) && p.RefKind != RefKind.None);
-		foreach (var typeSymbol in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
-			if (typeSymbol.IsCompilerGenerated() || sourceCode && !typeSymbol.HasSource()) {
+		foreach (var typeSymbol in nsFilter.Filter(compilation.GlobalNamespace.GetAllTypes(cancellationToken))) {
+			if (typeSymbol.IsCompilerGenerated()
+				|| sourceCode && !typeSymbol.HasSource()) {
 				continue;
 			}
+
 			foreach (var member in typeSymbol.GetMembers()) {
 				if (cancellationToken.IsCancellationRequested) {
 					goto EXIT;
@@ -174,14 +177,16 @@ partial class CodeAnalysisHelper
 	}
 
 	/// <summary>Returns interfaces derived from the given interface <paramref name="type"/> in specific <paramref name="project"/>.</summary>
-	public static async Task<ImmutableArray<INamedTypeSymbol>> FindDerivedInterfacesAsync(this INamedTypeSymbol type, Project project, bool directDerive, SymbolSourceFilter source, CancellationToken cancellationToken = default) {
+	public static async Task<ImmutableArray<INamedTypeSymbol>> FindDerivedInterfacesAsync(this INamedTypeSymbol type, Project project, bool directDerive, SymbolSourceFilter source, SymbolNamespaceFilter namespaceFilter, CancellationToken cancellationToken = default) {
 		var compilation = await project.GetCompilationAsync(cancellationToken).ConfigureAwait(false);
 		var r = ImmutableArray.CreateBuilder<INamedTypeSymbol>(7);
 		var d = new SourceSymbolDeduper();
+		var filterNs = namespaceFilter.HasFilter;
 		foreach (var item in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
 			if (item.TypeKind == TypeKind.Interface
 				&& !item.Equals(type)
 				&& source.Match(item)
+				&& (!filterNs || namespaceFilter.Filter(item))
 				&& (directDerive ? item.Interfaces : item.AllInterfaces).Contains(type, Comparers.NamedTypeComparer)
 				&& d.TryAdd(item)) {
 				r.Add(item);
@@ -190,11 +195,11 @@ partial class CodeAnalysisHelper
 		return r.ToSortedSymbolArray();
 	}
 
-	public static async Task<IEnumerable<ISymbol>> FindOverridesAsync(this ISymbol symbol, Solution solution, SymbolSourceFilter source = default, IEnumerable<Project> projects = null, CancellationToken cancellationToken = default) {
-		return source.Filter(await SymbolFinder.FindOverridesAsync(symbol, solution, projects.MakeImmutableSet(), cancellationToken).ConfigureAwait(false));
+	public static async Task<IEnumerable<ISymbol>> FindOverridesAsync(this ISymbol symbol, Solution solution, SymbolSourceFilter source = default, SymbolNamespaceFilter nsFilter = default, IEnumerable<Project> projects = null, CancellationToken cancellationToken = default) {
+		return nsFilter.Filter(source.Filter(await SymbolFinder.FindOverridesAsync(symbol, solution, projects.MakeImmutableSet(), cancellationToken).ConfigureAwait(false)));
 	}
 
-	public static async Task<ImmutableArray<ISymbol>> FindImplementationsAsync(this ISymbol symbol, Solution solution, bool directImplementation, SymbolSourceFilter source = default, IEnumerable<Project> projects = null, CancellationToken cancellationToken = default) {
+	public static async Task<ImmutableArray<ISymbol>> FindImplementationsAsync(this ISymbol symbol, Solution solution, bool directImplementation, SymbolSourceFilter source = default, SymbolNamespaceFilter namespaceFilter = default, IEnumerable<Project> projects = null, CancellationToken cancellationToken = default) {
 		var s = symbol;
 		INamedTypeSymbol st = null;
 		bool isNamedType = symbol.Kind == SymbolKind.NamedType;
@@ -205,6 +210,7 @@ partial class CodeAnalysisHelper
 		var implementations = await SymbolFinder.FindImplementationsAsync(s, solution, projects.MakeImmutableSet(), cancellationToken).ConfigureAwait(false);
 		var r = ImmutableArray.CreateBuilder<ISymbol>();
 		var d = new SourceSymbolDeduper();
+		implementations = namespaceFilter.Filter(implementations);
 		if (isNamedType) {
 			if (Equals(st.ConstructedFrom, st)) {
 				foreach (var impl in implementations.OfType<INamedTypeSymbol>()) {
@@ -308,12 +314,12 @@ partial class CodeAnalysisHelper
 	}
 
 
-	public static async Task<ImmutableArray<IMethodSymbol>> FindExtensionMethodsAsync(this ITypeSymbol type, Project project, bool strict, bool matchTypeArgument, SymbolSourceFilter source, CancellationToken cancellationToken = default) {
+	public static async Task<ImmutableArray<IMethodSymbol>> FindExtensionMethodsAsync(this ITypeSymbol type, Project project, bool strict, bool matchTypeArgument, SymbolSourceFilter source, SymbolNamespaceFilter nsFilter, CancellationToken cancellationToken = default) {
 		var compilation = await project.GetCompilationAsync(cancellationToken).ConfigureAwait(false);
 		var members = ImmutableArray.CreateBuilder<IMethodSymbol>(10);
 		var isValueType = type.IsValueType;
 		var d = new SourceSymbolDeduper();
-		foreach (var typeSymbol in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
+		foreach (var typeSymbol in nsFilter.Filter(compilation.GlobalNamespace.GetAllTypes(cancellationToken))) {
 			if (typeSymbol.MightContainExtensionMethods == false
 				|| typeSymbol.IsStatic == false
 				|| source.Mismatch(typeSymbol)) {
@@ -452,12 +458,12 @@ partial class CodeAnalysisHelper
 		}
 	}
 
-	public static IEnumerable<ISymbol> FindMethodBySignature(this Compilation compilation, ISymbol symbol, bool excludeGenerics, SymbolSourceFilter sourceFilter, CancellationToken cancellationToken = default) {
+	public static IEnumerable<ISymbol> FindMethodBySignature(this Compilation compilation, ISymbol symbol, bool excludeGenerics, SymbolSourceFilter sourceFilter, SymbolNamespaceFilter nsFilter, CancellationToken cancellationToken = default) {
 		var rt = symbol.GetReturnType();
 		var pn = symbol.GetParameters();
 		var pl = pn.Length;
 		var d = new SourceSymbolDeduper();
-		foreach (var type in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
+		foreach (var type in nsFilter.Filter(compilation.GlobalNamespace.GetAllTypes(cancellationToken))) {
 			if (sourceFilter.Mismatch(type)
 				|| type.IsAccessible(true) == false
 				|| excludeGenerics && (type.IsGenericType || type.IsDefinedInGenericType())
@@ -606,7 +612,7 @@ partial class CodeAnalysisHelper
 		return a;
 	}
 
-	public static async Task<List<(ISymbol, List<(SymbolUsageKind, ReferenceLocation)>)>> FindReferrersAsync(this ISymbol symbol, Project project, IEnumerable<Document> documents, Predicate<ISymbol> definitionFilter = null, Predicate<ISymbol> occurrenceFilter = null, Predicate<SyntaxNode> nodeFilter = null, CancellationToken cancellationToken = default) {
+	public static async Task<List<(ISymbol, List<(SymbolUsageKind, ReferenceLocation)>)>> FindReferrersAsync(this ISymbol symbol, Project project, IEnumerable<Document> documents, Predicate<ISymbol> definitionFilter = null, Predicate<ISymbol> occurrenceFilter = null, Predicate<SyntaxNode> nodeFilter = null, SymbolNamespaceFilter nsFilter = default, CancellationToken cancellationToken = default) {
 		var d = new Dictionary<ISymbol, List<(SymbolUsageKind, ReferenceLocation)>>(5);
 		// hack: fix FindReferencesAsync returning unbounded references for generic type or method
 		//string sign = null;
@@ -643,7 +649,7 @@ partial class CodeAnalysisHelper
 			if (definitionFilter?.Invoke(sr.Definition) == false) {
 				continue;
 			}
-			await GroupReferenceByContainerAsync(d, sr, null, nodeFilter, occurrenceFilter, usageFilter, cancellationToken).ConfigureAwait(false);
+			await GroupReferenceByContainerAsync(d, sr, null, nodeFilter, nsFilter, occurrenceFilter, usageFilter, cancellationToken).ConfigureAwait(false);
 		}
 		if (d.Count == 0) {
 			return null;
@@ -682,7 +688,7 @@ partial class CodeAnalysisHelper
 		}
 	}
 
-	static async Task GroupReferenceByContainerAsync(Dictionary<ISymbol, List<(SymbolUsageKind usage, ReferenceLocation loc)>> results, ReferencedSymbol reference, string symbolSignature, Predicate<SyntaxNode> nodeFilter = null, Predicate<ISymbol> occurrenceFilter = null, Predicate<SymbolUsageKind> usageFilter = null, CancellationToken cancellationToken = default) {
+	static async Task GroupReferenceByContainerAsync(Dictionary<ISymbol, List<(SymbolUsageKind usage, ReferenceLocation loc)>> results, ReferencedSymbol reference, string symbolSignature, Predicate<SyntaxNode> nodeFilter = null, SymbolNamespaceFilter nsFilter = default, Predicate<ISymbol> occurrenceFilter = null, Predicate<SymbolUsageKind> usageFilter = null, CancellationToken cancellationToken = default) {
 		var pu = GetPotentialUsageKinds(reference.Definition);
 		foreach (var docRefs in reference.Locations.GroupBy(l => l.Document)) {
 			var sm = await docRefs.Key.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
@@ -715,6 +721,9 @@ partial class CodeAnalysisHelper
 				if (s == null) {
 					continue;
 				}
+				if (nsFilter.HasFilter && !nsFilter.Filter(s)) {
+					continue;
+				}
 				if (s.Kind == SymbolKind.Method) {
 					switch (((IMethodSymbol)s).MethodKind) {
 						case MethodKind.AnonymousFunction:
@@ -729,7 +738,7 @@ partial class CodeAnalysisHelper
 					}
 				}
 				var u = GetUsageKind(pu, n);
-				if (usageFilter != null && usageFilter(u) == false) {
+				if (usageFilter != null && !usageFilter(u)) {
 					continue;
 				}
 				if (results.TryGetValue(s, out var l)) {
@@ -744,7 +753,7 @@ partial class CodeAnalysisHelper
 					l.Add((u, location));
 				}
 				else {
-					results[s] = new List<(SymbolUsageKind, ReferenceLocation)> { (u, location) };
+					results[s] = [(u, location)];
 				}
 			NEXT:;
 			}

@@ -5,104 +5,112 @@ using System.Threading.Tasks;
 using Codist.Controls;
 using Microsoft.CodeAnalysis;
 using R = Codist.Properties.Resources;
+using OD = Codist.SymbolCommands.PredefinedOptionDescriptors;
 
-namespace Codist.SymbolCommands
+namespace Codist.SymbolCommands;
+
+sealed class FindInstanceProducersCommand : CommonListCommand<ISymbol>
 {
-	sealed class FindInstanceProducersCommand : CommonListCommand<ISymbol>
-	{
-		static readonly OptionDescriptor[] __Options = [
-			PredefinedOptionDescriptors.ExtractMatch,
-			PredefinedOptionDescriptors.SourceCodeScope, PredefinedOptionDescriptors.ExternalScope
-		];
+	static readonly OptionDescriptor[] __Options = [
+		OD.ExtractMatch,
+		OD.SourceCodeScope, OD.ExternalScope,
+		OD.NamespaceScope
+	];
 
-		public override int ImageId => IconIds.InstanceProducer;
-		public override string Title => R.CMD_FindInstanceProducer;
-		public override string Description => R.CMDT_FindInstanceProducer;
-		public override IEnumerable<OptionDescriptor> OptionDescriptors => __Options;
-		protected override string ResultLabel => R.T_Producers;
-		protected override bool UseCtrlRestriction => true;
+	public override int ImageId => IconIds.InstanceProducer;
+	public override string Title => R.CMD_FindInstanceProducer;
+	public override string Description => R.CMDT_FindInstanceProducer;
+	public override IEnumerable<OptionDescriptor> OptionDescriptors => __Options;
+	protected override string ResultLabel => R.T_Producers;
+	protected override bool UseCtrlRestriction => true;
 
-		public override Task<ImmutableArray<ISymbol>> PrepareListDataAsync(CancellationToken cancellationToken) {
-			var source = MakeSourceFilterFromOption(Options);
-			return (Symbol as ITypeSymbol).FindSymbolInstanceProducerAsync(Context.Document.Project, StrictMatch, source == SymbolSourceFilter.RequiresSource, cancellationToken);
-		}
-
-		public override void UpdateList(SymbolMenu resultList, ImmutableArray<ISymbol> data) {
-			SetupSymbolMenuForResult(resultList, data, true);
-		}
+	public override Task<ImmutableArray<ISymbol>> PrepareListDataAsync(CancellationToken cancellationToken) {
+		var source = MakeSourceFilterFromOption(Options);
+		var ns = MakeNamespaceFilterFromOption(Options);
+		return (Symbol as ITypeSymbol).FindSymbolInstanceProducerAsync(Context.Document.Project, StrictMatch, source == SymbolSourceFilter.RequiresSource, ns, cancellationToken);
 	}
 
-	sealed class FindInstanceConsumersCommand : CommonListCommand<ISymbol>
-	{
-		static readonly OptionDescriptor[] __Options = [
-			PredefinedOptionDescriptors.ExtractMatch,
-			PredefinedOptionDescriptors.SourceCodeScope, PredefinedOptionDescriptors.ExternalScope
-		];
+	public override void UpdateList(SymbolMenu resultList, ImmutableArray<ISymbol> data) {
+		SetupSymbolMenuForResult(resultList, data, true);
+	}
+}
 
-		public override int ImageId => IconIds.Argument;
-		public override string Title => R.CMD_FindInstanceAsParameter;
-		public override string Description => R.CMDT_FindInstanceAsParameter;
-		public override IEnumerable<OptionDescriptor> OptionDescriptors => __Options;
-		protected override string ResultLabel => R.T_AsParameter;
-		protected override bool UseCtrlRestriction => true;
+sealed class FindInstanceConsumersCommand : CommonListCommand<ISymbol>
+{
+	static readonly OptionDescriptor[] __Options = [
+		OD.ExtractMatch,
+		OD.SourceCodeScope, OD.ExternalScope,
+		OD.NamespaceScope
+	];
 
-		public override Task<ImmutableArray<ISymbol>> PrepareListDataAsync(CancellationToken cancellationToken) {
-			var source = MakeSourceFilterFromOption(Options);
-			return (Symbol as ITypeSymbol).FindInstanceAsParameterAsync(Context.Document.Project, StrictMatch, source == SymbolSourceFilter.RequiresSource, cancellationToken);
-		}
+	public override int ImageId => IconIds.Argument;
+	public override string Title => R.CMD_FindInstanceAsParameter;
+	public override string Description => R.CMDT_FindInstanceAsParameter;
+	public override IEnumerable<OptionDescriptor> OptionDescriptors => __Options;
+	protected override string ResultLabel => R.T_AsParameter;
+	protected override bool UseCtrlRestriction => true;
 
-		public override void UpdateList(SymbolMenu resultList, ImmutableArray<ISymbol> data) {
-			SetupSymbolMenuForResult(resultList, data, true);
-		}
+	public override Task<ImmutableArray<ISymbol>> PrepareListDataAsync(CancellationToken cancellationToken) {
+		var source = MakeSourceFilterFromOption(Options);
+		var ns = MakeNamespaceFilterFromOption(Options);
+		return (Symbol as ITypeSymbol).FindInstanceAsParameterAsync(Context.Document.Project, StrictMatch, source == SymbolSourceFilter.RequiresSource, ns, cancellationToken);
 	}
 
-	sealed class FindContainingTypeInstanceProducersCommand : CommonListCommand<ISymbol>
-	{
-		static readonly OptionDescriptor[] __Options = [
-			PredefinedOptionDescriptors.ExtractMatch,
-			PredefinedOptionDescriptors.SourceCodeScope, PredefinedOptionDescriptors.ExternalScope
-		];
+	public override void UpdateList(SymbolMenu resultList, ImmutableArray<ISymbol> data) {
+		SetupSymbolMenuForResult(resultList, data, true);
+	}
+}
 
-		public override int ImageId => IconIds.InstanceProducer;
-		public override string Title => R.CMD_FindInstanceProducer;
-		public override string Description => R.CMDT_FindContainingTypeInstanceProducer;
-		public override IEnumerable<OptionDescriptor> OptionDescriptors => __Options;
-		protected override ISymbol ResultSymbol => Symbol.ContainingType;
-		protected override string ResultLabel => R.T_Producers;
-		protected override bool UseCtrlRestriction => true;
+sealed class FindContainingTypeInstanceProducersCommand : CommonListCommand<ISymbol>
+{
+	static readonly OptionDescriptor[] __Options = [
+		OD.ExtractMatch,
+		OD.SourceCodeScope, OD.ExternalScope,
+		OD.NamespaceScope,
+	];
 
-		public override Task<ImmutableArray<ISymbol>> PrepareListDataAsync(CancellationToken cancellationToken) {
-			var source = MakeSourceFilterFromOption(Options);
-			return Symbol.ContainingType.FindSymbolInstanceProducerAsync(Context.Document.Project, StrictMatch, source == SymbolSourceFilter.RequiresSource, cancellationToken);
-		}
+	public override int ImageId => IconIds.InstanceProducer;
+	public override string Title => R.CMD_FindInstanceProducer;
+	public override string Description => R.CMDT_FindContainingTypeInstanceProducer;
+	public override IEnumerable<OptionDescriptor> OptionDescriptors => __Options;
+	protected override ISymbol ResultSymbol => Symbol.ContainingType;
+	protected override string ResultLabel => R.T_Producers;
+	protected override bool UseCtrlRestriction => true;
 
-		public override void UpdateList(SymbolMenu resultList, ImmutableArray<ISymbol> data) {
-			SetupSymbolMenuForResult(resultList, data, true);
-		}
+	public override Task<ImmutableArray<ISymbol>> PrepareListDataAsync(CancellationToken cancellationToken) {
+		var source = MakeSourceFilterFromOption(Options);
+		var ns = MakeNamespaceFilterFromOption(Options);
+		return Symbol.ContainingType.FindSymbolInstanceProducerAsync(Context.Document.Project, StrictMatch, source == SymbolSourceFilter.RequiresSource, ns, cancellationToken);
 	}
 
-	sealed class FindContainingTypeInstanceConsumersCommand : CommonListCommand<ISymbol>
-	{
-		static readonly OptionDescriptor[] __Options = [
-			PredefinedOptionDescriptors.ExtractMatch,
-			PredefinedOptionDescriptors.SourceCodeScope, PredefinedOptionDescriptors.ExternalScope
-		];
+	public override void UpdateList(SymbolMenu resultList, ImmutableArray<ISymbol> data) {
+		SetupSymbolMenuForResult(resultList, data, true);
+	}
+}
 
-		public override int ImageId => IconIds.Argument;
-		public override string Title => R.CMD_FindInstanceAsParameter;
-		public override string Description => R.CMDT_FindContainingTypeInstanceAsParameter;
-		public override IEnumerable<OptionDescriptor> OptionDescriptors => __Options;
-		protected override ISymbol ResultSymbol => Symbol.ContainingType;
-		protected override string ResultLabel => R.T_AsParameter;
-		protected override bool UseCtrlRestriction => true;
+sealed class FindContainingTypeInstanceConsumersCommand : CommonListCommand<ISymbol>
+{
+	static readonly OptionDescriptor[] __Options = [
+		OD.ExtractMatch,
+		OD.SourceCodeScope, OD.ExternalScope,
+		OD.NamespaceScope
+	];
 
-		public override Task<ImmutableArray<ISymbol>> PrepareListDataAsync(CancellationToken cancellationToken) {
-			var source = MakeSourceFilterFromOption(Options);
-			return Symbol.ContainingType.FindInstanceAsParameterAsync(Context.Document.Project, StrictMatch, source == SymbolSourceFilter.RequiresSource, cancellationToken);
-		}
+	public override int ImageId => IconIds.Argument;
+	public override string Title => R.CMD_FindInstanceAsParameter;
+	public override string Description => R.CMDT_FindContainingTypeInstanceAsParameter;
+	public override IEnumerable<OptionDescriptor> OptionDescriptors => __Options;
+	protected override ISymbol ResultSymbol => Symbol.ContainingType;
+	protected override string ResultLabel => R.T_AsParameter;
+	protected override bool UseCtrlRestriction => true;
 
-		public override void UpdateList(SymbolMenu resultList, ImmutableArray<ISymbol> data) {
-			SetupSymbolMenuForResult(resultList, data, true);
-		}
+	public override Task<ImmutableArray<ISymbol>> PrepareListDataAsync(CancellationToken cancellationToken) {
+		var source = MakeSourceFilterFromOption(Options);
+		var ns = MakeNamespaceFilterFromOption(Options);
+		return Symbol.ContainingType.FindInstanceAsParameterAsync(Context.Document.Project, StrictMatch, source == SymbolSourceFilter.RequiresSource, ns, cancellationToken);
+	}
+
+	public override void UpdateList(SymbolMenu resultList, ImmutableArray<ISymbol> data) {
+		SetupSymbolMenuForResult(resultList, data, true);
 	}
 }

@@ -8,17 +8,19 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.FindSymbols;
 using R = Codist.Properties.Resources;
+using OD = Codist.SymbolCommands.PredefinedOptionDescriptors;
 
 namespace Codist.SymbolCommands;
 
 abstract class ReferrerAnalysisCommandBase : AnalysisListCommandBase<List<(ISymbol, List<(SymbolUsageKind, ReferenceLocation)>)>>
 {
 	static readonly OptionDescriptor[] __Options = [
-		PredefinedOptionDescriptors.ExtractMatch,
-		PredefinedOptionDescriptors.MatchTypeArgument,
-		PredefinedOptionDescriptors.CurrentFileScope,
-		PredefinedOptionDescriptors.CurrentProjectScope,
-		PredefinedOptionDescriptors.RelatedProjectsScope,
+		OD.ExtractMatch,
+		OD.MatchTypeArgument,
+		OD.CurrentFileScope,
+		OD.CurrentProjectScope,
+		OD.RelatedProjectsScope,
+		OD.NamespaceScope,
 	];
 
 	string _ResultLabel;
@@ -94,7 +96,8 @@ sealed class FindReferrersCommand : ReferrerAnalysisCommandBase
 		_MatchTypeArgument = MatchTypeArgument;
 		Predicate<ISymbol> df = StrictMatch ? (Symbol is IMethodSymbol ms && ms.MethodKind == MethodKind.ReducedExtension ? ms.ReducedFrom : Symbol).Equals : default;
 		Predicate<ISymbol> of = _MatchTypeArgument ? Symbol.Equals : null;
-		return Symbol.FindReferrersAsync(Context.Document.Project, docs, df, of, null, cancellationToken);
+		var ns = MakeNamespaceFilterFromOption(Options);
+		return Symbol.FindReferrersAsync(Context.Document.Project, docs, df, of, null, ns, cancellationToken);
 	}
 }
 
@@ -102,10 +105,11 @@ sealed class FindConstructorReferrersCommand : ReferrerAnalysisCommandBase
 {
 	static readonly OptionDescriptor[] __Options = [
 		new OptionDescriptor(IconIds.EditMatches, CommandOptions.ExtractMatch, R.CMDT_FindDirectCallers),
-		PredefinedOptionDescriptors.MatchTypeArgument,
-		PredefinedOptionDescriptors.CurrentFileScope,
-		PredefinedOptionDescriptors.CurrentProjectScope,
-		PredefinedOptionDescriptors.RelatedProjectsScope
+		OD.MatchTypeArgument,
+		OD.CurrentFileScope,
+		OD.CurrentProjectScope,
+		OD.RelatedProjectsScope,
+		OD.NamespaceScope,
 	];
 
 	bool _MatchTypeArgument;
@@ -123,7 +127,8 @@ sealed class FindConstructorReferrersCommand : ReferrerAnalysisCommandBase
 
 		Predicate<ISymbol> df = StrictMatch ? (symbol is IMethodSymbol ms && ms.MethodKind == MethodKind.ReducedExtension ? ms.ReducedFrom : symbol).Equals : default;
 		Predicate<ISymbol> of = _MatchTypeArgument ? symbol.Equals : null;
-		return symbol.FindReferrersAsync(Context.Document.Project, docs, df, of, null, cancellationToken);
+		var ns = MakeNamespaceFilterFromOption(Options);
+		return symbol.FindReferrersAsync(Context.Document.Project, docs, df, of, null, ns, cancellationToken);
 	}
 }
 
@@ -138,15 +143,16 @@ sealed class FindObjectInitializersCommand : ReferrerAnalysisCommandBase
 
 		Predicate<ISymbol> defFilter = StrictMatch ? Symbol.Equals : default;
 		Predicate<ISymbol> symbolFilter;
+		var ns = MakeNamespaceFilterFromOption(Options);
 
 		if (Symbol is INamedTypeSymbol typeSymbol && typeSymbol.GetPrimaryConstructor() != null) {
 			Predicate<SyntaxNode> nodeFilter = n => !IsTypeReference(n);
 			symbolFilter = MatchTypeArgument ? s => Symbol.Equals(s.ContainingType) : s => s.Kind == SymbolKind.Method;
-			return Symbol.FindReferrersAsync(Context.Document.Project, docs, defFilter, symbolFilter, nodeFilter, cancellationToken);
+			return Symbol.FindReferrersAsync(Context.Document.Project, docs, defFilter, symbolFilter, nodeFilter, ns, cancellationToken);
 		}
 		else {
 			symbolFilter = s => s?.Kind == SymbolKind.Method;
-			return Symbol.FindReferrersAsync(Context.Document.Project, docs, defFilter, symbolFilter, null, cancellationToken);
+			return Symbol.FindReferrersAsync(Context.Document.Project, docs, defFilter, symbolFilter, null, ns, cancellationToken);
 		}
 	}
 }
@@ -166,7 +172,8 @@ sealed class FindTypeReferrersCommand : ReferrerAnalysisCommandBase
 		Predicate<ISymbol> df = StrictMatch ? targetSymbol.Equals : default;
 		Predicate<ISymbol> of = MatchTypeArgument ? targetSymbol.Equals : null;
 		Predicate<SyntaxNode> nodeFilter = IsTypeReference;
+		var ns = MakeNamespaceFilterFromOption(Options);
 
-		return targetSymbol.FindReferrersAsync(Context.Document.Project, docs, df, of, nodeFilter, cancellationToken);
+		return targetSymbol.FindReferrersAsync(Context.Document.Project, docs, df, of, nodeFilter, ns, cancellationToken);
 	}
 }

@@ -3181,4 +3181,8 @@ Use a Tab character to indicate indentation.</value>
   <data name="OTC_WrapText" xml:space="preserve">
     <value>Wrap Text:</value>
   </data>
+  <data name="CMDT_ScopeToNamespace" xml:space="preserve">
+    <value>Current Namespace
+Only search in current namespace</value>
+  </data>
 </root>
