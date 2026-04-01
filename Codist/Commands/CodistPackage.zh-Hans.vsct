@@ -158,6 +158,8 @@
 				<Parent guid="guidCodistPackageCmdSet" id="IDG_VS_EDIT_GOTO" />
 				<Icon guid="ImageCatalogGuid" id="SearchMember" />
 				<CommandFlag>DefaultDisabled</CommandFlag>
+				<CommandFlag>DefaultInvisible</CommandFlag>
+				<CommandFlag>DynamicVisibility</CommandFlag>
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
 					<ButtonText>查找类成员</ButtonText>
@@ -168,6 +170,8 @@
 				<Parent guid="guidCodistPackageCmdSet" id="IDG_VS_EDIT_GOTO" />
 				<Icon guid="ImageCatalogGuid" id="Search" />
 				<CommandFlag>DefaultDisabled</CommandFlag>
+				<CommandFlag>DefaultInvisible</CommandFlag>
+				<CommandFlag>DynamicVisibility</CommandFlag>
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
 					<ButtonText>在当前文档查找声明</ButtonText>
@@ -178,6 +182,8 @@
 				<Parent guid="guidCodistPackageCmdSet" id="IDG_VS_EDIT_GOTO" />
 				<Icon guid="ImageCatalogGuid" id="Search" />
 				<CommandFlag>DefaultDisabled</CommandFlag>
+				<CommandFlag>DefaultInvisible</CommandFlag>
+				<CommandFlag>DynamicVisibility</CommandFlag>
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
 					<ButtonText>在当前项目查找声明</ButtonText>
@@ -188,6 +194,8 @@
 				<Parent guid="guidSHLMainMenu" id="IDG_VS_TOOLS_OPTIONS" />
 				<Icon guid="ImageCatalogGuid" id="StyleBlock" />
 				<CommandFlag>IconIsMoniker</CommandFlag>
+				<CommandFlag>DefaultInvisible</CommandFlag>
+				<CommandFlag>DynamicVisibility</CommandFlag>
 				<Strings>
 					<ButtonText>配置 Codist 高级语法样式...</ButtonText>
 					<LocCanonicalName>.Codist.配置高级语法样式</LocCanonicalName>

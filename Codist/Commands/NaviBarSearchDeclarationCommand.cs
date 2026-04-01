@@ -1,7 +1,6 @@
 ﻿using System;
-using System.ComponentModel.Design;
+using CLR;
 using Microsoft.VisualStudio.Shell;
-using R = Codist.Properties.Resources;
 
 namespace Codist.Commands
 {
@@ -18,7 +17,10 @@ namespace Codist.Commands
 
 		static void HandleMenuState(object s, EventArgs args) {
 			ThreadHelper.ThrowIfNotOnUIThread();
-			((OleMenuCommand)s).Enabled = GetNaviBar() != null;
+			var m = (OleMenuCommand)s;
+			if (m.Visible = Config.Instance.Features.MatchFlags(Features.NaviBar)) {
+				m.Enabled = GetNaviBar() != null;
+			}
 		}
 
 		static NaviBar.INaviBar GetNaviBar() {

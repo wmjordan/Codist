@@ -14,7 +14,13 @@ namespace Codist.Commands
 		static Options.SyntaxHighlightCustomizationWindow _Window;
 
 		public static void Initialize() {
-			Command.SyntaxCustomizerWindow.Register(Execute);
+			Command.SyntaxCustomizerWindow.Register(Execute, HandleMenuState);
+		}
+
+		static void HandleMenuState(object s, EventArgs args) {
+			ThreadHelper.ThrowIfNotOnUIThread();
+			var m = (OleMenuCommand)s;
+			m.Visible = m.Enabled = Config.Instance.Features.MatchFlags(Features.SyntaxHighlight);
 		}
 
 		/// <summary>

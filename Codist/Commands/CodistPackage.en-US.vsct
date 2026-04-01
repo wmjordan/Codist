@@ -164,6 +164,8 @@
 				<Parent guid="guidCodistPackageCmdSet" id="IDG_VS_EDIT_GOTO" />
 				<Icon guid="ImageCatalogGuid" id="SearchMember" />
 				<CommandFlag>DefaultDisabled</CommandFlag>
+				<CommandFlag>DefaultInvisible</CommandFlag>
+				<CommandFlag>DynamicVisibility</CommandFlag>
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
 					<ButtonText>Search Class Member</ButtonText>
@@ -174,6 +176,8 @@
 				<Parent guid="guidCodistPackageCmdSet" id="IDG_VS_EDIT_GOTO" />
 				<Icon guid="ImageCatalogGuid" id="Search" />
 				<CommandFlag>DefaultDisabled</CommandFlag>
+				<CommandFlag>DefaultInvisible</CommandFlag>
+				<CommandFlag>DynamicVisibility</CommandFlag>
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
 					<ButtonText>Search Declaration in Document</ButtonText>
@@ -184,6 +188,8 @@
 				<Parent guid="guidCodistPackageCmdSet" id="IDG_VS_EDIT_GOTO" />
 				<Icon guid="ImageCatalogGuid" id="Search" />
 				<CommandFlag>DefaultDisabled</CommandFlag>
+				<CommandFlag>DefaultInvisible</CommandFlag>
+				<CommandFlag>DynamicVisibility</CommandFlag>
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
 					<ButtonText>Search Declaration in Project</ButtonText>
@@ -194,6 +200,8 @@
 				<Parent guid="guidSHLMainMenu" id="IDG_VS_TOOLS_OPTIONS" />
 				<Icon guid="ImageCatalogGuid" id="StyleBlock" />
 				<CommandFlag>IconIsMoniker</CommandFlag>
+				<CommandFlag>DefaultInvisible</CommandFlag>
+				<CommandFlag>DynamicVisibility</CommandFlag>
 				<Strings>
 					<ButtonText>Customize Codist Syntax Highlight...</ButtonText>
 					<LocCanonicalName>.Codist.CustomizeSyntaxHighlight</LocCanonicalName>
