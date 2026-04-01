@@ -137,6 +137,7 @@
     <Compile Include="Semantics\SyntaxModel.cs" />
     <Compile Include="SmartBars\MarkupSmartBar.cs" />
     <Compile Include="SnippetTexts\ActiveWrapTextTracker.cs" />
+    <Compile Include="SnippetTexts\PlaceholderInfo.cs" />
     <Compile Include="SnippetTexts\SnippetSession.cs" />
     <Compile Include="SnippetTexts\WrapTextPicker.cs" />
     <Compile Include="Suppression.cs" />

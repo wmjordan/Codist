@@ -12,17 +12,6 @@ using Inlines = System.Windows.Documents.InlineCollection;
 
 namespace Codist.SnippetTexts;
 
-readonly struct PlaceholderInfo(string name, int position, int length)
-{
-	public string Name { get; } = name;
-	public int Position { get; } = position;
-	public int Length { get; } = length;
-
-	public SnapshotSpan ToSnapshotSpan(ITextSnapshot snapshot) {
-		return new SnapshotSpan(snapshot, Position, Length);
-	}
-}
-
 sealed class WrapText
 {
 	string _Pattern;
@@ -269,7 +258,6 @@ sealed class WrapText
 			var replacement = Wrap(
 				t,
 				_HasMultilinePrefix ? view.TextSnapshot.GetLinePrecedingWhitespaceAtPosition(start) : null,
-				_HasMultilineSuffix ? view.TextSnapshot.GetLinePrecedingWhitespaceAtPosition(item.End.Position) : null,
 				view.Options.GetIndentStringSize(),
 				view.Options.GetNewLineCharacter(),
 				placeholders,
@@ -297,7 +285,7 @@ sealed class WrapText
 		return Enumerable.Empty<SnapshotSpan>();
 	}
 
-	string Wrap(string text, string startLineSpace, string endLineSpace, int indentStringSize, string newLineChar, List<PlaceholderInfo> placeholders, int placeholderOffset) {
+	string Wrap(string text, string startLineSpace, int indentStringSize, string newLineChar, List<PlaceholderInfo> placeholders, int placeholderOffset) {
 		using var sbr = ReusableStringBuilder.AcquireDefault(text.Length + _Pattern.Length);
 		var sb = sbr.Resource;
 

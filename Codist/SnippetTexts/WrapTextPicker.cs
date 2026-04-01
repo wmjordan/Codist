@@ -15,7 +15,7 @@ using R = Codist.Properties.Resources;
 namespace Codist.SnippetTexts;
 
 /// <summary>
-/// 用于选择包装文本的控件，包含搜索框和列表，支持键盘导航。
+/// A picker control for wrap text.
 /// </summary>
 sealed class WrapTextPicker : UserControl
 {
@@ -28,14 +28,8 @@ sealed class WrapTextPicker : UserControl
 	readonly TextViewOverlay _Overlay;
 	ActiveWrapTextTracker _Tracker;
 
-	/// <summary>
-	/// 当用户按下 Enter 选中一项时触发。
-	/// </summary>
 	public event EventHandler<EventArgs<WrapText>> ItemSelected;
 
-	/// <summary>
-	/// 获取当前选中的包装文本。
-	/// </summary>
 	public WrapText SelectedItem => _ListBox.SelectedItem as WrapText;
 
 	public WrapTextPicker(IWpfTextView view, List<WrapText> items) {
@@ -146,11 +140,6 @@ sealed class WrapTextPicker : UserControl
 		_Tracker = null;
 	}
 
-	void HideWrapTextOnSelectionChange(object sender, EventArgs e) {
-		Close();
-	}
-
-
 	void HandleUnloaded(object sender, RoutedEventArgs e) {
 		_ListContainer.IsOpen = false;
 		Close();
@@ -163,23 +152,20 @@ sealed class WrapTextPicker : UserControl
 
 	void OnLoaded(object sender, RoutedEventArgs e) {
 		Loaded += OnLoaded;
-		// 自动焦点到搜索框
 		_SearchBox.Focus();
 
 		_ListContainer.IsOpen = true;
 
-		// 如果没有选中项且数据源非空，默认选中第一项
 		if (_ListBox.SelectedItem == null && _ListView.Cast<WrapText>().Any()) {
 			_ListBox.SelectedIndex = 0;
 		}
 
-		// 确保选中项可见
-		if (_ListBox.SelectedItem != null)
+		if (_ListBox.SelectedItem != null) {
 			_ListBox.ScrollIntoView(_ListBox.SelectedItem);
+		}
 	}
 
 	void OnPreviewKeyDown(object sender, KeyEventArgs e) {
-		// 处理确认和取消
 		if (e.Key == Key.Enter) {
 			if (_ListBox.SelectedItem is WrapText i) {
 				OnSelect(i);
@@ -194,7 +180,6 @@ sealed class WrapTextPicker : UserControl
 			return;
 		}
 
-		// 如果焦点在搜索框内，处理方向键导航（阻止光标移动）
 		if (_SearchBox.IsKeyboardFocusWithin) {
 			int currentIndex = _ListBox.SelectedIndex;
 			int totalCount = _ListView.Cast<WrapText>().Count();
