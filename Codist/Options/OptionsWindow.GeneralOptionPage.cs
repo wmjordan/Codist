@@ -22,7 +22,7 @@ namespace Codist.Options
 
 			sealed class PageControl : OptionPage
 			{
-				readonly OptionBox<Features> _SyntaxHighlight, _SuperQuickInfo, _SmartBar, _NavigationBar, _ScrollbarMarker, _JumpListEnhancer, _AutoSurround;
+				readonly OptionBox<Features> _SyntaxHighlight, _SuperQuickInfo, _SmartBar, _NavigationBar, _ScrollbarMarker, _JumpListEnhancer, _WrapText, _AutoSurround;
 				readonly OptionBox<Features>[] _Options;
 				readonly Button _LoadButton, _SaveButton, _OpenConfigFolderButton;
 				readonly Note _NoticeBox;
@@ -47,6 +47,8 @@ namespace Codist.Options
 									.SetLazyToolTip(() => R.OT_ScrollbarMarkerTip)),
 								(_JumpListEnhancer = o.CreateOptionBox(Features.JumpList, UpdateConfig, R.T_JumpList)
 									.SetLazyToolTip(() => R.OT_JumpListTip)),
+								(_WrapText = o.CreateOptionBox(Features.WrapText, UpdateConfig, R.OT_WrapText)
+									.SetLazyToolTip(() => R.OT_WrapTextTip)),
 								(_AutoSurround = o.CreateOptionBox(Features.AutoSurround, UpdateConfig, R.T_AutoSurround)
 									.SetLazyToolTip(() => R.OT_AutoSurround))
 							}
@@ -75,7 +77,7 @@ namespace Codist.Options
 						new TextBlock { Margin = linkMargin }.AppendLink(R.CMD_WechatDonateLink, ShowWechatQrCode, R.CMDT_OpenWechatQrCode),
 						new DescriptionBox(R.OT_DonateLinkTip)
 					);
-					_Options = new[] { _SyntaxHighlight, _SuperQuickInfo, _SmartBar, _NavigationBar, _ScrollbarMarker, _JumpListEnhancer, _AutoSurround };
+					_Options = new[] { _SyntaxHighlight, _SuperQuickInfo, _SmartBar, _NavigationBar, _ScrollbarMarker, _JumpListEnhancer, _WrapText, _AutoSurround };
 					foreach (var item in _Options) {
 						item.MinWidth = 150;
 						item.Margin = WpfHelper.MiddleMargin;

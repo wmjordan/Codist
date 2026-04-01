@@ -6024,7 +6024,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to This page defines text items wrapping selection which can be accessed by right clicking the &quot;Wrap selection with text&quot; button on Smart Bar.
+        ///   Looks up a localized string similar to This page defines text items wrapping selection which can be accessed by right clicking the &quot;Wrap selection with text&quot; button on Smart Bar or from the Edit menu.
         /// </summary>
         internal static string OT_WrapTextNote {
             get {
@@ -6071,6 +6071,15 @@ namespace Codist.Properties {
         internal static string OT_WrapTexts {
             get {
                 return ResourceManager.GetString("OT_WrapTexts", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Provides command to wrap selected text with various text content.
+        /// </summary>
+        internal static string OT_WrapTextTip {
+            get {
+                return ResourceManager.GetString("OT_WrapTextTip", resourceCulture);
             }
         }
         

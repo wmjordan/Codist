@@ -1826,7 +1826,7 @@ Shift：匹配大小写</value>
     <value>环绕文本</value>
   </data>
   <data name="OT_WrapTextNote" xml:space="preserve">
-    <value>本页面定义环绕文本，环绕文本可用于智能工具条的“文本环绕选中内容”命令</value>
+    <value>本页面定义环绕文本，环绕文本可从智能工具条的“文本环绕选中内容”命令或编辑菜单的相应命令插入</value>
   </data>
   <data name="OT_WrapTextPattern" xml:space="preserve">
     <value>环绕文本内容</value>
@@ -3174,5 +3174,8 @@ Shift: 匹配大小写</value>
   </data>
   <data name="OT_FeatureDisabled" xml:space="preserve">
     <value>当前选项页面因对应的功能被关闭而禁用。如需调整选项，请在“常规”页选中对应的特性控制复选框。</value>
+  </data>
+  <data name="OT_WrapTextTip" xml:space="preserve">
+    <value>提供以各种文本内容环绕选定文本的功能</value>
   </data>
 </root>

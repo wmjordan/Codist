@@ -15,8 +15,7 @@ sealed partial class OptionsWindow
 	sealed class WrapTextPage : OptionPageFactory
 	{
 		public override string Name => R.OT_WrapText;
-		public override Features RequiredFeature => Features.SmartBar;
-		public override bool IsSubOption => true;
+		public override Features RequiredFeature => Features.WrapText;
 
 		protected override OptionPage CreatePage() {
 			return new PageControl();

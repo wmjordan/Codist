@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Windows.Input;
+using CLR;
 using Codist.Controls;
 using Codist.SnippetTexts;
 using Microsoft.VisualStudio.Shell;
@@ -17,7 +17,9 @@ static class WrapTextCommand
 	static void QueryStatus(object sender, EventArgs args) {
 		ThreadHelper.ThrowIfNotOnUIThread();
 		var m = ((OleMenuCommand)sender);
-		var view = TextEditorHelper.GetActiveWpfDocumentView();
+		var view = Config.Instance.Features.MatchFlags(Features.WrapText)
+			? TextEditorHelper.GetActiveWpfDocumentView()
+			: null;
 		if (m.Visible = view != null) {
 			m.Enabled = !view.Selection.IsEmpty;
 		}

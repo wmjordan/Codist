@@ -1841,7 +1841,7 @@ ALL existing items will be REPLACE by default items.</value>
     <value>Wrap Text</value>
   </data>
   <data name="OT_WrapTextNote" xml:space="preserve">
-    <value>This page defines text items wrapping selection which can be accessed by right clicking the "Wrap selection with text" button on Smart Bar</value>
+    <value>This page defines text items wrapping selection which can be accessed by right clicking the "Wrap selection with text" button on Smart Bar or from the Edit menu</value>
   </data>
   <data name="OT_WrapTextPattern" xml:space="preserve">
     <value>Wrap text pattern</value>
@@ -3187,5 +3187,8 @@ Only search in current namespace</value>
   </data>
   <data name="OT_FeatureDisabled" xml:space="preserve">
     <value>Current options page is disabled because the corresponding feature is turned off. To enable the feature and this options page, please check the corresponding checkbox under the Feature Controllers section in the General page.</value>
+  </data>
+  <data name="OT_WrapTextTip" xml:space="preserve">
+    <value>Provides command to wrap selected text with various text content</value>
   </data>
 </root>
