@@ -12,8 +12,8 @@ using Microsoft.VisualStudio.Shell.Interop;
 using Task = System.Threading.Tasks.Task;
 using R = Codist.Properties.Resources;
 
-namespace Codist
-{
+namespace Codist;
+
 	/// <summary>
 	/// <para>This is the class that implements the package exposed by <see cref="Codist"/>.</para>
 	/// <para>The project consists of the following namespace: <see cref="SyntaxHighlight"/> backed by <see cref="Taggers"/>, <see cref="SmartBars"/>, <see cref="QuickInfo"/>, <see cref="Margins"/>, <see cref="NaviBar"/> etc.</para>
@@ -129,8 +129,6 @@ namespace Codist
 				InitializeOrUpgradeConfig();
 				"Config upgraded.".Log();
 			}
-			Commands.SyntaxCustomizerWindowCommand.Initialize();
-			Commands.OptionsWindowCommand.Initialize();
 
 			"Package initialization finished.".Log();
 		}
@@ -168,4 +166,3 @@ namespace Codist
 			public static readonly Version Version = new Version(Application.Current.MainWindow.GetType().Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version);
 		}
 	}
-}
