@@ -26,6 +26,7 @@ namespace Codist.Commands
 			TransformDocumentCommand.Initialize();
 			OpenActivityLogCommand.Initialize();
 			WrapTextCommand.Initialize();
+			NewTextFileCommand.Initialize();
 			nameof(CommandRegistry).LogInitialized();
 		}
 
@@ -57,6 +58,7 @@ namespace Codist.Commands
 		OpenIntermediateFolder,
 		OpenReleaseIntermediateFolder,
 		WrapRecentText,
-		ListWrapText
+		ListWrapText,
+		NewTextFile
 	}
 }

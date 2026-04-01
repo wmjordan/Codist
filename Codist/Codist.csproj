@@ -90,6 +90,7 @@
     <Compile Include="Commands\AutoParenthesisHandler.cs" />
     <Compile Include="Commands\OpenActivityLogCommand.cs" />
     <Compile Include="Commands\OptionsWindowCommand.cs" />
+    <Compile Include="Commands\NewTextFileCommand.cs" />
     <Compile Include="Commands\WrapTextCommand.cs" />
     <Compile Include="Commands\TransformDocumentCommand.cs" />
     <Compile Include="Commands\ShowSupportedFileTypesCommand.cs" />

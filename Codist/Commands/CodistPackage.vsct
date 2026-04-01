@@ -104,6 +104,7 @@
 			<IDSymbol name="WrapRecentTextId" value="0x4015" />
 			<IDSymbol name="ListWrapTextId" value="0x4016" />
 			<IDSymbol name="CodeRefactoringId" value="0x400B" />
+			<IDSymbol name="NewTextFileId" value="0x4017" />
 		</GuidSymbol>
 	</Symbols>
 

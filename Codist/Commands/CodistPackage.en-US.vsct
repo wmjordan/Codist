@@ -45,6 +45,16 @@
 					<LocCanonicalName>.Codist.OpenActivityLog</LocCanonicalName>
 				</Strings>
 			</Button>
+			<Button guid="guidCodistPackageCmdSet" id="NewTextFileId" priority="0x8000" type="Button">
+				<Parent guid="guidSHLMainMenu" id="IDG_VS_FILE_NEW_CASCADE" />
+				<Icon guid="ImageCatalogGuid" id="AddTextFile" />
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<Strings>
+					<ButtonText>New Text File</ButtonText>
+					<MenuText>Text File</MenuText>
+					<LocCanonicalName>.Codist.NewTextFile</LocCanonicalName>
+				</Strings>
+			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="ShowSupportedFileTypesId" priority="4134" type="Button">
 				<Parent guid="guidCodistPackageCmdSet" id="CodistMenuGroup" />
 				<Icon guid="ImageCatalogGuid" id="SourceFileGroup" />
