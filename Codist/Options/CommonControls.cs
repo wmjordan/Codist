@@ -32,17 +32,29 @@ sealed class TitleBox : ContentControl
 
 sealed class Note : Border
 {
-	public Note(string text) {
+	public Note(string text, bool highlight = false) {
 		Margin = WpfHelper.MiddleVerticalMargin;
 		Child = new TextBlock {
 			Text = text,
 			TextWrapping = TextWrapping.Wrap
 		};
+		if (highlight) {
+			Highlight();
+		}
 	}
-	public Note(TextBlock text) {
+	public Note(TextBlock text, bool highlight = false) {
 		Margin = WpfHelper.MiddleVerticalMargin;
 		Child = text;
 		text.TextWrapping = TextWrapping.Wrap;
+		if (highlight) {
+			Highlight();
+		}
+	}
+
+	public void Highlight() {
+		BorderBrush = SystemColors.HighlightBrush;
+		Background = SystemColors.HighlightBrush.Alpha(WpfHelper.DimmedOpacity);
+		this.ReferenceProperty(Control.ForegroundProperty, Microsoft.VisualStudio.Shell.VsBrushes.WindowTextKey);
 	}
 }
 

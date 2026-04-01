@@ -3172,4 +3172,7 @@ Shift: 匹配大小写</value>
     <value>当前名称空间
 限制搜索范围为当前名称空间</value>
   </data>
+  <data name="OT_FeatureDisabled" xml:space="preserve">
+    <value>当前选项页面因对应的功能被关闭而禁用。如需调整选项，请在“常规”页选中对应的特性控制复选框。</value>
+  </data>
 </root>

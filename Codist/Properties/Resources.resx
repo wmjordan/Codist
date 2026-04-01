@@ -3185,4 +3185,7 @@ Use a Tab character to indicate indentation.</value>
     <value>Current Namespace
 Only search in current namespace</value>
   </data>
+  <data name="OT_FeatureDisabled" xml:space="preserve">
+    <value>Current options page is disabled because the corresponding feature is turned off. To enable the feature and this options page, please check the corresponding checkbox under the Feature Controllers section in the General page.</value>
+  </data>
 </root>

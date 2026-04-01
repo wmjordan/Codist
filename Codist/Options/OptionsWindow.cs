@@ -121,9 +121,10 @@ namespace Codist.Options
 		void OptionCategoryChanged(object sender, SelectionChangedEventArgs e) {
 			var pageFactory = (OptionPageFactory)_OptionCategoriesBox.SelectedValue;
 			_TitleLabel.Content = pageFactory.Name;
-			OptionPage page;
-			_OptionContainer.Content = page = pageFactory.Page;
-			page.IsEnabled = Config.Instance.Features.MatchFlags(pageFactory.RequiredFeature);
+			OptionPage page = pageFactory.Page;
+			_OptionContainer.Content = (page.IsEnabled = Config.Instance.Features.MatchFlags(pageFactory.RequiredFeature))
+				? page
+				: new Note(R.OT_FeatureDisabled, true) { Padding = WpfHelper.MiddleMargin, BorderThickness = WpfHelper.TinyMargin, VerticalAlignment = VerticalAlignment.Top };
 		}
 
 		protected override void OnClosed(EventArgs e) {

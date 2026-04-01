@@ -4074,6 +4074,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Current options page is disabled because the corresponding feature is turned off. To enable the feature and this options page, please check the corresponding checkbox under the Feature Controllers section in the General page..
+        /// </summary>
+        internal static string OT_FeatureDisabled {
+            get {
+                return ResourceManager.GetString("OT_FeatureDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Filter auto properties with fields, accessor properties with methods.
         /// </summary>
         internal static string OT_FilterAutoPropertiesAsFields {
