@@ -202,17 +202,21 @@ static class TextEditorHelper
 		}
 	}
 
-	public static void SelectSpan(this ITextView view, SnapshotSpan span) {
-		if (view.TextSnapshot != span.Snapshot) {
-			// should not be here
-			span = new SnapshotSpan(view.TextSnapshot, span.Span);
-		}
+	public static void Reveal(this ITextView view, SnapshotSpan span) {
 		var m = ServicesHelper.Instance.OutliningManager.GetOutliningManager(view);
 		if (m != null) {
 			foreach (var c in m.GetCollapsedRegions(span)) {
 				m.Expand(c);
 			}
 		}
+	}
+
+	public static void SelectSpan(this ITextView view, SnapshotSpan span) {
+		if (view.TextSnapshot != span.Snapshot) {
+			// should not be here
+			span = new SnapshotSpan(view.TextSnapshot, span.Span);
+		}
+		view.Reveal(span);
 		view.ViewScroller.EnsureSpanVisible(span, EnsureSpanVisibleOptions.ShowStart);
 		view.Selection.Select(span, false);
 		view.Caret.MoveTo(span.End);
@@ -227,6 +231,7 @@ static class TextEditorHelper
 			return;
 		}
 		var span = new SnapshotSpan(view.TextSnapshot, start, length);
+		view.Reveal(span);
 		view.ViewScroller.EnsureSpanVisible(span, EnsureSpanVisibleOptions.ShowStart);
 		view.Selection.Select(span, false);
 		if (moveCaret != 0) {
@@ -291,12 +296,11 @@ static class TextEditorHelper
 	/// <inheritdoc cref="Edit{TView, TArg}(TView, TArg, Action{TView, TArg, ITextEdit})"/>
 	public static ITextSnapshot Edit<TView>(this TView view, Action<TView, ITextEdit> action)
 		where TView : ITextView {
-		using (var edit = view.TextSnapshot.TextBuffer.CreateEdit()) {
-			action(view, edit);
-			return edit.HasEffectiveChanges
-				? edit.Apply()
-				: null;
-		}
+		using var edit = view.TextSnapshot.TextBuffer.CreateEdit();
+		action(view, edit);
+		return edit.HasEffectiveChanges
+			? edit.Apply()
+			: null;
 	}
 	/// <summary>
 	/// Begins an edit operation to the <paramref name="view"/>.
@@ -309,12 +313,11 @@ static class TextEditorHelper
 	/// <returns>Returns a new <see cref="ITextSnapshot"/> if <see cref="ITextEdit.HasEffectiveChanges"/>  returns <see langword="true"/>, otherwise, returns <see langword="null"/>.</returns>
 	public static ITextSnapshot Edit<TView, TArg>(this TView view, TArg arg, Action<TView, TArg, ITextEdit> action)
 		where TView : ITextView {
-		using (var edit = view.TextSnapshot.TextBuffer.CreateEdit()) {
-			action(view, arg, edit);
-			return edit.HasEffectiveChanges
-				? edit.Apply()
-				: null;
-		}
+		using var edit = view.TextSnapshot.TextBuffer.CreateEdit();
+		action(view, arg, edit);
+		return edit.HasEffectiveChanges
+			? edit.Apply()
+			: null;
 	}
 	/// <summary>
 	/// Performs edit operation to each selected spans in the <paramref name="view"/>.
@@ -327,19 +330,18 @@ static class TextEditorHelper
 		where TView : ITextView {
 		Chain<Span> changedSpans = new Chain<Span>();
 		Span? s;
-		using (var edit = view.TextSnapshot.TextBuffer.CreateEdit()) {
-			foreach (var item in view.Selection.SelectedSpans) {
-				s = action(view, edit, item);
-				if (s.HasValue) {
-					changedSpans.Add(s.Value);
-				}
+		using var edit = view.TextSnapshot.TextBuffer.CreateEdit();
+		foreach (var item in view.Selection.SelectedSpans) {
+			s = action(view, edit, item);
+			if (s.HasValue) {
+				changedSpans.Add(s.Value);
 			}
-			if (edit.HasEffectiveChanges) {
-				var oldSnapshot = view.TextSnapshot;
-				var newSnapshot = edit.Apply();
-				if (changedSpans.IsEmpty == false) {
-					return changedSpans.Select(i => oldSnapshot.MapTo(i, newSnapshot));
-				}
+		}
+		if (edit.HasEffectiveChanges) {
+			var oldSnapshot = view.TextSnapshot;
+			var newSnapshot = edit.Apply();
+			if (changedSpans.IsEmpty == false) {
+				return changedSpans.Select(i => oldSnapshot.MapTo(i, newSnapshot));
 			}
 		}
 		return null;
@@ -355,18 +357,17 @@ static class TextEditorHelper
 	public static IEnumerable<SnapshotSpan> EditSelection<TView>(this TView view, Func<TView, ITextEdit, SnapshotSpan, IEnumerable<Span>> action)
 		where TView : ITextView {
 		var changedSpans = new Chain<Span>();
-		using (var edit = view.TextSnapshot.TextBuffer.CreateEdit()) {
-			foreach (var item in view.Selection.SelectedSpans) {
-				foreach (var span in action(view, edit, item)) {
-					changedSpans.Add(span);
-				}
+		using var edit = view.TextSnapshot.TextBuffer.CreateEdit();
+		foreach (var item in view.Selection.SelectedSpans) {
+			foreach (var span in action(view, edit, item)) {
+				changedSpans.Add(span);
 			}
-			if (edit.HasEffectiveChanges) {
-				var oldSnapshot = view.TextSnapshot;
-				var newSnapshot = edit.Apply();
-				if (changedSpans.IsEmpty == false) {
-					return changedSpans.Select(i => oldSnapshot.MapTo(i, newSnapshot));
-				}
+		}
+		if (edit.HasEffectiveChanges) {
+			var oldSnapshot = view.TextSnapshot;
+			var newSnapshot = edit.Apply();
+			if (changedSpans.IsEmpty == false) {
+				return changedSpans.Select(i => oldSnapshot.MapTo(i, newSnapshot));
 			}
 		}
 		return null;
@@ -401,34 +402,31 @@ static class TextEditorHelper
 		var sPath = sourceNode.SyntaxTree.FilePath;
 		var tPath = targetNode.SyntaxTree.FilePath;
 		if (String.Equals(sPath, tPath, StringComparison.OrdinalIgnoreCase)) {
-			using (var edit = view.TextBuffer.CreateEdit()) {
-				edit.Insert(target, view.TextSnapshot.GetText(sSpan));
-				if (copy == false) {
-					edit.Delete(sSpan.Start, sSpan.Length);
-				}
-				if (edit.HasEffectiveChanges) {
-					edit.Apply();
-					view.SelectSpan(sSpan.Start > tSpan.Start ? target : target - sSpan.Length, sSpan.Length, -1);
-				}
+			using var edit = view.TextBuffer.CreateEdit();
+			edit.Insert(target, view.TextSnapshot.GetText(sSpan));
+			if (copy == false) {
+				edit.Delete(sSpan.Start, sSpan.Length);
+			}
+			if (edit.HasEffectiveChanges) {
+				edit.Apply();
+				view.SelectSpan(sSpan.Start > tSpan.Start ? target : target - sSpan.Length, sSpan.Length, -1);
 			}
 		}
 		else if (String.Equals(sPath, view.TextBuffer.GetTextDocument()?.FilePath, StringComparison.OrdinalIgnoreCase)) {
 			// drag & drop from current file to external file
 			if (copy == false) {
-				using (var edit = view.TextBuffer.CreateEdit()) {
-					edit.Delete(sSpan.Start, sSpan.Length);
-					if (edit.HasEffectiveChanges) {
-						edit.Apply();
-					}
+				using var edit = view.TextBuffer.CreateEdit();
+				edit.Delete(sSpan.Start, sSpan.Length);
+				if (edit.HasEffectiveChanges) {
+					edit.Apply();
 				}
 			}
 			OpenFile(tPath, v => {
-				using (var edit = v.TextBuffer.CreateEdit()) {
-					edit.Insert(target, sNode.ToFullString());
-					if (edit.HasEffectiveChanges) {
-						edit.Apply();
-						v.SelectSpan(target, sSpan.Length, -1);
-					}
+				using var edit = v.TextBuffer.CreateEdit();
+				edit.Insert(target, sNode.ToFullString());
+				if (edit.HasEffectiveChanges) {
+					edit.Apply();
+					v.SelectSpan(target, sSpan.Length, -1);
 				}
 			});
 		}
@@ -436,11 +434,10 @@ static class TextEditorHelper
 			// drag & drop from external file to current file
 			if (copy == false) {
 				OpenFile(sPath, v => {
-					using (var edit = v.TextBuffer.CreateEdit()) {
-						edit.Delete(sSpan.Start, sSpan.Length);
-						if (edit.HasEffectiveChanges) {
-							edit.Apply();
-						}
+					using var edit = v.TextBuffer.CreateEdit();
+					edit.Delete(sSpan.Start, sSpan.Length);
+					if (edit.HasEffectiveChanges) {
+						edit.Apply();
 					}
 				});
 			}
@@ -591,6 +588,7 @@ static class TextEditorHelper
 		}
 	}
 	static void MoveToActiveViewPosition(IWpfTextView view, int position) {
+		view.Reveal(new SnapshotSpan(view.TextSnapshot, position, 0));
 		view.MoveCaret(position);
 		view.DisplayTextLineContainingBufferPosition(view.Caret.Position.BufferPosition, view.ViewportHeight * 0.2, ViewRelativePosition.Top);
 		view.Caret.EnsureVisible();
@@ -645,7 +643,7 @@ static class TextEditorHelper
 		return (textBuffer.IsReadOnly(0) == false
 				|| textBuffer.Properties.ContainsProperty(typeof(ITextDocument))
 				|| textBuffer is IProjectionBuffer pb && pb.SourceBuffers.Any(MayBeEditor))
-			&& textBuffer.ContentType.IsOfType("RoslynPreviewContentType") == false;
+			&& !textBuffer.ContentType.IsOfType("RoslynPreviewContentType");
 	}
 
 	public static ITextDocument GetTextDocument(this ITextBuffer textBuffer) {
@@ -958,19 +956,13 @@ static class TextEditorHelper
 		}
 	}
 
-	sealed class RepeatingAction
+	sealed class RepeatingAction(Action repeatAction, Action unregisterAction)
 	{
-		readonly Action _RepeatAction, _UnregisterAction;
-
-		public RepeatingAction(Action repeatAction, Action unregisterAction) {
-			_RepeatAction = repeatAction;
-			_UnregisterAction = unregisterAction;
-		}
 		public void Run() {
-			_RepeatAction();
+			repeatAction();
 		}
 		public void Unregister() {
-			_UnregisterAction();
+			unregisterAction();
 		}
 	}
 
