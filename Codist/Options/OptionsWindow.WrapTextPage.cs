@@ -138,7 +138,7 @@ sealed partial class OptionsWindow
 				_List.ScrollIntoView(container);
 				RefreshWrapTextUI();
 				_Name.Focus();
-				Config.Instance.FireConfigChangedEvent(Features.SmartBar);
+				Config.Instance.FireConfigChangedEvent(Features.WrapText);
 			}
 
 			void HandleRemoveButtonClick(object s, RoutedEventArgs args) {
