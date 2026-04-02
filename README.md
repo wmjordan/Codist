@@ -19,6 +19,7 @@ Check out this list to see what _Codist_ can do for you.
    ![Feature Brief Navigation Bar](doc/feature-brief-navigation-bar.png)
 * [Smart Bar](#smart-bar) with common edit commands, C# code refactoring and symbol reference analyzers
    ![Feature Brief Smart Bar](doc/feature-brief-smart-bar.png)
+* [Wrap Text](#wrap-text)
 * [Scrollbar Marker](#scrollbar-marker) draws a powerful mini code map
    ![Feature Brief Scrollbar Marker](doc/feature-brief-scrollbar-marker.png)
 * [Auto Changing Version Numbers](#auto-changing-version-numbers)
@@ -355,9 +356,7 @@ The Markdown navigation bar lists all titles appear in a Markdown document.
 
   ![Navigation Bar Markdown](doc/navigation-bar-markdown.png)
 
-Similarly, you can type in the search box to filter down the titles.
-
-From version 7.8 on, there are buttons near the search box to limit displaying titles to specific levels.
+Similarly, you can type in the search box or click the toggle buttons near the search box to filter titles.
 
 ## Smart Bar
 
@@ -379,7 +378,7 @@ There are multiple predefined **web search** commands in the menu when you right
 
 You can specify what browser you prefer to use in the options page.
 
-![Smart Bar Search Options](doc/smart-bar-search-options.png)
+![Smart Bar Search Options](doc/web-search-options.png)
 
 ### C# Specific Commands
 
@@ -459,12 +458,29 @@ _Smart Bar_ also works on _Output_, _C# Interactive_, _Immediate (Debug)_, _Find
 
   ![Smart Bar File Operations](doc/smart-bar-file-operations.png)
 
+## Wrap Text
+
+_Wrap Text_ is a feature that surround your select text with predefined customizable text patterns, somewhat like the Code Snippet feature provided by Visual Studio, but can be customized easier.
+
+To insert a piece of Wrap Text, select something in the editor, then click/right click the *Wrap Text* button on the Smart Bar, or invoke the *Wrap Text* command in the Edit menu.
+
+You can customize Wrap Text items from the *Options* dialog.
+
+  ![Wrap Text Options](doc/wrap-text-options.png)
+
+Use *New Item* button to create a new item, then type the *Name* and *Pattern* for the item.
+
+The *Name* is the text you see within the Wrap Text menu and the *Pattern* is what is inserted.
+
+Click the "?" button near the fields to read corresponding explanations.
+
 ## Scrollbar Marker
 
 _Scrollbar Marker_ draws extra glyphs and shapes on the vertical scrollbar for the following syntax elements:
 
 * **Line numbers** (marked with gray dashed lines and numbers, from version 7.4 on, total line count is displayed at the bottom of the scroll bar)
 * Selection range (marked with semi-transparent color blocks over the bar)
+* Selection matches (marked with bordered color blocks over other matches that case-sensitively or case-insensitively equals to the current selection or the word where the caret is)
 * Special comments tagged by comment tagger (marked with small squares)
 * C# `class`/`struct`/`interface`/`enum` **declarations** (marked with lines indicating their ranges and a square, and their names indicating their declaration locations)
 * C# compiler directives, e.g. `#if`, `#else`, `#region`, `#pragma`, etc. (marked with a gray spot)

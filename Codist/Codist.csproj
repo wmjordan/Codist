@@ -521,6 +521,9 @@
     <PackageReference Include="Microsoft.VisualStudio.ComponentModelHost">
       <Version>15.8.525</Version>
     </PackageReference>
+    <PackageReference Include="Microsoft.VisualStudio.Editor">
+      <Version>15.8.525</Version>
+    </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Language.Intellisense">
       <Version>15.8.525</Version>
     </PackageReference>
@@ -534,7 +537,7 @@
       <Version>15.8.243</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.SDK">
-      <Version>17.0.31902.203</Version>
+      <Version>17.14.40265</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.SDK.Analyzers">
       <Version>17.7.79</Version>
@@ -554,7 +557,7 @@
       <Version>15.8.168</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers">
-      <Version>17.11.20</Version>
+      <Version>17.14.15</Version>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
@@ -562,7 +565,7 @@
       <Version>15.3.32</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.VSSDK.BuildTools">
-      <Version>17.11.435</Version>
+      <Version>17.14.2120</Version>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>

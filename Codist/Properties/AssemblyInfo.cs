@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("WMJ")]
 [assembly: AssemblyProduct(nameof(Codist))]
-[assembly: AssemblyCopyright("Copyright WMJ, 2025")]
+[assembly: AssemblyCopyright("Copyright WMJ, 2026")]
 [assembly: AssemblyTrademark(nameof(Codist))]
 [assembly: ComVisible(false)]
 [assembly: AssemblyVersion(Codist.Config.CurrentVersion + ".0")]
