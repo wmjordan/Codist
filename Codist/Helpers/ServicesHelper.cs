@@ -68,9 +68,6 @@ namespace Codist
 		public IAsyncCompletionBroker CompletionBroker { get; private set; }
 
 		[Import]
-		public Microsoft.VisualStudio.Text.Adornments.IToolTipService ToolTipService { get; private set; }
-
-		[Import]
 		public ITextStructureNavigatorSelectorService TextStructureNavigator { get; private set; }
 
 		[Import]
