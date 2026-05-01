@@ -43,7 +43,6 @@ sealed class FileSystemItem : INotifyPropertyChanged
 		FileItemType.EmptyFolder => IconIds.EmptyFolder,
 		FileItemType.InaccessibleFolder => IconIds.InaccessibleFolder,
 		FileItemType.Solution => IconIds.GoToSolutionFolder,
-		FileItemType.Project => IconIds.Project,
 		FileItemType.UnloadedProject => IconIds.UnloadedProject,
 		_ => VsImageHelper.GetImageIdForFile(_Name)
 	});
@@ -114,8 +113,8 @@ sealed class FileSystemItem : INotifyPropertyChanged
 	public FileSystemItem(DirectoryInfo dirInfo, FileItemType type) {
 		(_Info, _Type, _Name) = (dirInfo, type, dirInfo.Name);
 	}
-	public FileSystemItem(DirectoryInfo dirInfo, string alias, bool isCurrent, FileItemType type) {
-		(_Info, _Type, _Name, _IsCurrent, _Icon) = (dirInfo, type, Path.GetFileNameWithoutExtension(alias), isCurrent, VsImageHelper.GetImageForFile(alias));
+	public FileSystemItem(FileSystemInfo fsInfo, FileItemType type, bool isCurrent) {
+		(_Info, _Type, _IsCurrent, _Name) = (fsInfo, type, isCurrent, fsInfo.Name);
 	}
 
 	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]

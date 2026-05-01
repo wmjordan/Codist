@@ -331,9 +331,10 @@ sealed partial class FileList : VirtualList
 		var solution = ServicesHelper.Instance.DTE.Solution;
 		var projects = solution.Projects;
 		_Items?.Clear();
-		var (dir, file) = FileHelper.DeconstructPath(solution.FullName, true);
+		var solutionPath = solution.FullName;
+		(_SolutionFolderPath, _) = FileHelper.DeconstructPath(solutionPath, true);
 		var items = new List<FileSystemItem>(projects.Count + 1) {
-			new(new DirectoryInfo(_SolutionFolderPath = dir), file, false, FileItemType.Solution)
+			new(new FileInfo(solutionPath), FileItemType.Solution, false)
 		};
 		var current = ServicesHelper.Instance.DTE.ActiveDocument?.ProjectItem?.ContainingProject?.UniqueName;
 		foreach (EnvDTE.Project project in projects) {
@@ -378,9 +379,7 @@ sealed partial class FileList : VirtualList
 		if (String.IsNullOrEmpty(path)) {
 			return;
 		}
-		path = Path.Combine(_SolutionFolderPath, path);
-		var (dir, file) = FileHelper.DeconstructPath(path, true);
-		items.Add(new(new DirectoryInfo(dir), file, isCurrent, type));
+		items.Add(new(new FileInfo(Path.Combine(_SolutionFolderPath, path)), type, isCurrent));
 	}
 
 	void SetViewMode(ViewMode viewMode) {
@@ -476,10 +475,12 @@ sealed partial class FileList : VirtualList
 					break;
 				case FileItemType.Folder:
 				case FileItemType.EmptyFolder:
+					UnsafeNavigateToDirectoryAsync(item.FullPath).FireAndForget();
+					break;
 				case FileItemType.Solution:
 				case FileItemType.Project:
 				case FileItemType.UnloadedProject:
-					UnsafeNavigateToDirectoryAsync(item.FullPath).FireAndForget();
+					UnsafeNavigateToDirectoryAsync(Path.GetDirectoryName(item.FullPath)).FireAndForget();
 					break;
 			}
 		}
