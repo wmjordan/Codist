@@ -223,12 +223,6 @@ namespace Codist.QuickInfo
 				qiContent.Add(new BlockItem(IconIds.Argument, R.T_ArgumentNOf.Replace("<N>", (++argIndex).ToString())).Append(methodName, true));
 			}
 			else if (argList.IsKind(SyntaxKind.TupleExpression) && argIndex >= 0) {
-				if (semanticModel.GetTypeInfo(argList).Type is INamedTypeSymbol type) {
-					var tuples = type.TupleElements;
-					if (tuples.Length != 0) {
-						ctx.symbol = tuples[argIndex];
-					}
-				}
 				qiContent.Add(new BlockItem(IconIds.ValueType, R.T_TupleElementN.Replace("<N>", (argIndex + 1).ToString())));
 			}
 			else {
