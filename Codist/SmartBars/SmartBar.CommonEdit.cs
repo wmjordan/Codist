@@ -632,7 +632,6 @@ partial class SmartBar
 		}
 		catch (NullReferenceException) { }
 		catch (ArgumentException) { }
-		var w = ServicesHelper.Instance.DTE.ItemOperations.NewFile("General\\Text File", name);
 		using var sbr = ReusableStringBuilder.AcquireDefault(1000);
 		var sb = sbr.Resource;
 		var option = FindOptions.OrdinalComparison | FindOptions.SingleLine;
@@ -649,11 +648,7 @@ partial class SmartBar
 			p = line.EndIncludingLineBreak;
 			sb.Append(line.GetTextIncludingLineBreak());
 		}
-		var newView = w.Document.GetActiveWpfDocumentView();
-		newView.TextBuffer.ChangeContentType(ctx.View.TextBuffer.ContentType, null);
-		w.Document.GetActiveDocumentView().GetBuffer(out var textLines);
-		textLines.InitializeContent(sb.ToString(), sb.Length);
-		textLines.SetStateFlags(0);
+		TextEditorHelper.CreateDocumentWindowWithContent(sb.ToString(), name, ctx.View.TextBuffer.ContentType);
 	}
 
 	static CommandItem[] GetSurroundingCommands() {

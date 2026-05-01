@@ -602,6 +602,25 @@ static class TextEditorHelper
 		view.Caret.EnsureVisible();
 		view.VisualElement.Focus();
 	}
+
+	public static void CreateDocumentWindowWithContent(string initialText, string name, IContentType contentType) {
+		ThreadHelper.ThrowIfNotOnUIThread();
+		var w = ServicesHelper.Instance.DTE.ItemOperations.NewFile(Name: name);
+		var view = w.Document.GetActiveWpfDocumentView();
+		view.TextBuffer.ChangeContentType(contentType, null);
+		var options = view.Options;
+		var trackChange = DefaultTextViewHostOptions.ChangeTrackingId;
+		var c = options.GetOptionValue(trackChange);
+		if (c) {
+			options.SetOptionValue(trackChange, false); // turn off change tracking
+		}
+		w.Document.GetActiveDocumentView().GetBuffer(out var textLines);
+		textLines.InitializeContent(initialText, initialText.Length); // set initial text
+		textLines.SetStateFlags(0); // clear undo history
+		if (c) {
+			options.SetOptionValue(trackChange, true); // restore change tracking
+		}
+	}
 	#endregion
 
 	#region Properties
