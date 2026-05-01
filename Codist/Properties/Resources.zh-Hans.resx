@@ -3264,4 +3264,13 @@ Shift: 匹配大小写</value>
     <value>是否确认要加载解决方案 &lt;FILE&gt;？
 未保存的修改将在加载方案前被抛弃。</value>
   </data>
+  <data name="CMD_ListProjectFolders" xml:space="preserve">
+    <value>列出解决方案各项目对应的文件夹</value>
+  </data>
+  <data name="T_UnloadedProject" xml:space="preserve">
+    <value>未加载的项目: </value>
+  </data>
+  <data name="T_Solution" xml:space="preserve">
+    <value>解决方案: </value>
+  </data>
 </root>

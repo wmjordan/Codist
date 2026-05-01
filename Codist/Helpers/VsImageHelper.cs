@@ -193,12 +193,12 @@ internal static class VsImageHelper
 		// hack: Due to incompatibility of VS SDK accross VS 15 through 18,
 		//   we can't use ServicesHelper.Get<IVsImageService2, SVsImageService>() to obtain an instance of IVsImageService.
 		//   Hence a reflection hack is used.
-		static readonly object InstanceObject = Package.GetGlobalService(typeof(SVsImageService));
-		static readonly Func<object, string, ImageMoniker> Getter = ReflectionHelper.CreateMethodInvoker<string, ImageMoniker>(InstanceObject, nameof(IVsImageService2.GetImageMonikerForFile));
+		static readonly object __ServiceObject = Package.GetGlobalService(typeof(SVsImageService));
+		static readonly Func<object, string, ImageMoniker> __GetImageMonikerForFile = ReflectionHelper.CreateMethodInvoker<string, ImageMoniker>(__ServiceObject, nameof(IVsImageService2.GetImageMonikerForFile));
 
 		public static ImageMoniker GetImageMonikerForFile(string fileName) {
-			var moniker = Getter(InstanceObject, fileName);
-			return moniker.Id == IconIds.OtherFile
+			var moniker = __GetImageMonikerForFile(__ServiceObject, fileName);
+			return moniker.Id < 0
 				? new ImageMoniker { // use fallback icon mapper
 					Guid = KnownImageIds.ImageCatalogGuid,
 					Id = GetFileIconId(System.IO.Path.GetExtension(fileName))

@@ -403,6 +403,7 @@ static class IconIds
 	public const int EBookFile = KnownImageIds.PageBodyGroup;
 	public const int MediaFile = KnownImageIds.Media;
 	public const int OtherFile = KnownImageIds.Document;
+	public const int UnloadedProject = KnownImageIds.DocumentCollection;
 	#endregion
 	#region Overlay
 

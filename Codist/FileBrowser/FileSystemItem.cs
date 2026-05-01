@@ -13,8 +13,8 @@ sealed class FileSystemItem : INotifyPropertyChanged
 	readonly FileItemType _Type;
 	readonly string _Name;
 	bool _IsCurrent;
-	FrameworkElement _Icon;
 	SolutionItemInfo _IsSolutionItem;
+	FrameworkElement _Icon;
 
 	long _FileSize = -1;
 	DateTime _CreationTime;
@@ -42,6 +42,9 @@ sealed class FileSystemItem : INotifyPropertyChanged
 		FileItemType.Folder => IconIds.Folder,
 		FileItemType.EmptyFolder => IconIds.EmptyFolder,
 		FileItemType.InaccessibleFolder => IconIds.InaccessibleFolder,
+		FileItemType.Solution => IconIds.GoToSolutionFolder,
+		FileItemType.Project => IconIds.Project,
+		FileItemType.UnloadedProject => IconIds.UnloadedProject,
 		_ => VsImageHelper.GetImageIdForFile(_Name)
 	});
 
@@ -92,7 +95,7 @@ sealed class FileSystemItem : INotifyPropertyChanged
 	public bool IsSolutionItem {
 		get {
 			if (_Type != FileItemType.File) {
-				return true;
+				return _Type != FileItemType.UnloadedProject;
 			}
 			if (_IsSolutionItem == 0) {
 				_IsSolutionItem = GetIsSolutionItem();
@@ -111,8 +114,8 @@ sealed class FileSystemItem : INotifyPropertyChanged
 	public FileSystemItem(DirectoryInfo dirInfo, FileItemType type) {
 		(_Info, _Type, _Name) = (dirInfo, type, dirInfo.Name);
 	}
-	public FileSystemItem(DirectoryInfo dirInfo, string alias) {
-		(_Info, _Type, _Name, _Icon) = (dirInfo, FileItemType.Folder, Path.GetFileNameWithoutExtension(alias), VsImageHelper.GetImageForFile(alias));
+	public FileSystemItem(DirectoryInfo dirInfo, string alias, bool isCurrent, FileItemType type) {
+		(_Info, _Type, _Name, _IsCurrent, _Icon) = (dirInfo, type, Path.GetFileNameWithoutExtension(alias), isCurrent, VsImageHelper.GetImageForFile(alias));
 	}
 
 	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
@@ -130,9 +133,10 @@ sealed class FileSystemItem : INotifyPropertyChanged
 
 	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
 	SolutionItemInfo GetIsSolutionItem() {
-		const string MISC_FILES = "{66A2671F-8FB5-11D2-AA7E-00C04F688DDE}";
 		var projItem = ServicesHelper.Instance.DTE.Solution.FindProjectItem(_Info.FullName);
-		return projItem != null && projItem.Kind != MISC_FILES ? SolutionItemInfo.Yes : SolutionItemInfo.No;
+		return projItem != null && projItem.Kind != VsShellHelper.MiscFilesKind
+			? SolutionItemInfo.Yes
+			: SolutionItemInfo.No;
 	}
 
 	internal void ClearIsSolutionItem() {

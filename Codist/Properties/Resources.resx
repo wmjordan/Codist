@@ -3247,7 +3247,7 @@ Click to view folder containing current file</value>
     <value>Invalid file name</value>
   </data>
   <data name="CMD_BackToCurrentFile" xml:space="preserve">
-    <value>Back to current file</value>
+    <value>Back to Current File</value>
   </data>
   <data name="CMD_GoToSolutionFolder" xml:space="preserve">
     <value>Go to Solution Folder</value>
@@ -3276,5 +3276,14 @@ Press down this button to keep list synchronizing with active code file</value>
   <data name="T_ConfirmLoadSolutionNote" xml:space="preserve">
     <value>Are you sure to load solution &lt;FILE&gt;?
 Unsaved changes will be discarded before reload.</value>
+  </data>
+  <data name="CMD_ListProjectFolders" xml:space="preserve">
+    <value>List Solution Project Folders</value>
+  </data>
+  <data name="T_UnloadedProject" xml:space="preserve">
+    <value>Unloaded Project: </value>
+  </data>
+  <data name="T_Solution" xml:space="preserve">
+    <value>Solution: </value>
   </data>
 </root>

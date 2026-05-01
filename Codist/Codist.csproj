@@ -101,6 +101,7 @@
     <Compile Include="Controls\ThemedHyperlink.cs" />
     <Compile Include="Commands\CancelRepeatingActionCommand.cs" />
     <Compile Include="FileBrowser\FileItemType.cs" />
+    <Compile Include="FileBrowser\FileList.Commands.cs" />
     <Compile Include="FileBrowser\FileSystemItem.cs" />
     <Compile Include="Helpers\ClassificationStyleHelper.cs" />
     <Compile Include="Helpers\EditCommands.cs" />

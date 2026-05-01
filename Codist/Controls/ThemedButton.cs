@@ -225,24 +225,35 @@ public sealed class ThemedControlGroup : Border
 
 	public IEnumerable<Control> Controls => _ControlPanel.Children.OfType<Control>();
 
+	public int ControlCount => _ControlPanel.Children.Count;
+
 	public ThemedControlGroup AddRange(params Control[] controls) {
+		var children = _ControlPanel.Children;
 		foreach (var item in controls) {
-			item.Padding = WpfHelper.NoMargin;
-			item.Margin = WpfHelper.NoMargin;
-			item.BorderThickness = WpfHelper.NoMargin;
-			item.MinHeight = 10;
-			_ControlPanel.Add(item);
+			SetItemStyle(item);
+			children.Add(item);
 		}
 		return this;
 	}
+
 	public ThemedControlGroup AddRange(IEnumerable<Control> controls) {
+		var children = _ControlPanel.Children;
 		foreach (var item in controls) {
-			item.Padding = WpfHelper.NoMargin;
-			item.Margin = WpfHelper.NoMargin;
-			item.BorderThickness = WpfHelper.NoMargin;
-			item.MinHeight = 10;
-			_ControlPanel.Add(item);
+			SetItemStyle(item);
+			children.Add(item);
 		}
 		return this;
+	}
+
+	public void Insert(int index, Control control) {
+		SetItemStyle(control);
+		_ControlPanel.Children.Insert(index, control);
+	}
+
+	static void SetItemStyle(Control item) {
+		item.Padding = WpfHelper.NoMargin;
+		item.Margin = WpfHelper.NoMargin;
+		item.BorderThickness = WpfHelper.NoMargin;
+		item.MinHeight = 10;
 	}
 }

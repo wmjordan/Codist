@@ -124,7 +124,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Back to current file.
+        ///   Looks up a localized string similar to Back to Current File.
         /// </summary>
         internal static string CMD_BackToCurrentFile {
             get {
@@ -1233,6 +1233,15 @@ namespace Codist.Properties {
         internal static string CMD_ListMembersOf {
             get {
                 return ResourceManager.GetString("CMD_ListMembersOf", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to List Solution Project Folders.
+        /// </summary>
+        internal static string CMD_ListProjectFolders {
+            get {
+                return ResourceManager.GetString("CMD_ListProjectFolders", resourceCulture);
             }
         }
         
@@ -8962,6 +8971,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Solution: .
+        /// </summary>
+        internal static string T_Solution {
+            get {
+                return ResourceManager.GetString("T_Solution", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Source file: .
         /// </summary>
         internal static string T_SourceFile {
@@ -9381,6 +9399,15 @@ namespace Codist.Properties {
         internal static string T_UnauthorizedFolder {
             get {
                 return ResourceManager.GetString("T_UnauthorizedFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unloaded Project: .
+        /// </summary>
+        internal static string T_UnloadedProject {
+            get {
+                return ResourceManager.GetString("T_UnloadedProject", resourceCulture);
             }
         }
         

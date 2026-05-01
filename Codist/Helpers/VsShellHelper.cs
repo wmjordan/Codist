@@ -16,6 +16,8 @@ namespace Codist;
 		public const string CSharpProjectKind = "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}",
 			ProjectFolderKind = "{66A26720-8FB5-11D2-AA7E-00C04F688DDE}",
 		MiscKind = "{66A2671D-8FB5-11D2-AA7E-00C04F688DDE}",
+		UnloadedProjectKind = "{67294A52-A4F0-11D2-AA88-00C04F688DDE}",
+		MiscFilesKind = "{66A2671F-8FB5-11D2-AA7E-00C04F688DDE}",
 			VsixProjectExtender = "VsixProjectExtender";
 
 		[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]

@@ -5,6 +5,9 @@ enum FileItemType
 	File,
 	Folder,
 	EmptyFolder,
-	InaccessibleFolder
+	InaccessibleFolder,
+	Solution,
+	Project,
+	UnloadedProject
 }
 

@@ -357,6 +357,13 @@ static partial class WpfHelper
 		element.Margin = element.Padding = element.BorderThickness = NoMargin;
 		return element;
 	}
+	public static TElement TinySpacing<TElement>(this TElement element)
+		where TElement : Control {
+		element.Margin = NoMargin;
+		element.Padding = TinyMargin;
+		element.MinHeight = 10;
+		return element;
+	}
 	public static TElement ClearMargin<TElement>(this TElement element)
 		where TElement : FrameworkElement {
 		element.Margin = NoMargin;
