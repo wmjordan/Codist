@@ -124,7 +124,7 @@ internal static class VsImageHelper
 			#endregion
 
 			#region Data & Configuration Files
-			".json" or ".yaml" or ".yml" or ".targets" => IconIds.SettingsFile,
+			".json" or ".yaml" or ".yml" or ".toml" or ".targets" or ".editorconfig" or ".properties" => IconIds.SettingsFile,
 			".xml" or ".xsl" or ".xslt" => IconIds.XMLFile,
 			".xsd" => IconIds.XMLSchemaFile,
 			".resx" => IconIds.ResxFile,
@@ -147,13 +147,14 @@ internal static class VsImageHelper
 
 			#region Image & Resource Files
 			".png" or ".jpg" or ".jpeg" or ".gif" or ".bmp" or ".webp" or ".svg" => IconIds.ImageFile,
+			".psd" => IconIds.ImageProcessorFile,
 			".ico" => IconIds.IconFile,
 			".cur" or ".ani" => IconIds.CursorFile,
 			".tif" or ".tiff" => IconIds.TifFile,
 			#endregion
 
 			#region Build Artifacts & Binary Files
-			".dll" or ".sys" or ".bin" or ".dat" => IconIds.BinaryFile,
+			".dll" or ".sys" or ".bin" or ".dat" or ".lib" => IconIds.BinaryFile,
 			".exe" or ".com" => IconIds.ExecutableFile,
 			".cmd" or ".bat" or ".wsf" or ".ps" or ".ps1" or ".bash" or ".sh" or ".zsh" or ".ksh" => IconIds.ConsoleFile,
 			".tmp" or ".temp" or ".obj" => IconIds.IntermediateFile,
@@ -172,11 +173,15 @@ internal static class VsImageHelper
 			#endregion
 
 			#region Miscellaneous Files
+			".gitmodules" or ".gitattributes" or ".gitconfig" => IconIds.GitFile,
+			".gitignore" => IconIds.GitIgnoreFile,
 			".jar" => IconIds.JARFile,
+			".nupkg" or ".nuspec" => IconIds.NuGetFile,
 			".zip" or ".rar" or ".7z" or ".cab" or ".gz" or ".tar" => IconIds.CompressedFile,
 			".pfx" or ".snk" or ".cer" => IconIds.SignatureFile,
 			".manifest" => IconIds.ManifestFile,
 			".suo" or ".user" or ".vssettings" or ".vsct" or ".vsixmanifest" or ".vsixlangpack" => IconIds.VisualStudioFile,
+			".po" or ".lang" => IconIds.LangFile,
 			".lnk" => IconIds.SymlinkFile,
 			".chm" or ".hlp" => IconIds.CompiledHelpFile,
 			".pdf" or ".epub" or ".mobi" or ".djvu" => IconIds.EBookFile,
@@ -198,7 +203,7 @@ internal static class VsImageHelper
 
 		public static ImageMoniker GetImageMonikerForFile(string fileName) {
 			var moniker = __GetImageMonikerForFile(__ServiceObject, fileName);
-			return moniker.Id < 0
+			return moniker.Id < 0 || moniker.Id == 1001
 				? new ImageMoniker { // use fallback icon mapper
 					Guid = KnownImageIds.ImageCatalogGuid,
 					Id = GetFileIconId(System.IO.Path.GetExtension(fileName))
@@ -212,10 +217,10 @@ internal static class VsImageHelper
 		internal static readonly Dictionary<string, int> Map = CreateMap();
 
 		static Dictionary<string, int> CreateMap() {
-			const int FIELD_COUNT_OF_KnownImageIds = 3760;
-			var d = new Dictionary<string, int>(FIELD_COUNT_OF_KnownImageIds);
+			var fields = typeof(KnownImageIds).GetFields();
+			var d = new Dictionary<string, int>(fields.Length);
 			var intType = typeof(int);
-			foreach (var item in typeof(KnownImageIds).GetFields()) {
+			foreach (var item in fields) {
 				if (item.FieldType == intType) {
 					d.Add(item.Name, (int)item.GetValue(null));
 				}

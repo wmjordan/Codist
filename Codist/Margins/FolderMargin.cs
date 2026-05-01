@@ -36,7 +36,7 @@ sealed partial class FolderMargin : IWpfTextViewMargin
 				Background = Brushes.Transparent,
 				BorderThickness = WpfHelper.NoMargin
 			}.TinySpacing();
-			_ProjectViewButton = new ThemedToggleButton(IconIds.RelatedProjects, R.CMD_ListProjectFolders, OnProjectViewClick) {
+			_ProjectViewButton = new ThemedToggleButton(IconIds.GoToSolutionProjects, R.CMD_ListProjectFolders, OnProjectViewClick) {
 				Background = Brushes.Transparent,
 				BorderThickness = WpfHelper.NoMargin
 			}.TinySpacing();

@@ -293,6 +293,7 @@ static class IconIds
 	public const int GoToCurrentFile = KnownImageIds.GenerateFile;
 	public const int GoToSolutionFolder = KnownImageIds.Solution;
 	public const int GoToProjectFolder = KnownImageIds.Library;
+	public const int GoToSolutionProjects = KnownImageIds.ApplicationGroup;
 	public const int Capitalize = KnownImageIds.Font;
 	public const int Uppercase = KnownImageIds.IncreaseFontSize;
 	public const int Lowercase = KnownImageIds.DecreaseFontSize;
@@ -348,6 +349,8 @@ static class IconIds
 	public const int CSS = KnownImageIds.CSSElement;
 	public const int FSFileNode = KnownImageIds.FSFileNode;
 	public const int FSProjectNode = KnownImageIds.FSProjectNode;
+	public const int GitFile = KnownImageIds.Git;
+	public const int GitIgnoreFile = KnownImageIds.GitNoColor;
 	public const int JSFile = KnownImageIds.JSScript;
 	public const int JSXFile = KnownImageIds.JSXScript;
 	public const int JSProjectNode = KnownImageIds.JSProjectNode;
@@ -365,12 +368,15 @@ static class IconIds
 	public const int HTMLFile = KnownImageIds.HTMLFile;
 	public const int IconFile = KnownImageIds.IconFile;
 	public const int ImageFile = KnownImageIds.Image;
+	public const int ImageProcessorFile = KnownImageIds.ImageGroup;
 	public const int JARFile = KnownImageIds.JARFile;
 	public const int PDBFile = KnownImageIds.PDBFile;
 	public const int PHPFile = KnownImageIds.PHPFile;
 	public const int ManifestFile = KnownImageIds.ManifestFile;
+	public const int NuGetFile = KnownImageIds.NuGet;
 	public const int MarkdownFile = KnownImageIds.MarkdownFile;
 	public const int TextFile = KnownImageIds.TextFile;
+	public const int LangFile = KnownImageIds.HanCharacter;
 	public const int ConfigurationFile = KnownImageIds.ConfigurationFile;
 	public const int SettingsFile = KnownImageIds.SettingsFile;
 	public const int SignatureFile = KnownImageIds.Certificate;
