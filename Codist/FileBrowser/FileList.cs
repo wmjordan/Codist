@@ -166,6 +166,7 @@ sealed partial class FileList : VirtualList
 
 		_GoToCurrentFileButton.Visibility = Visibility.Collapsed;
 		_FilterBox.TextChanged += FilterBox_TextChanged;
+		_FilterBox.Loaded += FilterBox_Loaded;
 	}
 
 	public string CurrentFile {
@@ -267,6 +268,10 @@ sealed partial class FileList : VirtualList
 			_LockFilter = false;
 		}
 		ApplyFilter();
+	}
+
+	void FilterBox_Loaded(object sender, RoutedEventArgs e) {
+		_FilterBox.Focus();
 	}
 
 	void FilterBox_TextChanged(object sender, TextChangedEventArgs e) {
@@ -505,7 +510,7 @@ sealed partial class FileList : VirtualList
 		if (_Items.Count != 0 && SelectedIndex < 0) {
 			SelectedIndex = 0;
 		}
-		Focus();
+		_FilterBox.Focus();
 	}
 
 	void SetCurrentDir(string directoryPath) {
