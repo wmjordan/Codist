@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows;
@@ -7,19 +8,24 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using Codist.Controls;
 using Codist.FileBrowser;
+using EnvDTE;
+using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using R = Codist.Properties.Resources;
 
 namespace Codist.Margins;
 
-sealed partial class FolderMargin : IWpfTextViewMargin
+sealed class FolderMargin : IWpfTextViewMargin
 {
 	internal const string Name = nameof(FolderMargin);
+	static readonly Thickness __ContainerMargin = CodistPackage.VsVersion.Major < 17 ? WpfHelper.NoMargin : new Thickness(2);
 
 	readonly ThemedControlGroup _Container;
 	readonly ThemedToggleButton _FileButton, _SolutionButton, _ProjectViewButton;
-	ThemedToggleButton _ProjectButton;
 	readonly IWpfTextView _View;
+	readonly ITextDocument _Document;
+	ThemedToggleButton _ProjectButton;
 	Popup _FilePopup;
 	FileList _FileList;
 	CancellationTokenSource _CancellationTokenSource;
@@ -30,34 +36,54 @@ sealed partial class FolderMargin : IWpfTextViewMargin
 
 	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
 	public FolderMargin(IWpfTextView view) {
-		_Container = new ThemedControlGroup { Margin = new Thickness(2), Resources = SharedDictionaryManager.ThemedControls };
-		if (!String.IsNullOrEmpty(ServicesHelper.Instance.DTE.Solution.FullName)) {
+		string path;
+		_Container = new ThemedControlGroup {
+			Margin = __ContainerMargin,
+			Resources = SharedDictionaryManager.ThemedControls
+		};
+		if (!String.IsNullOrEmpty(path = ServicesHelper.Instance.DTE.Solution.FullName)) {
 			_SolutionButton = new ThemedToggleButton(IconIds.GoToSolutionFolder, R.CMD_GoToSolutionFolder, OnSolutionClick) {
 				Background = Brushes.Transparent,
 				BorderThickness = WpfHelper.NoMargin
 			}.TinySpacing();
+			_SolutionButton.SetText(Path.GetFileNameWithoutExtension(path));
+			_SolutionButton.Text.Margin = WpfHelper.SmallHorizontalMargin;
+
 			_ProjectViewButton = new ThemedToggleButton(IconIds.GoToSolutionProjects, R.CMD_ListProjectFolders, OnProjectViewClick) {
 				Background = Brushes.Transparent,
 				BorderThickness = WpfHelper.NoMargin
 			}.TinySpacing();
+			_ProjectViewButton.SetText("\\");
+			_ProjectViewButton.Text.Margin = WpfHelper.SmallHorizontalMargin;
 
 			_Container.AddRange(_ProjectViewButton, _SolutionButton);
 
-			_Container.Loaded += AddProjectButtonOnLoaded;
+			view.VisualElement.Loaded += AddProjectButtonOnLoaded;
 		}
+
+		_Document = view.TextBuffer.GetTextDocument();
 		_FileButton = new ThemedToggleButton(IconIds.Folder, R.CMDT_ClickToViewFolder, OnFolderClick) {
 			Background = Brushes.Transparent,
 			BorderThickness = WpfHelper.NoMargin
 		}.TinySpacing();
+		_Document.FileActionOccurred += HandleDocumentFileActivation;
+		_FileButton.SetText(Path.GetFileName(Path.GetDirectoryName(_Document.FilePath)));
+		_FileButton.Text.Margin = WpfHelper.SmallHorizontalMargin;
+
 		_Container.AddRange(_FileButton);
 
 		_View = view;
 	}
 
 	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.EventHandler)]
-	void AddProjectButtonOnLoaded(object sender, RoutedEventArgs e) {
-		_Container.Loaded -= AddProjectButtonOnLoaded;
-		var project = ServicesHelper.Instance.DTE.ActiveDocument?.ProjectItem?.ContainingProject;
+	void AddProjectButtonOnLoaded(object sender, EventArgs e) {
+		_View.VisualElement.Loaded -= AddProjectButtonOnLoaded;
+		var dte = ServicesHelper.Instance.DTE;
+		// hack: sometimes when the View is ready, but dte.ActiveDocument is somehow null,
+		//   we try alternative ways
+		var project = dte.ActiveDocument?.ProjectItem?.ContainingProject
+			?? GetProjectFromTextView()
+			?? dte.Solution.FindProjectItem(_View.TextBuffer.GetTextDocument().FilePath)?.ContainingProject;
 		if (project?.IsMiscOrProjectFolder() != false) {
 			return;
 		}
@@ -65,6 +91,8 @@ sealed partial class FolderMargin : IWpfTextViewMargin
 			Background = Brushes.Transparent,
 			BorderThickness = WpfHelper.NoMargin
 		}.TinySpacing();
+		_ProjectButton.SetText(Path.GetFileNameWithoutExtension(project.UniqueName));
+		_ProjectButton.Text.Margin = WpfHelper.SmallHorizontalMargin;
 		_Container.Insert(_Container.ControlCount - 1, _ProjectButton);
 	}
 
@@ -144,6 +172,10 @@ sealed partial class FolderMargin : IWpfTextViewMargin
 		}
 	}
 
+	void HandleDocumentFileActivation(object sender, TextDocumentFileActionEventArgs e) {
+		_FileButton.SetText(Path.GetFileNameWithoutExtension(e.FilePath));
+	}
+
 	void Popup_Closed(object sender, EventArgs e) {
 		_FileButton.IsChecked = false;
 		_SolutionButton?.IsChecked = false;
@@ -161,10 +193,19 @@ sealed partial class FolderMargin : IWpfTextViewMargin
 
 	public void Dispose() {
 		_CancellationTokenSource.CancelAndDispose();
+		_Document.FileActionOccurred -= HandleDocumentFileActivation;
+		_View.VisualElement.Loaded -= AddProjectButtonOnLoaded;
 	}
 
 	ITextViewMargin ITextViewMargin.GetTextViewMargin(string marginName) {
 		return marginName == Name ? this : null;
 	}
 
+	Project GetProjectFromTextView() {
+		return _Document != null
+			&& ServicesHelper.Get<IVsRunningDocumentTable, SVsRunningDocumentTable>()
+				.FindAndLockDocument((uint)_VSRDTFLAGS.RDT_NoLock, _Document.FilePath, out var hierarchy, out _, out _, out _) == 0
+			? hierarchy.GetExtObjectAs<Project>()
+			: null;
+	}
 }
