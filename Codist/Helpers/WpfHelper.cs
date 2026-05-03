@@ -579,7 +579,7 @@ static partial class WpfHelper
 		}
 		return null;
 	}
-	public static void AddRange(this ItemCollection items, IEnumerable<object> objects) {
+	public static void AddRange(this ItemCollection items, params IEnumerable<object> objects) {
 		foreach (var item in objects) {
 			items.Add(item);
 		}

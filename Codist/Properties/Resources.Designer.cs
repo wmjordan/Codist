@@ -1174,6 +1174,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invert Selection.
+        /// </summary>
+        internal static string CMD_InvertSelection {
+            get {
+                return ResourceManager.GetString("CMD_InvertSelection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Italic.
         /// </summary>
         internal static string CMD_Italic {
@@ -2035,6 +2044,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Select None.
+        /// </summary>
+        internal static string CMD_SelectNone {
+            get {
+                return ResourceManager.GetString("CMD_SelectNone", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Select Symbol in Document
         ///Select all occurrences of current symbol in active document.
         /// </summary>
@@ -2239,6 +2257,15 @@ namespace Codist.Properties {
         internal static string CMD_ToggleBreakpoint {
             get {
                 return ResourceManager.GetString("CMD_ToggleBreakpoint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Toggle Multi-selection Mode.
+        /// </summary>
+        internal static string CMD_ToggleMultiSelectionMode {
+            get {
+                return ResourceManager.GetString("CMD_ToggleMultiSelectionMode", resourceCulture);
             }
         }
         
@@ -3169,8 +3196,8 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Multi-selection Mode
-        ///Press down this button to enter multi-selection mode that single clicking on items will toggle their selection, making it easier to select multiple items.
+        ///   Looks up a localized string similar to Toggle Multi-selection Mode
+        ///Enter multi-selection mode that single clicking on items will toggle their selection, making it easier to select multiple items.
         ///To multi-select items without entering this mode, press Ctrl or Shift key when clicking on items..
         /// </summary>
         internal static string CMDT_ToggleMultiSelectionMode {

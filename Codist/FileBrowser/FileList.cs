@@ -29,9 +29,9 @@ sealed partial class FileList : VirtualList
 	readonly TextBlock _PathBlock, _SelectionInfoBlock;
 	readonly TextBox _FilterBox;
 	readonly ThemedControlGroup _FilterGroup;
-	readonly ThemedToggleButton _FolderFilterButton, _FileFilterButton, _SelectionModeButton;
+	readonly ThemedToggleButton _FolderFilterButton, _FileFilterButton, _SelectionMenuButton;
 	readonly ThemedButton _GoToCurrentFileButton, _GoToSolutionFolderButton, _GoToProjectFolderButton;
-	readonly ContextMenu _FileMenu;
+	readonly ContextMenu _FileMenu, _SelectionMenu;
 	readonly Grid _PathControl;
 
 	ObservableCollection<FileSystemItem> _Items;
@@ -98,7 +98,7 @@ sealed partial class FileList : VirtualList
 			Margin = WpfHelper.SmallMargin,
 			Children = {
 				new ThemedControlGroup(
-					_SelectionModeButton = new ThemedToggleButton(IconIds.MultiSelection, R.CMDT_ToggleMultiSelectionMode, ToggleMultiSelectionMode)
+					_SelectionMenuButton = new ThemedToggleButton(IconIds.MultiSelection, R.T_Selection, ShowSelectionMenu)
 					) {
 					Margin = WpfHelper.GlyphMargin,
 					VerticalAlignment = VerticalAlignment.Center,
@@ -142,6 +142,7 @@ sealed partial class FileList : VirtualList
 		}
 		#endregion
 		ContextMenu = m = _FileMenu = new() {
+			PlacementTarget = this,
 			Resources = SharedDictionaryManager.ContextMenu,
 		};
 		this.ReferenceCrispImageBackground(CommonControlsColors.ComboBoxListBackgroundColorKey)
@@ -154,6 +155,13 @@ sealed partial class FileList : VirtualList
 		_GoToCurrentFileButton.Visibility = Visibility.Collapsed;
 		_FilterBox.TextChanged += FilterBox_TextChanged;
 		_FilterBox.Loaded += FilterBox_Loaded;
+
+		_SelectionMenu = new() {
+			PlacementTarget = _SelectionMenuButton,
+			Placement = PlacementMode.Bottom,
+			Resources = SharedDictionaryManager.ContextMenu,
+		};
+		_SelectionMenu.Closed += HandleSelectionMenuClosed;
 	}
 
 	public string CurrentFile {
@@ -312,6 +320,25 @@ sealed partial class FileList : VirtualList
 		}
 	}
 
+	void ShowSelectionMenu(object sender, EventArgs e) {
+		if (_SelectionMenuButton.IsChecked != true) {
+			return;
+		}
+		if (!_SelectionMenu.HasItems) {
+			_SelectionMenu.Items.AddRange(
+				new ThemedMenuItem(IconIds.MultiSelection, R.CMD_ToggleMultiSelectionMode, ToggleMultiSelectionMode, R.CMDT_ToggleMultiSelectionMode),
+				new ThemedMenuItem(IconIds.SelectAll, R.CMD_SelectAll, HandleSelectAll),
+				new ThemedMenuItem(IconIds.None, R.CMD_SelectNone, HandleSelectNone)
+			);
+		}
+		((ThemedMenuItem)_SelectionMenu.Items[0]).Icon = VsImageHelper.GetImage(SelectionMode == SelectionMode.Multiple ? IconIds.Enabled : IconIds.Default);
+		_SelectionMenu.IsOpen = true;
+	}
+
+	void HandleSelectionMenuClosed(object sender, EventArgs e) {
+		_SelectionMenuButton.IsChecked = false;
+	}
+
 	protected override void OnSelectionChanged(SelectionChangedEventArgs e) {
 		base.OnSelectionChanged(e);
 		_SelectionInfoBlock.Inlines.Clear();
@@ -396,7 +423,7 @@ sealed partial class FileList : VirtualList
 		switch (_ViewMode = viewMode) {
 			case ViewMode.File:
 				_PathControl.Visibility
-					= _SelectionModeButton.Visibility
+					= _SelectionMenuButton.Visibility
 					= _FilterGroup.Visibility
 					= Visibility.Visible;
 				ContextMenu = _FileMenu;
@@ -405,7 +432,7 @@ sealed partial class FileList : VirtualList
 				_PathControl.Visibility = Visibility.Collapsed;
 				BuildPathNavigator(String.Empty);
 				_GoToCurrentFileButton.ToggleVisibility(_ActiveFilePath != null);
-				_SelectionModeButton.Visibility
+				_SelectionMenuButton.Visibility
 					= _GoToSolutionFolderButton.Visibility
 					= _GoToProjectFolderButton.Visibility
 					= _FilterGroup.Visibility

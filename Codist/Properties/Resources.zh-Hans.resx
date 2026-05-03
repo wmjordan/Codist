@@ -3250,7 +3250,7 @@ Shift: 匹配大小写</value>
   </data>
   <data name="CMDT_ToggleMultiSelectionMode" xml:space="preserve">
     <value>切换多选模式
-按下此按钮进入多选模式。点击列表项将切换其选中状态，便于选中多项。
+进入多选模式，点击列表项将切换其选中状态，便于选中多项。
 非多选模式下，按Ctrl或Shift键选择多项。</value>
   </data>
   <data name="T_FileExplorer" xml:space="preserve">
@@ -3272,5 +3272,14 @@ Shift: 匹配大小写</value>
   </data>
   <data name="T_Solution" xml:space="preserve">
     <value>解决方案: </value>
+  </data>
+  <data name="CMD_ToggleMultiSelectionMode" xml:space="preserve">
+    <value>切换多重选择方式</value>
+  </data>
+  <data name="CMD_SelectNone" xml:space="preserve">
+    <value>取消选择</value>
+  </data>
+  <data name="CMD_InvertSelection" xml:space="preserve">
+    <value>反转选中内容</value>
   </data>
 </root>

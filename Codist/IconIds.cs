@@ -223,7 +223,7 @@ static class IconIds
 	public const int SelectCodeWithoutTrivia = KnownImageIds.Uncomment;
 	public const int SelectBlock = KnownImageIds.MatchBrace;
 	public const int SelectText = KnownImageIds.RectangleSelection;
-	public const int SelectAll = KnownImageIds.SelectAll;
+	public const int SelectAll = KnownImageIds.FitSelection;
 	public const int Open = KnownImageIds.Open;
 	public const int Folder = KnownImageIds.FolderClosed;
 	public const int NonEmptyFolder = KnownImageIds.SamplesFolder;

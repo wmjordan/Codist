@@ -323,6 +323,15 @@ partial class FileList
 	}
 	#endregion
 
+	#region Selection
+	void HandleSelectAll(object sender, EventArgs args) {
+		SelectAll();
+	}
+	void HandleSelectNone(object sender, EventArgs args) {
+		SelectedIndex = -1;
+	}
+	#endregion
+
 	static class NativeMethods
 	{
 		[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]

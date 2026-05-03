@@ -3262,8 +3262,8 @@ Click to view folder containing current file</value>
     <value>Directory does not exist:</value>
   </data>
   <data name="CMDT_ToggleMultiSelectionMode" xml:space="preserve">
-    <value>Multi-selection Mode
-Press down this button to enter multi-selection mode that single clicking on items will toggle their selection, making it easier to select multiple items.
+    <value>Toggle Multi-selection Mode
+Enter multi-selection mode that single clicking on items will toggle their selection, making it easier to select multiple items.
 To multi-select items without entering this mode, press Ctrl or Shift key when clicking on items.</value>
   </data>
   <data name="T_FileExplorer" xml:space="preserve">
@@ -3285,5 +3285,14 @@ Unsaved changes will be discarded before reload.</value>
   </data>
   <data name="T_Solution" xml:space="preserve">
     <value>Solution: </value>
+  </data>
+  <data name="CMD_ToggleMultiSelectionMode" xml:space="preserve">
+    <value>Toggle Multi-selection Mode</value>
+  </data>
+  <data name="CMD_SelectNone" xml:space="preserve">
+    <value>Select None</value>
+  </data>
+  <data name="CMD_InvertSelection" xml:space="preserve">
+    <value>Invert Selection</value>
   </data>
 </root>
