@@ -805,10 +805,11 @@ static class TextEditorHelper
 
 	public static IWpfTextView GetWpfTextView(this UIElement element) {
 		foreach (var item in __WpfTextViews) {
-			if (item.VisualElement.IsVisible == false) {
+			var e = item.VisualElement;
+			if (!e.IsVisible) {
 				continue;
 			}
-			if (item.VisualElement.Contains(element.TranslatePoint(new Point(0,0), item.VisualElement))) {
+			if (e.Contains(element.TranslatePoint(new Point(0,0), e))) {
 				return item;
 			}
 		}

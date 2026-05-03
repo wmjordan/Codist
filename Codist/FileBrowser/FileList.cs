@@ -523,9 +523,7 @@ sealed partial class FileList : VirtualList
 			IsEnabled = false;
 			return Task.CompletedTask;
 		}
-		else {
-			IsEnabled = true;
-		}
+		IsEnabled = true;
 		var (folder, _) = FileHelper.DeconstructPath(_ActiveFilePath, true);
 		return LoadCurrentDirectoryAsync(folder, cancellationToken);
 	}

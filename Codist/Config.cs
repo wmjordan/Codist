@@ -261,7 +261,7 @@ namespace Codist
 				config.SearchEngines.RemoveAll(i => String.IsNullOrWhiteSpace(i.Name) || String.IsNullOrWhiteSpace(i.Pattern));
 				config.WrapTexts.RemoveAll(i => String.IsNullOrWhiteSpace(i.Pattern));
 			}
-			var removeFontNames = System.Windows.Forms.Control.ModifierKeys == System.Windows.Forms.Keys.Control;
+			var removeFontNames = UIHelper.IsCtrlDown;
 			LoadStyleEntries<CodeStyle, CodeStyleTypes>(config.GeneralStyles, removeFontNames);
 			LoadStyleEntries<CommentStyle, CommentStyleTypes>(config.CommentStyles, removeFontNames);
 			LoadStyleEntries<CppStyle, CppStyleTypes>(config.CppStyles, removeFontNames);
