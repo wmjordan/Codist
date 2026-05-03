@@ -14,7 +14,7 @@ namespace Codist.Commands;
 [Guid(WindowGuidString)]
 public class FileExplorerWindow : ToolWindowPane
 {
-	internal const string WindowGuidString = "f4fff674-6d0e-4cae-8619-8a66bb65c7b5";
+	const string WindowGuidString = "f4fff674-6d0e-4cae-8619-8a66bb65c7b5";
 	internal static readonly Guid WindowGuid = new(WindowGuidString);
 
 	FileList _FileList;
