@@ -3295,4 +3295,23 @@ Unsaved changes will be discarded before reload.</value>
   <data name="CMD_InvertSelection" xml:space="preserve">
     <value>Invert Selection</value>
   </data>
+  <data name="CMDT_ListOpenDocuments" xml:space="preserve">
+    <value>List Opened Documents
+List currently opened code documents</value>
+  </data>
+  <data name="T_OpenedDocuments" xml:space="preserve">
+    <value>Opened Documents</value>
+  </data>
+  <data name="T_SolutionProjects" xml:space="preserve">
+    <value>Solution Projects</value>
+  </data>
+  <data name="T_CurrentProjectFolder" xml:space="preserve">
+    <value>Current Project Folder</value>
+  </data>
+  <data name="T_CurrentDocumentFolder" xml:space="preserve">
+    <value>Current Document Folder</value>
+  </data>
+  <data name="T_SolutionFolder" xml:space="preserve">
+    <value>Solution Folder</value>
+  </data>
 </root>

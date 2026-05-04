@@ -3282,4 +3282,23 @@ Shift: 匹配大小写</value>
   <data name="CMD_InvertSelection" xml:space="preserve">
     <value>反转选中内容</value>
   </data>
+  <data name="CMDT_ListOpenDocuments" xml:space="preserve">
+    <value>列出已打开的文档
+列出当前打开的代码文档</value>
+  </data>
+  <data name="T_OpenedDocuments" xml:space="preserve">
+    <value>已打开的文档</value>
+  </data>
+  <data name="T_SolutionProjects" xml:space="preserve">
+    <value>解决方案及项目</value>
+  </data>
+  <data name="T_CurrentProjectFolder" xml:space="preserve">
+    <value>当前项目文件夹</value>
+  </data>
+  <data name="T_CurrentDocumentFolder" xml:space="preserve">
+    <value>当前文档文件夹</value>
+  </data>
+  <data name="T_SolutionFolder" xml:space="preserve">
+    <value>解决方案文件夹</value>
+  </data>
 </root>

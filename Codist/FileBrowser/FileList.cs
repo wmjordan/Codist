@@ -31,7 +31,7 @@ sealed partial class FileList : VirtualList
 	readonly ThemedControlGroup _FilterGroup;
 	readonly ThemedToggleButton _FolderFilterButton, _FileFilterButton, _SelectionMenuButton;
 	readonly ThemedButton _GoToCurrentFileButton, _GoToSolutionFolderButton, _GoToProjectFolderButton;
-	readonly ContextMenu _FileMenu, _SelectionMenu;
+	readonly ContextMenu _FileMenu, _DocumentMenu, _SelectionMenu;
 	readonly Grid _PathControl;
 
 	ObservableCollection<FileSystemItem> _Items;
@@ -58,7 +58,7 @@ sealed partial class FileList : VirtualList
 				new Setter(PaddingProperty, WpfHelper.TinyMargin),
 				new Setter(MaxWidthProperty, 550d),
 				new Setter(ToolTipService.ToolTipProperty, new Binding {
-					Converter = new FileSystemItemToTooltipConverter()
+					Converter = new FileSystemItemToTooltipConverter(this)
 				}),
 				new Setter(ToolTipService.PlacementProperty, PlacementMode.Right),
 				new Setter(ToolTipService.ShowDurationProperty, 30000),
@@ -162,6 +162,11 @@ sealed partial class FileList : VirtualList
 			Resources = SharedDictionaryManager.ContextMenu,
 		};
 		_SelectionMenu.Closed += HandleSelectionMenuClosed;
+
+		_DocumentMenu = new() {
+			PlacementTarget = this,
+			Resources = SharedDictionaryManager.ContextMenu,
+		};
 	}
 
 	public string CurrentFile {
@@ -219,19 +224,26 @@ sealed partial class FileList : VirtualList
 			return;
 		}
 		if (!ContextMenu.HasItems) {
-			ContextMenu.Items.AddRange(
-				new ListItemContextMenuItem(IconIds.OpenWithVisualStudio, R.CMD_OpenWithVS, ActivationCondition.HasFile, OpenFilesWithVisualStudio),
-				new ListItemContextMenuItem(IconIds.LocateInSolutionExplorer, R.CMD_LocateInSolutionExplorer, ActivationCondition.HasSingleSolutionItem, LocateInSolutionExplorer),
-				new Separator(),
-				new ListItemContextMenuItem(IconIds.Cut, R.CMD_Cut, ActivationCondition.HasFileOrFolder, CutFiles),
-				new ListItemContextMenuItem(IconIds.Copy, R.CMD_Copy, ActivationCondition.HasFileOrFolder, CopyFiles),
-				new ListItemContextMenuItem(IconIds.Paste, R.CMD_Paste, ActivationCondition.HasClipboardFile, PasteFiles),
-				new Separator(),
-				new ListItemContextMenuItem(IconIds.Delete, R.CMD_Delete, ActivationCondition.HasFileOrFolder, DeleteFiles),
-				new Separator(),
-				new ListItemContextMenuItem(IconIds.Rename, R.CMD_Rename, ActivationCondition.HasSingleItem, StartRename),
-				new ListItemContextMenuItem(IconIds.Properties, R.CMD_Properties, ActivationCondition.HasFileOrFolder, ShowProperties)
-			);
+			if (ContextMenu == _FileMenu) {
+				_FileMenu.Items.AddRange(
+					new ListItemContextMenuItem(IconIds.OpenWithVisualStudio, R.CMD_OpenWithVS, ActivationCondition.HasFile, OpenFilesWithVisualStudio),
+					new ListItemContextMenuItem(IconIds.LocateInSolutionExplorer, R.CMD_LocateInSolutionExplorer, ActivationCondition.HasSingleSolutionItem, LocateInSolutionExplorer),
+					new Separator(),
+					new ListItemContextMenuItem(IconIds.Cut, R.CMD_Cut, ActivationCondition.HasFileOrFolder, CutFiles),
+					new ListItemContextMenuItem(IconIds.Copy, R.CMD_Copy, ActivationCondition.HasFileOrFolder, CopyFiles),
+					new ListItemContextMenuItem(IconIds.Paste, R.CMD_Paste, ActivationCondition.HasClipboardFile, PasteFiles),
+					new Separator(),
+					new ListItemContextMenuItem(IconIds.Delete, R.CMD_Delete, ActivationCondition.HasFileOrFolder, DeleteFiles),
+					new Separator(),
+					new ListItemContextMenuItem(IconIds.Rename, R.CMD_Rename, ActivationCondition.HasSingleItem, StartRename),
+					new ListItemContextMenuItem(IconIds.Properties, R.CMD_Properties, ActivationCondition.HasFileOrFolder, ShowProperties)
+				);
+			}
+			else if (ContextMenu == _DocumentMenu) {
+				_DocumentMenu.Items.AddRange(
+					new ListItemContextMenuItem(IconIds.LocateInSolutionExplorer, R.CMD_LocateInSolutionExplorer, ActivationCondition.HasSingleSolutionItem, LocateInSolutionExplorer)
+				);
+			}
 		}
 		ActivationCondition condition = default;
 		if (SelectedItem != null) {
@@ -374,8 +386,23 @@ sealed partial class FileList : VirtualList
 		foreach (EnvDTE.Project project in projects) {
 			AddProject(project, items, current);
 		}
-		_Items = new ObservableCollection<FileSystemItem>(items);
-		ItemsSource = _ItemsView = CollectionViewSource.GetDefaultView(_Items);
+		SetItems(items);
+	}
+
+	public void LoadOpenedDocuments() {
+		ThreadHelper.ThrowIfNotOnUIThread();
+		SetViewMode(ViewMode.Documents);
+		var documents = ServicesHelper.Instance.DTE.Documents;
+		var items = new List<FileSystemItem>(documents.Count + 1);
+		foreach (EnvDTE.Document document in documents) {
+			var filePath = document.FullName;
+			if (items.Any(i => FileHelper.AreFileNamesEqual(i.FullPath, filePath))) {
+				continue;
+			}
+			items.Add(new(new FileInfo(filePath), FileHelper.AreFileNamesEqual(filePath, _ActiveFilePath)));
+		}
+		items.Sort((x, y) => String.Compare(x.Name, y.Name, true));
+		SetItems(items);
 	}
 
 	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
@@ -430,7 +457,6 @@ sealed partial class FileList : VirtualList
 				break;
 			case ViewMode.SolutionProjects:
 				_PathControl.Visibility = Visibility.Collapsed;
-				BuildPathNavigator(String.Empty);
 				_GoToCurrentFileButton.ToggleVisibility(_ActiveFilePath != null);
 				_SelectionMenuButton.Visibility
 					= _GoToSolutionFolderButton.Visibility
@@ -439,6 +465,22 @@ sealed partial class FileList : VirtualList
 					= Visibility.Collapsed;
 				ContextMenu = null;
 				break;
+			case ViewMode.Documents:
+				_GoToCurrentFileButton.Visibility = Visibility.Visible;
+				_PathControl.Visibility = _FilterGroup.Visibility = Visibility.Collapsed;
+				ContextMenu = _DocumentMenu;
+				break;
+		}
+	}
+
+	void SetItems(List<FileSystemItem> items) {
+		_Items = new ObservableCollection<FileSystemItem>(items);
+		ItemsSource = _ItemsView = CollectionViewSource.GetDefaultView(_Items);
+		var highlightItem = items.FirstOrDefault(i => i.IsCurrent);
+		ApplyFilter();
+		if (highlightItem != null) {
+			SelectedItem = highlightItem;
+			this.ScrollToSelectedItem();
 		}
 	}
 
@@ -559,6 +601,7 @@ sealed partial class FileList : VirtualList
 
 	public async Task LoadCurrentDirectoryAsync(string directory, CancellationToken cancellationToken = default) {
 		SetCurrentDir(directory);
+		SetViewMode(ViewMode.File);
 		await LoadDirectoryAsync(_ActiveDirPath, cancellationToken);
 
 		var highlightItem = _Items.FirstOrDefault(i => i.IsCurrent);
@@ -599,19 +642,11 @@ sealed partial class FileList : VirtualList
 
 	async Task UncheckedLoadDirectoryAsync(string directoryPath, CancellationToken cancellationToken) {
 		try {
-			var (newItems, folders, files) = GetFileSystemItems(directoryPath, _ActiveFilePath, cancellationToken);
+			var (items, folders, files) = GetFileSystemItems(directoryPath, _ActiveFilePath, cancellationToken);
 			_FolderFilterButton.SetText(folders.ToText());
 			_FileFilterButton.SetText(files.ToText());
 			await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
-			_Items = new ObservableCollection<FileSystemItem>(newItems);
-			ItemsSource = _ItemsView = CollectionViewSource.GetDefaultView(_Items);
-			var highlightItem = newItems.FirstOrDefault(i => i.IsCurrent);
-			ApplyFilter();
-			if (highlightItem != null) {
-				SelectedItem = highlightItem;
-				this.ScrollToSelectedItem();
-			}
-			Focus();
+			SetItems(items);
 		}
 		catch (OperationCanceledException) { }
 		catch (Exception ex) {
@@ -879,6 +914,7 @@ sealed partial class FileList : VirtualList
 	{
 		File,
 		SolutionProjects,
+		Documents,
 	}
 
 	sealed class PathSegment(string path, int index)
@@ -892,8 +928,10 @@ sealed partial class FileList : VirtualList
 		}
 	}
 
-	sealed class FileSystemItemToTooltipConverter : IValueConverter
+	sealed class FileSystemItemToTooltipConverter(FileList list) : IValueConverter
 	{
+		readonly FileList _List = list;
+
 		public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
 			if (value is not FileSystemItem item) return null;
 
@@ -916,6 +954,10 @@ sealed partial class FileList : VirtualList
 
 			if (item.Type == FileItemType.InaccessibleFolder) {
 				return panel;
+			}
+
+			if (_List._ViewMode != ViewMode.File && item.Type == FileItemType.File) {
+				panel.Children.Add(new TextBlock { Text = R.T_Folder + Path.GetDirectoryName(item.FullPath) });
 			}
 
 			panel.Children.Add(new TextBlock { Text = R.T_CreateTime + item.CreationTime.ToString("yyyy-MM-dd HH:mm:ss") });

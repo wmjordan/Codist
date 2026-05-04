@@ -4,11 +4,13 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using Codist.Controls;
 using Codist.FileBrowser;
 using EnvDTE;
+using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
@@ -22,7 +24,7 @@ sealed class FolderMargin : IWpfTextViewMargin
 	static readonly Thickness __ContainerMargin = CodistPackage.VsVersion.Major < 17 ? WpfHelper.NoMargin : new Thickness(2);
 
 	readonly ThemedControlGroup _Container;
-	readonly ThemedToggleButton _FileButton, _SolutionButton, _ProjectViewButton;
+	readonly ThemedToggleButton _ProjectViewButton, _SolutionButton, _FolderButton, _FileButton;
 	readonly IWpfTextView _View;
 	readonly ITextDocument _Document;
 	ThemedToggleButton _ProjectButton;
@@ -31,7 +33,7 @@ sealed class FolderMargin : IWpfTextViewMargin
 	CancellationTokenSource _CancellationTokenSource;
 
 	public FrameworkElement VisualElement => _Container;
-	public double MarginSize => _FileButton.RenderSize.Height;
+	public double MarginSize => _FolderButton.RenderSize.Height;
 	public bool Enabled => true;
 
 	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
@@ -42,13 +44,6 @@ sealed class FolderMargin : IWpfTextViewMargin
 			Resources = SharedDictionaryManager.ThemedControls
 		};
 		if (!String.IsNullOrEmpty(path = ServicesHelper.Instance.DTE.Solution.FullName)) {
-			_SolutionButton = new ThemedToggleButton(IconIds.GoToSolutionFolder, R.CMD_GoToSolutionFolder, OnSolutionClick) {
-				Background = Brushes.Transparent,
-				BorderThickness = WpfHelper.NoMargin
-			}.TinySpacing();
-			_SolutionButton.SetText(Path.GetFileNameWithoutExtension(path));
-			_SolutionButton.Text.Margin = WpfHelper.SmallHorizontalMargin;
-
 			_ProjectViewButton = new ThemedToggleButton(IconIds.GoToSolutionProjects, R.CMD_ListProjectFolders, OnProjectViewClick) {
 				Background = Brushes.Transparent,
 				BorderThickness = WpfHelper.NoMargin
@@ -56,21 +51,37 @@ sealed class FolderMargin : IWpfTextViewMargin
 			_ProjectViewButton.SetText("\\");
 			_ProjectViewButton.Text.Margin = WpfHelper.SmallHorizontalMargin;
 
+			_SolutionButton = new ThemedToggleButton(IconIds.GoToSolutionFolder, R.CMD_GoToSolutionFolder, OnSolutionClick) {
+				Background = Brushes.Transparent,
+				BorderThickness = WpfHelper.NoMargin
+			}.TinySpacing();
+			_SolutionButton.SetText(Path.GetFileNameWithoutExtension(path));
+			_SolutionButton.Text.Margin = WpfHelper.SmallHorizontalMargin;
+
 			_Container.AddRange(_ProjectViewButton, _SolutionButton);
 
 			view.VisualElement.Loaded += AddProjectButtonOnLoaded;
 		}
 
 		_Document = view.TextBuffer.GetTextDocument();
-		_FileButton = new ThemedToggleButton(IconIds.Folder, R.CMDT_ClickToViewFolder, OnFolderClick) {
+		_Document.FileActionOccurred += HandleDocumentFileActivation;
+
+		var (dir, file) = FileHelper.DeconstructPath(_Document.FilePath, true);
+		_FolderButton = new ThemedToggleButton(IconIds.Folder, R.CMDT_ClickToViewFolder, OnFolderClick) {
 			Background = Brushes.Transparent,
 			BorderThickness = WpfHelper.NoMargin
 		}.TinySpacing();
-		_Document.FileActionOccurred += HandleDocumentFileActivation;
-		_FileButton.SetText(Path.GetFileName(Path.GetDirectoryName(_Document.FilePath)));
+		_FolderButton.SetText(Path.GetFileName(dir));
+		_FolderButton.Text.Margin = WpfHelper.SmallHorizontalMargin;
+
+		_FileButton = new ThemedToggleButton(VsImageHelper.GetImageIdForFile(file), R.CMDT_ListOpenDocuments, OnFileClick) {
+			Background = Brushes.Transparent,
+			BorderThickness = WpfHelper.NoMargin
+		}.TinySpacing();
+		_FileButton.SetText(file);
 		_FileButton.Text.Margin = WpfHelper.SmallHorizontalMargin;
 
-		_Container.AddRange(_FileButton);
+		_Container.AddRange(_FolderButton, _FileButton);
 
 		_View = view;
 	}
@@ -93,17 +104,20 @@ sealed class FolderMargin : IWpfTextViewMargin
 		}.TinySpacing();
 		_ProjectButton.SetText(Path.GetFileNameWithoutExtension(project.UniqueName));
 		_ProjectButton.Text.Margin = WpfHelper.SmallHorizontalMargin;
-		_Container.Insert(_Container.ControlCount - 1, _ProjectButton);
+		_Container.Insert(_Container.ControlCount - 2, _ProjectButton);
 	}
 
+	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.EventHandler)]
 	void OnSolutionClick(object sender, RoutedEventArgs e) {
 		if (_SolutionButton.IsChecked != true) {
 			return;
 		}
 		UncheckToggleButtons(_Container, _SolutionButton);
 		CreateFilePopup();
+		MakeTitleBar(R.T_SolutionFolder);
 		_FileList.InitCurrentFile();
 		_FileList.LoadSolutionDirectoryAsync(SyncHelper.CancelAndRetainToken(ref _CancellationTokenSource)).FireAndForget();
+		_FilePopup.PlacementTarget = _SolutionButton;
 		_FilePopup.IsOpen = true;
 	}
 
@@ -114,37 +128,70 @@ sealed class FolderMargin : IWpfTextViewMargin
 		}
 		UncheckToggleButtons(_Container, _ProjectViewButton);
 		CreateFilePopup();
+		MakeTitleBar(R.T_SolutionProjects);
 		_FileList.InitCurrentFile();
 		_FileList.ListSolutionAndProjects();
+		_FilePopup.PlacementTarget = _ProjectViewButton;
 		_FilePopup.IsOpen = true;
 	}
 
+	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.EventHandler)]
 	void OnProjectClick(object sender, RoutedEventArgs e) {
 		if (_ProjectButton.IsChecked != true) {
 			return;
 		}
 		UncheckToggleButtons(_Container, _ProjectButton);
 		CreateFilePopup();
+		MakeTitleBar(R.T_CurrentProjectFolder);
 		_FileList.InitCurrentFile();
 		_FileList.LoadCurrentProjectDirectoryAsync(SyncHelper.CancelAndRetainToken(ref _CancellationTokenSource)).FireAndForget();
+		_FilePopup.PlacementTarget = _ProjectButton;
 		_FilePopup.IsOpen = true;
 	}
 
+	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.EventHandler)]
 	void OnFolderClick(object sender, RoutedEventArgs args) {
+		if (_FolderButton.IsChecked != true) {
+			return;
+		}
+		UncheckToggleButtons(_Container, _FolderButton);
+		var path = _View.TextBuffer.GetTextDocument().FilePath;
+		var (folder, _) = FileHelper.DeconstructPath(path, true);
+		if (String.IsNullOrEmpty(folder)) {
+			_FolderButton.IsChecked = false;
+			return;
+		}
+		CreateFilePopup();
+		MakeTitleBar(R.T_CurrentDocumentFolder);
+		_FileList.CurrentFile = path;
+		_FileList.LoadCurrentDirectoryAsync(folder, SyncHelper.CancelAndRetainToken(ref _CancellationTokenSource)).FireAndForget();
+		_FilePopup.PlacementTarget = _FolderButton;
+		_FilePopup.IsOpen = true;
+	}
+
+	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.EventHandler)]
+	void OnFileClick(object sender, RoutedEventArgs args) {
 		if (_FileButton.IsChecked != true) {
 			return;
 		}
 		UncheckToggleButtons(_Container, _FileButton);
-		var path = _View.TextBuffer.GetTextDocument().FilePath;
-		var (folder, _) = FileHelper.DeconstructPath(path, true);
-		if (String.IsNullOrEmpty(folder)) {
-			_FileButton.IsChecked = false;
-			return;
-		}
 		CreateFilePopup();
-		_FileList.CurrentFile = path;
-		_FileList.LoadCurrentDirectoryAsync(folder, SyncHelper.CancelAndRetainToken(ref _CancellationTokenSource)).FireAndForget();
+		MakeTitleBar(R.T_OpenedDocuments);
+		_FileList.InitCurrentFile();
+		_FileList.LoadOpenedDocuments();
+		_FilePopup.PlacementTarget = _FileButton;
 		_FilePopup.IsOpen = true;
+	}
+
+	void MakeTitleBar(string title) {
+		_FileList.Header = new Border {
+			Child = new ThemedMenuText(title) {
+				Margin = WpfHelper.MiddleHorizontalMargin,
+				FontWeight = FontWeights.Bold
+			},
+			BorderThickness = WpfHelper.TinyBottomMargin,
+			Padding = WpfHelper.SmallVerticalMargin
+		}.ReferenceProperty(Border.BorderBrushProperty, CommonControlsColors.TextBoxBorderBrushKey);
 	}
 
 	void CreateFilePopup() {
@@ -173,11 +220,13 @@ sealed class FolderMargin : IWpfTextViewMargin
 	}
 
 	void HandleDocumentFileActivation(object sender, TextDocumentFileActionEventArgs e) {
-		_FileButton.SetText(Path.GetFileNameWithoutExtension(e.FilePath));
+		var (dir, file) = FileHelper.DeconstructPath(e.FilePath, true);
+		_FolderButton.SetText(Path.GetFileName(dir));
+		_FileButton.SetText(file);
 	}
 
 	void Popup_Closed(object sender, EventArgs e) {
-		_FileButton.IsChecked = false;
+		_FolderButton.IsChecked = _FileButton.IsChecked = false;
 		_SolutionButton?.IsChecked = false;
 		_ProjectViewButton?.IsChecked = false;
 		_ProjectButton?.IsChecked = false;

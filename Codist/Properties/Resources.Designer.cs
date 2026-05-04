@@ -2926,6 +2926,16 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to List Opened Documents
+        ///List currently opened code documents.
+        /// </summary>
+        internal static string CMDT_ListOpenDocuments {
+            get {
+                return ResourceManager.GetString("CMDT_ListOpenDocuments", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to List symbols referenced within current symbol.
         /// </summary>
         internal static string CMDT_ListReferencedSymbols {
@@ -7108,6 +7118,24 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Current Document Folder.
+        /// </summary>
+        internal static string T_CurrentDocumentFolder {
+            get {
+                return ResourceManager.GetString("T_CurrentDocumentFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Current Project Folder.
+        /// </summary>
+        internal static string T_CurrentProjectFolder {
+            get {
+                return ResourceManager.GetString("T_CurrentProjectFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Custom.
         /// </summary>
         internal static string T_Custom {
@@ -8517,6 +8545,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Opened Documents.
+        /// </summary>
+        internal static string T_OpenedDocuments {
+            get {
+                return ResourceManager.GetString("T_OpenedDocuments", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to options.
         /// </summary>
         internal static string T_Options {
@@ -9003,6 +9040,24 @@ namespace Codist.Properties {
         internal static string T_Solution {
             get {
                 return ResourceManager.GetString("T_Solution", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Solution Folder.
+        /// </summary>
+        internal static string T_SolutionFolder {
+            get {
+                return ResourceManager.GetString("T_SolutionFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Solution Projects.
+        /// </summary>
+        internal static string T_SolutionProjects {
+            get {
+                return ResourceManager.GetString("T_SolutionProjects", resourceCulture);
             }
         }
         
