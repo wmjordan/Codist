@@ -6,6 +6,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Input;
 using System.Windows.Media;
 using Codist.Controls;
 using Codist.FileBrowser;
@@ -211,6 +212,7 @@ sealed class FolderMargin : IWpfTextViewMargin
 		KeystrokeThief.Bind(_FilePopup);
 		_FileList.FileActivated += HandleFileActivation;
 		_FileList.LocationTypeChanged += HandleLocationTypeChanged;
+		_FileList.KeyUp += HandleFileListKeyUp;
 	}
 
 	void HandleFileActivation(object sender, EventArgs<FileItem> e) {
@@ -235,6 +237,13 @@ sealed class FolderMargin : IWpfTextViewMargin
 			FileListLocationType.OpenedDocuments => R.T_OpenedDocuments,
 			_ => R.T_FolderContent
 		});
+	}
+
+	void HandleFileListKeyUp(object sender, KeyEventArgs e) {
+		if (e.Key == Key.Escape) {
+			_FilePopup.IsOpen = false;
+			_View.VisualElement.Focus();
+		}
 	}
 
 	void Popup_Closed(object sender, EventArgs e) {
