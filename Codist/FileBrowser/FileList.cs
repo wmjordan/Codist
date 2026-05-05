@@ -990,6 +990,9 @@ sealed partial class FileList : VirtualList
 		readonly int _capacity = capacity;
 
 		public void Push(ViewItem item) {
+			if (item == list._CurrentView) {
+				return;
+			}
 			Add(list._CurrentView);
 			list._CurrentView = item;
 		}
