@@ -56,8 +56,8 @@ namespace Codist.SymbolCommands
 		}
 
 		void SetExtIconProvider(SymbolMenu resultList) {
-			if (resultList.IconProvider is null && Symbol.Kind == SymbolKind.NamedType) {
-				switch (((INamedTypeSymbol)Symbol).TypeKind) {
+			if (resultList.IconProvider is null && ResultSymbol is INamedTypeSymbol type) {
+				switch (type.TypeKind) {
 					case TypeKind.Interface:
 						resultList.ExtIconProvider = ExtIconProvider.InterfaceMembers.GetExtIcons; break;
 					case TypeKind.Class:
