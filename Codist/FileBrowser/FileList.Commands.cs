@@ -44,17 +44,20 @@ partial class FileList
 		if (String.IsNullOrEmpty(directory)) {
 			return;
 		}
+		LocationType = FileListLocationType.CurrentDocumentFolder;
 		UnsafeNavigateToDirectoryAsync(directory).FireAndForget();
 	}
 
 	void GoToSolutionFolder(object sender, RoutedEventArgs args) {
 		if (!String.IsNullOrEmpty(_SolutionFolderPath)) {
+			LocationType = FileListLocationType.SolutionFolder;
 			UnsafeNavigateToDirectoryAsync(_SolutionFolderPath).FireAndForget();
 		}
 	}
 
 	void GoToProjectFolder(object sender, RoutedEventArgs args) {
 		if (!String.IsNullOrEmpty(_ProjectFolderPath)) {
+			LocationType = FileListLocationType.CurrentProjectFolder;
 			UnsafeNavigateToDirectoryAsync(_ProjectFolderPath).FireAndForget();
 		}
 	}
@@ -427,7 +430,7 @@ partial class FileList
 
 		public static void ShowFileProperties(string filePath) {
 			var info = new SHELLEXECUTEINFO {
-				lpVerb = "properties", // 关键动词
+				lpVerb = "properties",
 				lpFile = filePath,
 				nShow = 5, // SW_SHOW
 				fMask = 0x0000000C

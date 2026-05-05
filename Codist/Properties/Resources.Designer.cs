@@ -1579,6 +1579,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Navigate backward.
+        /// </summary>
+        internal static string CMD_NavigateBackward {
+            get {
+                return ResourceManager.GetString("CMD_NavigateBackward", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to New Item.
         /// </summary>
         internal static string CMD_NewItem {
@@ -7882,6 +7891,15 @@ namespace Codist.Properties {
         internal static string T_Folder {
             get {
                 return ResourceManager.GetString("T_Folder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Folder Content.
+        /// </summary>
+        internal static string T_FolderContent {
+            get {
+                return ResourceManager.GetString("T_FolderContent", resourceCulture);
             }
         }
         

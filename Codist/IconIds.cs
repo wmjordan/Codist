@@ -290,6 +290,7 @@ static class IconIds
 	public const int GoToMember = KnownImageIds.Next;
 	public const int GoToSymbol = KnownImageIds.FindSymbol;
 	public const int GoToDeclaration = KnownImageIds.GoToDeclaration;
+	public const int GoBack = KnownImageIds.Backwards;
 	public const int GoToCurrentFile = KnownImageIds.GenerateFile;
 	public const int GoToSolutionFolder = KnownImageIds.Solution;
 	public const int GoToProjectFolder = KnownImageIds.Library;

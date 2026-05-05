@@ -3314,4 +3314,10 @@ List currently opened code documents</value>
   <data name="T_SolutionFolder" xml:space="preserve">
     <value>Solution Folder</value>
   </data>
+  <data name="CMD_NavigateBackward" xml:space="preserve">
+    <value>Navigate backward</value>
+  </data>
+  <data name="T_FolderContent" xml:space="preserve">
+    <value>Folder Content</value>
+  </data>
 </root>

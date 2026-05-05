@@ -114,9 +114,9 @@ sealed class FolderMargin : IWpfTextViewMargin
 		}
 		UncheckToggleButtons(_Container, _SolutionButton);
 		CreateFilePopup();
-		MakeTitleBar(R.T_SolutionFolder);
 		_FileList.InitCurrentFile();
 		_FileList.LoadSolutionDirectoryAsync(SyncHelper.CancelAndRetainToken(ref _CancellationTokenSource)).FireAndForget();
+		_FileList.ClearNavigationHistory();
 		_FilePopup.PlacementTarget = _SolutionButton;
 		_FilePopup.IsOpen = true;
 	}
@@ -128,9 +128,9 @@ sealed class FolderMargin : IWpfTextViewMargin
 		}
 		UncheckToggleButtons(_Container, _ProjectViewButton);
 		CreateFilePopup();
-		MakeTitleBar(R.T_SolutionProjects);
 		_FileList.InitCurrentFile();
 		_FileList.ListSolutionAndProjects();
+		_FileList.ClearNavigationHistory();
 		_FilePopup.PlacementTarget = _ProjectViewButton;
 		_FilePopup.IsOpen = true;
 	}
@@ -142,9 +142,9 @@ sealed class FolderMargin : IWpfTextViewMargin
 		}
 		UncheckToggleButtons(_Container, _ProjectButton);
 		CreateFilePopup();
-		MakeTitleBar(R.T_CurrentProjectFolder);
 		_FileList.InitCurrentFile();
 		_FileList.LoadCurrentProjectDirectoryAsync(SyncHelper.CancelAndRetainToken(ref _CancellationTokenSource)).FireAndForget();
+		_FileList.ClearNavigationHistory();
 		_FilePopup.PlacementTarget = _ProjectButton;
 		_FilePopup.IsOpen = true;
 	}
@@ -162,9 +162,9 @@ sealed class FolderMargin : IWpfTextViewMargin
 			return;
 		}
 		CreateFilePopup();
-		MakeTitleBar(R.T_CurrentDocumentFolder);
 		_FileList.CurrentFile = path;
 		_FileList.LoadCurrentDirectoryAsync(folder, SyncHelper.CancelAndRetainToken(ref _CancellationTokenSource)).FireAndForget();
+		_FileList.ClearNavigationHistory();
 		_FilePopup.PlacementTarget = _FolderButton;
 		_FilePopup.IsOpen = true;
 	}
@@ -176,9 +176,9 @@ sealed class FolderMargin : IWpfTextViewMargin
 		}
 		UncheckToggleButtons(_Container, _FileButton);
 		CreateFilePopup();
-		MakeTitleBar(R.T_OpenedDocuments);
 		_FileList.InitCurrentFile();
-		_FileList.LoadOpenedDocuments();
+		_FileList.ListOpenedDocuments();
+		_FileList.ClearNavigationHistory();
 		_FilePopup.PlacementTarget = _FileButton;
 		_FilePopup.IsOpen = true;
 	}
@@ -210,6 +210,7 @@ sealed class FolderMargin : IWpfTextViewMargin
 		_FilePopup.Closed += Popup_Closed;
 		KeystrokeThief.Bind(_FilePopup);
 		_FileList.FileActivated += HandleFileActivation;
+		_FileList.LocationTypeChanged += HandleLocationTypeChanged;
 	}
 
 	void HandleFileActivation(object sender, EventArgs<FileSystemItem> e) {
@@ -223,6 +224,17 @@ sealed class FolderMargin : IWpfTextViewMargin
 		var (dir, file) = FileHelper.DeconstructPath(e.FilePath, true);
 		_FolderButton.SetText(Path.GetFileName(dir));
 		_FileButton.SetText(file);
+	}
+
+	void HandleLocationTypeChanged(object sender, EventArgs<FileListLocationType> e) {
+		MakeTitleBar(e.Data switch {
+			FileListLocationType.CurrentDocumentFolder => R.T_CurrentDocumentFolder,
+			FileListLocationType.CurrentProjectFolder => R.T_CurrentProjectFolder,
+			FileListLocationType.SolutionFolder => R.T_SolutionFolder,
+			FileListLocationType.SolutionProjects => R.T_SolutionProjects,
+			FileListLocationType.OpenedDocuments => R.T_OpenedDocuments,
+			_ => R.T_FolderContent
+		});
 	}
 
 	void Popup_Closed(object sender, EventArgs e) {

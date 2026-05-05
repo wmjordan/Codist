@@ -30,14 +30,17 @@ sealed partial class FileList : VirtualList
 	readonly TextBox _FilterBox;
 	readonly ThemedControlGroup _FilterGroup;
 	readonly ThemedToggleButton _FolderFilterButton, _FileFilterButton, _SelectionMenuButton;
-	readonly ThemedButton _GoToCurrentFileButton, _GoToSolutionFolderButton, _GoToProjectFolderButton;
+	readonly ThemedButton _BackButton, _GoToCurrentFileButton, _GoToSolutionFolderButton, _GoToProjectFolderButton;
 	readonly ContextMenu _FileMenu, _DocumentMenu, _SelectionMenu;
 	readonly Grid _PathControl;
+	readonly ViewItemList _ViewHistories;
 
 	ObservableCollection<FileSystemItem> _Items;
 	ICollectionView _ItemsView;
 	bool _LockFilter, _TrackActiveFile;
 	ViewMode _ViewMode;
+	FileListLocationType _LocationType;
+	ViewItem _CurrentView;
 
 	string _ActiveFilePath, _ActiveDirPath, _SolutionFolderPath, _ProjectFolderPath;
 	int _ProjectIconId;
@@ -98,7 +101,8 @@ sealed partial class FileList : VirtualList
 			Margin = WpfHelper.SmallMargin,
 			Children = {
 				new ThemedControlGroup(
-					_SelectionMenuButton = new ThemedToggleButton(IconIds.MultiSelection, R.T_Selection, ShowSelectionMenu)
+					_SelectionMenuButton = new ThemedToggleButton(IconIds.MultiSelection, R.T_Selection, ShowSelectionMenu),
+					_BackButton = new ThemedButton(IconIds.GoBack, R.CMD_NavigateBackward, NavigateBackward){ IsEnabled = false }
 					) {
 					Margin = WpfHelper.GlyphMargin,
 					VerticalAlignment = VerticalAlignment.Center,
@@ -167,6 +171,7 @@ sealed partial class FileList : VirtualList
 			PlacementTarget = this,
 			Resources = SharedDictionaryManager.ContextMenu,
 		};
+		_ViewHistories = new(this);
 	}
 
 	public string CurrentFile {
@@ -214,8 +219,19 @@ sealed partial class FileList : VirtualList
 			}
 		}
 	}
+	public FileListLocationType LocationType {
+		get => _LocationType;
+		set {
+			if (_LocationType != value) {
+				_LocationType = value;
+				LocationTypeChanged?.Invoke(this, new(value));
+			}
+		}
+	}
 
 	public event EventHandler<EventArgs<FileSystemItem>> FileActivated;
+
+	public event EventHandler<EventArgs<FileListLocationType>> LocationTypeChanged;
 
 	#region Event handlers
 	protected override void OnContextMenuOpening(ContextMenuEventArgs e) {
@@ -332,6 +348,29 @@ sealed partial class FileList : VirtualList
 		}
 	}
 
+	void NavigateBackward(object sender, EventArgs e) {
+		if (_ViewHistories.TryPop(out var history)) {
+			// prevent current view from added back to history
+			_CurrentView = default;
+			NavigateToView(history);
+		}
+	}
+
+	void NavigateToView(ViewItem history) {
+		LocationType = history.LocationType;
+		switch (history.Mode) {
+			case ViewMode.File:
+				NavigateToDirectoryAsync(history.Path, default).FireAndForget();
+				break;
+			case ViewMode.SolutionProjects:
+				ListSolutionAndProjects();
+				break;
+			case ViewMode.Documents:
+				ListOpenedDocuments();
+				break;
+		}
+	}
+
 	void ShowSelectionMenu(object sender, EventArgs e) {
 		if (_SelectionMenuButton.IsChecked != true) {
 			return;
@@ -374,24 +413,32 @@ sealed partial class FileList : VirtualList
 	public void ListSolutionAndProjects() {
 		ThreadHelper.ThrowIfNotOnUIThread();
 		SetViewMode(ViewMode.SolutionProjects);
+		_ViewHistories.Push(new(ViewMode.SolutionProjects, FileListLocationType.SolutionProjects, null));
 		var solution = ServicesHelper.Instance.DTE.Solution;
 		var projects = solution.Projects;
 		_Items?.Clear();
 		var solutionPath = solution.FullName;
-		(_SolutionFolderPath, _) = FileHelper.DeconstructPath(solutionPath, true);
-		var items = new List<FileSystemItem>(projects.Count + 1) {
-			new(new FileInfo(solutionPath), FileItemType.Solution, false)
-		};
+		var items = new List<FileSystemItem>(projects.Count + 1);
+		if (Directory.Exists(solutionPath)) {
+			_SolutionFolderPath = solutionPath;
+			items.Add(new(new DirectoryInfo(solutionPath), FileItemType.Solution, true));
+		}
+		else {
+			(_SolutionFolderPath, _) = FileHelper.DeconstructPath(solutionPath, true);
+			items.Add(new(new FileInfo(solutionPath), FileItemType.Solution, false));
+		}
 		var current = ServicesHelper.Instance.DTE.ActiveDocument?.ProjectItem?.ContainingProject?.UniqueName;
 		foreach (EnvDTE.Project project in projects) {
 			AddProject(project, items, current);
 		}
 		SetItems(items);
+		LocationType = FileListLocationType.SolutionProjects;
 	}
 
-	public void LoadOpenedDocuments() {
+	public void ListOpenedDocuments() {
 		ThreadHelper.ThrowIfNotOnUIThread();
 		SetViewMode(ViewMode.Documents);
+		_ViewHistories.Push(new(ViewMode.Documents, FileListLocationType.OpenedDocuments, null));
 		var documents = ServicesHelper.Instance.DTE.Documents;
 		var items = new List<FileSystemItem>(documents.Count + 1);
 		foreach (EnvDTE.Document document in documents) {
@@ -403,6 +450,7 @@ sealed partial class FileList : VirtualList
 		}
 		items.Sort((x, y) => String.Compare(x.Name, y.Name, true));
 		SetItems(items);
+		LocationType = FileListLocationType.OpenedDocuments;
 	}
 
 	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
@@ -503,7 +551,8 @@ sealed partial class FileList : VirtualList
 	void UpdateProjectStatus(EnvDTE.Project project) {
 		ThreadHelper.ThrowIfNotOnUIThread();
 		string projectPath;
-		if (project == null || String.IsNullOrEmpty(projectPath = project.FullName)) {
+		if (project == null
+			|| String.IsNullOrEmpty(projectPath = project.FullName)) {
 			_GoToProjectFolderButton.Visibility = Visibility.Collapsed;
 			_ProjectFolderPath = String.Empty;
 			return;
@@ -526,7 +575,9 @@ sealed partial class FileList : VirtualList
 		}
 		else {
 			shortcutButton.Visibility = Visibility.Visible;
-			filePath = Path.GetDirectoryName(filePath);
+			filePath = Directory.Exists(filePath)
+				? filePath // filePath maybe a directory after "Open Folder" command is executed
+				: Path.GetDirectoryName(filePath); // filePath is a file
 		}
 	}
 
@@ -551,15 +602,25 @@ sealed partial class FileList : VirtualList
 					break;
 				case FileItemType.Folder:
 				case FileItemType.EmptyFolder:
+					LocationType = FileListLocationType.Normal;
 					UnsafeNavigateToDirectoryAsync(item.FullPath).FireAndForget();
 					break;
 				case FileItemType.Solution:
+					LocationType = FileListLocationType.SolutionFolder;
+					UnsafeNavigateToDirectoryAsync(item.IsCurrent ? item.FullPath : Path.GetDirectoryName(item.FullPath)).FireAndForget();
+					break;
 				case FileItemType.Project:
 				case FileItemType.UnloadedProject:
+					LocationType = FileListLocationType.Normal;
 					UnsafeNavigateToDirectoryAsync(Path.GetDirectoryName(item.FullPath)).FireAndForget();
 					break;
 			}
 		}
+	}
+
+	public void ClearNavigationHistory() {
+		_ViewHistories.Clear();
+		_BackButton.IsEnabled = false;
 	}
 
 	public Task NavigateToDirectoryAsync(string directoryPath, CancellationToken cancellationToken = default) {
@@ -571,6 +632,7 @@ sealed partial class FileList : VirtualList
 	async Task UnsafeNavigateToDirectoryAsync(string directoryPath, CancellationToken cancellationToken = default) {
 		SetCurrentDir(directoryPath);
 		SetViewMode(ViewMode.File);
+		_ViewHistories.Push(new(ViewMode.File, LocationType, directoryPath));
 
 		await LoadDirectoryAsync(_ActiveDirPath, cancellationToken);
 		FileSystemItem fs;
@@ -602,6 +664,7 @@ sealed partial class FileList : VirtualList
 	public async Task LoadCurrentDirectoryAsync(string directory, CancellationToken cancellationToken = default) {
 		SetCurrentDir(directory);
 		SetViewMode(ViewMode.File);
+		_ViewHistories.Push(new(ViewMode.File, FileListLocationType.CurrentDocumentFolder, directory));
 		await LoadDirectoryAsync(_ActiveDirPath, cancellationToken);
 
 		var highlightItem = _Items.FirstOrDefault(i => i.IsCurrent);
@@ -611,16 +674,18 @@ sealed partial class FileList : VirtualList
 		}
 		_GoToCurrentFileButton.ToggleVisibility(false);
 		ToggleFolderButton(_GoToSolutionFolderButton, _SolutionFolderPath, directory);
-		Focus();
+		LocationType = FileListLocationType.CurrentDocumentFolder;
 	}
 
 	public Task LoadSolutionDirectoryAsync(CancellationToken cancellationToken = default) {
+		LocationType = FileListLocationType.SolutionFolder;
 		return String.IsNullOrEmpty(_SolutionFolderPath)
 			? Task.CompletedTask
 			: UnsafeNavigateToDirectoryAsync(_SolutionFolderPath, cancellationToken);
 	}
 
 	public Task LoadCurrentProjectDirectoryAsync(CancellationToken cancellationToken = default) {
+		LocationType = FileListLocationType.CurrentProjectFolder;
 		return String.IsNullOrEmpty(_ProjectFolderPath)
 			? Task.CompletedTask
 			: UnsafeNavigateToDirectoryAsync(_ProjectFolderPath, cancellationToken);
@@ -915,6 +980,45 @@ sealed partial class FileList : VirtualList
 		File,
 		SolutionProjects,
 		Documents,
+	}
+
+	record struct ViewItem(ViewMode Mode, FileListLocationType LocationType, string Path);
+
+	// A view item list with limited capacity to avoid memory leak.
+	// When new entry is added to the list, if the capacity is exceeded, the oldest entry will be removed
+	sealed class ViewItemList(FileList list, int capacity = 100) : LinkedList<ViewItem>
+	{
+		readonly int _capacity = capacity;
+
+		public void Push(ViewItem item) {
+			Add(list._CurrentView);
+			list._CurrentView = item;
+		}
+
+		public void Add(ViewItem history) {
+			if (history == default
+				|| Count != 0 && history == Last.Value) {
+				return;
+			}
+			list._BackButton.IsEnabled = true;
+			AddFirst(history);
+			if (Count > _capacity) {
+				RemoveLast();
+			}
+		}
+
+		public bool TryPop(out ViewItem recentHistory) {
+			if (Count != 0) {
+				recentHistory = First.Value;
+				RemoveFirst();
+				if (Count == 0) {
+					list._BackButton.IsEnabled = false;
+				}
+				return true;
+			}
+			recentHistory = default;
+			return false;
+		}
 	}
 
 	sealed class PathSegment(string path, int index)

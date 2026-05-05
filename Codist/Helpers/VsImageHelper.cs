@@ -37,6 +37,10 @@ internal static class VsImageHelper
 		};
 	}
 
+	public static void UseGrayscaleIcon(this System.Windows.UIElement element, bool gray) {
+		element.SetProperty(CrispImage.GrayscaleProperty, gray);
+	}
+
 	public static int GetImageIdForFile(string fileName) {
 		return VsImageService.GetImageMonikerForFile(fileName).Id;
 	}

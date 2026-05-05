@@ -22,6 +22,11 @@ public sealed class ThemedButton : Button, IContextMenuHost, IDisposable
 		MinWidth = 0;
 		this.ReferenceStyle(VsResourceKeys.ButtonStyleKey)
 			.ReferenceCrispImageBackground(EnvironmentColors.MainWindowActiveCaptionColorKey);
+		IsEnabledChanged += ThemedButton_IsEnabledChanged;
+	}
+
+	void ThemedButton_IsEnabledChanged(object sender, DependencyPropertyChangedEventArgs e) {
+		(Content as UIElement)?.UseGrayscaleIcon(!IsEnabled);
 	}
 
 	public ThemedButton(int imageId, object toolTip, Action onClickHandler)

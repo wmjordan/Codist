@@ -3301,4 +3301,10 @@ Shift: 匹配大小写</value>
   <data name="T_SolutionFolder" xml:space="preserve">
     <value>解决方案文件夹</value>
   </data>
+  <data name="CMD_NavigateBackward" xml:space="preserve">
+    <value>向后导航</value>
+  </data>
+  <data name="T_FolderContent" xml:space="preserve">
+    <value>文件夹内容</value>
+  </data>
 </root>
