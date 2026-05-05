@@ -917,8 +917,12 @@ partial class CodeAnalysisHelper
 					? SymbolUsageKind.Write | SymbolUsageKind.SetNull
 					: SymbolUsageKind.Write;
 			}
-			else if (n.IsAnyKind(SyntaxKind.PostIncrementExpression, SyntaxKind.PreIncrementExpression)
-				|| n is ArgumentSyntax r && r.RefKindKeyword.IsAnyKind(SyntaxKind.RefKeyword, SyntaxKind.OutKeyword)) {
+			if (n.IsAnyKind(SyntaxKind.PostIncrementExpression, SyntaxKind.PreIncrementExpression)
+				|| n is ArgumentSyntax r
+					&& (r.RefKindKeyword.IsAnyKind(SyntaxKind.RefKeyword, SyntaxKind.OutKeyword) // ref or out argument
+						|| (n = r.Parent).IsKind(SyntaxKind.TupleExpression)
+							&& n.Parent.IsKind(SyntaxKind.SimpleAssignmentExpression))  // tuple argument assignment
+						) {
 				return SymbolUsageKind.Write;
 			}
 		}
