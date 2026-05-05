@@ -98,7 +98,7 @@
 			</Trigger>
 		</DataTemplate.Triggers>
 	</DataTemplate>
-	<DataTemplate x:Key="FileItemTemplate" DataType="{x:Type f:FileSystemItem}">
+	<DataTemplate x:Key="FileItemTemplate" DataType="{x:Type f:FileItem}">
 		<StackPanel Orientation="Horizontal" Margin="2">
 			<ContentPresenter Content="{Binding Icon}" Margin="0,0,6,0" />
 			<TextBlock Text="{Binding Name}" VerticalAlignment="Center">

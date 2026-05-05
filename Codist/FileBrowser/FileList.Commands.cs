@@ -75,7 +75,7 @@ partial class FileList
 
 	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.EventHandler)]
 	void OpenFilesWithVisualStudio(object sender, RoutedEventArgs args) {
-		var activeItem = (FileSystemItem)SelectedItem;
+		var activeItem = (FileItem)SelectedItem;
 		FileActivated?.Invoke(this, new(activeItem));
 		if (activeItem.IsFile
 			&& (FileHelper.HasAnyExtension(activeItem.Name, "sln", "slnx"))) {
@@ -96,7 +96,7 @@ partial class FileList
 
 	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.EventHandler)]
 	void LocateInSolutionExplorer(object sender, RoutedEventArgs args) {
-		if (SelectedItem is FileSystemItem fsi && fsi.IsFile) {
+		if (SelectedItem is FileItem fsi && fsi.IsFile) {
 			var dte = ServicesHelper.Instance.DTE;
 			var projectItem = dte.Solution.FindProjectItem(fsi.FullPath);
 			var parents = new Stack<string>();
@@ -180,7 +180,7 @@ partial class FileList
 		}
 		catch { }
 		LoadDirectoryAsync(_ActiveDirPath, default).FireAndForget();
-		FileActivated?.Invoke(this, new((FileSystemItem)SelectedItem));
+		FileActivated?.Invoke(this, new((FileItem)SelectedItem));
 	}
 
 	void DeleteFiles(object sender, RoutedEventArgs args) {
@@ -188,7 +188,7 @@ partial class FileList
 		int c = selection.Count;
 		var pathsToDelete = new string[c];
 		for (int i = 0; i < c; i++) {
-			var item = (FileSystemItem)selection[i];
+			var item = (FileItem)selection[i];
 			pathsToDelete[i] = item.FullPath;
 			if (_ActiveFilePath != null && item.IsCurrent) {
 				_ActiveFilePath = null;
@@ -205,7 +205,7 @@ partial class FileList
 	}
 
 	void StartRename(object sender, RoutedEventArgs args) {
-		if (SelectedItem is not FileSystemItem fsi) {
+		if (SelectedItem is not FileItem fsi) {
 			return;
 		}
 
@@ -276,7 +276,7 @@ partial class FileList
 		editBox.LostFocus += EditBox_LostFocus;
 	}
 
-	void CommitRename(FileSystemItem fsi, string newText, StackPanel panel, TextBlock originalTb, TextBox editBox) {
+	void CommitRename(FileItem fsi, string newText, StackPanel panel, TextBlock originalTb, TextBox editBox) {
 		panel.Children.Remove(editBox);
 		originalTb.Visibility = Visibility.Visible;
 
@@ -320,7 +320,7 @@ partial class FileList
 	}
 
 	void ShowProperties(object sender, RoutedEventArgs args) {
-		if (SelectedItem is FileSystemItem fsi) {
+		if (SelectedItem is FileItem fsi) {
 			NativeMethods.ShowFileProperties(fsi.FullPath);
 		}
 	}

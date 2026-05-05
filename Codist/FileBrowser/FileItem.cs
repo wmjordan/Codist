@@ -7,7 +7,7 @@ using CLR;
 
 namespace Codist.FileBrowser;
 
-sealed class FileSystemItem : INotifyPropertyChanged
+sealed class FileItem : INotifyPropertyChanged
 {
 	readonly FileSystemInfo _Info;
 	readonly FileItemType _Type;
@@ -103,17 +103,17 @@ sealed class FileSystemItem : INotifyPropertyChanged
 		}
 	}
 
-	public FileSystemItem(FileInfo fileInfo, bool isCurrent) {
+	public FileItem(FileInfo fileInfo, bool isCurrent) {
 		(_Info, _Type, _IsCurrent, _Name) = (fileInfo, FileItemType.File, isCurrent, fileInfo.Name);
 	}
 
-	public FileSystemItem(DirectoryInfo dirInfo, bool isEmpty, bool isCurrent) {
+	public FileItem(DirectoryInfo dirInfo, bool isEmpty, bool isCurrent) {
 		(_Info, _Type, _IsCurrent, _Name) = (dirInfo, isEmpty ? FileItemType.Folder : FileItemType.EmptyFolder, isCurrent, dirInfo.Name);
 	}
-	public FileSystemItem(DirectoryInfo dirInfo, FileItemType type) {
+	public FileItem(DirectoryInfo dirInfo, FileItemType type) {
 		(_Info, _Type, _Name) = (dirInfo, type, dirInfo.Name);
 	}
-	public FileSystemItem(FileSystemInfo fsInfo, FileItemType type, bool isCurrent) {
+	public FileItem(FileSystemInfo fsInfo, FileItemType type, bool isCurrent) {
 		(_Info, _Type, _IsCurrent, _Name) = (fsInfo, type, isCurrent, fsInfo.Name);
 	}
 

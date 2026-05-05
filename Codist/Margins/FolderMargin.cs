@@ -213,7 +213,7 @@ sealed class FolderMargin : IWpfTextViewMargin
 		_FileList.LocationTypeChanged += HandleLocationTypeChanged;
 	}
 
-	void HandleFileActivation(object sender, EventArgs<FileSystemItem> e) {
+	void HandleFileActivation(object sender, EventArgs<FileItem> e) {
 		_FilePopup.IsOpen = false;
 		if (e.Data.IsCurrent) {
 			_View.VisualElement.Focus();

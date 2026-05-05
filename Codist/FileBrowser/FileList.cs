@@ -35,7 +35,7 @@ sealed partial class FileList : VirtualList
 	readonly Grid _PathControl;
 	readonly ViewItemList _ViewHistories;
 
-	ObservableCollection<FileSystemItem> _Items;
+	ObservableCollection<FileItem> _Items;
 	ICollectionView _ItemsView;
 	bool _LockFilter, _TrackActiveFile;
 	ViewMode _ViewMode;
@@ -61,7 +61,7 @@ sealed partial class FileList : VirtualList
 				new Setter(PaddingProperty, WpfHelper.TinyMargin),
 				new Setter(MaxWidthProperty, 550d),
 				new Setter(ToolTipService.ToolTipProperty, new Binding {
-					Converter = new FileSystemItemToTooltipConverter(this)
+					Converter = new FileItemToTooltipConverter(this)
 				}),
 				new Setter(ToolTipService.PlacementProperty, PlacementMode.Right),
 				new Setter(ToolTipService.ShowDurationProperty, 30000),
@@ -186,7 +186,7 @@ sealed partial class FileList : VirtualList
 	public IEnumerable<string> SelectedFileNames {
 		get {
 			foreach (var item in SelectedItems) {
-				if (item is FileSystemItem fs && fs.IsFile) {
+				if (item is FileItem fs && fs.IsFile) {
 					yield return fs.Name;
 				}
 			}
@@ -195,7 +195,7 @@ sealed partial class FileList : VirtualList
 	public IEnumerable<string> SelectedFilePaths {
 		get {
 			foreach (var item in SelectedItems) {
-				if (item is FileSystemItem fs && fs.IsFile) {
+				if (item is FileItem fs && fs.IsFile) {
 					yield return fs.FullPath;
 				}
 			}
@@ -204,7 +204,7 @@ sealed partial class FileList : VirtualList
 	public IEnumerable<string> SelectedNames {
 		get {
 			foreach (var item in SelectedItems) {
-				if (item is FileSystemItem fs) {
+				if (item is FileItem fs) {
 					yield return fs.Name;
 				}
 			}
@@ -213,7 +213,7 @@ sealed partial class FileList : VirtualList
 	public IEnumerable<string> SelectedPaths {
 		get {
 			foreach (var item in SelectedItems) {
-				if (item is FileSystemItem fs) {
+				if (item is FileItem fs) {
 					yield return fs.FullPath;
 				}
 			}
@@ -229,7 +229,7 @@ sealed partial class FileList : VirtualList
 		}
 	}
 
-	public event EventHandler<EventArgs<FileSystemItem>> FileActivated;
+	public event EventHandler<EventArgs<FileItem>> FileActivated;
 
 	public event EventHandler<EventArgs<FileListLocationType>> LocationTypeChanged;
 
@@ -264,19 +264,19 @@ sealed partial class FileList : VirtualList
 		ActivationCondition condition = default;
 		if (SelectedItem != null) {
 			var selected = SelectedItems;
-			if (((FileSystemItem)selected[0]).IsFolder) {
+			if (((FileItem)selected[0]).IsFolder) {
 				condition |= ActivationCondition.HasFolder;
 			}
-			if (((FileSystemItem)selected[selected.Count - 1]).IsFile) {
+			if (((FileItem)selected[selected.Count - 1]).IsFile) {
 				condition |= ActivationCondition.HasFile;
 			}
 			if (selected.Count == 1
-				&& ((FileSystemItem)SelectedItem).Type != FileItemType.InaccessibleFolder) {
+				&& ((FileItem)SelectedItem).Type != FileItemType.InaccessibleFolder) {
 				condition |= ActivationCondition.HasSingleItem;
 			}
 			if (condition.MatchFlags(ActivationCondition.HasSingleItem | ActivationCondition.HasFile)
 				&& _SolutionFolderPath.Length != 0
-				&& ((FileSystemItem)SelectedItem).IsSolutionItem) {
+				&& ((FileItem)SelectedItem).IsSolutionItem) {
 				condition |= ActivationCondition.HasSingleSolutionItem;
 			}
 		}
@@ -418,7 +418,7 @@ sealed partial class FileList : VirtualList
 		var projects = solution.Projects;
 		_Items?.Clear();
 		var solutionPath = solution.FullName;
-		var items = new List<FileSystemItem>(projects.Count + 1);
+		var items = new List<FileItem>(projects.Count + 1);
 		if (Directory.Exists(solutionPath)) {
 			_SolutionFolderPath = solutionPath;
 			items.Add(new(new DirectoryInfo(solutionPath), FileItemType.Solution, true));
@@ -440,7 +440,7 @@ sealed partial class FileList : VirtualList
 		SetViewMode(ViewMode.Documents);
 		_ViewHistories.Push(new(ViewMode.Documents, FileListLocationType.OpenedDocuments, null));
 		var documents = ServicesHelper.Instance.DTE.Documents;
-		var items = new List<FileSystemItem>(documents.Count + 1);
+		var items = new List<FileItem>(documents.Count + 1);
 		foreach (EnvDTE.Document document in documents) {
 			var filePath = document.FullName;
 			if (items.Any(i => FileHelper.AreFileNamesEqual(i.FullPath, filePath))) {
@@ -454,7 +454,7 @@ sealed partial class FileList : VirtualList
 	}
 
 	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
-	void AddProjectItems(EnvDTE.ProjectItems projectItems, List<FileSystemItem> items, string current) {
+	void AddProjectItems(EnvDTE.ProjectItems projectItems, List<FileItem> items, string current) {
 		foreach (var item in projectItems) {
 			var project = (item as EnvDTE.ProjectItem)?.SubProject;
 			if (project != null) {
@@ -464,7 +464,7 @@ sealed partial class FileList : VirtualList
 	}
 
 	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
-	void AddProject(Project project, List<FileSystemItem> items, string current) {
+	void AddProject(Project project, List<FileItem> items, string current) {
 		FileItemType type;
 		bool isCurrent;
 		string path;
@@ -521,8 +521,8 @@ sealed partial class FileList : VirtualList
 		}
 	}
 
-	void SetItems(List<FileSystemItem> items) {
-		_Items = new ObservableCollection<FileSystemItem>(items);
+	void SetItems(List<FileItem> items) {
+		_Items = new ObservableCollection<FileItem>(items);
 		ItemsSource = _ItemsView = CollectionViewSource.GetDefaultView(_Items);
 		var highlightItem = items.FirstOrDefault(i => i.IsCurrent);
 		ApplyFilter();
@@ -594,7 +594,7 @@ sealed partial class FileList : VirtualList
 	}
 
 	void ActivateSelectedItem() {
-		if (SelectedItem is FileSystemItem item) {
+		if (SelectedItem is FileItem item) {
 			switch (item.Type) {
 				case FileItemType.File:
 					TextEditorHelper.OpenFile(item.FullPath);
@@ -635,9 +635,9 @@ sealed partial class FileList : VirtualList
 		_ViewHistories.Push(new(ViewMode.File, LocationType, directoryPath));
 
 		await LoadDirectoryAsync(_ActiveDirPath, cancellationToken);
-		FileSystemItem fs;
+		FileItem fs;
 		_GoToCurrentFileButton.ToggleVisibility(_ActiveFilePath != null
-			&& ((fs = SelectedItem as FileSystemItem) is null || !fs.IsFile || !fs.IsCurrent));
+			&& ((fs = SelectedItem as FileItem) is null || !fs.IsFile || !fs.IsCurrent));
 		ToggleFolderButton(_GoToSolutionFolderButton, _SolutionFolderPath, directoryPath);
 		ToggleFolderButton(_GoToProjectFolderButton, _ProjectFolderPath, directoryPath);
 		if (_Items.Count != 0 && SelectedIndex < 0) {
@@ -720,25 +720,25 @@ sealed partial class FileList : VirtualList
 		}
 	}
 
-	static (List<FileSystemItem> items, int folders, int files) GetFileSystemItems(string directory, string highlightFilePath, CancellationToken token) {
+	static (List<FileItem> items, int folders, int files) GetFileSystemItems(string directory, string highlightFilePath, CancellationToken token) {
 		if (directory[directory.Length - 1] == ':') {
 			directory += "\\";
 		}
 		var dirInfo = new DirectoryInfo(directory);
 		var dirs = dirInfo.GetDirectories();
 		var files = dirInfo.GetFiles();
-		var items = new List<FileSystemItem>(dirs.Length + files.Length);
+		var items = new List<FileItem>(dirs.Length + files.Length);
 		var highlight = GetHighlightName(directory, highlightFilePath);
 
 		foreach (var dir in dirs) {
 			if (token.IsCancellationRequested) break;
-			try { items.Add(new FileSystemItem(dir, dir.EnumerateFileSystemInfos().Any(), highlight.IsCurrent(dir))); }
-			catch (UnauthorizedAccessException) { items.Add(new FileSystemItem(dir, FileItemType.InaccessibleFolder)); }
-			catch (SecurityException) { items.Add(new FileSystemItem(dir, FileItemType.InaccessibleFolder)); }
+			try { items.Add(new FileItem(dir, dir.EnumerateFileSystemInfos().Any(), highlight.IsCurrent(dir))); }
+			catch (UnauthorizedAccessException) { items.Add(new FileItem(dir, FileItemType.InaccessibleFolder)); }
+			catch (SecurityException) { items.Add(new FileItem(dir, FileItemType.InaccessibleFolder)); }
 		}
 
 		foreach (var file in files) {
-			items.Add(new FileSystemItem(file, highlight.IsCurrent(file)));
+			items.Add(new FileItem(file, highlight.IsCurrent(file)));
 		}
 
 		return (items, dirs.Length, files.Length);
@@ -850,7 +850,7 @@ sealed partial class FileList : VirtualList
 		}
 
 		_ItemsView.Filter = item => {
-			if (item is not FileSystemItem fsi) return false;
+			if (item is not FileItem fsi) return false;
 
 			var isFile = fsi.IsFile;
 			if (fs == FILES && !isFile) return false;
@@ -912,7 +912,7 @@ sealed partial class FileList : VirtualList
 	internal async Task RefreshCurrentFileAsync(bool forceReload, CancellationToken cancellationToken) {
 		await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 		var newPath = TextEditorHelper.GetActiveWpfInteractiveView().TextBuffer.GetTextDocument().FilePath;
-		FileSystemItem currentItem = null;
+		FileItem currentItem = null;
 		if (!forceReload && _TrackActiveFile) {
 			forceReload = !FileHelper.AreFileNamesEqual(CurrentFile, newPath)
 				&& _ActiveDirPath != Path.GetDirectoryName(newPath);
@@ -922,7 +922,7 @@ sealed partial class FileList : VirtualList
 			_ActiveDirPath ??= Path.GetDirectoryName(CurrentFile);
 			BuildPathNavigator(_ActiveDirPath);
 			await LoadCurrentDirectoryAsync(cancellationToken);
-			currentItem = SelectedItem as FileSystemItem;
+			currentItem = SelectedItem as FileItem;
 		}
 		else {
 			BuildPathNavigator(_ActiveDirPath);
@@ -953,7 +953,7 @@ sealed partial class FileList : VirtualList
 		public bool IsCurrent(FileInfo file) {
 			return IsFile && FileHelper.AreFileNamesEqual(Name, file.Name);
 		}
-		public bool IsCurrent(FileSystemItem item) {
+		public bool IsCurrent(FileItem item) {
 			return IsFile == item.IsFile && FileHelper.AreFileNamesEqual(Name, item.Name);
 		}
 	}
@@ -1032,12 +1032,12 @@ sealed partial class FileList : VirtualList
 		}
 	}
 
-	sealed class FileSystemItemToTooltipConverter(FileList list) : IValueConverter
+	sealed class FileItemToTooltipConverter(FileList list) : IValueConverter
 	{
 		readonly FileList _List = list;
 
 		public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
-			if (value is not FileSystemItem item) return null;
+			if (value is not FileItem item) return null;
 
 			var panel = new StackPanel { Margin = WpfHelper.MiddleMargin }.LimitSize();
 
