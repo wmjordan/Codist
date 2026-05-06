@@ -68,7 +68,7 @@ sealed class FolderMargin : IWpfTextViewMargin
 		_Document.FileActionOccurred += HandleDocumentFileActivation;
 
 		var (dir, file) = FileHelper.DeconstructPath(_Document.FilePath, true);
-		_FolderButton = new ThemedToggleButton(IconIds.Folder, R.CMDT_ClickToViewFolder, OnFolderClick) {
+		_FolderButton = new ThemedToggleButton(IconIds.Folder, R.CMDT_ViewCurrentFolder, OnFolderClick) {
 			Background = Brushes.Transparent,
 			BorderThickness = WpfHelper.NoMargin
 		}.TinySpacing();
@@ -117,7 +117,6 @@ sealed class FolderMargin : IWpfTextViewMargin
 		CreateFilePopup();
 		_FileList.InitCurrentFile();
 		_FileList.LoadSolutionDirectoryAsync(SyncHelper.CancelAndRetainToken(ref _CancellationTokenSource)).FireAndForget();
-		_FileList.ClearNavigationHistory();
 		_FilePopup.PlacementTarget = _SolutionButton;
 		_FilePopup.IsOpen = true;
 	}
@@ -131,7 +130,6 @@ sealed class FolderMargin : IWpfTextViewMargin
 		CreateFilePopup();
 		_FileList.InitCurrentFile();
 		_FileList.ListSolutionAndProjects();
-		_FileList.ClearNavigationHistory();
 		_FilePopup.PlacementTarget = _ProjectViewButton;
 		_FilePopup.IsOpen = true;
 	}
@@ -145,7 +143,6 @@ sealed class FolderMargin : IWpfTextViewMargin
 		CreateFilePopup();
 		_FileList.InitCurrentFile();
 		_FileList.LoadCurrentProjectDirectoryAsync(SyncHelper.CancelAndRetainToken(ref _CancellationTokenSource)).FireAndForget();
-		_FileList.ClearNavigationHistory();
 		_FilePopup.PlacementTarget = _ProjectButton;
 		_FilePopup.IsOpen = true;
 	}
@@ -165,7 +162,6 @@ sealed class FolderMargin : IWpfTextViewMargin
 		CreateFilePopup();
 		_FileList.CurrentFile = path;
 		_FileList.LoadCurrentDirectoryAsync(folder, SyncHelper.CancelAndRetainToken(ref _CancellationTokenSource)).FireAndForget();
-		_FileList.ClearNavigationHistory();
 		_FilePopup.PlacementTarget = _FolderButton;
 		_FilePopup.IsOpen = true;
 	}
@@ -179,7 +175,6 @@ sealed class FolderMargin : IWpfTextViewMargin
 		CreateFilePopup();
 		_FileList.InitCurrentFile();
 		_FileList.ListOpenedDocuments();
-		_FileList.ClearNavigationHistory();
 		_FilePopup.PlacementTarget = _FileButton;
 		_FilePopup.IsOpen = true;
 	}

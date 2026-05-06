@@ -268,15 +268,15 @@
 					<LocCanonicalName>.Codist.ReinsertLastWrapText</LocCanonicalName>
 				</Strings>
 			</Button>
-			<Button guid="guidCodistPackageCmdSet" id="FileExplorerWindowCommandId" priority="0x0100" type="Button">
+			<Button guid="guidCodistPackageCmdSet" id="FileBrowserWindowCommandId" priority="0x0100" type="Button">
 				<Parent guid="guidSHLMainMenu" id="IDG_VS_VIEW_ORG_WINDOWS" />
 				<Icon guid="ImageCatalogGuid" id="FolderOpened" />
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
-					<MenuText>File Explorer</MenuText>
-					<ButtonText>File Explorer</ButtonText>
-					<ToolTipText>Displays File Explorer Window...</ToolTipText>
-					<LocCanonicalName>.Codist.FileExplorerWindow</LocCanonicalName>
+					<MenuText>File Browser</MenuText>
+					<ButtonText>File Browser</ButtonText>
+					<ToolTipText>Displays File Browser Window...</ToolTipText>
+					<LocCanonicalName>.Codist.FileBrowserWindow</LocCanonicalName>
 				</Strings>
 			</Button>
 		</Buttons>

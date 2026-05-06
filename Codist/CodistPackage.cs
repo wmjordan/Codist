@@ -23,7 +23,7 @@ namespace Codist;
 [InstalledProductRegistration("#110", "#112", Config.CurrentVersion, IconResourceID = 400)] // Information on this package for Help/About
 [Guid(PackageGuidString)]
 [ProvideMenuResource("Menus.ctmenu", 1)]
-[ProvideToolWindow(typeof(Commands.FileExplorerWindow), Style = VsDockStyle.Tabbed, Window = EnvDTE.Constants.vsWindowKindProperties)]
+[ProvideToolWindow(typeof(Commands.FileBrowserWindow), Style = VsDockStyle.Tabbed, Window = EnvDTE.Constants.vsWindowKindProperties)]
 [ProvideAutoLoad(UIContextGuids80.NoSolution, PackageAutoLoadFlags.BackgroundLoad)]
 sealed class CodistPackage : AsyncPackage
 {
@@ -125,7 +125,7 @@ sealed class CodistPackage : AsyncPackage
 			Display.ResourceMonitor.Reload(config.DisplayOptimizations);
 		}
 		WindowHandle = ReflectionHelper.CreateGetPropertyMethod<Window, IntPtr>("CriticalHandle")(Application.Current.MainWindow);
-		await Commands.FileExplorerWindowCommand.InitializeAsync(this);
+		await Commands.FileBrowserWindowCommand.InitializeAsync(this);
 
 		if (config.InitStatus != InitStatus.Normal) {
 			InitializeOrUpgradeConfig();
@@ -137,19 +137,19 @@ sealed class CodistPackage : AsyncPackage
 
 	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
 	public override IVsAsyncToolWindowFactory GetAsyncToolWindowFactory(Guid toolWindowType) {
-		return toolWindowType == Commands.FileExplorerWindow.WindowGuid
+		return toolWindowType == Commands.FileBrowserWindow.WindowGuid
 			? this
 			: base.GetAsyncToolWindowFactory(toolWindowType);
 	}
 
 	protected override string GetToolWindowTitle(Type toolWindowType, int id) {
-		return toolWindowType == typeof(Commands.FileExplorerWindow)
-			? R.T_FileExplorer
+		return toolWindowType == typeof(Commands.FileBrowserWindow)
+			? R.T_FileBrowser
 			: base.GetToolWindowTitle(toolWindowType, id);
 	}
 	protected override System.Threading.Tasks.Task<object> InitializeToolWindowAsync(Type toolWindowType, int id, CancellationToken cancellationToken) {
-		return toolWindowType == typeof(Commands.FileExplorerWindow)
-				? Task.FromResult((object)R.T_FileExplorer)
+		return toolWindowType == typeof(Commands.FileBrowserWindow)
+				? Task.FromResult((object)R.T_FileBrowser)
 				: base.InitializeToolWindowAsync(toolWindowType, id, cancellationToken);
 	}
 

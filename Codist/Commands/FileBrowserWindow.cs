@@ -12,7 +12,7 @@ using R = Codist.Properties.Resources;
 namespace Codist.Commands;
 
 [Guid(WindowGuidString)]
-public class FileExplorerWindow : ToolWindowPane
+public class FileBrowserWindow : ToolWindowPane
 {
 	const string WindowGuidString = "f4fff674-6d0e-4cae-8619-8a66bb65c7b5";
 	internal static readonly Guid WindowGuid = new(WindowGuidString);
@@ -23,8 +23,8 @@ public class FileExplorerWindow : ToolWindowPane
 	CancellationTokenSource _CancellationTokenSource = new();
 
 	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
-	public FileExplorerWindow() : base(null) {
-		Caption = R.T_FileExplorer;
+	public FileBrowserWindow() : base(null) {
+		Caption = R.T_FileBrowser;
 		Content = _FileList = new FileList(true);
 		_FileList.IsVisibleChanged += HandleVisibilityChange;
 	}

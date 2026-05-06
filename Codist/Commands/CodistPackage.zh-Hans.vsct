@@ -263,7 +263,7 @@
 					<LocCanonicalName>.Codist.插入上一次的环绕文本</LocCanonicalName>
 				</Strings>
 			</Button>
-			<Button guid="guidCodistPackageCmdSet" id="FileExplorerWindowCommandId" priority="0x0100" type="Button">
+			<Button guid="guidCodistPackageCmdSet" id="FileBrowserWindowCommandId" priority="0x0100" type="Button">
 				<Parent guid="guidSHLMainMenu" id="IDG_VS_VIEW_ORG_WINDOWS" />
 				<Icon guid="ImageCatalogGuid" id="FolderOpened" />
 				<CommandFlag>IconIsMoniker</CommandFlag>

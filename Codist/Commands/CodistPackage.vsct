@@ -93,7 +93,7 @@
 			<IDSymbol name="OpenDebugOutputFolderId" value="0x400D" />
 			<IDSymbol name="OpenReleaseOutputFolderId" value="0x400E" />
 			<IDSymbol name="IDG_VS_TOOLS_OPTIONS" value="0x1020" />
-			<IDSymbol name="FileExplorerWindowCommandId" value="0x4004" />
+			<IDSymbol name="FileBrowserWindowCommandId" value="0x4004" />
 			<IDSymbol name="SyntaxCustomizeHighlightId" value="0x4005" />
 			<IDSymbol name="NaviBarSearchDeclarationId" value="0x4006" />
 			<IDSymbol name="NaviBarSearchActiveClassId" value="0x4007" />

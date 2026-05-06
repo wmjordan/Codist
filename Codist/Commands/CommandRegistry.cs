@@ -42,7 +42,7 @@ internal enum Command
 	CodeWindowScreenshot = 0x4001,
 	WindowInformer,
 	IncrementVsixVersion,
-	FileExplorer,
+	FileBrowser,
 	SyntaxCustomizerWindow,
 	NaviBarSearchDeclaration,
 	NaviBarSearchActiveClass,

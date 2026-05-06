@@ -63,6 +63,11 @@ partial class FileList
 	}
 	#endregion
 
+	#region Folder or files operations
+	void LocateInFileBrowser(object sender, RoutedEventArgs args) {
+		Commands.FileBrowserWindowCommand.Instance.ShowAt(_ActiveDirPath);
+	}
+
 	void OpenInExplorer(object sender, RoutedEventArgs args) {
 		if (!String.IsNullOrEmpty(_ActiveFilePath)
 			&& Path.GetDirectoryName(_ActiveFilePath) == _ActiveDirPath) {
@@ -130,8 +135,9 @@ partial class FileList
 			}
 		}
 	}
+	#endregion
 
-	#region File operations
+	#region Shell File operations
 	void CutFiles(object sender, RoutedEventArgs args) {
 		CopyOrCutFiles(true);
 	}

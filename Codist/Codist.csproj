@@ -308,8 +308,8 @@
     <Compile Include="NaviBar\CSharpBar.cs" />
     <Compile Include="CodistPackage.cs" />
     <Compile Include="Commands\ScreenshotCommand.cs" />
-    <Compile Include="Commands\FileExplorerWindow.cs" />
-    <Compile Include="Commands\FileExplorerWindowCommand.cs" />
+    <Compile Include="Commands\FileBrowserWindow.cs" />
+    <Compile Include="Commands\FileBrowserWindowCommand.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Controls\ThemedButton.cs" />

@@ -1353,7 +1353,7 @@ Ctrl+1, Ctrl+3: Codist.在当前项目查找声明</value>
     <value>保存 Codist 配置文件...</value>
   </data>
   <data name="CMD_OpenFolder" xml:space="preserve">
-    <value>打开文件夹</value>
+    <value>在系统资源管理器打开文件夹</value>
   </data>
   <data name="CMD_OpenOrExecuteFile" xml:space="preserve">
     <value>打开或执行文件</value>
@@ -3193,9 +3193,9 @@ Shift: 匹配大小写</value>
   <data name="T_UpdateTime" xml:space="preserve">
     <value>更改时间: </value>
   </data>
-  <data name="CMDT_ClickToViewFolder" xml:space="preserve">
-    <value>文件夹查看器
-点击查看文件所在文件夹的内容</value>
+  <data name="CMDT_ViewCurrentFolder" xml:space="preserve">
+    <value>当前文件夹
+查看当前文件所在文件夹的内容</value>
   </data>
   <data name="CMD_GoToFolder" xml:space="preserve">
     <value>转到文件夹</value>
@@ -3253,8 +3253,8 @@ Shift: 匹配大小写</value>
 进入多选模式，点击列表项将切换其选中状态，便于选中多项。
 非多选模式下，按Ctrl或Shift键选择多项。</value>
   </data>
-  <data name="T_FileExplorer" xml:space="preserve">
-    <value>文件管理器</value>
+  <data name="T_FileBrowser" xml:space="preserve">
+    <value>文件浏览器</value>
   </data>
   <data name="CMDT_SyncActiveFile" xml:space="preserve">
     <value>同步当前代码文件
@@ -3306,5 +3306,11 @@ Shift: 匹配大小写</value>
   </data>
   <data name="T_FolderContent" xml:space="preserve">
     <value>文件夹内容</value>
+  </data>
+  <data name="T_SelectionMenu" xml:space="preserve">
+    <value>打开选择项的菜单</value>
+  </data>
+  <data name="CMD_ViewFolderInFileBrowser" xml:space="preserve">
+    <value>在文件浏览器打开文件夹</value>
   </data>
 </root>

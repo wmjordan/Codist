@@ -28,11 +28,13 @@ sealed partial class FileList : VirtualList
 	readonly TextBlock _PathBlock, _SelectionInfoBlock;
 	readonly TextBox _FilterBox;
 	readonly ThemedControlGroup _FilterGroup;
-	readonly ThemedToggleButton _FolderFilterButton, _FileFilterButton, _SelectionMenuButton;
+	readonly ThemedMenuButton _SelectionMenuButton;
+	readonly ThemedToggleButton _FolderFilterButton, _FileFilterButton;
 	readonly ThemedButton _BackButton, _GoToCurrentFileButton, _GoToSolutionFolderButton, _GoToProjectFolderButton;
-	readonly ContextMenu _FileMenu, _DocumentMenu, _SelectionMenu;
+	readonly ContextMenu _FileMenu, _DocumentMenu;
 	readonly Grid _PathControl;
 	readonly ViewItemList _ViewHistories;
+	readonly bool _InWindowPane;
 
 	ObservableCollection<FileItem> _Items;
 	ICollectionView _ItemsView;
@@ -81,9 +83,9 @@ sealed partial class FileList : VirtualList
 					BorderThickness = WpfHelper.TinyMargin,
 					Margin = WpfHelper.SmallMargin,
 					CornerRadius = WpfHelper.SmallCorner,
-					Child = new ThemedButton(IconIds.OpenFolder, R.CMD_OpenFolder, OpenInExplorer)
+					Child = new ThemedMenuButton(IconIds.OpenFolder, R.CMD_OpenFolder, ShowFolderMenu)
 						.ClearSpacing()
-						.SetProperty(PaddingProperty, WpfHelper.SmallHorizontalMargin),
+						.SetProperty(PaddingProperty, WpfHelper.SmallMargin),
 					VerticalAlignment = VerticalAlignment.Top,
 				}.ReferenceProperty(Border.BorderBrushProperty, CommonControlsColors.TextBoxBorderBrushKey),
 				new TextBlock {
@@ -100,7 +102,7 @@ sealed partial class FileList : VirtualList
 			Margin = WpfHelper.SmallMargin,
 			Children = {
 				new ThemedControlGroup(
-					_SelectionMenuButton = new ThemedToggleButton(IconIds.MultiSelection, R.T_Selection, ShowSelectionMenu),
+					_SelectionMenuButton = new ThemedMenuButton(IconIds.SelectionMenu, R.T_SelectionMenu, ShowSelectionMenu, ConfigSelectionMenu),
 					_BackButton = new ThemedButton(IconIds.GoBack, R.CMD_NavigateBackward, NavigateBackward){ IsEnabled = false }
 					) {
 					Margin = WpfHelper.GlyphMargin,
@@ -135,7 +137,7 @@ sealed partial class FileList : VirtualList
 		var commandPanel = new StackPanel {
 			Children = { _PathControl, toolbar }
 		};
-		if (inWindowPane) {
+		if (_InWindowPane = inWindowPane) {
 			Header = commandPanel;
 			((ThemedControlGroup)toolbar.Children[0])
 				.AddRange(new ThemedToggleButton(IconIds.SyncActiveFile, R.CMDT_SyncActiveFile, ToggleSyncMode));
@@ -148,6 +150,7 @@ sealed partial class FileList : VirtualList
 			PlacementTarget = this,
 			Resources = SharedDictionaryManager.ContextMenu,
 		};
+
 		this.ReferenceCrispImageBackground(CommonControlsColors.ComboBoxListBackgroundColorKey)
 			.ReferenceProperty(ForegroundProperty, CommonControlsColors.ComboBoxListItemTextBrushKey);
 
@@ -158,13 +161,6 @@ sealed partial class FileList : VirtualList
 		_GoToCurrentFileButton.Visibility = Visibility.Collapsed;
 		_FilterBox.TextChanged += FilterBox_TextChanged;
 		_FilterBox.Loaded += FilterBox_Loaded;
-
-		_SelectionMenu = new() {
-			PlacementTarget = _SelectionMenuButton,
-			Placement = PlacementMode.Bottom,
-			Resources = SharedDictionaryManager.ContextMenu,
-		};
-		_SelectionMenu.Closed += HandleSelectionMenuClosed;
 
 		_DocumentMenu = new() {
 			PlacementTarget = this,
@@ -370,23 +366,34 @@ sealed partial class FileList : VirtualList
 		}
 	}
 
-	void ShowSelectionMenu(object sender, EventArgs e) {
-		if (_SelectionMenuButton.IsChecked != true) {
-			return;
-		}
-		if (!_SelectionMenu.HasItems) {
-			_SelectionMenu.Items.AddRange(
-				new ThemedMenuItem(IconIds.MultiSelection, R.CMD_ToggleMultiSelectionMode, ToggleMultiSelectionMode, R.CMDT_ToggleMultiSelectionMode),
-				new ThemedMenuItem(IconIds.SelectAll, R.CMD_SelectAll, HandleSelectAll),
-				new ThemedMenuItem(IconIds.None, R.CMD_SelectNone, HandleSelectNone)
+	void ShowFolderMenu(ContextMenu menu) {
+		menu.Placement = PlacementMode.Bottom;
+		menu.Items.AddRange(
+			new ThemedMenuItem(IconIds.OpenFolder, R.CMD_OpenFolder, OpenInExplorer)
+		);
+		if (!_InWindowPane) {
+			menu.Items.AddRange(
+				new Separator(),
+				new ThemedMenuItem(IconIds.Folder, R.CMD_ViewFolderInFileBrowser, LocateInFileBrowser)
 			);
 		}
-		((ThemedMenuItem)_SelectionMenu.Items[0]).Icon = VsImageHelper.GetImage(SelectionMode == SelectionMode.Multiple ? IconIds.Enabled : IconIds.Default);
-		_SelectionMenu.IsOpen = true;
+	}
+
+	void ShowSelectionMenu(ContextMenu menu) {
+		menu.Placement = PlacementMode.Bottom;
+		menu.Items.AddRange(
+			new ThemedMenuItem(IconIds.MultiSelection, R.CMD_ToggleMultiSelectionMode, ToggleMultiSelectionMode, R.CMDT_ToggleMultiSelectionMode),
+			new ThemedMenuItem(IconIds.SelectAll, R.CMD_SelectAll, HandleSelectAll),
+			new ThemedMenuItem(IconIds.None, R.CMD_SelectNone, HandleSelectNone)
+		);
+	}
+
+	void ConfigSelectionMenu(ContextMenu menu) {
+		((ThemedMenuItem)menu.Items[0]).Icon = VsImageHelper.GetImage(SelectionMode == SelectionMode.Multiple ? IconIds.Enabled : IconIds.Default);
 	}
 
 	void HandleSelectionMenuClosed(object sender, EventArgs e) {
-		_SelectionMenuButton.IsChecked = false;
+		(((ContextMenu)sender).PlacementTarget as ThemedToggleButton)?.IsChecked = false;
 	}
 
 	protected override void OnSelectionChanged(SelectionChangedEventArgs e) {
@@ -985,7 +992,7 @@ sealed partial class FileList : VirtualList
 
 	// A view item list with limited capacity to avoid memory leak.
 	// When new entry is added to the list, if the capacity is exceeded, the oldest entry will be removed
-	sealed class ViewItemList(FileList list, int capacity = 100) : LinkedList<ViewItem>
+	sealed class ViewItemList(FileList list, int capacity = 256) : LinkedList<ViewItem>
 	{
 		readonly int _capacity = capacity;
 
@@ -999,7 +1006,8 @@ sealed partial class FileList : VirtualList
 
 		public void Add(ViewItem history) {
 			if (history == default
-				|| Count != 0 && history == Last.Value) {
+				|| history.Path is null
+				|| Count != 0 && FileHelper.AreFileNamesEqual(history.Path, Last.Value.Path)) {
 				return;
 			}
 			list._BackButton.IsEnabled = true;

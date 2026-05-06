@@ -154,7 +154,7 @@ public class ThemedImageButton : Button, IDisposable
 	}
 }
 
-public sealed class ThemedToggleButton : ToggleButton, IDisposable
+public class ThemedToggleButton : ToggleButton, IDisposable
 {
 	TextBlock _Text;
 
@@ -210,6 +210,36 @@ public sealed class ThemedToggleButton : ToggleButton, IDisposable
 			p.Children.DisposeCollection();
 		}
 		Content = null;
+	}
+}
+
+public sealed class ThemedMenuButton : ThemedToggleButton
+{
+	readonly Action<ContextMenu> _MenuBuilder, _MenuShownHandler;
+
+	public ThemedMenuButton(int imageId, string toolTip, Action<ContextMenu> menuBuilder, Action<ContextMenu> menuShownHandler = null) : base(imageId, toolTip) {
+		this.InheritStyle<ThemedToggleButton>(SharedDictionaryManager.ThemedControls);
+		Checked += ShowMenu;
+		_MenuBuilder = menuBuilder;
+		_MenuShownHandler = menuShownHandler;
+	}
+
+	void ShowMenu(object sender, RoutedEventArgs e) {
+		ContextMenu m;
+		if ((m = ContextMenu) is null) {
+			m = ContextMenu = new ContextMenu {
+				PlacementTarget = this,
+				Resources = SharedDictionaryManager.ContextMenu
+			};
+			m.Closed += Menu_Closed;
+			_MenuBuilder(m);
+		}
+		_MenuShownHandler?.Invoke(m);
+		m.IsOpen = true;
+	}
+
+	void Menu_Closed(object sender, RoutedEventArgs e) {
+		IsChecked = false;
 	}
 }
 

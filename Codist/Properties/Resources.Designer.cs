@@ -1579,7 +1579,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Navigate backward.
+        ///   Looks up a localized string similar to Navigate Backward.
         /// </summary>
         internal static string CMD_NavigateBackward {
             get {
@@ -1633,7 +1633,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Open folder.
+        ///   Looks up a localized string similar to Open Folder in Windows Explorer.
         /// </summary>
         internal static string CMD_OpenFolder {
             get {
@@ -2441,6 +2441,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to View Folder in File Browser.
+        /// </summary>
+        internal static string CMD_ViewFolderInFileBrowser {
+            get {
+                return ResourceManager.GetString("CMD_ViewFolderInFileBrowser", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to View URL in browser.
         /// </summary>
         internal static string CMD_ViewUrlInBrowser {
@@ -2547,16 +2556,6 @@ namespace Codist.Properties {
         internal static string CMDT_Capitalize {
             get {
                 return ResourceManager.GetString("CMDT_Capitalize", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Folder viewer
-        ///Click to view folder containing current file.
-        /// </summary>
-        internal static string CMDT_ClickToViewFolder {
-            get {
-                return ResourceManager.GetString("CMDT_ClickToViewFolder", resourceCulture);
             }
         }
         
@@ -3231,6 +3230,16 @@ namespace Codist.Properties {
         internal static string CMDT_UndoChanges {
             get {
                 return ResourceManager.GetString("CMDT_UndoChanges", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Current Folder
+        ///View folder containing current file.
+        /// </summary>
+        internal static string CMDT_ViewCurrentFolder {
+            get {
+                return ResourceManager.GetString("CMDT_ViewCurrentFolder", resourceCulture);
             }
         }
         
@@ -7850,11 +7859,11 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to File Explorer.
+        ///   Looks up a localized string similar to File Browser.
         /// </summary>
-        internal static string T_FileExplorer {
+        internal static string T_FileBrowser {
             get {
-                return ResourceManager.GetString("T_FileExplorer", resourceCulture);
+                return ResourceManager.GetString("T_FileBrowser", resourceCulture);
             }
         }
         
@@ -8995,6 +9004,15 @@ namespace Codist.Properties {
         internal static string T_SelectionLength {
             get {
                 return ResourceManager.GetString("T_SelectionLength", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Selection menu.
+        /// </summary>
+        internal static string T_SelectionMenu {
+            get {
+                return ResourceManager.GetString("T_SelectionMenu", resourceCulture);
             }
         }
         
