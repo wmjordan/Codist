@@ -87,7 +87,12 @@ public sealed partial class CSharpBar
 					if (_Menu.Symbols.Count == 0) {
 						goto GOTO_DEFINITION;
 					}
-					_FilterBox.UpdateNumbers((Symbol as ITypeSymbol)?.GetMembers().Select(s => new SymbolItem(s, null, false)) ?? Enumerable.Empty<SymbolItem>());
+					if (Node.IsKind(CodeAnalysisHelper.SwitchExpression)) {
+						_FilterBox.UpdateNumbers(Enumerable.Empty<SymbolItem>());
+					}
+					else {
+						_FilterBox.UpdateNumbers((Symbol as ITypeSymbol)?.GetMembers().Select(s => new SymbolItem(s, null, false)) ?? Enumerable.Empty<SymbolItem>());
+					}
 					var footer = (TextBlock)_Menu.Footer;
 					if (_PartialCount > 1) {
 						footer.AddImage(IconIds.PartialDocumentCount)
@@ -127,7 +132,7 @@ public sealed partial class CSharpBar
 					&& (Node.FirstAncestorOrSelf<MemberDeclarationSyntax>()?.Span.Contains(Node.Span)) != true
 				|| kind.IsNonDelegateTypeDeclaration()
 				|| kind.IsMethodDeclaration()
-				|| kind == SyntaxKind.SwitchStatement;
+				|| kind.CeqAny(SyntaxKind.SwitchStatement, CodeAnalysisHelper.SwitchExpression);
 		}
 
 		async Task CreateMenuForTypeSymbolNodeAsync(CancellationToken cancellationToken) {
@@ -183,6 +188,7 @@ public sealed partial class CSharpBar
 		Task AddItemsAsync(SyntaxNode node, CancellationToken cancellationToken) {
 			switch (node.Kind()) {
 				case SyntaxKind.SwitchStatement:
+				case CodeAnalysisHelper.SwitchExpression:
 					AddSwitchLabels(node);
 					return Task.CompletedTask;
 				case SyntaxKind.RegionDirectiveTrivia:
@@ -342,14 +348,47 @@ public sealed partial class CSharpBar
 		void AddSwitchLabels(SyntaxNode node) {
 			int pos = Bar.View.GetCaretPosition();
 			bool selected = false;
-			foreach (var section in ((SwitchStatementSyntax)node).Sections) {
-				foreach (var item in section.Labels) {
-					var i = _Menu.Add(item);
-					if (selected == false && section.FullSpan.Contains(pos)) {
-						selected = true;
-						i.Container.SelectedValue = i;
+			if (node is SwitchStatementSyntax ss) {
+				foreach (var section in ss.Sections) {
+					foreach (var item in section.Labels) {
+						AddExpression(pos, ref selected, section, item);
 					}
 				}
+			}
+			else {
+				foreach (var child in node.ChildNodes()) {
+					if (child.IsKind(CodeAnalysisHelper.SwitchExpressionArm)) {
+						var exp = child.GetSwitchExpressionArmPattern();
+						if (exp.IsKind(CodeAnalysisHelper.OrPattern)) {
+							foreach (var item in DescendantOrPattern(exp)) {
+								AddExpression(pos, ref selected, child, item);
+							}
+							continue;
+						}
+						AddExpression(pos, ref selected, child, exp);
+					}
+				}
+			}
+		}
+
+		static IEnumerable<SyntaxNode> DescendantOrPattern(SyntaxNode orPattern) {
+			foreach (var child in orPattern.ChildNodes()) {
+				if (child.IsKind(CodeAnalysisHelper.OrPattern)) {
+					foreach (var item in DescendantOrPattern(child)) {
+						yield return item;
+					}
+				}
+				else {
+					yield return child;
+				}
+			}
+		}
+
+		void AddExpression(int pos, ref bool selected, SyntaxNode section, SyntaxNode item) {
+			var i = _Menu.Add(item);
+			if (!selected && section.FullSpan.Contains(pos)) {
+				selected = true;
+				i.Container.SelectedValue = i;
 			}
 		}
 

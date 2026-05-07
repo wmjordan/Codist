@@ -241,6 +241,15 @@ namespace Codist
 				case SyntaxKind.SwitchSection:
 				case SyntaxKind.CaseSwitchLabel:
 				case SyntaxKind.DefaultSwitchLabel:
+				case ConstantPattern:
+				case CasePatternSwitchLabel:
+				case RelationPattern:
+				case OrPattern:
+				case AndPattern:
+				case NotPattern:
+				case SlicePattern:
+				case DiscardPattern:
+				case TypePattern:
 					return IconIds.SwitchSection;
 				case SyntaxKind.TryStatement: return IconIds.TryCatch;
 				case SyntaxKind.UsingStatement: return IconIds.Using;

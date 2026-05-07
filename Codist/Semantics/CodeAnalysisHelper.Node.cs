@@ -690,6 +690,16 @@ namespace Codist
 				case SyntaxKind.SwitchSection: return GetSwitchSignature((SwitchSectionSyntax)node);
 				case SyntaxKind.SwitchStatement: return ((SwitchStatementSyntax)node).Expression.GetExpressionSignature();
 				case SwitchExpression: return (node.ChildNodes().FirstOrDefault() as ExpressionSyntax).GetExpressionSignature();
+				case CasePatternSwitchLabel:
+					return node.ChildNodes().FirstOrDefault()?.ToString(); // Pattern
+				case DiscardPattern: return "_";
+				case ConstantPattern:
+				case TypePattern:
+				case AndPattern:
+				case OrPattern:
+				case NotPattern:
+				case SlicePattern:
+				case RelationPattern: return node.NormalizeWhitespace().ToString();
 				case SyntaxKind.WhileStatement: return ((WhileStatementSyntax)node).Condition.GetExpressionSignature();
 				case SyntaxKind.UsingStatement: return GetUsingSignature((UsingStatementSyntax)node);
 				case SyntaxKind.LockStatement: return ((LockStatementSyntax)node).Expression.GetExpressionSignature();
