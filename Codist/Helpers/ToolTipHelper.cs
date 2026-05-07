@@ -239,21 +239,20 @@ static class ToolTipHelper
 		if (value == null) {
 			return null;
 		}
-		switch (Type.GetTypeCode(value.GetType())) {
-			case TypeCode.Int32: return ShowInt((int)value, form);
-			case TypeCode.Int64: return ShowInt64((long)value, form);
-			case TypeCode.Byte: return ShowNumberAndBytes(((byte)value).ToString(), new byte[] { (byte)value });
-			case TypeCode.Single: return ShowSingle((float)value, form);
-			case TypeCode.Double: return ShowDouble((double)value, form);
-			case TypeCode.Int16: return ShowInt16((short)value, form);
-			case TypeCode.Char: return ShowChar((char)value);
-			case TypeCode.UInt32: return ShowNumericRepresentations((int)(uint)value, NumericForm.Unsigned);
-			case TypeCode.UInt16: return ShowNumericRepresentations((short)(ushort)value, NumericForm.Unsigned);
-			case TypeCode.UInt64: return ShowNumericRepresentations((long)(ulong)value, NumericForm.Unsigned);
-			case TypeCode.SByte: return ShowNumberAndBytes(((sbyte)value).ToString(), new byte[] { (byte)(sbyte)value });
-		}
-		return null;
-
+		return Type.GetTypeCode(value.GetType()) switch {
+			TypeCode.Int32 => ShowInt((int)value, form),
+			TypeCode.Int64 => ShowInt64((long)value, form),
+			TypeCode.Byte => ShowNumberAndBytes(((byte)value).ToString(), [(byte)value]),
+			TypeCode.Single => ShowSingle((float)value, form),
+			TypeCode.Double => ShowDouble((double)value, form),
+			TypeCode.Int16 => ShowInt16((short)value, form),
+			TypeCode.Char => ShowChar((char)value),
+			TypeCode.UInt32 => ShowNumericRepresentations((int)(uint)value, NumericForm.Unsigned),
+			TypeCode.UInt16 => ShowNumericRepresentations((short)(ushort)value, NumericForm.Unsigned),
+			TypeCode.UInt64 => ShowNumericRepresentations((long)(ulong)value, NumericForm.Unsigned),
+			TypeCode.SByte => ShowNumberAndBytes(((sbyte)value).ToString(), [(byte)(sbyte)value]),
+			_ => null,
+		};
 		Grid ShowNumberAndBytes(string number, byte[] bytes) {
 			return new Grid {
 				HorizontalAlignment = HorizontalAlignment.Left,
@@ -338,7 +337,7 @@ static class ToolTipHelper
 			}
 			return ShowNumberAndBytes(
 				f == NumericForm.Unsigned ? ((uint)v).ToString() : v.ToString(),
-				new byte[] { (byte)(v >> 24), (byte)(v >> 16), (byte)(v >> 8), (byte)v });
+				[(byte)(v >> 24), (byte)(v >> 16), (byte)(v >> 8), (byte)v]);
 		}
 
 		Grid ShowInt64(long v, NumericForm f) {
@@ -347,7 +346,7 @@ static class ToolTipHelper
 			}
 			return ShowNumberAndBytes(
 				f == NumericForm.Unsigned ? ((ulong)v).ToString() : v.ToString(),
-				new byte[] { (byte)(v >> 56), (byte)(v >> 48), (byte)(v >> 40), (byte)(v >> 32), (byte)(v >> 24), (byte)(v >> 16), (byte)(v >> 8), (byte)v });
+				[(byte)(v >> 56), (byte)(v >> 48), (byte)(v >> 40), (byte)(v >> 32), (byte)(v >> 24), (byte)(v >> 16), (byte)(v >> 8), (byte)v]);
 		}
 
 		Grid ShowSingle(float v, NumericForm f) {
@@ -370,11 +369,11 @@ static class ToolTipHelper
 			}
 			return ShowNumberAndBytes(
 				f == NumericForm.Unsigned ? ((ushort)v).ToString() : v.ToString(),
-				new byte[] { (byte)(v >> 8), (byte)v });
+				[(byte)(v >> 8), (byte)v]);
 		}
 
 		Grid ShowChar(char v) {
-			return ShowNumberAndBytes(((ushort)v).ToString(), new byte[] { (byte)(v >> 8), (byte)v });
+			return ShowNumberAndBytes(((ushort)v).ToString(), [(byte)(v >> 8), (byte)v]);
 		}
 	}
 

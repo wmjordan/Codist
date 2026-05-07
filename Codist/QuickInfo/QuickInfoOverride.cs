@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
 using CLR;
 using Codist.Controls;
@@ -150,7 +148,7 @@ namespace Codist.QuickInfo
 				}
 				var errorTagger = GetErrorTagger();
 				return errorTagger != null
-					? (_ErrorTags ?? (_ErrorTags = new ErrorTags()))
+					? (_ErrorTags ??= new ErrorTags())
 						.GetErrorIcon(tt, errorTagger, _Session.ApplicableToSpan.GetSpan(_Session.TextView.TextSnapshot))
 					: null;
 			}
@@ -170,18 +168,13 @@ namespace Codist.QuickInfo
 			}
 		}
 
-		sealed class UIOverride : UIElement
+		sealed class UIOverride(DefaultOverride uiOverride, Action<bool> holder) : UIElement
 		{
 			static readonly Thickness __TitlePanelMargin = new Thickness(0, 0, 30, 6);
 
-			readonly DefaultOverride _Override;
-			readonly Action<bool> _Holder;
+			readonly DefaultOverride _Override = uiOverride;
+			readonly Action<bool> _Holder = holder;
 			bool _Overridden;
-
-			public UIOverride(DefaultOverride uiOverride, Action<bool> holder) {
-				_Override = uiOverride;
-				_Holder = holder;
-			}
 
 			public void Hold(bool hold) {
 				_Holder(hold);
@@ -313,7 +306,8 @@ namespace Codist.QuickInfo
 				var icon = titlePanel.GetFirstVisualChild<CrispImage>();
 				var signature = infoPanel.GetFirstVisualChild<TextBlock>();
 
-				if (_Override.DocElement != null || Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle) && _Override.ClickAndGoSymbol != null) {
+				if (_Override.DocElement != null
+					|| Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle) && _Override.ClickAndGoSymbol != null) {
 					OverrideDocumentation(doc);
 				}
 
@@ -540,15 +534,15 @@ namespace Codist.QuickInfo
 			}
 
 			static int GetIconIdForErrorType(string error) {
-				switch (error) {
-					case PredefinedErrorTypeNames.Suggestion: return IconIds.HiddenInfo;
-					case PredefinedErrorTypeNames.HintedSuggestion: return IconIds.Info;
-					case PredefinedErrorTypeNames.Warning: return IconIds.Warning;
-					case PredefinedErrorTypeNames.SyntaxError: return IconIds.SyntaxError;
-					case PredefinedErrorTypeNames.CompilerError: return IconIds.Stop;
-					case PredefinedErrorTypeNames.OtherError: return IconIds.Error;
-				}
-				return GetIconIdForCustomErrorTypes(error);
+				return error switch {
+					PredefinedErrorTypeNames.Suggestion => IconIds.HiddenInfo,
+					PredefinedErrorTypeNames.HintedSuggestion => IconIds.Info,
+					PredefinedErrorTypeNames.Warning => IconIds.Warning,
+					PredefinedErrorTypeNames.SyntaxError => IconIds.SyntaxError,
+					PredefinedErrorTypeNames.CompilerError => IconIds.Stop,
+					PredefinedErrorTypeNames.OtherError => IconIds.Error,
+					_ => GetIconIdForCustomErrorTypes(error),
+				};
 			}
 
 			static int GetIconIdForCustomErrorTypes(string error) {
@@ -565,9 +559,7 @@ namespace Codist.QuickInfo
 			}
 
 			Dictionary<string, string> GetTags(ITagAggregator<IErrorTag> tagger, SnapshotSpan span) {
-				if (_TagHolder == null) {
-					_TagHolder = new Dictionary<string, string>();
-				}
+				_TagHolder ??= [];
 				foreach (var tag in tagger.GetTags(span)) {
 					var content = tag.Tag.ToolTipContent;
 					if (content is ContainerElement ce) {
