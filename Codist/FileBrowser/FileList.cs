@@ -252,7 +252,9 @@ sealed partial class FileList : VirtualList
 			}
 			else if (ContextMenu == _DocumentMenu) {
 				_DocumentMenu.Items.AddRange(
-					new ListItemContextMenuItem(IconIds.LocateInSolutionExplorer, R.CMD_LocateInSolutionExplorer, ActivationCondition.HasSingleSolutionItem, LocateInSolutionExplorer)
+					new ListItemContextMenuItem(IconIds.LocateInSolutionExplorer, R.CMD_LocateInSolutionExplorer, ActivationCondition.HasSingleSolutionItem, LocateInSolutionExplorer),
+					new ListItemContextMenuItem(IconIds.Save, R.CMD_Save, ActivationCondition.HasFile, SaveDocument),
+					new ListItemContextMenuItem(IconIds.Close, R.CMD_Close, ActivationCondition.HasFile, CloseDocument)
 				);
 			}
 		}
@@ -520,7 +522,7 @@ sealed partial class FileList : VirtualList
 				ContextMenu = null;
 				break;
 			case ViewMode.Documents:
-				_GoToCurrentFileButton.Visibility = Visibility.Visible;
+				_GoToCurrentFileButton.Visibility = _SelectionMenuButton.Visibility = Visibility.Visible;
 				_PathControl.Visibility = _FilterGroup.Visibility = Visibility.Collapsed;
 				ContextMenu = _DocumentMenu;
 				break;

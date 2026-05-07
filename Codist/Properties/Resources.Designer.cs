@@ -1908,11 +1908,20 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Save....
+        ///   Looks up a localized string similar to Save.
         /// </summary>
         internal static string CMD_Save {
             get {
                 return ResourceManager.GetString("CMD_Save", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Save....
+        /// </summary>
+        internal static string CMD_SaveAs {
+            get {
+                return ResourceManager.GetString("CMD_SaveAs", resourceCulture);
             }
         }
         

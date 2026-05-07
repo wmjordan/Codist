@@ -60,7 +60,7 @@ namespace Codist.Options
 						new WrapPanel {
 							Children = {
 								(_LoadButton = new Button { Name = "_Load", Content = R.CMD_Load, ToolTip = R.OT_LoadConfigFileTip }),
-								(_SaveButton = new Button { Name = "_Save", Content = R.CMD_Save, ToolTip = R.OT_SaveConfigFileTip }),
+								(_SaveButton = new Button { Name = "_Save", Content = R.CMD_SaveAs, ToolTip = R.OT_SaveConfigFileTip }),
 								(_OpenConfigFolderButton = new Button { Content = R.CMD_OpenConfigFolder, ToolTip = R.OT_OpenConfigFolderTip})
 							}
 						},

@@ -260,6 +260,7 @@ sealed class FolderMargin : IWpfTextViewMargin
 		_CancellationTokenSource.CancelAndDispose();
 		_Document.FileActionOccurred -= HandleDocumentFileActivation;
 		_View.VisualElement.Loaded -= AddProjectButtonOnLoaded;
+		_FilePopup?.IsOpen = false;
 	}
 
 	ITextViewMargin ITextViewMargin.GetTextViewMargin(string marginName) {

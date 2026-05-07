@@ -235,6 +235,7 @@ static class IconIds
 	public const int LocateInSolutionExplorer = KnownImageIds.SwitchSourceOrTarget;
 	public const int OpenWithCmd = KnownImageIds.Console;
 	public const int Load = KnownImageIds.FolderOpened;
+	public const int Save = KnownImageIds.Save;
 	public const int SaveAs = KnownImageIds.SaveAs;
 	public const int Copy = KnownImageIds.Copy;
 	public const int Cut = KnownImageIds.Cut;

@@ -135,6 +135,27 @@ partial class FileList
 			}
 		}
 	}
+	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.EventHandler)]
+	void SaveDocument(object sender, RoutedEventArgs args) {
+		var documents = ServicesHelper.Instance.DTE.Documents;
+		foreach (var file in SelectedFilePaths) {
+			var doc = documents.Item(file);
+			if (doc?.Saved == false) {
+				doc.Save();
+			}
+		}
+	}
+
+	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.EventHandler)]
+	void CloseDocument(object sender, RoutedEventArgs args) {
+		var documents = ServicesHelper.Instance.DTE.Documents;
+		foreach (var file in SelectedFilePaths) {
+			var doc = documents.Item(file);
+			doc?.Close();
+		}
+	}
+
+
 	#endregion
 
 	#region Shell File operations

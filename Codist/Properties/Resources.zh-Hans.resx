@@ -514,7 +514,7 @@ Shift：粘贴并选中下一项（整个单词）</value>
   <data name="CMD_PostIssue" xml:space="preserve">
     <value>发表建议或提交问题报告</value>
   </data>
-  <data name="CMD_Save" xml:space="preserve">
+  <data name="CMD_SaveAs" xml:space="preserve">
     <value>保存...</value>
   </data>
   <data name="OT_About" xml:space="preserve">
@@ -3312,5 +3312,8 @@ Shift: 匹配大小写</value>
   </data>
   <data name="CMD_ViewFolderInFileBrowser" xml:space="preserve">
     <value>在文件浏览器打开文件夹</value>
+  </data>
+  <data name="CMD_Save" xml:space="preserve">
+    <value>保存</value>
   </data>
 </root>
