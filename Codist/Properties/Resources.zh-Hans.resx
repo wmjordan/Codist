@@ -3319,4 +3319,10 @@ Shift: 匹配大小写</value>
   <data name="CMD_MultiLineOrPatterns" xml:space="preserve">
     <value>将 &lt;or&gt; 模式换行</value>
   </data>
+  <data name="CMD_CloseOtherSaved" xml:space="preserve">
+    <value>关闭其它已保存文档</value>
+  </data>
+  <data name="CMD_SaveAll" xml:space="preserve">
+    <value>全部保存</value>
+  </data>
 </root>

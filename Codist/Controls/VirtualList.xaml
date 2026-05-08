@@ -112,6 +112,7 @@
 					</Style>
 				</TextBlock.Style>
 			 </TextBlock>
+			<TextBlock Text="{Binding Note}" Margin="3,0,0,0" VerticalAlignment="Center" Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
 			<StackPanel.Style>
 				<Style TargetType="{x:Type StackPanel}">
 					<Style.Triggers>

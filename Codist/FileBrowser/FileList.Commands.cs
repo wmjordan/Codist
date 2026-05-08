@@ -100,6 +100,19 @@ partial class FileList
 	}
 
 	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.EventHandler)]
+	void ActivateWindow(FileItem file) {
+		var caption = file.Name;
+		foreach (EnvDTE.Document doc in ServicesHelper.Instance.DTE.Documents) {
+			if (doc.ActiveWindow.Caption != caption) {
+				continue;
+			}
+			doc.ActiveWindow.Activate();
+			FileActivated?.Invoke(this, new(file));
+			return;
+		}
+	}
+
+	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.EventHandler)]
 	void LocateInSolutionExplorer(object sender, RoutedEventArgs args) {
 		if (SelectedItem is FileItem fsi && fsi.IsFile) {
 			var dte = ServicesHelper.Instance.DTE;
@@ -144,6 +157,12 @@ partial class FileList
 				doc.Save();
 			}
 		}
+		ListOpenedDocuments();
+	}
+	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.EventHandler)]
+	void SaveAllDocuments(object sender, RoutedEventArgs args) {
+		ServicesHelper.Instance.DTE.Documents.SaveAll();
+		ListOpenedDocuments();
 	}
 
 	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.EventHandler)]
@@ -153,6 +172,23 @@ partial class FileList
 			var doc = documents.Item(file);
 			doc?.Close();
 		}
+		ListOpenedDocuments();
+	}
+	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.EventHandler)]
+	void CloseOtherSavedDocuments(object sender, RoutedEventArgs args) {
+		var dte = ServicesHelper.Instance.DTE;
+		var documents = dte.Documents;
+		var activeWin = dte.ActiveWindow;
+		foreach (EnvDTE.Document doc in documents) {
+			var w = doc.ActiveWindow;
+			if (w is null || w == activeWin) {
+				continue;
+			}
+			if (doc.Saved) {
+				doc.Close();
+			}
+		}
+		ListOpenedDocuments();
 	}
 
 

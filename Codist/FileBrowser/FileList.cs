@@ -254,7 +254,10 @@ sealed partial class FileList : VirtualList
 				_DocumentMenu.Items.AddRange(
 					new ListItemContextMenuItem(IconIds.LocateInSolutionExplorer, R.CMD_LocateInSolutionExplorer, ActivationCondition.HasSingleSolutionItem, LocateInSolutionExplorer),
 					new ListItemContextMenuItem(IconIds.Save, R.CMD_Save, ActivationCondition.HasFile, SaveDocument),
-					new ListItemContextMenuItem(IconIds.Close, R.CMD_Close, ActivationCondition.HasFile, CloseDocument)
+					new ListItemContextMenuItem(IconIds.Close, R.CMD_Close, ActivationCondition.HasFile, CloseDocument),
+					new Separator(),
+					new ListItemContextMenuItem(IconIds.SaveAll, R.CMD_SaveAll, ActivationCondition.HasFile, SaveAllDocuments),
+					new ListItemContextMenuItem(IconIds.CloseAll, R.CMD_CloseOtherSaved, ActivationCondition.HasFile, CloseOtherSavedDocuments)
 				);
 			}
 		}
@@ -326,13 +329,20 @@ sealed partial class FileList : VirtualList
 	}
 
 	void HandleMouseUp(object sender, MouseButtonEventArgs e) {
-		if (e.ChangedButton == MouseButton.Left
-			&& !UIHelper.IsCtrlDown
-			&& !UIHelper.IsShiftDown
-			&& e.OriginalSource is UIElement u
-			&& u.FindAncestor<ListBoxItem>() != null) {
-			ActivateSelectedItem();
-			e.Handled = true;
+		switch (e.ChangedButton) {
+			case MouseButton.Left:
+				if (!UIHelper.IsCtrlDown
+					&& !UIHelper.IsShiftDown
+					&& e.OriginalSource is UIElement u
+					&& u.FindAncestor<ListBoxItem>() != null) {
+					ActivateSelectedItem();
+					e.Handled = true;
+				}
+				break;
+			case MouseButton.XButton1:
+				NavigateBackward(this, EventArgs.Empty);
+				e.Handled = true;
+				break;
 		}
 	}
 
@@ -386,12 +396,20 @@ sealed partial class FileList : VirtualList
 		menu.Items.AddRange(
 			new ThemedMenuItem(IconIds.MultiSelection, R.CMD_ToggleMultiSelectionMode, ToggleMultiSelectionMode, R.CMDT_ToggleMultiSelectionMode),
 			new ThemedMenuItem(IconIds.SelectAll, R.CMD_SelectAll, HandleSelectAll),
-			new ThemedMenuItem(IconIds.None, R.CMD_SelectNone, HandleSelectNone)
+			new ThemedMenuItem(IconIds.None, R.CMD_SelectNone, HandleSelectNone),
+			new Separator() { Tag = ViewMode.Documents },
+			new ThemedMenuItem(IconIds.SaveAll, R.CMD_SaveAll, SaveAllDocuments) { Tag = ViewMode.Documents },
+			new ThemedMenuItem(IconIds.CloseAll, R.CMD_CloseOtherSaved, CloseOtherSavedDocuments) { Tag = ViewMode.Documents }
 		);
 	}
 
 	void ConfigSelectionMenu(ContextMenu menu) {
 		((ThemedMenuItem)menu.Items[0]).Icon = VsImageHelper.GetImage(SelectionMode == SelectionMode.Multiple ? IconIds.Enabled : IconIds.Default);
+		foreach (FrameworkElement item in menu.Items) {
+			if (item.Tag is ViewMode m) {
+				item.ToggleVisibility(m == _ViewMode);
+			}
+		}
 	}
 
 	void HandleSelectionMenuClosed(object sender, EventArgs e) {
@@ -447,14 +465,20 @@ sealed partial class FileList : VirtualList
 		ThreadHelper.ThrowIfNotOnUIThread();
 		SetViewMode(ViewMode.Documents);
 		_ViewHistories.Push(new(ViewMode.Documents, FileListLocationType.OpenedDocuments, null));
-		var documents = ServicesHelper.Instance.DTE.Documents;
+		var dte = ServicesHelper.Instance.DTE;
+		var documents = dte.Documents;
+		var activeWin = dte.ActiveWindow;
 		var items = new List<FileItem>(documents.Count + 1);
-		foreach (EnvDTE.Document document in documents) {
-			var filePath = document.FullName;
-			if (items.Any(i => FileHelper.AreFileNamesEqual(i.FullPath, filePath))) {
+		foreach (EnvDTE.Document doc in documents) {
+			var w = doc.ActiveWindow;
+			if (w is null) {
 				continue;
 			}
-			items.Add(new(new FileInfo(filePath), FileHelper.AreFileNamesEqual(filePath, _ActiveFilePath)));
+			var item = new FileItem(new FileInfo(doc.FullName), FileItemType.OpenedDocument, w == activeWin, w.Caption);
+			if (!doc.Saved) {
+				item.Note = "*";
+			}
+			items.Add(item);
 		}
 		items.Sort((x, y) => String.Compare(x.Name, y.Name, true));
 		SetItems(items);
@@ -621,6 +645,9 @@ sealed partial class FileList : VirtualList
 				case FileItemType.UnloadedProject:
 					LocationType = FileListLocationType.Normal;
 					UnsafeNavigateToDirectoryAsync(Path.GetDirectoryName(item.FullPath)).FireAndForget();
+					break;
+				case FileItemType.OpenedDocument:
+					ActivateWindow(item);
 					break;
 			}
 		}

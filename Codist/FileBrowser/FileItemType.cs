@@ -8,6 +8,7 @@ enum FileItemType
 	InaccessibleFolder,
 	Solution,
 	Project,
-	UnloadedProject
+	UnloadedProject,
+	OpenedDocument
 }
 

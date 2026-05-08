@@ -15,6 +15,7 @@ sealed class FileItem : INotifyPropertyChanged
 	bool _IsCurrent;
 	SolutionItemInfo _IsSolutionItem;
 	FrameworkElement _Icon;
+	string _Note;
 
 	long _FileSize = -1;
 	DateTime _CreationTime;
@@ -27,7 +28,7 @@ sealed class FileItem : INotifyPropertyChanged
 	public FileItemType Type => _Type;
 	public bool IsEmptyFolder => _Type == FileItemType.EmptyFolder;
 	public bool IsFolder => _Type.CeqAny(FileItemType.Folder, FileItemType.EmptyFolder);
-	public bool IsFile => _Type == FileItemType.File;
+	public bool IsFile => _Type.CeqAny(FileItemType.File, FileItemType.OpenedDocument);
 	public bool IsCurrent {
 		get => _IsCurrent;
 		set {
@@ -44,6 +45,7 @@ sealed class FileItem : INotifyPropertyChanged
 		FileItemType.InaccessibleFolder => IconIds.InaccessibleFolder,
 		FileItemType.Solution => IconIds.GoToSolutionFolder,
 		FileItemType.UnloadedProject => IconIds.UnloadedProject,
+		FileItemType.OpenedDocument => VsImageHelper.GetImageIdForFile(_Info.Name),
 		_ => VsImageHelper.GetImageIdForFile(_Name)
 	});
 
@@ -103,6 +105,11 @@ sealed class FileItem : INotifyPropertyChanged
 		}
 	}
 
+	public string Note {
+		get => _Note;
+		set => _Note = value;
+	}
+
 	public FileItem(FileInfo fileInfo, bool isCurrent) {
 		(_Info, _Type, _IsCurrent, _Name) = (fileInfo, FileItemType.File, isCurrent, fileInfo.Name);
 	}
@@ -115,6 +122,9 @@ sealed class FileItem : INotifyPropertyChanged
 	}
 	public FileItem(FileSystemInfo fsInfo, FileItemType type, bool isCurrent) {
 		(_Info, _Type, _IsCurrent, _Name) = (fsInfo, type, isCurrent, fsInfo.Name);
+	}
+	public FileItem(FileSystemInfo fsInfo, FileItemType type, bool isCurrent, string alias) {
+		(_Info, _Type, _IsCurrent, _Name) = (fsInfo, type, isCurrent, alias);
 	}
 
 	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]

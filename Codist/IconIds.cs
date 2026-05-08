@@ -236,6 +236,7 @@ static class IconIds
 	public const int OpenWithCmd = KnownImageIds.Console;
 	public const int Load = KnownImageIds.FolderOpened;
 	public const int Save = KnownImageIds.Save;
+	public const int SaveAll = KnownImageIds.SaveAll;
 	public const int SaveAs = KnownImageIds.SaveAs;
 	public const int Copy = KnownImageIds.Copy;
 	public const int Cut = KnownImageIds.Cut;
@@ -309,6 +310,7 @@ static class IconIds
 	public const int Pin = KnownImageIds.Pin;
 	public const int Unpin = KnownImageIds.Unpin;
 	public const int Close = KnownImageIds.Close;
+	public const int CloseAll = KnownImageIds.CloseAll;
 	public const int SyntaxTheme = KnownImageIds.ColorPalette;
 	public const int Opacity = KnownImageIds.FillOpacity;
 	public const int CustomizeStyle = KnownImageIds.StyleBlock;

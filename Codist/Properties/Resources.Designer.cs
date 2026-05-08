@@ -196,6 +196,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Close Other Saved Documents.
+        /// </summary>
+        internal static string CMD_CloseOtherSaved {
+            get {
+                return ResourceManager.GetString("CMD_CloseOtherSaved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Comment selection
         ///Right click: Comment line.
         /// </summary>
@@ -1922,6 +1931,15 @@ namespace Codist.Properties {
         internal static string CMD_Save {
             get {
                 return ResourceManager.GetString("CMD_Save", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Save All.
+        /// </summary>
+        internal static string CMD_SaveAll {
+            get {
+                return ResourceManager.GetString("CMD_SaveAll", resourceCulture);
             }
         }
         
