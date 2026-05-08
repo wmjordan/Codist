@@ -38,6 +38,7 @@ namespace Codist.Refactorings
 			ReplaceToken.UseExplicitType,
 			ReplaceText.UseVarType,
 			ReplaceText.SplitDeclaration,
+			ReplaceText.SplitOrPatterns,
 			ReplaceNode.DeleteCondition,
 			ReplaceNode.RemoveContainingStatement,
 			ReplaceNode.DeleteStatement,

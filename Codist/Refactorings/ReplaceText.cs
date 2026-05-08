@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
+using Microsoft.VisualStudio.Utilities;
 using R = Codist.Properties.Resources;
 
 namespace Codist.Refactorings
@@ -24,6 +25,7 @@ namespace Codist.Refactorings
 		public static readonly ReplaceText MakePrivate = new ChangeAccessibilityRefactoring(SyntaxKind.PrivateKeyword);
 		public static readonly ReplaceText UseVarType = new UseVarTypeRefactoring();
 		public static readonly ReplaceText SplitDeclaration = new SplitDeclarationAssignmentRefactoring();
+		public static readonly ReplaceText SplitOrPatterns = new SplitOrPatternsRefactoring();
 
 		public abstract int IconId { get; }
 		public abstract string Title { get; }
@@ -621,6 +623,55 @@ namespace Codist.Refactorings
 					});
 					ctx.View.SelectSpan(v.Identifier.Span.ToSpan());
 				}
+			}
+		}
+
+		sealed class SplitOrPatternsRefactoring : ReplaceText
+		{
+			public override int IconId => IconIds.MultiLineList;
+			public override string Title => R.CMD_MultiLineOrPatterns;
+
+			public override bool Accept(RefactoringContext ctx) {
+				return ctx.Node.IsKind(CodeAnalysisHelper.SwitchExpression)
+					&& ctx.Node.ChildNodes().Any(IsSwitchExpressionArmWithOrPattern);
+			}
+
+			bool IsSwitchExpressionArmWithOrPattern(SyntaxNode i) {
+				return i.IsKind(CodeAnalysisHelper.SwitchExpressionArm)
+					&& i.GetSwitchExpressionArmPattern().IsKind(CodeAnalysisHelper.OrPattern)
+					&& !i.IsMultiLine(true);
+			}
+
+			public override void Refactor(SemanticContext ctx) {
+				ctx.View.Edit((ctx, me: this), (view, arg, edit) => {
+					foreach (var arm in arg.ctx.Node.ChildNodes().Where(arg.me.IsSwitchExpressionArmWithOrPattern)) {
+						var pattern = arm.GetSwitchExpressionArmPattern();
+						var (indent, newline) = arg.ctx.GetIndentAndNewLine(pattern.SpanStart);
+						using var sbr = ReusableStringBuilder.AcquireDefault(pattern.FullSpan.Length + indent.FullSpan.Length + newline.FullSpan.Length);
+						var sb = sbr.Resource;
+						SplitOrPattern(pattern, indent, newline, sb, false);
+						edit.Replace(pattern.FullSpan.ToSpan(), sb.ToString());
+					}
+				});
+			}
+
+			static void SplitOrPattern(PatternSyntax pattern, SyntaxTriviaList indent, SyntaxTrivia newline, System.Text.StringBuilder sb, bool stripTrailingTrivia) {
+				var children = pattern.ChildNodesAndTokens().ToList();
+				if (children.Count != 3) {
+					sb.Append(pattern.ToFullString());
+					return;
+				}
+
+				if (children[0].IsKind(CodeAnalysisHelper.OrPattern)) {
+					SplitOrPattern((PatternSyntax)children[0], indent, newline, sb, true);
+				}
+				else {
+					sb.Append(children[0].WithTrailingTrivia().ToFullString());
+				}
+				sb.Append(newline)
+					.Append(indent)
+					.Append(children[1].ToFullString())
+					.Append((stripTrailingTrivia ? children[2].WithTrailingTrivia() : children[2]).ToFullString());
 			}
 		}
 	}

@@ -3329,4 +3329,7 @@ List currently opened code documents</value>
   <data name="CMD_Save" xml:space="preserve">
     <value>Save</value>
   </data>
+  <data name="CMD_MultiLineOrPatterns" xml:space="preserve">
+    <value>Split &lt;or&gt; Patterns into Lines</value>
+  </data>
 </root>

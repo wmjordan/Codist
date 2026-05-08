@@ -2635,7 +2635,7 @@ Right click: 显示“线程”窗口</value>
     <value>删除 Switch 条件</value>
   </data>
   <data name="CMD_SortLines" xml:space="preserve">
-    <value>Sort Lines</value>
+    <value>排序选中行</value>
   </data>
   <data name="T_FailedToSaveStyleFile" xml:space="preserve">
     <value>在保存语法样式配置文件时出错:</value>
@@ -3315,5 +3315,8 @@ Shift: 匹配大小写</value>
   </data>
   <data name="CMD_Save" xml:space="preserve">
     <value>保存</value>
+  </data>
+  <data name="CMD_MultiLineOrPatterns" xml:space="preserve">
+    <value>将 &lt;or&gt; 模式换行</value>
   </data>
 </root>

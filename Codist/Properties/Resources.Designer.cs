@@ -1570,6 +1570,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Split &lt;or&gt; Patterns into Lines.
+        /// </summary>
+        internal static string CMD_MultiLineOrPatterns {
+            get {
+                return ResourceManager.GetString("CMD_MultiLineOrPatterns", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Split Parameters into Lines.
         /// </summary>
         internal static string CMD_MultiLineParameters {
