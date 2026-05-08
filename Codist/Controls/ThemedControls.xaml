@@ -48,7 +48,7 @@
 		<Setter Property="Template">
 			<Setter.Value>
 				<ControlTemplate TargetType="{x:Type c:ThemedToggleButton}">
-					<Border x:Name="Bd" BorderThickness="{TemplateBinding BorderThickness}" Background="{DynamicResource CommonControlsColors.ButtonDefaultBrushKey}" BorderBrush="{DynamicResource {x:Static vsp:CommonControlsColors.ButtonBorderBrushKey}}" Padding="{TemplateBinding Padding}" Margin="{TemplateBinding Margin}">
+					<Border x:Name="Bd" BorderThickness="{TemplateBinding BorderThickness}" Background="{DynamicResource CommonControlsColors.ButtonDefaultBrushKey}" BorderBrush="{DynamicResource {x:Static vsp:CommonControlsColors.ButtonBorderBrushKey}}" Padding="{TemplateBinding Padding}" Margin="{TemplateBinding Margin}" SnapsToDevicePixels="True">
 						<ContentPresenter />
 					</Border>
 					<ControlTemplate.Triggers>
@@ -67,7 +67,7 @@
 		<Setter Property="Template">
 			<Setter.Value>
 				<ControlTemplate TargetType="{x:Type c:HelpMessageButton}">
-					<Border x:Name="Bd" BorderThickness="{TemplateBinding BorderThickness}" BorderBrush="{DynamicResource {x:Static vsp:CommonControlsColors.ButtonBorderBrushKey}}" Padding="{TemplateBinding Padding}" Margin="{TemplateBinding Margin}">
+					<Border x:Name="Bd" BorderThickness="{TemplateBinding BorderThickness}" BorderBrush="{DynamicResource {x:Static vsp:CommonControlsColors.ButtonBorderBrushKey}}" Padding="{TemplateBinding Padding}" Margin="{TemplateBinding Margin}" SnapsToDevicePixels="True">
 						<ContentPresenter />
 					</Border>
 					<ControlTemplate.Triggers>
@@ -87,7 +87,7 @@
 		<Setter Property="Template">
 			<Setter.Value>
 				<ControlTemplate TargetType="{x:Type c:ThemedButton}">
-					<Border Name="Border" BorderThickness="{TemplateBinding BorderThickness}" Margin="{TemplateBinding Margin}" Padding="{TemplateBinding Padding}">
+					<Border Name="Border" BorderThickness="{TemplateBinding BorderThickness}" Margin="{TemplateBinding Margin}" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="True">
 						<ContentPresenter />
 					</Border>
 					<ControlTemplate.Triggers>
@@ -107,7 +107,7 @@
 		<Setter Property="Template">
 			<Setter.Value>
 				<ControlTemplate TargetType="{x:Type c:ThemedImageButton}">
-					<Border Name="Border" BorderThickness="{TemplateBinding BorderThickness}" Margin="{TemplateBinding Margin}" Padding="{TemplateBinding Padding}" VerticalAlignment="Center">
+					<Border Name="Border" BorderThickness="{TemplateBinding BorderThickness}" Margin="{TemplateBinding Margin}" Padding="{TemplateBinding Padding}" VerticalAlignment="Center" SnapsToDevicePixels="True">
 						<ContentPresenter />
 					</Border>
 					<ControlTemplate.Triggers>
