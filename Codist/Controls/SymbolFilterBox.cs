@@ -201,22 +201,21 @@ sealed class SymbolFilterBox : StackPanel
 	}
 
 	internal static bool FilterBySymbol(MemberFilterTypes filterTypes, ISymbol symbol) {
-		MemberFilterTypes symbolFlags;
 		if (symbol is null) {
 			return false;
 		}
 		if (symbol.Kind == SymbolKind.Alias) {
 			symbol = ((IAliasSymbol)symbol).Target;
 		}
-		switch (symbol.DeclaredAccessibility) {
-			case Accessibility.Private: symbolFlags = MemberFilterTypes.Private; break;
-			case Accessibility.Protected: symbolFlags = MemberFilterTypes.Protected; break;
-			case Accessibility.Internal: symbolFlags = MemberFilterTypes.Internal; break;
-			case Accessibility.ProtectedAndInternal:
-			case Accessibility.ProtectedOrInternal: symbolFlags = MemberFilterTypes.Internal | MemberFilterTypes.Protected; break;
-			case Accessibility.Public: symbolFlags = MemberFilterTypes.Public; break;
-			default: symbolFlags = MemberFilterTypes.None; break;
-		}
+
+		var symbolFlags = symbol.DeclaredAccessibility switch {
+			Accessibility.Private => MemberFilterTypes.Private,
+			Accessibility.Protected => MemberFilterTypes.Protected,
+			Accessibility.Internal => MemberFilterTypes.Internal,
+			Accessibility.ProtectedAndInternal or Accessibility.ProtectedOrInternal => MemberFilterTypes.Internal | MemberFilterTypes.Protected,
+			Accessibility.Public => MemberFilterTypes.Public,
+			_ => MemberFilterTypes.None,
+		};
 		switch (symbol.Kind) {
 			case SymbolKind.Event: symbolFlags |= MemberFilterTypes.Event; break;
 			case SymbolKind.Field: symbolFlags |= MemberFilterTypes.Field; break;
@@ -230,7 +229,6 @@ sealed class SymbolFilterBox : StackPanel
 	}
 
 	internal static bool FilterBySymbolType(MemberFilterTypes filterTypes, ISymbol symbol) {
-		MemberFilterTypes symbolFlags;
 		if (symbol is null) {
 			return false;
 		}
@@ -238,15 +236,15 @@ sealed class SymbolFilterBox : StackPanel
 			symbol = ((IAliasSymbol)symbol).Target;
 		}
 
-		switch (symbol.DeclaredAccessibility) {
-			case Accessibility.Private: symbolFlags = MemberFilterTypes.Private; break;
-			case Accessibility.Protected: symbolFlags = MemberFilterTypes.Protected; break;
-			case Accessibility.Internal: symbolFlags = MemberFilterTypes.Internal; break;
-			case Accessibility.ProtectedAndInternal:
-			case Accessibility.ProtectedOrInternal: symbolFlags = MemberFilterTypes.Internal | MemberFilterTypes.Protected; break;
-			case Accessibility.Public: symbolFlags = MemberFilterTypes.Public; break;
-			default: symbolFlags = MemberFilterTypes.None; break;
-		}
+		var symbolFlags = symbol.DeclaredAccessibility switch {
+			Accessibility.Private => MemberFilterTypes.Private,
+			Accessibility.Protected => MemberFilterTypes.Protected,
+			Accessibility.Internal => MemberFilterTypes.Internal,
+			Accessibility.ProtectedAndInternal
+				or Accessibility.ProtectedOrInternal => MemberFilterTypes.Internal | MemberFilterTypes.Protected,
+			Accessibility.Public => MemberFilterTypes.Public,
+			_ => MemberFilterTypes.None,
+		};
 		if (symbol.Kind == SymbolKind.NamedType) {
 			switch (((INamedTypeSymbol)symbol).TypeKind) {
 				case TypeKind.Class: symbolFlags |= MemberFilterTypes.Class; break;
