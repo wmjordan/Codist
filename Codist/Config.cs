@@ -320,14 +320,14 @@ namespace Codist
 		}
 		public static void ResetSearchEngines(List<SearchEngine> engines) {
 			engines.Clear();
-			engines.AddRange(new[] {
-				new SearchEngine("Bing", "https://www.bing.com/search?q=%s"),
-				new SearchEngine("Google", "https://www.google.com/search?q=%s"),
-				new SearchEngine("StackOverflow", "https://stackoverflow.com/search?q=%s"),
-				new SearchEngine("GitHub", "https://github.com/search?q=%s"),
-				new SearchEngine(".NET Core Source", "https://source.dot.net/#q=%s"),
-				new SearchEngine(".NET Framework Source", "https://referencesource.microsoft.com/#q=%s"),
-			});
+			engines.AddRange([
+				new("Bing", "https://www.bing.com/search?q=%s"),
+				new("Google", "https://www.google.com/search?q=%s"),
+				new("StackOverflow", "https://stackoverflow.com/search?q=%s"),
+				new("GitHub", "https://github.com/search?q=%s"),
+				new(".NET Core Source", "https://source.dot.net/#q=%s"),
+				new(".NET Framework Source", "https://referencesource.microsoft.com/#q=%s"),
+			]);
 		}
 
 		public void ResetWrapTexts() {
@@ -335,19 +335,19 @@ namespace Codist
 		}
 		public static void ResetWrapTexts(List<WrapText> wrapTexts) {
 			wrapTexts.Clear();
-			wrapTexts.AddRange(new[] {
-				new WrapText("\"$\"", "\"\""),
-				new WrapText("($)", "()"),
-				new WrapText("'$'", "''"),
-				new WrapText("[$]", "[]"),
-				new WrapText("{$}", "{}"),
-				new WrapText("<$>", "<>"),
-				new WrapText("%$%", "%%"),
-			});
+			wrapTexts.AddRange([
+				new("\"$\"", "\"\""),
+				new("($)", "()"),
+				new("'$'", "''"),
+				new("[$]", "[]"),
+				new("{$}", "{}"),
+				new("<$>", "<>"),
+				new("%$%", "%%"),
+			]);
 		}
 
 		public void SaveConfig(string path, bool stylesOnly = false, bool allStyles = false) {
-			path = path ?? ConfigPath;
+			path ??= ConfigPath;
 			try {
 				var d = Path.GetDirectoryName(path);
 				if (Directory.Exists(d) == false) {
@@ -519,25 +519,25 @@ namespace Codist
 		}
 
 		static void InitDefaultLabels(List<CommentLabel> labels) {
-			labels.AddRange (new CommentLabel[] {
-				new CommentLabel("!", CommentStyleTypes.Emphasis),
-				new CommentLabel("#", CommentStyleTypes.Emphasis),
-				new CommentLabel("?", CommentStyleTypes.Question),
-				new CommentLabel("!?", CommentStyleTypes.Exclamation),
-				new CommentLabel("x", CommentStyleTypes.Deletion, true),
-				new CommentLabel("+++", CommentStyleTypes.Heading1),
-				new CommentLabel("!!", CommentStyleTypes.Heading1),
-				new CommentLabel("++", CommentStyleTypes.Heading2),
-				new CommentLabel("+", CommentStyleTypes.Heading3),
-				new CommentLabel("-", CommentStyleTypes.Heading4),
-				new CommentLabel("--", CommentStyleTypes.Heading5),
-				new CommentLabel("---", CommentStyleTypes.Heading6),
-				new CommentLabel("TODO", CommentStyleTypes.ToDo, true) { AllowPunctuationDelimiter = true },
-				new CommentLabel("TO-DO", CommentStyleTypes.ToDo, true) { AllowPunctuationDelimiter = true },
-				new CommentLabel("undone", CommentStyleTypes.Undone, true) { AllowPunctuationDelimiter = true },
-				new CommentLabel("NOTE", CommentStyleTypes.Note, true) { AllowPunctuationDelimiter = true },
-				new CommentLabel("HACK", CommentStyleTypes.Hack, true) { AllowPunctuationDelimiter = true },
-			});
+			labels.AddRange ([
+				new("!", CommentStyleTypes.Emphasis),
+				new("#", CommentStyleTypes.Emphasis),
+				new("?", CommentStyleTypes.Question),
+				new("!?", CommentStyleTypes.Exclamation),
+				new("x", CommentStyleTypes.Deletion, true),
+				new("+++", CommentStyleTypes.Heading1),
+				new("!!", CommentStyleTypes.Heading1),
+				new("++", CommentStyleTypes.Heading2),
+				new("+", CommentStyleTypes.Heading3),
+				new("-", CommentStyleTypes.Heading4),
+				new("--", CommentStyleTypes.Heading5),
+				new("---", CommentStyleTypes.Heading6),
+				new("TODO", CommentStyleTypes.ToDo, true) { AllowPunctuationDelimiter = true },
+				new("TO-DO", CommentStyleTypes.ToDo, true) { AllowPunctuationDelimiter = true },
+				new("undone", CommentStyleTypes.Undone, true) { AllowPunctuationDelimiter = true },
+				new("NOTE", CommentStyleTypes.Note, true) { AllowPunctuationDelimiter = true },
+				new("HACK", CommentStyleTypes.Hack, true) { AllowPunctuationDelimiter = true },
+			]);
 		}
 		static void MergeDefaultCodeStyles<TStyle, TStyleType> (List<TStyle> styles)
 			where TStyle : StyleBase<TStyleType>, new()
@@ -564,31 +564,31 @@ namespace Codist
 			}
 		}
 		internal static CommentStyle[] GetDefaultCommentStyles() {
-			return new CommentStyle[] {
-				new CommentStyle(CommentStyleTypes.Emphasis, Constants.CommentColor) { Bold = true, FontSize = 10 },
-				new CommentStyle(CommentStyleTypes.Exclamation, Constants.ExclamationColor),
-				new CommentStyle(CommentStyleTypes.Question, Constants.QuestionColor),
-				new CommentStyle(CommentStyleTypes.Deletion, Constants.DeletionColor) { Strikethrough = true },
-				new CommentStyle(CommentStyleTypes.ToDo, Colors.White) { BackColor = Constants.ToDoColor, ScrollBarMarkerStyle = ScrollbarMarkerStyle.Square },
-				new CommentStyle(CommentStyleTypes.Note, Colors.White) { BackColor = Constants.NoteColor, ScrollBarMarkerStyle = ScrollbarMarkerStyle.Square },
-				new CommentStyle(CommentStyleTypes.Hack, Colors.LightGreen) { BackColor = Constants.HackColor, ScrollBarMarkerStyle = ScrollbarMarkerStyle.Square },
-				new CommentStyle(CommentStyleTypes.Undone, Color.FromRgb(164, 175, 209)) { BackColor = Constants.UndoneColor, ScrollBarMarkerStyle = ScrollbarMarkerStyle.Square },
-				new CommentStyle(CommentStyleTypes.Heading1) { FontSize = 12 },
-				new CommentStyle(CommentStyleTypes.Heading2) { FontSize = 8 },
-				new CommentStyle(CommentStyleTypes.Heading3) { FontSize = 4 },
-				new CommentStyle(CommentStyleTypes.Heading4) { FontSize = -1 },
-				new CommentStyle(CommentStyleTypes.Heading5) { FontSize = -2 },
-				new CommentStyle(CommentStyleTypes.Heading6) { FontSize = -3 },
-				new CommentStyle(CommentStyleTypes.Task1) { ScrollBarMarkerStyle = ScrollbarMarkerStyle.Number1 },
-				new CommentStyle(CommentStyleTypes.Task2) { ScrollBarMarkerStyle = ScrollbarMarkerStyle.Number2 },
-				new CommentStyle(CommentStyleTypes.Task3) { ScrollBarMarkerStyle = ScrollbarMarkerStyle.Number3 },
-				new CommentStyle(CommentStyleTypes.Task4) { ScrollBarMarkerStyle = ScrollbarMarkerStyle.Number4 },
-				new CommentStyle(CommentStyleTypes.Task5) { ScrollBarMarkerStyle = ScrollbarMarkerStyle.Number5 },
-				new CommentStyle(CommentStyleTypes.Task6) { ScrollBarMarkerStyle = ScrollbarMarkerStyle.Number6 },
-				new CommentStyle(CommentStyleTypes.Task7) { ScrollBarMarkerStyle = ScrollbarMarkerStyle.Number7 },
-				new CommentStyle(CommentStyleTypes.Task8) { ScrollBarMarkerStyle = ScrollbarMarkerStyle.Number8 },
-				new CommentStyle(CommentStyleTypes.Task9) { ScrollBarMarkerStyle = ScrollbarMarkerStyle.Number9 },
-			};
+			return [
+				new(CommentStyleTypes.Emphasis, Constants.CommentColor) { Bold = true, FontSize = 10 },
+				new(CommentStyleTypes.Exclamation, Constants.ExclamationColor),
+				new(CommentStyleTypes.Question, Constants.QuestionColor),
+				new(CommentStyleTypes.Deletion, Constants.DeletionColor) { Strikethrough = true },
+				new(CommentStyleTypes.ToDo, Colors.White) { BackColor = Constants.ToDoColor, ScrollBarMarkerStyle = ScrollbarMarkerStyle.Square },
+				new(CommentStyleTypes.Note, Colors.White) { BackColor = Constants.NoteColor, ScrollBarMarkerStyle = ScrollbarMarkerStyle.Square },
+				new(CommentStyleTypes.Hack, Colors.LightGreen) { BackColor = Constants.HackColor, ScrollBarMarkerStyle = ScrollbarMarkerStyle.Square },
+				new(CommentStyleTypes.Undone, Color.FromRgb(164, 175, 209)) { BackColor = Constants.UndoneColor, ScrollBarMarkerStyle = ScrollbarMarkerStyle.Square },
+				new(CommentStyleTypes.Heading1) { FontSize = 12 },
+				new(CommentStyleTypes.Heading2) { FontSize = 8 },
+				new(CommentStyleTypes.Heading3) { FontSize = 4 },
+				new(CommentStyleTypes.Heading4) { FontSize = -1 },
+				new(CommentStyleTypes.Heading5) { FontSize = -2 },
+				new(CommentStyleTypes.Heading6) { FontSize = -3 },
+				new(CommentStyleTypes.Task1) { ScrollBarMarkerStyle = ScrollbarMarkerStyle.Number1 },
+				new(CommentStyleTypes.Task2) { ScrollBarMarkerStyle = ScrollbarMarkerStyle.Number2 },
+				new(CommentStyleTypes.Task3) { ScrollBarMarkerStyle = ScrollbarMarkerStyle.Number3 },
+				new(CommentStyleTypes.Task4) { ScrollBarMarkerStyle = ScrollbarMarkerStyle.Number4 },
+				new(CommentStyleTypes.Task5) { ScrollBarMarkerStyle = ScrollbarMarkerStyle.Number5 },
+				new(CommentStyleTypes.Task6) { ScrollBarMarkerStyle = ScrollbarMarkerStyle.Number6 },
+				new(CommentStyleTypes.Task7) { ScrollBarMarkerStyle = ScrollbarMarkerStyle.Number7 },
+				new(CommentStyleTypes.Task8) { ScrollBarMarkerStyle = ScrollbarMarkerStyle.Number8 },
+				new(CommentStyleTypes.Task9) { ScrollBarMarkerStyle = ScrollbarMarkerStyle.Number9 },
+			];
 		}
 
 		sealed class StyleConfig
@@ -742,14 +742,10 @@ namespace Codist
 		}
 	}
 
-	sealed class ConfigUpdatedEventArgs : EventArgs
+	sealed class ConfigUpdatedEventArgs(Config config, Features updatedFeature) : EventArgs
 	{
-		public ConfigUpdatedEventArgs(Config config, Features updatedFeature) {
-			Config = config;
-			UpdatedFeature = updatedFeature;
-		}
-		public Config Config { get; }
-		public Features UpdatedFeature { get; }
+		public Config Config { get; } = config;
+		public Features UpdatedFeature { get; } = updatedFeature;
 		public object Parameter { get; set; }
 	}
 
@@ -930,8 +926,8 @@ namespace Codist
 		UseTypeStyleOnVarKeyword = 1 << 14,
 		SearchResult = 1 << 20,
 		Default = SpecialComment,
-		AllParentheses = ParameterBrace | CastBrace | BranchBrace | LoopBrace | ResourceBrace,
-		AllBraces = DeclarationBrace | ParameterBrace | CastBrace | BranchBrace | LoopBrace | ResourceBrace | BoldSemanticPunctuation
+		AllParentheses = SemanticPunctuation,
+		AllBraces = SemanticPunctuation | BoldSemanticPunctuation
 	}
 
 	[Flags]
