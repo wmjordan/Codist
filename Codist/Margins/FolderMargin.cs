@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
+using CLR;
 using Codist.Controls;
 using Codist.FileBrowser;
 using EnvDTE;
@@ -85,6 +86,10 @@ sealed class FolderMargin : IWpfTextViewMargin
 		_Container.AddRange(_FolderButton, _FileButton);
 
 		_View = view;
+
+		Config.RegisterUpdateHandler(HandleConfigUpdate);
+		// apply config
+		HandleConfigUpdate(new(Config.Instance, Features.FileBrowser));
 	}
 
 	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.EventHandler)]
@@ -106,6 +111,7 @@ sealed class FolderMargin : IWpfTextViewMargin
 		_ProjectButton.SetText(Path.GetFileNameWithoutExtension(project.UniqueName));
 		_ProjectButton.Text.Margin = WpfHelper.SmallHorizontalMargin;
 		_Container.Insert(_Container.ControlCount - 2, _ProjectButton);
+		_ProjectButton.Text.ToggleVisibility(Config.Instance.FileBrowserOptions.MatchFlags(FileBrowserOptions.ShowLabels));
 	}
 
 	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.EventHandler)]
@@ -256,11 +262,51 @@ sealed class FolderMargin : IWpfTextViewMargin
 		}
 	}
 
+	void HandleConfigUpdate(ConfigUpdatedEventArgs args) {
+		if (!args.UpdatedFeature.MatchFlags(Features.FileBrowser)) {
+			return;
+		}
+
+		var options = args.Config.FileBrowserOptions;
+		if (!options.HasAnyFlag(FileBrowserOptions.AllButtons)) {
+			_Container.ToggleVisibility(false);
+			return;
+		}
+		var hasControl = false;
+		ToggleButton(_ProjectViewButton, options, FileBrowserOptions.ShowSolutionProjects, ref hasControl);
+		ToggleButton(_SolutionButton, options, FileBrowserOptions.ShowSolutionFolder, ref hasControl);
+		ToggleButton(_ProjectButton, options, FileBrowserOptions.ShowCurrentProjectFolder, ref hasControl);
+		ToggleButton(_FolderButton, options, FileBrowserOptions.ShowCurrentDocumentFolder, ref hasControl);
+		ToggleButton(_FileButton, options, FileBrowserOptions.ShowOpenedDocuments, ref hasControl);
+		_Container.ToggleVisibility(hasControl);
+
+		var showLabels = options.MatchFlags(FileBrowserOptions.ShowLabels);
+		_ProjectViewButton?.Text.ToggleVisibility(showLabels);
+		_SolutionButton?.Text.ToggleVisibility(showLabels);
+		_ProjectButton?.Text.ToggleVisibility(showLabels);
+		_FolderButton.Text.ToggleVisibility(showLabels);
+		_FileButton.Text.ToggleVisibility(showLabels);
+
+		void ToggleButton(UIElement b, FileBrowserOptions opts, FileBrowserOptions opt, ref bool c) {
+			if (b is null) {
+				return;
+			}
+			if (opts.MatchFlags(opt)) {
+				b.Visibility = Visibility.Visible;
+				c = true;
+			}
+			else {
+				b.Visibility = Visibility.Collapsed;
+			}
+		}
+	}
+
 	public void Dispose() {
 		_CancellationTokenSource.CancelAndDispose();
 		_Document.FileActionOccurred -= HandleDocumentFileActivation;
 		_View.VisualElement.Loaded -= AddProjectButtonOnLoaded;
 		_FilePopup?.IsOpen = false;
+		Config.UnregisterUpdateHandler(HandleConfigUpdate);
 	}
 
 	ITextViewMargin ITextViewMargin.GetTextViewMargin(string marginName) {

@@ -47,6 +47,9 @@ namespace Codist
 		[DefaultValue(DisplayOptimizations.None)]
 		public DisplayOptimizations DisplayOptimizations { get; set; } = DisplayOptimizations.None;
 
+		[DefaultValue(FileBrowserOptions.Default)]
+		public FileBrowserOptions FileBrowserOptions { get; set; } = FileBrowserOptions.Default;
+
 		[DefaultValue(SpecialHighlightOptions.Default)]
 		public SpecialHighlightOptions SpecialHighlightOptions { get; set; } = SpecialHighlightOptions.Default;
 
@@ -445,6 +448,9 @@ namespace Codist
 		internal void Set(DisplayOptimizations options, bool set) {
 			DisplayOptimizations = DisplayOptimizations.SetFlags(options, set);
 		}
+		internal void Set(FileBrowserOptions options, bool set) {
+			FileBrowserOptions = FileBrowserOptions.SetFlags(options, set);
+		}
 		internal void Set(QuickInfoOptions options, bool set) {
 			QuickInfoOptions = QuickInfoOptions.SetFlags(options, set);
 		}
@@ -785,7 +791,8 @@ namespace Codist
 		WrapText = 1 << 6,
 		JumpList = 1 << 7,
 		AutoSurround = 1 << 8,
-		Default = SyntaxHighlight | ScrollbarMarkers | SuperQuickInfo | SmartBar | NaviBar | WebSearch | WrapText,
+		FileBrowser = 1 << 9,
+		Default = SyntaxHighlight | ScrollbarMarkers | SuperQuickInfo | SmartBar | NaviBar | WebSearch | WrapText | FileBrowser,
 		All = Default | AutoSurround
 	}
 
@@ -806,6 +813,20 @@ namespace Codist
 		ShowDrive = 1 << 12,
 		ShowNetwork = 1	<< 13,
 		ResourceMonitors = ShowCpu | ShowMemory | ShowDrive | ShowNetwork
+	}
+
+	[Flags]
+	public enum FileBrowserOptions
+	{
+		None,
+		ShowLabels = 1,
+		ShowSolutionProjects = 1 << 1,
+		ShowSolutionFolder = 1 << 2,
+		ShowCurrentProjectFolder = 1 << 3,
+		ShowCurrentDocumentFolder = 1 << 4,
+		ShowOpenedDocuments = 1 << 5,
+		AllButtons = ShowSolutionProjects | ShowSolutionFolder | ShowCurrentProjectFolder | ShowCurrentDocumentFolder | ShowOpenedDocuments,
+		Default = ShowLabels | AllButtons 
 	}
 
 	[Flags]

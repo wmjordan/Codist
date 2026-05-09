@@ -3852,6 +3852,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to To configure File Browser buttons, open a code file and toggle the following checkboxes to see changes..
+        /// </summary>
+        internal static string OT_ConfigFileBrowserNote {
+            get {
+                return ResourceManager.GetString("OT_ConfigFileBrowserNote", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to To configure syntax highlight and manage comment taggers, click this command under the Tools menu: .
         /// </summary>
         internal static string OT_ConfigSyntaxNote {
@@ -4318,6 +4327,15 @@ namespace Codist.Properties {
         internal static string OT_FeatureDisabled {
             get {
                 return ResourceManager.GetString("OT_FeatureDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Provides buttons at the bottom of code document window to manage files.
+        /// </summary>
+        internal static string OT_FileBrowser {
+            get {
+                return ResourceManager.GetString("OT_FileBrowser", resourceCulture);
             }
         }
         
@@ -5614,6 +5632,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Show current document folder button.
+        /// </summary>
+        internal static string OT_ShowDocumentFolder {
+            get {
+                return ResourceManager.GetString("OT_ShowDocumentFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Show &lt;example/&gt; XML Doc.
         /// </summary>
         internal static string OT_ShowExampleXmlDoc {
@@ -5650,6 +5677,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Show labels near buttons.
+        /// </summary>
+        internal static string OT_ShowLabels {
+            get {
+                return ResourceManager.GetString("OT_ShowLabels", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Show parameter name instead of parameter type.
         /// </summary>
         internal static string OT_ShowMethodParameterName {
@@ -5664,6 +5700,15 @@ namespace Codist.Properties {
         internal static string OT_ShowMethodParameterNameTip {
             get {
                 return ResourceManager.GetString("OT_ShowMethodParameterNameTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Show opened documents list button.
+        /// </summary>
+        internal static string OT_ShowOpenedDocuments {
+            get {
+                return ResourceManager.GetString("OT_ShowOpenedDocuments", resourceCulture);
             }
         }
         
@@ -5691,6 +5736,15 @@ namespace Codist.Properties {
         internal static string OT_ShowParameterInfoTip {
             get {
                 return ResourceManager.GetString("OT_ShowParameterInfoTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Show current project folder button.
+        /// </summary>
+        internal static string OT_ShowProjectFolder {
+            get {
+                return ResourceManager.GetString("OT_ShowProjectFolder", resourceCulture);
             }
         }
         
@@ -5763,6 +5817,24 @@ namespace Codist.Properties {
         internal static string OT_ShowSeeContainingTypeTip {
             get {
                 return ResourceManager.GetString("OT_ShowSeeContainingTypeTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Show solution folder button.
+        /// </summary>
+        internal static string OT_ShowSolutionFolder {
+            get {
+                return ResourceManager.GetString("OT_ShowSolutionFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Show solution projects list button.
+        /// </summary>
+        internal static string OT_ShowSolutionProjects {
+            get {
+                return ResourceManager.GetString("OT_ShowSolutionProjects", resourceCulture);
             }
         }
         

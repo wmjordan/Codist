@@ -3325,4 +3325,28 @@ Shift: 匹配大小写</value>
   <data name="CMD_SaveAll" xml:space="preserve">
     <value>全部保存</value>
   </data>
+  <data name="OT_ShowLabels" xml:space="preserve">
+    <value>在按钮旁显示文本标签</value>
+  </data>
+  <data name="OT_ConfigFileBrowserNote" xml:space="preserve">
+    <value>要配置文件浏览器的按钮，打开一个代码窗口并切换下方的按钮以观察效果。</value>
+  </data>
+  <data name="OT_ShowSolutionProjects" xml:space="preserve">
+    <value>显示解决方案和项目列表按钮</value>
+  </data>
+  <data name="OT_ShowSolutionFolder" xml:space="preserve">
+    <value>显示解决方案文件夹按钮</value>
+  </data>
+  <data name="OT_ShowProjectFolder" xml:space="preserve">
+    <value>显示当前项目文件夹按钮</value>
+  </data>
+  <data name="OT_ShowDocumentFolder" xml:space="preserve">
+    <value>显示当前文档文件夹按钮</value>
+  </data>
+  <data name="OT_ShowOpenedDocuments" xml:space="preserve">
+    <value>显示已打开文档列表按钮</value>
+  </data>
+  <data name="OT_FileBrowser" xml:space="preserve">
+    <value>在代码窗口下方提供管理文件的快捷按钮</value>
+  </data>
 </root>

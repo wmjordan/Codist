@@ -3338,4 +3338,28 @@ List currently opened code documents</value>
   <data name="CMD_SaveAll" xml:space="preserve">
     <value>Save All</value>
   </data>
+  <data name="OT_ShowLabels" xml:space="preserve">
+    <value>Show labels near buttons</value>
+  </data>
+  <data name="OT_ConfigFileBrowserNote" xml:space="preserve">
+    <value>To configure File Browser buttons, open a code file and toggle the following checkboxes to see changes.</value>
+  </data>
+  <data name="OT_ShowSolutionProjects" xml:space="preserve">
+    <value>Show solution projects list button</value>
+  </data>
+  <data name="OT_ShowSolutionFolder" xml:space="preserve">
+    <value>Show solution folder button</value>
+  </data>
+  <data name="OT_ShowProjectFolder" xml:space="preserve">
+    <value>Show current project folder button</value>
+  </data>
+  <data name="OT_ShowDocumentFolder" xml:space="preserve">
+    <value>Show current document folder button</value>
+  </data>
+  <data name="OT_ShowOpenedDocuments" xml:space="preserve">
+    <value>Show opened documents list button</value>
+  </data>
+  <data name="OT_FileBrowser" xml:space="preserve">
+    <value>Provides buttons at the bottom of code document window to manage files</value>
+  </data>
 </root>

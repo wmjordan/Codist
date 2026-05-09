@@ -117,6 +117,7 @@
     <Compile Include="Options\OptionsWindow.cs" />
     <Compile Include="Options\OptionsWindow.DisplayPage.cs" />
     <Compile Include="Options\OptionsWindow.AutoPunctuationPage.cs" />
+    <Compile Include="Options\OptionsWindow.FileBrowserPage.cs" />
     <Compile Include="Options\OptionsWindow.WrapTextPage.cs" />
     <Compile Include="Options\OptionsWindow.WebSearchPage.cs" />
     <Compile Include="Options\OptionsWindow.GeneralOptionPage.cs" />
