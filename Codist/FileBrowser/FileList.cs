@@ -893,6 +893,10 @@ sealed partial class FileList : VirtualList
 
 			return fsi.Name.ContainsWords(keywords);
 		};
+
+		if (SelectedIndex == -1 && Items.Count != 0) {
+			SelectedIndex = 0;
+		}
 	}
 
 	#region Refresh methods for window mode
