@@ -474,7 +474,7 @@ sealed partial class FileList : VirtualList
 			if (w is null) {
 				continue;
 			}
-			var item = new FileItem(new FileInfo(doc.FullName), FileItemType.OpenedDocument, w == activeWin, w.Caption);
+			var item = new FileItem(new FileInfo(doc.FullName), FileItemType.OpenedDocument, w == activeWin);
 			if (!doc.Saved) {
 				item.Note = "*";
 			}

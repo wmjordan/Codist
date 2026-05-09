@@ -101,12 +101,14 @@ partial class FileList
 
 	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.EventHandler)]
 	void ActivateWindow(FileItem file) {
-		var caption = file.Name;
+		var filePath = file.FullPath;
 		foreach (EnvDTE.Document doc in ServicesHelper.Instance.DTE.Documents) {
-			if (doc.ActiveWindow.Caption != caption) {
+			var window = doc.ActiveWindow;
+			if (window is null
+				|| !FileHelper.AreFileNamesEqual(doc.FullName, filePath)) {
 				continue;
 			}
-			doc.ActiveWindow.Activate();
+			window.Activate();
 			FileActivated?.Invoke(this, new(file));
 			return;
 		}
