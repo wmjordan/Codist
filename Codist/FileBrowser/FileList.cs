@@ -468,7 +468,7 @@ sealed partial class FileList : VirtualList
 		var dte = ServicesHelper.Instance.DTE;
 		var documents = dte.Documents;
 		var activeWin = dte.ActiveWindow;
-		var items = new List<FileItem>(documents.Count + 1);
+		var items = new List<FileItem>(documents.Count);
 		foreach (EnvDTE.Document doc in documents) {
 			var w = doc.ActiveWindow;
 			if (w is null) {
