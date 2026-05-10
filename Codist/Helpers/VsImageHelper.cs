@@ -38,6 +38,14 @@ internal static class VsImageHelper
 	}
 
 	public static void UseGrayscaleIcon(this System.Windows.UIElement element, bool gray) {
+		if (element is Panel panel) {
+			foreach (var item in panel.Children) {
+				if (item is CrispImage i) {
+					i.Grayscale = true;
+				}
+			}
+			return;
+		}
 		element.SetProperty(CrispImage.GrayscaleProperty, gray);
 	}
 

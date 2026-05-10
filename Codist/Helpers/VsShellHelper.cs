@@ -134,6 +134,7 @@ namespace Codist;
 			return null;
 		}
 
+	#region Project
 	public static Project GetProject(string projectName) {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			var projects = ServicesHelper.Instance.DTE.Solution.Projects;
@@ -217,7 +218,65 @@ namespace Codist;
 				return false;
 			}
 		}
+	#endregion
 
+	#region VsWindowFrame
+	public static bool TryGetProperty<T>(this IVsWindowFrame frame, int propertyId, out T value) {
+		ThreadHelper.ThrowIfNotOnUIThread();
+		if (frame.GetProperty(propertyId, out object obj) == 0 && obj is T v) {
+			value = v;
+			return true;
+		}
+		value = default;
+		return false;
+	}
+	public static bool TryGetProperty<T>(this IVsWindowFrame frame, __VSFPROPID propertyId, out T value) {
+		return frame.TryGetProperty<T>((int)propertyId, out value);
+	}
+	public static T GetProperty<T>(this IVsWindowFrame frame, int propertyId) {
+		ThreadHelper.ThrowIfNotOnUIThread();
+		return (frame.GetProperty(propertyId, out object obj) == 0 && obj is T v)
+			? v
+			: default;
+	}
+	public static T GetProperty<T>(this IVsWindowFrame frame, __VSFPROPID propertyId) {
+		return frame.GetProperty<T>((int)propertyId);
+	}
+	public static string GetDocumentFullPath(this IVsWindowFrame frame) {
+		return frame.GetProperty<string>(__VSFPROPID.VSFPROPID_pszMkDocument);
+	}
+	public static string GetCaption(this IVsWindowFrame frame) {
+		return frame.GetProperty<string>(__VSFPROPID.VSFPROPID_Caption);
+	}
+	public static string GetShortCaption(this IVsWindowFrame frame) {
+		return frame.GetProperty<string>(__VSFPROPID.VSFPROPID_ShortCaption);
+	}
+	public static bool TryGetDocCookie(this IVsWindowFrame frame, out int cookie) {
+		return frame.TryGetProperty(__VSFPROPID.VSFPROPID_DocCookie, out cookie);
+	}
+
+	public static IVsWindowFrame GetCurrentWindowFrame() {
+		ThreadHelper.ThrowIfNotOnUIThread();
+		if (ServicesHelper.Get<IVsMonitorSelection, SVsShellMonitorSelection>()
+			.GetCurrentElementValue((int)VSConstants.SelectionElement.DocumentFrame, out var v) != 0
+			|| v is not IVsWindowFrame windowFrame) {
+			return null;
+		}
+		return windowFrame.TryGetProperty<IVsWindowFrame>((int)__VSFPROPID2.VSFPROPID_ParentFrame, out var parentFrame)
+			? parentFrame
+			: windowFrame;
+	}
+
+	public static IEnumerable<IVsWindowFrame> GetDocumentWindows() {
+		ThreadHelper.ThrowIfNotOnUIThread();
+		return ServicesHelper.Get<IVsUIShell4, SVsUIShell>()
+			.GetWindowEnum((int)__WindowFrameTypeFlags.WINDOWFRAMETYPE_Document, out IEnumWindowFrames windowFramesEnum) == 0
+			? ComUtilities.EnumerableFrom(windowFramesEnum).Where(i => i.GetProperty<IVsWindowFrame>((int)__VSFPROPID2.VSFPROPID_ParentFrame) is null)
+			: [];
+	}
+	#endregion
+
+	#region Output pane
 		[Conditional("LOG")]
 		public static void Log(string text) {
 			OutputPane.OutputLine(text);
@@ -228,6 +287,7 @@ namespace Codist;
 		public static void ClearOutputPane() {
 			OutputPane.ClearOutputPane();
 		}
+	#endregion
 
 		static class OutputPane
 		{

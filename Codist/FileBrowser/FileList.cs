@@ -18,6 +18,7 @@ using Codist.Controls;
 using EnvDTE;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 using R = Codist.Properties.Resources;
 using Task = System.Threading.Tasks.Task;
 
@@ -463,20 +464,58 @@ sealed partial class FileList : VirtualList
 
 	public void ListOpenedDocuments() {
 		ThreadHelper.ThrowIfNotOnUIThread();
+		const uint NEW_DOC_FLAGS = (uint)(VsRdtFlags.DontPollForState | VsRdtFlags.DontAutoOpen);
 		SetViewMode(ViewMode.Documents);
 		_ViewHistories.Push(new(ViewMode.Documents, FileListLocationType.OpenedDocuments, null));
-		var dte = ServicesHelper.Instance.DTE;
-		var documents = dte.Documents;
-		var activeWin = dte.ActiveWindow;
-		var items = new List<FileItem>(documents.Count);
-		foreach (EnvDTE.Document doc in documents) {
-			var w = doc.ActiveWindow;
-			if (w is null) {
+
+		var frames = new IVsWindowFrame[1];
+		var currentFrame = VsShellHelper.GetCurrentWindowFrame();
+		RunningDocumentTable t = new(CodistPackage.Instance);
+		List<FileItem> items = [];
+		foreach (var frame in VsShellHelper.GetDocumentWindows()) {
+			if (!frame.TryGetProperty(__VSFPROPID.VSFPROPID_pszMkDocument, out string fullPath)) {
 				continue;
 			}
-			var item = new FileItem(new FileInfo(doc.FullName), FileItemType.OpenedDocument, w == activeWin);
-			if (!doc.Saved) {
-				item.Note = "*";
+			FileItem item = new(new FileInfo(fullPath),
+				FileItemType.OpenedDocument,
+				currentFrame == frame, // is active
+				frame.GetProperty<string>(__VSFPROPID.VSFPROPID_Caption));
+			Chain<int> extIcons = new();
+			if (frame.GetProperty<bool>((int)__VSFPROPID5.VSFPROPID_IsPinned)) {
+				extIcons.Add(IconIds.Pin);
+			}
+			if (frame.TryGetDocCookie(out var cookie)) {
+				var docInfo = t.GetDocumentInfo((uint)cookie);
+				if (!docInfo.IsDocumentInitialized) {
+					extIcons.Add(IconIds.Hibernated);
+				}
+				else {
+					if (docInfo.IsReadOnly) {
+						extIcons.Add(IconIds.Readonly);
+					}
+					uint flags = docInfo.Flags;
+					if (flags.MatchFlags(NEW_DOC_FLAGS)) {
+						extIcons.Add(IconIds.NewFile);
+					}
+					if (flags.HasAnyFlag((uint)(VsRdtFlags.DontSave | VsRdtFlags.DontSaveAs))) {
+						extIcons.Add(IconIds.DontSave);
+					}
+					if (flags.MatchFlags((uint)VsRdtFlags.VirtualDocument)) {
+						extIcons.Add(IconIds.FileVirtual);
+					}
+					if (docInfo.IsDirty) {
+						extIcons.Add(IconIds.Modified);
+					}
+				}
+			}
+			if (!extIcons.IsEmpty) {
+				var p = new StackPanel { Orientation = Orientation.Horizontal };
+				foreach (var id in extIcons) {
+					var icon = VsImageHelper.GetImage(id, 14);
+					icon.UseGrayscaleIcon(true);
+					p.Children.Add(icon);
+				}
+				item.Note = p;
 			}
 			items.Add(item);
 		}
@@ -623,6 +662,27 @@ sealed partial class FileList : VirtualList
 		_FolderFilterButton.IsChecked = _FileFilterButton.IsChecked = false;
 		_FilterBox.Clear();
 		_LockFilter = false;
+	}
+
+	IEnumerable<OpenDocumentId> GetOpenedDocuments() {
+		if (_ViewMode != ViewMode.Documents) {
+			yield break;
+		}
+		foreach (var item in Items) {
+			if (item is FileItem fi && fi.Type == FileItemType.OpenedDocument) {
+				yield return new OpenDocumentId(fi.Name, fi.FullPath);
+			}
+		}
+	}
+	IEnumerable<OpenDocumentId> GetSelectedOpenedDocuments() {
+		if (_ViewMode != ViewMode.Documents) {
+			yield break;
+		}
+		foreach (var item in SelectedItems) {
+			if (item is FileItem fi && fi.Type == FileItemType.OpenedDocument) {
+				yield return new OpenDocumentId(fi.Name, fi.FullPath);
+			}
+		}
 	}
 
 	void ActivateSelectedItem() {
@@ -980,6 +1040,14 @@ sealed partial class FileList : VirtualList
 		}
 	}
 	#endregion
+
+	readonly struct OpenDocumentId(string name, string fullPath)
+	{
+		public readonly string Name = name;
+		public readonly string FullPath = fullPath;
+
+		public OpenDocumentId(IVsWindowFrame windowFrame) : this(windowFrame.GetCaption(), windowFrame.GetDocumentFullPath()) { }
+	}
 
 	readonly struct HighlightCondition(bool isFile, string name)
 	{

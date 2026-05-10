@@ -112,6 +112,9 @@ static class IconIds
 	public const int Remove = KnownImageIds.Cancel;
 	public const int Enabled = KnownImageIds.OnlineStatusAvailable;
 	public const int Disabled = KnownImageIds.OnlineStatusPresenting;
+	public const int Readonly = KnownImageIds.Lock;
+	public const int Modified = KnownImageIds.Edit;
+	public const int DontSave = KnownImageIds.Save | KnownImageIds.OverlayNo << OverlayShift | FullOverlayMask;
 	public const int Default = KnownImageIds.OnlineStatusUnknown;
 	public const int Search = KnownImageIds.Search;
 	public const int RunTest = KnownImageIds.RunTest;
@@ -120,10 +123,13 @@ static class IconIds
 	public const int RelatedProjects = KnownImageIds.CSClassCollection;
 	public const int SourceCode = KnownImageIds.EditDocument;
 	public const int ExternalSymbol = KnownImageIds.ReferenceFolderOpened;
+	public const int NewFile = KnownImageIds.NewDocument;
 	public const int File = KnownImageIds.CSSourceFile;
 	public const int FileEmpty = KnownImageIds.CSFile;
+	public const int FileVirtual = KnownImageIds.Snippet;
 	public const int FileLocations = KnownImageIds.DocumentCollection;
 	public const int GlobalNamespace = KnownImageIds.Home;
+	public const int Hibernated = KnownImageIds.OnlineStatusAway;
 	public const int Module = KnownImageIds.Module;
 	public const int Headings = KnownImageIds.Flag;
 	public const int Heading1 = KnownImageIds.FlagDarkRed;

@@ -15,7 +15,7 @@ sealed class FileItem : INotifyPropertyChanged
 	bool _IsCurrent;
 	SolutionItemInfo _IsSolutionItem;
 	FrameworkElement _Icon;
-	string _Note;
+	FrameworkElement _Note;
 
 	long _FileSize = -1;
 	DateTime _CreationTime;
@@ -105,7 +105,7 @@ sealed class FileItem : INotifyPropertyChanged
 		}
 	}
 
-	public string Note {
+	public FrameworkElement Note {
 		get => _Note;
 		set => _Note = value;
 	}

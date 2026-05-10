@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -7,7 +8,10 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using CLR;
 using Codist.Controls;
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 using R = Codist.Properties.Resources;
 
 namespace Codist.FileBrowser;
@@ -102,13 +106,12 @@ partial class FileList
 	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.EventHandler)]
 	void ActivateWindow(FileItem file) {
 		var filePath = file.FullPath;
-		foreach (EnvDTE.Document doc in ServicesHelper.Instance.DTE.Documents) {
-			var window = doc.ActiveWindow;
-			if (window is null
-				|| !FileHelper.AreFileNamesEqual(doc.FullName, filePath)) {
+		foreach (var frame in VsShellHelper.GetDocumentWindows()) {
+			if (!FileHelper.AreFileNamesEqual(frame.GetDocumentFullPath(), filePath)
+				|| frame.GetCaption() != file.Name) {
 				continue;
 			}
-			window.Activate();
+			frame.Show();
 			FileActivated?.Invoke(this, new(file));
 			return;
 		}
@@ -117,80 +120,140 @@ partial class FileList
 	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.EventHandler)]
 	void LocateInSolutionExplorer(object sender, RoutedEventArgs args) {
 		if (SelectedItem is FileItem fsi && fsi.IsFile) {
-			var dte = ServicesHelper.Instance.DTE;
-			var projectItem = dte.Solution.FindProjectItem(fsi.FullPath);
-			var parents = new Stack<string>();
-			var current = projectItem;
-			while (current != null) {
-				parents.Push(current.Name);
-				current = current.Collection?.Parent as EnvDTE.ProjectItem;
-				if (current == null && projectItem.ContainingProject != null) {
-					parents.Push(projectItem.ContainingProject.Name);
-					parents.Push(Path.GetFileNameWithoutExtension(dte.Solution.FileName));
-					break;
-				}
-			}
-
 			try {
-				if (parents.Count != 0) {
-					var item = dte.ToolWindows.SolutionExplorer.GetItem(parents.Pop());
-					while (parents.Count != 0) {
-						var items = item.UIHierarchyItems;
-						if (!items.Expanded) {
-							items.Expanded = true;
-						}
-						item = items.Item(parents.Pop());
-					}
-					item.Select(EnvDTE.vsUISelectionType.vsUISelectionTypeSelect);
-				}
-				FileActivated?.Invoke(this, new(fsi));
+				TryLocateInSolutionExplorer(fsi);
 			}
 			catch (Exception ex) {
 				MessageWindow.Error(ex, source: this);
 			}
 		}
 	}
-	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.EventHandler)]
-	void SaveDocument(object sender, RoutedEventArgs args) {
-		var documents = ServicesHelper.Instance.DTE.Documents;
-		foreach (var file in SelectedFilePaths) {
-			var doc = documents.Item(file);
-			if (doc?.Saved == false) {
-				doc.Save();
+
+	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
+	void TryLocateInSolutionExplorer(FileItem fsi) {
+		var dte = ServicesHelper.Instance.DTE;
+		var projectItem = dte.Solution.FindProjectItem(fsi.FullPath);
+		var parents = new Stack<string>();
+		var current = projectItem;
+		while (current != null) {
+			parents.Push(current.Name);
+			current = current.Collection?.Parent as EnvDTE.ProjectItem;
+			if (current == null && projectItem.ContainingProject != null) {
+				parents.Push(projectItem.ContainingProject.Name);
+				parents.Push(Path.GetFileNameWithoutExtension(dte.Solution.FileName));
+				break;
 			}
 		}
-		ListOpenedDocuments();
+
+		try {
+			if (parents.Count != 0) {
+				var item = dte.ToolWindows.SolutionExplorer.GetItem(parents.Pop());
+				while (parents.Count != 0) {
+					var items = item.UIHierarchyItems;
+					if (!items.Expanded) {
+						items.Expanded = true;
+					}
+					item = items.Item(parents.Pop());
+				}
+				item.Select(EnvDTE.vsUISelectionType.vsUISelectionTypeSelect);
+			}
+			FileActivated?.Invoke(this, new(fsi));
+		}
+		catch (Exception ex) {
+			MessageWindow.Error(ex, source: this);
+		}
 	}
+
+	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.EventHandler)]
+	void SaveDocument(object sender, RoutedEventArgs args) {
+		if (SaveDocuments(GetSelectedOpenedDocuments().ToImmutableHashSet())) {
+			ListOpenedDocuments();
+		}
+	}
+
+	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
+	bool SaveDocuments(ImmutableHashSet<OpenDocumentId> selection) {
+		const uint NEW_DOC_FLAGS = (uint)(VsRdtFlags.DontPollForState | VsRdtFlags.DontAutoOpen),
+			DONT_SAVE = (uint)(VsRdtFlags.DontSave | VsRdtFlags.DontSaveAs);
+		var shell = ServicesHelper.Get<IVsUIShell, SVsUIShell>();
+		var rdt = ServicesHelper.Get<IVsRunningDocumentTable, SVsRunningDocumentTable>();
+		RunningDocumentInfo rdi = default;
+		OpenDocumentId id;
+		bool saved = false;
+		string defaultPath = null;
+		foreach (var frame in VsShellHelper.GetDocumentWindows()) {
+			bool isNewDoc = false;
+			if (!frame.TryGetProperty((int)__VSFPROPID.VSFPROPID_DocData, out IPersistFileFormat data)
+				|| !frame.TryGetDocCookie(out var cookie)
+				|| ((data.IsDirty(out var dirty) != 0 || dirty == 0)
+					&& !(isNewDoc = (rdi = new RunningDocumentInfo(rdt, (uint)cookie)).Flags.MatchFlags(NEW_DOC_FLAGS))
+					&& !rdi.Flags.HasAnyFlag(DONT_SAVE))
+				|| !selection.Contains(id = new OpenDocumentId(frame))) {
+				continue;
+			}
+
+			if (!isNewDoc) {
+				shell.SaveDocDataToFile(VSSAVEFLAGS.VSSAVE_Save, data, null, out _, out _);
+				saved = true;
+				continue;
+			}
+
+			defaultPath ??= !String.IsNullOrEmpty(_ProjectFolderPath) ? _ProjectFolderPath :
+					!String.IsNullOrEmpty(_SolutionFolderPath) ? _SolutionFolderPath :
+					Environment.CurrentDirectory;
+			if (shell.SaveDocDataToFile(VSSAVEFLAGS.VSSAVE_SaveAs, data, Path.Combine(defaultPath, frame.GetShortCaption()), out var newPath, out var canceled) == 0
+				&& canceled == 0) {
+				if (!FileHelper.AreFileNamesEqual(id.FullPath, newPath)) {
+					rdt.RenameDocument(id.FullPath, newPath, new IntPtr(-1L), (uint)Microsoft.VisualStudio.VSConstants.VSITEMID.Nil);
+				}
+				rdt.ModifyDocumentFlags((uint)cookie, rdi.Flags.SetFlags(NEW_DOC_FLAGS, false), 0);
+				//rdi.Sync();
+				saved = true;
+			}
+		}
+		return saved;
+	}
+
 	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.EventHandler)]
 	void SaveAllDocuments(object sender, RoutedEventArgs args) {
-		ServicesHelper.Instance.DTE.Documents.SaveAll();
-		ListOpenedDocuments();
+		if (SaveDocuments(GetOpenedDocuments().ToImmutableHashSet())) {
+			ListOpenedDocuments();
+		}
 	}
 
 	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.EventHandler)]
 	void CloseDocument(object sender, RoutedEventArgs args) {
-		var documents = ServicesHelper.Instance.DTE.Documents;
-		foreach (var file in SelectedFilePaths) {
-			var doc = documents.Item(file);
-			doc?.Close();
+		var selection = GetSelectedOpenedDocuments().ToImmutableHashSet();
+		var closed = false;
+		foreach (var frame in VsShellHelper.GetDocumentWindows()) {
+			if (selection.Contains(new OpenDocumentId(frame))
+				&& frame.CloseFrame((uint)__FRAMECLOSE.FRAMECLOSE_PromptSave) == 0) {
+				closed = true;
+			}
 		}
-		ListOpenedDocuments();
+		if (closed) {
+			ListOpenedDocuments();
+		}
 	}
 	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.EventHandler)]
 	void CloseOtherSavedDocuments(object sender, RoutedEventArgs args) {
-		var dte = ServicesHelper.Instance.DTE;
-		var documents = dte.Documents;
-		var activeWin = dte.ActiveWindow;
-		foreach (EnvDTE.Document doc in documents) {
-			var w = doc.ActiveWindow;
-			if (w is null || w == activeWin) {
+		var currentFrame = VsShellHelper.GetCurrentWindowFrame();
+		var rdt = new RunningDocumentTable(CodistPackage.Instance);
+		var closed = false;
+		foreach (var frame in VsShellHelper.GetDocumentWindows()) {
+			if (currentFrame == frame // is active
+				|| !frame.TryGetDocCookie(out var cookie)
+				|| rdt.GetDocumentInfo((uint)cookie).IsDirty) { // is unsaved
 				continue;
 			}
-			if (doc.Saved) {
-				doc.Close();
+			if (frame.CloseFrame((uint)__FRAMECLOSE.FRAMECLOSE_NoSave) == 0) {
+				closed = true;
 			}
 		}
-		ListOpenedDocuments();
+
+		if (closed) {
+			ListOpenedDocuments();
+		}
 	}
 
 
