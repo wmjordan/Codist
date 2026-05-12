@@ -220,7 +220,7 @@ internal partial class SmartBar : IOleCommandTarget
 			ToolBar2.HideOverflow();
 		}
 		if (_NextCommandTarget is null) {
-			GetVsView(view).AddCommandFilter(this, out _NextCommandTarget);
+			GetVsView(view)?.AddCommandFilter(this, out _NextCommandTarget);
 		}
 		_ToolBarTray.Visibility = Visibility.Visible;
 		_ToolBarTray.Opacity = WpfHelper.DimmedOpacity;
@@ -239,7 +239,7 @@ internal partial class SmartBar : IOleCommandTarget
 		_ToolBarTray.SizeChanged -= ToolBarSizeChanged;
 		_View.VisualElement.MouseMove -= ViewMouseMove;
 		if (_NextCommandTarget != null) {
-			GetVsView(_View).RemoveCommandFilter(this);
+			GetVsView(_View)?.RemoveCommandFilter(this);
 			_NextCommandTarget = null;
 		}
 		if (cancelAsyncOperation) {

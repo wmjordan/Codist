@@ -24,7 +24,9 @@ internal sealed class SmartBarFactory : IWpfTextViewCreationListener
 	public void TextViewCreated(IWpfTextView textView) {
 		if (Config.Instance.Features.MatchFlags(Features.SmartBar) == false
 			|| textView.TextBuffer.MayBeEditor() == false
-			|| textView.Roles.Contains("WATCHWINDOWEDIT")) {
+			|| textView.Roles.Contains("WATCHWINDOWEDIT")
+			|| textView.Roles.Contains("CHATRESPONSECODEBLOCK")
+			) {
 			return;
 		}
 		// The toolbar will get wired to the text view events
