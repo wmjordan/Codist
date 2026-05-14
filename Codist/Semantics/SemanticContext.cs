@@ -243,6 +243,10 @@ sealed class SemanticContext
 		return _Model.MapDownToSourceSpan(span, _View);
 	}
 
+	public Task<bool> UpdateAsync() {
+		return UpdateAsync(View.TextBuffer, default, default);
+	}
+
 	public Task<bool> UpdateAsync(CancellationToken cancellationToken) {
 		return UpdateAsync(View.TextBuffer, default, cancellationToken);
 	}

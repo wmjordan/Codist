@@ -929,7 +929,6 @@ static partial class WpfHelper
 			ToolTip = String.Empty;
 			Highlight(sender, e);
 			MouseEnter += Highlight;
-			MouseLeave += Leave;
 
 			OnInitInteraction();
 		}
@@ -947,9 +946,9 @@ static partial class WpfHelper
 		}
 
 		protected void ReleaseHighlight() {
-			MouseLeave -= Leave;
-			MouseLeave += Leave;
-			Background = WpfBrushes.Transparent;
+			ClearValue(BackgroundProperty);
+			MouseEnter -= Highlight;
+			MouseEnter += Highlight;
 		}
 
 		protected override void OnToolTipOpening(ToolTipEventArgs e) {
@@ -960,19 +959,18 @@ static partial class WpfHelper
 		}
 
 		void Highlight(object sender, MouseEventArgs e) {
+			MouseEnter -= Highlight;
+			MouseLeave += Leave;
 			DoHighlight();
 		}
 
 		void Leave(object sender, MouseEventArgs e) {
-			Background = WpfBrushes.Transparent;
+			MouseLeave -= Leave;
+			MouseEnter += Highlight;
+			ClearValue(BackgroundProperty);
 		}
 
 		void Unload(object sender, RoutedEventArgs e) {
-			MouseEnter -= InitInteraction;
-			MouseEnter -= Highlight;
-			MouseLeave -= Leave;
-			Unloaded -= Unload;
-
 			OnUnload();
 		}
 	}

@@ -264,7 +264,7 @@ partial class WpfHelper
 
 		protected override void OnInitInteraction() {
 			MouseLeftButtonDown += GoToSymbol;
-			MouseRightButtonDown += ShowContextMenu;
+			ContextMenuOpening += ShowContextMenu;
 		}
 
 		protected override void OnUnload() {
@@ -283,48 +283,50 @@ partial class WpfHelper
 		}
 
 		[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
-		async void ShowContextMenu(object sender, MouseButtonEventArgs e) {
+		async void ShowContextMenu(object sender, ContextMenuEventArgs e) {
 			await SyncHelper.SwitchToMainThreadAsync(default);
 			if (ContextMenu != null) {
 				HoldQuickInfo();
-				ContextMenu.IsOpen = true;
 				return;
 			}
 			var ctx = SemanticContext.GetHovered();
-			if (ctx != null) {
-				await ctx.UpdateAsync(default);
-				await SyncHelper.SwitchToMainThreadAsync(default);
-				var s = _Symbol;
-				if (s != null) {
-					var m = new CSharpSymbolContextMenu(s, s.GetSyntaxNode(), ctx);
-					m.AddAnalysisCommands();
-					if (m.HasItems) {
-						m.Items.Add(new Separator());
-					}
-					m.AddSymbolNodeCommands();
-					m.AddTitleItem(s.GetOriginalName());
-					HoldQuickInfo();
-					m.Closed += ReleaseQuickInfo;
-					m.CommandExecuted += DismissQuickInfo;
-					m.SetProperty(TextBlock.FontFamilyProperty, ThemeCache.ToolTipFont)
-						.SetProperty(TextBlock.FontSizeProperty, ThemeCache.ToolTipFontSize);
-					m.PlacementTarget = this.GetParent<UIElement>();
-					ContextMenu = m;
-					m.IsOpen = true;
-				}
-				e.Handled = true;
+			if (ctx == null) {
+				return;
 			}
+
+			SyncHelper.RunSync(ctx.UpdateAsync);
+			var s = _Symbol;
+			if (s == null) {
+				goto EXIT;
+			}
+
+			var m = new CSharpSymbolContextMenu(s, s.GetSyntaxNode(), ctx);
+			m.AddAnalysisCommands();
+			if (m.HasItems) {
+				m.Items.Add(new Separator());
+			}
+			m.AddSymbolNodeCommands();
+			m.AddTitleItem(s.GetOriginalName());
+			HoldQuickInfo();
+			m.Closed += ReleaseQuickInfo;
+			m.CommandExecuted += DismissQuickInfo;
+			m.SetProperty(TextBlock.FontFamilyProperty, ThemeCache.ToolTipFont)
+				.SetProperty(TextBlock.FontSizeProperty, ThemeCache.ToolTipFontSize);
+			m.PlacementTarget = this.GetUIParentCore() as UIElement;
+			ContextMenu = m;
+			m.IsOpen = true;
+		EXIT:
+			e.Handled = true;
 		}
 
 		void HoldQuickInfo() {
 			QuickInfo.QuickInfoOverride.HoldQuickInfo(this, true);
-			DoHighlight();
 			KeepHighlight();
+			DoHighlight();
 		}
 
 		void ReleaseQuickInfo(object sender, RoutedEventArgs e) {
 			QuickInfo.QuickInfoOverride.HoldQuickInfo(this, false);
-			ClearValue(BackgroundProperty);
 			ReleaseHighlight();
 		}
 
