@@ -207,8 +207,7 @@ sealed class WrapText
 		var modified = new Chain<Span>();
 		var undoHistory = ServicesHelper.Instance.TextUndoHistory.GetHistory(view.TextBuffer);
 		using var tran = undoHistory.CreateTransaction(R.T_WrapTextName.Replace("<NAME>", name));
-		var eo = ServicesHelper.Instance.EditorOperationsFactory.GetEditorOperations(view);
-		eo.AddBeforeTextBufferChangePrimitive();
+		view.GetEditorOperations().AddBeforeTextBufferChangePrimitive();
 		using var edit = view.TextSnapshot.TextBuffer.CreateEdit();
 		foreach (var item in view.Selection.SelectedSpans) {
 			var t = item.GetText();
@@ -248,8 +247,7 @@ sealed class WrapText
 		var undoHistory = ServicesHelper.Instance.TextUndoHistory.GetHistory(view.TextBuffer);
 
 		using var tran = undoHistory.CreateTransaction(R.T_WrapTextName.Replace("<NAME>", Name));
-		var eo = ServicesHelper.Instance.EditorOperationsFactory.GetEditorOperations(view);
-		eo.AddBeforeTextBufferChangePrimitive();
+		view.GetEditorOperations().AddBeforeTextBufferChangePrimitive();
 		using var edit = view.TextSnapshot.TextBuffer.CreateEdit();
 		foreach (var item in view.Selection.SelectedSpans) {
 			var t = item.GetText();

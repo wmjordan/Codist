@@ -661,6 +661,10 @@ static class TextEditorHelper
 		return view.Options.GetOptionValue(DefaultWpfViewOptions.AppearanceCategory);
 	}
 
+	public static IEditorOperations GetEditorOperations(this ITextView view) {
+		return ServicesHelper.Instance.EditorOperationsFactory.GetEditorOperations(view);
+	}
+
 	/// <summary>Gets the floating point zoom factor <c>(<see cref="IWpfTextView.ZoomLevel"/> / 100)</c> from specific view</summary>
 	public static double ZoomFactor(this IWpfTextView view) {
 		return view.ZoomLevel / 100;

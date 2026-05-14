@@ -188,16 +188,6 @@ static class EditCommands
 		TextEditorHelper.ExecuteEditorCommand("Edit.Copy");
 	}
 
-	public static void DeleteEmptyLinesInSelection(this ITextView view) {
-		view.Edit((v, edit) => {
-			foreach (var line in v.GetSelectedLines()) {
-				if (line.IsEmptyOrWhitespace()) {
-					edit.Delete(line.ExtentIncludingLineBreak);
-				}
-			}
-		});
-	}
-
 	public static void TrimTrailingSpaces(this ITextView view) {
 		view.Edit((v, edit) => {
 			var snapshot = v.TextSnapshot;

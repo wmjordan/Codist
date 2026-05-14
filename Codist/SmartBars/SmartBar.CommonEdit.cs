@@ -139,8 +139,8 @@ partial class SmartBar
 
 			if (ctx.ModifierKeys.MatchFlags(ModifierKeys.Shift)) {
 				TextEditorHelper.ExecuteEditorCommand("Edit.Cut");
-			}
-			else {
+				}
+				else {
 				ctx.View.CopySelectionWithoutIndentation();
 				TextEditorHelper.ExecuteEditorCommand("Edit.Delete");
 			}
@@ -178,7 +178,7 @@ partial class SmartBar
 				ctx.View.ExpandSelectionToLine();
 			}
 			ctx.KeepToolBar(true);
-			TextEditorHelper.ExecuteEditorCommand("Edit.Duplicate");
+			((IEditorOperations3)ctx.View.GetEditorOperations()).DuplicateSelection();
 		});
 	}
 
@@ -416,7 +416,7 @@ partial class SmartBar
 			}
 		}
 		if (arg.HasMultiLineSelection) {
-			r.Add(new CommandItem(IconIds.DeleteEmptyLines, R.CMD_DeleteEmptyLines, ctx => ctx.View.DeleteEmptyLinesInSelection()) { QuickAccessCondition = CommandItem.EditableAndMultiline });
+			r.Add(new CommandItem(IconIds.DeleteEmptyLines, R.CMD_DeleteEmptyLines, ctx => ctx.View.GetEditorOperations().DeleteBlankLines()) { QuickAccessCondition = CommandItem.EditableAndMultiline });
 		}
 		r.Add(new CommandItem(IconIds.TrimTrailingSpaces, R.CMD_TrimTrailingSpaces, ctx => ctx.View.TrimTrailingSpaces()) { QuickAccessCondition = CommandItem.HasEditableSelection });
 		r.AddRange(__WebCommands);
@@ -477,16 +477,16 @@ partial class SmartBar
 						});}, true);
 				}
 				else {
-					TextEditorHelper.ExecuteEditorCommand("Edit.Capitalize");
+				ctx.View.GetEditorOperations().Capitalize();
 				}
 			}) { ToolTip = R.CMDT_Capitalize, QuickAccessCondition = CommandItem.HasEditableSelection },
 			new CommandItem(IconIds.Uppercase, R.CMD_Uppercase, ctx => {
 				ctx.KeepToolBarOnClick = true;
-				TextEditorHelper.ExecuteEditorCommand("Edit.MakeUppercase");
+				ctx.View.GetEditorOperations().MakeUppercase();
 			}) { QuickAccessCondition = CommandItem.HasEditableSelection },
 			new CommandItem(IconIds.Lowercase, R.CMD_Lowercase, ctx => {
 				ctx.KeepToolBarOnClick = true;
-				TextEditorHelper.ExecuteEditorCommand("Edit.MakeLowercase");
+				ctx.View.GetEditorOperations().MakeLowercase();
 			}) { QuickAccessCondition = CommandItem.HasEditableSelection },
 		};
 	}
