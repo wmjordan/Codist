@@ -3364,4 +3364,13 @@ Shift: 匹配大小写</value>
   <data name="T_ExportGlobalEditorOptions" xml:space="preserve">
     <value>导出全局编辑器选项</value>
   </data>
+  <data name="OT_UseProvisionalWindow" xml:space="preserve">
+    <value>在临时窗口打开文件</value>
+  </data>
+  <data name="OT_PreferCodeWindow" xml:space="preserve">
+    <value>打开文件时，优先使用代码窗口而非设计窗口</value>
+  </data>
+  <data name="OT_DimNonSolutionItems" xml:space="preserve">
+    <value>用浅色显示不属于解决方案的文件</value>
+  </data>
 </root>

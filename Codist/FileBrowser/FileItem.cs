@@ -10,11 +10,26 @@ namespace Codist.FileBrowser;
 
 sealed class FileItem : INotifyPropertyChanged
 {
+	static SolutionItemInfo __DefaultSolutionState = GetDefaultSolutionState();
+
+	static SolutionItemInfo GetDefaultSolutionState() {
+		Config.RegisterUpdateHandler(UpdateSolutionStateOnConfigChange);
+		return Config.Instance.FileBrowserOptions.MatchFlags(FileBrowserOptions.DimNonSolutionItems)
+			? SolutionItemInfo.Unknown
+			: SolutionItemInfo.Yes;
+	}
+
+	static void UpdateSolutionStateOnConfigChange(ConfigUpdatedEventArgs args) {
+		if (args.UpdatedFeature.MatchFlags(Features.FileBrowser)) {
+			__DefaultSolutionState = GetDefaultSolutionState();
+		}
+	}
+
 	readonly FileSystemInfo _Info;
 	readonly FileItemType _Type;
 	readonly string _Name;
 	bool _IsCurrent;
-	SolutionItemInfo _IsSolutionItem;
+	SolutionItemInfo _IsSolutionItem = __DefaultSolutionState;
 	FileState _State;
 	FrameworkElement _Icon;
 	FrameworkElement _Note;
@@ -100,7 +115,7 @@ sealed class FileItem : INotifyPropertyChanged
 			if (_Type != FileItemType.File) {
 				return _Type != FileItemType.UnloadedProject;
 			}
-			if (_IsSolutionItem == 0) {
+			if (_IsSolutionItem == SolutionItemInfo.Unknown) {
 				_IsSolutionItem = GetIsSolutionItem();
 			}
 			return _IsSolutionItem == SolutionItemInfo.Yes;

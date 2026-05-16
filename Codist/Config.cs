@@ -822,7 +822,10 @@ namespace Codist
 		ShowCurrentDocumentFolder = 1 << 4,
 		ShowOpenedDocuments = 1 << 5,
 		AllButtons = ShowSolutionProjects | ShowSolutionFolder | ShowCurrentProjectFolder | ShowCurrentDocumentFolder | ShowOpenedDocuments,
-		Default = ShowLabels | AllButtons 
+		UseProvisional = 1 << 6,
+		UseCodeWindow = 1 << 7,
+		DimNonSolutionItems = 1 << 8,
+		Default = ShowLabels | AllButtons | UseProvisional | DimNonSolutionItems
 	}
 
 	[Flags]

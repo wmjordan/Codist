@@ -4142,6 +4142,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Dim non-solution files.
+        /// </summary>
+        internal static string OT_DimNonSolutionItems {
+            get {
+                return ResourceManager.GetString("OT_DimNonSolutionItems", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Disable change tracker interaction (VS 2022 only).
         /// </summary>
         internal static string OT_DisableChangeTracker {
@@ -5335,6 +5344,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Prefer code window over designer when opening file.
+        /// </summary>
+        internal static string OT_PreferCodeWindow {
+            get {
+                return ResourceManager.GetString("OT_PreferCodeWindow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Insert _underscore_ pairs instead of *asterisk* pairs.
         /// </summary>
         internal static string OT_PreferUnderscoreTip {
@@ -6267,6 +6285,15 @@ namespace Codist.Properties {
         internal static string OT_UseOrdinaryCommentTip {
             get {
                 return ResourceManager.GetString("OT_UseOrdinaryCommentTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Open file in provisional window.
+        /// </summary>
+        internal static string OT_UseProvisionalWindow {
+            get {
+                return ResourceManager.GetString("OT_UseProvisionalWindow", resourceCulture);
             }
         }
         

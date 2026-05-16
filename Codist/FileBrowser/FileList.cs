@@ -668,30 +668,31 @@ sealed partial class FileList : VirtualList
 	}
 
 	void ActivateSelectedItem() {
-		if (SelectedItem is FileItem item) {
-			switch (item.Type) {
-				case FileItemType.File:
-					TextEditorHelper.OpenFile(item.FullPath);
-					FileActivated?.Invoke(this, new(item));
-					break;
-				case FileItemType.Folder:
-				case FileItemType.EmptyFolder:
-					LocationType = FileListLocationType.Normal;
-					UnsafeNavigateToDirectoryAsync(item.FullPath).FireAndForget();
-					break;
-				case FileItemType.Solution:
-					LocationType = FileListLocationType.SolutionFolder;
-					UnsafeNavigateToDirectoryAsync(item.IsCurrent ? item.FullPath : Path.GetDirectoryName(item.FullPath)).FireAndForget();
-					break;
-				case FileItemType.Project:
-				case FileItemType.UnloadedProject:
-					LocationType = FileListLocationType.Normal;
-					UnsafeNavigateToDirectoryAsync(Path.GetDirectoryName(item.FullPath)).FireAndForget();
-					break;
-				case FileItemType.OpenedDocument:
-					ActivateWindow(item);
-					break;
-			}
+		if (SelectedItem is not FileItem item) {
+			return;
+		}
+		switch (item.Type) {
+			case FileItemType.File:
+				TextEditorHelper.OpenFile(item.FullPath, !Config.Instance.FileBrowserOptions.MatchFlags(FileBrowserOptions.UseProvisional), !Config.Instance.FileBrowserOptions.MatchFlags(FileBrowserOptions.UseCodeWindow));
+				FileActivated?.Invoke(this, new(item));
+				break;
+			case FileItemType.Folder:
+			case FileItemType.EmptyFolder:
+				LocationType = FileListLocationType.Normal;
+				UnsafeNavigateToDirectoryAsync(item.FullPath).FireAndForget();
+				break;
+			case FileItemType.Solution:
+				LocationType = FileListLocationType.SolutionFolder;
+				UnsafeNavigateToDirectoryAsync(item.IsCurrent ? item.FullPath : Path.GetDirectoryName(item.FullPath)).FireAndForget();
+				break;
+			case FileItemType.Project:
+			case FileItemType.UnloadedProject:
+				LocationType = FileListLocationType.Normal;
+				UnsafeNavigateToDirectoryAsync(Path.GetDirectoryName(item.FullPath)).FireAndForget();
+				break;
+			case FileItemType.OpenedDocument:
+				ActivateWindow(item);
+				break;
 		}
 	}
 

@@ -3380,4 +3380,13 @@ List currently opened code documents</value>
   <data name="T_ExportGlobalEditorOptionsTip" xml:space="preserve">
     <value>Save EditorOptions.GlobalOptions to a file</value>
   </data>
+  <data name="OT_UseProvisionalWindow" xml:space="preserve">
+    <value>Open file in provisional window</value>
+  </data>
+  <data name="OT_PreferCodeWindow" xml:space="preserve">
+    <value>Prefer code window over designer when opening file</value>
+  </data>
+  <data name="OT_DimNonSolutionItems" xml:space="preserve">
+    <value>Dim non-solution files</value>
+  </data>
 </root>

@@ -104,8 +104,9 @@ partial class FileList
 			ServicesHelper.Instance.DTE.Solution.Open(activeItem.FullPath);
 			return;
 		}
-		var newWindow = false; // preview the first; open others
-		var useDesigner = !UIHelper.IsCtrlDown; // press Ctrl to force code view
+		var options = Config.Instance.FileBrowserOptions;
+		var newWindow = !options.MatchFlags(FileBrowserOptions.UseProvisional); // preview the first; open others
+		var useDesigner = !options.MatchFlags(FileBrowserOptions.UseCodeWindow) ^ !UIHelper.IsCtrlDown; // press Ctrl to force code view
 		foreach (var path in SelectedFilePaths) {
 			TextEditorHelper.OpenFile(path, newWindow, useDesigner);
 			newWindow = true;
