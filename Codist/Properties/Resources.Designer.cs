@@ -8445,6 +8445,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Modified.
+        /// </summary>
+        internal static string T_Modified {
+            get {
+                return ResourceManager.GetString("T_Modified", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to And more....
         /// </summary>
         internal static string T_More {
@@ -8523,6 +8532,15 @@ namespace Codist.Properties {
         internal static string T_NetworkUsage {
             get {
                 return ResourceManager.GetString("T_NetworkUsage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to New file.
+        /// </summary>
+        internal static string T_NewFile {
+            get {
+                return ResourceManager.GetString("T_NewFile", resourceCulture);
             }
         }
         
@@ -8739,6 +8757,15 @@ namespace Codist.Properties {
         internal static string T_PickColor {
             get {
                 return ResourceManager.GetString("T_PickColor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Pinned.
+        /// </summary>
+        internal static string T_Pinned {
+            get {
+                return ResourceManager.GetString("T_Pinned", resourceCulture);
             }
         }
         
@@ -9706,6 +9733,15 @@ namespace Codist.Properties {
         internal static string T_ViewRoles {
             get {
                 return ResourceManager.GetString("T_ViewRoles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Virtual file.
+        /// </summary>
+        internal static string T_VirtualFile {
+            get {
+                return ResourceManager.GetString("T_VirtualFile", resourceCulture);
             }
         }
         

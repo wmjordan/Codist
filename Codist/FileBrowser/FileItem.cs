@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Windows;
 using CLR;
+using Microsoft.VisualStudio.Shell;
 
 namespace Codist.FileBrowser;
 
@@ -14,6 +15,7 @@ sealed class FileItem : INotifyPropertyChanged
 	readonly string _Name;
 	bool _IsCurrent;
 	SolutionItemInfo _IsSolutionItem;
+	FileState _State;
 	FrameworkElement _Icon;
 	FrameworkElement _Note;
 
@@ -105,6 +107,11 @@ sealed class FileItem : INotifyPropertyChanged
 		}
 	}
 
+	public FileState FileState {
+		get => _State;
+		set => _State = value;
+	}
+
 	public FrameworkElement Note {
 		get => _Note;
 		set => _Note = value;
@@ -161,6 +168,35 @@ sealed class FileItem : INotifyPropertyChanged
 		if (_IsCurrent) {
 			_IsCurrent = false;
 			PropertyChanged?.Invoke(this, new(nameof(IsCurrent)));
+		}
+	}
+	internal void SetStateFromRunningDocumentInfo(RunningDocumentInfo docInfo, Chain<int> icons) {
+		if (!docInfo.IsDocumentInitialized) {
+			//_State |= FileState.Uninitialized;
+			//icons.Add(IconIds.Hibernated);
+			return;
+		}
+
+		if (docInfo.IsReadOnly) {
+			_State |= FileState.ReadOnly;
+			icons.Add(IconIds.Readonly);
+		}
+		uint flags = docInfo.Flags;
+		if (flags.MatchFlags((uint)(VsRdtFlags.DontAddToMRU | VsRdtFlags.DontAutoOpen))) {
+			_State |= FileState.New;
+			icons.Add(IconIds.NewFile);
+		}
+		if (flags.HasAnyFlag((uint)(VsRdtFlags.DontSave | VsRdtFlags.DontSaveAs))) {
+			_State |= FileState.DontSave;
+			icons.Add(IconIds.DontSave);
+		}
+		if (flags.MatchFlags((uint)VsRdtFlags.VirtualDocument)) {
+			_State |= FileState.Virtual;
+			icons.Add(IconIds.FileVirtual);
+		}
+		if (docInfo.IsDirty) {
+			_State |= FileState.Modified;
+			icons.Add(IconIds.Modified);
 		}
 	}
 

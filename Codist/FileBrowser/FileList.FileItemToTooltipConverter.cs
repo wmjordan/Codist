@@ -4,6 +4,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using CLR;
 using R = Codist.Properties.Resources;
 
 namespace Codist.FileBrowser;
@@ -34,12 +35,38 @@ sealed partial class FileList
 				TextWrapping = TextWrapping.Wrap
 			});
 
-			if (item.Type == FileItemType.InaccessibleFolder) {
-				return panel;
+			if (_List._ViewMode == ViewMode.Documents) {
+				var state = item.FileState;
+				if (state != 0) {
+					var s = new TextBlock();
+					if (state.MatchFlags(FileState.Modified)) {
+						s.AddImage(IconIds.Modified).Append(R.T_Modified);
+					}
+					if (state.MatchFlags(FileState.Pinned)) {
+						s.AddImage(IconIds.Pin).Append(R.T_Pinned);
+					}
+					if (state.MatchFlags(FileState.Virtual)) {
+						s.AddImage(IconIds.FileVirtual).Append(R.T_VirtualFile);
+					}
+					if (state.MatchFlags(FileState.New)) {
+						s.AddImage(IconIds.NewFile).Append(R.T_NewFile);
+					}
+					//if (state.MatchFlags(FileState.Uninitialized)) {
+					//	s.AddImage(IconIds.Hibernated).Append("Not loaded");
+					//}
+					panel.Children.Add(s);
+				}
 			}
 
-			if (_List._ViewMode != ViewMode.File && item.Type == FileItemType.File) {
-				panel.Children.Add(new TextBlock { Text = R.T_Folder + Path.GetDirectoryName(item.FullPath) });
+			switch (item.Type) {
+				case FileItemType.InaccessibleFolder:
+					return panel;
+				case FileItemType.OpenedDocument:
+					panel.Children.Add(new TextBlock {
+						Text = R.T_Folder + Path.GetDirectoryName(item.FullPath),
+						TextWrapping = TextWrapping.Wrap
+					});
+					break;
 			}
 
 			panel.Children.Add(new TextBlock { Text = R.T_CreateTime + item.CreationTime.ToString("yyyy-MM-dd HH:mm:ss") });

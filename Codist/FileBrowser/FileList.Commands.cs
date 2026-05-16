@@ -69,10 +69,19 @@ partial class FileList
 
 	#region Folder or files operations
 	void LocateInFileBrowser(object sender, RoutedEventArgs args) {
+		if (_ViewMode == ViewMode.Documents) {
+			Commands.FileBrowserWindowCommand.Instance.ShowAt(Path.GetDirectoryName(((FileItem)SelectedItem).FullPath));
+			return;
+		}
 		Commands.FileBrowserWindowCommand.Instance.ShowAt(_ActiveDirPath);
 	}
 
 	void OpenInExplorer(object sender, RoutedEventArgs args) {
+		if (_ViewMode == ViewMode.Documents) {
+			FileHelper.OpenInExplorer(((FileItem)SelectedItem).FullPath);
+			return;
+		}
+
 		if (!String.IsNullOrEmpty(_ActiveFilePath)
 			&& Path.GetDirectoryName(_ActiveFilePath) == _ActiveDirPath) {
 			FileHelper.OpenInExplorer(_ActiveFilePath);
@@ -173,7 +182,7 @@ partial class FileList
 
 	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
 	bool SaveDocuments(ImmutableHashSet<OpenDocumentId> selection) {
-		const uint NEW_DOC_FLAGS = (uint)(VsRdtFlags.DontPollForState | VsRdtFlags.DontAutoOpen),
+		const uint NEW_DOC_FLAGS = (uint)(VsRdtFlags.DontAddToMRU | VsRdtFlags.DontAutoOpen | VsRdtFlags.DontPollForState),
 			DONT_SAVE = (uint)(VsRdtFlags.DontSave | VsRdtFlags.DontSaveAs);
 		var shell = ServicesHelper.Get<IVsUIShell, SVsUIShell>();
 		var rdt = ServicesHelper.Get<IVsRunningDocumentTable, SVsRunningDocumentTable>();
@@ -201,13 +210,18 @@ partial class FileList
 			defaultPath ??= !String.IsNullOrEmpty(_ProjectFolderPath) ? _ProjectFolderPath :
 					!String.IsNullOrEmpty(_SolutionFolderPath) ? _SolutionFolderPath :
 					Environment.CurrentDirectory;
-			if (shell.SaveDocDataToFile(VSSAVEFLAGS.VSSAVE_SaveAs, data, Path.Combine(defaultPath, frame.GetShortCaption()), out var newPath, out var canceled) == 0
+			data.InitNew(0);
+			if (shell.SaveDocDataToFile(VSSAVEFLAGS.VSSAVE_SaveAs, data, defaultPath, out var newPath, out var canceled) == 0
 				&& canceled == 0) {
 				if (!FileHelper.AreFileNamesEqual(id.FullPath, newPath)) {
 					rdt.RenameDocument(id.FullPath, newPath, new IntPtr(-1L), (uint)Microsoft.VisualStudio.VSConstants.VSITEMID.Nil);
 				}
-				rdt.ModifyDocumentFlags((uint)cookie, rdi.Flags.SetFlags(NEW_DOC_FLAGS, false), 0);
-				//rdi.Sync();
+				rdt.ModifyDocumentFlags((uint)cookie, NEW_DOC_FLAGS, 0);
+				foreach (var updateFrame in VsShellHelper.GetDocumentWindows()) {
+					if (updateFrame.TryGetDocCookie(out var c) && c == cookie) {
+						updateFrame.SetProperty((int)__VSFPROPID.VSFPROPID_OwnerCaption, Path.GetFileName(newPath));
+					}
+				}
 				saved = true;
 			}
 		}

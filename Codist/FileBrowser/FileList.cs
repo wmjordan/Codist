@@ -253,11 +253,14 @@ sealed partial class FileList : VirtualList
 			}
 			else if (ContextMenu == _DocumentMenu) {
 				_DocumentMenu.Items.AddRange(
+					new ListItemContextMenuItem(IconIds.OpenFolder, R.CMD_OpenFolder, ActivationCondition.HasFile, OpenInExplorer),
+					new ListItemContextMenuItem(IconIds.Folder, R.CMD_ViewFolderInFileBrowser, ActivationCondition.HasFile, LocateInFileBrowser),
 					new ListItemContextMenuItem(IconIds.LocateInSolutionExplorer, R.CMD_LocateInSolutionExplorer, ActivationCondition.HasSingleSolutionItem, LocateInSolutionExplorer),
-					new ListItemContextMenuItem(IconIds.Save, R.CMD_Save, ActivationCondition.HasFile, SaveDocument),
+					// note: disabled due to a problem when saving untitled document
+					//new ListItemContextMenuItem(IconIds.Save, R.CMD_Save, ActivationCondition.HasFile, SaveDocument),
 					new ListItemContextMenuItem(IconIds.Close, R.CMD_Close, ActivationCondition.HasFile, CloseDocument),
 					new Separator(),
-					new ListItemContextMenuItem(IconIds.SaveAll, R.CMD_SaveAll, ActivationCondition.HasFile, SaveAllDocuments),
+					//new ListItemContextMenuItem(IconIds.SaveAll, R.CMD_SaveAll, ActivationCondition.HasFile, SaveAllDocuments),
 					new ListItemContextMenuItem(IconIds.CloseAll, R.CMD_CloseOtherSaved, ActivationCondition.HasFile, CloseOtherSavedDocuments)
 				);
 			}
@@ -464,13 +467,12 @@ sealed partial class FileList : VirtualList
 
 	public void ListOpenedDocuments() {
 		ThreadHelper.ThrowIfNotOnUIThread();
-		const uint NEW_DOC_FLAGS = (uint)(VsRdtFlags.DontPollForState | VsRdtFlags.DontAutoOpen);
 		SetViewMode(ViewMode.Documents);
 		_ViewHistories.Push(new(ViewMode.Documents, FileListLocationType.OpenedDocuments, null));
 
 		var frames = new IVsWindowFrame[1];
 		var currentFrame = VsShellHelper.GetCurrentWindowFrame();
-		RunningDocumentTable t = new(CodistPackage.Instance);
+		RunningDocumentTable t = new();
 		List<FileItem> items = [];
 		foreach (var frame in VsShellHelper.GetDocumentWindows()) {
 			if (!frame.TryGetProperty(__VSFPROPID.VSFPROPID_pszMkDocument, out string fullPath)) {
@@ -480,33 +482,13 @@ sealed partial class FileList : VirtualList
 				FileItemType.OpenedDocument,
 				currentFrame == frame, // is active
 				frame.GetProperty<string>(__VSFPROPID.VSFPROPID_Caption));
-			Chain<int> extIcons = new();
+			Chain<int> extIcons = [];
 			if (frame.GetProperty<bool>((int)__VSFPROPID5.VSFPROPID_IsPinned)) {
+				item.FileState = FileState.Pinned;
 				extIcons.Add(IconIds.Pin);
 			}
 			if (frame.TryGetDocCookie(out var cookie)) {
-				var docInfo = t.GetDocumentInfo((uint)cookie);
-				if (!docInfo.IsDocumentInitialized) {
-					extIcons.Add(IconIds.Hibernated);
-				}
-				else {
-					if (docInfo.IsReadOnly) {
-						extIcons.Add(IconIds.Readonly);
-					}
-					uint flags = docInfo.Flags;
-					if (flags.MatchFlags(NEW_DOC_FLAGS)) {
-						extIcons.Add(IconIds.NewFile);
-					}
-					if (flags.HasAnyFlag((uint)(VsRdtFlags.DontSave | VsRdtFlags.DontSaveAs))) {
-						extIcons.Add(IconIds.DontSave);
-					}
-					if (flags.MatchFlags((uint)VsRdtFlags.VirtualDocument)) {
-						extIcons.Add(IconIds.FileVirtual);
-					}
-					if (docInfo.IsDirty) {
-						extIcons.Add(IconIds.Modified);
-					}
-				}
+				item.SetStateFromRunningDocumentInfo(t.GetDocumentInfo((uint)cookie), extIcons);
 			}
 			if (!extIcons.IsEmpty) {
 				var p = new StackPanel { Orientation = Orientation.Horizontal };
@@ -1041,19 +1023,13 @@ sealed partial class FileList : VirtualList
 	}
 	#endregion
 
-	readonly struct OpenDocumentId(string name, string fullPath)
+	readonly record struct OpenDocumentId(string Name, string FullPath)
 	{
-		public readonly string Name = name;
-		public readonly string FullPath = fullPath;
-
 		public OpenDocumentId(IVsWindowFrame windowFrame) : this(windowFrame.GetCaption(), windowFrame.GetDocumentFullPath()) { }
 	}
 
-	readonly struct HighlightCondition(bool isFile, string name)
+	readonly record struct HighlightCondition(bool IsFile, string Name)
 	{
-		public readonly bool IsFile = isFile;
-		public readonly string Name = name;
-
 		public bool IsCurrent(DirectoryInfo dir) {
 			return !IsFile && FileHelper.AreFileNamesEqual(Name, dir.Name);
 		}
@@ -1089,7 +1065,7 @@ sealed partial class FileList : VirtualList
 		Documents,
 	}
 
-	record struct ViewItem(ViewMode Mode, FileListLocationType LocationType, string Path);
+	readonly record struct ViewItem(ViewMode Mode, FileListLocationType LocationType, string Path);
 
 	// A view item list with limited capacity to avoid memory leak.
 	// When new entry is added to the list, if the capacity is exceeded, the oldest entry will be removed

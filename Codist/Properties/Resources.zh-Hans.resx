@@ -3349,4 +3349,16 @@ Shift: 匹配大小写</value>
   <data name="OT_FileBrowser" xml:space="preserve">
     <value>在代码窗口下方提供管理文件的快捷按钮</value>
   </data>
+  <data name="T_Modified" xml:space="preserve">
+    <value>已更改</value>
+  </data>
+  <data name="T_Pinned" xml:space="preserve">
+    <value>已固定</value>
+  </data>
+  <data name="T_VirtualFile" xml:space="preserve">
+    <value>虚拟文件</value>
+  </data>
+  <data name="T_NewFile" xml:space="preserve">
+    <value>新建文件</value>
+  </data>
 </root>

@@ -3362,4 +3362,16 @@ List currently opened code documents</value>
   <data name="OT_FileBrowser" xml:space="preserve">
     <value>Provides buttons at the bottom of code document window to manage files</value>
   </data>
+  <data name="T_Modified" xml:space="preserve">
+    <value>Modified</value>
+  </data>
+  <data name="T_Pinned" xml:space="preserve">
+    <value>Pinned</value>
+  </data>
+  <data name="T_VirtualFile" xml:space="preserve">
+    <value>Virtual file</value>
+  </data>
+  <data name="T_NewFile" xml:space="preserve">
+    <value>New file</value>
+  </data>
 </root>
