@@ -12,7 +12,9 @@ using CLR;
 using Codist.Controls;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Utilities;
 using Microsoft.Win32;
+using Newtonsoft.Json;
 using R = Codist.Properties.Resources;
 
 namespace Codist.Options;
@@ -57,7 +59,8 @@ sealed partial class OptionsWindow
 							MakeToolButton(DteCommandsExporter.Instance),
 							MakeToolButton(ThemeColorsExporter.Instance),
 							MakeToolButton(AppResourcesExporter.Instance),
-							MakeToolButton(ClassificationFormatMapExporter.Instance)
+							MakeToolButton(ClassificationFormatMapExporter.Instance),
+							MakeToolButton(EditorOptionExporter.Instance)
 						}
 					}
 				);
@@ -384,6 +387,52 @@ sealed partial class OptionsWindow
 					writer.Write('\t');
 					writer.WriteLine(String.Join(", ", item.BaseTypes.Select(i => i.Classification)));
 				}
+			}
+		}
+
+		sealed class EditorOptionExporter : ExporterBase
+		{
+			public static readonly EditorOptionExporter Instance = new();
+			EditorOptionExporter() { }
+
+			public override int IconId => IconIds.Settings;
+			public override string Title => R.T_ExportGlobalEditorOptions;
+			public override string Description => R.T_ExportGlobalEditorOptionsTip;
+			protected override string DefaultFileName => "EditorOptions.txt";
+
+			protected override void ExportContent(StreamWriter writer) {
+				var options = ServicesHelper.Instance.EditorOptionsFactory.GlobalOptions;
+				writer.WriteLine("Name\tDefaultValue\tValue\tValueType");
+				foreach (var item in options.SupportedOptions) {
+					if (item is null) {
+						continue;
+					}
+					writer.Write(item.Name);
+					writer.Write('\t');
+					writer.Write(ExportObject(item.DefaultValue));
+					writer.Write('\t');
+					if (options.IsOptionDefined(item.Name, false)) {
+						writer.Write(ExportObject(options.GetOptionValue(item.Name)));
+					}
+					else {
+						writer.Write("<default>");
+					}
+					writer.Write('\t');
+					writer.WriteLine(item.ValueType.Name);
+				}
+			}
+
+			static string ExportObject(Object obj) {
+				if (obj is null) {
+					return "<null>";
+				}
+				if (obj is string s) {
+					return s.Replace("\r", "\\r").Replace("\n", "\\n");
+				}
+				if (obj.GetType().IsPrimitive) {
+					return obj.ToString();
+				}
+				return JsonConvert.SerializeObject(obj);
 			}
 		}
 	}

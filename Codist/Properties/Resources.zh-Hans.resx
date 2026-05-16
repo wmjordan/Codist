@@ -3361,4 +3361,7 @@ Shift: 匹配大小写</value>
   <data name="T_NewFile" xml:space="preserve">
     <value>新建文件</value>
   </data>
+  <data name="T_ExportGlobalEditorOptions" xml:space="preserve">
+    <value>导出全局编辑器选项</value>
+  </data>
 </root>

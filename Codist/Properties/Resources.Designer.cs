@@ -7777,6 +7777,24 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Export Global Editor Options.
+        /// </summary>
+        internal static string T_ExportGlobalEditorOptions {
+            get {
+                return ResourceManager.GetString("T_ExportGlobalEditorOptions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Save EditorOptions.GlobalOptions to a file.
+        /// </summary>
+        internal static string T_ExportGlobalEditorOptionsTip {
+            get {
+                return ResourceManager.GetString("T_ExportGlobalEditorOptionsTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Export Theme Colors.
         /// </summary>
         internal static string T_ExportThemeColors {

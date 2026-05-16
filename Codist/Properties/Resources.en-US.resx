@@ -3374,4 +3374,10 @@ List currently opened code documents</value>
   <data name="T_NewFile" xml:space="preserve">
     <value>New file</value>
   </data>
+  <data name="T_ExportGlobalEditorOptions" xml:space="preserve">
+    <value>Export Global Editor Options</value>
+  </data>
+  <data name="T_ExportGlobalEditorOptionsTip" xml:space="preserve">
+    <value>Save EditorOptions.GlobalOptions to a file</value>
+  </data>
 </root>
