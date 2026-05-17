@@ -2961,7 +2961,8 @@ Ctrl: 将下划线分隔的单词转换为首字母大写的单词</value>
   </data>
   <data name="CMDT_CopyDefinition" xml:space="preserve">
     <value>复制定义
-复制符号签名和成员定义</value>
+复制符号签名和成员定义
+Ctrl: 不包含 XML 代码文档</value>
   </data>
   <data name="CMDT_SelectCodeWithoutTrivia" xml:space="preserve">
     <value>仅代码

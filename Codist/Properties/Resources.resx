@@ -2975,7 +2975,8 @@ Copy name in type.member or namespace.type format</value>
   </data>
   <data name="CMDT_CopyDefinition" xml:space="preserve">
     <value>Copy Definition
-Copy symbol signature and member definitions</value>
+Copy symbol signature and member definitions
+Ctrl: Exclude XML documentation</value>
   </data>
   <data name="CMDT_SelectCodeWithoutTrivia" xml:space="preserve">
     <value>Without Trivia

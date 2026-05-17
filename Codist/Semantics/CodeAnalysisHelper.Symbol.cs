@@ -10,7 +10,6 @@ using CLR;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Utilities;
 
 namespace Codist
@@ -1061,89 +1060,6 @@ namespace Codist
 				Extension => "extension",
 				_ => "type",
 			};
-		}
-
-		public static string GetDefinition(this INamedTypeSymbol type, SymbolDisplayFormat format) {
-			switch (type.TypeKind) {
-				case TypeKind.Dynamic:
-				case TypeKind.Enum:
-				case TypeKind.Interface:
-				case TypeKind.Struct:
-				case TypeKind.Class:
-					using (var sbr = ReusableStringBuilder.AcquireDefault(100)) {
-						GetTypeDefinition(sbr.Resource, type, format, 0);
-						return sbr.Resource.ToString();
-					}
-				default:
-					return type.ToDisplayString(format);
-			}
-
-			static void GetTypeDefinition(StringBuilder sb, INamedTypeSymbol t, SymbolDisplayFormat format, int indent) {
-				sb.Append('\t', indent);
-				if (t.TypeKind == TypeKind.Delegate) {
-					sb.Append(t.ToDisplayString(format))
-						.Append(';')
-						.AppendLine();
-					return;
-				}
-				if (t.ContainingType != null && t.DeclaredAccessibility != Accessibility.Private) {
-					sb.Append(t.GetAccessibility());
-				}
-				sb.Append(t.ToDisplayString(format));
-				GetBaseTypeList(sb, t, format);
-				sb.AppendLine(" {");
-				indent++;
-				foreach (var member in t.GetMembers()) {
-					if (member.IsCompilerGenerated()) {
-						continue;
-					}
-					if (!member.CanBeReferencedByName
-						&& member.GetExplicitInterfaceImplementations().Count == 0) {
-						continue;
-					}
-					if (member.Kind == SymbolKind.NamedType) {
-						GetTypeDefinition(sb, member as INamedTypeSymbol, format, indent);
-						continue;
-					}
-					sb.Append('\t', indent)
-						.Append(member.ToDisplayString(format));
-					if (member.Kind != SymbolKind.Property) {
-						sb.Append(';');
-					}
-					sb.AppendLine();
-				}
-				sb.Append('\t', indent - 1).Append('}').AppendLine().ToString();
-			}
-
-			static void GetBaseTypeList(StringBuilder sb, INamedTypeSymbol t, SymbolDisplayFormat format) {
-				INamedTypeSymbol baseType;
-				if (t.TypeKind == TypeKind.Enum) {
-					baseType = t.EnumUnderlyingType;
-				}
-				else {
-					baseType = t.BaseType;
-					if (baseType?.SpecialType == SpecialType.System_Object) {
-						baseType = null;
-					}
-				}
-				var interfaces = t.Interfaces;
-				if (baseType != null || interfaces.Length != 0) {
-					var typeFormat = format.WithKindOptions(SymbolDisplayKindOptions.None);
-					sb.Append(" : ");
-					if (baseType != null) {
-						sb.Append(baseType.ToDisplayString(typeFormat));
-						if (interfaces.Length != 0) {
-							sb.Append(", ");
-						}
-					}
-					for (int i = 0; i < interfaces.Length; i++) {
-						if (i != 0) {
-							sb.Append(", ");
-						}
-						sb.Append(interfaces[i].ToDisplayString(typeFormat));
-					}
-				}
-			}
 		}
 
 		public static bool IsPublicConcreteInstance(this ISymbol symbol) {

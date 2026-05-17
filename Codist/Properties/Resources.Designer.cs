@@ -2615,7 +2615,8 @@ namespace Codist.Properties {
         
         /// <summary>
         ///   Looks up a localized string similar to Copy Definition
-        ///Copy symbol signature and member definitions.
+        ///Copy symbol signature and member definitions
+        ///Ctrl: Exclude XML documentation.
         /// </summary>
         internal static string CMDT_CopyDefinition {
             get {
