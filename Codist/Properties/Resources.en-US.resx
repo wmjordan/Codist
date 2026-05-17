@@ -139,14 +139,14 @@
     <value>Close</value>
   </data>
   <data name="CMD_CommentSelection" xml:space="preserve">
-    <value>Comment selection
+    <value>Comment Selection
 Right click: Comment line</value>
   </data>
   <data name="CMD_CopyQualifiedSymbolName" xml:space="preserve">
     <value>Copy Qualified Symbol Name</value>
   </data>
   <data name="CMD_CopySelectedText" xml:space="preserve">
-    <value>Copy selected text (without indentation)
+    <value>Copy Selected Text (without indentation)
 Right click: Copy line
 Shift: With indentation</value>
   </data>
@@ -154,7 +154,7 @@ Shift: With indentation</value>
     <value>Copy Symbol</value>
   </data>
   <data name="CMD_CutSelectedText" xml:space="preserve">
-    <value>Cut selected text (without indentation)
+    <value>Cut Selected Text (without indentation)
 Right click: Cut line
 Shift: With indentation</value>
   </data>
@@ -167,20 +167,20 @@ Right click: "Debugger" menu...</value>
     <value>Delete All Breakpoints</value>
   </data>
   <data name="CMD_DeleteSelectedText" xml:space="preserve">
-    <value>Delete selected text
+    <value>Delete Selected Text
 Right click: Delete line
 Ctrl: Delete and select next
 Shift: Delete and select next (whole word)</value>
   </data>
   <data name="CMD_DuplicateSelection" xml:space="preserve">
-    <value>Duplicate selection
+    <value>Duplicate Selection
 Right click: Duplicate line</value>
   </data>
   <data name="CMD_ExtractInterface" xml:space="preserve">
-    <value>Extract interface...</value>
+    <value>Extract Interface...</value>
   </data>
   <data name="CMD_ExtractMethod" xml:space="preserve">
-    <value>Extract method...</value>
+    <value>Extract Method...</value>
   </data>
   <data name="CMD_Find" xml:space="preserve">
     <value>Find...</value>
@@ -234,7 +234,7 @@ Right click: Duplicate line</value>
     <value>Find Referrers...</value>
   </data>
   <data name="CMD_FindReplace" xml:space="preserve">
-    <value>Find next selected text
+    <value>Find Next Selected Text
 Ctrl: Match case
 Shift: Match whole word
 Alt: Insert caret at next match
@@ -250,7 +250,7 @@ Right click: "Find and replace" menu...</value>
     <value>Format Document</value>
   </data>
   <data name="CMD_FormatSelection" xml:space="preserve">
-    <value>Format selection</value>
+    <value>Format Selection</value>
   </data>
   <data name="CMD_Formatting" xml:space="preserve">
     <value>Formatting...
@@ -260,13 +260,13 @@ Format selected text, encode/decode, change case, etc.</value>
     <value>Go to &lt;TYPE&gt;</value>
   </data>
   <data name="CMD_GoToDeclaration" xml:space="preserve">
-    <value>Go to declaration</value>
+    <value>Go to Declaration</value>
   </data>
   <data name="CMD_GoToDefinition" xml:space="preserve">
     <value>Go to Definition</value>
   </data>
   <data name="CMD_GoToDefinitionPeek" xml:space="preserve">
-    <value>Go to definition
+    <value>Go to Definition
 Right click: Peek definition</value>
   </data>
   <data name="CMD_GotoMember" xml:space="preserve">
@@ -286,16 +286,16 @@ Hint: To create a new GUID, type 'guid' (without quotes) and select it</value>
     <value>Highlight</value>
   </data>
   <data name="CMD_IncrementNumber" xml:space="preserve">
-    <value>Increment number</value>
+    <value>Increment Number</value>
   </data>
   <data name="CMD_Indent" xml:space="preserve">
     <value>Indent</value>
   </data>
   <data name="CMD_InsertComment" xml:space="preserve">
-    <value>Insert comment</value>
+    <value>Insert Comment</value>
   </data>
   <data name="CMD_InvertOperator" xml:space="preserve">
-    <value>Invert operator</value>
+    <value>Invert Operator</value>
   </data>
   <data name="CMD_JoinLines" xml:space="preserve">
     <value>Join Lines</value>
@@ -311,7 +311,7 @@ Hint: To create a new GUID, type 'guid' (without quotes) and select it</value>
 Mark symbol, breakpoint or bookmark</value>
   </data>
   <data name="CMD_PasteText" xml:space="preserve">
-    <value>Paste text from clipboard
+    <value>Paste Text from Clipboard
 Right click: Paste over line
 Ctrl: Paste and select next
 Shift: Paste and select next (whole word)</value>
@@ -320,10 +320,10 @@ Shift: Paste and select next (whole word)</value>
     <value>Pin</value>
   </data>
   <data name="CMD_RenameSymbol" xml:space="preserve">
-    <value>Rename symbol...</value>
+    <value>Rename Symbol...</value>
   </data>
   <data name="CMD_ReorderParameters" xml:space="preserve">
-    <value>Reorder parameters...</value>
+    <value>Reorder Parameters...</value>
   </data>
   <data name="CMD_Replace" xml:space="preserve">
     <value>Replace...</value>
@@ -344,10 +344,10 @@ Shift: Paste and select next (whole word)</value>
     <value>Select Code</value>
   </data>
   <data name="CMD_SelectDirectiveRegion" xml:space="preserve">
-    <value>Select directive region</value>
+    <value>Select Directive Region</value>
   </data>
   <data name="CMD_ShowSyntaxClassificationInfo" xml:space="preserve">
-    <value>Show syntax classification info</value>
+    <value>Show Syntax Classification Info</value>
   </data>
   <data name="CMD_SurroundWith" xml:space="preserve">
     <value>Surround with...</value>
@@ -377,16 +377,16 @@ Shift: Paste and select next (whole word)</value>
     <value>Toggle Breakpoint</value>
   </data>
   <data name="CMD_ToggleOperator" xml:space="preserve">
-    <value>Toggle operator</value>
+    <value>Toggle Operator</value>
   </data>
   <data name="CMD_ToggleParentheses" xml:space="preserve">
     <value>Toggle Parentheses</value>
   </data>
   <data name="CMD_ToggleValue" xml:space="preserve">
-    <value>Toggle value</value>
+    <value>Toggle Value</value>
   </data>
   <data name="CMD_UncommentSelection" xml:space="preserve">
-    <value>Uncomment selection</value>
+    <value>Uncomment Selection</value>
   </data>
   <data name="CMD_Unindent" xml:space="preserve">
     <value>Unindent</value>
@@ -510,10 +510,10 @@ Use space to separate keywords.</value>
   <data name="T_Write" xml:space="preserve">
     <value>Write</value>
   </data>
-  <data name="CMD_GotoProjectReleasePage" xml:space="preserve">
+  <data name="CMDT_GotoProjectReleasePage" xml:space="preserve">
     <value>Go to project release page</value>
   </data>
-  <data name="CMD_GotoProjectWebSite" xml:space="preserve">
+  <data name="CMDT_GotoProjectWebSite" xml:space="preserve">
     <value>Go to project web site</value>
   </data>
   <data name="CMD_Load" xml:space="preserve">
@@ -522,7 +522,7 @@ Use space to separate keywords.</value>
   <data name="CMDT_OpenDonatePage" xml:space="preserve">
     <value>Open your browser and donate to project Codist</value>
   </data>
-  <data name="CMD_PostIssue" xml:space="preserve">
+  <data name="CMDT_PostIssue" xml:space="preserve">
     <value>Post your opinions in the issues page</value>
   </data>
   <data name="CMD_SaveAs" xml:space="preserve">
@@ -1365,7 +1365,7 @@ Ctrl+1, Ctrl+3: Codist.SearchProjectDeclaration</value>
     <value>Open Folder in Windows Explorer</value>
   </data>
   <data name="CMD_OpenOrExecuteFile" xml:space="preserve">
-    <value>Open or execute file</value>
+    <value>Open or Execute File</value>
   </data>
   <data name="CMD_OpenWithVS" xml:space="preserve">
     <value>Open File with Visual Studio</value>
@@ -1504,7 +1504,7 @@ Shift: Save built-in default styles as well</value>
     <value>Pick color...</value>
   </data>
   <data name="CMD_ResetColor" xml:space="preserve">
-    <value>Reset color</value>
+    <value>Reset Color</value>
   </data>
   <data name="CMD_SaveHighlightChanges" xml:space="preserve">
     <value>Save</value>
@@ -1713,10 +1713,10 @@ Shift: Match case</value>
     <value>Encapsulate field...</value>
   </data>
   <data name="CMD_OpenFolderWithCmd" xml:space="preserve">
-    <value>Open folder with command prompt</value>
+    <value>Open Folder with Command Prompt</value>
   </data>
   <data name="CMD_OpenFileInCmd" xml:space="preserve">
-    <value>Execute file in command prompt</value>
+    <value>Execute File in Command Prompt</value>
   </data>
   <data name="OT_BuildTimestamp" xml:space="preserve">
     <value>Timestamps of build</value>
@@ -1821,7 +1821,7 @@ Use space to separate multiple search terms.
     <value>Open the folder where configurations of Codist are saved.</value>
   </data>
   <data name="CMD_WrapText" xml:space="preserve">
-    <value>Wrap selection with text
+    <value>Wrap Selection with Text
 Right click: Wrap text menu...</value>
   </data>
   <data name="OTC_Indicator" xml:space="preserve">
@@ -1953,7 +1953,7 @@ Indicator within the Pattern will be replaced by the selection when Wrap Selecti
     <value>Jump List Shortcuts</value>
   </data>
   <data name="CMD_ViewUrlInBrowser" xml:space="preserve">
-    <value>View URL in browser</value>
+    <value>View URL in Browser</value>
   </data>
   <data name="OT_HideAccountIcon" xml:space="preserve">
     <value>Hide account icon</value>
@@ -2144,7 +2144,7 @@ Sent or received bytes per second through all network interfaces</value>
     <value>Delete &lt;if&gt; Condition</value>
   </data>
   <data name="CMD_RefactorSelection" xml:space="preserve">
-    <value>Refactor selection</value>
+    <value>Refactor Selection</value>
   </data>
   <data name="CMD_SwapOperands" xml:space="preserve">
     <value>Swap Operands</value>
@@ -2655,19 +2655,19 @@ Copy qualified name in namespace.type.member format</value>
     <value>Error occured while saving style file:</value>
   </data>
   <data name="CMD_FilterToHeading1" xml:space="preserve">
-    <value>Filter to heading 1</value>
+    <value>Filter to Heading 1</value>
   </data>
   <data name="CMD_FilterToHeading2" xml:space="preserve">
-    <value>Filter to heading 2</value>
+    <value>Filter to Heading 2</value>
   </data>
   <data name="CMD_FilterToHeading3" xml:space="preserve">
-    <value>Filter to heading 3</value>
+    <value>Filter to Heading 3</value>
   </data>
   <data name="CMD_FilterToHeading4" xml:space="preserve">
-    <value>Filter to heading 4</value>
+    <value>Filter to Heading 4</value>
   </data>
   <data name="CMD_FilterToHeading5" xml:space="preserve">
-    <value>Filter to heading 5</value>
+    <value>Filter to Heading 5</value>
   </data>
   <data name="T_StackTrace" xml:space="preserve">
     <value>Stack trace:</value>
@@ -2743,7 +2743,7 @@ Ctrl: toggle and select next</value>
     <value>Symbol definition:</value>
   </data>
   <data name="CMD_InvertBrightness" xml:space="preserve">
-    <value>Invert brightness</value>
+    <value>Invert Brightness</value>
   </data>
   <data name="CMDT_FindAssignmentsFor" xml:space="preserve">
     <value>Find all places and values where this parameter is assigned</value>
@@ -3212,7 +3212,7 @@ Only search in current namespace</value>
 View folder containing current file</value>
   </data>
   <data name="CMD_GoToFolder" xml:space="preserve">
-    <value>Go to folder</value>
+    <value>Go to Folder</value>
   </data>
   <data name="T_EmptyFolder" xml:space="preserve">
     <value>Empty folder: </value>

@@ -205,7 +205,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Comment selection
+        ///   Looks up a localized string similar to Comment Selection
         ///Right click: Comment line.
         /// </summary>
         internal static string CMD_CommentSelection {
@@ -314,7 +314,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Copy selected text (without indentation)
+        ///   Looks up a localized string similar to Copy Selected Text (without indentation)
         ///Right click: Copy line
         ///Shift: With indentation.
         /// </summary>
@@ -361,7 +361,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Cut selected text (without indentation)
+        ///   Looks up a localized string similar to Cut Selected Text (without indentation)
         ///Right click: Cut line
         ///Shift: With indentation.
         /// </summary>
@@ -540,7 +540,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Delete selected text
+        ///   Looks up a localized string similar to Delete Selected Text
         ///Right click: Delete line
         ///Ctrl: Delete and select next
         ///Shift: Delete and select next (whole word).
@@ -615,7 +615,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Duplicate selection
+        ///   Looks up a localized string similar to Duplicate Selection
         ///Right click: Duplicate line.
         /// </summary>
         internal static string CMD_DuplicateSelection {
@@ -654,7 +654,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Extract interface....
+        ///   Looks up a localized string similar to Extract Interface....
         /// </summary>
         internal static string CMD_ExtractInterface {
             get {
@@ -672,7 +672,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Extract method....
+        ///   Looks up a localized string similar to Extract Method....
         /// </summary>
         internal static string CMD_ExtractMethod {
             get {
@@ -681,7 +681,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Filter to heading 1.
+        ///   Looks up a localized string similar to Filter to Heading 1.
         /// </summary>
         internal static string CMD_FilterToHeading1 {
             get {
@@ -690,7 +690,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Filter to heading 2.
+        ///   Looks up a localized string similar to Filter to Heading 2.
         /// </summary>
         internal static string CMD_FilterToHeading2 {
             get {
@@ -699,7 +699,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Filter to heading 3.
+        ///   Looks up a localized string similar to Filter to Heading 3.
         /// </summary>
         internal static string CMD_FilterToHeading3 {
             get {
@@ -708,7 +708,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Filter to heading 4.
+        ///   Looks up a localized string similar to Filter to Heading 4.
         /// </summary>
         internal static string CMD_FilterToHeading4 {
             get {
@@ -717,7 +717,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Filter to heading 5.
+        ///   Looks up a localized string similar to Filter to Heading 5.
         /// </summary>
         internal static string CMD_FilterToHeading5 {
             get {
@@ -870,7 +870,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Find next selected text
+        ///   Looks up a localized string similar to Find Next Selected Text
         ///Ctrl: Match case
         ///Shift: Match whole word
         ///Alt: Insert caret at next match
@@ -910,7 +910,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Format selection.
+        ///   Looks up a localized string similar to Format Selection.
         /// </summary>
         internal static string CMD_FormatSelection {
             get {
@@ -947,7 +947,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Go to declaration.
+        ///   Looks up a localized string similar to Go to Declaration.
         /// </summary>
         internal static string CMD_GoToDeclaration {
             get {
@@ -965,7 +965,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Go to definition
+        ///   Looks up a localized string similar to Go to Definition
         ///Right click: Peek definition.
         /// </summary>
         internal static string CMD_GoToDefinitionPeek {
@@ -975,7 +975,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Go to folder.
+        ///   Looks up a localized string similar to Go to Folder.
         /// </summary>
         internal static string CMD_GoToFolder {
             get {
@@ -998,24 +998,6 @@ namespace Codist.Properties {
         internal static string CMD_GoToProjectFolder {
             get {
                 return ResourceManager.GetString("CMD_GoToProjectFolder", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Go to project release page.
-        /// </summary>
-        internal static string CMD_GotoProjectReleasePage {
-            get {
-                return ResourceManager.GetString("CMD_GotoProjectReleasePage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Go to project web site.
-        /// </summary>
-        internal static string CMD_GotoProjectWebSite {
-            get {
-                return ResourceManager.GetString("CMD_GotoProjectWebSite", resourceCulture);
             }
         }
         
@@ -1129,7 +1111,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Increment number.
+        ///   Looks up a localized string similar to Increment Number.
         /// </summary>
         internal static string CMD_IncrementNumber {
             get {
@@ -1156,7 +1138,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Insert comment.
+        ///   Looks up a localized string similar to Insert Comment.
         /// </summary>
         internal static string CMD_InsertComment {
             get {
@@ -1165,7 +1147,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Invert brightness.
+        ///   Looks up a localized string similar to Invert Brightness.
         /// </summary>
         internal static string CMD_InvertBrightness {
             get {
@@ -1174,7 +1156,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Invert operator.
+        ///   Looks up a localized string similar to Invert Operator.
         /// </summary>
         internal static string CMD_InvertOperator {
             get {
@@ -1642,7 +1624,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Execute file in command prompt.
+        ///   Looks up a localized string similar to Execute File in Command Prompt.
         /// </summary>
         internal static string CMD_OpenFileInCmd {
             get {
@@ -1660,7 +1642,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Open folder with command prompt.
+        ///   Looks up a localized string similar to Open Folder with Command Prompt.
         /// </summary>
         internal static string CMD_OpenFolderWithCmd {
             get {
@@ -1669,7 +1651,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Open or execute file.
+        ///   Looks up a localized string similar to Open or Execute File.
         /// </summary>
         internal static string CMD_OpenOrExecuteFile {
             get {
@@ -1741,7 +1723,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Paste text from clipboard
+        ///   Looks up a localized string similar to Paste Text from Clipboard
         ///Right click: Paste over line
         ///Ctrl: Paste and select next
         ///Shift: Paste and select next (whole word).
@@ -1767,15 +1749,6 @@ namespace Codist.Properties {
         internal static string CMD_Pin {
             get {
                 return ResourceManager.GetString("CMD_Pin", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Post your opinions in the issues page.
-        /// </summary>
-        internal static string CMD_PostIssue {
-            get {
-                return ResourceManager.GetString("CMD_PostIssue", resourceCulture);
             }
         }
         
@@ -1807,7 +1780,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Refactor selection.
+        ///   Looks up a localized string similar to Refactor Selection.
         /// </summary>
         internal static string CMD_RefactorSelection {
             get {
@@ -1834,7 +1807,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Rename symbol....
+        ///   Looks up a localized string similar to Rename Symbol....
         /// </summary>
         internal static string CMD_RenameSymbol {
             get {
@@ -1843,7 +1816,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Reorder parameters....
+        ///   Looks up a localized string similar to Reorder Parameters....
         /// </summary>
         internal static string CMD_ReorderParameters {
             get {
@@ -1879,7 +1852,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Reset color.
+        ///   Looks up a localized string similar to Reset Color.
         /// </summary>
         internal static string CMD_ResetColor {
             get {
@@ -2080,7 +2053,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Select directive region.
+        ///   Looks up a localized string similar to Select Directive Region.
         /// </summary>
         internal static string CMD_SelectDirectiveRegion {
             get {
@@ -2117,7 +2090,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Show syntax classification info.
+        ///   Looks up a localized string similar to Show Syntax Classification Info.
         /// </summary>
         internal static string CMD_ShowSyntaxClassificationInfo {
             get {
@@ -2315,7 +2288,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Toggle operator.
+        ///   Looks up a localized string similar to Toggle Operator.
         /// </summary>
         internal static string CMD_ToggleOperator {
             get {
@@ -2333,7 +2306,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Toggle value.
+        ///   Looks up a localized string similar to Toggle Value.
         /// </summary>
         internal static string CMD_ToggleValue {
             get {
@@ -2351,7 +2324,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Uncomment selection.
+        ///   Looks up a localized string similar to Uncomment Selection.
         /// </summary>
         internal static string CMD_UncommentSelection {
             get {
@@ -2486,7 +2459,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to View URL in browser.
+        ///   Looks up a localized string similar to View URL in Browser.
         /// </summary>
         internal static string CMD_ViewUrlInBrowser {
             get {
@@ -2567,7 +2540,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Wrap selection with text
+        ///   Looks up a localized string similar to Wrap Selection with Text
         ///Right click: Wrap text menu....
         /// </summary>
         internal static string CMD_WrapText {
@@ -2935,6 +2908,24 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Go to project release page.
+        /// </summary>
+        internal static string CMDT_GotoProjectReleasePage {
+            get {
+                return ResourceManager.GetString("CMDT_GotoProjectReleasePage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Go to project web site.
+        /// </summary>
+        internal static string CMDT_GotoProjectWebSite {
+            get {
+                return ResourceManager.GetString("CMDT_GotoProjectWebSite", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Go to definition of current type.
         /// </summary>
         internal static string CMDT_GoToTypeDefinition {
@@ -3067,6 +3058,15 @@ namespace Codist.Properties {
         internal static string CMDT_PasteColor {
             get {
                 return ResourceManager.GetString("CMDT_PasteColor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Post your opinions in the issues page.
+        /// </summary>
+        internal static string CMDT_PostIssue {
+            get {
+                return ResourceManager.GetString("CMDT_PostIssue", resourceCulture);
             }
         }
         

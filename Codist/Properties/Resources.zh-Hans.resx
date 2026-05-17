@@ -499,10 +499,10 @@ Shift：粘贴并选中下一项（整个单词）</value>
   <data name="T_Write" xml:space="preserve">
     <value>写入</value>
   </data>
-  <data name="CMD_GotoProjectReleasePage" xml:space="preserve">
+  <data name="CMDT_GotoProjectReleasePage" xml:space="preserve">
     <value>转到发布 Codist 项目的网页</value>
   </data>
-  <data name="CMD_GotoProjectWebSite" xml:space="preserve">
+  <data name="CMDT_GotoProjectWebSite" xml:space="preserve">
     <value>转到 Codist 项目的网站</value>
   </data>
   <data name="CMD_Load" xml:space="preserve">
@@ -511,7 +511,7 @@ Shift：粘贴并选中下一项（整个单词）</value>
   <data name="CMDT_OpenDonatePage" xml:space="preserve">
     <value>用浏览器打开捐赠 Codist 项目的网页</value>
   </data>
-  <data name="CMD_PostIssue" xml:space="preserve">
+  <data name="CMDT_PostIssue" xml:space="preserve">
     <value>发表建议或提交问题报告</value>
   </data>
   <data name="CMD_SaveAs" xml:space="preserve">
