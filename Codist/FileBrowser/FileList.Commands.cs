@@ -91,6 +91,10 @@ partial class FileList
 		}
 	}
 
+	void OpenOrExecuteFile(object sender, RoutedEventArgs args) {
+		FileHelper.TryRun(((FileItem)SelectedItem).FullPath);
+	}
+
 	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.EventHandler)]
 	void OpenFilesWithVisualStudio(object sender, RoutedEventArgs args) {
 		var activeItem = (FileItem)SelectedItem;

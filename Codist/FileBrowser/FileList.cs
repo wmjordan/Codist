@@ -240,6 +240,7 @@ sealed partial class FileList : VirtualList
 				_FileMenu.Items.AddRange(
 					new ListItemContextMenuItem(IconIds.OpenWithVisualStudio, R.CMD_OpenWithVS, ActivationCondition.HasFile, OpenFilesWithVisualStudio),
 					new ListItemContextMenuItem(IconIds.LocateInSolutionExplorer, R.CMD_LocateInSolutionExplorer, ActivationCondition.HasSingleSolutionItem, LocateInSolutionExplorer),
+					new ListItemContextMenuItem(IconIds.Open, R.CMD_OpenOrExecuteFile, ActivationCondition.HasFile | ActivationCondition.HasSingleItem, OpenOrExecuteFile),
 					new Separator(),
 					new ListItemContextMenuItem(IconIds.Cut, R.CMD_Cut, ActivationCondition.HasFileOrFolder, CutFiles),
 					new ListItemContextMenuItem(IconIds.Copy, R.CMD_Copy, ActivationCondition.HasFileOrFolder, CopyFiles),
@@ -256,6 +257,7 @@ sealed partial class FileList : VirtualList
 					new ListItemContextMenuItem(IconIds.OpenFolder, R.CMD_OpenFolder, ActivationCondition.HasFile, OpenInExplorer),
 					new ListItemContextMenuItem(IconIds.Folder, R.CMD_ViewFolderInFileBrowser, ActivationCondition.HasFile, LocateInFileBrowser),
 					new ListItemContextMenuItem(IconIds.LocateInSolutionExplorer, R.CMD_LocateInSolutionExplorer, ActivationCondition.HasSingleSolutionItem, LocateInSolutionExplorer),
+					new ListItemContextMenuItem(IconIds.Open, R.CMD_OpenOrExecuteFile, ActivationCondition.HasFile | ActivationCondition.HasSingleItem, OpenOrExecuteFile),
 					// note: disabled due to a problem when saving untitled document
 					//new ListItemContextMenuItem(IconIds.Save, R.CMD_Save, ActivationCondition.HasFile, SaveDocument),
 					new ListItemContextMenuItem(IconIds.Close, R.CMD_Close, ActivationCondition.HasFile, CloseDocument),
