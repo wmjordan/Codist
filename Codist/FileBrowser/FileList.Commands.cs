@@ -119,15 +119,10 @@ partial class FileList
 
 	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.EventHandler)]
 	void ActivateWindow(FileItem file) {
-		var filePath = file.FullPath;
-		foreach (var frame in VsShellHelper.GetDocumentWindows()) {
-			if (!FileHelper.AreFileNamesEqual(frame.GetDocumentFullPath(), filePath)
-				|| frame.GetCaption() != file.Name) {
-				continue;
-			}
+		var frame = GetWindowFrameForFile(file);
+		if (frame != null) {
 			frame.Show();
 			FileActivated?.Invoke(this, new(file));
-			return;
 		}
 	}
 
@@ -256,21 +251,26 @@ partial class FileList
 	}
 	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.EventHandler)]
 	void CloseOtherSavedDocuments(object sender, RoutedEventArgs args) {
+		var selection = GetSelectedOpenedDocuments().ToImmutableHashSet();
 		var currentFrame = VsShellHelper.GetCurrentWindowFrame();
 		var rdt = new RunningDocumentTable(CodistPackage.Instance);
 		var closed = false;
+		var closedCurrent = false;
 		foreach (var frame in VsShellHelper.GetDocumentWindows()) {
-			if (currentFrame == frame // is active
+			if (selection.Contains(new OpenDocumentId(frame))
 				|| !frame.TryGetDocCookie(out var cookie)
 				|| rdt.GetDocumentInfo((uint)cookie).IsDirty) { // is unsaved
 				continue;
 			}
 			if (frame.CloseFrame((uint)__FRAMECLOSE.FRAMECLOSE_NoSave) == 0) {
 				closed = true;
+				if (currentFrame == frame) {
+					closedCurrent = true;
+				}
 			}
 		}
 
-		if (closed) {
+		if (closed && !closedCurrent) {
 			ListOpenedDocuments();
 		}
 	}

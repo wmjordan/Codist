@@ -648,6 +648,22 @@ sealed partial class FileList : VirtualList
 		_LockFilter = false;
 	}
 
+	IVsWindowFrame GetWindowFrameForFile(FileItem file) {
+		if (file is null
+			|| file.Type != FileItemType.File) {
+			return null;
+		}
+		var filePath = file.FullPath;
+		foreach (var frame in VsShellHelper.GetDocumentWindows()) {
+			if (!FileHelper.AreFileNamesEqual(frame.GetDocumentFullPath(), filePath)
+				|| frame.GetCaption() != file.Name) {
+				continue;
+			}
+			return frame;
+		}
+		return null;
+	}
+
 	IEnumerable<OpenDocumentId> GetOpenedDocuments() {
 		if (_ViewMode != ViewMode.Documents) {
 			yield break;
