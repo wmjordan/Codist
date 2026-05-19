@@ -121,7 +121,9 @@ namespace Codist.Options
 						}
 					};
 
-					_MenuLayoutOverride.IsEnabled = CodistPackage.VsVersion.Major == 15;
+					var v = CodistPackage.VsVersion;
+					_MenuLayoutOverride.IsEnabled = v.Major == 15;
+					_HideSearchBox.ToggleVisibility(v.Major < 18);
 				}
 
 				protected override void LoadConfig(Config config) {
