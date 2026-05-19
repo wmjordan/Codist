@@ -402,10 +402,7 @@ sealed partial class FileList : VirtualList
 		menu.Items.AddRange(
 			new ThemedMenuItem(IconIds.MultiSelection, R.CMD_ToggleMultiSelectionMode, ToggleMultiSelectionMode, R.CMDT_ToggleMultiSelectionMode),
 			new ThemedMenuItem(IconIds.SelectAll, R.CMD_SelectAll, HandleSelectAll),
-			new ThemedMenuItem(IconIds.None, R.CMD_SelectNone, HandleSelectNone),
-			new Separator() { Tag = ViewMode.Documents },
-			new ThemedMenuItem(IconIds.SaveAll, R.CMD_SaveAll, SaveAllDocuments) { Tag = ViewMode.Documents },
-			new ThemedMenuItem(IconIds.CloseAll, R.CMD_CloseOtherSaved, CloseOtherSavedDocuments) { Tag = ViewMode.Documents }
+			new ThemedMenuItem(IconIds.None, R.CMD_SelectNone, HandleSelectNone)
 		);
 	}
 
