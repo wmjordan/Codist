@@ -234,6 +234,7 @@ namespace Codist.SymbolCommands
 				if (member.DeclaredAccessibility == Accessibility.Private
 					|| member.IsCompilerGenerated()
 					|| !member.CanBeReferencedByName
+						&& (member is not IMethodSymbol m || !m.MethodKind.CeqAny(MethodKind.Constructor, MethodKind.StaticConstructor, MethodKind.Destructor))
 						&& member.GetExplicitInterfaceImplementations().Count == 0) {
 					continue;
 				}
