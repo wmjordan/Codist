@@ -231,10 +231,12 @@ sealed partial class FileList : VirtualList
 
 	#region Event handlers
 	protected override void OnContextMenuOpening(ContextMenuEventArgs e) {
-		base.OnContextMenuOpening(e);
-		if (ContextMenu is null) {
+		if (ContextMenu is null
+			|| (e.OriginalSource as UIElement).GetParent<ListBoxItem>() is null) {
+			e.Handled = true;
 			return;
 		}
+		base.OnContextMenuOpening(e);
 		if (!ContextMenu.HasItems) {
 			if (ContextMenu == _FileMenu) {
 				_FileMenu.Items.AddRange(
