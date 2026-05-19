@@ -646,8 +646,7 @@ sealed partial class FileList : VirtualList
 	}
 
 	IVsWindowFrame GetWindowFrameForFile(FileItem file) {
-		if (file is null
-			|| file.Type != FileItemType.File) {
+		if (file?.IsFile != true) {
 			return null;
 		}
 		var filePath = file.FullPath;
