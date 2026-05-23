@@ -202,6 +202,7 @@ sealed class ColorButton : Button
 {
 	readonly Border _Border;
 	readonly Action<Color> _ColorChangedHandler;
+	readonly TextBlock _Text;
 	bool _IsColorChanging;
 
 	public ColorButton(Color color, string text, Action<Color> colorChangedHandler) {
@@ -214,7 +215,7 @@ sealed class ColorButton : Button
 						Width = 16, Height = 16,
 						Margin = WpfHelper.GlyphMargin
 					}),
-					new TextBlock { Text = text }
+					(_Text = new TextBlock { Text = text })
 				}
 		};
 		Width = 120;
@@ -222,6 +223,7 @@ sealed class ColorButton : Button
 		_ColorChangedHandler = colorChangedHandler;
 	}
 	public Func<Color> DefaultColor { get; set; }
+	public Func<Color> ResetColor { get; set; }
 	public Color Color {
 		get => (_Border.Background as SolidColorBrush).Color;
 		set {
@@ -241,6 +243,10 @@ sealed class ColorButton : Button
 		}
 	}
 	public Brush Brush => _Border.Background;
+	public string Text {
+		get => _Text.Text;
+		set => _Text.Text = value;
+	}
 
 	public void UseVsTheme() {
 		_Border.ReferenceProperty(Border.BorderBrushProperty, VsBrushes.CommandBarMenuIconBackgroundKey);
@@ -254,7 +260,7 @@ sealed class ColorButton : Button
 				Resources = SharedDictionaryManager.ContextMenu,
 				Items = {
 						new ThemedMenuItem(IconIds.PickColor, R.CMD_PickColor, PickColor),
-						new ThemedMenuItem(IconIds.Reset, R.CMD_ResetColor, ResetColor),
+						new ThemedMenuItem(IconIds.Reset, R.CMD_ResetColor, Reset),
 						new ThemedMenuItem(IconIds.Brightness, R.CMD_InvertBrightness, InvertBrightness),
 						new ThemedMenuItem(IconIds.Copy, R.CMD_CopyColor, CopyColor),
 						new ThemedMenuItem(IconIds.Paste, R.CMD_PasteColor, PasteColor),
@@ -279,8 +285,8 @@ sealed class ColorButton : Button
 		Color = GetClipboardColor();
 	}
 
-	void ResetColor(object sender, RoutedEventArgs e) {
-		Color = default;
+	void Reset(object sender, RoutedEventArgs e) {
+		Color = ResetColor?.Invoke() ?? default;
 	}
 
 	void InvertBrightness(object sender, RoutedEventArgs e) {
