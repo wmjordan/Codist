@@ -114,19 +114,44 @@ static class EditCommands
 			goto BUILTIN_COPY;
 		}
 
-		var indentation = startOfSelection - startLine.Start.Position;
+		var firstLineOffset = startOfSelection - startLine.Start.Position;
+		int indentation;
 		int p;
-		if (indentation == 0) {
-			p = startOfSelection;
-			while (p < endOfSelection && snapshot[p].IsCodeWhitespaceChar()) {
-				++p;
+
+		if (firstLineOffset == 0) {
+			// The selection starts at the beginning of the first line.
+			// Scan line by line, skipping empty and pure-whitespace lines, to find the first line containing non-whitespace text,
+			// and use the leading indentation amount of this line as the indentation to be removed.
+			indentation = -1;
+			for (int lineNum = startLine.LineNumber; lineNum <= endLine.LineNumber; lineNum++) {
+				var currentLine = snapshot.GetLineFromLineNumber(lineNum);
+				if (currentLine.Extent.IsEmpty) {
+					continue;
+				}
+
+				p = currentLine.Start.Position;
+				while (p < currentLine.End.Position && snapshot[p].IsCodeWhitespaceChar()) {
+					++p;
+				}
+				if (p < currentLine.End.Position) {
+					// non-empty line found
+					indentation = p - currentLine.Start.Position;
+					break;
+				}
 			}
-			if ((indentation = p - startOfSelection) == 0) {
+			if (indentation <= 0) {
 				goto BUILTIN_COPY;
 			}
 		}
-		else if (String.IsNullOrWhiteSpace(snapshot.GetText(startLine.Start.Position, indentation)) == false) {
-			goto BUILTIN_COPY;
+		else {
+			// The selection starts in the middle of the first line.
+			// Check character by character whether the part before the selection is all whitespace, avoiding string allocation by not calling GetText
+			for (p = startLine.Start.Position; p < startOfSelection; p++) {
+				if (!snapshot[p].IsCodeWhitespaceChar()) {
+					goto BUILTIN_COPY;
+				}
+			}
+			indentation = firstLineOffset;
 		}
 
 		var spans = new List<SnapshotSpan>();
