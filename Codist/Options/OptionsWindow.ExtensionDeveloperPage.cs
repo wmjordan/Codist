@@ -103,8 +103,13 @@ sealed partial class OptionsWindow
 			public void Export() {
 				string path;
 				if ((path = GetSavePath(DefaultFileName, Title)) != null) {
-					using (var writer = new StreamWriter(path)) {
+					try {
+						using var writer = new StreamWriter(path);
 						ExportContent(writer);
+					}
+					catch (Exception ex) {
+						MessageWindow.Error(ex, "Error while exporting data", Title, this);
+						return;
 					}
 					TextEditorHelper.OpenFile(path);
 				}
