@@ -251,6 +251,36 @@ sealed partial class OptionsWindow
 						writer.WriteLine();
 					}
 				}
+
+				var res = Application.Current.Resources;
+				foreach (var type in new Type[]{ typeof(VsBrushes), typeof(VsColors) }) {
+					var typeName = type.Name;
+					foreach (var prop in type.GetProperties(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)) {
+						if (!prop.Name.EndsWith("Key", StringComparison.Ordinal)) {
+							continue;
+			}
+						var value = prop.GetValue(null);
+						if (value is null || !res.Contains(value)) {
+							continue;
+		}
+
+						var item = res[value];
+						writer.Write(typeName);
+						writer.Write('\t');
+						writer.Write(prop.Name);
+						writer.Write('\t');
+						if (item is Color c) {
+							writer.Write(c.ToHexString());
+						}
+						else if (item is SolidColorBrush b) {
+							writer.Write(b.Color.ToHexString());
+						}
+						else {
+							writer.Write(item);
+						}
+						writer.WriteLine();
+					}
+				}
 			}
 		}
 
