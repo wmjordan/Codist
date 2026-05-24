@@ -312,12 +312,8 @@ sealed partial class OptionsWindow
 				var list = new List<ResourceEntryInfo>(dict.Count);
 				foreach (DictionaryEntry entry in dict) {
 					try {
-						var e = new ResourceEntryInfo(entry);
-						if (e.KeyString == "MainWindowActiveCaptionBrushKey") {
-
+						list.Add(new ResourceEntryInfo(entry));
 						}
-						list.Add(e);
-					}
 					catch (Exception ex) {
 						ex.Log();
 					}
