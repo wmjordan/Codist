@@ -167,7 +167,7 @@ namespace Codist.QuickInfo
 				if (m.IsGenericMethod) {
 					for (int i = 0; i < m.TypeArguments.Length; i++) {
 						content.Append("\n").AddTypeParameterInfo(m.TypeParameters[i], m.TypeArguments[i]);
-						var typeParamDoc = doc.GetTypeParameter(m.TypeParameters[i].Name);
+						var typeParamDoc = doc?.GetTypeParameter(m.TypeParameters[i].Name);
 						if (typeParamDoc != null) {
 							content.Append(": ").AddXmlDoc(typeParamDoc, semanticModel.Compilation);
 						}
