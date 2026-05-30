@@ -199,8 +199,7 @@ namespace Codist.QuickInfo
 						semanticModel,
 						cancellationToken);
 					if (ctx.symbol?.Kind == SymbolKind.RangeVariable) {
-						ctx.Container.Add(new BlockItem(IconIds.LocalVariable, "Range Variable: ").Append(ctx.symbol.Name, true));
-						semanticModel.GetTypeInfo(ctx.node, cancellationToken).Type.SetNotDefault(ref ctx.symbol);
+						ctx.Container.Add(new BlockItem(IconIds.LocalVariable, R.T_RangeVariableType).AddSymbol(semanticModel.GetTypeInfo(ctx.node, cancellationToken).Type));
 					}
 				}
 				if (ctx.isConvertedType == false) {

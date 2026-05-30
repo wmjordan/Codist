@@ -3374,4 +3374,7 @@ Shift: 匹配大小写</value>
   <data name="OT_DimNonSolutionItems" xml:space="preserve">
     <value>用浅色显示不属于解决方案的文件</value>
   </data>
+  <data name="T_RangeVariableType" xml:space="preserve">
+    <value>特定范围变量类型：</value>
+  </data>
 </root>

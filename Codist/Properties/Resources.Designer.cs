@@ -8915,6 +8915,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Range variable type: .
+        /// </summary>
+        internal static string T_RangeVariableType {
+            get {
+                return ResourceManager.GetString("T_RangeVariableType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Read variable: .
         /// </summary>
         internal static string T_ReadVariable {

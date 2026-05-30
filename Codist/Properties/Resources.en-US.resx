@@ -3390,4 +3390,7 @@ List currently opened code documents</value>
   <data name="OT_DimNonSolutionItems" xml:space="preserve">
     <value>Dim non-solution files</value>
   </data>
+  <data name="T_RangeVariableType" xml:space="preserve">
+    <value>Range variable type: </value>
+  </data>
 </root>
