@@ -555,20 +555,45 @@ static class TextEditorHelper
 	static void InternalOpenFile(string file, Action<VsTextView> action, bool newWindow = false, bool useDesigner = false) {
 		try {
 			using (new NewDocumentStateScope(newWindow ^ UIHelper.IsShiftDown, VSConstants.NewDocumentStateReason.Navigation)) {
-				VsShellUtilities.OpenDocument(ServiceProvider.GlobalProvider,
+				Guid editorType;
+				Guid logicalView;
+				if (!useDesigner) {
+					editorType = VSConstants.VsEditorFactoryGuid.TextEditor_guid;
+					logicalView = __ViewKindCodeGuid;
+				}
+				else {
+					Guid std = GetStandardEditorGuidForFile(file, __ViewKindPrimaryGuid);
+					editorType = (std != Guid.Empty) ? std : VSConstants.VsEditorFactoryGuid.TextEditor_guid;
+					logicalView = __ViewKindPrimaryGuid;
+				}
+				VsShellUtilities.OpenDocumentWithSpecificEditor(
+					ServiceProvider.GlobalProvider,
 					file,
-					useDesigner ? __ViewKindPrimaryGuid : __ViewKindCodeGuid,
+					editorType,
+					logicalView,
 					out var hierarchy,
 					out var itemId,
-					out var windowFrame,
-					out var view);
-				action?.Invoke(view);
+					out var windowFrame);
+				windowFrame.Show();
+				var view = VsShellUtilities.GetTextView(windowFrame);
+				if (view != null) {
+					action?.Invoke(view);
+				}
 			}
 		}
 		catch (Exception ex) {
 			ex.Log();
 			/* ignore */
 		}
+	}
+
+	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
+	static Guid GetStandardEditorGuidForFile(string file, Guid logicalView) {
+		var vsUiOpenDoc = ServicesHelper.Get<IVsUIShellOpenDocument, SVsUIShellOpenDocument>();
+		Guid editorGuid = Guid.Empty;
+		return vsUiOpenDoc != null && ErrorHandler.Succeeded(vsUiOpenDoc.GetStandardEditorFactory(0, ref editorGuid, file, ref logicalView, out _, out _))
+			? editorGuid
+			: Guid.Empty;
 	}
 
 	static void MoveCaretToKeptViewPosition() {
