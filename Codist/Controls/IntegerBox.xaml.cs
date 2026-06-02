@@ -30,11 +30,6 @@ namespace Codist.Controls
 
 		public IntegerBox() {
 			#region Build control tree
-			var border = new Border {
-				BorderThickness = new Thickness(1),
-				BorderBrush = SystemColors.ControlDarkBrush
-			};
-
 			// TextBox
 			_textBox = new TextBox {
 				BorderThickness = new Thickness(0),
@@ -63,32 +58,37 @@ namespace Codist.Controls
 			_unitTextBlock = new TextBlock {
 				VerticalAlignment = VerticalAlignment.Center,
 				HorizontalAlignment = HorizontalAlignment.Left,
-				Margin = new Thickness(2, 0, 2, 0),
-				Foreground = SystemColors.GrayTextBrush
+				Margin = new Thickness(2, 0, 2, 0)
 			};
-			Grid.SetColumn(_unitTextBlock, 2);
-			Grid.SetRowSpan(_unitTextBlock, 2);
 			var unitBinding = new Binding(nameof(Unit)) {
 				Source = this
 			};
 			_unitTextBlock.SetBinding(TextBlock.TextProperty, unitBinding);
 
-			border.Child = new Grid {
-				Background = Brushes.Transparent,
-				RowDefinitions = {
-					new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
-					new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
-				},
-				ColumnDefinitions = {
-					new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
-					new ColumnDefinition { Width = GridLength.Auto },
-					new ColumnDefinition { Width = GridLength.Auto },
-				},
+			Content = new StackPanel {
+				Orientation = Orientation.Horizontal,
 				Children = {
-					_textBox, _upButton, _downButton, _unitTextBlock
+					new Border {
+						BorderThickness = new Thickness(1),
+						BorderBrush = SystemColors.ControlDarkBrush,
+						Child = new Grid {
+							Background = Brushes.Transparent,
+							RowDefinitions = {
+								new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+								new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+							},
+							ColumnDefinitions = {
+								new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+								new ColumnDefinition { Width = GridLength.Auto },
+							},
+							Children = {
+								_textBox, _upButton, _downButton
+							}
+						},
+					},
+					_unitTextBlock
 				}
 			};
-			Content = border;
 			#endregion
 
 			AttachEvents();
@@ -107,7 +107,15 @@ namespace Codist.Controls
 
 		public int Step { get => (int)GetValue(StepProperty); set => SetValue(StepProperty, value); }
 
-		public string Unit { get => (string)GetValue(UnitProperty); set => SetValue(UnitProperty, value); }
+		public string Unit {
+			get => (string)GetValue(UnitProperty);
+			set {
+				if (value != (string)GetValue(UnitProperty)) {
+					SetValue(UnitProperty, value);
+					UpdateUnitVisibility();
+				}
+			}
+		}
 
 		public event EventHandler<DependencyPropertyChangedEventArgs> ValueChanged;
 		private void RaiseValueChangedEvent(DependencyPropertyChangedEventArgs e) {

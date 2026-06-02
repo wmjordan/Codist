@@ -42,11 +42,11 @@ namespace Codist.Options
 							Children = {
 								new StackPanel().MakeHorizontal()
 									.Add(new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin }.Append(R.OT_MaxWidth))
-									.Add(_MaxWidth = new Controls.IntegerBox(Config.Instance.QuickInfo.MaxWidth) { Minimum = 0, Maximum = 5000, Step = 100 }.UseVsTheme())
+									.Add(_MaxWidth = new IntegerBox(Config.Instance.QuickInfo.MaxWidth) { Minimum = 0, Maximum = 5000, Step = 100 }.UseVsTheme())
 									.SetLazyToolTip(() => R.OT_MaxWidthTip),
 								new StackPanel().MakeHorizontal()
 									.Add(new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin }.Append(R.OT_MaxHeight))
-									.Add(_MaxHeight = new Controls.IntegerBox(Config.Instance.QuickInfo.MaxHeight) { Minimum = 0, Maximum = 5000, Step = 50 }.UseVsTheme())
+									.Add(_MaxHeight = new IntegerBox(Config.Instance.QuickInfo.MaxHeight) { Minimum = 0, Maximum = 5000, Step = 50 }.UseVsTheme())
 									.SetLazyToolTip(() => R.OT_MaxHeightTip),
 							}
 						}.ForEachChild((FrameworkElement b) => b.MinWidth = MinColumnWidth),
@@ -55,8 +55,8 @@ namespace Codist.Options
 
 						new TitleBox(R.OT_DelayDisplay),
 						new StackPanel().MakeHorizontal()
-							.Add(new TextBlock { MinWidth = 240, Margin = WpfHelper.SmallHorizontalMargin, Text = R.OT_DelayTime })
-							.Add(_DisplayDelay = new Controls.IntegerBox(Config.Instance.QuickInfo.DelayDisplay) { Minimum = 0, Maximum = 100000, Step = 100 }.UseVsTheme()),
+							.Add(new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin, Text = R.OT_DelayTime })
+							.Add(_DisplayDelay = new IntegerBox(Config.Instance.QuickInfo.DelayDisplay) { Minimum = 0, Maximum = 100000, Step = 100, Unit = R.OT_Milliseconds }.UseVsTheme()),
 						new DescriptionBox(R.OT_DelayDisplayNote),
 
 						new TitleBox(R.T_Color),

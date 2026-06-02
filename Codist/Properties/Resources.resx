@@ -2538,7 +2538,7 @@ Copy qualified name in namespace.type.member format</value>
     <value>Postpone the display of Quick Info</value>
   </data>
   <data name="OT_DelayTime" xml:space="preserve">
-    <value>Delay time (milliseconds):</value>
+    <value>Delay time:</value>
   </data>
   <data name="CMD_Export" xml:space="preserve">
     <value>Export...</value>
@@ -3395,5 +3395,8 @@ List currently opened code documents</value>
   </data>
   <data name="T_NA" xml:space="preserve">
     <value>N/A</value>
+  </data>
+  <data name="OT_Milliseconds" xml:space="preserve">
+    <value>Milliseconds</value>
   </data>
 </root>

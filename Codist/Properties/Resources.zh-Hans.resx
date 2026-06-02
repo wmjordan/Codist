@@ -2523,7 +2523,7 @@ Right click: 显示“线程”窗口</value>
     <value>延迟显示快速信息</value>
   </data>
   <data name="OT_DelayTime" xml:space="preserve">
-    <value>延迟毫秒数:</value>
+    <value>延迟:</value>
   </data>
   <data name="CMD_Export" xml:space="preserve">
     <value>导出...</value>
@@ -3379,5 +3379,8 @@ Shift: 匹配大小写</value>
   </data>
   <data name="T_NA" xml:space="preserve">
     <value>数据无效</value>
+  </data>
+  <data name="OT_Milliseconds" xml:space="preserve">
+    <value>毫秒</value>
   </data>
 </root>

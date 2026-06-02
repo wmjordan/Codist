@@ -4107,7 +4107,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Delay time (milliseconds):.
+        ///   Looks up a localized string similar to Delay time:.
         /// </summary>
         internal static string OT_DelayTime {
             get {
@@ -5167,6 +5167,15 @@ namespace Codist.Properties {
         internal static string OT_MethodParameterListTip {
             get {
                 return ResourceManager.GetString("OT_MethodParameterListTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Milliseconds.
+        /// </summary>
+        internal static string OT_Milliseconds {
+            get {
+                return ResourceManager.GetString("OT_Milliseconds", resourceCulture);
             }
         }
         
