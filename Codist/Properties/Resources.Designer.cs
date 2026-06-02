@@ -8527,6 +8527,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to N/A.
+        /// </summary>
+        internal static string T_NA {
+            get {
+                return ResourceManager.GetString("T_NA", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to  name alike.
         /// </summary>
         internal static string T_NameAlike {

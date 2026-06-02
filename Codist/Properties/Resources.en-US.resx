@@ -3393,4 +3393,7 @@ List currently opened code documents</value>
   <data name="T_RangeVariableType" xml:space="preserve">
     <value>Range variable type: </value>
   </data>
+  <data name="T_NA" xml:space="preserve">
+    <value>N/A</value>
+  </data>
 </root>

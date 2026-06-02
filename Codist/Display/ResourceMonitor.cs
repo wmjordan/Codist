@@ -159,6 +159,10 @@ static class ResourceMonitor
 
 		public override void Stop() {
 			base.Stop();
+			DisposeCounter();
+		}
+
+		void DisposeCounter() {
 			if (_Counter != null) {
 				_Counter.Dispose();
 				_Counter = null;
@@ -167,8 +171,16 @@ static class ResourceMonitor
 
 		public override void Sample() {
 			var c = _Counter;
-			if (c != null) {
+			if (c == null) {
+				return;
+			}
+			try {
 				UpdateSample(_Value = c.NextValue());
+			}
+			catch (InvalidOperationException ex) {
+				ex.Log();
+				_Value = Single.NaN;
+				DisposeCounter();
 			}
 		}
 
@@ -430,6 +442,12 @@ static class ResourceMonitor
 		}
 
 		protected override void UpdateDisplay(float counterValue) {
+			if (Single.IsNaN(counterValue)) {
+				Label.Text = R.T_NA;
+				Label.ClearValue(OpacityProperty);
+				Label.ClearValue(BackgroundProperty);
+				return;
+			}
 			counterValue = counterValue > 100f ? 0f : (float)Math.Round(100 - counterValue, 0);
 			Label.Text = counterValue.ToString("0") + "%";
 			Label.Opacity = (Math.Min(50, counterValue) + 50) / 100;

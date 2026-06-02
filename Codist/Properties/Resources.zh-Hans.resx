@@ -3377,4 +3377,7 @@ Shift: 匹配大小写</value>
   <data name="T_RangeVariableType" xml:space="preserve">
     <value>特定范围变量类型：</value>
   </data>
+  <data name="T_NA" xml:space="preserve">
+    <value>数据无效</value>
+  </data>
 </root>
