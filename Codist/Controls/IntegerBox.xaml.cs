@@ -124,25 +124,18 @@ namespace Codist.Controls
 
 		public IntegerBox UseVsTheme() {
 			_textBox.ReferenceStyle(VsResourceKeys.TextBoxStyleKey);
-			_upButton.OverridesDefaultStyle = _downButton.OverridesDefaultStyle = false;
-			_upButton.MouseEnter += UseVsThemeOnMouseEnter;
-			_upButton.MouseLeave += UseVsThemeOnMouseLeave;
-			_downButton.MouseEnter += UseVsThemeOnMouseEnter;
-			_downButton.MouseLeave += UseVsThemeOnMouseLeave;
-			_upButton.Style = _downButton.Style = new Style {
-				TargetType = typeof(RepeatButton),
-				Setters = {
-					new Setter {
-						Property = ForegroundProperty,
-						Value = new DynamicResourceExtension { ResourceKey = EnvironmentColors.ScrollBarArrowGlyphBrushKey }
-					},
-					new Setter {
-						Property = BackgroundProperty,
-						Value = new DynamicResourceExtension { ResourceKey = EnvironmentColors.ScrollBarArrowBackgroundBrushKey }
-					}
-				},
-			};
+			SetupStyleAndEffects(_upButton);
+			SetupStyleAndEffects(_downButton);
 			return this;
+		}
+
+		void SetupStyleAndEffects(RepeatButton button) {
+			// the default RepeatButton does not bind background brush,
+			// thus we have to hack into it with event handler
+			button.MouseEnter += UseVsThemeOnMouseEnter;
+			button.MouseLeave += UseVsThemeOnMouseLeave;
+			button.ReferenceProperty(ForegroundProperty, EnvironmentColors.ScrollBarArrowGlyphBrushKey)
+				.ReferenceProperty(BackgroundProperty, EnvironmentColors.ScrollBarArrowBackgroundBrushKey);
 		}
 
 		void UseVsThemeOnMouseEnter(object sender, MouseEventArgs e) {
