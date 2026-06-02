@@ -359,11 +359,14 @@ sealed partial class OptionsWindow
 				if (value is Style style) {
 					var targetType = style.TargetType?.Name ?? "?";
 					var basedOn = style.BasedOn != null ? $", BasedOn: {style.BasedOn.TargetType?.Name}" : String.Empty;
-					return $"Style (@{targetType}{basedOn}, Setters: {style.Setters.Count})";
+					return $"Style (TargetType: {targetType}{basedOn}, Setters: {style.Setters.Count}, Triggers: {style.Triggers.Count})";
 				}
 
-				if (value is DataTemplate template) {
-					return $"DataTemplate (DataType: {template.DataType?.ToString() ?? "<null>"})";
+				if (value is DataTemplate dt) {
+					return $"DataTemplate (DataType: {dt.DataType?.ToString() ?? "<null>"}, Triggers: {dt.Triggers.Count})";
+				}
+				if (value is ControlTemplate ct) {
+					return $"ControlTemplate (TargetType: {ct.TargetType?.ToString() ?? "<null>"}, Triggers: {ct.Triggers.Count})";
 				}
 
 				if (value is double d) return d.ToString("F2");
