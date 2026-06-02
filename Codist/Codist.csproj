@@ -96,6 +96,7 @@
     <Compile Include="Commands\ShowSupportedFileTypesCommand.cs" />
     <Compile Include="Commands\TransformDocumentWindow.cs" />
     <Compile Include="Controls\HelpMessageButton.cs" />
+    <Compile Include="Controls\IntegerBox.xaml.cs" />
     <Compile Include="Controls\ThemedListBox.cs" />
     <Compile Include="Controls\ThemedRichTextBox.cs" />
     <Compile Include="Controls\ThemedHyperlink.cs" />
@@ -187,9 +188,6 @@
     <Compile Include="Helpers\ExternalCommand.cs" />
     <Compile Include="Controls\ExtIconProvider.cs" />
     <Compile Include="Controls\IContextMenuHost.cs" />
-    <Compile Include="Controls\IntegerBox.xaml.cs">
-      <DependentUpon>IntegerBox.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Controls\MenuItemFilter.cs" />
     <Compile Include="Controls\MessageWindow.cs" />
     <Compile Include="Controls\SearchScopeBox.cs" />
@@ -478,10 +476,6 @@
     <Page Include="Controls\ColorSelector.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Controls\IntegerBox.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\SliderResources.xaml">
       <Generator>MSBuild:Compile</Generator>
