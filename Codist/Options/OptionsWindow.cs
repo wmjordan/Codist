@@ -6,6 +6,7 @@ using CLR;
 using Codist.Controls;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.Win32;
 using R = Codist.Properties.Resources;
 
 namespace Codist.Options;
@@ -68,6 +69,14 @@ sealed partial class OptionsWindow : Window
 								FontWeight = FontWeights.Bold
 							},
 							_OptionCategoriesBox,
+							new Label {
+								Content = R.OT_ConfigurationFile,
+								FontWeight = FontWeights.Bold,
+								Height = 24,
+							},
+							new ThemedButton(IconIds.Load, R.CMD_Load, R.OT_LoadConfigFileTip, LoadConfig) { HorizontalContentAlignment = HorizontalAlignment.Left },
+							new ThemedButton(IconIds.Save, R.CMD_SaveAs, R.OT_SaveConfigFileTip, SaveConfig) { HorizontalContentAlignment = HorizontalAlignment.Left },
+							new ThemedButton(IconIds.OpenFolder, R.CMD_OpenConfigFolder, R.OT_OpenConfigFolderTip, OpenConfigFolder) { HorizontalContentAlignment = HorizontalAlignment.Left },
 						}
 					},
 
@@ -139,6 +148,61 @@ sealed partial class OptionsWindow : Window
 	void WindowIsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) {
 		if (IsVisible == false) {
 			Owner.Activate();
+		}
+	}
+
+	void LoadConfig() {
+		var d = new OpenFileDialog {
+			Title = R.T_LoadConfig,
+			FileName = "Codist.json",
+			DefaultExt = "json",
+			Filter = R.F_Config
+		};
+		if (d.ShowDialog() != true) {
+			return;
+		}
+		try {
+			string file = d.FileName;
+			Config.LoadConfig(file);
+			if (Version.TryParse(Config.Instance.Version, out var newVersion)
+				&& newVersion > Version.Parse(Config.CurrentVersion)) {
+				new MessageWindow(R.T_NewVersionConfig, nameof(Codist), MessageBoxButton.OK, MessageBoxImage.Information).ShowDialog();
+			}
+			if (file != Config.ConfigPath) {
+				System.IO.File.Copy(file, Config.ConfigPath, true);
+			}
+		}
+		catch (Exception ex) {
+			MessageWindow.Error(R.T_ErrorLoadingConfig + ex.Message);
+		}
+	}
+	void SaveConfig() {
+		var d = new SaveFileDialog {
+			Title = R.T_SaveConfig,
+			FileName = "Codist.json",
+			DefaultExt = "json",
+			Filter = R.F_Config
+		};
+		if (d.ShowDialog() != true) {
+			return;
+		}
+
+		try {
+			Config.Instance.SaveConfig(d.FileName);
+		}
+		catch (Exception ex) {
+			MessageWindow.Error(ex, R.T_ErrorSavingConfig);
+		}
+	}
+	void OpenConfigFolder() {
+		try {
+			if (System.IO.Directory.Exists(Config.ConfigDirectory) == false) {
+				System.IO.Directory.CreateDirectory(Config.ConfigDirectory);
+			}
+			System.Diagnostics.Process.Start(Config.ConfigDirectory);
+		}
+		catch (Exception ex) {
+			ex.Log();
 		}
 	}
 

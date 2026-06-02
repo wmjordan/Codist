@@ -24,7 +24,6 @@ sealed partial class OptionsWindow
 		{
 			readonly OptionBox<Features> _SyntaxHighlight, _SuperQuickInfo, _SmartBar, _NavigationBar, _ScrollbarMarker, _JumpListEnhancer, _WrapText, _AutoSurround, _FileBrowser;
 			readonly OptionBox<Features>[] _Options;
-			readonly Button _LoadButton, _SaveButton, _OpenConfigFolderButton;
 			readonly Note _NoticeBox;
 
 			public PageControl() {
@@ -57,16 +56,6 @@ sealed partial class OptionsWindow
 					},
 					(_NoticeBox = new Note(R.OT_FeatureChangesTip) { BorderThickness = WpfHelper.TinyMargin, Visibility = Visibility.Collapsed }),
 
-					new TitleBox(R.OT_ConfigurationFile),
-					new DescriptionBox(R.OT_ConfigurationFileTip),
-					new WrapPanel {
-						Children = {
-							(_LoadButton = new Button { Name = "_Load", Content = R.CMD_Load, ToolTip = R.OT_LoadConfigFileTip }),
-							(_SaveButton = new Button { Name = "_Save", Content = R.CMD_SaveAs, ToolTip = R.OT_SaveConfigFileTip }),
-							(_OpenConfigFolderButton = new Button { Content = R.CMD_OpenConfigFolder, ToolTip = R.OT_OpenConfigFolderTip})
-						}
-					},
-
 					new TitleBox(R.OT_ThankYou),
 					new TextBlock { Margin = WpfHelper.MiddleTopMargin }.Append(R.OT_ProjectWebSite),
 					new TextBlock { Margin = linkMargin }.AppendLink("github.com/wmjordan/Codist", "https://github.com/wmjordan/Codist", R.CMDT_GotoProjectWebSite),
@@ -87,11 +76,6 @@ sealed partial class OptionsWindow
 						item.PreviewMouseDown += HighlightNoticeBox;
 					}
 				}
-				foreach (var item in new[] { _LoadButton, _SaveButton, _OpenConfigFolderButton}) {
-					item.MinWidth = 120;
-					item.Margin = WpfHelper.MiddleMargin;
-					item.Click += LoadOrSaveConfig;
-				}
 			}
 
 			protected override void LoadConfig(Config config) {
@@ -104,63 +88,6 @@ sealed partial class OptionsWindow
 				_NoticeBox.Visibility = Visibility.Visible;
 				foreach (var item in _Options) {
 					item.PreviewMouseDown -= HighlightNoticeBox;
-				}
-			}
-
-			void LoadOrSaveConfig(object sender, EventArgs args) {
-				if (sender == _LoadButton) {
-					var d = new OpenFileDialog {
-						Title = R.T_LoadConfig,
-						FileName = "Codist.json",
-						DefaultExt = "json",
-						Filter = R.F_Config
-					};
-					if (d.ShowDialog() != true) {
-						return;
-					}
-					try {
-						string file = d.FileName;
-						Config.LoadConfig(file);
-						if (Version.TryParse(Config.Instance.Version, out var newVersion)
-							&& newVersion > Version.Parse(Config.CurrentVersion)) {
-							new MessageWindow(R.T_NewVersionConfig, nameof(Codist), MessageBoxButton.OK, MessageBoxImage.Information).ShowDialog();
-						}
-						if (file != Config.ConfigPath) {
-							System.IO.File.Copy(file, Config.ConfigPath, true);
-						}
-					}
-					catch (Exception ex) {
-						MessageWindow.Error(R.T_ErrorLoadingConfig + ex.Message);
-					}
-				}
-				else if (sender == _SaveButton) {
-					var d = new SaveFileDialog {
-						Title = R.T_SaveConfig,
-						FileName = "Codist.json",
-						DefaultExt = "json",
-						Filter = R.F_Config
-					};
-					if (d.ShowDialog() != true) {
-						return;
-					}
-
-					try {
-						Config.Instance.SaveConfig(d.FileName);
-					}
-					catch (Exception ex) {
-						MessageWindow.Error(ex, R.T_ErrorSavingConfig);
-					}
-				}
-				else {
-					try {
-						if (System.IO.Directory.Exists(Config.ConfigDirectory) == false) {
-							System.IO.Directory.CreateDirectory(Config.ConfigDirectory);
-						}
-						System.Diagnostics.Process.Start(Config.ConfigDirectory);
-					}
-					catch (Exception ex) {
-						ex.Log();
-					}
 				}
 			}
 			void ShowWechatQrCode(object link) {
