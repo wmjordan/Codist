@@ -862,7 +862,6 @@ sealed partial class FileList : VirtualList
 		}
 		pathInlines.Clear();
 
-		int startIndex = 0;
 		int length = path.Length;
 
 		if (length == 0) {
@@ -873,7 +872,8 @@ sealed partial class FileList : VirtualList
 			length--;
 		}
 
-		while (startIndex <= length) {
+		int startIndex = 0;
+		do {
 			int separatorIndex = path.IndexOf('\\', startIndex, length - startIndex);
 			// If no separator is found (-1), we are at the last segment (e.g., "System32" in "C:\Windows\System32")
 			int segmentEndIndex = separatorIndex == -1 ? length : separatorIndex;
@@ -912,6 +912,7 @@ sealed partial class FileList : VirtualList
 			pathInlines.Add(new Run("\\"));
 			startIndex = separatorIndex + 1;
 		}
+		while (startIndex <= length);
 	}
 
 	void OpenFolderLink(object s, EventArgs e) {
