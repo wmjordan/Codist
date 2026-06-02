@@ -33,11 +33,11 @@ namespace Codist.Options
 							Children = {
 								new StackPanel().MakeHorizontal()
 									.Add(new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin }.Append(R.OTC_TopMargin))
-									.Add(new Controls.IntegerBox((int)Config.Instance.TopSpace) { Minimum = 0, Maximum = 255 }.Set(ref _TopSpace))
+									.Add(new Controls.IntegerBox((int)Config.Instance.TopSpace) { Minimum = 0, Maximum = 255 }.UseVsTheme().Set(ref _TopSpace))
 									.SetLazyToolTip(() => R.OT_TopMarginTip),
 								new StackPanel().MakeHorizontal()
 									.Add(new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin }.Append(R.OTC_BottomMargin))
-									.Add(new Controls.IntegerBox((int)Config.Instance.BottomSpace) { Minimum = 0, Maximum = 255 }.Set(ref _BottomSpace))
+									.Add(new Controls.IntegerBox((int)Config.Instance.BottomSpace) { Minimum = 0, Maximum = 255 }.UseVsTheme().Set(ref _BottomSpace))
 									.SetLazyToolTip(() => R.OT_BottomMarginTip),
 							}
 						}.ForEachChild((FrameworkElement b) => b.MinWidth = MinColumnWidth),
