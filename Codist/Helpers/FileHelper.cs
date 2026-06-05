@@ -33,7 +33,7 @@ namespace Codist
 				return;
 			}
 			try {
-				Process.Start(path);
+				Process.Start(new ProcessStartInfo(path) { WorkingDirectory = Path.GetDirectoryName(path) });
 			}
 			catch (System.ComponentModel.Win32Exception ex) {
 				Controls.MessageWindow.Error(ex, R.T_ErrorOpeningFile);
