@@ -3,8 +3,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using CLR;
-using Codist.Controls;
-using Microsoft.Win32;
 using R = Codist.Properties.Resources;
 
 namespace Codist.Options;
@@ -27,7 +25,7 @@ sealed partial class OptionsWindow
 			readonly Note _NoticeBox;
 
 			public PageControl() {
-				Thickness linkMargin = new Thickness(23, 0, 3, 0);
+				Thickness linkMargin = new(23, 0, 3, 0);
 				var o = Config.Instance.Features;
 				SetContents(
 					new TitleBox(R.OT_FeatureControllers),
@@ -68,11 +66,11 @@ sealed partial class OptionsWindow
 					new TextBlock { Margin = linkMargin }.AppendLink(R.CMD_WechatDonateLink, ShowWechatQrCode, R.CMDT_OpenWechatQrCode),
 					new DescriptionBox(R.OT_DonateLinkTip)
 				);
-				_Options = new[] { _SyntaxHighlight, _SuperQuickInfo, _SmartBar, _NavigationBar, _ScrollbarMarker, _JumpListEnhancer, _WrapText, _AutoSurround };
+				_Options = [_SyntaxHighlight, _SuperQuickInfo, _SmartBar, _NavigationBar, _ScrollbarMarker, _JumpListEnhancer, _WrapText, _AutoSurround, _FileBrowser];
 				foreach (var item in _Options) {
 					item.MinWidth = 150;
 					item.Margin = WpfHelper.MiddleMargin;
-					if (item.CeqAny(_JumpListEnhancer, _AutoSurround) == false) {
+					if (!item.CeqAny(_JumpListEnhancer, _AutoSurround)) {
 						item.PreviewMouseDown += HighlightNoticeBox;
 					}
 				}
