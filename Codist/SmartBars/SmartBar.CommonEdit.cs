@@ -452,7 +452,7 @@ partial class SmartBar
 	}
 
 	void AddDebuggerCommands() {
-		if (CodistPackage.DebuggerStatus != DebuggerStatus.Design) {
+		if (_IsPrimaryDocument && CodistPackage.DebuggerStatus != DebuggerStatus.Design) {
 			AddCommand(ToolBar2, IconIds.RunToCursor, R.CMD_RunToCursor, ctx => {
 				TextEditorHelper.ExecuteEditorCommand(
 					ctx.ModifierKeys.MatchFlags(ModifierKeys.Control) ? "Debug.RunFlaggedThreadsToCursor"

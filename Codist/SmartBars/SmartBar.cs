@@ -30,7 +30,7 @@ internal partial class SmartBar : IOleCommandTarget
 	// The layer for the smart bar.
 	TextViewOverlay _ToolBarLayer;
 	readonly ToolBarTray _ToolBarTray;
-	readonly bool _IsDiffWindow;
+	readonly bool _IsDiffWindow, _IsPrimaryDocument;
 	CancellationTokenSource _Cancellation = new CancellationTokenSource();
 	IWpfTextView _View;
 	DateTime _LastExecute;
@@ -47,6 +47,7 @@ internal partial class SmartBar : IOleCommandTarget
 	public SmartBar(IWpfTextView view) {
 		_View = view ?? throw new ArgumentNullException(nameof(view));
 		_IsDiffWindow = view.Roles.Contains("DIFF");
+		_IsPrimaryDocument = view.Roles.Contains(PredefinedTextViewRoles.PrimaryDocument);
 		_ToolBarLayer = TextViewOverlay.GetOrCreate(view);
 		Config.RegisterUpdateHandler(UpdateSmartBarConfig);
 		if (Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.ShiftToggleDisplay)) {
