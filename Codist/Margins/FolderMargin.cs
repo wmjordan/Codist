@@ -268,7 +268,8 @@ sealed class FolderMargin : IWpfTextViewMargin
 		}
 
 		var options = args.Config.FileBrowserOptions;
-		if (!options.HasAnyFlag(FileBrowserOptions.AllButtons)) {
+		if (!args.Config.Features.MatchFlags(Features.FileBrowser)
+			|| !options.HasAnyFlag(FileBrowserOptions.AllButtons)) {
 			_Container.ToggleVisibility(false);
 			return;
 		}
