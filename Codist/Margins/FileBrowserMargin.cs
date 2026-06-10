@@ -20,9 +20,9 @@ using R = Codist.Properties.Resources;
 
 namespace Codist.Margins;
 
-sealed class FolderMargin : IWpfTextViewMargin
+sealed class FileBrowserMargin : IWpfTextViewMargin
 {
-	internal const string Name = nameof(FolderMargin);
+	internal const string Name = nameof(FileBrowserMargin);
 	static readonly Thickness __ContainerMargin = CodistPackage.VsVersion.Major < 17 ? WpfHelper.NoMargin : new Thickness(2);
 
 	readonly ThemedControlGroup _Container;
@@ -39,7 +39,7 @@ sealed class FolderMargin : IWpfTextViewMargin
 	public bool Enabled => true;
 
 	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
-	public FolderMargin(IWpfTextView view) {
+	public FileBrowserMargin(IWpfTextView view) {
 		string path;
 		_Container = new ThemedControlGroup {
 			Margin = __ContainerMargin,

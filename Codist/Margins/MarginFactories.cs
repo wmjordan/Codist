@@ -148,7 +148,7 @@ sealed class MatchSelectionMarginFactory : IWpfTextViewMarginProvider
 }
 
 [Export(typeof(IWpfTextViewMarginProvider))]
-[Name(FolderMargin.Name)]
+[Name(FileBrowserMargin.Name)]
 [Order(After = PredefinedMarginNames.ZoomControl)]
 [MarginContainer(PredefinedMarginNames.BottomControl)]
 [ContentType(Constants.CodeTypes.Text)]
@@ -157,7 +157,7 @@ internal sealed class FolderBrowserMarginProvider : IWpfTextViewMarginProvider
 {
 	public IWpfTextViewMargin CreateMargin(IWpfTextViewHost wpfTextViewHost, IWpfTextViewMargin marginContainer) {
 		return Config.Instance.Features.MatchFlags(Features.FileBrowser)
-			? new FolderMargin(wpfTextViewHost.TextView)
+			? new FileBrowserMargin(wpfTextViewHost.TextView)
 			: null;
 	}
 }

@@ -115,7 +115,7 @@
     <Compile Include="Helpers\VsImageHelper.cs" />
     <Compile Include="Helpers\ThemeHelper.cs" />
     <Compile Include="FileBrowser\FileList.cs" />
-    <Compile Include="Margins\FolderMargin.cs" />
+    <Compile Include="Margins\FileBrowserMargin.cs" />
     <Compile Include="Margins\MatchMargin.cs" />
     <Compile Include="Options\OptionsWindow.cs" />
     <Compile Include="Options\OptionsWindow.DisplayPage.cs" />
