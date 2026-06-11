@@ -26,6 +26,7 @@ Check out this list to see what _Codist_ can do for you.
 * [Display Enhancements](#display-enhancements)
 * [Jump List Shortcuts](#jump-list-shortcuts)
 * [Auto Pair Punctuations](#auto-pair-punctuations)
+* [File Browser](#file-browser)
 * [Codist in Your Language](#codist-in-your-language)
 * [Others](#other-features)
 * [Comprehensive Configurations](#feature-control)
@@ -557,6 +558,60 @@ To make this work, follow the steps below:
 From version 8.1 on, while you auto-complete a C# method name or a delegate variable, Codist will try to append parentheses for method or delegate invocation, by evaluating the context.
 
 You can toggle the above features by changing the _Pair close punctuation_ and the _Append parentheses on completing method names_ options in the option page under the __Auto Pair Punctuation_ section.
+
+## File Browser
+
+From version 9 on, Codist offers quick access to your files without leaving Visual Studio.
+
+There are two ways to bring out the File Browser.
+
+### File Browser Window
+
+The first approach is to access it via the *Edit/File Browser* menu. A window pane will appear nearby the *Properties* window displaying the files within the directory of the current working file.
+
+![File Browser Window](doc/file-browser-window.png)
+
+There are three parts in the window.
+
+The most obvious part is the file list at the bottom. The active file, or folder containing the active file will be **bold**. Optionally, you can "Dim non-solution files", so files not belonging to the current solution will be displayed semi-transparently.
+
+You can right click the items on the list to bring out a context menu with more commands. The *Cut*, *Copy*, *Paste*, *Delete*, *Rename* and *Properties* commands works as the same as the corresponding ones in Windows Explorer. Typically, the *Delete* command will move files to the Recycle Bin, and pressing Shift when executing that command will remove the selected files or folders permanently.
+
+At the top is a button that brings out a menu with commands that you can operate on to the folder that contains the active file, such as *Open Folder in Windows Explorer*. Besides the button is the address of the folder. Each part can be click to lsit the corresponding contents.
+
+Below to the top row are some buttons and the filters.
+
+The first *Selection Menu* button brings out a menu to allow you multi-select items in the file list. Another way to multi-select items in the file list is to press the *Ctrl* or *Shift* key when clicking on them.
+
+The second *Navigate Back* button allows you jump back to the previous folder.
+
+The third *Synchonize with Active File* button, when pressed, will force the file list to track down the folder of the active file, which might be useful.
+
+The rest are filter buttons and text box that can be used to filter contents of the file list or shortcuts pointing to the folder containing the current solution, project or active file.
+
+### File Browser Margin
+
+The second approach to access the file browser is via buttons at the bottom of a code window.
+
+![File Browser Margin](doc/file-browser-margin.png)
+
+There are usually five buttons next to the *Zoom* control.
+
+The 1st button will list the *Solution and Projects*. Clicking on items within the list will list the folder containing the corresponding solution file or project file.
+
+The 2nd button is a shortcut button which lists the folder contents where the current solution file locates.
+
+The 3rd button is a shortcut button which lists the folder contents where the current project file locates. If a file does not belong to any project, this button will be invisible.
+
+The 4th button lists the folder containing current file.
+
+The 5th button lists currently opened document windows.
+
+### Customizing File Browser
+
+Codist offers various options for the File Browser. You can change the behavior or appearances via the *Codist Options* dialog.
+
+![File Browser Options](doc/file-browser-options.png)
 
 ## Codist in Your Language
 
