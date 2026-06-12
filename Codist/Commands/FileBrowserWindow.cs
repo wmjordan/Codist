@@ -52,16 +52,19 @@ public class FileBrowserWindow : ToolWindowPane
 
 		var currentFile = ServicesHelper.Instance.DTE.ActiveDocument?.FullName
 			?? ServicesHelper.Instance.DTE.Solution.FullName;
-		if (!FileHelper.AreFileNamesEqual(currentFile, _FileList.CurrentFile)
-			&& !String.IsNullOrEmpty(currentFile)) {
-			_FileList.CurrentFile = currentFile;
+		if (FileHelper.AreFileNamesEqual(currentFile, _FileList.CurrentFile)) {
 			RefreshSolutionIfChanged();
 			_FileList.LoadCurrentDirectoryAsync(_CancellationTokenSource.Token).FireAndForget();
 		}
-		else {
+		else if (String.IsNullOrEmpty(currentFile)) {
 			_FileList.CurrentFile = null;
 			RefreshSolutionIfChanged();
 			_FileList.NavigateToDirectoryAsync(VsShellHelper.GetDefaultProjectLocation(), _CancellationTokenSource.Token).FireAndForget();
+		}
+		else {
+			_FileList.CurrentFile = currentFile;
+			RefreshSolutionIfChanged();
+			_FileList.LoadCurrentDirectoryAsync(_CancellationTokenSource.Token).FireAndForget();
 		}
 	}
 
