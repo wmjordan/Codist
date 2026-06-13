@@ -474,7 +474,7 @@ sealed partial class FileList : VirtualList
 		var currentFrame = VsShellHelper.GetCurrentWindowFrame();
 		RunningDocumentTable t = new();
 		List<FileItem> items = [];
-		HashSet<string> openedFiles = RecentlyClosedFileCollection.ShouldTrackFileClose && RecentlyClosedFileCollection.HasItem ? new() : null;
+		HashSet<string> openedFiles = RecentlyClosedFileCollection.HasItem ? new() : null;
 		foreach (var frame in VsShellHelper.GetDocumentWindows()) {
 			if (!frame.TryGetProperty(__VSFPROPID.VSFPROPID_pszMkDocument, out string fullPath)) {
 				continue;
@@ -507,9 +507,10 @@ sealed partial class FileList : VirtualList
 			items.InsertRange(0,
 				RecentlyClosedFileCollection.Items
 					.SkipWhile(openedFiles.Contains)
+					.Take(Config.Instance.FileBrowser.ListRecentClosedFiles)
 					.Select(i => new FileItem(new FileInfo(i), FileItemType.File, false) {
 						FileState = FileState.RecentlyClosed,
-						Note = VsImageHelper.GetImage(IconIds.FileClosed, 14).UseGrayscaleIcon(true)
+						Note = VsImageHelper.GetImage(IconIds.FileClosed, 14)
 					})
 				);
 		}
