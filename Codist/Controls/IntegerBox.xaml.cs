@@ -33,11 +33,7 @@ namespace Codist.Controls
 			// TextBox
 			_textBox = new TextBox {
 				BorderThickness = new Thickness(0),
-				Width = 60
-			};
-			Grid.SetColumn(_textBox, 0);
-			Grid.SetRowSpan(_textBox, 2);
-			_textBox.SetBinding(TextBox.TextProperty, new Binding(nameof(Value)) {
+			}.Bind(TextBox.TextProperty, new Binding(nameof(Value)) {
 				Source = this,
 				Mode = BindingMode.TwoWay,
 				NotifyOnSourceUpdated = true,
@@ -46,27 +42,24 @@ namespace Codist.Controls
 
 			// Up button
 			_upButton = CreateRepeatButton("M 0 3 L 6 3 L 3 0 Z");
-			Grid.SetColumn(_upButton, 1);
-			Grid.SetRow(_upButton, 0);
 
 			// Down button
 			_downButton = CreateRepeatButton("M 0 0 L 3 3 L 6 0 Z");
-			Grid.SetColumn(_downButton, 1);
-			Grid.SetRow(_downButton, 1);
 
 			// Unit text block
 			_unitTextBlock = new TextBlock {
 				VerticalAlignment = VerticalAlignment.Center,
 				HorizontalAlignment = HorizontalAlignment.Left,
 				Margin = new Thickness(2, 0, 2, 0)
-			};
-			var unitBinding = new Binding(nameof(Unit)) {
+			}.Bind(TextBlock.TextProperty, new Binding(nameof(Unit)) {
 				Source = this
-			};
-			_unitTextBlock.SetBinding(TextBlock.TextProperty, unitBinding);
+			});
 
-			Content = new StackPanel {
-				Orientation = Orientation.Horizontal,
+			Content = new Grid {
+				ColumnDefinitions = {
+					new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+					new ColumnDefinition { Width = GridLength.Auto },
+				},
 				Children = {
 					new Border {
 						BorderThickness = new Thickness(1),
@@ -82,13 +75,16 @@ namespace Codist.Controls
 								new ColumnDefinition { Width = GridLength.Auto },
 							},
 							Children = {
-								_textBox, _upButton, _downButton
+								_textBox.SetValue(Grid.SetRowSpan, 2),
+								_upButton.SetValue(Grid.SetColumn, 1),
+								_downButton.SetValue(Grid.SetColumn, 1).SetValue(Grid.SetRow, 1)
 							}
 						},
 					},
-					_unitTextBlock
+					_unitTextBlock.SetValue(Grid.SetColumn, 1)
 				}
 			};
+			Width = 60;
 			#endregion
 
 			AttachEvents();
