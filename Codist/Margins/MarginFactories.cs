@@ -155,9 +155,13 @@ sealed class MatchSelectionMarginFactory : IWpfTextViewMarginProvider
 [TextViewRole(PredefinedTextViewRoles.Document)]
 internal sealed class FolderBrowserMarginProvider : IWpfTextViewMarginProvider
 {
+	static readonly string[] __ExcludeRoles = ["LEFTDIFF", "RIGHTDIFF"];
+
 	public IWpfTextViewMargin CreateMargin(IWpfTextViewHost wpfTextViewHost, IWpfTextViewMargin marginContainer) {
+		IWpfTextView view;
 		return Config.Instance.Features.MatchFlags(Features.FileBrowser)
-			? new FileBrowserMargin(wpfTextViewHost.TextView)
+			&& !(view = wpfTextViewHost.TextView).Roles.ContainsAny(__ExcludeRoles)
+			? new FileBrowserMargin(view)
 			: null;
 	}
 }
