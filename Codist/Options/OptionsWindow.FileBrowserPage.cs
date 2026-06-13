@@ -51,6 +51,16 @@ sealed partial class OptionsWindow
 					_ShowOpenedDocumentsBox = o.CreateOptionBox(FileBrowserOptions.ShowOpenedDocuments, UpdateConfig, R.OT_ShowOpenedDocuments),
 					_ShowLabelsBox = o.CreateOptionBox(FileBrowserOptions.ShowLabels, UpdateConfig, R.OT_ShowLabels)
 				);
+
+				_ListRecentClosedFiles.ValueChanged += ListRecentClosedFiles_ValueChanged;
+			}
+
+			void ListRecentClosedFiles_ValueChanged(object sender, System.Windows.DependencyPropertyChangedEventArgs e) {
+				if (IsConfigUpdating) {
+					return;
+				}
+				Config.Instance.FileBrowser.ListRecentClosedFiles = _ListRecentClosedFiles.Value;
+				Config.Instance.FireConfigChangedEvent(Features.FileBrowser);
 			}
 
 			void UpdateConfig(FileBrowserOptions options, bool set) {
