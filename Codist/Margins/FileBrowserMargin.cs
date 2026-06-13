@@ -305,6 +305,7 @@ sealed class FileBrowserMargin : IWpfTextViewMargin
 	public void Dispose() {
 		_CancellationTokenSource.CancelAndDispose();
 		_Document.FileActionOccurred -= HandleDocumentFileActivation;
+		RecentlyClosedFileCollection.Add(_Document.FilePath);
 		_View.VisualElement.Loaded -= AddProjectButtonOnLoaded;
 		_FilePopup?.IsOpen = false;
 		Config.UnregisterUpdateHandler(HandleConfigUpdate);

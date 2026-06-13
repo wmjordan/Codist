@@ -40,19 +40,22 @@ sealed partial class FileList
 				if (state != 0) {
 					var s = new TextBlock();
 					if (state.MatchFlags(FileState.Modified)) {
-						s.AddImage(IconIds.Modified).Append(R.T_Modified);
+						s.AddGlyph(IconIds.Modified).Append(R.T_Modified);
 					}
 					if (state.MatchFlags(FileState.Pinned)) {
-						s.AddImage(IconIds.Pin).Append(R.T_Pinned);
+						s.AddGlyph(IconIds.Pin).Append(R.T_Pinned);
 					}
 					if (state.MatchFlags(FileState.Virtual)) {
-						s.AddImage(IconIds.FileVirtual).Append(R.T_VirtualFile);
+						s.AddGlyph(IconIds.FileVirtual).Append(R.T_VirtualFile);
 					}
 					if (state.MatchFlags(FileState.New)) {
-						s.AddImage(IconIds.NewFile).Append(R.T_NewFile);
+						s.AddGlyph(IconIds.NewFile).Append(R.T_NewFile);
+					}
+					if (state.MatchFlags(FileState.RecentlyClosed)) {
+						s.AddGlyph(IconIds.FileClosed).Append(R.T_RecentlyClosed);
 					}
 					//if (state.MatchFlags(FileState.Uninitialized)) {
-					//	s.AddImage(IconIds.Hibernated).Append("Not loaded");
+					//	s.AddGlyph(IconIds.Hibernated).Append("Not loaded");
 					//}
 					panel.Children.Add(s);
 				}

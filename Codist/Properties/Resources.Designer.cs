@@ -4837,6 +4837,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to List recently closed files in Opened Documents list: .
+        /// </summary>
+        internal static string OT_ListRecentlyClosedFiles {
+            get {
+                return ResourceManager.GetString("OT_ListRecentlyClosedFiles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Restore configurations from a file....
         /// </summary>
         internal static string OT_LoadConfigFileTip {
@@ -8956,6 +8965,15 @@ namespace Codist.Properties {
         internal static string T_Reassigned {
             get {
                 return ResourceManager.GetString("T_Reassigned", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Recently closed.
+        /// </summary>
+        internal static string T_RecentlyClosed {
+            get {
+                return ResourceManager.GetString("T_RecentlyClosed", resourceCulture);
             }
         }
         

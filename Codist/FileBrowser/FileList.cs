@@ -471,10 +471,10 @@ sealed partial class FileList : VirtualList
 		SetViewMode(ViewMode.Documents);
 		_ViewHistories.Push(new(ViewMode.Documents, FileListLocationType.OpenedDocuments, null));
 
-		var frames = new IVsWindowFrame[1];
 		var currentFrame = VsShellHelper.GetCurrentWindowFrame();
 		RunningDocumentTable t = new();
 		List<FileItem> items = [];
+		HashSet<string> openedFiles = RecentlyClosedFileCollection.ShouldTrackFileClose && RecentlyClosedFileCollection.HasItem ? new() : null;
 		foreach (var frame in VsShellHelper.GetDocumentWindows()) {
 			if (!frame.TryGetProperty(__VSFPROPID.VSFPROPID_pszMkDocument, out string fullPath)) {
 				continue;
@@ -494,15 +494,27 @@ sealed partial class FileList : VirtualList
 			if (!extIcons.IsEmpty) {
 				var p = new StackPanel { Orientation = Orientation.Horizontal };
 				foreach (var id in extIcons) {
-					var icon = VsImageHelper.GetImage(id, 14);
-					icon.UseGrayscaleIcon(true);
-					p.Children.Add(icon);
+					p.Children.Add(VsImageHelper.GetImage(id, 14).UseGrayscaleIcon(true));
 				}
 				item.Note = p;
 			}
 			items.Add(item);
+			openedFiles?.Add(fullPath);
 		}
 		items.Sort((x, y) => String.Compare(x.Name, y.Name, true));
+		#region add recently closed files
+		if (openedFiles != null) {
+			items.InsertRange(0,
+				RecentlyClosedFileCollection.Items
+					.SkipWhile(openedFiles.Contains)
+					.Select(i => new FileItem(new FileInfo(i), FileItemType.File, false) {
+						FileState = FileState.RecentlyClosed,
+						Note = VsImageHelper.GetImage(IconIds.FileClosed, 14).UseGrayscaleIcon(true)
+					})
+				);
+		}
+		#endregion
+
 		SetItems(items);
 		LocationType = FileListLocationType.OpenedDocuments;
 	}

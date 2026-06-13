@@ -104,19 +104,20 @@ namespace Codist
 		public bool SuppressAutoBuildVersion { get; set; }
 		[DefaultValue(DefaultIconSize)]
 		public int SmartBarButtonSize { get; set; } = DefaultIconSize;
-		public List<CommentLabel> Labels { get; } = new List<CommentLabel>();
-		public QuickInfoConfig QuickInfo { get; } = new QuickInfoConfig();
-		public MarkerConfig ScrollbarMarker { get; } = new MarkerConfig();
-		public List<Color> CustomColors { get; } = new List<Color>();
+		public List<CommentLabel> Labels { get; } = [];
+		public QuickInfoConfig QuickInfo { get; } = new();
+		public MarkerConfig ScrollbarMarker { get; } = new();
+		public FileBrowserConfig FileBrowser { get; } = new();
+		public List<Color> CustomColors { get; } = [];
 
 		#region Deprecated style containers
-		public List<CommentStyle> CommentStyles { get; } = new List<CommentStyle>();
-		public List<XmlCodeStyle> XmlCodeStyles { get; } = new List<XmlCodeStyle>();
-		public List<CSharpStyle> CodeStyles { get; } = new List<CSharpStyle>();
-		public List<CppStyle> CppStyles { get; } = new List<CppStyle>();
-		public List<MarkdownStyle> MarkdownStyles { get; } = new List<MarkdownStyle>();
-		public List<CodeStyle> GeneralStyles { get; } = new List<CodeStyle>();
-		public List<SymbolMarkerStyle> SymbolMarkerStyles { get; } = new List<SymbolMarkerStyle>();
+		public List<CommentStyle> CommentStyles { get; } = [];
+		public List<XmlCodeStyle> XmlCodeStyles { get; } = [];
+		public List<CSharpStyle> CodeStyles { get; } = [];
+		public List<CppStyle> CppStyles { get; } = [];
+		public List<MarkdownStyle> MarkdownStyles { get; } = [];
+		public List<CodeStyle> GeneralStyles { get; } = [];
+		public List<SymbolMarkerStyle> SymbolMarkerStyles { get; } = [];
 		public bool ShouldSerializeCommentStyles() => false;
 		public bool ShouldSerializeXmlCodeStyles() => false;
 		public bool ShouldSerializeCodeStyles() => false;
@@ -127,9 +128,9 @@ namespace Codist
 		#endregion
 
 		public List<SyntaxStyle> Styles { get; set; } // for serialization only
-		public List<MarkerStyle> MarkerSettings { get; } = new List<MarkerStyle>();
-		public List<SearchEngine> SearchEngines { get; } = new List<SearchEngine>();
-		public List<WrapText> WrapTexts { get; } = new List<WrapText>();
+		public List<MarkerStyle> MarkerSettings { get; } = [];
+		public List<SearchEngine> SearchEngines { get; } = [];
+		public List<WrapText> WrapTexts { get; } = [];
 		public SymbolReferenceMarkerStyle SymbolReferenceMarkerSettings { get; } = new SymbolReferenceMarkerStyle();
 		public string BrowserPath { get; set; }
 		public string BrowserParameter { get; set; }
@@ -598,7 +599,7 @@ namespace Codist
 		sealed class StyleConfig
 		{
 			public bool? IsDark { get; set; }
-			public List<SyntaxStyle> Styles { get; } = new List<SyntaxStyle>();
+			public List<SyntaxStyle> Styles { get; } = [];
 
 			public StyleConfig() {}
 
@@ -728,6 +729,20 @@ namespace Codist
 				return;
 			}
 			ColorHelper.ParseColor(value, out color, out _);
+		}
+	}
+
+	sealed class FileBrowserConfig
+	{
+		internal const int DefaultRecentClosedFilesCount = 4,
+			MaxRecentClosedFilesCount = 16;
+
+		int _ListRecentClosedFiles = DefaultRecentClosedFilesCount;
+
+		[DefaultValue(DefaultRecentClosedFilesCount)]
+		public int ListRecentClosedFiles {
+			get => _ListRecentClosedFiles;
+			set => _ListRecentClosedFiles = value.Clamp(0, MaxRecentClosedFilesCount);
 		}
 	}
 

@@ -34,6 +34,9 @@ partial class WpfHelper
 	public static TextBlock AddImage(this TextBlock block, int imageId) {
 		return block.Append(VsImageHelper.GetImage(imageId));
 	}
+	public static TextBlock AddGlyph(this TextBlock block, int imageId) {
+		return block.Append(VsImageHelper.GetImage(imageId).WrapMargin(WpfHelper.GlyphMargin));
+	}
 	public static TextBlock AddSymbol(this TextBlock block, ISymbol symbol, string alias, bool bold, SymbolFormatter formatter) {
 		if (symbol != null) {
 			formatter.Format(block.Inlines, symbol, alias, bold);

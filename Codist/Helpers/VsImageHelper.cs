@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Windows;
 using System.Windows.Controls;
 using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Imaging.Interop;
@@ -22,7 +23,7 @@ internal static class VsImageHelper
 	/// Gets a themed <see cref="Image"/> from a value defined in <see cref="KnownImageIds"/>
 	/// </summary>
 	/// <param name="imageId">The image id.</param>
-	public static System.Windows.FrameworkElement GetImage(int imageId, double size = 0) {
+	public static FrameworkElement GetImage(int imageId, double size = 0) {
 		if (imageId.HasOverlay()) {
 			return MakeOverlayImage(imageId, size);
 		}
@@ -37,16 +38,18 @@ internal static class VsImageHelper
 		};
 	}
 
-	public static void UseGrayscaleIcon(this System.Windows.UIElement element, bool gray) {
+	public static TUIElement UseGrayscaleIcon<TUIElement>(this TUIElement element, bool gray)
+		where TUIElement : UIElement {
 		if (element is Panel panel) {
 			foreach (var item in panel.Children) {
 				if (item is CrispImage i) {
 					i.Grayscale = true;
 				}
 			}
-			return;
+			return element;
 		}
 		element.SetProperty(CrispImage.GrayscaleProperty, gray);
+		return element;
 	}
 
 	public static int GetImageIdForFile(string fileName) {
@@ -71,11 +74,11 @@ internal static class VsImageHelper
 		};
 	}
 
-	public static System.Windows.FrameworkElement GetImage(string monikerName, int size = 0) {
+	public static FrameworkElement GetImage(string monikerName, int size = 0) {
 		return GetImage(KnownMonikerNameMap.Map.TryGetValue(monikerName, out int i) ? i : KnownImageIds.Blank, size);
 	}
 
-	public static TControl ReferenceCrispImageBackground<TControl>(this TControl target, object colorKey) where TControl : System.Windows.FrameworkElement {
+	public static TControl ReferenceCrispImageBackground<TControl>(this TControl target, object colorKey) where TControl : FrameworkElement {
 		if (colorKey != null) {
 			target.SetResourceReference(ImageThemingUtilities.ImageBackgroundColorProperty, colorKey);
 		}
@@ -84,7 +87,7 @@ internal static class VsImageHelper
 		}
 		return target;
 	}
-	public static void SetBackgroundForCrispImage(this System.Windows.DependencyObject target, WpfColor color) {
+	public static void SetBackgroundForCrispImage(this DependencyObject target, WpfColor color) {
 		ImageThemingUtilities.SetImageBackgroundColor(target, color);
 	}
 
@@ -104,8 +107,8 @@ internal static class VsImageHelper
 					Moniker = overlay,
 					Height = fullOverlay ? size : size *= 0.6,
 					Width = size,
-					HorizontalAlignment = System.Windows.HorizontalAlignment.Right,
-					VerticalAlignment = System.Windows.VerticalAlignment.Bottom
+					HorizontalAlignment = HorizontalAlignment.Right,
+					VerticalAlignment = VerticalAlignment.Bottom
 				}
 			}
 		};

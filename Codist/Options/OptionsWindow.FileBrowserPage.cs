@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Windows.Controls;
+using Codist.Controls;
 using R = Codist.Properties.Resources;
 
 namespace Codist.Options;
@@ -17,6 +19,7 @@ sealed partial class OptionsWindow
 		sealed class PageControl : OptionPage
 		{
 			readonly OptionBox<FileBrowserOptions> _UsePreview, _UseCodeWindow, _DimNonSolutionItems, _ShowLabelsBox, _ShowSolutionProjectsBox, _ShowSolutionFolderBox, _ShowProjectFolderBox, _ShowDocumentFolderBox, _ShowOpenedDocumentsBox;
+			readonly IntegerBox _ListRecentClosedFiles;
 
 			public PageControl() {
 				var o = Config.Instance.FileBrowserOptions;
@@ -25,6 +28,21 @@ sealed partial class OptionsWindow
 					_UsePreview = o.CreateOptionBox(FileBrowserOptions.UseProvisional, UpdateConfig, R.OT_UseProvisionalWindow),
 					_UseCodeWindow = o.CreateOptionBox(FileBrowserOptions.UseCodeWindow, UpdateConfig, R.OT_PreferCodeWindow),
 					_DimNonSolutionItems = o.CreateOptionBox(FileBrowserOptions.DimNonSolutionItems, UpdateConfig, R.OT_DimNonSolutionItems),
+					new StackPanel {
+						Orientation = Orientation.Horizontal,
+						Children = {
+							new TextBlock {
+								Text = R.OT_ListRecentlyClosedFiles,
+								Margin = WpfHelper.SmallMargin,
+							},
+							new IntegerBox(Config.Instance.FileBrowser.ListRecentClosedFiles) {
+								Minimum = 0,
+								Maximum = FileBrowserConfig.MaxRecentClosedFilesCount,
+								Margin = WpfHelper.SmallMargin,
+								Width = 50
+							}.UseVsTheme().Set(ref _ListRecentClosedFiles)
+						}
+					},
 					new TitleBox(R.OT_ExtraHighlight),
 					_ShowSolutionProjectsBox = o.CreateOptionBox(FileBrowserOptions.ShowSolutionProjects, UpdateConfig, R.OT_ShowSolutionProjects),
 					_ShowSolutionFolderBox = o.CreateOptionBox(FileBrowserOptions.ShowSolutionFolder, UpdateConfig, R.OT_ShowSolutionFolder),
@@ -54,6 +72,7 @@ sealed partial class OptionsWindow
 				_ShowProjectFolderBox.UpdateWithOption(options);
 				_ShowDocumentFolderBox.UpdateWithOption(options);
 				_ShowOpenedDocumentsBox.UpdateWithOption(options);
+				_ListRecentClosedFiles.Value = config.FileBrowser.ListRecentClosedFiles;
 			}
 		}
 	}

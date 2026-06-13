@@ -108,6 +108,7 @@
     <Compile Include="FileBrowser\FileListLocationType.cs" />
     <Compile Include="FileBrowser\FileItem.cs" />
     <Compile Include="FileBrowser\FileState.cs" />
+    <Compile Include="FileBrowser\RecentlyClosedFileCollection.cs" />
     <Compile Include="Helpers\ClassificationStyleHelper.cs" />
     <Compile Include="Helpers\EditCommands.cs" />
     <Compile Include="Helpers\SpanHelper.cs" />

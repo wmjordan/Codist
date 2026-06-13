@@ -3399,4 +3399,10 @@ List currently opened code documents</value>
   <data name="OT_Milliseconds" xml:space="preserve">
     <value>Milliseconds</value>
   </data>
+  <data name="T_RecentlyClosed" xml:space="preserve">
+    <value>Recently closed</value>
+  </data>
+  <data name="OT_ListRecentlyClosedFiles" xml:space="preserve">
+    <value>List recently closed files in Opened Documents list: </value>
+  </data>
 </root>

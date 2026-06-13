@@ -3383,4 +3383,10 @@ Shift: 匹配大小写</value>
   <data name="OT_Milliseconds" xml:space="preserve">
     <value>毫秒</value>
   </data>
+  <data name="T_RecentlyClosed" xml:space="preserve">
+    <value>最近关闭</value>
+  </data>
+  <data name="OT_ListRecentlyClosedFiles" xml:space="preserve">
+    <value>在已打开的文档列表中列出最近关闭的文档: </value>
+  </data>
 </root>

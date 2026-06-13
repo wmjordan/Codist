@@ -128,6 +128,7 @@ static class IconIds
 	public const int FileEmpty = KnownImageIds.CSFile;
 	public const int FileVirtual = KnownImageIds.Snippet;
 	public const int FileLocations = KnownImageIds.DocumentCollection;
+	public const int FileClosed = KnownImageIds.History;
 	public const int GlobalNamespace = KnownImageIds.Home;
 	public const int Hibernated = KnownImageIds.OnlineStatusAway;
 	public const int Module = KnownImageIds.Module;
