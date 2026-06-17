@@ -621,6 +621,7 @@ static class TextEditorHelper
 		}
 	}
 	static void MoveToActiveViewPosition(IWpfTextView view, int position) {
+		position = position.Clamp(0, view.TextSnapshot.Length);
 		view.Reveal(new SnapshotSpan(view.TextSnapshot, position, 0));
 		view.MoveCaret(position);
 		view.DisplayTextLineContainingBufferPosition(view.Caret.Position.BufferPosition, view.ViewportHeight * 0.2, ViewRelativePosition.Top);
