@@ -506,7 +506,7 @@ sealed partial class FileList : VirtualList
 		if (openedFiles != null) {
 			items.InsertRange(0,
 				RecentlyClosedFileCollection.Items
-					.SkipWhile(openedFiles.Contains)
+					.Where(i => !openedFiles.Contains(i))
 					.Take(Config.Instance.FileBrowser.ListRecentClosedFiles)
 					.Select(i => new FileItem(new FileInfo(i), FileItemType.File, false) {
 						FileState = FileState.RecentlyClosed,
@@ -702,7 +702,12 @@ sealed partial class FileList : VirtualList
 		}
 		switch (item.Type) {
 			case FileItemType.File:
-				TextEditorHelper.OpenFile(item.FullPath, !Config.Instance.FileBrowserOptions.MatchFlags(FileBrowserOptions.UseProvisional), !Config.Instance.FileBrowserOptions.MatchFlags(FileBrowserOptions.UseCodeWindow));
+				if (item.FileState == FileState.RecentlyClosed) {
+					RecentlyClosedFileCollection.Reopen(item.FullPath);
+				}
+				else {
+					TextEditorHelper.OpenFile(item.FullPath, !Config.Instance.FileBrowserOptions.MatchFlags(FileBrowserOptions.UseProvisional), !Config.Instance.FileBrowserOptions.MatchFlags(FileBrowserOptions.UseCodeWindow));
+				}
 				FileActivated?.Invoke(this, new(item));
 				break;
 			case FileItemType.Folder:

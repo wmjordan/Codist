@@ -64,6 +64,11 @@ sealed partial class FileList
 			switch (item.Type) {
 				case FileItemType.InaccessibleFolder:
 					return panel;
+				case FileItemType.File:
+					if (item.FileState.MatchFlags(FileState.RecentlyClosed)) {
+						goto case FileItemType.OpenedDocument;
+					}
+					break;
 				case FileItemType.OpenedDocument:
 					panel.Children.Add(new TextBlock {
 						Text = R.T_Folder + Path.GetDirectoryName(item.FullPath),

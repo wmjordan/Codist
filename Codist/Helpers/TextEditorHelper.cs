@@ -532,10 +532,10 @@ static class TextEditorHelper
 	public static void ForgetViewPosition() {
 		__ActiveViewPosition = -1;
 	}
-	public static void OpenFile(string file, bool newWindow = false, bool useDesigner = false) {
-		OpenFile(file, (VsTextView _) => { }, newWindow, useDesigner);
+	public static void OpenFile(string file, bool newWindow = false, bool useDesigner = false, int caretPosition = -1) {
+		OpenFile(file, null, newWindow, useDesigner, caretPosition);
 	}
-	public static void OpenFile(string file, Action<VsTextView> action, bool newWindow = false, bool useDesigner = false) {
+	public static void OpenFile(string file, Action<IWpfTextView> action, bool newWindow = false, bool useDesigner = false, int caretPosition = -1) {
 		ThreadHelper.ThrowIfNotOnUIThread();
 		if (String.IsNullOrEmpty(file)) {
 			return;
@@ -545,14 +545,18 @@ static class TextEditorHelper
 			return;
 		}
 		if (__ActiveViewPosition > -1) {
+			// used by Click and Go of Quick Info
 			MoveCaretToKeptViewPosition();
 		}
 
+		if (caretPosition != -1) {
+			action += v => MoveToViewPosition(v, caretPosition);
+		}
 		InternalOpenFile(file, action, newWindow, useDesigner);
 	}
 
 	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
-	static void InternalOpenFile(string file, Action<VsTextView> action, bool newWindow = false, bool useDesigner = false) {
+	static void InternalOpenFile(string file, Action<IWpfTextView> action, bool newWindow = false, bool useDesigner = false) {
 		try {
 			using (new NewDocumentStateScope(newWindow ^ UIHelper.IsShiftDown, VSConstants.NewDocumentStateReason.Navigation)) {
 				Guid editorType;
@@ -577,7 +581,7 @@ static class TextEditorHelper
 				windowFrame.Show();
 				var view = VsShellUtilities.GetTextView(windowFrame);
 				if (view != null) {
-					action?.Invoke(view);
+					action?.Invoke(GetWpfTextView(view));
 				}
 			}
 		}
@@ -606,21 +610,17 @@ static class TextEditorHelper
 			__ActiveViewPosition = -1;
 		}
 	}
-
-	public static void OpenFile(string file, Action<IWpfTextView> action) {
-		OpenFile(file, (VsTextView view) => action(GetWpfTextView(view)));
-	}
 	public static void OpenFile(string file, int caretPosition) {
 		var view = GetActiveWpfDocumentView();
 		if (view != null
 			&& FileHelper.AreFileNamesEqual(view.TextBuffer.GetTextDocument()?.FilePath, file)) {
-			MoveToActiveViewPosition(view, caretPosition);
+			MoveToViewPosition(view, caretPosition);
 		}
 		else {
-			OpenFile(file, (IWpfTextView view) => MoveToActiveViewPosition(view, caretPosition));
+			OpenFile(file, (IWpfTextView view) => MoveToViewPosition(view, caretPosition));
 		}
 	}
-	static void MoveToActiveViewPosition(IWpfTextView view, int position) {
+	static void MoveToViewPosition(IWpfTextView view, int position) {
 		position = position.Clamp(0, view.TextSnapshot.Length);
 		view.Reveal(new SnapshotSpan(view.TextSnapshot, position, 0));
 		view.MoveCaret(position);
