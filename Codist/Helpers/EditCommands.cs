@@ -6,87 +6,28 @@ using CLR;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Utilities;
+using R = Codist.Properties.Resources;
 
 namespace Codist;
 
 static class EditCommands
 {
 	public static void JoinSelectedLines(this ITextView view) {
-		const char FullWidthSpace = (char)0x3000;
-		if (!view.TryGetFirstSelectionSpan(out var span)) {
+		if (!view.TryGetFirstSelectionSpan(out var span)
+			|| view.Selection.Mode != TextSelectionMode.Stream) {
 			return;
 		}
-		var t = span.GetText();
-		ReusableResourceHolder<StringBuilder> b = default;
-		StringBuilder sb = null;
-		var p = 0;
-		bool newLine = false, noSlash = NoSlash(view);
-		char c;
-		for (int i = 0; i < t.Length; i++) {
-			switch (t[i]) {
-				case '\r':
-				case '\n':
-					newLine = true;
-					goto case ' ';
-				case ' ':
-				case FullWidthSpace:
-				case '\t':
-					int n;
-					for (n = i + 1; n < t.Length; n++) {
-						switch (t[n]) {
-							case ' ':
-							case FullWidthSpace:
-							case '\t':
-								continue;
-							case '/':
-								if (newLine && noSlash && (t[n - 1] == '/' || n + 1 < t.Length && t[n + 1] == '/')) {
-									continue;
-								}
-								goto default;
-							case '\n':
-							case '\r':
-								newLine = true;
-								continue;
-							default:
-								goto CHECK_NEW_LINE;
-						}
-					}
-				CHECK_NEW_LINE:
-					if (newLine == false) {
-						continue;
-					}
-					if (sb == null) {
-						b = ReusableStringBuilder.AcquireDefault(t.Length);
-						sb = b.Resource;
-					}
-					if (p == 0) {
-						span = new SnapshotSpan(span.Snapshot, span.Start.Position + i, span.Length - i);
-					}
-					else {
-						sb.Append(t, p, i - p);
-					}
-					if (i > 0
-						&& n < t.Length
-						&& !(c = t[n]).CeqAny('.', ')', ']', '>', '\'', '<')
-						&& c < 0x2E80
-						&& !(c = t[i - 1]).CeqAny('(', '[', '<', '\'', '>')
-						&& c < 0x2E80) {
-						sb.Append(' ');
-					}
-					i = n;
-					p = n;
-					newLine = false;
-					break;
-			}
+		bool noSlash = NoSlash(view);
+		var history = ServicesHelper.Instance.TextUndoHistory.GetHistory(view.TextBuffer);
+		using var transaction = history.CreateTransaction(R.CMD_JoinLines);
+		using var edit = view.TextBuffer.CreateEdit();
+		foreach (var item in view.Selection.SelectedSpans) {
+			JoinSpan(edit, item, noSlash);
 		}
-
-		if (p > 0) {
-			if (p < t.Length) {
-				span = new SnapshotSpan(span.Snapshot, span.Start, span.Length - (t.Length - p));
-			}
-			view.TextBuffer.Replace(span, sb.ToString());
+		if (edit.HasEffectiveChanges) {
+			edit.Apply();
+			transaction.Complete();
 		}
-		b.Dispose();
 
 		static bool NoSlash(ITextView v) {
 			var ct = v.TextBuffer.ContentType;
@@ -94,6 +35,81 @@ static class EditCommands
 				|| ct.IsOfType(Constants.CodeTypes.CPlusPlus)
 				|| ct.LikeContentType("TypeScript")
 				|| ct.LikeContentType("Java");
+		}
+
+		static void JoinSpan(ITextEdit edit, SnapshotSpan span, bool noSlash) {
+			const char FullWidthSpace = (char)0x3000;
+			var t = span.GetText();
+			ReusableResourceHolder<StringBuilder> b = ReusableStringBuilder.AcquireDefault(100);
+			StringBuilder sb = null;
+			var p = 0;
+			bool newLine = false;
+			char c;
+			for (int i = 0; i < t.Length; i++) {
+				switch (t[i]) {
+					case '\r':
+					case '\n':
+						newLine = true;
+						goto case ' ';
+					case ' ':
+					case FullWidthSpace:
+					case '\t':
+						int n;
+						for (n = i + 1; n < t.Length; n++) {
+							switch (t[n]) {
+								case ' ':
+								case FullWidthSpace:
+								case '\t':
+									continue;
+								case '/':
+									if (newLine && noSlash && (t[n - 1] == '/' || n + 1 < t.Length && t[n + 1] == '/')) {
+										continue;
+									}
+									goto default;
+								case '\n':
+								case '\r':
+									newLine = true;
+									continue;
+								default:
+									goto CHECK_NEW_LINE;
+							}
+						}
+					CHECK_NEW_LINE:
+						if (newLine == false) {
+							continue;
+						}
+						if (sb == null) {
+							b = ReusableStringBuilder.AcquireDefault(t.Length);
+							sb = b.Resource;
+						}
+						if (p == 0) {
+							span = new SnapshotSpan(span.Snapshot, span.Start.Position + i, span.Length - i);
+						}
+						else {
+							sb.Append(t, p, i - p);
+						}
+						if (i > 0
+							&& n < t.Length
+							&& !(c = t[n]).CeqAny('.', ')', ']', '>', '\'', '<')
+							&& c < 0x2E80
+							&& !(c = t[i - 1]).CeqAny('(', '[', '<', '\'', '>')
+							&& c < 0x2E80) {
+							sb.Append(' ');
+						}
+						i = n;
+						p = n;
+						newLine = false;
+						break;
+				}
+			}
+
+			if (p > 0) {
+				if (p < t.Length) {
+					span = new SnapshotSpan(span.Snapshot, span.Start, span.Length - (t.Length - p));
+				}
+				edit.Replace(span, sb.ToString());
+			}
+			b.Dispose();
 		}
 	}
 
