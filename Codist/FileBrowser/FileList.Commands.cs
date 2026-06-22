@@ -91,6 +91,10 @@ partial class FileList
 		}
 	}
 
+	void OpenFolderInCmd(object sender, RoutedEventArgs args) {
+		FileHelper.OpenInCmd(_ActiveDirPath);
+	}
+
 	void OpenOrExecuteFile(object sender, RoutedEventArgs args) {
 		FileHelper.TryRun(((FileItem)SelectedItem).FullPath);
 	}

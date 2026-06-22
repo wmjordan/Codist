@@ -62,6 +62,15 @@ namespace Codist
 			OpenPathInExplorer(folder, file);
 		}
 
+		public static void OpenInCmd(string path) {
+			if (Directory.Exists(path)) {
+				Process.Start(new ProcessStartInfo(Environment.SystemDirectory + "\\cmd.exe") { WorkingDirectory = path });
+			}
+			else {
+				Process.Start(new ProcessStartInfo(Environment.SystemDirectory + "\\cmd.exe", $"/K \"{path}\"") { WorkingDirectory = Path.GetDirectoryName(path) });
+			}
+		}
+
 		public static bool AreFileNamesEqual(string file1, string file2) {
 			return String.Equals(file1, file2, StringComparison.OrdinalIgnoreCase);
 		}

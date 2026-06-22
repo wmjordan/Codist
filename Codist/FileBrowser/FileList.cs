@@ -389,7 +389,8 @@ sealed partial class FileList : VirtualList
 	void ShowFolderMenu(ContextMenu menu) {
 		menu.Placement = PlacementMode.Bottom;
 		menu.Items.AddRange(
-			new ThemedMenuItem(IconIds.OpenFolder, R.CMD_OpenFolder, OpenInExplorer)
+			new ThemedMenuItem(IconIds.OpenFolder, R.CMD_OpenFolder, OpenInExplorer),
+			new ThemedMenuItem(IconIds.OpenWithCmd, R.CMD_OpenFolderWithCmd, OpenFolderInCmd)
 		);
 		if (!_InWindowPane) {
 			menu.Items.AddRange(
