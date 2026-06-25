@@ -44,11 +44,18 @@ namespace Codist.Taggers
 		IEnumerable<ITagSpan<IClassificationTag>> ParseSnapshot() {
 			"Full parse".Log(LogCategory.SyntaxHighlight);
 			var snapshot = _TextView.TextSnapshot;
+			var end = snapshot.Length;
 			foreach (var span in snapshot.Lines.Select(l => l.Extent)) {
+				if (span.Start == end) {
+					// HACK: sometimes there is a line starting at the end of the snapshot,
+					//   but has zero length,
+					//   we have to skip this weird case
+					break;
+				}
 				Parse(span, _TaggedContents);
 			}
 			_Tags.AddRange(_TaggedContents);
-			_Tags.LastParsed = snapshot.Length;
+			_Tags.LastParsed = end;
 			return _TaggedContents;
 		}
 
