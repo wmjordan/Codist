@@ -617,7 +617,7 @@ static class TextEditorHelper
 			MoveToViewPosition(view, caretPosition);
 		}
 		else {
-			OpenFile(file, (IWpfTextView view) => MoveToViewPosition(view, caretPosition));
+			OpenFile(file, (IWpfTextView view) => MoveToViewPosition(view, caretPosition), useDesigner: true);
 		}
 	}
 	static void MoveToViewPosition(IWpfTextView view, int position) {
