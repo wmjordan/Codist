@@ -382,39 +382,18 @@ public class AutoParenthesisHandler : IWpfTextViewCreationListener
 			return;
 		}
 		var hasCtorParam = false;
-		var hasInitProp = false;
 		foreach (var member in type.GetMembers()) {
-			switch (member.Kind) {
-				case SymbolKind.Field:
-					if (!hasInitProp) {
-						var field = member as IFieldSymbol;
-						hasInitProp |= !field.IsStatic && !field.IsReadOnly;
-					}
-					break;
-				case SymbolKind.Method:
-					if (!hasCtorParam) {
-						var method = member as IMethodSymbol;
-						hasCtorParam |= !member.IsStatic
-							&& method.MethodKind == MethodKind.Constructor
-							&& method.Parameters.Length != 0;
-						break;
-					}
-					break;
-				case SymbolKind.Property:
-					if (!hasInitProp) {
-						var prop = member as IPropertySymbol;
-						hasInitProp |= !prop.IsStatic && prop.SetMethod != null;
-					}
-					break;
+			if (member.Kind == SymbolKind.Method && !hasCtorParam) {
+				var method = member as IMethodSymbol;
+				hasCtorParam |= !member.IsStatic
+					&& method.MethodKind == MethodKind.Constructor
+					&& method.Parameters.Length != 0;
+				break;
 			}
 		}
-		if (hasCtorParam || !hasInitProp && type.InstanceConstructors.Length != 0) {
+		if (hasCtorParam || type.InstanceConstructors.Length != 0) {
 			insertion = space ? " ()" : "()";
 			caretAfterInsertion = (hasCtorParam ? 0 : 1) + (space ? 2 : 1);
-		}
-		else if (hasInitProp) {
-			insertion = " {}";
-			caretAfterInsertion = 2;
 		}
 		else {
 			insertion = null;
