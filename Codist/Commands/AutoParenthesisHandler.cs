@@ -109,7 +109,7 @@ public class AutoParenthesisHandler : IWpfTextViewCreationListener
 		}
 		else if ((si = sc.SemanticModel.GetSymbolInfo(node, ct)).HasSymbol()) {
 			if (IsAcceptableMethod(si, node, sc, ct)) {
-				InsertParentheses(sc, si, InsertionType.Method, !node.GetNodePurpose().IsAnyKind(SyntaxKind.SimpleLambdaExpression, SyntaxKind.ParenthesizedLambdaExpression));
+				InsertParentheses(sc, si, InsertionType.Method, !node.GetNodePurpose().RawKind.CeqAny(SyntaxKind.SimpleLambdaExpression, SyntaxKind.ParenthesizedLambdaExpression, SyntaxKind.CollectionInitializerExpression, SyntaxKind.ObjectInitializerExpression, SyntaxKind.Argument));
 			}
 			else if (IsConstructor(si, node)) {
 				TryConstructor(sc, node, si, ct);
@@ -205,8 +205,11 @@ public class AutoParenthesisHandler : IWpfTextViewCreationListener
 				// do not append parentheses if attribute constructor does not take parameter
 				return symbols.All(i => ((IMethodSymbol)i).Parameters.Length != 0);
 			case SyntaxKind.Argument:
-				if (IsDelegateTypedArgumentOrName(sc, (ArgumentSyntax)pNode, ct)) {
+				if (IsDelegateTypedArgumentOrName(sc, (ArgumentSyntax)pNode, ct)
 					// do not append parentheses if method used as delegate or within nameof
+					|| symbols.All(s => s.GetReturnType()?.SpecialType == SpecialType.System_Void)
+					// do not append if method returns void
+					) {
 					return false;
 				}
 				break;
