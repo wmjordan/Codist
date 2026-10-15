@@ -27,9 +27,9 @@ namespace Codist.Taggers
 		}
 
 		public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag {
-			if (_Enabled == false
-				|| Config.Instance.Features.MatchFlags(Features.SyntaxHighlight) == false
-				|| buffer.MayBeEditor() == false && textView.TextBuffer.ContentType.IsOfType("RoslynPreviewContentType") == false
+			if (!_Enabled
+				|| !Config.Instance.Features.MatchFlags(Features.SyntaxHighlight)
+				|| !textView.TextBuffer.ContentType.IsOfType("RoslynPreviewContentType") && !buffer.ContentType.IsOfType(Constants.CodeTypes.Output)
 				|| textView.Roles.Contains("STICKYSCROLL_TEXT_VIEW")
 				) {
 				return null;
@@ -42,19 +42,11 @@ namespace Codist.Taggers
 
 		CustomTagger CreateTaggerInternal(ITextView textView) {
 			CustomTagger t;
-			var d = textView.TextBuffer.GetTextDocument();
-			if (d == null) {
-				return null;
-			}
-			var p = d.FilePath;
-			if (String.IsNullOrEmpty(p)) {
-				return null;
-			}
 			if (_Taggers.TryGetValue(textView, out var ct)) {
 				return MarkAndHookEvent(textView, ct, this);
 			}
 			try {
-				t = CustomTagger.Get(textView, d);
+				t = CustomTagger.Get(textView, textView.TextBuffer.GetTextDocument());
 			}
 			catch (Exception ex) {
 				ex.Log();
@@ -67,7 +59,7 @@ namespace Codist.Taggers
 			return null;
 
 			CustomTagger MarkAndHookEvent(ITextView tv, CustomTagger ct, CustomTaggerProvider p) {
-				if (tv.Properties.ContainsProperty(typeof(CustomTagger)) == false) {
+				if (!tv.Properties.ContainsProperty(typeof(CustomTagger))) {
 					tv.Properties.AddProperty(typeof(CustomTagger), ct);
 					tv.Closed -= p.TextViewClosed;
 					tv.Closed += p.TextViewClosed;
@@ -107,7 +99,7 @@ namespace Codist.Taggers
 	sealed class CommentTaggerProvider : IViewTaggerProvider
 	{
 		public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag {
-			if (Config.Instance.Features.MatchFlags(Features.SyntaxHighlight) == false
+			if (!Config.Instance.Features.MatchFlags(Features.SyntaxHighlight)
 			#region Suppress CreateTagAggregator call
 				// note:
 				//   CommentTagger will call CreateTagAggregator<IClassificationTag>
@@ -116,8 +108,8 @@ namespace Codist.Taggers
 				//   we should return null when this happens, otherwise stack overflow will occur.
 				|| textView.TryGetProperty(out CommentTagger t)
 			#endregion
-				|| CommentTagger.IsCommentTaggable(buffer) == false
-				|| buffer.MayBeEditor() == false && textView.TextBuffer.ContentType.IsOfType("RoslynPreviewContentType") == false
+				|| !CommentTagger.IsCommentTaggable(buffer)
+				|| !buffer.MayBeEditor() && !textView.TextBuffer.ContentType.IsOfType("RoslynPreviewContentType")
 				|| textView.Roles.Contains("STICKYSCROLL_TEXT_VIEW")
 				) {
 				return null;
@@ -188,12 +180,11 @@ namespace Codist.Taggers
 		}
 
 		ITagger<IClassificationTag> GetTagger(ITextView textView, ITextBuffer buffer) {
-			if (_Enabled == false
-				|| buffer.MayBeEditor() == false // it seems that the analyzer preview windows do not call the View_Close event handler, thus we exclude them here
+			if (!_Enabled
+				|| !buffer.MayBeEditor() // it seems that the analyzer preview windows do not call the View_Close event handler, thus we exclude them here
 				|| textView.TextBuffer.ContentType.IsOfType("RoslynPreviewContentType")
-				|| textView.Roles.ContainsAny(__TaggableRoles) == false && textView.TextBuffer.ContentType.TypeName != Constants.CodeTypes.InteractiveContent
-				|| textView.Roles.Contains("PREVIEWTOOLTIPTEXTVIEWROLE")
-				|| textView.Roles.Contains("STICKYSCROLL_TEXT_VIEW") // disables advanced highlight for it does not work well if any style contains font size definition
+				|| !textView.Roles.ContainsAny(__TaggableRoles) && textView.TextBuffer.ContentType.TypeName != Constants.CodeTypes.InteractiveContent
+				|| textView.Roles.ContainsAny(["PREVIEWTOOLTIPTEXTVIEWROLE", "STICKYSCROLL_TEXT_VIEW"]) // disables advanced highlight for it does not work well if any style contains font size definition
 				) {
 				return null;
 			}

@@ -23,9 +23,7 @@ internal sealed class SmartBarFactory : IWpfTextViewCreationListener
 	/// <param name="textView">The <see cref="IWpfTextView"/> where the <see cref="SmartBar"/> should be placed.</param>
 	public void TextViewCreated(IWpfTextView textView) {
 		if (Config.Instance.Features.MatchFlags(Features.SmartBar) == false
-			|| textView.TextBuffer.MayBeEditor() == false
-			|| textView.Roles.Contains("WATCHWINDOWEDIT")
-			|| textView.Roles.Contains("CHATRESPONSECODEBLOCK")
+			|| textView.Roles.ContainsAny(["WATCHWINDOWEDIT", "CHATRESPONSECODEBLOCK"])
 			) {
 			return;
 		}

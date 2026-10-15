@@ -96,7 +96,6 @@ sealed class LineNumberMarginFactory : IWpfTextViewMarginProvider
 	public IWpfTextViewMargin CreateMargin(IWpfTextViewHost wpfTextViewHost, IWpfTextViewMargin marginContainer) {
 		return Config.Instance.Features.MatchFlags(Features.ScrollbarMarkers)
 			&& marginContainer is IVerticalScrollBar scrollBar
-			&& wpfTextViewHost.TextView.TextBuffer.MayBeEditor()
 			? new LineNumberMargin(wpfTextViewHost.TextView, scrollBar)
 			: null;
 	}
@@ -119,7 +118,6 @@ sealed class SelectionMarginFactory : IWpfTextViewMarginProvider
 	public IWpfTextViewMargin CreateMargin(IWpfTextViewHost wpfTextViewHost, IWpfTextViewMargin marginContainer) {
 		return Config.Instance.Features.MatchFlags(Features.ScrollbarMarkers)
 			&& marginContainer is IVerticalScrollBar scrollBar
-			&& wpfTextViewHost.TextView.TextBuffer.MayBeEditor()
 			? new SelectionMargin(wpfTextViewHost.TextView, scrollBar)
 			: null;
 	}
@@ -141,7 +139,6 @@ sealed class MatchSelectionMarginFactory : IWpfTextViewMarginProvider
 	public IWpfTextViewMargin CreateMargin(IWpfTextViewHost wpfTextViewHost, IWpfTextViewMargin marginContainer) {
 		return Config.Instance.Features.MatchFlags(Features.ScrollbarMarkers)
 			&& marginContainer is IVerticalScrollBar scrollBar
-			&& wpfTextViewHost.TextView.TextBuffer.MayBeEditor()
 			? new MatchMargin(wpfTextViewHost.TextView, scrollBar)
 			: null;
 	}
