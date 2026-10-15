@@ -62,8 +62,18 @@ sealed partial class OptionsWindow
 							MakeToolButton(ClassificationFormatMapExporter.Instance),
 							MakeToolButton(EditorOptionExporter.Instance)
 						}
-					}
+					},
+					ShowVsVersion()
 				);
+			}
+
+			static TextBox ShowVsVersion() {
+				return new TextBox {
+					Text = R.OT_VisualStudio + ":" + CodistPackage.VsVersion,
+					IsReadOnly = true,
+					Padding = WpfHelper.SmallMargin,
+					Margin = WpfHelper.SmallMargin
+				};
 			}
 
 			protected override void LoadConfig(Config config) {
