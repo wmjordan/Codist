@@ -3389,4 +3389,7 @@ Shift: 匹配大小写</value>
   <data name="OT_ListRecentlyClosedFiles" xml:space="preserve">
     <value>在已打开的文档列表中列出最近关闭的文档: </value>
   </data>
+  <data name="T_NotLoaded" xml:space="preserve">
+    <value>尚未加载</value>
+  </data>
 </root>

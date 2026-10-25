@@ -8726,6 +8726,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Not loaded.
+        /// </summary>
+        internal static string T_NotLoaded {
+            get {
+                return ResourceManager.GetString("T_NotLoaded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Not saved yet.
         /// </summary>
         internal static string T_NotSaved {

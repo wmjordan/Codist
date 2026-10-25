@@ -187,8 +187,8 @@ sealed class FileItem : INotifyPropertyChanged
 	}
 	internal void SetStateFromRunningDocumentInfo(RunningDocumentInfo docInfo, Chain<int> icons) {
 		if (!docInfo.IsDocumentInitialized) {
-			//_State |= FileState.Uninitialized;
-			//icons.Add(IconIds.Hibernated);
+			_State |= FileState.Uninitialized;
+			icons.Add(IconIds.Hibernated);
 			return;
 		}
 

@@ -54,9 +54,9 @@ sealed partial class FileList
 					if (state.MatchFlags(FileState.RecentlyClosed)) {
 						s.AddGlyph(IconIds.FileClosed).Append(R.T_RecentlyClosed);
 					}
-					//if (state.MatchFlags(FileState.Uninitialized)) {
-					//	s.AddGlyph(IconIds.Hibernated).Append("Not loaded");
-					//}
+					if (state.MatchFlags(FileState.Uninitialized)) {
+						s.AddGlyph(IconIds.Hibernated).Append(R.T_NotLoaded);
+					}
 					panel.Children.Add(s);
 				}
 			}
@@ -92,4 +92,16 @@ sealed partial class FileList
 		}
 	}
 
+	sealed class FileInitializationConverter : IValueConverter
+	{
+		public readonly static FileInitializationConverter Instance = new();
+
+		public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
+			return value is FileItem item && item.FileState.HasAnyFlag(FileState.Uninitialized | FileState.RecentlyClosed) ? 0.5 : 1;
+		}
+
+		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) {
+			throw new NotImplementedException();
+		}
+	}
 }

@@ -3405,4 +3405,7 @@ List currently opened code documents</value>
   <data name="OT_ListRecentlyClosedFiles" xml:space="preserve">
     <value>List recently closed files in Opened Documents list: </value>
   </data>
+  <data name="T_NotLoaded" xml:space="preserve">
+    <value>Not loaded</value>
+  </data>
 </root>

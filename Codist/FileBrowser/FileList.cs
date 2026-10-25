@@ -62,6 +62,9 @@ sealed partial class FileList : VirtualList
 				new Setter(HorizontalContentAlignmentProperty, HorizontalAlignment.Stretch),
 				new Setter(PaddingProperty, WpfHelper.TinyMargin),
 				new Setter(MaxWidthProperty, 550d),
+				new Setter(OpacityProperty, new Binding {
+					Converter = FileInitializationConverter.Instance,
+				}),
 				new Setter(ToolTipService.ToolTipProperty, new Binding {
 					Converter = new FileItemToTooltipConverter(this)
 				}),

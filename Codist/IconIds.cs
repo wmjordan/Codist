@@ -130,7 +130,7 @@ static class IconIds
 	public const int FileLocations = KnownImageIds.DocumentCollection;
 	public const int FileClosed = KnownImageIds.History;
 	public const int GlobalNamespace = KnownImageIds.Home;
-	public const int Hibernated = KnownImageIds.OnlineStatusAway;
+	public const int Hibernated = KnownImageIds.HiddenFile;
 	public const int Module = KnownImageIds.Module;
 	public const int Headings = KnownImageIds.Flag;
 	public const int Heading1 = KnownImageIds.FlagDarkRed;
