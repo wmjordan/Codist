@@ -144,7 +144,8 @@ public class AutoParenthesisHandler : IWpfTextViewCreationListener
 				case SyntaxKind.EqualsValueClause:
 					break;
 				case SyntaxKind.Argument:
-					if ((si.Symbol.GetReturnType() as INamedTypeSymbol).DelegateInvokeMethod.ReturnsVoid) {
+					if ((si.Symbol.GetReturnType() as INamedTypeSymbol).DelegateInvokeMethod.ReturnsVoid
+						|| IsDelegateTypedArgumentOrName(sc, (ArgumentSyntax)node, ct)) {
 						return;
 					}
 					break;
