@@ -29,7 +29,7 @@ namespace Codist.Taggers
 		public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag {
 			if (!_Enabled
 				|| !Config.Instance.Features.MatchFlags(Features.SyntaxHighlight)
-				|| !textView.TextBuffer.ContentType.IsOfType("RoslynPreviewContentType") && !buffer.ContentType.IsOfType(Constants.CodeTypes.Output)
+				|| !buffer.MayBeEditor() && !textView.TextBuffer.ContentType.IsOfType("RoslynPreviewContentType") && !buffer.ContentType.IsOfType(Constants.CodeTypes.Output)
 				|| textView.Roles.Contains("STICKYSCROLL_TEXT_VIEW")
 				) {
 				return null;
