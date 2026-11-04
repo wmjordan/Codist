@@ -331,6 +331,13 @@ public class AutoParenthesisHandler : IWpfTextViewCreationListener
 							break;
 						}
 					}
+					else if (type == InsertionType.Constructor && candidate is INamedTypeSymbol t) {
+						allNoParam = !t.Constructors.Any(i => i.Parameters.Length != 0);
+						allVoidMethod = false;
+						if (!allNoParam) {
+							break;
+						}
+					}
 					else { // is type
 						allNoParam = false;
 						allVoidMethod = false;
@@ -386,16 +393,14 @@ public class AutoParenthesisHandler : IWpfTextViewCreationListener
 			return;
 		}
 		var hasCtorParam = false;
-		foreach (var member in type.GetMembers()) {
-			if (member.Kind == SymbolKind.Method && !hasCtorParam) {
-				var method = member as IMethodSymbol;
-				hasCtorParam |= !member.IsStatic
-					&& method.MethodKind == MethodKind.Constructor
-					&& method.Parameters.Length != 0;
+		var ctors = type.InstanceConstructors;
+		foreach (var ctor in ctors) {
+			if (!hasCtorParam
+				&& (hasCtorParam |= !ctor.IsStatic && ctor.Parameters.Length != 0)) {
 				break;
 			}
 		}
-		if (hasCtorParam || type.InstanceConstructors.Length != 0) {
+		if (hasCtorParam || ctors.Length != 0) {
 			insertion = space ? " ()" : "()";
 			caretAfterInsertion = (hasCtorParam ? 0 : 1) + (space ? 2 : 1);
 		}
