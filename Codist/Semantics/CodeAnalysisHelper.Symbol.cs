@@ -286,6 +286,9 @@ namespace Codist
 				else if (symbol.IsStatic && symbol.ContainingType?.TypeKind == TypeKind.Interface) {
 					return "static abstract ";
 				}
+			else if (symbol.Kind == SymbolKind.NamedType && ((INamedTypeSymbol)symbol).IsClosed()) {
+				return "closed ";
+			}
 				return "abstract ";
 			}
 			if (symbol.IsStatic && symbol.Kind != SymbolKind.Namespace) {
@@ -1055,7 +1058,7 @@ namespace Codist
 				TypeKind.Delegate => "delegate",
 				TypeKind.Enum => "enum",
 				TypeKind.Interface => "interface",
-				TypeKind.Struct => type.IsRecord() ? "record struct" : "struct",
+			TypeKind.Struct => type.IsRecord() ? "record struct" : type.IsUnion() ? "union" : "struct",
 				TypeKind.TypeParameter => "type parameter",
 				Extension => "extension",
 				_ => "type",
