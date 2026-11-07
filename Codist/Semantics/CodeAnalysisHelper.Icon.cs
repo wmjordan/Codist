@@ -168,16 +168,26 @@ namespace Codist
 							default: return IconIds.Interface;
 						}
 					case TypeKind.Struct:
-						switch (t.DeclaredAccessibility) {
-							case Accessibility.Public: return KnownImageIds.StructurePublic;
-							case Accessibility.Protected:
-							case Accessibility.ProtectedOrInternal:
-							case Accessibility.ProtectedAndInternal:
-								return KnownImageIds.StructureProtected;
-							case Accessibility.Private: return KnownImageIds.StructurePrivate;
-							case Accessibility.Internal: return KnownImageIds.StructureInternal;
-							default: return IconIds.Structure;
+						if (t.IsUnion()) {
+							return t.DeclaredAccessibility switch {
+								Accessibility.Public => KnownImageIds.UnionPublic,
+								Accessibility.Protected
+									or Accessibility.ProtectedOrInternal
+									or Accessibility.ProtectedAndInternal => KnownImageIds.UnionProtected,
+								Accessibility.Private => KnownImageIds.UnionPrivate,
+								Accessibility.Internal => KnownImageIds.UnionInternal,
+								_ => IconIds.Union,
+							};
 						}
+						return t.DeclaredAccessibility switch {
+							Accessibility.Public => KnownImageIds.StructurePublic,
+							Accessibility.Protected
+								or Accessibility.ProtectedOrInternal
+								or Accessibility.ProtectedAndInternal => KnownImageIds.StructureProtected,
+							Accessibility.Private => KnownImageIds.StructurePrivate,
+							Accessibility.Internal => KnownImageIds.StructureInternal,
+							_ => IconIds.Structure,
+						};
 					case Extension:
 						return IconIds.ExtensionDeclaration;
 					case TypeKind.TypeParameter:
@@ -212,6 +222,7 @@ namespace Codist
 				case SyntaxKind.EnumDeclaration: return GetEnumIcon((EnumDeclarationSyntax)node);
 				case SyntaxKind.StructDeclaration:
 				case RecordStructDeclaration:
+				case UnionDeclaration:
 					return GetStructIcon((BaseTypeDeclarationSyntax)node);
 				case SyntaxKind.InterfaceDeclaration: return GetInterfaceIcon((InterfaceDeclarationSyntax)node);
 				case SyntaxKind.MethodDeclaration: return GetMethodIcon((MethodDeclarationSyntax)node);

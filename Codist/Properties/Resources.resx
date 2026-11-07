@@ -874,7 +874,7 @@ Use space to separate keywords.</value>
     <value>Base type</value>
   </data>
   <data name="OT_BaseTypeTip" xml:space="preserve">
-    <value>Displays base type of a symbol</value>
+    <value>Displays base type of a symbol, or case types of a union</value>
   </data>
   <data name="OT_Behavior" xml:space="preserve">
     <value>Behavior</value>
@@ -3407,5 +3407,8 @@ List currently opened code documents</value>
   </data>
   <data name="T_NotLoaded" xml:space="preserve">
     <value>Not loaded</value>
+  </data>
+  <data name="T_CaseType" xml:space="preserve">
+    <value>Case type: </value>
   </data>
 </root>

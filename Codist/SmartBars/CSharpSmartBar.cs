@@ -411,6 +411,7 @@ sealed class CSharpSmartBar : SmartBar
 			case SyntaxKind.StructDeclaration:
 			case CodeAnalysisHelper.RecordDeclaration:
 			case CodeAnalysisHelper.RecordStructDeclaration:
+			case CodeAnalysisHelper.UnionDeclaration:
 				if ((node as TypeDeclarationSyntax).Modifiers.Any(SyntaxKind.StaticKeyword) == false) {
 					AddEditorCommand(MyToolBar, IconIds.ExtractInterface, "Refactor.ExtractInterface", R.CMD_ExtractInterface);
 				}

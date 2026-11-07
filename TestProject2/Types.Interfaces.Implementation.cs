@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TestProject.Interfaces.Implementation;
+namespace TestProject.Types.Interfaces.Implementation;
 
 interface IBase
 {

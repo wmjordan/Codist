@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace TestProject.Interfaces.Static;
+namespace TestProject.Types.Interfaces.Static;
 
 [ApiVersion(11)]
 public interface IMonoid<TSelf> where TSelf : IMonoid<TSelf>

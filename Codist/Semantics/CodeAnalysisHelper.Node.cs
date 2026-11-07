@@ -84,6 +84,7 @@ namespace Codist
 				case SyntaxKind.PropertyDeclaration:
 				case SyntaxKind.StructDeclaration:
 				case RecordStructDeclaration:
+				case UnionDeclaration:
 				case SyntaxKind.VariableDeclaration:
 				case SyntaxKind.LocalFunctionStatement:
 				case SyntaxKind.SingleVariableDesignation:
@@ -105,6 +106,7 @@ namespace Codist
 				case SyntaxKind.InterfaceDeclaration:
 				case SyntaxKind.StructDeclaration:
 				case RecordStructDeclaration:
+				case UnionDeclaration:
 				case ExtensionDeclaration:
 					return DeclarationCategory.Type;
 				case SyntaxKind.FieldDeclaration:
@@ -141,6 +143,7 @@ namespace Codist
 				case SyntaxKind.NamespaceDeclaration:
 				case RecordDeclaration:
 				case RecordStructDeclaration:
+				case UnionDeclaration:
 				case FileScopedNamespaceDeclaration:
 					return true;
 			}
@@ -156,6 +159,7 @@ namespace Codist
 				case SyntaxKind.StructDeclaration:
 				case RecordDeclaration:
 				case RecordStructDeclaration:
+				case UnionDeclaration:
 				case ExtensionDeclaration:
 					return true;
 			}
@@ -170,6 +174,7 @@ namespace Codist
 				case SyntaxKind.StructDeclaration:
 				case RecordDeclaration:
 				case RecordStructDeclaration:
+				case UnionDeclaration:
 				case ExtensionDeclaration:
 					return true;
 			}
@@ -319,6 +324,7 @@ namespace Codist
 				case SyntaxKind.EnumDeclaration:
 				case RecordDeclaration:
 				case RecordStructDeclaration:
+				case UnionDeclaration:
 					return ((BaseTypeDeclarationSyntax)node).Identifier;
 				case SyntaxKind.DelegateDeclaration: return ((DelegateDeclarationSyntax)node).Identifier;
 				case SyntaxKind.MethodDeclaration: return ((MethodDeclarationSyntax)node).Identifier;
@@ -343,7 +349,8 @@ namespace Codist
 				case SyntaxKind.ClassDeclaration: return "class";
 				case RecordDeclaration: return "record";
 				case SyntaxKind.EnumDeclaration: return "enum";
-				case SyntaxKind.StructDeclaration: return "struct";
+				case SyntaxKind.StructDeclaration:
+				case UnionDeclaration: return "struct";
 				case RecordStructDeclaration: return "record struct";
 				case SyntaxKind.InterfaceDeclaration: return "interface";
 				case SyntaxKind.ConstructorDeclaration: return "constructor";
@@ -535,6 +542,7 @@ namespace Codist
 				case SyntaxKind.InterfaceDeclaration:
 				case RecordDeclaration:
 				case RecordStructDeclaration:
+				case UnionDeclaration:
 					var t1 = (TypeDeclarationSyntax)node;
 					var t2 = (TypeDeclarationSyntax)other;
 					return t1.Arity == t2.Arity && t1.Identifier.Text == t2.Identifier.Text;
@@ -659,6 +667,7 @@ namespace Codist
 				case SyntaxKind.InterfaceDeclaration:
 				case RecordDeclaration:
 				case RecordStructDeclaration:
+				case UnionDeclaration:
 					return GetTypeSignature((TypeDeclarationSyntax)node);
 				case ExtensionDeclaration:
 					return "(" + ((TypeDeclarationSyntax)node).GetParameterList().Parameters.FirstOrDefault()?.Type?.ToString() + ")";
@@ -1108,6 +1117,7 @@ namespace Codist
 					case SyntaxKind.StructDeclaration:
 					case RecordDeclaration:
 					case RecordStructDeclaration:
+					case UnionDeclaration:
 						yield return child;
 						goto case SyntaxKind.CompilationUnit;
 					case SyntaxKind.MethodDeclaration:

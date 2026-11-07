@@ -160,6 +160,7 @@ static class IconIds
 	public const int Disposable = KnownImageIds.InterfacePublic | KnownImageIds.Brush << OverlayShift;
 	public const int Discard = KnownImageIds.HiddenFile;
 	public const int BaseTypes = KnownImageIds.ParentChild;
+	public const int Union = KnownImageIds.Union;
 	public const int MethodOverloads = KnownImageIds.MethodSet;
 	public const int XmlDocComment = KnownImageIds.Comment;
 	public const int TypeParameters = KnownImageIds.TypeDefinition;

@@ -863,7 +863,7 @@ Shift：粘贴并选中下一项（整个单词）</value>
     <value>基类</value>
   </data>
   <data name="OT_BaseTypeTip" xml:space="preserve">
-    <value>显示基类</value>
+    <value>显示基类或联合类型</value>
   </data>
   <data name="OT_Behavior" xml:space="preserve">
     <value>行为</value>
@@ -3391,5 +3391,8 @@ Shift: 匹配大小写</value>
   </data>
   <data name="T_NotLoaded" xml:space="preserve">
     <value>尚未加载</value>
+  </data>
+  <data name="T_CaseType" xml:space="preserve">
+    <value>联合类: </value>
   </data>
 </root>

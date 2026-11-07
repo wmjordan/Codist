@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TestProject.Partial;
+namespace TestProject.Types.Partial;
 
 [ApiVersion(13)]
 static class PartialProperty

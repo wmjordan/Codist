@@ -837,7 +837,7 @@ namespace Codist.QuickInfo
 				&& typeSymbol.TypeKind == TypeKind.Interface) {
 				var declarationType = (node.Parent.UnqualifyExceptNamespace().Parent as BaseListSyntax)?.Parent;
 				var declaredClass = declarationType?.Kind()
-					.CeqAny(SyntaxKind.ClassDeclaration, SyntaxKind.StructDeclaration, CodeAnalysisHelper.RecordDeclaration, CodeAnalysisHelper.RecordStructDeclaration) == true
+				.CeqAny(SyntaxKind.ClassDeclaration, SyntaxKind.StructDeclaration, CodeAnalysisHelper.RecordDeclaration, CodeAnalysisHelper.RecordStructDeclaration, CodeAnalysisHelper.UnionDeclaration) == true
 					? context.semanticModel.GetDeclaredSymbol(declarationType, context.cancellationToken) as INamedTypeSymbol
 					: null;
 				ShowInterfaceMembers(qiContent, typeSymbol, declaredClass);
@@ -902,16 +902,32 @@ namespace Codist.QuickInfo
 
 		static void ShowBaseType(InfoContainer qiContent, ITypeSymbol typeSymbol) {
 			var baseType = typeSymbol.BaseType;
-			if (baseType == null || baseType.IsCommonBaseType()) {
+		if (baseType.IsCommonBaseType()) {
+			if (typeSymbol.IsUnion()) {
+				ShowUnionCaseTypes(qiContent, typeSymbol);
+			}
 				return;
 			}
 			var classList = new BlockItem(IconIds.BaseTypes, R.T_BaseType, true)
 				.AddSymbol(baseType, null, __SymbolFormatter);
 			var info = new GeneralInfoBlock(classList);
 			while ((baseType = baseType.BaseType) != null) {
-				if (baseType.IsCommonBaseType() == false) {
+			if (!baseType.IsCommonBaseType()) {
 					classList.Append(" - ").AddSymbol(baseType, null, __SymbolFormatter);
 				}
+		}
+		qiContent.Add(info);
+	}
+
+	static void ShowUnionCaseTypes(InfoContainer qiContent, ITypeSymbol typeSymbol) {
+		var typeList = new BlockItem(IconIds.Union, R.T_CaseType, true);
+		var info = new GeneralInfoBlock(typeList);
+		int c = 0;
+		foreach (var caseType in typeSymbol.GetUnionCaseTypes()) {
+			if (c++ != 0) {
+				typeList.Append(", ");
+			}
+			typeList.AddSymbol(caseType, null, __SymbolFormatter);
 			}
 			qiContent.Add(info);
 		}

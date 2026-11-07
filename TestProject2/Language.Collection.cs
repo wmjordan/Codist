@@ -64,3 +64,10 @@ static class CollectionExpression
 	}
 }
 
+[ApiVersion(15)]
+static class CollectionExpressionWithArgument
+{
+	static readonly string[] values = ["one", "two", "three"];
+	static readonly List<string> _list = [with(capacity: values.Length * 2), .. values];
+	static readonly HashSet<string> _set = [with(StringComparer.OrdinalIgnoreCase), "Hello", "HELLO", "hello"];
+}

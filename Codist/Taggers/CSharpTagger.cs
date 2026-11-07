@@ -496,8 +496,9 @@ namespace Codist.Taggers
 						return __Classifications.InterfaceName;
 					case SyntaxKind.EnumDeclaration:
 						return __Classifications.EnumName;
-					case CodeAnalysisHelper.RecordStructDeclaration:
 					case SyntaxKind.StructDeclaration:
+					case CodeAnalysisHelper.RecordStructDeclaration:
+					case CodeAnalysisHelper.UnionDeclaration:
 						return __Classifications.StructName;
 					case SyntaxKind.Attribute:
 						return __Classifications.AttributeName;

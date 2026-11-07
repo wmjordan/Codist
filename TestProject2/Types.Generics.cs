@@ -2,7 +2,7 @@
 using IntDict = System.Collections.Generic.Dictionary<int, object>;
 using StringDict = System.Collections.Generic.Dictionary<string, object>;
 
-namespace TestProject.Generics;
+namespace TestProject.Types.Generics;
 
 class GenericReferenceTest
 {

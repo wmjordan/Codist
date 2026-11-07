@@ -23,7 +23,7 @@ namespace Codist
 				?? semanticModel.GetTypeInfo(node, cancellationToken).Type
 				?? (node.IsKind(SyntaxKind.FieldDeclaration) ? semanticModel.GetDeclaredSymbol(((FieldDeclarationSyntax)node).Declaration.Variables.First(), cancellationToken)
 					: node.IsKind(SyntaxKind.EventFieldDeclaration) ? semanticModel.GetDeclaredSymbol(((EventFieldDeclarationSyntax)node).Declaration.Variables.First(), cancellationToken)
-					: node.IsKind(RecordDeclaration) || node.IsKind(RecordStructDeclaration) ? semanticModel.GetDeclaredSymbol(node, cancellationToken)
+					: node.IsAnyKind(RecordDeclaration, RecordStructDeclaration, UnionDeclaration) ? semanticModel.GetDeclaredSymbol(node, cancellationToken)
 					: null)
 				;
 		}
@@ -42,7 +42,7 @@ namespace Codist
 				s = semanticModel.GetSymbolInfo(node.Parent, cancellationToken).Symbol;
 			}
 			else if (node is AccessorDeclarationSyntax
-				|| k.CeqAny(SyntaxKind.TypeParameter, SyntaxKind.Parameter, RecordDeclaration, RecordStructDeclaration)) {
+				|| k.CeqAny(SyntaxKind.TypeParameter, SyntaxKind.Parameter, RecordDeclaration, RecordStructDeclaration, UnionDeclaration)) {
 				s = semanticModel.GetDeclaredSymbol(node, cancellationToken);
 			}
 			if (s != null) {
@@ -1384,6 +1384,15 @@ namespace Codist
 		public static int GetNullableAnnotation(this ITypeSymbol type) {
 			return type != null ? NonPublicOrFutureAccessors.GetTypeNullableAnnotation(type) : 0;
 		}
+		public static bool IsUnion(this ITypeSymbol type) {
+			return type != null && NonPublicOrFutureAccessors.GetTypeIsUnion(type);
+		}
+		public static ImmutableArray<ITypeSymbol> GetUnionCaseTypes(this ITypeSymbol type) {
+			return type != null ? NonPublicOrFutureAccessors.GetTypeUnionCaseTypes(type) : ImmutableArray<ITypeSymbol>.Empty;
+		}
+		public static bool IsClosed(this ITypeSymbol type) {
+			return type != null && NonPublicOrFutureAccessors.GetTypeIsClosed(type);
+		}
 		public static IParameterSymbol GetExtensionParameter(this ITypeSymbol type) {
 			return type != null ? NonPublicOrFutureAccessors.GetTypeExtensionParameter(type) : null;
 		}
@@ -1969,6 +1978,12 @@ namespace Codist
 			public static readonly Func<ITypeSymbol, bool> GetTypeIsNativeIntegerType = ReflectionHelper.CreateGetPropertyMethod<ITypeSymbol, bool>("IsNativeIntegerType");
 
 			public static readonly Func<ITypeSymbol, int> GetTypeNullableAnnotation = ReflectionHelper.CreateGetPropertyMethod<ITypeSymbol, int>("NullableAnnotation");
+
+			public static readonly Func<ITypeSymbol, bool> GetTypeIsUnion = ReflectionHelper.CreateGetPropertyMethod<ITypeSymbol, bool>("IsUnion");
+
+			public static readonly Func<ITypeSymbol, ImmutableArray<ITypeSymbol>> GetTypeUnionCaseTypes = ReflectionHelper.CreateGetPropertyMethod<ITypeSymbol, ImmutableArray<ITypeSymbol>>("UnionCaseTypes");
+
+			public static readonly Func<ITypeSymbol, bool> GetTypeIsClosed = ReflectionHelper.CreateGetPropertyMethod<ITypeSymbol, bool>("IsClosed");
 
 			public static readonly Func<ITypeSymbol, IParameterSymbol> GetTypeExtensionParameter = ReflectionHelper.CreateGetPropertyMethod<ITypeSymbol, IParameterSymbol>("ExtensionParameter");
 

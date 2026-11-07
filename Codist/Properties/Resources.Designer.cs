@@ -3655,7 +3655,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Displays base type of a symbol.
+        ///   Looks up a localized string similar to Displays base type of a symbol, or case types of a union.
         /// </summary>
         internal static string OT_BaseTypeTip {
             get {
@@ -7005,6 +7005,15 @@ namespace Codist.Properties {
         internal static string T_CaseSensitive {
             get {
                 return ResourceManager.GetString("T_CaseSensitive", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Case type: .
+        /// </summary>
+        internal static string T_CaseType {
+            get {
+                return ResourceManager.GetString("T_CaseType", resourceCulture);
             }
         }
         

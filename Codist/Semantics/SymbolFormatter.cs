@@ -675,7 +675,9 @@ namespace Codist
 				case SyntaxKind.DestructorDeclaration:
 				case CodeAnalysisHelper.RecordDeclaration: return Class;
 				case SyntaxKind.StructDeclaration:
-				case CodeAnalysisHelper.RecordStructDeclaration: return Struct;
+				case CodeAnalysisHelper.RecordStructDeclaration:
+				case CodeAnalysisHelper.UnionDeclaration:
+					return Struct;
 				case SyntaxKind.InterfaceDeclaration: return Interface;
 				case SyntaxKind.EventDeclaration:
 				case SyntaxKind.EventFieldDeclaration: return Event;
@@ -974,8 +976,8 @@ namespace Codist
 				}
 			}
 			else if (symbol.IsAbstract) {
-				if ((symbol as INamedTypeSymbol)?.TypeKind != TypeKind.Interface) {
-					info.Append("abstract ", Keyword);
+				if ((t = symbol as INamedTypeSymbol)?.TypeKind != TypeKind.Interface) {
+					info.Append(t.IsClosed() ? "closed " : "abstract ", Keyword);
 				}
 			}
 			else if (symbol.IsVirtual) {
