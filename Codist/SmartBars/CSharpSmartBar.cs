@@ -450,16 +450,13 @@ sealed class CSharpSmartBar : SmartBar
 	}
 
 	void DeleteCurrentNode(CommandContext ctx) {
-		var node = _Context.Node;
-		ctx.View.SelectNode(node, true);
-		ctx.View.Edit(node, (view, n, edit) => edit.Delete(n.FullSpan.ToSpan()));
+		ctx.View.Edit(_Context.Node, (_, n, edit) => edit.Delete(n.GetSematicSpan(true)));
 	}
 
 	void DeleteParentDeclaration(CommandContext ctx) {
 		var node = _Context.Node.Parent?.Parent;
 		if (node != null) {
-			ctx.View.SelectNode(node, true);
-			ctx.View.Edit(node, (view, n, edit) => edit.Delete(n.FullSpan.ToSpan()));
+			ctx.View.Edit(node, (_, n, edit) => edit.Delete(n.GetSematicSpan(true)));
 		}
 	}
 

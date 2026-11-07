@@ -1249,7 +1249,8 @@ namespace Codist
 
 		#region Trivias
 		/// <summary>Gets full span for ordinary nodes, excluding leading directives; gets span for regions.</summary>
-		public static Span GetSematicSpan(this SyntaxNode node, bool expandRegion) {
+		/// <param name="expandToEndRegion">Expands selection to #endregion if #region is the selected node</param>
+		public static Span GetSematicSpan(this SyntaxNode node, bool expandToEndRegion) {
 			int start, end;
 			SyntaxTriviaList tl;
 			SyntaxTrivia t;
@@ -1263,7 +1264,7 @@ namespace Codist
 						start = t.SpanStart;
 					}
 				}
-				tl = (expandRegion ? (region.GetEndRegion() ?? (SyntaxNode)region) : region).GetTrailingTrivia();
+				tl = (expandToEndRegion ? (region.GetEndRegion() ?? (SyntaxNode)region) : region).GetTrailingTrivia();
 				for (int i = tl.Count - 1; i >= 0; i--) {
 					t = tl[i];
 					if (t.IsKind(SyntaxKind.EndOfLineTrivia)) {
