@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Codist.Controls;
 using Microsoft.CodeAnalysis;
 using R = Codist.Properties.Resources;
-using OD = Codist.SymbolCommands.PredefinedOptionDescriptors;
+using OD = Codist.SymbolCommands.OptionDescriptor;
 
 namespace Codist.SymbolCommands;
 

@@ -8,7 +8,7 @@ using Codist.Controls;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using R = Codist.Properties.Resources;
-using OD = Codist.SymbolCommands.PredefinedOptionDescriptors;
+using OD = Codist.SymbolCommands.OptionDescriptor;
 
 namespace Codist.SymbolCommands;
 
@@ -16,7 +16,7 @@ sealed class FindMethodsBySignatureCommand
 	: CommonListCommand<ISymbol>
 {
 	static readonly OptionDescriptor[] __Options = [
-		new OptionDescriptor(IconIds.ExcludeGeneric, CommandOptions.NoTypeArgument, R.CMDT_ExcludeGenerics),
+		new OD(IconIds.ExcludeGeneric, CommandOptions.NoTypeArgument, R.CMDT_ExcludeGenerics),
 		OD.SourceCodeScope,
 		OD.ExternalScope,
 		OD.NamespaceScope,

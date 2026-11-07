@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.FindSymbols;
 using R = Codist.Properties.Resources;
-using OD = Codist.SymbolCommands.PredefinedOptionDescriptors;
+using OD = Codist.SymbolCommands.OptionDescriptor;
 
 namespace Codist.SymbolCommands;
 

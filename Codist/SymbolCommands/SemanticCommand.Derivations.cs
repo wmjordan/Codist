@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.FindSymbols;
 using R = Codist.Properties.Resources;
 using TypeRelations = Codist.SymbolCommands.SymbolRelations<Microsoft.CodeAnalysis.INamedTypeSymbol, Microsoft.CodeAnalysis.INamedTypeSymbol>;
-using OD = Codist.SymbolCommands.PredefinedOptionDescriptors;
+using OD = Codist.SymbolCommands.OptionDescriptor;
 
 namespace Codist.SymbolCommands;
 
@@ -175,7 +175,7 @@ sealed class FindOverridesCommand
 	: AnalysisListCommandBase<ImmutableArray<ISymbol>>
 {
 	static readonly OptionDescriptor[] __Options = [
-		PredefinedOptionDescriptors.CurrentProjectScope,
+		OD.CurrentProjectScope,
 		OD.RelatedProjectsScope,
 		OD.SourceCodeScope,
 		OD.ExternalScope,

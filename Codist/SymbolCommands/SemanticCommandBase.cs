@@ -240,8 +240,8 @@ sealed class FindSymbolsWithNameCommand
 	static readonly OptionDescriptor[] __Options = [
 		new OptionDescriptor(IconIds.SameName, CommandOptions.ExtractMatch, R.CMDT_FindSymbolWithFullName),
 		new OptionDescriptor(IconIds.MatchCase, CommandOptions.MatchCase, R.CMDT_MatchCase),
-		PredefinedOptionDescriptors.SourceCodeScope,
-		PredefinedOptionDescriptors.ExternalScope
+		OptionDescriptor.SourceCodeScope,
+		OptionDescriptor.ExternalScope
 		];
 
 	public override int ImageId => IconIds.FindSymbolsWithName;

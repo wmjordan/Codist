@@ -6,15 +6,6 @@ namespace Codist.SymbolCommands;
 
 sealed class OptionDescriptor(int imageId, CommandOptions options, string description, CommandOptions exclusiveOptions = default, Predicate<ISymbol> applicationFilter = null)
 {
-	public int ImageId { get; } = imageId;
-	public CommandOptions Options { get; } = options;
-	public CommandOptions ExclusiveOptions { get; } = exclusiveOptions;
-	public string Description { get; } = description;
-	public Predicate<ISymbol> ApplicationFilter { get; } = applicationFilter;
-}
-
-static class PredefinedOptionDescriptors
-{
 	public readonly static OptionDescriptor DirectDerive = new(IconIds.DirectDerive, CommandOptions.DirectDerive, R.CMDT_FindDirectlyDerived);
 	public readonly static OptionDescriptor MatchTypeArgument = new(IconIds.MatchTypeArgument, CommandOptions.MatchTypeArgument, R.CMDT_MatchTypeArgument, default, MayHaveMatchTypeArgumentOption);
 	public readonly static OptionDescriptor ExtractMatch = new(IconIds.CurrentSymbolOnly, CommandOptions.ExtractMatch, R.CMDT_FindExtract, default, MayHaveExtractMatchOption);
@@ -24,6 +15,12 @@ static class PredefinedOptionDescriptors
 	public readonly static OptionDescriptor NamespaceScope = new(IconIds.MatchNamespace, CommandOptions.MatchNamespace, R.CMDT_ScopeToNamespace, default, MayHaveMatchNamespaceOption);
 	public readonly static OptionDescriptor SourceCodeScope = new(IconIds.SourceCode, CommandOptions.SourceCode, R.CMDT_ScopeToSourceCode, CommandOptions.SourceCode | CommandOptions.External);
 	public readonly static OptionDescriptor ExternalScope = new(IconIds.ExternalSymbol, CommandOptions.External, R.CMDT_ScopeToExternal, CommandOptions.SourceCode | CommandOptions.External);
+
+	public int ImageId { get; } = imageId;
+	public CommandOptions Options { get; } = options;
+	public CommandOptions ExclusiveOptions { get; } = exclusiveOptions;
+	public string Description { get; } = description;
+	public Predicate<ISymbol> ApplicationFilter { get; } = applicationFilter;
 
 	static bool MayHaveExtractMatchOption(ISymbol symbol) {
 		if (symbol == null
