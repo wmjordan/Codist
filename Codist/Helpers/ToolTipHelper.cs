@@ -110,7 +110,7 @@ static class ToolTipHelper
 		content.AppendLineBreak()
 			.Append(type.GetSymbolKindName(), SymbolFormatter.Instance.Keyword)
 			.Append(": ")
-			.Append((type.TypeKind != CodeAnalysisHelper.Extension ? type : type.GetExtensionParameter().Type).ToDisplayString(CodeAnalysisHelper.MemberNameFormat), true);
+			.Append((type.TypeKind == (TypeKind)TypeKindEx.Extension ? type.GetExtensionParameter().Type : type).ToDisplayString(CodeAnalysisHelper.MemberNameFormat), true);
 	}
 
 	static void ShowNamespaceSource(TextBlock content, INamespaceSymbol symbol, SemanticContext context) {

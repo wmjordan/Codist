@@ -22,7 +22,7 @@ namespace Codist
 				case SymbolKind.Namespace: return IconIds.Namespace;
 				case SymbolKind.Parameter: return IconIds.Argument;
 				case SymbolKind.Property: return GetPropertyImageId((IPropertySymbol)symbol);
-				case FunctionPointerType: return IconIds.FunctionPointer;
+				case (SymbolKind)SymbolKindEx.FunctionPointerType: return IconIds.FunctionPointer;
 				case SymbolKind.Discard: return IconIds.Discard;
 				default: return KnownImageIds.Item;
 			}
@@ -188,7 +188,7 @@ namespace Codist
 							Accessibility.Internal => KnownImageIds.StructureInternal,
 							_ => IconIds.Structure,
 						};
-					case Extension:
+					case (TypeKind)TypeKindEx.Extension:
 						return IconIds.ExtensionDeclaration;
 					case TypeKind.TypeParameter:
 					default: return KnownImageIds.Type;
@@ -217,12 +217,12 @@ namespace Codist
 		public static int GetImageId(this SyntaxNode node) {
 			switch (node.Kind()) {
 				case SyntaxKind.ClassDeclaration:
-				case RecordDeclaration:
+				case (SyntaxKind)SyntaxKindEx.RecordDeclaration:
 					return GetClassIcon((BaseTypeDeclarationSyntax)node);
 				case SyntaxKind.EnumDeclaration: return GetEnumIcon((EnumDeclarationSyntax)node);
 				case SyntaxKind.StructDeclaration:
-				case RecordStructDeclaration:
-				case UnionDeclaration:
+				case (SyntaxKind)SyntaxKindEx.RecordStructDeclaration:
+				case (SyntaxKind)SyntaxKindEx.UnionDeclaration:
 					return GetStructIcon((BaseTypeDeclarationSyntax)node);
 				case SyntaxKind.InterfaceDeclaration: return GetInterfaceIcon((InterfaceDeclarationSyntax)node);
 				case SyntaxKind.MethodDeclaration: return GetMethodIcon((MethodDeclarationSyntax)node);
@@ -237,7 +237,7 @@ namespace Codist
 				case SyntaxKind.VariableDeclaration:
 				case SyntaxKind.LocalDeclarationStatement: return IconIds.LocalVariable;
 				case SyntaxKind.NamespaceDeclaration:
-				case FileScopedNamespaceDeclaration: return IconIds.Namespace;
+				case (SyntaxKind)SyntaxKindEx.FileScopedNamespaceDeclaration: return IconIds.Namespace;
 				case SyntaxKind.ArgumentList:
 				case SyntaxKind.AttributeArgumentList: return IconIds.Argument;
 				case SyntaxKind.DoStatement: return IconIds.DoWhile;
@@ -247,20 +247,20 @@ namespace Codist
 				case SyntaxKind.IfStatement: return IconIds.If;
 				case SyntaxKind.LockStatement: return KnownImageIds.Lock;
 				case SyntaxKind.SwitchStatement:
-				case SwitchExpression:
+				case (SyntaxKind)SyntaxKindEx.SwitchExpression:
 					return IconIds.Switch;
 				case SyntaxKind.SwitchSection:
 				case SyntaxKind.CaseSwitchLabel:
 				case SyntaxKind.DefaultSwitchLabel:
-				case ConstantPattern:
-				case CasePatternSwitchLabel:
-				case RelationPattern:
-				case OrPattern:
-				case AndPattern:
-				case NotPattern:
-				case SlicePattern:
-				case DiscardPattern:
-				case TypePattern:
+				case (SyntaxKind)SyntaxKindEx.ConstantPattern:
+				case (SyntaxKind)SyntaxKindEx.CasePatternSwitchLabel:
+				case (SyntaxKind)SyntaxKindEx.RelationPattern:
+				case (SyntaxKind)SyntaxKindEx.OrPattern:
+				case (SyntaxKind)SyntaxKindEx.AndPattern:
+				case (SyntaxKind)SyntaxKindEx.NotPattern:
+				case (SyntaxKind)SyntaxKindEx.SlicePattern:
+				case (SyntaxKind)SyntaxKindEx.DiscardPattern:
+				case (SyntaxKind)SyntaxKindEx.TypePattern:
 					return IconIds.SwitchSection;
 				case SyntaxKind.TryStatement: return IconIds.TryCatch;
 				case SyntaxKind.UsingStatement: return IconIds.Using;
@@ -289,7 +289,7 @@ namespace Codist
 				case SyntaxKind.LocalFunctionStatement: return IconIds.LocalFunction;
 				case SyntaxKind.RegionDirectiveTrivia: return IconIds.Region;
 				case SyntaxKind.EndRegionDirectiveTrivia: return KnownImageIds.ToolstripPanelBottom;
-				case CodeAnalysisHelper.ExtensionDeclaration: return IconIds.ExtensionDeclaration;
+				case (SyntaxKind)SyntaxKindEx.ExtensionDeclaration: return IconIds.ExtensionDeclaration;
 			}
 			return KnownImageIds.UnknownMember;
 

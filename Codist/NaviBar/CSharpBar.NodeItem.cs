@@ -87,7 +87,7 @@ public sealed partial class CSharpBar
 					if (_Menu.Symbols.Count == 0) {
 						goto GOTO_DEFINITION;
 					}
-					if (Node.IsKind(CodeAnalysisHelper.SwitchExpression)) {
+					if (Node.IsKind((SyntaxKind)SyntaxKindEx.SwitchExpression)) {
 						_FilterBox.UpdateNumbers(Enumerable.Empty<SymbolItem>());
 					}
 					else {
@@ -132,7 +132,7 @@ public sealed partial class CSharpBar
 					&& (Node.FirstAncestorOrSelf<MemberDeclarationSyntax>()?.Span.Contains(Node.Span)) != true
 				|| kind.IsNonDelegateTypeDeclaration()
 				|| kind.IsMethodDeclaration()
-				|| kind.CeqAny(SyntaxKind.SwitchStatement, CodeAnalysisHelper.SwitchExpression);
+				|| kind.CeqAny(SyntaxKind.SwitchStatement, (SyntaxKind)SyntaxKindEx.SwitchExpression);
 		}
 
 		async Task CreateMenuForTypeSymbolNodeAsync(CancellationToken cancellationToken) {
@@ -188,7 +188,7 @@ public sealed partial class CSharpBar
 		Task AddItemsAsync(SyntaxNode node, CancellationToken cancellationToken) {
 			switch (node.Kind()) {
 				case SyntaxKind.SwitchStatement:
-				case CodeAnalysisHelper.SwitchExpression:
+				case (SyntaxKind)SyntaxKindEx.SwitchExpression:
 					AddSwitchLabels(node);
 					return Task.CompletedTask;
 				case SyntaxKind.RegionDirectiveTrivia:
@@ -213,7 +213,7 @@ public sealed partial class CSharpBar
 			var externals = (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.PartialClassMember)
 				&& node is BaseTypeDeclarationSyntax t
 				&& t.Modifiers.Any(SyntaxKind.PartialKeyword) ? MemberListOptions.ShowPartial : 0)
-				| (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.BaseClassMember) && (node.IsKind(SyntaxKind.ClassDeclaration) || node.IsKind(CodeAnalysisHelper.RecordDeclaration)) ? MemberListOptions.ShowBase : 0);
+				| (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.BaseClassMember) && (node.IsKind(SyntaxKind.ClassDeclaration) || node.IsKind((SyntaxKind)SyntaxKindEx.RecordDeclaration)) ? MemberListOptions.ShowBase : 0);
 			return externals == 0 ? Task.CompletedTask : AddExternalItemsAsync(node, externals, cancellationToken);
 		}
 
@@ -327,7 +327,7 @@ public sealed partial class CSharpBar
 					if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.RegionInMember) == false) {
 						lastNodeSpan = child.Span;
 					}
-					if (childKind == CodeAnalysisHelper.ExtensionDeclaration) {
+					if (childKind == (SyntaxKind)SyntaxKindEx.ExtensionDeclaration) {
 						i.Hint = "extension";
 						AddExtensionDeclaration(child, isExternal, includeDirectives);
 					}
@@ -357,9 +357,9 @@ public sealed partial class CSharpBar
 			}
 			else {
 				foreach (var child in node.ChildNodes()) {
-					if (child.IsKind(CodeAnalysisHelper.SwitchExpressionArm)) {
+					if (child.IsKind((SyntaxKind)SyntaxKindEx.SwitchExpressionArm)) {
 						var exp = child.GetSwitchExpressionArmPattern();
-						if (exp.IsKind(CodeAnalysisHelper.OrPattern)) {
+						if (exp.IsKind((SyntaxKind)SyntaxKindEx.OrPattern)) {
 							foreach (var item in DescendantOrPattern(exp)) {
 								AddExpression(pos, ref selected, child, item);
 							}
@@ -373,7 +373,7 @@ public sealed partial class CSharpBar
 
 		static IEnumerable<SyntaxNode> DescendantOrPattern(SyntaxNode orPattern) {
 			foreach (var child in orPattern.ChildNodes()) {
-				if (child.IsKind(CodeAnalysisHelper.OrPattern)) {
+				if (child.IsKind((SyntaxKind)SyntaxKindEx.OrPattern)) {
 					foreach (var item in DescendantOrPattern(child)) {
 						yield return item;
 					}
@@ -506,7 +506,7 @@ public sealed partial class CSharpBar
 						case SyntaxKind.ReadOnlyKeyword: AddIcon(ref icons, IconIds.ReadonlyMethod); break;
 						case SyntaxKind.RefKeyword: AddIcon(ref icons, IconIds.RefMember); break;
 						case SyntaxKind.VirtualKeyword: AddIcon(ref icons, IconIds.VirtualMember); break;
-						case CodeAnalysisHelper.RequiredKeyword: AddIcon(ref icons, IconIds.RequiredMember); break;
+						case (SyntaxKind)SyntaxKindEx.RequiredKeyword: AddIcon(ref icons, IconIds.RequiredMember); break;
 					}
 				}
 				if (p.Type is RefTypeSyntax r) {
@@ -519,7 +519,7 @@ public sealed partial class CSharpBar
 					var a = p.AccessorList.Accessors;
 					AccessorDeclarationSyntax item;
 					if (a.Count == 2) {
-						if (a.Any(i => i.RawKind == (int)CodeAnalysisHelper.InitAccessorDeclaration)) {
+						if (a.Any(i => i.RawKind == (int)(SyntaxKind)SyntaxKindEx.InitAccessorDeclaration)) {
 							AddIcon(ref icons, IconIds.InitonlyProperty);
 						}
 						else if ((item = a[0]).Body == null
@@ -596,7 +596,7 @@ public sealed partial class CSharpBar
 				if (vi != null) {
 					var v = vi.Value?.ToString();
 					if (v != null) {
-						if (vi.Value.IsKind(CodeAnalysisHelper.ImplicitObjectCreationExpression)) {
+						if (vi.Value.IsKind((SyntaxKind)SyntaxKindEx.ImplicitObjectCreationExpression)) {
 							v = $"new {(fieldItem.SyntaxNode.Parent as VariableDeclarationSyntax).Type}{vi.Value.GetImplicitObjectCreationArgumentList()}";
 						}
 						fieldItem.Hint = ShowInitializerIndicator() + (v.Length > 200 ? v.Substring(0, 200) : v);
@@ -619,7 +619,7 @@ public sealed partial class CSharpBar
 				var p = (PropertyDeclarationSyntax)propertyItem.SyntaxNode;
 				if (p.Initializer != null) {
 					propertyItem.Hint = ShowInitializerIndicator()
-						+ (p.Initializer.Value.IsKind(CodeAnalysisHelper.ImplicitObjectCreationExpression) ? $"new {p.Type}{p.Initializer.Value.GetImplicitObjectCreationArgumentList()}" : p.Initializer.Value.ToString());
+						+ (p.Initializer.Value.IsKind((SyntaxKind)SyntaxKindEx.ImplicitObjectCreationExpression) ? $"new {p.Type}{p.Initializer.Value.GetImplicitObjectCreationArgumentList()}" : p.Initializer.Value.ToString());
 				}
 				else if (p.ExpressionBody != null) {
 					propertyItem.Hint = p.ExpressionBody.ToString();

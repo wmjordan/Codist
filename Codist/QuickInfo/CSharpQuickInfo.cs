@@ -193,7 +193,7 @@ sealed partial class CSharpQuickInfo : SingletonQuickInfoSource
 					o,
 					ctor != null
 						? semanticModel.GetSymbolInfo(ctor, cancellationToken).Symbol ?? ctx.symbol
-						: ctx.node.Parent.IsKind(CodeAnalysisHelper.PrimaryConstructorBaseType)
+						: ctx.node.Parent.IsKind((SyntaxKind)SyntaxKindEx.PrimaryConstructorBaseType)
 						? (ctx.symbol = semanticModel.GetSymbolInfo(ctx.node.Parent, cancellationToken).Symbol ?? ctx.symbol)
 						: ctx.symbol,
 					semanticModel,
@@ -293,7 +293,7 @@ sealed partial class CSharpQuickInfo : SingletonQuickInfoSource
 		if (kind.CeqAny(SyntaxKind.BaseExpression, SyntaxKind.DefaultLiteralExpression, SyntaxKind.ImplicitStackAllocArrayCreationExpression)) {
 			return semanticModel.GetTypeInfo(node, cancellationToken).ConvertedType;
 		}
-		if (kind.CeqAny(SyntaxKind.ThisExpression, CodeAnalysisHelper.VarPattern, SyntaxKind.ImplicitArrayCreationExpression, SyntaxKind.ArrayCreationExpression)) {
+		if (kind.CeqAny(SyntaxKind.ThisExpression, (SyntaxKind)SyntaxKindEx.VarPattern, SyntaxKind.ImplicitArrayCreationExpression, SyntaxKind.ArrayCreationExpression)) {
 			return semanticModel.GetTypeInfo(node, cancellationToken).Type;
 		}
 		if (kind.CeqAny(SyntaxKind.TupleElement, SyntaxKind.ForEachStatement, SyntaxKind.FromClause, SyntaxKind.QueryContinuation, SyntaxKind.VariableDeclarator, SyntaxKind.CatchDeclaration, SyntaxKind.LabeledStatement)) {
@@ -837,7 +837,7 @@ sealed partial class CSharpQuickInfo : SingletonQuickInfoSource
 			&& typeSymbol.TypeKind == TypeKind.Interface) {
 			var declarationType = (node.Parent.UnqualifyExceptNamespace().Parent as BaseListSyntax)?.Parent;
 			var declaredClass = declarationType?.Kind()
-				.CeqAny(SyntaxKind.ClassDeclaration, SyntaxKind.StructDeclaration, CodeAnalysisHelper.RecordDeclaration, CodeAnalysisHelper.RecordStructDeclaration, CodeAnalysisHelper.UnionDeclaration) == true
+				.CeqAny(SyntaxKind.ClassDeclaration, SyntaxKind.StructDeclaration, (SyntaxKind)SyntaxKindEx.RecordDeclaration, (SyntaxKind)SyntaxKindEx.RecordStructDeclaration, (SyntaxKind)SyntaxKindEx.UnionDeclaration) == true
 				? context.semanticModel.GetDeclaredSymbol(declarationType, context.cancellationToken) as INamedTypeSymbol
 				: null;
 			ShowInterfaceMembers(qiContent, typeSymbol, declaredClass);

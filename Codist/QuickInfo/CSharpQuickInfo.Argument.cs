@@ -38,9 +38,9 @@ partial class CSharpQuickInfo
 				case SyntaxKind.CollectionInitializerExpression:
 				case SyntaxKind.ObjectInitializerExpression:
 				case SyntaxKind.ComplexElementInitializerExpression:
-				case CodeAnalysisHelper.CollectionExpression:
+				case (SyntaxKind)SyntaxKindEx.CollectionExpression:
 					ShowLocationOfInitializerExpression(ctx.Container, argument, parent);
-					if (parent.IsKind(CodeAnalysisHelper.CollectionExpression) == false) {
+					if (parent.IsKind((SyntaxKind)SyntaxKindEx.CollectionExpression) == false) {
 						var initSymbol = ctx.semanticModel.GetCollectionInitializerSymbolInfo((ExpressionSyntax)argument, ctx.cancellationToken).Symbol;
 						if (initSymbol != null) {
 							ctx.Container.Add(new BlockItem(initSymbol.GetImageId())
@@ -65,7 +65,7 @@ partial class CSharpQuickInfo
 		if (n is InitializerExpressionSyntax ie) {
 			argIndex = ie.Expressions.IndexOf((ExpressionSyntax)argument);
 		}
-		else if (n.IsKind(CodeAnalysisHelper.CollectionExpression)) {
+		else if (n.IsKind((SyntaxKind)SyntaxKindEx.CollectionExpression)) {
 			var elements = ((ExpressionSyntax)n).GetCollectionExpressionElements();
 			argIndex = 0;
 			var argSpan = argument.Span;
@@ -122,7 +122,7 @@ partial class CSharpQuickInfo
 			IMethodSymbol m;
 			switch (symbol.Symbol.Kind) {
 				case SymbolKind.Method: m = symbol.Symbol as IMethodSymbol; break;
-				case CodeAnalysisHelper.FunctionPointerType: m = (symbol.Symbol as ITypeSymbol).GetFunctionPointerTypeSignature(); break;
+				case (SymbolKind)SymbolKindEx.FunctionPointerType: m = (symbol.Symbol as ITypeSymbol).GetFunctionPointerTypeSignature(); break;
 				default: return;
 			}
 			if (m == null) { // in a very rare case m can be null

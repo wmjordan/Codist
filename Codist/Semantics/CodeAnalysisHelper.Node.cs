@@ -64,7 +64,7 @@ namespace Codist
 		public static bool IsDeclaration(this SyntaxKind kind) {
 			switch (kind) {
 				case SyntaxKind.ClassDeclaration:
-				case RecordDeclaration:
+				case (SyntaxKind)SyntaxKindEx.RecordDeclaration:
 				case SyntaxKind.ConstructorDeclaration:
 				case SyntaxKind.ConversionOperatorDeclaration:
 				case SyntaxKind.DelegateDeclaration:
@@ -79,16 +79,16 @@ namespace Codist
 				case SyntaxKind.LocalDeclarationStatement:
 				case SyntaxKind.MethodDeclaration:
 				case SyntaxKind.NamespaceDeclaration:
-				case FileScopedNamespaceDeclaration:
+				case (SyntaxKind)SyntaxKindEx.FileScopedNamespaceDeclaration:
 				case SyntaxKind.OperatorDeclaration:
 				case SyntaxKind.PropertyDeclaration:
 				case SyntaxKind.StructDeclaration:
-				case RecordStructDeclaration:
-				case UnionDeclaration:
+				case (SyntaxKind)SyntaxKindEx.RecordStructDeclaration:
+				case (SyntaxKind)SyntaxKindEx.UnionDeclaration:
 				case SyntaxKind.VariableDeclaration:
 				case SyntaxKind.LocalFunctionStatement:
 				case SyntaxKind.SingleVariableDesignation:
-				case ExtensionDeclaration:
+				case (SyntaxKind)SyntaxKindEx.ExtensionDeclaration:
 				//case SyntaxKind.CatchDeclaration:
 				//case SyntaxKind.VariableDeclarator:
 					return true;
@@ -99,15 +99,15 @@ namespace Codist
 		static DeclarationCategory GetDeclarationCategory(this SyntaxKind kind) {
 			switch (kind) {
 				case SyntaxKind.ClassDeclaration:
-				case RecordDeclaration:
+				case (SyntaxKind)SyntaxKindEx.RecordDeclaration:
 				case SyntaxKind.DelegateDeclaration:
 				case SyntaxKind.EnumDeclaration:
 				case SyntaxKind.EventDeclaration:
 				case SyntaxKind.InterfaceDeclaration:
 				case SyntaxKind.StructDeclaration:
-				case RecordStructDeclaration:
-				case UnionDeclaration:
-				case ExtensionDeclaration:
+				case (SyntaxKind)SyntaxKindEx.RecordStructDeclaration:
+				case (SyntaxKind)SyntaxKindEx.UnionDeclaration:
+				case (SyntaxKind)SyntaxKindEx.ExtensionDeclaration:
 					return DeclarationCategory.Type;
 				case SyntaxKind.FieldDeclaration:
 				case SyntaxKind.MethodDeclaration:
@@ -121,7 +121,7 @@ namespace Codist
 				case SyntaxKind.EnumMemberDeclaration:
 					return DeclarationCategory.Member;
 				case SyntaxKind.NamespaceDeclaration:
-				case FileScopedNamespaceDeclaration:
+				case (SyntaxKind)SyntaxKindEx.FileScopedNamespaceDeclaration:
 					return DeclarationCategory.Namespace;
 				case SyntaxKind.LocalDeclarationStatement:
 				case SyntaxKind.VariableDeclaration:
@@ -141,10 +141,10 @@ namespace Codist
 				case SyntaxKind.InterfaceDeclaration:
 				case SyntaxKind.StructDeclaration:
 				case SyntaxKind.NamespaceDeclaration:
-				case RecordDeclaration:
-				case RecordStructDeclaration:
-				case UnionDeclaration:
-				case FileScopedNamespaceDeclaration:
+				case (SyntaxKind)SyntaxKindEx.RecordDeclaration:
+				case (SyntaxKind)SyntaxKindEx.RecordStructDeclaration:
+				case (SyntaxKind)SyntaxKindEx.UnionDeclaration:
+				case (SyntaxKind)SyntaxKindEx.FileScopedNamespaceDeclaration:
 					return true;
 			}
 			return false;
@@ -157,10 +157,10 @@ namespace Codist
 				case SyntaxKind.EventDeclaration:
 				case SyntaxKind.InterfaceDeclaration:
 				case SyntaxKind.StructDeclaration:
-				case RecordDeclaration:
-				case RecordStructDeclaration:
-				case UnionDeclaration:
-				case ExtensionDeclaration:
+				case (SyntaxKind)SyntaxKindEx.RecordDeclaration:
+				case (SyntaxKind)SyntaxKindEx.RecordStructDeclaration:
+				case (SyntaxKind)SyntaxKindEx.UnionDeclaration:
+				case (SyntaxKind)SyntaxKindEx.ExtensionDeclaration:
 					return true;
 			}
 			return false;
@@ -172,17 +172,17 @@ namespace Codist
 				case SyntaxKind.EventDeclaration:
 				case SyntaxKind.InterfaceDeclaration:
 				case SyntaxKind.StructDeclaration:
-				case RecordDeclaration:
-				case RecordStructDeclaration:
-				case UnionDeclaration:
-				case ExtensionDeclaration:
+				case (SyntaxKind)SyntaxKindEx.RecordDeclaration:
+				case (SyntaxKind)SyntaxKindEx.RecordStructDeclaration:
+				case (SyntaxKind)SyntaxKindEx.UnionDeclaration:
+				case (SyntaxKind)SyntaxKindEx.ExtensionDeclaration:
 					return true;
 			}
 			return false;
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool IsNamespaceDeclaration(this SyntaxKind kind) {
-			return kind.CeqAny(SyntaxKind.NamespaceDeclaration, FileScopedNamespaceDeclaration);
+			return kind.CeqAny(SyntaxKind.NamespaceDeclaration, (SyntaxKind)SyntaxKindEx.FileScopedNamespaceDeclaration);
 		}
 		public static bool IsMemberDeclaration(this SyntaxKind kind) {
 			switch (kind) {
@@ -196,7 +196,7 @@ namespace Codist
 				case SyntaxKind.OperatorDeclaration:
 				case SyntaxKind.ConversionOperatorDeclaration:
 				case SyntaxKind.EnumMemberDeclaration:
-				case CodeAnalysisHelper.ExtensionDeclaration:
+				case (SyntaxKind)SyntaxKindEx.ExtensionDeclaration:
 					return true;
 			}
 			return false;
@@ -247,7 +247,7 @@ namespace Codist
 				case SyntaxKind.GotoDefaultStatement:
 				case SyntaxKind.XmlElement:
 				case SyntaxKind.XmlEmptyElement:
-				case SwitchExpression:
+				case (SyntaxKind)SyntaxKindEx.SwitchExpression:
 				case SyntaxKind.XmlComment:
 					return true;
 			}
@@ -322,9 +322,9 @@ namespace Codist
 				case SyntaxKind.StructDeclaration:
 				case SyntaxKind.InterfaceDeclaration:
 				case SyntaxKind.EnumDeclaration:
-				case RecordDeclaration:
-				case RecordStructDeclaration:
-				case UnionDeclaration:
+				case (SyntaxKind)SyntaxKindEx.RecordDeclaration:
+				case (SyntaxKind)SyntaxKindEx.RecordStructDeclaration:
+				case (SyntaxKind)SyntaxKindEx.UnionDeclaration:
 					return ((BaseTypeDeclarationSyntax)node).Identifier;
 				case SyntaxKind.DelegateDeclaration: return ((DelegateDeclarationSyntax)node).Identifier;
 				case SyntaxKind.MethodDeclaration: return ((MethodDeclarationSyntax)node).Identifier;
@@ -347,11 +347,11 @@ namespace Codist
 		public static string GetSyntaxBrief(this SyntaxKind kind) {
 			switch (kind) {
 				case SyntaxKind.ClassDeclaration: return "class";
-				case RecordDeclaration: return "record";
+				case (SyntaxKind)SyntaxKindEx.RecordDeclaration: return "record";
 				case SyntaxKind.EnumDeclaration: return "enum";
 				case SyntaxKind.StructDeclaration:
-				case UnionDeclaration: return "struct";
-				case RecordStructDeclaration: return "record struct";
+				case (SyntaxKind)SyntaxKindEx.UnionDeclaration: return "struct";
+				case (SyntaxKind)SyntaxKindEx.RecordStructDeclaration: return "record struct";
 				case SyntaxKind.InterfaceDeclaration: return "interface";
 				case SyntaxKind.ConstructorDeclaration: return "constructor";
 				case SyntaxKind.ConversionOperatorDeclaration: return "conversion operator";
@@ -362,7 +362,7 @@ namespace Codist
 				case SyntaxKind.PropertyDeclaration: return "property";
 				case SyntaxKind.FieldDeclaration: return "field";
 				case SyntaxKind.NamespaceDeclaration:
-				case FileScopedNamespaceDeclaration: return "namespace";
+				case (SyntaxKind)SyntaxKindEx.FileScopedNamespaceDeclaration: return "namespace";
 				case SyntaxKind.DelegateDeclaration: return "delegate";
 				case SyntaxKind.ArgumentList:
 				case SyntaxKind.AttributeArgumentList: return "argument list";
@@ -374,7 +374,7 @@ namespace Codist
 				case SyntaxKind.LocalDeclarationStatement: return "local";
 				case SyntaxKind.LockStatement: return "lock";
 				case SyntaxKind.SwitchStatement:
-				case SwitchExpression: return "switch";
+				case (SyntaxKind)SyntaxKindEx.SwitchExpression: return "switch";
 				case SyntaxKind.SwitchSection: return "switch section";
 				case SyntaxKind.TryStatement: return "try catch";
 				case SyntaxKind.UsingStatement: return "using";
@@ -419,7 +419,7 @@ namespace Codist
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static NameSyntax GetFileScopedNamespaceDeclarationName(this SyntaxNode node) {
-			return node.IsKind(FileScopedNamespaceDeclaration) ? NonPublicOrFutureAccessors.GetFileScopedNamespaceName(node) : null;
+			return node.IsKind((SyntaxKind)SyntaxKindEx.FileScopedNamespaceDeclaration) ? NonPublicOrFutureAccessors.GetFileScopedNamespaceName(node) : null;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -535,14 +535,14 @@ namespace Codist
 			switch (k1) {
 				case SyntaxKind.NamespaceDeclaration:
 					return ((NamespaceDeclarationSyntax)node).Name.ToString() == ((NamespaceDeclarationSyntax)other).Name.ToString();
-				case FileScopedNamespaceDeclaration:
+				case (SyntaxKind)SyntaxKindEx.FileScopedNamespaceDeclaration:
 					return NonPublicOrFutureAccessors.GetFileScopedNamespaceName(node).ToString() == NonPublicOrFutureAccessors.GetFileScopedNamespaceName(other).ToString();
 				case SyntaxKind.ClassDeclaration:
 				case SyntaxKind.StructDeclaration:
 				case SyntaxKind.InterfaceDeclaration:
-				case RecordDeclaration:
-				case RecordStructDeclaration:
-				case UnionDeclaration:
+				case (SyntaxKind)SyntaxKindEx.RecordDeclaration:
+				case (SyntaxKind)SyntaxKindEx.RecordStructDeclaration:
+				case (SyntaxKind)SyntaxKindEx.UnionDeclaration:
 					var t1 = (TypeDeclarationSyntax)node;
 					var t2 = (TypeDeclarationSyntax)other;
 					return t1.Arity == t2.Arity && t1.Identifier.Text == t2.Identifier.Text;
@@ -665,11 +665,11 @@ namespace Codist
 				case SyntaxKind.ClassDeclaration:
 				case SyntaxKind.StructDeclaration:
 				case SyntaxKind.InterfaceDeclaration:
-				case RecordDeclaration:
-				case RecordStructDeclaration:
-				case UnionDeclaration:
+				case (SyntaxKind)SyntaxKindEx.RecordDeclaration:
+				case (SyntaxKind)SyntaxKindEx.RecordStructDeclaration:
+				case (SyntaxKind)SyntaxKindEx.UnionDeclaration:
 					return GetTypeSignature((TypeDeclarationSyntax)node);
-				case ExtensionDeclaration:
+				case (SyntaxKind)SyntaxKindEx.ExtensionDeclaration:
 					return "(" + ((TypeDeclarationSyntax)node).GetParameterList().Parameters.FirstOrDefault()?.Type?.ToString() + ")";
 				case SyntaxKind.EnumDeclaration: return ((EnumDeclarationSyntax)node).Identifier.Text;
 				case SyntaxKind.MethodDeclaration: return GetMethodSignature((MethodDeclarationSyntax)node);
@@ -689,7 +689,7 @@ namespace Codist
 				case SyntaxKind.ParenthesizedLambdaExpression: return ((ParenthesizedLambdaExpressionSyntax)node).ParameterList.ToString();
 				case SyntaxKind.LocalFunctionStatement: return ((LocalFunctionStatementSyntax)node).Identifier.Text;
 				case SyntaxKind.NamespaceDeclaration: return (node as NamespaceDeclarationSyntax).Name.GetName();
-				case FileScopedNamespaceDeclaration: return NonPublicOrFutureAccessors.GetFileScopedNamespaceName(node).GetName();
+				case (SyntaxKind)SyntaxKindEx.FileScopedNamespaceDeclaration: return NonPublicOrFutureAccessors.GetFileScopedNamespaceName(node).GetName();
 				case SyntaxKind.VariableDeclarator: return ((VariableDeclaratorSyntax)node).Identifier.Text;
 				case SyntaxKind.LocalDeclarationStatement: return GetVariableSignature(((LocalDeclarationStatementSyntax)node).Declaration, position);
 				case SyntaxKind.VariableDeclaration: return GetVariableSignature((VariableDeclarationSyntax)node, position);
@@ -698,17 +698,17 @@ namespace Codist
 				case SyntaxKind.IfStatement: return ((IfStatementSyntax)node).Condition.GetExpressionSignature();
 				case SyntaxKind.SwitchSection: return GetSwitchSignature((SwitchSectionSyntax)node);
 				case SyntaxKind.SwitchStatement: return ((SwitchStatementSyntax)node).Expression.GetExpressionSignature();
-				case SwitchExpression: return (node.ChildNodes().FirstOrDefault() as ExpressionSyntax).GetExpressionSignature();
-				case CasePatternSwitchLabel:
+				case (SyntaxKind)SyntaxKindEx.SwitchExpression: return (node.ChildNodes().FirstOrDefault() as ExpressionSyntax).GetExpressionSignature();
+				case (SyntaxKind)SyntaxKindEx.CasePatternSwitchLabel:
 					return node.ChildNodes().FirstOrDefault()?.ToString(); // Pattern
-				case DiscardPattern: return "_";
-				case ConstantPattern:
-				case TypePattern:
-				case AndPattern:
-				case OrPattern:
-				case NotPattern:
-				case SlicePattern:
-				case RelationPattern: return node.NormalizeWhitespace().ToString();
+				case (SyntaxKind)SyntaxKindEx.DiscardPattern: return "_";
+				case (SyntaxKind)SyntaxKindEx.ConstantPattern:
+				case (SyntaxKind)SyntaxKindEx.TypePattern:
+				case (SyntaxKind)SyntaxKindEx.AndPattern:
+				case (SyntaxKind)SyntaxKindEx.OrPattern:
+				case (SyntaxKind)SyntaxKindEx.NotPattern:
+				case (SyntaxKind)SyntaxKindEx.SlicePattern:
+				case (SyntaxKind)SyntaxKindEx.RelationPattern: return node.NormalizeWhitespace().ToString();
 				case SyntaxKind.WhileStatement: return ((WhileStatementSyntax)node).Condition.GetExpressionSignature();
 				case SyntaxKind.UsingStatement: return GetUsingSignature((UsingStatementSyntax)node);
 				case SyntaxKind.LockStatement: return ((LockStatementSyntax)node).Expression.GetExpressionSignature();
@@ -1104,7 +1104,7 @@ namespace Codist
 				switch (child.Kind()) {
 					case SyntaxKind.CompilationUnit:
 					case SyntaxKind.NamespaceDeclaration:
-					case CodeAnalysisHelper.FileScopedNamespaceDeclaration:
+					case (SyntaxKind)SyntaxKindEx.FileScopedNamespaceDeclaration:
 						foreach (var item in child.GetDescendantDeclarations(cancellationToken)) {
 							yield return item;
 						}
@@ -1115,9 +1115,9 @@ namespace Codist
 					case SyntaxKind.EventDeclaration:
 					case SyntaxKind.InterfaceDeclaration:
 					case SyntaxKind.StructDeclaration:
-					case RecordDeclaration:
-					case RecordStructDeclaration:
-					case UnionDeclaration:
+					case (SyntaxKind)SyntaxKindEx.RecordDeclaration:
+					case (SyntaxKind)SyntaxKindEx.RecordStructDeclaration:
+					case (SyntaxKind)SyntaxKindEx.UnionDeclaration:
 						yield return child;
 						goto case SyntaxKind.CompilationUnit;
 					case SyntaxKind.MethodDeclaration:

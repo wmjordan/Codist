@@ -232,7 +232,7 @@ sealed class CSharpMargin : MarginElementBase, IWpfTextViewMargin
 		static CodeMemberType MatchDeclaration(SyntaxNode node) {
 			return node.Kind() switch {
 				SyntaxKind.ClassDeclaration
-					or CodeAnalysisHelper.RecordDeclaration => CodeMemberType.Class,
+					or (SyntaxKind)SyntaxKindEx.RecordDeclaration => CodeMemberType.Class,
 				SyntaxKind.InterfaceDeclaration => CodeMemberType.Interface,
 				SyntaxKind.StructDeclaration => CodeMemberType.Struct,
 				SyntaxKind.EnumDeclaration => CodeMemberType.Enum,

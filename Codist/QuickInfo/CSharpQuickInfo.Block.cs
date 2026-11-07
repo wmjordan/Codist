@@ -20,11 +20,11 @@ namespace Codist.QuickInfo
 						SyntaxKind.CollectionInitializerExpression,
 						SyntaxKind.ComplexElementInitializerExpression,
 						SyntaxKind.ObjectInitializerExpression,
-						CodeAnalysisHelper.WithInitializerExpression)) {
+						(SyntaxKind)SyntaxKindEx.WithInitializerExpression)) {
 				container.Add(new BlockItem(IconIds.InstanceMember, R.T_ExpressionCount)
 					.Append(((InitializerExpressionSyntax)node).Expressions.Count.ToText(), true, __SymbolFormatter.Number));
 			}
-			else if (node.IsKind(CodeAnalysisHelper.PropertyPatternClause)) {
+			else if (node.IsKind((SyntaxKind)SyntaxKindEx.PropertyPatternClause)) {
 				container.Add(new BlockItem(IconIds.InstanceMember, R.T_SubPatternCount)
 					.Append(((CSharpSyntaxNode)node).GetPropertyPatternSubPatternsCount().ToText(), true, __SymbolFormatter.Number)
 					);

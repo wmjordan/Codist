@@ -47,11 +47,11 @@ partial class CSharpQuickInfo
 		{ SyntaxKind.QuestionToken, ProcessValueToken },
 		{ SyntaxKind.ColonToken, ProcessValueToken },
 		{ SyntaxKind.QuestionQuestionToken, ProcessValueToken },
-		{ CodeAnalysisHelper.QuestionQuestionEqualsToken, ProcessValueToken },
+		{ (SyntaxKind)SyntaxKindEx.QuestionQuestionEqualsToken, ProcessValueToken },
 		{ SyntaxKind.UnderscoreToken, ProcessValueToken },
 		{ SyntaxKind.WhereKeyword, ProcessValueToken },
 		{ SyntaxKind.OrderByKeyword, ProcessValueToken },
-		{ CodeAnalysisHelper.WithKeyword, ProcessValueToken },
+		{ (SyntaxKind) SyntaxKindEx.WithKeyword, ProcessValueToken },
 		{ SyntaxKind.AsKeyword, ProcessAsType },
 		{ SyntaxKind.CaseKeyword, ProcessCaseToken },
 		{ SyntaxKind.DefaultKeyword, ProcessDefaultToken },
@@ -75,8 +75,8 @@ partial class CSharpQuickInfo
 		{ SyntaxKind.TypeOfKeyword, c => c.symbol = c.semanticModel.GetSystemTypeSymbol(nameof(Type)) },
 		{ SyntaxKind.ThrowKeyword, ProcessThrowKeyword },
 		{ SyntaxKind.StackAllocKeyword, ProcessNewToken },
-		{ CodeAnalysisHelper.DotDotToken, ProcessDotDotToken },
-		{ CodeAnalysisHelper.ExtensionKeyword, ProcessExtension },
+		{ (SyntaxKind) SyntaxKindEx.DotDotToken, ProcessDotDotToken },
+		{ (SyntaxKind) SyntaxKindEx.ExtensionKeyword, ProcessExtension },
 		{ SyntaxKind.StringLiteralToken, ProcessStringToken },
 		{ SyntaxKind.InterpolatedStringStartToken, ProcessStringToken },
 		{ SyntaxKind.InterpolatedStringEndToken, ProcessStringToken },
@@ -84,9 +84,9 @@ partial class CSharpQuickInfo
 		{ SyntaxKind.InterpolatedStringToken, ProcessStringToken },
 		{ SyntaxKind.InterpolatedStringTextToken, ProcessStringToken },
 		{ SyntaxKind.NameOfKeyword, ProcessStringToken },
-		{ CodeAnalysisHelper.Utf8StringLiteralToken, ProcessNewToken },
-		{ CodeAnalysisHelper.SingleLineRawStringLiteralToken, ProcessStringToken },
-		{ CodeAnalysisHelper.MultiLineRawStringLiteralToken, ProcessStringToken },
+		{ (SyntaxKind) SyntaxKindEx.Utf8StringLiteralToken, ProcessNewToken },
+		{ (SyntaxKind) SyntaxKindEx.SingleLineRawStringLiteralToken, ProcessStringToken },
+		{ (SyntaxKind) SyntaxKindEx.MultiLineRawStringLiteralToken, ProcessStringToken },
 		{ SyntaxKind.CharacterLiteralToken, ProcessCharToken },
 		{ SyntaxKind.NumericLiteralToken, ProcessNumericToken },
 		{ SyntaxKind.XmlComment, TokenUnavailable },
@@ -250,7 +250,7 @@ partial class CSharpQuickInfo
 			ctx.SetSymbol(ctx.semanticModel.GetSymbolInfo(ctx.node = node.Parent, ctx.cancellationToken));
 			ctx.State = State.Process;
 		}
-		else if (node.IsKind(CodeAnalysisHelper.RelationPattern)) {
+		else if (node.IsKind((SyntaxKind)SyntaxKindEx.RelationPattern)) {
 			ctx.SetSymbol(ctx.semanticModel.GetTypeInfo(ctx.node, ctx.cancellationToken));
 			ctx.State = State.Return;
 		}
@@ -284,8 +284,8 @@ partial class CSharpQuickInfo
 					&& node.Parent.IsKind(SyntaxKind.ElementAccessExpression)) {
 			ctx.SetSymbol(ctx.semanticModel.GetSymbolInfo((ElementAccessExpressionSyntax)node.Parent, ctx.cancellationToken));
 		}
-		else if (node.IsAnyKind(CodeAnalysisHelper.CollectionExpression, CodeAnalysisHelper.ListPatternExpression)) {
-			if (node.IsKind(CodeAnalysisHelper.CollectionExpression)) {
+		else if (node.IsAnyKind((SyntaxKind)SyntaxKindEx.CollectionExpression, (SyntaxKind)SyntaxKindEx.ListPatternExpression)) {
+			if (node.IsKind((SyntaxKind)SyntaxKindEx.CollectionExpression)) {
 				ctx.Container.Add(new BlockItem(IconIds.InstanceMember, R.T_ElementCount + ((ExpressionSyntax)node).GetCollectionExpressionElementsCount().ToText()));
 			}
 			else {
@@ -448,7 +448,7 @@ partial class CSharpQuickInfo
 
 	static void ProcessSwitchToken(Context ctx) {
 		var node = ctx.node = ctx.token.Parent;
-		if (node.IsKind(CodeAnalysisHelper.SwitchExpression)) {
+		if (node.IsKind((SyntaxKind)SyntaxKindEx.SwitchExpression)) {
 			ProcessSwitchExpression(ctx, node);
 			if (ctx.symbol == null) {
 				ctx.State = State.Unavailable;
@@ -501,8 +501,8 @@ partial class CSharpQuickInfo
 	static void ProcessEqualsGreaterThanToken(Context ctx) {
 		SyntaxNode node;
 		ctx.node = node = ctx.token.Parent;
-		if (node.IsKind(CodeAnalysisHelper.SwitchExpressionArm)
-			&& node.Parent.IsKind(CodeAnalysisHelper.SwitchExpression)) {
+		if (node.IsKind((SyntaxKind)SyntaxKindEx.SwitchExpressionArm)
+			&& node.Parent.IsKind((SyntaxKind)SyntaxKindEx.SwitchExpression)) {
 			ctx.SetSymbol(ctx.semanticModel.GetTypeInfo(node.Parent, ctx.cancellationToken));
 			var patternType = ctx.semanticModel.GetTypeInfo(node.GetSwitchExpressionArmPattern(), ctx.cancellationToken);
 			if (patternType.ConvertedType != null) {
@@ -555,7 +555,7 @@ partial class CSharpQuickInfo
 				ctx.isConvertedType = ctx.symbol != null;
 				ctx.State = State.Process;
 				return;
-			case CodeAnalysisHelper.RecursivePattern:
+			case (SyntaxKind)SyntaxKindEx.RecursivePattern:
 				ctx.SetSymbol(ctx.semanticModel.GetTypeInfo(ctx.node, ctx.cancellationToken));
 				ctx.State = State.Process;
 				return;

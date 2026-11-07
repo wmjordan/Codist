@@ -201,7 +201,7 @@ namespace Codist
 				case RefKind.In:
 					inlines.Append("in ", Keyword);
 					return;
-				case CodeAnalysisHelper.RefReadonly:
+				case (RefKind)RefKindEx.RefReadonly:
 					inlines.Append("ref readonly ", Keyword);
 					return;
 			}
@@ -455,7 +455,7 @@ namespace Codist
 				case SymbolKind.ErrorType:
 					inlines.Append((symbol as INamedTypeSymbol).GetTypeName() ?? "?", PlainText);
 					return;
-				case CodeAnalysisHelper.FunctionPointerType:
+				case (SymbolKind)SymbolKindEx.FunctionPointerType:
 					inlines.Add((symbol as ITypeSymbol).GetTypeName());
 					return;
 				case SymbolKind.Label:
@@ -498,7 +498,7 @@ namespace Codist
 				case MethodKind.LambdaMethod:
 					inline = symbol.Render("lambda", true, Method);
 					break;
-				case CodeAnalysisHelper.FunctionPointerMethod:
+				case (MethodKind)MethodKindEx.FunctionPointerMethod:
 					inline = symbol.Render("delegate*", true, GetBrushForMethod(method));
 					break;
 				case MethodKind.ExplicitInterfaceImplementation:
@@ -553,7 +553,7 @@ namespace Codist
 				case TypeKind.TypeParameter:
 					inlines.Add(symbol.Render(alias ?? symbol.Name, bold, TypeParameter));
 					return;
-				case CodeAnalysisHelper.Extension:
+				case (TypeKind)TypeKindEx.Extension:
 					FormatExtensionType(inlines, symbol, bold, type);
 					return;
 				default:
@@ -673,10 +673,10 @@ namespace Codist
 				case SyntaxKind.LocalFunctionStatement: return Method;
 				case SyntaxKind.ClassDeclaration:
 				case SyntaxKind.DestructorDeclaration:
-				case CodeAnalysisHelper.RecordDeclaration: return Class;
+				case (SyntaxKind)SyntaxKindEx.RecordDeclaration: return Class;
 				case SyntaxKind.StructDeclaration:
-				case CodeAnalysisHelper.RecordStructDeclaration:
-				case CodeAnalysisHelper.UnionDeclaration:
+				case (SyntaxKind)SyntaxKindEx.RecordStructDeclaration:
+				case (SyntaxKind)SyntaxKindEx.UnionDeclaration:
 					return Struct;
 				case SyntaxKind.InterfaceDeclaration: return Interface;
 				case SyntaxKind.EventDeclaration:

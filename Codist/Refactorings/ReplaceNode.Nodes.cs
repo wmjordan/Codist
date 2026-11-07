@@ -308,7 +308,7 @@ abstract partial class ReplaceNode
 					or SyntaxKind.RefValueExpression
 					or SyntaxKind.MakeRefExpression
 					or SyntaxKind.ObjectCreationExpression
-					or CodeAnalysisHelper.ImplicitObjectCreationExpression
+					or (SyntaxKind)SyntaxKindEx.ImplicitObjectCreationExpression
 					or SyntaxKind.AnonymousObjectCreationExpression
 					or SyntaxKind.ArrayCreationExpression
 					or SyntaxKind.ImplicitArrayCreationExpression
@@ -847,8 +847,8 @@ abstract partial class ReplaceNode
 								t = ReplaceBraces(t);
 								break;
 							case SyntaxKind.InterpolatedStringToken:
-							case CodeAnalysisHelper.SingleLineRawStringLiteralToken:
-							case CodeAnalysisHelper.MultiLineRawStringLiteralToken:
+							case (SyntaxKind)SyntaxKindEx.SingleLineRawStringLiteralToken:
+							case (SyntaxKind)SyntaxKindEx.MultiLineRawStringLiteralToken:
 							default:
 								ch.Add(SF.Interpolation(exp.WithoutTrivia()));
 								goto NEXT;

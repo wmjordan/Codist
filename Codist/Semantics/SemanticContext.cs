@@ -372,7 +372,7 @@ sealed class SemanticContext
 		nodes.Reverse();
 		if (nodes.Count > 0) {
 			var members = model.Compilation.Members;
-			if (members.Count > 1 && members[0].IsKind(CodeAnalysisHelper.FileScopedNamespaceDeclaration)) {
+			if (members.Count > 1 && members[0].IsKind((SyntaxKind)SyntaxKindEx.FileScopedNamespaceDeclaration)) {
 				nodes.Insert(0, members[0]);
 			}
 		}

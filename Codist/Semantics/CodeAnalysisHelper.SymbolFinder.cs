@@ -865,7 +865,7 @@ partial class CodeAnalysisHelper
 					return new ArgumentListContainer(a.ArgumentList);
 				}
 				break;
-			case CodeAnalysisHelper.ImplicitObjectCreationExpression:
+			case (SyntaxKind)SyntaxKindEx.ImplicitObjectCreationExpression:
 				return new ArgumentListContainer((node as ExpressionSyntax).GetImplicitObjectCreationArgumentList());
 			case SyntaxKind.BaseConstructorInitializer:
 			case SyntaxKind.ThisConstructorInitializer:

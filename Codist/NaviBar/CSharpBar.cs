@@ -227,7 +227,7 @@ public sealed partial class CSharpBar : NaviBar
 			if (node.IsKind(SyntaxKind.NamespaceDeclaration)) {
 				AddNamespaceNodes(node, ((NamespaceDeclarationSyntax)node).Name);
 			}
-			else if (node.IsKind(CodeAnalysisHelper.FileScopedNamespaceDeclaration)) {
+			else if (node.IsKind((SyntaxKind)SyntaxKindEx.FileScopedNamespaceDeclaration)) {
 				AddNamespaceNodes(node, node.GetFileScopedNamespaceDeclarationName());
 			}
 			else {

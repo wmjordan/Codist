@@ -23,7 +23,7 @@ static partial class CodeAnalysisHelper
 			?? semanticModel.GetTypeInfo(node, cancellationToken).Type
 			?? (node.IsKind(SyntaxKind.FieldDeclaration) ? semanticModel.GetDeclaredSymbol(((FieldDeclarationSyntax)node).Declaration.Variables.First(), cancellationToken)
 				: node.IsKind(SyntaxKind.EventFieldDeclaration) ? semanticModel.GetDeclaredSymbol(((EventFieldDeclarationSyntax)node).Declaration.Variables.First(), cancellationToken)
-				: node.IsAnyKind(RecordDeclaration, RecordStructDeclaration, UnionDeclaration) ? semanticModel.GetDeclaredSymbol(node, cancellationToken)
+				: node.IsAnyKind((SyntaxKind)SyntaxKindEx.RecordDeclaration, (SyntaxKind)SyntaxKindEx.RecordStructDeclaration, (SyntaxKind)SyntaxKindEx.UnionDeclaration) ? semanticModel.GetDeclaredSymbol(node, cancellationToken)
 				: null)
 			;
 	}
@@ -42,7 +42,7 @@ static partial class CodeAnalysisHelper
 			s = semanticModel.GetSymbolInfo(node.Parent, cancellationToken).Symbol;
 		}
 		else if (node is AccessorDeclarationSyntax
-			|| k.CeqAny(SyntaxKind.TypeParameter, SyntaxKind.Parameter, RecordDeclaration, RecordStructDeclaration, UnionDeclaration)) {
+			|| k.CeqAny(SyntaxKind.TypeParameter, SyntaxKind.Parameter, (SyntaxKind)SyntaxKindEx.RecordDeclaration, (SyntaxKind)SyntaxKindEx.RecordStructDeclaration, (SyntaxKind)SyntaxKindEx.UnionDeclaration)) {
 			s = semanticModel.GetDeclaredSymbol(node, cancellationToken);
 		}
 		if (s != null) {
@@ -789,7 +789,7 @@ static partial class CodeAnalysisHelper
 					case RefKind.Ref: sb.Append("ref "); break;
 					case RefKind.Out: sb.Append("out "); break;
 					case RefKind.In: sb.Append("in "); break;
-					case RefReadonly: sb.Append("ref readonly "); break;
+					case (RefKind)RefKindEx.RefReadonly: sb.Append("ref readonly "); break;
 				}
 				GetTypeName(item.Type, sb);
 				if (pn) {
@@ -802,23 +802,25 @@ static partial class CodeAnalysisHelper
 			sb.Append(')');
 		}
 		string GetTypeParameters(INamedTypeSymbol t, bool pn) {
-			if (t.TypeKind == TypeKind.Delegate) {
-				using var sbr = ReusableStringBuilder.AcquireDefault(100);
-				var sb = sbr.Resource;
-				if (t.IsGenericType) {
-					BuildTypeParametersString(sb, t.TypeParameters);
+			switch (t.TypeKind) {
+				case TypeKind.Delegate: {
+					using var sbr = ReusableStringBuilder.AcquireDefault(100);
+					var sb = sbr.Resource;
+					if (t.IsGenericType) {
+						BuildTypeParametersString(sb, t.TypeParameters);
+					}
+					BuildParametersString(sb, t.DelegateInvokeMethod.Parameters, pn);
+					return sb.ToString();
 				}
-				BuildParametersString(sb, t.DelegateInvokeMethod.Parameters, pn);
-				return sb.ToString();
-			}
-			else if (t.TypeKind == Extension) {
-				using var sbr = ReusableStringBuilder.AcquireDefault(100);
-				var sb = sbr.Resource;
-				if (t.IsGenericType) {
-					BuildTypeParametersString(sb, t.TypeParameters);
+				case (TypeKind)TypeKindEx.Extension: {
+					using var sbr = ReusableStringBuilder.AcquireDefault(100);
+					var sb = sbr.Resource;
+					if (t.IsGenericType) {
+						BuildTypeParametersString(sb, t.TypeParameters);
+					}
+					BuildParametersString(sb, ImmutableArray.Create(t.GetExtensionParameter()), pn);
+					return sb.ToString();
 				}
-				BuildParametersString(sb, ImmutableArray.Create(t.GetExtensionParameter()), pn);
-				return sb.ToString();
 			}
 			return t.Arity > 0 ? $"<{new string (',', t.Arity - 1)}>" : String.Empty;
 		}
@@ -879,7 +881,7 @@ static partial class CodeAnalysisHelper
 			case SymbolKind.ErrorType:
 			case SymbolKind.PointerType:
 			case SymbolKind.DynamicType:
-			case FunctionPointerType:
+			case (SymbolKind)SymbolKindEx.FunctionPointerType:
 				using (var sb = ReusableStringBuilder.AcquireDefault(30)) {
 					var b = sb.Resource;
 					GetTypeName(symbol, b);
@@ -906,7 +908,7 @@ static partial class CodeAnalysisHelper
 				GetTypeName(((IPointerTypeSymbol)type).PointedAtType, output);
 				output.Append('*');
 				return;
-			case FunctionPointer:
+			case (TypeKind)TypeKindEx.FunctionPointer:
 				var sig = type.GetFunctionPointerTypeSignature();
 				if (sig != null) {
 					output.Append("delegate*");
@@ -1022,7 +1024,7 @@ static partial class CodeAnalysisHelper
 			SymbolKind.Parameter => "parameter",
 			SymbolKind.Property => "property",
 			SymbolKind.TypeParameter => "type parameter",
-			FunctionPointerType => "function pointer",
+			(SymbolKind)SymbolKindEx.FunctionPointerType => "function pointer",
 			_ => symbol.Kind.ToString(),
 		};
 	}
@@ -1055,7 +1057,7 @@ static partial class CodeAnalysisHelper
 			TypeKind.Interface => "interface",
 			TypeKind.Struct => type.IsRecord() ? "record struct" : type.IsUnion() ? "union" : "struct",
 			TypeKind.TypeParameter => "type parameter",
-			Extension => "extension",
+			(TypeKind)TypeKindEx.Extension => "extension",
 			_ => "type",
 		};
 	}
@@ -1299,7 +1301,7 @@ static partial class CodeAnalysisHelper
 			or SymbolKind.NamedType
 			or SymbolKind.Namespace
 			or SymbolKind.PointerType
-			or FunctionPointerType => true,
+			or (SymbolKind)SymbolKindEx.FunctionPointerType => true,
 			_ => false,
 		};
 	}
@@ -1413,7 +1415,7 @@ static partial class CodeAnalysisHelper
 		return type != null ? NonPublicOrFutureAccessors.GetNamedTypeNativeIntegerUnderlyingType(type) : null;
 	}
 	public static IMethodSymbol GetFunctionPointerTypeSignature(this ITypeSymbol symbol) {
-		return symbol?.TypeKind == FunctionPointer ? NonPublicOrFutureAccessors.GetFunctionPointerTypeSignature(symbol) : null;
+		return symbol?.TypeKind == (TypeKind)TypeKindEx.FunctionPointer ? NonPublicOrFutureAccessors.GetFunctionPointerTypeSignature(symbol) : null;
 	}
 	public static IFieldSymbol GetPropertyBackingField(this IPropertySymbol property) {
 		return property != null && property.ContainingAssembly.GetSourceType() != AssemblySource.Metadata ? NonPublicOrFutureAccessors.GetPropertyBackingField(property) : null;
@@ -1445,16 +1447,16 @@ static partial class CodeAnalysisHelper
 			: (AssemblySource)NonPublicOrFutureAccessors.GetAssemblySourceType(assembly);
 	}
 	public static int GetSwitchExpressionArmsCount(this ExpressionSyntax switchExpression) {
-		return switchExpression.IsKind(SwitchExpression) ? NonPublicOrFutureAccessors.GetSwitchExpressionArmsCount(switchExpression) : 0;
+		return switchExpression.IsKind((SyntaxKind)SyntaxKindEx.SwitchExpression) ? NonPublicOrFutureAccessors.GetSwitchExpressionArmsCount(switchExpression) : 0;
 	}
 	public static int GetPropertyPatternSubPatternsCount(this CSharpSyntaxNode propertyPatternClause) {
-		return propertyPatternClause.IsKind(PropertyPatternClause) ? NonPublicOrFutureAccessors.GetPropertyPatternSubPatternsCount(propertyPatternClause) : 0;
+		return propertyPatternClause.IsKind((SyntaxKind)SyntaxKindEx.PropertyPatternClause) ? NonPublicOrFutureAccessors.GetPropertyPatternSubPatternsCount(propertyPatternClause) : 0;
 	}
 	public static int GetCollectionExpressionElementsCount(this ExpressionSyntax collectionExpression) {
-		return collectionExpression.IsKind(CollectionExpression) ? NonPublicOrFutureAccessors.GetCollectionExpressionElementsCount(collectionExpression) : 0;
+		return collectionExpression.IsKind((SyntaxKind)SyntaxKindEx.CollectionExpression) ? NonPublicOrFutureAccessors.GetCollectionExpressionElementsCount(collectionExpression) : 0;
 	}
 	public static int GetListPatternsCount(this PatternSyntax listPattern) {
-		return listPattern.IsKind(ListPatternExpression) ? NonPublicOrFutureAccessors.GetListPatternsCount(listPattern) : 0;
+		return listPattern.IsKind((SyntaxKind)SyntaxKindEx.ListPatternExpression) ? NonPublicOrFutureAccessors.GetListPatternsCount(listPattern) : 0;
 	}
 	#endregion
 	#endregion
@@ -1874,7 +1876,7 @@ static partial class CodeAnalysisHelper
 				case SymbolKind.NamedType: return 2;
 				case SymbolKind.ArrayType: return 3;
 				case SymbolKind.PointerType:
-				case FunctionPointerType:
+				case (SymbolKind)SymbolKindEx.FunctionPointerType:
 					return 4;
 				case SymbolKind.DynamicType: return 5;
 				case SymbolKind.Field: return 6;

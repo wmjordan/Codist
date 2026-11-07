@@ -191,9 +191,9 @@ namespace Codist.Refactorings
 
 			public override bool Accept(RefactoringContext ctx) {
 				var node = ctx.Node;
-				if (node.IsAnyKind(SyntaxKind.ClassDeclaration, CodeAnalysisHelper.RecordDeclaration)
+				if (node.IsAnyKind(SyntaxKind.ClassDeclaration, (SyntaxKind)SyntaxKindEx.RecordDeclaration)
 					&& CanBeSealed(((TypeDeclarationSyntax)node).Modifiers)) {
-					_Title = node.IsKind(CodeAnalysisHelper.RecordDeclaration)
+					_Title = node.IsKind((SyntaxKind)SyntaxKindEx.RecordDeclaration)
 						? R.CMD_SealRecord
 						: R.CMD_SealClass;
 					return true;
@@ -307,7 +307,7 @@ namespace Codist.Refactorings
 							continue;
 						case SyntaxKind.AddKeyword:
 						case SyntaxKind.RemoveKeyword:
-						case CodeAnalysisHelper.InitKeyword:
+						case (SyntaxKind)SyntaxKindEx.InitKeyword:
 							return false;
 					}
 				}
@@ -357,7 +357,7 @@ namespace Codist.Refactorings
 					var m = d.GetModifiers(out var canHaveModifier);
 					TypeDeclarationSyntax t;
 					return canHaveModifier
-						&& !d.IsAnyKind(SyntaxKind.ConstructorDeclaration, SyntaxKind.DestructorDeclaration, CodeAnalysisHelper.RecordDeclaration, CodeAnalysisHelper.RecordStructDeclaration)
+						&& !d.IsAnyKind(SyntaxKind.ConstructorDeclaration, SyntaxKind.DestructorDeclaration, (SyntaxKind)SyntaxKindEx.RecordDeclaration, (SyntaxKind)SyntaxKindEx.RecordStructDeclaration)
 						&& ((t = d as TypeDeclarationSyntax) == null
 							|| t.GetParameterList() == null) // exclude primary constructor
 						&& CanBeStatic(m);
@@ -430,7 +430,7 @@ namespace Codist.Refactorings
 			}
 
 			bool CanChangeAccessibility(MemberDeclarationSyntax d) {
-				if (d.IsAnyKind(SyntaxKind.EnumMemberDeclaration, CodeAnalysisHelper.ExtensionDeclaration)) {
+				if (d.IsAnyKind(SyntaxKind.EnumMemberDeclaration, (SyntaxKind)SyntaxKindEx.ExtensionDeclaration)) {
 					return false;
 				}
 				var m = d.GetModifiers(out var canHaveModifier);
@@ -632,13 +632,13 @@ namespace Codist.Refactorings
 			public override string Title => R.CMD_MultiLineOrPatterns;
 
 			public override bool Accept(RefactoringContext ctx) {
-				return ctx.Node.IsKind(CodeAnalysisHelper.SwitchExpression)
+				return ctx.Node.IsKind((SyntaxKind)SyntaxKindEx.SwitchExpression)
 					&& ctx.Node.ChildNodes().Any(IsSwitchExpressionArmWithOrPattern);
 			}
 
 			bool IsSwitchExpressionArmWithOrPattern(SyntaxNode i) {
-				return i.IsKind(CodeAnalysisHelper.SwitchExpressionArm)
-					&& i.GetSwitchExpressionArmPattern().IsKind(CodeAnalysisHelper.OrPattern)
+				return i.IsKind((SyntaxKind)SyntaxKindEx.SwitchExpressionArm)
+					&& i.GetSwitchExpressionArmPattern().IsKind((SyntaxKind)SyntaxKindEx.OrPattern)
 					&& !i.IsMultiLine(true);
 			}
 
@@ -662,7 +662,7 @@ namespace Codist.Refactorings
 					return;
 				}
 
-				if (children[0].IsKind(CodeAnalysisHelper.OrPattern)) {
+				if (children[0].IsKind((SyntaxKind)SyntaxKindEx.OrPattern)) {
 					SplitOrPattern((PatternSyntax)children[0], indent, newline, sb, true);
 				}
 				else {

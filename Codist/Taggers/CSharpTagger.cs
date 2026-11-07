@@ -155,7 +155,7 @@ namespace Codist.Taggers
 								TagXmlDocTokens(token.LeadingTrivia, textSpan, ctx);
 							}
 							if (FormatStore.TagUrl
-								&& token.IsAnyKind(CodeAnalysisHelper.MultiLineRawStringLiteralToken, CodeAnalysisHelper.InterpolatedMultiLineRawStringStartToken)) {
+								&& token.IsAnyKind((SyntaxKind)SyntaxKindEx.MultiLineRawStringLiteralToken, (SyntaxKind)SyntaxKindEx.InterpolatedMultiLineRawStringStartToken)) {
 								var s = span.Intersection(token.Span.ToSpan());
 								if (s.HasValue) {
 									TokenTaggers.TagUrlParts(ctx, s.Value.GetText(), 0, 0, s.Value.Start, StringKind.Raw);
@@ -215,8 +215,8 @@ namespace Codist.Taggers
 				{ SyntaxKind.ThisKeyword, TagThisKeyword },
 				{ SyntaxKind.ExplicitKeyword, TagTypeCastDeclaration },
 				{ SyntaxKind.ImplicitKeyword, TagTypeCastDeclaration },
-				{ CodeAnalysisHelper.RecordKeyword, TagRecordDeclaration },
-				{ CodeAnalysisHelper.ExtensionKeyword, TagExtensionDeclaration },
+				{ (SyntaxKind) SyntaxKindEx.RecordKeyword, TagRecordDeclaration },
+				{ (SyntaxKind) SyntaxKindEx.ExtensionKeyword, TagExtensionDeclaration },
 				{ SyntaxKind.DelegateKeyword, TagDelegateCapture },
 				{ SyntaxKind.BreakKeyword, TagBreakKeyword },
 				{ SyntaxKind.AwaitKeyword, TagAwaitKeyword },
@@ -244,8 +244,8 @@ namespace Codist.Taggers
 				{ SyntaxKind.CatchKeyword, TagResourceKeyword },
 				{ SyntaxKind.FinallyKeyword, TagResourceKeyword },
 				{ SyntaxKind.StackAllocKeyword, TagResourceKeyword },
-				{ CodeAnalysisHelper.ManagedKeyword, TagResourceKeyword },
-				{ CodeAnalysisHelper.UnmanagedKeyword, TagResourceKeyword },
+				{ (SyntaxKind) SyntaxKindEx.ManagedKeyword, TagResourceKeyword },
+				{ (SyntaxKind) SyntaxKindEx.UnmanagedKeyword, TagResourceKeyword },
 				{ SyntaxKind.TildeToken, TagResourceKeyword },
 				{ SyntaxKind.UsingKeyword, TagUsingKeyword },
 				{ SyntaxKind.IsKeyword, TagTypeCastKeyword },
@@ -277,7 +277,7 @@ namespace Codist.Taggers
 				{ SyntaxKind.LessThanLessThanToken, TagOperatorToken },
 				{ SyntaxKind.GreaterThanToken, TagOperatorToken },
 				{ SyntaxKind.GreaterThanGreaterThanToken, TagOperatorToken },
-				{ CodeAnalysisHelper.GreaterThanGreaterThanGreaterThanToken, TagOperatorToken },
+				{ (SyntaxKind) SyntaxKindEx.GreaterThanGreaterThanGreaterThanToken, TagOperatorToken },
 				{ SyntaxKind.EqualsEqualsToken, TagOperatorToken },
 				{ SyntaxKind.LessThanEqualsToken, TagOperatorToken },
 				{ SyntaxKind.GreaterThanEqualsToken, TagOperatorToken },
@@ -285,14 +285,14 @@ namespace Codist.Taggers
 				{ SyntaxKind.PlusPlusToken, TagOperatorToken },
 				{ SyntaxKind.MinusMinusToken, TagOperatorToken },
 				{ SyntaxKind.StringLiteralToken, TagStringToken },
-				{ CodeAnalysisHelper.SingleLineRawStringLiteralToken, TagStringToken },
-				{ CodeAnalysisHelper.MultiLineRawStringLiteralToken, TagStringToken },
-				{ CodeAnalysisHelper.Utf8StringLiteralToken, TagStringToken },
+				{ (SyntaxKind) SyntaxKindEx.SingleLineRawStringLiteralToken, TagStringToken },
+				{ (SyntaxKind) SyntaxKindEx.MultiLineRawStringLiteralToken, TagStringToken },
+				{ (SyntaxKind) SyntaxKindEx.Utf8StringLiteralToken, TagStringToken },
 				{ SyntaxKind.XmlTextLiteralToken, TagStringToken },
 				{ SyntaxKind.InterpolatedStringStartToken, TagInterpolatedStringStartToken },
 				{ SyntaxKind.InterpolatedVerbatimStringStartToken, TagInterpolatedStringStartToken },
-				{ CodeAnalysisHelper.InterpolatedSingleLineRawStringStartToken, TagInterpolatedStringStartToken },
-				{ CodeAnalysisHelper.InterpolatedMultiLineRawStringStartToken, TagInterpolatedStringStartToken },
+				{ (SyntaxKind) SyntaxKindEx.InterpolatedSingleLineRawStringStartToken, TagInterpolatedStringStartToken },
+				{ (SyntaxKind) SyntaxKindEx.InterpolatedMultiLineRawStringStartToken, TagInterpolatedStringStartToken },
 				{ SyntaxKind.IdentifierToken, TagIdentifier },
 			};
 
@@ -381,7 +381,7 @@ namespace Codist.Taggers
 							tag = null;
 						}
 						break;
-					case CodeAnalysisHelper.SwitchExpressionArm:
+					case (SyntaxKind)SyntaxKindEx.SwitchExpressionArm:
 						tag = __GeneralClassifications.BranchingKeyword;
 						break;
 					default: return;
@@ -406,7 +406,7 @@ namespace Codist.Taggers
 					if (node.IsKind(SyntaxKind.Interpolation)) {
 						TagTypeCastedInterpolationExpression(token, ctx, node);
 					}
-					else if (node.IsKind(CodeAnalysisHelper.PropertyPatternClause)) {
+					else if (node.IsKind((SyntaxKind)SyntaxKindEx.PropertyPatternClause)) {
 						ctx.Tags.Add(token, __GeneralClassifications.BranchingKeyword);
 					}
 					return;
@@ -479,9 +479,9 @@ namespace Codist.Taggers
 					case SyntaxKind.ArrayInitializerExpression:
 					case SyntaxKind.ThisConstructorInitializer:
 					case SyntaxKind.DestructorDeclaration:
-					case CodeAnalysisHelper.ImplicitObjectCreationExpression:
-					case CodeAnalysisHelper.WithInitializerExpression:
-					case CodeAnalysisHelper.PrimaryConstructorBaseType:
+					case (SyntaxKind)SyntaxKindEx.ImplicitObjectCreationExpression:
+					case (SyntaxKind)SyntaxKindEx.WithInitializerExpression:
+					case (SyntaxKind)SyntaxKindEx.PrimaryConstructorBaseType:
 						return __Classifications.ConstructorMethod;
 					case SyntaxKind.IndexerDeclaration:
 					case SyntaxKind.PropertyDeclaration:
@@ -489,16 +489,16 @@ namespace Codist.Taggers
 					case SyntaxKind.SetAccessorDeclaration:
 						return __Classifications.Property;
 					case SyntaxKind.ClassDeclaration:
-					case CodeAnalysisHelper.RecordDeclaration:
-					case CodeAnalysisHelper.ExtensionDeclaration:
+					case (SyntaxKind)SyntaxKindEx.RecordDeclaration:
+					case (SyntaxKind)SyntaxKindEx.ExtensionDeclaration:
 						return __Classifications.ClassName;
 					case SyntaxKind.InterfaceDeclaration:
 						return __Classifications.InterfaceName;
 					case SyntaxKind.EnumDeclaration:
 						return __Classifications.EnumName;
 					case SyntaxKind.StructDeclaration:
-					case CodeAnalysisHelper.RecordStructDeclaration:
-					case CodeAnalysisHelper.UnionDeclaration:
+					case (SyntaxKind)SyntaxKindEx.RecordStructDeclaration:
+					case (SyntaxKind)SyntaxKindEx.UnionDeclaration:
 						return __Classifications.StructName;
 					case SyntaxKind.Attribute:
 						return __Classifications.AttributeName;
@@ -514,8 +514,8 @@ namespace Codist.Taggers
 					case SyntaxKind.ElseClause:
 					case SyntaxKind.SwitchStatement:
 					case SyntaxKind.SwitchSection:
-					case CodeAnalysisHelper.SwitchExpression:
-					case CodeAnalysisHelper.RecursivePattern:
+					case (SyntaxKind)SyntaxKindEx.SwitchExpression:
+					case (SyntaxKind)SyntaxKindEx.RecursivePattern:
 						return __GeneralClassifications.BranchingKeyword;
 					case SyntaxKind.ForStatement:
 					case SyntaxKind.ForEachStatement:
@@ -554,7 +554,7 @@ namespace Codist.Taggers
 					case SyntaxKind.SwitchSection:
 					case SyntaxKind.IfStatement:
 					case SyntaxKind.ElseClause:
-					case CodeAnalysisHelper.PositionalPatternClause:
+					case (SyntaxKind)SyntaxKindEx.PositionalPatternClause:
 						return __GeneralClassifications.BranchingKeyword;
 					case SyntaxKind.ForStatement:
 					case SyntaxKind.ForEachStatement:
@@ -573,7 +573,7 @@ namespace Codist.Taggers
 					case SyntaxKind.FinallyClause:
 						return __GeneralClassifications.ResourceKeyword;
 					case SyntaxKind.ParenthesizedVariableDesignation:
-						return node.Parent.IsKind(CodeAnalysisHelper.VarPattern)
+						return node.Parent.IsKind((SyntaxKind)SyntaxKindEx.VarPattern)
 							? __GeneralClassifications.BranchingKeyword
 							: __Classifications.ConstructorMethod;
 					case SyntaxKind.TupleExpression:
@@ -611,10 +611,10 @@ namespace Codist.Taggers
 							: null;
 					case SyntaxKind.ImplicitStackAllocArrayCreationExpression:
 					case SyntaxKind.ImplicitArrayCreationExpression:
-					case CodeAnalysisHelper.CollectionExpression:
+					case (SyntaxKind)SyntaxKindEx.CollectionExpression:
 					case SyntaxKind.AttributeArgument:
 						return __Classifications.ConstructorMethod;
-					case CodeAnalysisHelper.ListPatternExpression:
+					case (SyntaxKind)SyntaxKindEx.ListPatternExpression:
 						return __GeneralClassifications.BranchingKeyword;
 					default:
 						return null;
@@ -714,13 +714,13 @@ namespace Codist.Taggers
 						trailing = 1;
 						kind = leading == 2 ? StringKind.Verbatim : StringKind.Default;
 						break;
-					case CodeAnalysisHelper.SingleLineRawStringLiteralToken:
-					case CodeAnalysisHelper.MultiLineRawStringLiteralToken:
+					case (SyntaxKind)SyntaxKindEx.SingleLineRawStringLiteralToken:
+					case (SyntaxKind)SyntaxKindEx.MultiLineRawStringLiteralToken:
 						GetRawStringQuoteLength(url, out leading);
 						trailing = leading;
 						kind = StringKind.Raw;
 						break;
-					case CodeAnalysisHelper.Utf8StringLiteralToken:
+					case (SyntaxKind)SyntaxKindEx.Utf8StringLiteralToken:
 						leading = url[0] == '@' ? 2 : 1; // @" or "
 						trailing = 3; // "u8
 						kind = leading == 2 ? StringKind.Verbatim : StringKind.Default;
@@ -820,7 +820,7 @@ namespace Codist.Taggers
 			static void TagRecordDeclaration(in SyntaxToken token, Context ctx) {
 				if (token.Parent is TypeDeclarationSyntax t) {
 					ctx.Tags.Add(t.Identifier.Span,
-						t.IsKind(CodeAnalysisHelper.RecordDeclaration) ? __Classifications.ClassName : __Classifications.StructName,
+						t.IsKind((SyntaxKind)SyntaxKindEx.RecordDeclaration) ? __Classifications.ClassName : __Classifications.StructName,
 						__Classifications.Declaration);
 				}
 			}

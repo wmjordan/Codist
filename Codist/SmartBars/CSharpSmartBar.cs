@@ -95,7 +95,7 @@ sealed class CSharpSmartBar : SmartBar
 					case SyntaxKind.IdentifierToken:
 					case SyntaxKind.SetKeyword:
 					case SyntaxKind.GetKeyword:
-					case CodeAnalysisHelper.InitKeyword:
+					case (SyntaxKind)SyntaxKindEx.InitKeyword:
 						if (nodeKind.IsDeclaration()
 							|| nodeKind.CeqAny(SyntaxKind.PredefinedType, SyntaxKind.Parameter, SyntaxKind.VariableDeclarator, SyntaxKind.ForEachStatement, SyntaxKind.SingleVariableDesignation)
 							|| node is TypeSyntax
@@ -152,7 +152,7 @@ sealed class CSharpSmartBar : SmartBar
 							AddCommand(MyToolBar, IconIds.SelectBlock, R.CMD_SelectBlock, SelectNodeAsKind<SyntaxNode>);
 						}
 						else if (tokenKind.IsBetween(SyntaxKind.NumericLiteralToken, SyntaxKind.StringLiteralToken)
-							|| tokenKind.CeqAny(CodeAnalysisHelper.SingleLineRawStringLiteralToken, CodeAnalysisHelper.MultiLineRawStringLiteralToken)) {
+							|| tokenKind.CeqAny((SyntaxKind)SyntaxKindEx.SingleLineRawStringLiteralToken, (SyntaxKind)SyntaxKindEx.MultiLineRawStringLiteralToken)) {
 							if (token.Span.Length > View.Selection.StreamSelectionSpan.Length) {
 								AddCommand(MyToolBar, IconIds.SelectText, R.CMD_SelectBlock, SelectNodeAsKind<SyntaxNode>);
 							}
@@ -409,9 +409,9 @@ sealed class CSharpSmartBar : SmartBar
 				break;
 			case SyntaxKind.ClassDeclaration:
 			case SyntaxKind.StructDeclaration:
-			case CodeAnalysisHelper.RecordDeclaration:
-			case CodeAnalysisHelper.RecordStructDeclaration:
-			case CodeAnalysisHelper.UnionDeclaration:
+			case (SyntaxKind)SyntaxKindEx.RecordDeclaration:
+			case (SyntaxKind)SyntaxKindEx.RecordStructDeclaration:
+			case (SyntaxKind)SyntaxKindEx.UnionDeclaration:
 				if ((node as TypeDeclarationSyntax).Modifiers.Any(SyntaxKind.StaticKeyword) == false) {
 					AddEditorCommand(MyToolBar, IconIds.ExtractInterface, "Refactor.ExtractInterface", R.CMD_ExtractInterface);
 				}
