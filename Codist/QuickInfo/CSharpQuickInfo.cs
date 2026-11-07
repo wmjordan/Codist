@@ -902,7 +902,7 @@ sealed partial class CSharpQuickInfo : SingletonQuickInfoSource
 
 	static void ShowBaseType(InfoContainer qiContent, ITypeSymbol typeSymbol) {
 		var baseType = typeSymbol.BaseType;
-		if (baseType.IsCommonBaseType()) {
+		if (baseType is null || baseType.IsCommonBaseType()) {
 			if (typeSymbol.IsUnion()) {
 				ShowUnionCaseTypes(qiContent, typeSymbol);
 			}
