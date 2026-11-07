@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 using CLR;
 using Codist.Controls;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using R = Codist.Properties.Resources;
 using OD = Codist.SymbolCommands.OptionDescriptor;
+using R = Codist.Properties.Resources;
 
 namespace Codist.SymbolCommands;
 
@@ -101,7 +100,7 @@ sealed class FindReturnTypeExtensionMethodsCommand
 	}
 }
 
-class FindParameterAssignmentsCommand : AnalysisListCommandBase<IReadOnlyCollection<KeyValuePair<ISymbol, List<(ArgumentAssignment assignment, Location location, ExpressionSyntax expression)>>>>
+class FindParameterAssignmentsCommand : AnalysisListCommandBase<IReadOnlyCollection<KeyValuePair<ISymbol, List<ArgumentAssignmentLocation>>>>
 {
 	public override int ImageId => IconIds.FindParameterAssignment;
 	public override string Title => R.CMD_FindAssignmentsFor;
@@ -110,19 +109,19 @@ class FindParameterAssignmentsCommand : AnalysisListCommandBase<IReadOnlyCollect
 	protected override string ResultLabel => null;
 	protected override bool UseCtrlRestriction => true;
 
-	public override Task<IReadOnlyCollection<KeyValuePair<ISymbol, List<(ArgumentAssignment assignment, Location location, ExpressionSyntax expression)>>>> PrepareListDataAsync(CancellationToken cancellationToken) {
+	public override Task<IReadOnlyCollection<KeyValuePair<ISymbol, List<ArgumentAssignmentLocation>>>> PrepareListDataAsync(CancellationToken cancellationToken) {
 		var docs = MakeDocumentListFromOption(Options);
 		return (Symbol as IParameterSymbol).FindParameterAssignmentsAsync(Context.Document.Project, docs, StrictMatch, ArgumentAssignmentFilter.Undefined, cancellationToken);
 	}
 
-	protected override void SetupListTitle(SymbolMenu resultList, IReadOnlyCollection<KeyValuePair<ISymbol, List<(ArgumentAssignment assignment, Location location, ExpressionSyntax expression)>>> data) {
+	protected override void SetupListTitle(SymbolMenu resultList, IReadOnlyCollection<KeyValuePair<ISymbol, List<ArgumentAssignmentLocation>>> data) {
 		int totalCount = data.Sum(d => d.Value.Count);
 		resultList.Title.SetGlyph(IconIds.Argument)
 			.AddSymbol(Symbol, null, true, SymbolFormatter.Instance)
 			.Append(R.T_AssignmentLocations + totalCount);
 	}
 
-	public override void UpdateList(SymbolMenu resultList, IReadOnlyCollection<KeyValuePair<ISymbol, List<(ArgumentAssignment assignment, Location location, ExpressionSyntax expression)>>> data) {
+	public override void UpdateList(SymbolMenu resultList, IReadOnlyCollection<KeyValuePair<ISymbol, List<ArgumentAssignmentLocation>>> data) {
 		resultList.ContainerType = SymbolListType.SymbolReferrers;
 		resultList.ExtIconProvider = ExtIconProvider.Default.GetExtIconsWithUsage;
 
@@ -130,9 +129,9 @@ class FindParameterAssignmentsCommand : AnalysisListCommandBase<IReadOnlyCollect
 			for (int i = 0; i < site.Value.Count; i++) {
 				var location = site.Value[i];
 				var symItem = resultList.Add(site.Key, false);
-				symItem.Location = location.location ?? location.expression.GetLocation();
-				symItem.Hint = location.assignment == ArgumentAssignment.Default ? "(default)" : location.expression.NormalizeWhitespace().ToString();
-				if (location.assignment.CeqAny(ArgumentAssignment.ImplicitlyConverted, ArgumentAssignment.ImplicitlyConvertedNameValue)) {
+				symItem.Location = location.Location ?? location.Expression.GetLocation();
+				symItem.Hint = location.Assignment == ArgumentAssignment.Default ? "(default)" : location.Expression.NormalizeWhitespace().ToString();
+				if (location.Assignment.CeqAny(ArgumentAssignment.ImplicitlyConverted, ArgumentAssignment.ImplicitlyConvertedNameValue)) {
 					symItem.Usage = SymbolUsageKind.TypeCast;
 				}
 				if (i != 0) {
@@ -152,7 +151,7 @@ sealed class FindOptionalParameterAssignmentsCommand : FindParameterAssignmentsC
 
 	public override IEnumerable<OptionDescriptor> OptionDescriptors => __Options;
 
-	public override Task<IReadOnlyCollection<KeyValuePair<ISymbol, List<(ArgumentAssignment assignment, Location location, ExpressionSyntax expression)>>>> PrepareListDataAsync(CancellationToken cancellationToken) {
+	public override Task<IReadOnlyCollection<KeyValuePair<ISymbol, List<ArgumentAssignmentLocation>>>> PrepareListDataAsync(CancellationToken cancellationToken) {
 		var docs = MakeDocumentListFromOption(Options);
 		var filter = Options.MatchFlags(CommandOptions.Explicit) ? ArgumentAssignmentFilter.ExplicitValue
 			: Options.MatchFlags(CommandOptions.Implicit) ? ArgumentAssignmentFilter.DefaultValue

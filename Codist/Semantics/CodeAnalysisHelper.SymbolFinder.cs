@@ -754,7 +754,7 @@ partial class CodeAnalysisHelper
 		}
 	}
 
-	public static async Task<IReadOnlyCollection<KeyValuePair<ISymbol, List<(ArgumentAssignment assignment, Location location, ExpressionSyntax expression)>>>> FindParameterAssignmentsAsync(this IParameterSymbol parameter, Project project, IEnumerable<Document> documents, bool strict, ArgumentAssignmentFilter assignmentFilter,  CancellationToken cancellationToken = default) {
+	public static async Task<IReadOnlyCollection<KeyValuePair<ISymbol, List<ArgumentAssignmentLocation>>>> FindParameterAssignmentsAsync(this IParameterSymbol parameter, Project project, IEnumerable<Document> documents, bool strict, ArgumentAssignmentFilter assignmentFilter,  CancellationToken cancellationToken = default) {
 		var method = (parameter.ContainingSymbol as IMethodSymbol);
 		bool mayBeExtension;
 		if (mayBeExtension = method.IsExtensionMethod) {
@@ -764,9 +764,9 @@ partial class CodeAnalysisHelper
 		var pn = parameter.Name;
 		var optional = parameter.IsOptional;
 		var modelCache = new System.Runtime.CompilerServices.ConditionalWeakTable<Document, SemanticModel>();
-		var symbolLocations = new Dictionary<ISymbol, List<(ArgumentAssignment, Location, ExpressionSyntax)>>();
+		var symbolLocations = new Dictionary<ISymbol, List<ArgumentAssignmentLocation>>();
 		var locationDedup = new HashSet<Location>(Comparers.SourceLocationComparer);
-		List<(ArgumentAssignment, Location, ExpressionSyntax)> refList;
+		List<ArgumentAssignmentLocation> refList;
 		foreach (var callerInfo in await SymbolFinder.FindReferencesAsync(method, project.Solution, documents is null ? null : ImmutableHashSet.CreateRange(documents), cancellationToken)) {
 			if (cancellationToken.IsCancellationRequested) {
 				return symbolLocations;
@@ -793,7 +793,7 @@ partial class CodeAnalysisHelper
 					}
 				}
 				if (symbolLocations.TryGetValue(caller, out refList) == false) {
-					symbolLocations.Add(caller, refList = new List<(ArgumentAssignment, Location, ExpressionSyntax)>());
+					symbolLocations.Add(caller, refList = new List<ArgumentAssignmentLocation>());
 				}
 				var pi = po;
 				if (strict || mayBeExtension) {
@@ -806,7 +806,7 @@ partial class CodeAnalysisHelper
 						if (isReduced) {
 							if (po == 0) {
 								if (assignmentFilter != ArgumentAssignmentFilter.DefaultValue) {
-									refList.Add((ArgumentAssignment.Normal, r.Location, (callerNode.Parent as MemberAccessExpressionSyntax).Expression));
+									refList.Add(new ArgumentAssignmentLocation(ArgumentAssignment.Normal, r.Location, (callerNode.Parent as MemberAccessExpressionSyntax).Expression));
 								}
 								continue;
 							}
@@ -824,7 +824,7 @@ partial class CodeAnalysisHelper
 						goto DEFAULT_VALUE;
 					}
 					if (assignmentFilter != ArgumentAssignmentFilter.DefaultValue) {
-						refList.Add((HasImplicitConversion(model, arg.Expression, cancellationToken) ? ArgumentAssignment.Normal : ArgumentAssignment.ImplicitlyConverted, null, arg.Expression));
+						refList.Add(new ArgumentAssignmentLocation(HasImplicitConversion(model, arg.Expression, cancellationToken) ? ArgumentAssignment.Normal : ArgumentAssignment.ImplicitlyConverted, null, arg.Expression));
 					}
 					continue;
 				}
@@ -832,14 +832,14 @@ partial class CodeAnalysisHelper
 					arg = args[i];
 					if (arg.NameColon?.Name.Identifier.Text == pn) {
 						if (assignmentFilter != ArgumentAssignmentFilter.DefaultValue) {
-							refList.Add((HasImplicitConversion(model, arg.Expression, cancellationToken) ? ArgumentAssignment.NameValue : ArgumentAssignment.ImplicitlyConvertedNameValue, null, arg.Expression));
+							refList.Add(new ArgumentAssignmentLocation(HasImplicitConversion(model, arg.Expression, cancellationToken) ? ArgumentAssignment.NameValue : ArgumentAssignment.ImplicitlyConvertedNameValue, null, arg.Expression));
 						}
 						goto NEXT;
 					}
 				}
 				DEFAULT_VALUE:
 				if (optional && assignmentFilter != ArgumentAssignmentFilter.ExplicitValue) {
-					refList.Add((ArgumentAssignment.Default, r.Location, null));
+					refList.Add(new ArgumentAssignmentLocation(ArgumentAssignment.Default, r.Location, null));
 				}
 			NEXT:;
 			}
