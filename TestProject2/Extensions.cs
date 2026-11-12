@@ -12,14 +12,14 @@ public static class ExtensionTypes
 		public bool HasContent => !String.IsNullOrWhiteSpace(text);
 	}
 
-    extension<T>(IEnumerable<T> source) where T : System.Numerics.INumber<T>
-    {
-        public IEnumerable<T> WhereGreaterThan(T threshold)
-            => source.Where(x => x > threshold);
+	extension<T>(IEnumerable<T> source) where T : System.Numerics.INumber<T>
+	{
+		public IEnumerable<T> WhereGreaterThan(T threshold)
+			=> source.Where(x => x > threshold);
 
-        public bool IsEmpty
-            => !source.Any();
-    }
+		public bool IsEmpty
+			=> !source.Any();
+	}
 
 	extension<T>([NotNullWhen(true)]T[] array) {
 		public bool HasContent => array?.Length > 0;
@@ -27,6 +27,15 @@ public static class ExtensionTypes
 
 	public static bool IsNumber(this string text) {
 		return !String.IsNullOrWhiteSpace(text) && Double.TryParse(text, out _);
+	}
+}
+
+[ApiVersion(15)]
+public static class IndexExtensionType
+{
+	extension(System.Xml.XmlElement element)
+	{
+		public System.Xml.XmlNode this[int index] => element.ChildNodes[index];
 	}
 }
 
