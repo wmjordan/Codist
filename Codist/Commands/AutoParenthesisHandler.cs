@@ -109,7 +109,7 @@ public class AutoParenthesisHandler : IWpfTextViewCreationListener
 		}
 		else if ((si = sc.SemanticModel.GetSymbolInfo(node, ct)).HasSymbol()) {
 			if (IsAcceptableMethod(si, node, sc, ct)) {
-				InsertParentheses(sc, si, InsertionType.Method, !node.GetNodePurpose().RawKind.CeqAny(SyntaxKind.SimpleLambdaExpression, SyntaxKind.ParenthesizedLambdaExpression, SyntaxKind.CollectionInitializerExpression, SyntaxKind.ObjectInitializerExpression, SyntaxKind.Argument));
+				InsertParentheses(sc, si, InsertionType.Method, !node.GetNodePurpose().RawKind.CeqAny(SyntaxKind.SimpleLambdaExpression, SyntaxKind.ParenthesizedLambdaExpression, SyntaxKind.CollectionInitializerExpression, SyntaxKind.ObjectInitializerExpression, SyntaxKind.Argument) && StatementIsMissingSemicolon(node));
 			}
 			else if (IsConstructor(si, node)) {
 				TryConstructor(sc, node, si, ct);
@@ -118,6 +118,19 @@ public class AutoParenthesisHandler : IWpfTextViewCreationListener
 				TryDelegate(sc, node.GetNodePurpose(), si, ct);
 			}
 		}
+	}
+
+	static bool StatementIsMissingSemicolon(SyntaxNode node) {
+		var statement = node.FirstAncestorOrSelf<StatementSyntax>();
+		if (statement is null) {
+			return false;
+		}
+		return statement switch {
+			ReturnStatementSyntax r => r.SemicolonToken.IsMissing,
+			ExpressionStatementSyntax e => e.SemicolonToken.IsMissing,
+			LocalDeclarationStatementSyntax l => l.SemicolonToken.IsMissing,
+			_ => false
+		};
 	}
 
 	static void TryConstructor(SemanticContext sc, SyntaxNode node, SymbolInfo si, CancellationToken ct) {
