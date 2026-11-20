@@ -24,7 +24,7 @@ namespace Codist.QuickInfo
 				container.Add(new BlockItem(IconIds.InstanceMember, R.T_ExpressionCount)
 					.Append(((InitializerExpressionSyntax)node).Expressions.Count.ToText(), true, __SymbolFormatter.Number));
 			}
-			else if (node.IsKind((SyntaxKind)SyntaxKindEx.PropertyPatternClause)) {
+			else if (node.IsKind(SyntaxKindEx.PropertyPatternClause)) {
 				container.Add(new BlockItem(IconIds.InstanceMember, R.T_SubPatternCount)
 					.Append(((CSharpSyntaxNode)node).GetPropertyPatternSubPatternsCount().ToText(), true, __SymbolFormatter.Number)
 					);

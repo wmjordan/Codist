@@ -193,7 +193,7 @@ namespace Codist.Refactorings
 				var node = ctx.Node;
 				if (node.IsAnyKind(SyntaxKind.ClassDeclaration, (SyntaxKind)SyntaxKindEx.RecordDeclaration)
 					&& CanBeSealed(((TypeDeclarationSyntax)node).Modifiers)) {
-					_Title = node.IsKind((SyntaxKind)SyntaxKindEx.RecordDeclaration)
+					_Title = node.IsKind(SyntaxKindEx.RecordDeclaration)
 						? R.CMD_SealRecord
 						: R.CMD_SealClass;
 					return true;
@@ -357,7 +357,7 @@ namespace Codist.Refactorings
 					var m = d.GetModifiers(out var canHaveModifier);
 					TypeDeclarationSyntax t;
 					return canHaveModifier
-						&& !d.IsAnyKind(SyntaxKind.ConstructorDeclaration, SyntaxKind.DestructorDeclaration, (SyntaxKind)SyntaxKindEx.RecordDeclaration, (SyntaxKind)SyntaxKindEx.RecordStructDeclaration)
+						&& !d.RawKind.CeqAny(SyntaxKind.ConstructorDeclaration, SyntaxKind.DestructorDeclaration, SyntaxKindEx.RecordDeclaration, SyntaxKindEx.RecordStructDeclaration)
 						&& ((t = d as TypeDeclarationSyntax) == null
 							|| t.GetParameterList() == null) // exclude primary constructor
 						&& CanBeStatic(m);
@@ -430,7 +430,7 @@ namespace Codist.Refactorings
 			}
 
 			bool CanChangeAccessibility(MemberDeclarationSyntax d) {
-				if (d.IsAnyKind(SyntaxKind.EnumMemberDeclaration, (SyntaxKind)SyntaxKindEx.ExtensionDeclaration)) {
+				if (d.RawKind.CeqAny(SyntaxKind.EnumMemberDeclaration, SyntaxKindEx.ExtensionDeclaration)) {
 					return false;
 				}
 				var m = d.GetModifiers(out var canHaveModifier);
@@ -632,13 +632,13 @@ namespace Codist.Refactorings
 			public override string Title => R.CMD_MultiLineOrPatterns;
 
 			public override bool Accept(RefactoringContext ctx) {
-				return ctx.Node.IsKind((SyntaxKind)SyntaxKindEx.SwitchExpression)
+				return ctx.Node.IsKind(SyntaxKindEx.SwitchExpression)
 					&& ctx.Node.ChildNodes().Any(IsSwitchExpressionArmWithOrPattern);
 			}
 
 			bool IsSwitchExpressionArmWithOrPattern(SyntaxNode i) {
-				return i.IsKind((SyntaxKind)SyntaxKindEx.SwitchExpressionArm)
-					&& i.GetSwitchExpressionArmPattern().IsKind((SyntaxKind)SyntaxKindEx.OrPattern)
+				return i.IsKind(SyntaxKindEx.SwitchExpressionArm)
+					&& i.GetSwitchExpressionArmPattern().IsKind(SyntaxKindEx.OrPattern)
 					&& !i.IsMultiLine(true);
 			}
 

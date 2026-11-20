@@ -150,12 +150,12 @@ namespace Codist.Taggers
 					}
 					var textSpan = new TextSpan(span.Start.Position, span.Length);
 					foreach (var token in compilationUnit.DescendantTokens(textSpan, FormatStore.TagAttributeAnnotation ? prober.Probe : null)) {
-						if (textSpan.Contains(token.SpanStart) == false) {
+						if (!textSpan.Contains(token.SpanStart)) {
 							if (token.HasLeadingTrivia) {
 								TagXmlDocTokens(token.LeadingTrivia, textSpan, ctx);
 							}
 							if (FormatStore.TagUrl
-								&& token.IsAnyKind((SyntaxKind)SyntaxKindEx.MultiLineRawStringLiteralToken, (SyntaxKind)SyntaxKindEx.InterpolatedMultiLineRawStringStartToken)) {
+								&& token.RawKind.CeqAny(SyntaxKindEx.MultiLineRawStringLiteralToken, SyntaxKindEx.InterpolatedMultiLineRawStringStartToken)) {
 								var s = span.Intersection(token.Span.ToSpan());
 								if (s.HasValue) {
 									TokenTaggers.TagUrlParts(ctx, s.Value.GetText(), 0, 0, s.Value.Start, StringKind.Raw);
@@ -406,7 +406,7 @@ namespace Codist.Taggers
 					if (node.IsKind(SyntaxKind.Interpolation)) {
 						TagTypeCastedInterpolationExpression(token, ctx, node);
 					}
-					else if (node.IsKind((SyntaxKind)SyntaxKindEx.PropertyPatternClause)) {
+					else if (node.IsKind(SyntaxKindEx.PropertyPatternClause)) {
 						ctx.Tags.Add(token, __GeneralClassifications.BranchingKeyword);
 					}
 					return;
@@ -573,7 +573,7 @@ namespace Codist.Taggers
 					case SyntaxKind.FinallyClause:
 						return __GeneralClassifications.ResourceKeyword;
 					case SyntaxKind.ParenthesizedVariableDesignation:
-						return node.Parent.IsKind((SyntaxKind)SyntaxKindEx.VarPattern)
+						return node.Parent.IsKind(SyntaxKindEx.VarPattern)
 							? __GeneralClassifications.BranchingKeyword
 							: __Classifications.ConstructorMethod;
 					case SyntaxKind.TupleExpression:
@@ -820,7 +820,7 @@ namespace Codist.Taggers
 			static void TagRecordDeclaration(in SyntaxToken token, Context ctx) {
 				if (token.Parent is TypeDeclarationSyntax t) {
 					ctx.Tags.Add(t.Identifier.Span,
-						t.IsKind((SyntaxKind)SyntaxKindEx.RecordDeclaration) ? __Classifications.ClassName : __Classifications.StructName,
+						t.IsKind(SyntaxKindEx.RecordDeclaration) ? __Classifications.ClassName : __Classifications.StructName,
 						__Classifications.Declaration);
 				}
 			}

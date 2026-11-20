@@ -190,7 +190,7 @@ namespace Codist
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool IsNamespaceDeclaration(this SyntaxKind kind) {
-			return kind.CeqAny(SyntaxKind.NamespaceDeclaration, (SyntaxKind)SyntaxKindEx.FileScopedNamespaceDeclaration);
+			return kind.CeqAny(SyntaxKind.NamespaceDeclaration, SyntaxKindEx.FileScopedNamespaceDeclaration);
 		}
 		public static bool IsMemberDeclaration(this SyntaxKind kind) {
 			switch (kind) {
@@ -427,7 +427,7 @@ namespace Codist
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static NameSyntax GetFileScopedNamespaceDeclarationName(this SyntaxNode node) {
-			return node.IsKind((SyntaxKind)SyntaxKindEx.FileScopedNamespaceDeclaration) ? NonPublicOrFutureAccessors.GetFileScopedNamespaceName(node) : null;
+			return node.IsKind(SyntaxKindEx.FileScopedNamespaceDeclaration) ? NonPublicOrFutureAccessors.GetFileScopedNamespaceName(node) : null;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -619,12 +619,12 @@ namespace Codist
 			}
 			switch (node.Kind()) {
 				case SyntaxKind.ObjectCreationExpression:
-				return node;
-				case SyntaxKind.QualifiedName:
-				node = node.Parent;
-				if (node.IsKind(SyntaxKind.ObjectCreationExpression)) {
 					return node;
-				}
+				case SyntaxKind.QualifiedName:
+					node = node.Parent;
+					if (node.IsKind(SyntaxKind.ObjectCreationExpression)) {
+						return node;
+					}
 					break;
 			}
 			return null;

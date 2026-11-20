@@ -250,7 +250,7 @@ partial class CSharpQuickInfo
 			ctx.SetSymbol(ctx.semanticModel.GetSymbolInfo(ctx.node = node.Parent, ctx.cancellationToken));
 			ctx.State = State.Process;
 		}
-		else if (node.IsKind((SyntaxKind)SyntaxKindEx.RelationPattern)) {
+		else if (node.IsKind(SyntaxKindEx.RelationPattern)) {
 			ctx.SetSymbol(ctx.semanticModel.GetTypeInfo(ctx.node, ctx.cancellationToken));
 			ctx.State = State.Return;
 		}
@@ -284,8 +284,8 @@ partial class CSharpQuickInfo
 					&& node.Parent.IsKind(SyntaxKind.ElementAccessExpression)) {
 			ctx.SetSymbol(ctx.semanticModel.GetSymbolInfo((ElementAccessExpressionSyntax)node.Parent, ctx.cancellationToken));
 		}
-		else if (node.IsAnyKind((SyntaxKind)SyntaxKindEx.CollectionExpression, (SyntaxKind)SyntaxKindEx.ListPatternExpression)) {
-			if (node.IsKind((SyntaxKind)SyntaxKindEx.CollectionExpression)) {
+		else if (node.IsAnyKind(SyntaxKindEx.CollectionExpression, SyntaxKindEx.ListPatternExpression)) {
+			if (node.IsKind(SyntaxKindEx.CollectionExpression)) {
 				ctx.Container.Add(new BlockItem(IconIds.InstanceMember, R.T_ElementCount + ((ExpressionSyntax)node).GetCollectionExpressionElementsCount().ToText()));
 			}
 			else {
@@ -448,7 +448,7 @@ partial class CSharpQuickInfo
 
 	static void ProcessSwitchToken(Context ctx) {
 		var node = ctx.node = ctx.token.Parent;
-		if (node.IsKind((SyntaxKind)SyntaxKindEx.SwitchExpression)) {
+		if (node.IsKind(SyntaxKindEx.SwitchExpression)) {
 			ProcessSwitchExpression(ctx, node);
 			if (ctx.symbol == null) {
 				ctx.State = State.Unavailable;
@@ -501,8 +501,8 @@ partial class CSharpQuickInfo
 	static void ProcessEqualsGreaterThanToken(Context ctx) {
 		SyntaxNode node;
 		ctx.node = node = ctx.token.Parent;
-		if (node.IsKind((SyntaxKind)SyntaxKindEx.SwitchExpressionArm)
-			&& node.Parent.IsKind((SyntaxKind)SyntaxKindEx.SwitchExpression)) {
+		if (node.IsKind(SyntaxKindEx.SwitchExpressionArm)
+			&& node.Parent.IsKind(SyntaxKindEx.SwitchExpression)) {
 			ctx.SetSymbol(ctx.semanticModel.GetTypeInfo(node.Parent, ctx.cancellationToken));
 			var patternType = ctx.semanticModel.GetTypeInfo(node.GetSwitchExpressionArmPattern(), ctx.cancellationToken);
 			if (patternType.ConvertedType != null) {

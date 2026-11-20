@@ -40,7 +40,7 @@ partial class CSharpQuickInfo
 				case SyntaxKind.ComplexElementInitializerExpression:
 				case (SyntaxKind)SyntaxKindEx.CollectionExpression:
 					ShowLocationOfInitializerExpression(ctx.Container, argument, parent);
-					if (parent.IsKind((SyntaxKind)SyntaxKindEx.CollectionExpression) == false) {
+					if (parent.IsKind(SyntaxKindEx.CollectionExpression) == false) {
 						var initSymbol = ctx.semanticModel.GetCollectionInitializerSymbolInfo((ExpressionSyntax)argument, ctx.cancellationToken).Symbol;
 						if (initSymbol != null) {
 							ctx.Container.Add(new BlockItem(initSymbol.GetImageId())
@@ -65,7 +65,7 @@ partial class CSharpQuickInfo
 		if (n is InitializerExpressionSyntax ie) {
 			argIndex = ie.Expressions.IndexOf((ExpressionSyntax)argument);
 		}
-		else if (n.IsKind((SyntaxKind)SyntaxKindEx.CollectionExpression)) {
+		else if (n.IsKind(SyntaxKindEx.CollectionExpression)) {
 			var elements = ((ExpressionSyntax)n).GetCollectionExpressionElements();
 			argIndex = 0;
 			var argSpan = argument.Span;

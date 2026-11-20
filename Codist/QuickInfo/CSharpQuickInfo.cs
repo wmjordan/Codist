@@ -193,7 +193,7 @@ sealed partial class CSharpQuickInfo : SingletonQuickInfoSource
 					o,
 					ctor != null
 						? semanticModel.GetSymbolInfo(ctor, cancellationToken).Symbol ?? ctx.symbol
-						: ctx.node.Parent.IsKind((SyntaxKind)SyntaxKindEx.PrimaryConstructorBaseType)
+						: ctx.node.Parent.IsKind(SyntaxKindEx.PrimaryConstructorBaseType)
 						? (ctx.symbol = semanticModel.GetSymbolInfo(ctx.node.Parent, cancellationToken).Symbol ?? ctx.symbol)
 						: ctx.symbol,
 					semanticModel,
@@ -837,7 +837,7 @@ sealed partial class CSharpQuickInfo : SingletonQuickInfoSource
 			&& typeSymbol.TypeKind == TypeKind.Interface) {
 			var declarationType = (node.Parent.UnqualifyExceptNamespace().Parent as BaseListSyntax)?.Parent;
 			var declaredClass = declarationType?.Kind()
-				.CeqAny(SyntaxKind.ClassDeclaration, SyntaxKind.StructDeclaration, (SyntaxKind)SyntaxKindEx.RecordDeclaration, (SyntaxKind)SyntaxKindEx.RecordStructDeclaration, (SyntaxKind)SyntaxKindEx.UnionDeclaration) == true
+				.CeqAny(SyntaxKind.ClassDeclaration, SyntaxKind.StructDeclaration, SyntaxKindEx.RecordDeclaration, SyntaxKindEx.RecordStructDeclaration, SyntaxKindEx.UnionDeclaration) == true
 				? context.semanticModel.GetDeclaredSymbol(declarationType, context.cancellationToken) as INamedTypeSymbol
 				: null;
 			ShowInterfaceMembers(qiContent, typeSymbol, declaredClass);

@@ -152,7 +152,7 @@ sealed class CSharpSmartBar : SmartBar
 							AddCommand(MyToolBar, IconIds.SelectBlock, R.CMD_SelectBlock, SelectNodeAsKind<SyntaxNode>);
 						}
 						else if (tokenKind.IsBetween(SyntaxKind.NumericLiteralToken, SyntaxKind.StringLiteralToken)
-							|| tokenKind.CeqAny((SyntaxKind)SyntaxKindEx.SingleLineRawStringLiteralToken, (SyntaxKind)SyntaxKindEx.MultiLineRawStringLiteralToken)) {
+							|| tokenKind.CeqAny(SyntaxKindEx.SingleLineRawStringLiteralToken, SyntaxKindEx.MultiLineRawStringLiteralToken)) {
 							if (token.Span.Length > View.Selection.StreamSelectionSpan.Length) {
 								AddCommand(MyToolBar, IconIds.SelectText, R.CMD_SelectBlock, SelectNodeAsKind<SyntaxNode>);
 							}

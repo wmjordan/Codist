@@ -23,7 +23,7 @@ static partial class CodeAnalysisHelper
 			?? semanticModel.GetTypeInfo(node, cancellationToken).Type
 			?? (node.IsKind(SyntaxKind.FieldDeclaration) ? semanticModel.GetDeclaredSymbol(((FieldDeclarationSyntax)node).Declaration.Variables.First(), cancellationToken)
 				: node.IsKind(SyntaxKind.EventFieldDeclaration) ? semanticModel.GetDeclaredSymbol(((EventFieldDeclarationSyntax)node).Declaration.Variables.First(), cancellationToken)
-				: node.IsAnyKind((SyntaxKind)SyntaxKindEx.RecordDeclaration, (SyntaxKind)SyntaxKindEx.RecordStructDeclaration, (SyntaxKind)SyntaxKindEx.UnionDeclaration) ? semanticModel.GetDeclaredSymbol(node, cancellationToken)
+				: node.RawKind.CeqAny(SyntaxKindEx.RecordDeclaration, SyntaxKindEx.RecordStructDeclaration, SyntaxKindEx.UnionDeclaration) ? semanticModel.GetDeclaredSymbol(node, cancellationToken)
 				: null)
 			;
 	}
@@ -42,7 +42,7 @@ static partial class CodeAnalysisHelper
 			s = semanticModel.GetSymbolInfo(node.Parent, cancellationToken).Symbol;
 		}
 		else if (node is AccessorDeclarationSyntax
-			|| k.CeqAny(SyntaxKind.TypeParameter, SyntaxKind.Parameter, (SyntaxKind)SyntaxKindEx.RecordDeclaration, (SyntaxKind)SyntaxKindEx.RecordStructDeclaration, (SyntaxKind)SyntaxKindEx.UnionDeclaration)) {
+			|| k.CeqAny(SyntaxKind.TypeParameter, SyntaxKind.Parameter, SyntaxKindEx.RecordDeclaration, SyntaxKindEx.RecordStructDeclaration, SyntaxKindEx.UnionDeclaration)) {
 			s = semanticModel.GetDeclaredSymbol(node, cancellationToken);
 		}
 		if (s != null) {
@@ -1447,16 +1447,16 @@ static partial class CodeAnalysisHelper
 			: (AssemblySource)NonPublicOrFutureAccessors.GetAssemblySourceType(assembly);
 	}
 	public static int GetSwitchExpressionArmsCount(this ExpressionSyntax switchExpression) {
-		return switchExpression.IsKind((SyntaxKind)SyntaxKindEx.SwitchExpression) ? NonPublicOrFutureAccessors.GetSwitchExpressionArmsCount(switchExpression) : 0;
+		return switchExpression.IsKind(SyntaxKindEx.SwitchExpression) ? NonPublicOrFutureAccessors.GetSwitchExpressionArmsCount(switchExpression) : 0;
 	}
 	public static int GetPropertyPatternSubPatternsCount(this CSharpSyntaxNode propertyPatternClause) {
-		return propertyPatternClause.IsKind((SyntaxKind)SyntaxKindEx.PropertyPatternClause) ? NonPublicOrFutureAccessors.GetPropertyPatternSubPatternsCount(propertyPatternClause) : 0;
+		return propertyPatternClause.IsKind(SyntaxKindEx.PropertyPatternClause) ? NonPublicOrFutureAccessors.GetPropertyPatternSubPatternsCount(propertyPatternClause) : 0;
 	}
 	public static int GetCollectionExpressionElementsCount(this ExpressionSyntax collectionExpression) {
-		return collectionExpression.IsKind((SyntaxKind)SyntaxKindEx.CollectionExpression) ? NonPublicOrFutureAccessors.GetCollectionExpressionElementsCount(collectionExpression) : 0;
+		return collectionExpression.IsKind(SyntaxKindEx.CollectionExpression) ? NonPublicOrFutureAccessors.GetCollectionExpressionElementsCount(collectionExpression) : 0;
 	}
 	public static int GetListPatternsCount(this PatternSyntax listPattern) {
-		return listPattern.IsKind((SyntaxKind)SyntaxKindEx.ListPatternExpression) ? NonPublicOrFutureAccessors.GetListPatternsCount(listPattern) : 0;
+		return listPattern.IsKind(SyntaxKindEx.ListPatternExpression) ? NonPublicOrFutureAccessors.GetListPatternsCount(listPattern) : 0;
 	}
 	#endregion
 	#endregion
