@@ -221,7 +221,7 @@ abstract class HierarchicalListCommand<TSymbol> : AnalysisListCommandBase<(Symbo
 		}
 	}
 
-	static void AddChildren(SymbolRelations<TSymbol, TSymbol> hierarchies, SymbolMenu resultList, byte indentLevel, TSymbol item) {
+	protected static void AddChildren(SymbolRelations<TSymbol, TSymbol> hierarchies, SymbolMenu resultList, byte indentLevel, TSymbol item) {
 		var children = hierarchies.GetRelations(item);
 		if (children is null) {
 			return;

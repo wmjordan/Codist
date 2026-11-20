@@ -60,11 +60,12 @@ sealed class FindDerivedClassesCommand
 		}
 
 		var hierarchies = new TypeRelations(CodeAnalysisHelper.GetNamedTypeComparer());
+		var dedup = new HashSet<INamedTypeSymbol>(CodeAnalysisHelper.GetNamedTypeComparer());
 		INamedTypeSymbol t, bt;
 		foreach (var c in classes) {
 			t = c.OriginalDefinition;
 			bt = t.BaseType.OriginalDefinition;
-			if (!hierarchies.Add(bt, t)) {
+			if (dedup.Add(t) && hierarchies.AddNew(bt, t)) {
 				continue;
 			}
 #if LOG || DEBUG
@@ -95,7 +96,15 @@ sealed class FindDerivedClassesCommand
 	}
 
 	public override void UpdateList(SymbolMenu resultList, (TypeRelations hierarchicalData, IReadOnlyList<INamedTypeSymbol> topList) data) {
-		SetupList(data, resultList);
+		var hierarchies = data.hierarchicalData;
+		if (hierarchies is null) {
+			return;
+		}
+		var root = hierarchies.KeySymbols.First();
+		foreach (var item in hierarchies.GetRelations(root)) {
+			resultList.Add(item, false);
+			AddChildren(hierarchies, resultList, 0, item);
+		}
 	}
 }
 
