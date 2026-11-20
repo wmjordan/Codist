@@ -51,6 +51,7 @@ enum SyntaxKindEx
 	InterpolatedSingleLineRawStringStartToken = 9072,
 	InterpolatedMultiLineRawStringStartToken = 9073,
 	CollectionExpression = 9076,
+	ExpressionElement = 9077,
 	ExtensionDeclaration = 9079,
 	UnionDeclaration = 9082,
 }

@@ -84,6 +84,9 @@ namespace Codist
 		public static IReadOnlyList<SyntaxNode> GetCollectionExpressionElements(this ExpressionSyntax collectionExpression) {
 			return NonPublicOrFutureAccessors.GetCollectionExpressionElements(collectionExpression);
 		}
+		public static ExpressionSyntax GetExpressionElementExpression(this SyntaxNode syntax) {
+			return NonPublicOrFutureAccessors.GetExpressionElementExpression(syntax);
+		}
 
 		public static ImmutableArray<TSymbol> MakeSortedSymbolArray<TSymbol>(this IEnumerable<TSymbol> symbols) where TSymbol : ISymbol {
 			var arrayBuilder = ImmutableArray.CreateBuilder<TSymbol>();
@@ -108,6 +111,8 @@ namespace Codist
 			public static readonly Func<SyntaxNode, NameSyntax> GetFileScopedNamespaceName = ReflectionHelper.CreateGetPropertyMethod<SyntaxNode, NameSyntax>("Name", typeof(NamespaceDeclarationSyntax).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Syntax.FileScopedNamespaceDeclarationSyntax"));
 
 			public static readonly Func<ExpressionSyntax, ArgumentListSyntax> GetImplicitObjectCreationArgumentList = ReflectionHelper.CreateGetPropertyMethod<ExpressionSyntax, ArgumentListSyntax>("ArgumentList", typeof(ExpressionSyntax).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Syntax.BaseObjectCreationExpressionSyntax"));
+
+			public static readonly Func<SyntaxNode, ExpressionSyntax> GetExpressionElementExpression = ReflectionHelper.CreateGetPropertyMethod<SyntaxNode, ExpressionSyntax>("Expression", typeof(ExpressionSyntax).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Syntax.ExpressionElementSyntax"));
 
 			public static readonly Func<int, int> GetWarningLevel = ReflectionHelper.CallStaticFunc<int, int>(typeof(LanguageVersionFacts).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.ErrorFacts")?.GetMethod("GetWarningLevel", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)) ?? (Func<int, int>)((int _) => 3);
 

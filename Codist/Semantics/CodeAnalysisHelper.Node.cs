@@ -18,6 +18,14 @@ namespace Codist
 	{
 		#region Node info
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool IsKind(this SyntaxNode node, SyntaxKindEx kind) {
+			return node.RawKind == (int)kind;
+		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool IsAnyKind(this SyntaxNode node, SyntaxKindEx kind1, SyntaxKindEx kind2) {
+			return node.RawKind.CeqAny(kind1, kind2);
+		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool IsAnyKind(this SyntaxNode node, SyntaxKind kind1, SyntaxKind kind2) {
 			return node.RawKind.CeqAny(kind1, kind2);
 		}
@@ -600,19 +608,24 @@ namespace Codist
 		/// <param name="node"></param>
 		/// <returns>Returns the constructor node if <paramref name="node"/>'s parent is <see cref="SyntaxKind.ObjectCreationExpression"/>, otherwise, <see langword="null"/> is returned.</returns>
 		public static SyntaxNode GetObjectCreationNode(this SyntaxNode node) {
+			if (node.IsKind(SyntaxKindEx.ExpressionElement)
+				&& node.GetExpressionElementExpression().IsKind(SyntaxKindEx.ImplicitObjectCreationExpression)) {
+				// special case for "new()" expression
+				return node.ChildNodes().First();
+			}
 			node = node.Parent;
 			if (node == null) {
 				return null;
 			}
-			var kind = node.Kind();
-			if (kind == SyntaxKind.ObjectCreationExpression) {
+			switch (node.Kind()) {
+				case SyntaxKind.ObjectCreationExpression:
 				return node;
-			}
-			if (kind == SyntaxKind.QualifiedName) {
+				case SyntaxKind.QualifiedName:
 				node = node.Parent;
 				if (node.IsKind(SyntaxKind.ObjectCreationExpression)) {
 					return node;
 				}
+					break;
 			}
 			return null;
 		}
