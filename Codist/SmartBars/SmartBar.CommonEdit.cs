@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
@@ -26,6 +27,7 @@ partial class SmartBar
 	static readonly CommandItem[] __SurroundingCommands = GetSurroundingCommands();
 	static readonly CommandItem[] __DebugCommands = GetDebugCommands();
 	static readonly Regex __CapitalizeExpression = new Regex(@"(^|\b|[^\w\s])?_?([a-zA-Z])([a-zA-Z]*)(?=_|\b|$)", RegexOptions.Compiled);
+	static readonly Regex __SnakeCaseExpression = new Regex(@"([a-z0-9])([A-Z])|([A-Z])([A-Z][a-z])", RegexOptions.Compiled);
 
 	static void ExecuteAndFind(CommandContext ctx, string command, string text, bool excludeLineBreakOnLineCommand) {
 		if (ctx.RightClick) {
@@ -467,27 +469,37 @@ partial class SmartBar
 
 	static CommandItem[] GetCaseCommands() {
 		return new CommandItem[] {
-			new CommandItem(IconIds.Capitalize, R.CMD_Capitalize, ctx => {
+			new CommandItem(IconIds.ChangeCase, R.CMD_CasePascal, ctx => {
 				ctx.KeepToolBarOnClick = true;
 				if (ctx.ModifierKeys.MatchFlags(ModifierKeys.Control)) {
-					Replace(ctx, t => {
-						return __CapitalizeExpression.Replace(t, m => {
-							var g = m.Groups;
-							return String.Concat(g[1].Value, g[2].Value.ToUpperInvariant(), g[3].Value.ToLowerInvariant());
-						});}, true);
+					ctx.View.GetEditorOperations().Capitalize();
 				}
 				else {
-				ctx.View.GetEditorOperations().Capitalize();
+					Replace(ctx, NameConverter.ToPascalCase, true);
 				}
-			}) { ToolTip = R.CMDT_Capitalize, QuickAccessCondition = CommandItem.HasEditableSelection },
-			new CommandItem(IconIds.Uppercase, R.CMD_Uppercase, ctx => {
+			}) { ToolTip = R.CMDT_CasePascal, QuickAccessCondition = CommandItem.HasEditableSelection },
+			new CommandItem(IconIds.ChangeCase, R.CMD_CaseUpper, ctx => {
 				ctx.KeepToolBarOnClick = true;
-				ctx.View.GetEditorOperations().MakeUppercase();
-			}) { QuickAccessCondition = CommandItem.HasEditableSelection },
-			new CommandItem(IconIds.Lowercase, R.CMD_Lowercase, ctx => {
+				if (ctx.ModifierKeys.MatchFlags(ModifierKeys.Control)) {
+					ctx.View.GetEditorOperations().MakeUppercase();
+				}
+				else {
+					Replace(ctx, NameConverter.ToUpperSnakeCase, true);
+				}
+			}) { ToolTip = R.CMDT_CaseUpper, QuickAccessCondition = CommandItem.HasEditableSelection },
+			new CommandItem(IconIds.ChangeCase, R.CMD_CaseCamel, ctx => {
 				ctx.KeepToolBarOnClick = true;
-				ctx.View.GetEditorOperations().MakeLowercase();
-			}) { QuickAccessCondition = CommandItem.HasEditableSelection },
+				if (ctx.ModifierKeys.MatchFlags(ModifierKeys.Control)) {
+					ctx.View.GetEditorOperations().MakeLowercase();
+				}
+				else {
+					Replace(ctx, NameConverter.ToCamelCase, true);
+				}
+			}) { ToolTip = R.CMDT_CaseCamel, QuickAccessCondition = CommandItem.HasEditableSelection },
+			new CommandItem(IconIds.ChangeCase, R.CMD_CaseSnake, ctx => {
+				ctx.KeepToolBarOnClick = true;
+				Replace(ctx, NameConverter.ToSnakeCase, true);
+			}) { ToolTip = R.CMDT_CaseSnake, QuickAccessCondition = CommandItem.HasEditableSelection },
 		};
 	}
 	static CommandItem[] GetWebCommands() {
@@ -663,5 +675,79 @@ partial class SmartBar
 	}
 	static void SearchSelection(string url, CommandContext ctx) {
 		ExternalCommand.OpenWithWebBrowser(url, ctx.View.GetFirstSelectionText());
+	}
+
+	static class NameConverter
+	{
+		static readonly Regex __WordExpression = new(@"[A-Z]+(?=[A-Z][a-z]|$)|[A-Z]?[a-z]+[0-9]*|[A-Z]+[0-9]*|[0-9]+", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+		static void CapitalizeWord(StringBuilder sb, string word) {
+			if (!String.IsNullOrEmpty(word)) {
+				sb.Append(Char.ToUpperInvariant(word[0])).Append(word.Substring(1, word.Length - 1).ToLowerInvariant());
+			}
+		}
+
+		static void LowerFirstWord(StringBuilder sb, string word) {
+			if (!String.IsNullOrEmpty(word)) {
+				sb.Append(word[0].IsBetween('a', 'z') ? word : word.ToLowerInvariant());
+			}
+		}
+
+		public static string ToPascalCase(string t) {
+			if (String.IsNullOrEmpty(t)) return t;
+
+			using var sbr = ReusableStringBuilder.AcquireDefault(t.Length);
+			var sb = sbr.Resource;
+			foreach (Match m in __WordExpression.Matches(t)) {
+				CapitalizeWord(sb, m.Value);
+			}
+			return sb.ToString();
+		}
+
+		public static string ToCamelCase(string t) {
+			if (String.IsNullOrEmpty(t)) return t;
+
+			using var sbr = ReusableStringBuilder.AcquireDefault(t.Length);
+			var sb = sbr.Resource;
+			bool first = true;
+			foreach (Match m in __WordExpression.Matches(t)) {
+				if (first) {
+					LowerFirstWord(sb, m.Value);
+				}
+				else {
+					CapitalizeWord(sb, m.Value);
+				}
+				first = false;
+			}
+			return sb.ToString();
+		}
+
+		public static string ToSnakeCase(string t) {
+			if (String.IsNullOrEmpty(t)) return t;
+
+			using var sbr = ReusableStringBuilder.AcquireDefault(t.Length);
+			var sb = sbr.Resource;
+			bool first = true;
+			foreach (Match m in __WordExpression.Matches(t)) {
+				if (!first) sb.Append('_');
+				sb.Append(m.Value.ToLowerInvariant());
+				first = false;
+			}
+			return sb.ToString();
+		}
+
+		public static string ToUpperSnakeCase(string t) {
+			if (String.IsNullOrEmpty(t)) return t;
+
+			using var sbr = ReusableStringBuilder.AcquireDefault(t.Length);
+			var sb = sbr.Resource;
+			bool first = true;
+			foreach (Match m in __WordExpression.Matches(t)) {
+				if (!first) sb.Append('_');
+				sb.Append(m.Value.ToUpperInvariant());
+				first = false;
+			}
+			return sb.ToString();
+		}
 	}
 }

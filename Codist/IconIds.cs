@@ -309,6 +309,7 @@ static class IconIds
 	public const int Capitalize = KnownImageIds.Font;
 	public const int Uppercase = KnownImageIds.IncreaseFontSize;
 	public const int Lowercase = KnownImageIds.DecreaseFontSize;
+	public const int ChangeCase = KnownImageIds.EditLabel;
 	public const int HtmlEncode = KnownImageIds.ReloadXML;
 	public const int UrlEncode = KnownImageIds.DynamicWebSite;
 	public const int EntityDecode = KnownImageIds.HanCharacter;

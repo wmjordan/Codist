@@ -160,11 +160,38 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Capitalize.
+        ///   Looks up a localized string similar to camelCase.
         /// </summary>
-        internal static string CMD_Capitalize {
+        internal static string CMD_CaseCamel {
             get {
-                return ResourceManager.GetString("CMD_Capitalize", resourceCulture);
+                return ResourceManager.GetString("CMD_CaseCamel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to PascalCase.
+        /// </summary>
+        internal static string CMD_CasePascal {
+            get {
+                return ResourceManager.GetString("CMD_CasePascal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to snake_case.
+        /// </summary>
+        internal static string CMD_CaseSnake {
+            get {
+                return ResourceManager.GetString("CMD_CaseSnake", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to UPPER_CASE.
+        /// </summary>
+        internal static string CMD_CaseUpper {
+            get {
+                return ResourceManager.GetString("CMD_CaseUpper", resourceCulture);
             }
         }
         
@@ -1282,15 +1309,6 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Lowercase.
-        /// </summary>
-        internal static string CMD_Lowercase {
-            get {
-                return ResourceManager.GetString("CMD_Lowercase", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Make Internal.
         /// </summary>
         internal static string CMD_MakeInternal {
@@ -2387,15 +2405,6 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Uppercase.
-        /// </summary>
-        internal static string CMD_Uppercase {
-            get {
-                return ResourceManager.GetString("CMD_Uppercase", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to URL Decode.
         /// </summary>
         internal static string CMD_UrlDecode {
@@ -2559,12 +2568,41 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Make words in selection capitalized
-        ///Ctrl: Convert underscore(&quot;_&quot;) separated words to capitalized words.
+        ///   Looks up a localized string similar to Make words in selection to camelCase
+        ///Ctrl: Convert all characters to lowercase.
         /// </summary>
-        internal static string CMDT_Capitalize {
+        internal static string CMDT_CaseCamel {
             get {
-                return ResourceManager.GetString("CMDT_Capitalize", resourceCulture);
+                return ResourceManager.GetString("CMDT_CaseCamel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Make words in selection to CamelCase
+        ///Ctrl: Convert the first character to Uppercase and others to lowercase.
+        /// </summary>
+        internal static string CMDT_CasePascal {
+            get {
+                return ResourceManager.GetString("CMDT_CasePascal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Make words in selection to snake_case.
+        /// </summary>
+        internal static string CMDT_CaseSnake {
+            get {
+                return ResourceManager.GetString("CMDT_CaseSnake", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Make words in selection to underscore separated UPPER_CASE
+        ///Ctrl: Convert all characters to UPPERCASE.
+        /// </summary>
+        internal static string CMDT_CaseUpper {
+            get {
+                return ResourceManager.GetString("CMDT_CaseUpper", resourceCulture);
             }
         }
         

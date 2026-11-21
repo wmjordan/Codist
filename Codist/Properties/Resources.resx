@@ -129,8 +129,8 @@
   <data name="CMD_AnalyzeSymbol" xml:space="preserve">
     <value>Analyze symbol...</value>
   </data>
-  <data name="CMD_Capitalize" xml:space="preserve">
-    <value>Capitalize</value>
+  <data name="CMD_CasePascal" xml:space="preserve">
+    <value>PascalCase</value>
   </data>
   <data name="CMD_ClearFilter" xml:space="preserve">
     <value>Clear filter</value>
@@ -300,8 +300,8 @@ Hint: To create a new GUID, type 'guid' (without quotes) and select it</value>
   <data name="CMD_JoinLines" xml:space="preserve">
     <value>Join Lines</value>
   </data>
-  <data name="CMD_Lowercase" xml:space="preserve">
-    <value>Lowercase</value>
+  <data name="CMD_CaseCamel" xml:space="preserve">
+    <value>camelCase</value>
   </data>
   <data name="CMD_Mark" xml:space="preserve">
     <value>Mark &lt;NAME&gt;</value>
@@ -397,8 +397,8 @@ Shift: Paste and select next (whole word)</value>
   <data name="CMD_UnmarkSymbol" xml:space="preserve">
     <value>Unmark symbol...</value>
   </data>
-  <data name="CMD_Uppercase" xml:space="preserve">
-    <value>Uppercase</value>
+  <data name="CMD_CaseUpper" xml:space="preserve">
+    <value>UPPER_CASE</value>
   </data>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="Dark" type="System.Resources.ResXFileRef, System.Windows.Forms">
@@ -2771,9 +2771,9 @@ Ctrl: Match case</value>
   <data name="T_Code" xml:space="preserve">
     <value>Code</value>
   </data>
-  <data name="CMDT_Capitalize" xml:space="preserve">
-    <value>Make words in selection capitalized
-Ctrl: Convert underscore("_") separated words to capitalized words</value>
+  <data name="CMDT_CasePascal" xml:space="preserve">
+    <value>Make words in selection to CamelCase
+Ctrl: Convert the first character to Uppercase and others to lowercase</value>
   </data>
   <data name="F_Html" xml:space="preserve">
     <value>HTML files|*.html|All files|*.*</value>
@@ -3410,5 +3410,19 @@ List currently opened code documents</value>
   </data>
   <data name="T_CaseType" xml:space="preserve">
     <value>Case type: </value>
+  </data>
+  <data name="CMD_CaseSnake" xml:space="preserve">
+    <value>snake_case</value>
+  </data>
+  <data name="CMDT_CaseSnake" xml:space="preserve">
+    <value>Make words in selection to snake_case</value>
+  </data>
+  <data name="CMDT_CaseCamel" xml:space="preserve">
+    <value>Make words in selection to camelCase
+Ctrl: Convert all characters to lowercase</value>
+  </data>
+  <data name="CMDT_CaseUpper" xml:space="preserve">
+    <value>Make words in selection to underscore separated UPPER_CASE
+Ctrl: Convert all characters to UPPERCASE</value>
   </data>
 </root>

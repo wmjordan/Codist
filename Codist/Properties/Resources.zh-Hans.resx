@@ -129,8 +129,8 @@
   <data name="CMD_AnalyzeSymbol" xml:space="preserve">
     <value>分析...</value>
   </data>
-  <data name="CMD_Capitalize" xml:space="preserve">
-    <value>首字母大写</value>
+  <data name="CMD_CasePascal" xml:space="preserve">
+    <value>转为帕斯卡格式（PascalCase）</value>
   </data>
   <data name="CMD_ClearFilter" xml:space="preserve">
     <value>清除筛选条件</value>
@@ -300,8 +300,8 @@ Alt：在下一个匹配位置插入光标
   <data name="CMD_JoinLines" xml:space="preserve">
     <value>连接选中的行</value>
   </data>
-  <data name="CMD_Lowercase" xml:space="preserve">
-    <value>转为小写</value>
+  <data name="CMD_CaseCamel" xml:space="preserve">
+    <value>转为驼峰格式（camelCase）</value>
   </data>
   <data name="CMD_Mark" xml:space="preserve">
     <value>标记 &lt;NAME&gt;</value>
@@ -397,8 +397,8 @@ Shift：粘贴并选中下一项（整个单词）</value>
   <data name="CMD_UnmarkSymbol" xml:space="preserve">
     <value>取消标记...</value>
   </data>
-  <data name="CMD_Uppercase" xml:space="preserve">
-    <value>转为大写</value>
+  <data name="CMD_CaseUpper" xml:space="preserve">
+    <value>转为大写格式（UPPER_CASE）</value>
   </data>
   <data name="T_AsParameter" xml:space="preserve">
     <value> 作为参数</value>
@@ -2757,9 +2757,9 @@ Ctrl: 匹配大小写</value>
   <data name="T_Code" xml:space="preserve">
     <value>代码</value>
   </data>
-  <data name="CMDT_Capitalize" xml:space="preserve">
-    <value>将选中内容的每个单词转换为首字母大写形式
-Ctrl: 将下划线分隔的单词转换为首字母大写的单词</value>
+  <data name="CMDT_CasePascal" xml:space="preserve">
+    <value>将选中内容的每个单词转换为帕斯卡形式（PascalCase）
+Ctrl: 首字母改成大写，其它字母改成小写</value>
   </data>
   <data name="F_Html" xml:space="preserve">
     <value>网页文件|*.html|所有文件|*.*</value>
@@ -3394,5 +3394,19 @@ Shift: 匹配大小写</value>
   </data>
   <data name="T_CaseType" xml:space="preserve">
     <value>联合类: </value>
+  </data>
+  <data name="CMD_CaseSnake" xml:space="preserve">
+    <value>转为蛇形格式（snake_case）</value>
+  </data>
+  <data name="CMDT_CaseSnake" xml:space="preserve">
+    <value>将选中内容中的单词转换为“蛇形_变量”形式</value>
+  </data>
+  <data name="CMDT_CaseCamel" xml:space="preserve">
+    <value>将选中内容的每个单词转换为驼峰形式（camelCase）
+Ctrl: 将所有字母转换为小写形式</value>
+  </data>
+  <data name="CMDT_CaseUpper" xml:space="preserve">
+    <value>将选中内容的每个单词转换为下划线分隔的大写形式（UPPER_CASE）
+Ctrl: 将所有字母转换为大写</value>
   </data>
 </root>
