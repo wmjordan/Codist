@@ -44,7 +44,6 @@ class SymbolList : VirtualList, ISymbolFilterable, INotifyCollectionChanged
 				new Setter { Property = OverridesDefaultStyleProperty, Value = true },
 				new Setter { Property = SnapsToDevicePixelsProperty, Value = true },
 				new Setter { Property = CursorProperty, Value = Cursors.Arrow },
-				new Setter { Property = HeightProperty, Value = 22d },
 				new Setter { Property = TemplateProperty, Value = Resources["ListBoxItemTemplate"] as ControlTemplate },
 				#region context menu for list items
 				new Setter { Property = ContextMenuProperty, Value = __ListItemDummyContextMenu },

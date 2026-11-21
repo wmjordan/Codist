@@ -134,7 +134,7 @@
 					<ContentPresenter
 						ContentTemplate="{StaticResource ListItemTemplate}"
 						ContentStringFormat="{TemplateBinding ContentControl.ContentStringFormat}" 
-						HorizontalAlignment="Stretch" VerticalAlignment="{TemplateBinding Control.VerticalContentAlignment}" SnapsToDevicePixels="False" Height="22" />
+						HorizontalAlignment="Stretch" VerticalAlignment="{TemplateBinding Control.VerticalContentAlignment}" SnapsToDevicePixels="False" MinHeight="22" />
 				</ControlTemplate>
 			</Setter.Value>
 		</Setter>
