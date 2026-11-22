@@ -552,24 +552,23 @@ namespace Codist.Refactorings
 
 					ctx.View.Edit((ctx, dec), (view, param, edit) => {
 						var (indent, newLine) = param.ctx.GetIndentAndNewLine(param.dec.SpanStart, 0);
-						using (var sbr = Microsoft.VisualStudio.Utilities.ReusableStringBuilder.AcquireDefault(128)) {
-							var sb = sbr.Resource;
-							sb.Append(param.dec.GetLeadingTrivia().ToString());
-							bool isFirst = true;
-							foreach (var variable in param.dec.Variables) {
-								if (isFirst) {
-									isFirst = false;
-								}
-								else {
-									sb.Append(newLine).Append(indent);
-								}
-								sb.Append("var ")
-									.Append(variable.ToFullString())
-									.Append(';');
+						using var sbr = ReusableStringBuilder.AcquireDefault(128);
+						var sb = sbr.Resource;
+						sb.Append(param.dec.GetLeadingTrivia().ToString());
+						bool isFirst = true;
+						foreach (var variable in param.dec.Variables) {
+							if (isFirst) {
+								isFirst = false;
 							}
-							sb.Append(param.dec.Parent.GetTrailingTrivia().ToString());
-							edit.Replace(param.dec.Parent.FullSpan.ToSpan(), sb.ToString());
+							else {
+								sb.Append(newLine).Append(indent);
+							}
+							sb.Append("var ")
+								.Append(variable.ToFullString())
+								.Append(';');
 						}
+						sb.Append(param.dec.Parent.GetTrailingTrivia().ToString());
+						edit.Replace(param.dec.Parent.FullSpan.ToSpan(), sb.ToString());
 					});
 				}
 			}
@@ -597,29 +596,28 @@ namespace Codist.Refactorings
 						var (indent, newLine) = param.ctx.GetIndentAndNewLine(param.dec.SpanStart, 0);
 						var start = param.v.Identifier.Span.Start;
 						var end = param.dec.Parent.FullSpan.End;
-						using (var sbr = Microsoft.VisualStudio.Utilities.ReusableStringBuilder.AcquireDefault(128)) {
-							var sb = sbr.Resource;
-							bool isFirst = true;
-							foreach (var variable in param.dec.Variables) {
-								if (isFirst) {
-									isFirst = false;
-								}
-								else {
-									sb.Append(", ");
-								}
-								sb.Append(variable.Identifier.Text);
+						using var sbr = ReusableStringBuilder.AcquireDefault(128);
+						var sb = sbr.Resource;
+						bool isFirst = true;
+						foreach (var variable in param.dec.Variables) {
+							if (isFirst) {
+								isFirst = false;
 							}
-							sb.Append(';');
-							foreach (var variable in param.dec.Variables) {
-								sb.Append(newLine)
-									.Append(indent)
-									.Append(variable.Identifier.ToFullString())
-									.Append(variable.Initializer.ToFullString())
-									.Append(';');
+							else {
+								sb.Append(", ");
 							}
-							sb.Append(param.dec.Parent.GetTrailingTrivia().ToString());
-							edit.Replace(Span.FromBounds(start, end), sb.ToString());
+							sb.Append(variable.Identifier.Text);
 						}
+						sb.Append(';');
+						foreach (var variable in param.dec.Variables) {
+							sb.Append(newLine)
+								.Append(indent)
+								.Append(variable.Identifier.ToFullString())
+								.Append(variable.Initializer.ToFullString())
+								.Append(';');
+						}
+						sb.Append(param.dec.Parent.GetTrailingTrivia().ToString());
+						edit.Replace(Span.FromBounds(start, end), sb.ToString());
 					});
 					ctx.View.SelectSpan(v.Identifier.Span.ToSpan());
 				}
@@ -663,7 +661,7 @@ namespace Codist.Refactorings
 				}
 
 				if (children[0].IsKind((SyntaxKind)SyntaxKindEx.OrPattern)) {
-					SplitOrPattern((PatternSyntax)children[0], indent, newline, sb, true);
+					SplitOrPattern((PatternSyntax)children[0].AsNode(), indent, newline, sb, true);
 				}
 				else {
 					sb.Append(children[0].WithTrailingTrivia().ToFullString());

@@ -492,6 +492,7 @@ sealed partial class FileList : VirtualList
 		RunningDocumentTable t = new();
 		List<FileItem> items = [];
 		HashSet<string> openedFiles = RecentlyClosedFileCollection.HasItem ? new() : null;
+		Chain<int> extIcons = [];
 		foreach (var frame in VsShellHelper.GetDocumentWindows()) {
 			if (!frame.TryGetProperty(__VSFPROPID.VSFPROPID_pszMkDocument, out string fullPath)) {
 				continue;
@@ -500,7 +501,7 @@ sealed partial class FileList : VirtualList
 				FileItemType.OpenedDocument,
 				currentFrame == frame, // is active
 				frame.GetProperty<string>(__VSFPROPID.VSFPROPID_Caption));
-			Chain<int> extIcons = [];
+			extIcons.Clear();
 			if (frame.GetProperty<bool>((int)__VSFPROPID5.VSFPROPID_IsPinned)) {
 				item.FileState = FileState.Pinned;
 				extIcons.Add(IconIds.Pin);
