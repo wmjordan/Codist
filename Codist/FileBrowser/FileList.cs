@@ -533,9 +533,36 @@ sealed partial class FileList : VirtualList
 				);
 		}
 		#endregion
-
+		if (FileItem.DisambiguateNames(items)) {
+			ShowPathHints(items);
+		}
 		SetItems(items);
 		LocationType = FileListLocationType.OpenedDocuments;
+	}
+
+	static void ShowPathHints(List<FileItem> items) {
+		foreach (var item in items) {
+			if (item.Hint == null) {
+				continue;
+			}
+			var ico = VsImageHelper.GetImage(IconIds.Folder, 14).WrapMargin(WpfHelper.SmallHorizontalMargin);
+			var h = new TextBlock { Text = item.Hint, Opacity = 0.8, VerticalAlignment = VerticalAlignment.Center };
+			if (item.Note is StackPanel p) {
+				p.Add(ico, h);
+			}
+			else if (item.Note is UIElement i) {
+				item.Note = new StackPanel {
+					Orientation = Orientation.Horizontal,
+					Children = { i, ico, h }
+				};
+			}
+			else {
+				item.Note = new StackPanel {
+					Orientation = Orientation.Horizontal,
+					Children = { ico, h }
+				};
+			}
+		}
 	}
 
 	[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
