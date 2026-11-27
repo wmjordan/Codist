@@ -6,133 +6,128 @@ using CLR;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.VisualStudio.Text;
 
-namespace Codist
+namespace Codist;
+
+static partial class CodeAnalysisHelper
 {
-	static partial class CodeAnalysisHelper
+	internal static readonly SymbolDisplayFormat QuickInfoSymbolDisplayFormat = new SymbolDisplayFormat(
+		typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypes,
+		genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
+		memberOptions: SymbolDisplayMemberOptions.IncludeParameters | SymbolDisplayMemberOptions.IncludeType | SymbolDisplayMemberOptions.IncludeContainingType,
+		delegateStyle: SymbolDisplayDelegateStyle.NameAndSignature,
+		parameterOptions: SymbolDisplayParameterOptions.IncludeDefaultValue | SymbolDisplayParameterOptions.IncludeName | SymbolDisplayParameterOptions.IncludeOptionalBrackets | SymbolDisplayParameterOptions.IncludeParamsRefOut | SymbolDisplayParameterOptions.IncludeType,
+		miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes | SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers);
+	internal static readonly SymbolDisplayFormat InTypeOverloadDisplayFormat = new SymbolDisplayFormat(
+		typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameOnly,
+		genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
+		memberOptions: SymbolDisplayMemberOptions.IncludeParameters | SymbolDisplayMemberOptions.IncludeType,
+		delegateStyle: SymbolDisplayDelegateStyle.NameAndSignature,
+		parameterOptions: SymbolDisplayParameterOptions.IncludeDefaultValue | SymbolDisplayParameterOptions.IncludeName | SymbolDisplayParameterOptions.IncludeOptionalBrackets | SymbolDisplayParameterOptions.IncludeParamsRefOut | SymbolDisplayParameterOptions.IncludeType,
+		miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes | SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers);
+	internal static readonly SymbolDisplayFormat MemberNameFormat = new SymbolDisplayFormat(
+		typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypes,
+		genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
+		parameterOptions: SymbolDisplayParameterOptions.IncludeParamsRefOut | SymbolDisplayParameterOptions.IncludeOptionalBrackets | SymbolDisplayParameterOptions.IncludeType,
+		miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
+	internal static readonly SymbolDisplayFormat TypeMemberNameFormat = new SymbolDisplayFormat(
+		typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypes,
+		genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
+		memberOptions: SymbolDisplayMemberOptions.IncludeContainingType,
+		miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
+	internal static readonly SymbolDisplayFormat QualifiedTypeNameFormat = new SymbolDisplayFormat(
+		typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
+		genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
+		memberOptions: SymbolDisplayMemberOptions.IncludeContainingType,
+		miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
+	internal static readonly SymbolDisplayFormat DefinitionNameFormat = new SymbolDisplayFormat(SymbolDisplayGlobalNamespaceStyle.Omitted,
+		SymbolDisplayTypeQualificationStyle.NameOnly,
+		SymbolDisplayGenericsOptions.IncludeTypeParameters | SymbolDisplayGenericsOptions.IncludeTypeConstraints | SymbolDisplayGenericsOptions.IncludeVariance,
+		SymbolDisplayMemberOptions.IncludeType | SymbolDisplayMemberOptions.IncludeModifiers | SymbolDisplayMemberOptions.IncludeAccessibility | SymbolDisplayMemberOptions.IncludeExplicitInterface | SymbolDisplayMemberOptions.IncludeParameters | SymbolDisplayMemberOptions.IncludeConstantValue | SymbolDisplayMemberOptions.IncludeRef,
+		SymbolDisplayDelegateStyle.NameAndSignature,
+		SymbolDisplayExtensionMethodStyle.StaticMethod,
+		SymbolDisplayParameterOptions.IncludeExtensionThis | SymbolDisplayParameterOptions.IncludeParamsRefOut | SymbolDisplayParameterOptions.IncludeType | SymbolDisplayParameterOptions.IncludeName | SymbolDisplayParameterOptions.IncludeDefaultValue | SymbolDisplayParameterOptions.IncludeOptionalBrackets,
+		SymbolDisplayPropertyStyle.ShowReadWriteDescriptor,
+		SymbolDisplayLocalOptions.IncludeType | SymbolDisplayLocalOptions.IncludeConstantValue | SymbolDisplayLocalOptions.IncludeRef,
+		SymbolDisplayKindOptions.IncludeNamespaceKeyword | SymbolDisplayKindOptions.IncludeTypeKeyword | SymbolDisplayKindOptions.IncludeMemberKeyword,
+		SymbolDisplayMiscellaneousOptions.UseSpecialTypes | SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers | SymbolDisplayMiscellaneousOptions.UseErrorTypeSymbolName | SymbolDisplayMiscellaneousOptions.RemoveAttributeSuffix);
+
+	public static string GetText(this RefKind refKind) {
+		return refKind.Map(String.Empty, "ref ", "out ", "in ", "ref readonly ");
+	}
+
+	public static ArgumentListSyntax GetImplicitObjectCreationArgumentList(this ExpressionSyntax syntax) {
+		return NonPublicOrFutureAccessors.GetImplicitObjectCreationArgumentList(syntax);
+	}
+
+	public static int GetWarningLevel(int csErrorCode) {
+		return NonPublicOrFutureAccessors.GetWarningLevel(csErrorCode);
+	}
+
+	// gets parameter list in primary constructor
+	public static ParameterListSyntax GetParameterList(this TypeDeclarationSyntax typeDeclaration) {
+		return NonPublicOrFutureAccessors.GetParameterList(typeDeclaration);
+	}
+
+	public static ExpressionSyntax GetSwitchExpressionArmExpression(this SyntaxNode switchExpressionArm) {
+		return NonPublicOrFutureAccessors.GetSwitchExpressionArmExpression(switchExpressionArm);
+	}
+
+	public static PatternSyntax GetSwitchExpressionArmPattern(this SyntaxNode switchExpressionArm) {
+		return NonPublicOrFutureAccessors.GetSwitchExpressionArmPattern(switchExpressionArm);
+	}
+
+	public static IReadOnlyList<SyntaxNode> GetCollectionExpressionElements(this ExpressionSyntax collectionExpression) {
+		return NonPublicOrFutureAccessors.GetCollectionExpressionElements(collectionExpression);
+	}
+	public static ExpressionSyntax GetExpressionElementExpression(this SyntaxNode syntax) {
+		return NonPublicOrFutureAccessors.GetExpressionElementExpression(syntax);
+	}
+
+	public static ImmutableArray<TSymbol> MakeSortedSymbolArray<TSymbol>(this IEnumerable<TSymbol> symbols) where TSymbol : ISymbol {
+		var arrayBuilder = ImmutableArray.CreateBuilder<TSymbol>();
+		arrayBuilder.AddRange(symbols);
+		return arrayBuilder.ToSortedSymbolArray();
+	}
+
+	public static List<TSymbol> MakeSortedSymbolList<TSymbol>(this IEnumerable<TSymbol> symbols) where TSymbol : ISymbol {
+		var list = new List<TSymbol>();
+		list.AddRange(symbols);
+		list.Sort(CompareSymbol);
+		return list;
+	}
+
+	static ImmutableArray<TSymbol> ToSortedSymbolArray<TSymbol>(this ImmutableArray<TSymbol>.Builder arrayBuilder) where TSymbol : ISymbol {
+		arrayBuilder.Sort(CompareSymbol);
+		return arrayBuilder.ToImmutable();
+	}
+
+	static partial class NonPublicOrFutureAccessors
 	{
-		internal static readonly SymbolDisplayFormat QuickInfoSymbolDisplayFormat = new SymbolDisplayFormat(
-			typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypes,
-			genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
-			memberOptions: SymbolDisplayMemberOptions.IncludeParameters | SymbolDisplayMemberOptions.IncludeType | SymbolDisplayMemberOptions.IncludeContainingType,
-			delegateStyle: SymbolDisplayDelegateStyle.NameAndSignature,
-			parameterOptions: SymbolDisplayParameterOptions.IncludeDefaultValue | SymbolDisplayParameterOptions.IncludeName | SymbolDisplayParameterOptions.IncludeOptionalBrackets | SymbolDisplayParameterOptions.IncludeParamsRefOut | SymbolDisplayParameterOptions.IncludeType,
-			miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes | SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers);
-		internal static readonly SymbolDisplayFormat InTypeOverloadDisplayFormat = new SymbolDisplayFormat(
-			typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameOnly,
-			genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
-			memberOptions: SymbolDisplayMemberOptions.IncludeParameters | SymbolDisplayMemberOptions.IncludeType,
-			delegateStyle: SymbolDisplayDelegateStyle.NameAndSignature,
-			parameterOptions: SymbolDisplayParameterOptions.IncludeDefaultValue | SymbolDisplayParameterOptions.IncludeName | SymbolDisplayParameterOptions.IncludeOptionalBrackets | SymbolDisplayParameterOptions.IncludeParamsRefOut | SymbolDisplayParameterOptions.IncludeType,
-			miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes | SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers);
-		internal static readonly SymbolDisplayFormat MemberNameFormat = new SymbolDisplayFormat(
-			typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypes,
-			genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
-			parameterOptions: SymbolDisplayParameterOptions.IncludeParamsRefOut | SymbolDisplayParameterOptions.IncludeOptionalBrackets | SymbolDisplayParameterOptions.IncludeType,
-			miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
-		internal static readonly SymbolDisplayFormat TypeMemberNameFormat = new SymbolDisplayFormat(
-			typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypes,
-			genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
-			memberOptions: SymbolDisplayMemberOptions.IncludeContainingType,
-			miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
-		internal static readonly SymbolDisplayFormat QualifiedTypeNameFormat = new SymbolDisplayFormat(
-			typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
-			genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
-			memberOptions: SymbolDisplayMemberOptions.IncludeContainingType,
-			miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
-		internal static readonly SymbolDisplayFormat DefinitionNameFormat = new SymbolDisplayFormat(SymbolDisplayGlobalNamespaceStyle.Omitted,
-			SymbolDisplayTypeQualificationStyle.NameOnly,
-			SymbolDisplayGenericsOptions.IncludeTypeParameters | SymbolDisplayGenericsOptions.IncludeTypeConstraints | SymbolDisplayGenericsOptions.IncludeVariance,
-			SymbolDisplayMemberOptions.IncludeType | SymbolDisplayMemberOptions.IncludeModifiers | SymbolDisplayMemberOptions.IncludeAccessibility | SymbolDisplayMemberOptions.IncludeExplicitInterface | SymbolDisplayMemberOptions.IncludeParameters | SymbolDisplayMemberOptions.IncludeConstantValue | SymbolDisplayMemberOptions.IncludeRef,
-			SymbolDisplayDelegateStyle.NameAndSignature,
-			SymbolDisplayExtensionMethodStyle.StaticMethod,
-			SymbolDisplayParameterOptions.IncludeExtensionThis | SymbolDisplayParameterOptions.IncludeParamsRefOut | SymbolDisplayParameterOptions.IncludeType | SymbolDisplayParameterOptions.IncludeName | SymbolDisplayParameterOptions.IncludeDefaultValue | SymbolDisplayParameterOptions.IncludeOptionalBrackets,
-			SymbolDisplayPropertyStyle.ShowReadWriteDescriptor,
-			SymbolDisplayLocalOptions.IncludeType | SymbolDisplayLocalOptions.IncludeConstantValue | SymbolDisplayLocalOptions.IncludeRef,
-			SymbolDisplayKindOptions.IncludeNamespaceKeyword | SymbolDisplayKindOptions.IncludeTypeKeyword | SymbolDisplayKindOptions.IncludeMemberKeyword,
-			SymbolDisplayMiscellaneousOptions.UseSpecialTypes | SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers | SymbolDisplayMiscellaneousOptions.UseErrorTypeSymbolName | SymbolDisplayMiscellaneousOptions.RemoveAttributeSuffix);
+		public static readonly Func<SyntaxNode, NameSyntax> GetFileScopedNamespaceName = ReflectionHelper.CreateGetPropertyMethod<SyntaxNode, NameSyntax>("Name", typeof(NamespaceDeclarationSyntax).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Syntax.FileScopedNamespaceDeclarationSyntax"));
 
-		#region Compatibility constants (for older VS versions)
-		#endregion
+		public static readonly Func<ExpressionSyntax, ArgumentListSyntax> GetImplicitObjectCreationArgumentList = ReflectionHelper.CreateGetPropertyMethod<ExpressionSyntax, ArgumentListSyntax>("ArgumentList", typeof(ExpressionSyntax).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Syntax.BaseObjectCreationExpressionSyntax"));
 
-		public static string GetText(this RefKind refKind) {
-			return refKind.Switch(String.Empty, "ref ", "out ", "in ", "ref readonly ", String.Empty);
-		}
+		public static readonly Func<SyntaxNode, ExpressionSyntax> GetExpressionElementExpression = ReflectionHelper.CreateGetPropertyMethod<SyntaxNode, ExpressionSyntax>("Expression", typeof(ExpressionSyntax).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Syntax.ExpressionElementSyntax"));
 
-		public static ArgumentListSyntax GetImplicitObjectCreationArgumentList(this ExpressionSyntax syntax) {
-			return NonPublicOrFutureAccessors.GetImplicitObjectCreationArgumentList(syntax);
-		}
+		public static readonly Func<int, int> GetWarningLevel = ReflectionHelper.CallStaticFunc<int, int>(typeof(LanguageVersionFacts).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.ErrorFacts")?.GetMethod("GetWarningLevel", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)) ?? (Func<int, int>)((int _) => 3);
 
-		public static int GetWarningLevel(int csErrorCode) {
-			return NonPublicOrFutureAccessors.GetWarningLevel(csErrorCode);
-		}
+		public static readonly Func<TypeDeclarationSyntax, ParameterListSyntax> GetParameterList = ReflectionHelper.CreateGetPropertyMethod<TypeDeclarationSyntax, ParameterListSyntax>("ParameterList", typeof(TypeDeclarationSyntax));
 
-		// gets parameter list in primary constructor
-		public static ParameterListSyntax GetParameterList(this TypeDeclarationSyntax typeDeclaration) {
-			return NonPublicOrFutureAccessors.GetParameterList(typeDeclaration);
-		}
+		public static readonly Func<SyntaxNode, ExpressionSyntax> GetSwitchExpressionArmExpression = ReflectionHelper.CreateGetPropertyMethod<SyntaxNode, ExpressionSyntax>("Expression", typeof(ExpressionSyntax).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Syntax.SwitchExpressionArmSyntax"));
 
-		public static ExpressionSyntax GetSwitchExpressionArmExpression(this SyntaxNode switchExpressionArm) {
-			return NonPublicOrFutureAccessors.GetSwitchExpressionArmExpression(switchExpressionArm);
-		}
+		public static readonly Func<SyntaxNode, PatternSyntax> GetSwitchExpressionArmPattern = ReflectionHelper.CreateGetPropertyMethod<SyntaxNode, PatternSyntax>("Pattern", typeof(ExpressionSyntax).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Syntax.SwitchExpressionArmSyntax"));
 
-		public static PatternSyntax GetSwitchExpressionArmPattern(this SyntaxNode switchExpressionArm) {
-			return NonPublicOrFutureAccessors.GetSwitchExpressionArmPattern(switchExpressionArm);
-		}
+		public static readonly Func<ExpressionSyntax, IReadOnlyList<SyntaxNode>> GetCollectionExpressionElements = ReflectionHelper.CreateGetPropertyMethod<ExpressionSyntax, IReadOnlyList<SyntaxNode>>("Elements", typeof(ExpressionSyntax).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Syntax.CollectionExpressionSyntax"));
+	}
 
-		public static IReadOnlyList<SyntaxNode> GetCollectionExpressionElements(this ExpressionSyntax collectionExpression) {
-			return NonPublicOrFutureAccessors.GetCollectionExpressionElements(collectionExpression);
-		}
-		public static ExpressionSyntax GetExpressionElementExpression(this SyntaxNode syntax) {
-			return NonPublicOrFutureAccessors.GetExpressionElementExpression(syntax);
-		}
-
-		public static ImmutableArray<TSymbol> MakeSortedSymbolArray<TSymbol>(this IEnumerable<TSymbol> symbols) where TSymbol : ISymbol {
-			var arrayBuilder = ImmutableArray.CreateBuilder<TSymbol>();
-			arrayBuilder.AddRange(symbols);
-			return arrayBuilder.ToSortedSymbolArray();
-		}
-
-		public static List<TSymbol> MakeSortedSymbolList<TSymbol>(this IEnumerable<TSymbol> symbols) where TSymbol : ISymbol {
-			var list = new List<TSymbol>();
-			list.AddRange(symbols);
-			list.Sort(CompareSymbol);
-			return list;
-		}
-
-		static ImmutableArray<TSymbol> ToSortedSymbolArray<TSymbol>(this ImmutableArray<TSymbol>.Builder arrayBuilder) where TSymbol : ISymbol {
-			arrayBuilder.Sort(CompareSymbol);
-			return arrayBuilder.ToImmutable();
-		}
-
-		static partial class NonPublicOrFutureAccessors
-		{
-			public static readonly Func<SyntaxNode, NameSyntax> GetFileScopedNamespaceName = ReflectionHelper.CreateGetPropertyMethod<SyntaxNode, NameSyntax>("Name", typeof(NamespaceDeclarationSyntax).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Syntax.FileScopedNamespaceDeclarationSyntax"));
-
-			public static readonly Func<ExpressionSyntax, ArgumentListSyntax> GetImplicitObjectCreationArgumentList = ReflectionHelper.CreateGetPropertyMethod<ExpressionSyntax, ArgumentListSyntax>("ArgumentList", typeof(ExpressionSyntax).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Syntax.BaseObjectCreationExpressionSyntax"));
-
-			public static readonly Func<SyntaxNode, ExpressionSyntax> GetExpressionElementExpression = ReflectionHelper.CreateGetPropertyMethod<SyntaxNode, ExpressionSyntax>("Expression", typeof(ExpressionSyntax).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Syntax.ExpressionElementSyntax"));
-
-			public static readonly Func<int, int> GetWarningLevel = ReflectionHelper.CallStaticFunc<int, int>(typeof(LanguageVersionFacts).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.ErrorFacts")?.GetMethod("GetWarningLevel", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)) ?? (Func<int, int>)((int _) => 3);
-
-			public static readonly Func<TypeDeclarationSyntax, ParameterListSyntax> GetParameterList = ReflectionHelper.CreateGetPropertyMethod<TypeDeclarationSyntax, ParameterListSyntax>("ParameterList", typeof(TypeDeclarationSyntax));
-
-			public static readonly Func<SyntaxNode, ExpressionSyntax> GetSwitchExpressionArmExpression = ReflectionHelper.CreateGetPropertyMethod<SyntaxNode, ExpressionSyntax>("Expression", typeof(ExpressionSyntax).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Syntax.SwitchExpressionArmSyntax"));
-
-			public static readonly Func<SyntaxNode, PatternSyntax> GetSwitchExpressionArmPattern = ReflectionHelper.CreateGetPropertyMethod<SyntaxNode, PatternSyntax>("Pattern", typeof(ExpressionSyntax).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Syntax.SwitchExpressionArmSyntax"));
-
-			public static readonly Func<ExpressionSyntax, IReadOnlyList<SyntaxNode>> GetCollectionExpressionElements = ReflectionHelper.CreateGetPropertyMethod<ExpressionSyntax, IReadOnlyList<SyntaxNode>>("Elements", typeof(ExpressionSyntax).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Syntax.CollectionExpressionSyntax"));
-		}
-
-		[Flags]
-		enum DeclarationCategory
-		{
-			None,
-			Type = 1,
-			Namespace = 1 << 1,
-			Member = 1 << 2,
-			Local = 1 << 3
-		}
+	[Flags]
+	enum DeclarationCategory
+	{
+		None,
+		Type = 1,
+		Namespace = 1 << 1,
+		Member = 1 << 2,
+		Local = 1 << 3
 	}
 }
