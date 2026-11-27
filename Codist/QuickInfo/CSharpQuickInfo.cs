@@ -193,7 +193,7 @@ sealed partial class CSharpQuickInfo : SingletonQuickInfoSource
 					o,
 					ctor != null
 						? semanticModel.GetSymbolInfo(ctor, cancellationToken).Symbol ?? ctx.symbol
-						: ctx.node.Parent.IsKind(SyntaxKindEx.PrimaryConstructorBaseType)
+						: ctx.node.Parent?.IsKind(SyntaxKindEx.PrimaryConstructorBaseType) == true
 						? (ctx.symbol = semanticModel.GetSymbolInfo(ctx.node.Parent, cancellationToken).Symbol ?? ctx.symbol)
 						: ctx.symbol,
 					semanticModel,
