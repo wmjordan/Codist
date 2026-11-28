@@ -106,7 +106,7 @@ namespace Codist
 					&& cfgProj.get_DisplayName(out var configDisplayName) == VSConstants.S_OK) {
 					AutoChangeBuildVersion(configDisplayName, project);
 				}
-				if (((VSSOLNBUILDUPDATEFLAGS)action).HasAnyFlag(VSSOLNBUILDUPDATEFLAGS.SBF_OPERATION_BUILD | VSSOLNBUILDUPDATEFLAGS.SBF_OPERATION_FORCE_UPDATE) && Config.Instance.BuildOptions.MatchFlags(BuildOptions.VsixAutoIncrement) && project.IsVsixProject()) {
+				if (((VSSOLNBUILDUPDATEFLAGS)action).HasAnyFlag(VSSOLNBUILDUPDATEFLAGS.SBF_OPERATION_BUILD | VSSOLNBUILDUPDATEFLAGS.SBF_OPERATION_FORCE_UPDATE) && Config.Instance.BuildOptions.MatchFlags(BuildOptions.VsixAutoIncrement) && IsVsProject(proj)) {
 					cfgProj.get_DisplayName(out string name);
 					// note: there's a bug in VS 2026,
 					//   which keeps the manifest file in the intermediate folder unchanged,
@@ -131,7 +131,7 @@ namespace Codist
 				|| (project = proj.GetExtObjectAs<Project>()) is null) {
 				return VSConstants.S_OK;
 			}
-			if (Config.Instance.BuildOptions.MatchFlags(BuildOptions.VsixAutoIncrement) && project.IsVsixProject()) {
+			if (Config.Instance.BuildOptions.MatchFlags(BuildOptions.VsixAutoIncrement) && IsVsProject(proj)) {
 				AutoIncrementVsixVersion(project);
 			}
 			return VSConstants.S_OK;
@@ -143,6 +143,10 @@ namespace Codist
 			foreach (var p in properties.Enumerate()) {
 				WriteBuildText($"  {p.Key} = {p.Value}{Environment.NewLine}");
 			}
+		}
+
+		static bool IsVsProject(IVsHierarchy proj) {
+			return proj.IsCapabilityMatch("CreateVsixContainer");
 		}
 
 		static void AutoChangeBuildVersion(string configDisplayName, Project project) {
