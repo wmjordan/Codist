@@ -1,0 +1,27 @@
+<Solution>
+  <Configurations>
+    <BuildType Name="Debug" />
+    <BuildType Name="Release" />
+    <BuildType Name="ReleaseLogged" />
+    <Platform Name="Any CPU" />
+    <Platform Name="arm64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/Misc/">
+    <File Path="license.txt" />
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="Codist/Codist.csproj" Id="357d8f0c-57b1-4981-949d-204fee0ec424">
+    <Platform Solution="*|arm64" Project="arm64" />
+    <Platform Solution="*|x86" Project="x86" />
+    <Deploy Solution="Debug|Any CPU" />
+  </Project>
+  <Project Path="TestProject/TestProject.csproj">
+    <BuildType Solution="ReleaseLogged|*" Project="Release" />
+  </Project>
+  <Project Path="TestProject2/TestProject2.csproj">
+    <BuildType Solution="ReleaseLogged|*" Project="Release" />
+    <Build Solution="*|arm64" Project="false" />
+    <Build Solution="*|x86" Project="false" />
+  </Project>
+</Solution>
